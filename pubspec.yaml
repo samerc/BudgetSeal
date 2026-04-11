@@ -1,0 +1,82 @@
+name: pocketplan
+description: Allocation-first household finance manager.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Database — Drift (type-safe SQLite ORM)
+  drift: ^2.22.0
+  drift_flutter: ^0.2.0
+  sqlite3_flutter_libs: ^0.5.0
+
+  # State management — Riverpod
+  flutter_riverpod: ^3.0.0
+  riverpod_annotation: ^4.0.0
+
+  # Navigation
+  go_router: ^17.0.0
+
+  # HTTP
+  dio: ^5.9.0
+  http: ^1.0.0
+
+  # Utilities
+  uuid: ^4.4.0
+  intl: ^0.20.0
+
+  # Charts
+  fl_chart: ^1.2.0
+
+  # Storage & file access
+  shared_preferences: ^2.5.0
+  path_provider: ^2.1.0
+  path: ^1.9.0
+
+  # UI helpers
+  cupertino_icons: ^1.0.0
+  google_fonts: ^8.0.0
+  shimmer: ^3.0.0
+  local_auth: ^3.0.0
+  image_picker: ^1.1.0
+  csv: ^8.0.0
+  share_plus: ^12.0.0
+  file_picker: ^11.0.0
+  haptic_feedback: ^0.6.0
+  flutter_local_notifications: ^21.0.0
+
+  # Cloud sync
+  google_sign_in: ^7.0.0
+  googleapis: ^16.0.0
+  googleapis_auth: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.0
+  drift_dev: ^2.22.0
+  riverpod_generator: ^4.0.0
+
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#6366F1"
+  adaptive_icon_foreground: "assets/icon/app_icon_fg.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icon/
+    - assets/categories/

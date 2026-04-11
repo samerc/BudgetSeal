@@ -1,0 +1,324 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import 'core/providers/biometric_provider.dart';
+import 'core/providers/sync_provider.dart';
+import 'core/providers/entry_mode_provider.dart';
+import 'core/providers/font_provider.dart';
+import 'core/providers/household_provider.dart';
+import 'core/providers/theme_provider.dart';
+import 'features/lock/lock_screen.dart';
+import 'features/accounts/account_detail_screen.dart';
+import 'features/accounts/accounts_screen.dart';
+import 'features/allocations/allocation_detail_screen.dart';
+import 'features/allocations/funding_screen.dart';
+import 'features/categories/categories_screen.dart';
+import 'features/main/main_screen.dart';
+import 'features/onboarding/guided_setup_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
+import 'features/periods/leftover_resolution_screen.dart';
+import 'features/recurring/bill_calendar_screen.dart';
+import 'features/recurring/recurring_screen.dart';
+import 'features/settings/import_screen.dart';
+import 'features/templates/templates_screen.dart';
+import 'features/periods/period_transition_screen.dart';
+import 'features/reports/export_report_screen.dart';
+import 'features/reports/reports_hub_screen.dart';
+import 'features/settings/about_screen.dart';
+import 'features/settings/backup_screen.dart';
+import 'features/settings/exchange_rates_screen.dart';
+import 'features/settings/export_screen.dart';
+import 'features/settings/sync_screen.dart';
+import 'features/transactions/add_transaction_screen.dart';
+import 'features/transactions/assisted_transaction_screen.dart';
+import 'features/transactions/transaction_detail_screen.dart';
+import 'features/splash/splash_screen.dart';
+import 'shared/theme/app_theme.dart';
+import 'shared/utils/page_transitions.dart';
+
+class PocketPlanApp extends ConsumerStatefulWidget {
+  const PocketPlanApp({super.key});
+
+  @override
+  ConsumerState<PocketPlanApp> createState() => _PocketPlanAppState();
+}
+
+class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
+    with WidgetsBindingObserver {
+  late final GoRouter _router;
+  bool _showSplash = true;
+  bool _showLock = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _router = GoRouter(
+      redirect: (context, state) {
+        final householdId = ref.read(currentHouseholdIdProvider);
+        final onOnboarding = state.matchedLocation == '/onboarding';
+        if (householdId == null && !onOnboarding) return '/onboarding';
+        if (householdId != null && onOnboarding) return '/';
+        return null;
+      },
+      routes: [
+        GoRoute(
+          path: '/onboarding',
+          pageBuilder: (_, state) =>
+              fadePage(child: const OnboardingScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/guided-setup',
+          pageBuilder: (_, state) =>
+              fadePage(child: const GuidedSetupScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/',
+          pageBuilder: (_, state) =>
+              fadePage(child: const MainScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/accounts',
+          pageBuilder: (_, state) => slideUpPage(
+            child: const AccountsScreen(),
+            state: state,
+          ),
+        ),
+        GoRoute(
+          path: '/accounts/:id',
+          pageBuilder: (_, state) => slideUpPage(
+            child: AccountDetailScreen(
+                accountId: state.pathParameters['id']!),
+            state: state,
+          ),
+        ),
+        GoRoute(
+          path: '/allocations/:id',
+          pageBuilder: (_, state) => slideUpPage(
+            child: AllocationDetailScreen(
+                allocationId: state.pathParameters['id']!),
+            state: state,
+          ),
+        ),
+        GoRoute(
+          path: '/funding',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const FundingScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/add-transaction',
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            // If editing or has pre-fill data, always use classic form.
+            final hasEditData = extra != null &&
+                (extra.containsKey('editTransactionId') ||
+                    extra.containsKey('editLines'));
+
+            if (!hasEditData) {
+              // Check entry mode preference.
+              // We can't use ref here directly, read from container.
+              // For simplicity, check if assisted mode via the route.
+              return slideUpPage(
+                child: _EntryModeRouter(extra: extra),
+                state: state,
+              );
+            }
+
+            return slideUpPage(
+              child: AddTransactionScreen(
+                editTransactionId:
+                    extra['editTransactionId'] as String?,
+                editType: extra['editType'] as String?,
+                editNote: extra['editNote'] as String?,
+                editDate: extra['editDate'] as DateTime?,
+                editLines:
+                    extra['editLines'] as List<Map<String, dynamic>>?,
+              ),
+              state: state,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/transactions/:id',
+          pageBuilder: (_, state) => slideUpPage(
+            child: TransactionDetailScreen(
+                transactionId: state.pathParameters['id']!),
+            state: state,
+          ),
+        ),
+        GoRoute(
+          path: '/categories',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const CategoriesScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/reports',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const ReportsHubScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/export-report',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const ExportReportScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/exchange-rates',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const ExchangeRatesScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/recurring',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const RecurringScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/bill-calendar',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const BillCalendarScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/templates',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const TemplatesScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/import',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const ImportScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/backup',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const BackupScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/export',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const ExportScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/sync',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const SyncScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/period-transition',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const PeriodTransitionScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/leftover-resolution',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const LeftoverResolutionScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/about',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const AboutScreen(), state: state),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Sync on app resume (download remote changes)
+      _autoSync();
+    } else if (state == AppLifecycleState.paused) {
+      // Sync on app pause (upload local changes)
+      _autoSync();
+    }
+  }
+
+  void _autoSync() {
+    final syncState = ref.read(syncProvider);
+    if (syncState.activeProvider != null &&
+        syncState.status != SyncStatus.syncing) {
+      ref.read(syncProvider.notifier).sync();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeModeProvider);
+    final selectedFont = ref.watch(fontProvider);
+
+    // Rebuild themes with the selected font.
+    final lightTheme = appTheme.copyWith(
+      textTheme: buildTextTheme(selectedFont),
+    );
+    final darkTheme = appDarkTheme.copyWith(
+      textTheme: buildTextTheme(selectedFont, Brightness.dark),
+    );
+
+    if (_showSplash) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        debugShowCheckedModeBanner: false,
+        home: SplashScreen(
+          onComplete: () {
+            final biometricEnabled = ref.read(biometricLockProvider);
+            setState(() {
+              _showSplash = false;
+              _showLock = biometricEnabled;
+            });
+          },
+        ),
+      );
+    }
+
+    if (_showLock) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        debugShowCheckedModeBanner: false,
+        home: LockScreen(
+          onUnlocked: () {
+            setState(() => _showLock = false);
+            _autoSync();
+          },
+        ),
+      );
+    }
+
+    return MaterialApp.router(
+      title: 'Pocket Plan',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
+      routerConfig: _router,
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+/// Routes to either assisted or classic transaction entry based on user preference.
+class _EntryModeRouter extends ConsumerWidget {
+  final Map<String, dynamic>? extra;
+  const _EntryModeRouter({this.extra});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(entryModeProvider);
+    if (mode == 'assisted') {
+      return const AssistedTransactionScreen();
+    }
+    return AddTransactionScreen(
+      editType: extra?['editType'] as String?,
+      editNote: extra?['editNote'] as String?,
+      editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
+    );
+  }
+}
