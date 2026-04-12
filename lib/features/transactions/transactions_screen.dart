@@ -7,6 +7,7 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -847,9 +848,25 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
-                            final e = group.entries[i];
+                            // Build visual items: transfers get 2 rows (from + to)
+                            final visualItems = <({TransactionEntry entry, String? transferSide})>[];
+                            for (final e in group.entries) {
+                              if (e.tx.type == 'transfer') {
+                                visualItems.add((entry: e, transferSide: 'from'));
+                                visualItems.add((entry: e, transferSide: 'to'));
+                              } else {
+                                visualItems.add((entry: e, transferSide: null));
+                              }
+                            }
+                            if (i >= visualItems.length) return const SizedBox.shrink();
+                            final item = visualItems[i];
+                            final e = item.entry;
+                            // Use a unique key for transfer halves
+                            final tileKey = item.transferSide != null
+                                ? '${e.tx.id}_${item.transferSide}'
+                                : e.tx.id;
                             return Dismissible(
-                              key: ValueKey(e.tx.id),
+                              key: ValueKey(tileKey),
                               direction: DismissDirection.horizontal,
                               // Left background (swipe right → edit) (#6)
                               background: Container(
@@ -914,6 +931,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                               child: _TxTile(
                                 entry: e,
                                 categoryMap: categoryMap,
+                                transferSide: item.transferSide,
                                 onCategoryTap: (catId, catName) {
                                   hapticLight();
                                   setState(() {
@@ -924,7 +942,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                               ),
                             );
                           },
-                          childCount: group.entries.length,
+                          childCount: group.entries.fold<int>(0, (sum, e) =>
+                              sum + (e.tx.type == 'transfer' ? 2 : 1)),
                         ),
                       ),
                     ),
@@ -1137,18 +1156,25 @@ class _TxTile extends ConsumerWidget {
   final TransactionEntry entry;
   final Map<String, Category> categoryMap;
   final void Function(String catId, String catName)? onCategoryTap;
+  /// null for normal transactions, 'from' or 'to' for transfer visual split.
+  final String? transferSide;
 
   const _TxTile({
     required this.entry,
     required this.categoryMap,
     this.onCategoryTap,
+    this.transferSide,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tx = entry.tx;
     final txColors = ref.watch(txColorsProvider);
-    final typeColor = txColors.forType(tx.type);
+    final isTransferSplit = transferSide != null;
+    final isFrom = transferSide == 'from';
+    final typeColor = isTransferSplit
+        ? (isFrom ? txColors.expense : txColors.income)
+        : txColors.forType(tx.type);
 
     // Resolve category
     final cat = _resolveCategory();
@@ -1156,8 +1182,27 @@ class _TxTile extends ConsumerWidget {
     final catColor =
         cat != null ? _parseColor(cat.colorHex) : AppColors.accent;
 
-    final displayName = _buildDisplayName(catName);
-    final note = _buildNote(catName);
+    // For transfers, override display name and note
+    final String displayName;
+    final String? note;
+    if (isTransferSplit) {
+      final accounts = ref.read(accountsProvider).value ?? [];
+      final acctMap = {for (final a in accounts) a.id: a};
+      final fromAcct = acctMap[tx.accountId];
+      final toAcct = tx.destinationAccountId != null
+          ? acctMap[tx.destinationAccountId]
+          : null;
+      if (isFrom) {
+        displayName = 'Transfer to ${toAcct?.name ?? 'account'}';
+        note = fromAcct?.name;
+      } else {
+        displayName = 'Transfer from ${fromAcct?.name ?? 'account'}';
+        note = toAcct?.name;
+      }
+    } else {
+      displayName = _buildDisplayName(catName);
+      note = _buildNote(catName);
+    }
     final notePreview = _buildNotePreview(catName, displayName);
 
     return Semantics(
@@ -1174,21 +1219,38 @@ class _TxTile extends ConsumerWidget {
           child: Row(
             children: [
               // ── Circular category icon (tap to filter #5) ─────
-            GestureDetector(
-              onTap: () {
-                final catId = cat?.id;
-                if (catId != null && onCategoryTap != null) {
-                  onCategoryTap!(catId, catName ?? 'Unknown');
-                }
-              },
-              child: CategoryIcon(
-                categoryName: catName ?? '',
-                emoji: cat?.icon,
-                color: catColor,
-                size: 46,
-                circular: true,
+            if (isTransferSplit)
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isFrom
+                      ? Icons.arrow_upward_rounded
+                      : Icons.arrow_downward_rounded,
+                  color: typeColor,
+                  size: 22,
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: () {
+                  final catId = cat?.id;
+                  if (catId != null && onCategoryTap != null) {
+                    onCategoryTap!(catId, catName ?? 'Unknown');
+                  }
+                },
+                child: CategoryIcon(
+                  categoryName: catName ?? '',
+                  emoji: cat?.icon,
+                  color: catColor,
+                  size: 46,
+                  circular: true,
+                ),
               ),
-            ),
             const SizedBox(width: 14),
             // ── Name + note ─────────────────────────────────────
             Expanded(
@@ -1369,6 +1431,8 @@ class _TxTile extends ConsumerWidget {
   List<Widget> _buildAmountColumn(BuildContext context, Color typeColor) {
     final tx = entry.tx;
     final lines = entry.lines;
+    final isTransferSplit = transferSide != null;
+    final isFrom = transferSide == 'from';
 
     String displayCurrency = tx.currency;
     double displayAmount = tx.amount;
@@ -1383,13 +1447,18 @@ class _TxTile extends ConsumerWidget {
         displayCurrency != baseCurrency && lines.isNotEmpty;
     final baseAmount = tx.amount;
 
+    // For transfer splits, show as expense (from) or income (to)
+    final effectiveType = isTransferSplit
+        ? (isFrom ? 'expense' : 'income')
+        : tx.type;
+
     // Show running balance only when a single account is involved
     final isSingleAccount = entry.involvedAccountNames.length <= 1;
 
     return [
       // Amount right-aligned (#3)
       Text(
-        formatSignedAmount(displayAmount, currency: displayCurrency, type: entry.tx.type),
+        formatSignedAmount(displayAmount, currency: displayCurrency, type: effectiveType),
         textAlign: TextAlign.end,
         style: TextStyle(
           fontWeight: FontWeight.w700,
