@@ -20,6 +20,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/hint_banner.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -37,7 +38,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
     final allocationsAsync = ref.watch(allocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
-    final txAsync = ref.watch(transactionEntriesProvider);
+    final txAsync = ref.watch(currentMonthTransactionsProvider);
+    final recentTxAsync = ref.watch(recentTransactionsProvider);
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryMap = {for (final c in categories) c.id: c};
     final baseCurrency = household?.baseCurrency ?? 'USD';
@@ -48,7 +50,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ref.invalidate(accountsWithBalanceProvider);
           ref.invalidate(allocationsProvider);
           ref.invalidate(unallocatedProvider);
-          ref.invalidate(transactionEntriesProvider);
+          ref.invalidate(currentMonthTransactionsProvider);
+          ref.invalidate(recentTransactionsProvider);
           await Future.delayed(const Duration(milliseconds: 300));
         },
         child: CustomScrollView(
@@ -94,6 +97,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
+              ),
+            ),
+
+            // ── Welcome hint (first visit) ──
+            const SliverToBoxAdapter(
+              child: HintBanner(
+                hintId: 'dashboard_welcome',
+                icon: Icons.waving_hand_rounded,
+                title: 'Welcome to PocketPlan!',
+                body:
+                    'This is your financial overview. Tap the quick actions below to start recording transactions.',
               ),
             ),
 
@@ -173,7 +187,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       message: "Couldn't load your data",
                       details: '$e',
                       onRetry: () =>
-                          ref.invalidate(transactionEntriesProvider),
+                          ref.invalidate(currentMonthTransactionsProvider),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -334,7 +348,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  txAsync.when(
+                  recentTxAsync.when(
                     data: (entries) {
                       if (entries.isEmpty) {
                         return Container(
@@ -372,7 +386,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       message: "Couldn't load your data",
                       details: '$e',
                       onRetry: () =>
-                          ref.invalidate(transactionEntriesProvider),
+                          ref.invalidate(recentTransactionsProvider),
                     ),
                   ),
                 ]),

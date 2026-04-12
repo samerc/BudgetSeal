@@ -130,6 +130,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   _showAdjustBalanceSheet();
                 } else if (v == 'archive') {
                   _confirmArchive();
+                } else if (v == 'delete') {
+                  _confirmDelete();
                 }
               },
               itemBuilder: (_) => [
@@ -151,6 +153,18 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
                       Text('Archive Account',
+                          style: TextStyle(color: AppColors.overspent)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_forever_rounded,
+                          size: 18, color: AppColors.overspent),
+                      const SizedBox(width: 10),
+                      Text('Delete Permanently',
                           style: TextStyle(color: AppColors.overspent)),
                     ],
                   ),
@@ -758,6 +772,103 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ..where((a) => a.id.equals(widget.accountId)))
           .write(const AccountsCompanion(archived: Value(true)));
       if (mounted) context.pop();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Delete with safeguards
+  // ---------------------------------------------------------------------------
+
+  Future<void> _confirmDelete() async {
+    final db = ref.read(databaseProvider);
+
+    // Count transactions referencing this account.
+    final txAsSource = await (db.select(db.transactions)
+          ..where((t) => t.accountId.equals(widget.accountId)))
+        .get();
+
+    final txAsDest = await (db.select(db.transactions)
+          ..where((t) => t.destinationAccountId.equals(widget.accountId)))
+        .get();
+
+    final txLineRefs = await (db.select(db.transactionLines)
+          ..where((t) => t.accountId.equals(widget.accountId)))
+        .get();
+
+    final totalRefs =
+        txAsSource.length + txAsDest.length + txLineRefs.length;
+
+    if (!mounted) return;
+
+    if (totalRefs > 0) {
+      // Has transactions -- cannot delete, offer archive instead.
+      final action = await showDialog<String>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Cannot Delete Account'),
+          content: Text(
+            'This account has $totalRefs transaction reference${totalRefs == 1 ? '' : 's'}. '
+            'You can\'t delete it while it has transactions.\n\n'
+            'Would you like to archive it instead? Archived accounts '
+            'are hidden from lists but preserve all transaction history.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'archive'),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.accent),
+              child: const Text('Archive Instead'),
+            ),
+          ],
+        ),
+      );
+
+      if (action == 'archive' && mounted) {
+        await (db.update(db.accounts)
+              ..where((a) => a.id.equals(widget.accountId)))
+            .write(const AccountsCompanion(archived: Value(true)));
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountsWithBalanceProvider);
+        if (mounted) context.pop();
+      }
+    } else {
+      // No transactions -- allow permanent deletion with confirmation.
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Delete Account Permanently'),
+          content: const Text(
+            'This account has no transactions. '
+            'Are you sure you want to permanently delete it? '
+            'This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && mounted) {
+        await (db.delete(db.accounts)
+              ..where((a) => a.id.equals(widget.accountId)))
+            .go();
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountsWithBalanceProvider);
+        if (mounted) context.pop();
+      }
     }
   }
 

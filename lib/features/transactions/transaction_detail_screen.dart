@@ -452,8 +452,10 @@ class _DetailBody extends ConsumerWidget {
       builder: (dialogCtx) => AlertDialog(
         title: const Text('Delete Transaction'),
         content: const Text(
-          'Are you sure you want to delete this transaction? '
-          'This will reverse any allocation ledger entries and cannot be undone.',
+          'Are you sure you want to delete this transaction?\n\n'
+          'This will reverse any envelope deductions and restore '
+          'the balance. Ledger entries will be removed.\n\n'
+          'This cannot be undone.',
         ),
         actions: [
           TextButton(

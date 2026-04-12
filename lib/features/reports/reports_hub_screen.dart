@@ -22,6 +22,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/hint_banner.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
 Color _hexToColor(String hex) {
@@ -114,6 +115,14 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                   color: AppColors.tp(context),
                 ),
               ),
+            ),
+            // ── First-visit hint ──
+            const HintBanner(
+              hintId: 'reports_intro',
+              icon: Icons.insights_rounded,
+              title: 'Explore your spending patterns',
+              body:
+                  'Switch between tabs to see different views. The Insights tab shows your financial health.',
             ),
             // ── Tab bar ──
             TabBar(

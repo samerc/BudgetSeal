@@ -20,6 +20,7 @@ import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/hint_banner.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
 // ---------------------------------------------------------------------------
@@ -100,7 +101,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final entriesAsync = ref.watch(transactionEntriesProvider);
+    final entriesAsync = ref.watch(monthlyTransactionsProvider(
+        (year: _selectedYear, month: _selectedMonth)));
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryMap = {for (final c in categories) c.id: c};
 
@@ -111,6 +113,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           children: [
             // ── Header area ──────────────────────────────────────
             _buildHeader(context),
+            // ── First-visit hint ────────────────────────────────
+            const HintBanner(
+              hintId: 'transactions_intro',
+              icon: Icons.receipt_long_rounded,
+              title: 'Your transactions',
+              body:
+                  'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.',
+            ),
             // ── Month tabs ───────────────────────────────────────
             _buildMonthTabs(context),
             // ── Filter chips (collapsible) ───────────────────────
@@ -147,8 +157,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 },
                 child: RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(transactionEntriesProvider);
-                    await ref.read(transactionEntriesProvider.future);
+                    final key = (year: _selectedYear, month: _selectedMonth);
+                    ref.invalidate(monthlyTransactionsProvider(key));
+                    await ref.read(monthlyTransactionsProvider(key).future);
                   },
                   child: entriesAsync.when(
                     data: (entries) =>
@@ -157,8 +168,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     error: (e, _) => ErrorRetry(
                       message: "Couldn't load your data",
                       details: '$e',
-                      onRetry: () =>
-                          ref.invalidate(transactionEntriesProvider),
+                      onRetry: () => ref.invalidate(
+                          monthlyTransactionsProvider(
+                              (year: _selectedYear, month: _selectedMonth))),
                     ),
                   ),
                 ),
@@ -758,18 +770,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   // ── Main content builder ─────────────────────────────────────
   Widget _buildContent(List<TransactionEntry> entries,
       Map<String, Category> categoryMap, BuildContext context) {
-    // Filter by date range if set, otherwise by selected month/year
+    // Month filtering is already done at the SQL level via
+    // monthlyTransactionsProvider. Apply optional date-range narrowing.
     final hasDateFilter = _dateFrom != null || _dateTo != null;
-    var filtered = entries.where((e) {
-      final d = e.tx.createdAt.toLocal();
-      if (hasDateFilter) {
-        final dayOnly = DateTime(d.year, d.month, d.day);
-        if (_dateFrom != null && dayOnly.isBefore(_dateFrom!)) return false;
-        if (_dateTo != null && dayOnly.isAfter(_dateTo!)) return false;
-        return true;
-      }
-      return d.year == _selectedYear && d.month == _selectedMonth;
-    }).toList();
+    var filtered = hasDateFilter
+        ? entries.where((e) {
+            final d = e.tx.createdAt.toLocal();
+            final dayOnly = DateTime(d.year, d.month, d.day);
+            if (_dateFrom != null && dayOnly.isBefore(_dateFrom!)) return false;
+            if (_dateTo != null && dayOnly.isAfter(_dateTo!)) return false;
+            return true;
+          }).toList()
+        : entries.toList();
 
     if (_typeFilter != null) {
       filtered = filtered.where((e) => e.tx.type == _typeFilter).toList();

@@ -24,4 +24,46 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     await into(transactions).insert(entry);
     return entry.id.value;
   }
+
+  /// Fetch transactions for a specific month, filtered at the SQL level.
+  /// Returns oldest-first for running-balance computation.
+  Stream<List<Transaction>> watchByMonth(
+    String householdId,
+    int year,
+    int month,
+  ) {
+    final start = DateTime(year, month, 1);
+    final end = DateTime(year, month + 1, 1);
+    return (select(transactions)
+          ..where((t) =>
+              t.householdId.equals(householdId) &
+              t.createdAt.isBiggerOrEqualValue(start) &
+              t.createdAt.isSmallerThanValue(end))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+        .watch();
+  }
+
+  /// Fetch all transactions up to (but not including) a given month,
+  /// oldest-first. Used to compute running balances before the target month.
+  Future<List<Transaction>> getBeforeMonth(
+    String householdId,
+    int year,
+    int month,
+  ) {
+    final start = DateTime(year, month, 1);
+    return (select(transactions)
+          ..where((t) =>
+              t.householdId.equals(householdId) &
+              t.createdAt.isSmallerThanValue(start))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+        .get();
+  }
+
+  /// Fetch the most recent N transactions for a household.
+  Stream<List<Transaction>> watchRecent(String householdId, {int limit = 10}) =>
+      (select(transactions)
+            ..where((t) => t.householdId.equals(householdId))
+            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+            ..limit(limit))
+          .watch();
 }

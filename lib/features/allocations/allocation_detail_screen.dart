@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
 import '../../core/database/daos/ledger_dao.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -169,6 +170,45 @@ class _AllocationDetailScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(_isNew ? 'New Envelope' : envelopeName),
+        actions: [
+          if (!_isNew)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              onSelected: (v) {
+                if (v == 'archive') {
+                  _confirmArchive();
+                } else if (v == 'delete') {
+                  _confirmDelete();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'archive',
+                  child: Row(
+                    children: [
+                      Icon(Icons.archive_outlined,
+                          size: 18, color: AppColors.overspent),
+                      const SizedBox(width: 10),
+                      Text('Archive Envelope',
+                          style: TextStyle(color: AppColors.overspent)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_forever_rounded,
+                          size: 18, color: AppColors.overspent),
+                      const SizedBox(width: 10),
+                      Text('Delete Permanently',
+                          style: TextStyle(color: AppColors.overspent)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
       bottomNavigationBar: (_isNew || _showSettings)
           ? SafeArea(
@@ -1125,6 +1165,165 @@ class _AllocationDetailScreenState
   Color _hexToColor(String hex) {
     final clean = hex.replaceAll('#', '');
     return Color(int.parse('FF$clean', radix: 16));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Archive
+  // ---------------------------------------------------------------------------
+
+  Future<void> _confirmArchive() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Archive Envelope'),
+        content: const Text(
+          'This envelope will be hidden from all lists. '
+          'Linked categories and transaction history will be preserved.\n\n'
+          'You can unarchive it later from Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style:
+                TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final db = ref.read(databaseProvider);
+      await AllocationsDao(db).archive(widget.allocationId);
+      ref.invalidate(allocationsProvider);
+      if (mounted) context.pop();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Delete with safeguards
+  // ---------------------------------------------------------------------------
+
+  Future<void> _confirmDelete() async {
+    final db = ref.read(databaseProvider);
+    final dao = AllocationsDao(db);
+
+    // Count linked categories.
+    final linked = await dao.linkedCategories(widget.allocationId);
+    final linkedCount = linked.length;
+
+    if (!mounted) return;
+
+    final warnings = <String>[];
+    if (linkedCount > 0) {
+      final names = linked.take(3).map((c) => c.name).join(', ');
+      final suffix = linkedCount > 3 ? ' and ${linkedCount - 3} more' : '';
+      warnings.add(
+          '$linkedCount categor${linkedCount == 1 ? 'y is' : 'ies are'} '
+          'linked to this envelope ($names$suffix)');
+    }
+
+    if (warnings.isNotEmpty) {
+      final action = await showDialog<String>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          title: const Text('Delete Envelope'),
+          content: Text(
+            '${warnings.join('. ')}.\n\n'
+            'Deleting will:\n'
+            '  \u2022 Unlink all categories from this envelope\n'
+            '  \u2022 Remove all ledger history for this envelope\n\n'
+            'Consider archiving instead to preserve history.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'archive'),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.accent),
+              child: const Text('Archive Instead'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'delete'),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (action == 'archive') {
+        await dao.archive(widget.allocationId);
+        ref.invalidate(allocationsProvider);
+        if (mounted) context.pop();
+      } else if (action == 'delete') {
+        // Unlink all categories.
+        for (final cat in linked) {
+          await dao.unlinkCategory(cat.id);
+        }
+        // Delete ledger entries.
+        await (db.delete(db.allocationLedger)
+              ..where(
+                  (l) => l.allocationId.equals(widget.allocationId)))
+            .go();
+        // Delete the allocation itself.
+        await (db.delete(db.allocations)
+              ..where((a) => a.id.equals(widget.allocationId)))
+            .go();
+        ref.invalidate(allocationsProvider);
+        ref.invalidate(categoriesProvider);
+        if (mounted) context.pop();
+      }
+    } else {
+      // No linked categories -- simple confirmation.
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          title: const Text('Delete Envelope Permanently'),
+          content: const Text(
+            'This envelope has no linked categories. '
+            'All ledger history will be removed.\n\n'
+            'Are you sure? This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, true),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && mounted) {
+        // Delete ledger entries.
+        await (db.delete(db.allocationLedger)
+              ..where(
+                  (l) => l.allocationId.equals(widget.allocationId)))
+            .go();
+        // Delete the allocation.
+        await (db.delete(db.allocations)
+              ..where((a) => a.id.equals(widget.allocationId)))
+            .go();
+        ref.invalidate(allocationsProvider);
+        if (mounted) context.pop();
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------

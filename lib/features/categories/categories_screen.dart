@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -533,14 +534,39 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           ),
           const SizedBox(height: 28),
 
-          // Archive / unarchive (edit only)
+          // Archive / Delete (edit only)
           if (!_isNew) ...[
-            TextButton(
-              onPressed: _loading ? null : _toggleArchive,
-              child: Text(
-                widget.existing!.archived ? 'Unarchive' : 'Archive',
-                style: const TextStyle(color: AppColors.textSecondary),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: _loading ? null : _toggleArchive,
+                    icon: Icon(
+                      widget.existing!.archived
+                          ? Icons.unarchive_outlined
+                          : Icons.archive_outlined,
+                      size: 18,
+                    ),
+                    label: Text(
+                      widget.existing!.archived ? 'Unarchive' : 'Archive',
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: _loading ? null : _confirmDelete,
+                    icon: const Icon(Icons.delete_forever_rounded, size: 18),
+                    label: const Text('Delete'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.overspent,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
           ],
@@ -614,5 +640,124 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       lastModified: Value(DateTime.now()),
     ));
     if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _confirmDelete() async {
+    final cat = widget.existing!;
+    final db = ref.read(databaseProvider);
+
+    // Count transactions referencing this category.
+    final txRows = await (db.select(db.transactions)
+          ..where((t) => t.categoryId.equals(cat.id)))
+        .get();
+
+    final lineRows = await (db.select(db.transactionLines)
+          ..where((t) => t.categoryId.equals(cat.id)))
+        .get();
+
+    final totalTx = txRows.length + lineRows.length;
+
+    // Check if linked to an envelope.
+    String? envelopeName;
+    if (cat.allocationId != null) {
+      final alloc = await (db.select(db.allocations)
+            ..where((a) => a.id.equals(cat.allocationId!)))
+          .getSingleOrNull();
+      envelopeName = alloc?.name;
+    }
+
+    if (!mounted) return;
+
+    final warnings = <String>[];
+    if (totalTx > 0) {
+      warnings.add('$totalTx transaction${totalTx == 1 ? '' : 's'} use this category');
+    }
+    if (envelopeName != null) {
+      warnings.add('linked to envelope "$envelopeName"');
+    }
+
+    if (warnings.isNotEmpty) {
+      final warningText = warnings.join(' and is ');
+      final action = await showDialog<String>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          title: const Text('Delete Category'),
+          content: Text(
+            'This category has $warningText.\n\n'
+            'Deleting it will uncategorize those transactions '
+            'and unlink it from the envelope.\n\n'
+            'Consider archiving instead to preserve history.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'archive'),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.accent),
+              child: const Text('Archive Instead'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, 'delete'),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (action == 'archive') {
+        await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+            .write(CategoriesCompanion(
+          archived: const Value(true),
+          lastModified: Value(DateTime.now()),
+        ));
+        if (mounted) Navigator.of(context).pop();
+      } else if (action == 'delete') {
+        // Category FK is onDelete: SetNull, so transactions will be uncategorized.
+        await (db.delete(db.categories)..where((c) => c.id.equals(cat.id)))
+            .go();
+        ref.invalidate(categoriesProvider);
+        ref.invalidate(allocationsProvider);
+        if (mounted) Navigator.of(context).pop();
+      }
+    } else {
+      // No references -- simple confirmation.
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          title: const Text('Delete Category Permanently'),
+          content: const Text(
+            'This category has no transactions and is not linked to any envelope. '
+            'Are you sure you want to permanently delete it? '
+            'This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, true),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && mounted) {
+        await (db.delete(db.categories)..where((c) => c.id.equals(cat.id)))
+            .go();
+        ref.invalidate(categoriesProvider);
+        if (mounted) Navigator.of(context).pop();
+      }
+    }
   }
 }
