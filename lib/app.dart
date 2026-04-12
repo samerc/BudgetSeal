@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/providers/currency_symbol_provider.dart';
+import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
 import 'core/providers/entry_mode_provider.dart';
@@ -254,9 +255,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final themeMode = ref.watch(themeModeProvider);
     final selectedFont = ref.watch(fontProvider);
 
-    // Apply currency symbol overrides whenever they change.
+    // Apply currency symbol overrides and number format whenever they change.
     final symbolOverrides = ref.watch(currencySymbolProvider);
     setCurrencySymbolOverrides(symbolOverrides);
+    final numFormat = ref.watch(numberFormatProvider);
+    setNumberFormatPrefs(numFormat);
 
     // Rebuild themes with the selected font.
     final lightTheme = appTheme.copyWith(

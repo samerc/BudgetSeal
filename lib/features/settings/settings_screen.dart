@@ -13,6 +13,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/biometric_provider.dart';
 import '../../core/providers/currency_symbol_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/number_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
@@ -323,6 +324,17 @@ class SettingsScreen extends ConsumerWidget {
               iconColor: const Color(0xFF4DB6AC),
               onTap: () => _showCurrencySymbolEditor(context, ref),
             ),
+            Builder(builder: (context) {
+              ref.watch(numberFormatProvider); // rebuild on change
+              final preview = formatAmount(1234567.89);
+              return _SettingsTile(
+                icon: Icons.format_list_numbered_rounded,
+                title: 'Number Format',
+                subtitle: 'Preview: $preview',
+                iconColor: const Color(0xFF5C6BC0),
+                onTap: () => _showNumberFormatEditor(context, ref),
+              );
+            }),
             const SizedBox(height: 20),
 
             // ── About + Reset ──
@@ -839,6 +851,16 @@ class SettingsScreen extends ConsumerWidget {
     if (picked != null) ref.read(homeTabProvider.notifier).set(picked);
   }
 
+  void _showNumberFormatEditor(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _NumberFormatSheet(),
+    );
+  }
+
   void _showCurrencySymbolEditor(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -1255,5 +1277,263 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
     if (result != null && result.isNotEmpty) {
       ref.read(currencySymbolProvider.notifier).setOverride(code, result);
     }
+  }
+}
+
+// ─── Number Format Editor Sheet ────────────────────────────────────────────
+
+class _NumberFormatSheet extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_NumberFormatSheet> createState() => _NumberFormatSheetState();
+}
+
+class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
+  late ThousandsSeparator _thousands;
+  late DecimalSeparator _decimal;
+  late NegativeFormat _negative;
+
+  @override
+  void initState() {
+    super.initState();
+    final current = ref.read(numberFormatProvider);
+    _thousands = current.thousands;
+    _decimal = current.decimal;
+    _negative = current.negative;
+  }
+
+  String get _preview {
+    // Temporarily apply to get a preview
+    final old = NumberFormatPrefs(
+        thousands: _thousands, decimal: _decimal, negative: _negative);
+    setNumberFormatPrefs(old);
+    final pos = formatAmount(1234567.89, currency: 'USD');
+    final neg = formatAmount(-500.00, currency: 'USD');
+    return '$pos  |  $neg';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Number Format',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 6),
+            Text('Choose how numbers are displayed throughout the app.',
+                style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.ts(context),
+                    height: 1.4)),
+            const SizedBox(height: 16),
+
+            // Preview
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.sfv(context),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  Text('Preview',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ts(context))),
+                  const SizedBox(height: 6),
+                  Text(_preview,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context))),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Thousands separator
+            Text('Thousands Separator',
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ThousandsSeparator.values.map((t) {
+                final selected = t == _thousands;
+                // Skip combinations where thousands == decimal
+                final conflicts = (t == ThousandsSeparator.comma &&
+                        _decimal == DecimalSeparator.comma) ||
+                    (t == ThousandsSeparator.period &&
+                        _decimal == DecimalSeparator.period);
+                return GestureDetector(
+                  onTap: conflicts
+                      ? null
+                      : () => setState(() => _thousands = t),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.accent.withValues(alpha: 0.15)
+                          : AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: selected
+                              ? AppColors.accent
+                              : AppColors.bd(context)),
+                    ),
+                    child: Text(t.label,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                            color: conflicts
+                                ? AppColors.th(context)
+                                : selected
+                                    ? AppColors.accent
+                                    : AppColors.tp(context))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+
+            // Decimal separator
+            Text('Decimal Separator',
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: DecimalSeparator.values.map((d) {
+                final selected = d == _decimal;
+                final conflicts = (d == DecimalSeparator.comma &&
+                        _thousands == ThousandsSeparator.comma) ||
+                    (d == DecimalSeparator.period &&
+                        _thousands == ThousandsSeparator.period);
+                return GestureDetector(
+                  onTap: conflicts
+                      ? null
+                      : () => setState(() => _decimal = d),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.accent.withValues(alpha: 0.15)
+                          : AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: selected
+                              ? AppColors.accent
+                              : AppColors.bd(context)),
+                    ),
+                    child: Text(d.label,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                            color: conflicts
+                                ? AppColors.th(context)
+                                : selected
+                                    ? AppColors.accent
+                                    : AppColors.tp(context))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+
+            // Negative format
+            Text('Negative Numbers',
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: NegativeFormat.values.map((n) {
+                final selected = n == _negative;
+                return GestureDetector(
+                  onTap: () => setState(() => _negative = n),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.accent.withValues(alpha: 0.15)
+                          : AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: selected
+                              ? AppColors.accent
+                              : AppColors.bd(context)),
+                    ),
+                    child: Text(n.label,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                            color: selected
+                                ? AppColors.accent
+                                : AppColors.tp(context))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+
+            FilledButton(
+              onPressed: () {
+                ref.read(numberFormatProvider.notifier).update(
+                    NumberFormatPrefs(
+                        thousands: _thousands,
+                        decimal: _decimal,
+                        negative: _negative));
+                Navigator.pop(context);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Save',
+                  style:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

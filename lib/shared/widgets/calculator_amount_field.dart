@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
+import '../utils/format_number.dart';
 
 /// A read-only amount field that opens a calculator bottom sheet when tapped.
 ///
@@ -42,8 +43,7 @@ class CalculatorAmountField extends StatelessWidget {
 
   String _fmtDisplay(double v) {
     if (v == 0) return '';
-    if (v == v.roundToDouble()) return v.toInt().toString();
-    return v.toStringAsFixed(2);
+    return formatForDisplay(v);
   }
 
   @override
@@ -133,6 +133,13 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   String _calcDisplay = '0';
   String _calcExpression = '';
   double _amount = 0;
+
+  /// True when the expression contains an operator (user is mid-calculation).
+  bool get _hasOperator =>
+      _calcExpression.contains('+') ||
+      _calcExpression.contains('-') ||
+      _calcExpression.contains('×') ||
+      _calcExpression.contains('÷');
 
   @override
   void initState() {
@@ -249,7 +256,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                _calcDisplay,
+                _hasOperator ? _calcDisplay : (_amount > 0 ? formatForDisplay(_amount) : _calcDisplay),
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w700,
