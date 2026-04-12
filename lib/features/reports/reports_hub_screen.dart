@@ -4,16 +4,23 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'package:drift/drift.dart' hide Column;
+
+import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/age_of_money_provider.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
-import '../../core/database/app_database.dart' show Category;
+import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
@@ -80,7 +87,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 4, vsync: this);
+    _tabCtrl = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -128,6 +135,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                 Tab(text: 'Categories'),
                 Tab(text: 'History'),
                 Tab(text: 'Cumulative'),
+                Tab(text: 'Insights'),
               ],
             ),
             // ── Tab content ──
@@ -139,6 +147,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                   _CategoriesTab(),
                   _HistoryTab(),
                   _CumulativeTab(),
+                  _InsightsTab(),
                 ],
               ),
             ),
@@ -226,15 +235,7 @@ class _OverviewTab extends ConsumerWidget {
                 expenseByMonth: expenseByMonth,
                 baseCurrency: baseCurrency,
               ),
-              const SizedBox(height: 20),
-              // Net worth over time
-              _NetWorthChart(
-                entries: entries,
-                months: months,
-                incomeByMonth: incomeByMonth,
-                expenseByMonth: expenseByMonth,
-                baseCurrency: baseCurrency,
-              ),
+              // Net worth chart moved to Insights tab
             ],
           ),
         );
@@ -1924,6 +1925,715 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
         message: "Couldn't load your data",
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Tab 5: Insights (analytics moved from dashboard)
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _InsightsTab extends ConsumerWidget {
+  const _InsightsTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final txAsync = ref.watch(transactionEntriesProvider);
+    final baseCurrency =
+        ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    final categories = ref.watch(categoriesProvider).value ?? [];
+    final categoryMap = {for (final c in categories) c.id: c};
+    final allocationsAsync = ref.watch(allocationsProvider);
+    final ageAsync = ref.watch(ageOfMoneyProvider);
+
+    return txAsync.when(
+      data: (entries) {
+        final now = DateTime.now();
+        final monthStart = DateTime(now.year, now.month, 1);
+        final daysElapsed = now.difference(monthStart).inDays + 1;
+        final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+
+        // ── Spending velocity ──
+        double monthExpense = 0;
+        for (final e in entries) {
+          if (e.tx.type == 'expense' &&
+              e.tx.createdAt.isAfter(monthStart)) {
+            monthExpense += _baseAmount(e);
+          }
+        }
+
+        final dailyRate =
+            monthExpense > 0 ? monthExpense / daysElapsed : 0.0;
+        final projected = dailyRate * daysInMonth;
+
+        final allocs = allocationsAsync.value ?? [];
+        double totalBudget = 0;
+        for (final a in allocs) {
+          final t = a.data.allocation.targetAmount;
+          if (t != null && t > 0) totalBudget += t;
+        }
+
+        Color velocityColor;
+        if (totalBudget <= 0) {
+          velocityColor = AppColors.accent;
+        } else if (projected <= totalBudget * 0.85) {
+          velocityColor = AppColors.healthy;
+        } else if (projected <= totalBudget) {
+          velocityColor = AppColors.caution;
+        } else {
+          velocityColor = AppColors.overspent;
+        }
+
+        final velocityFraction = totalBudget > 0
+            ? (projected / totalBudget).clamp(0.0, 1.5)
+            : 0.0;
+
+        // ── Biggest expense ──
+        TransactionEntry? biggest;
+        double biggestAmt = 0;
+        for (final e in entries) {
+          if (e.tx.type == 'expense' &&
+              e.tx.createdAt.isAfter(monthStart)) {
+            final amt = _baseAmount(e);
+            if (amt > biggestAmt) {
+              biggestAmt = amt;
+              biggest = e;
+            }
+          }
+        }
+
+        // ── Subscription summary ──
+        final householdId = ref.watch(currentHouseholdIdProvider);
+        final db = ref.watch(databaseProvider);
+
+        // ── Age of money ──
+        final ageValue = ageAsync.value;
+
+        // ── Financial health score ──
+        // Combine: age of money (0-40), budget adherence (0-30), savings rate (0-30)
+        double totalIncome = 0;
+        for (final e in entries) {
+          if (e.tx.type == 'income' &&
+              e.tx.createdAt.isAfter(monthStart)) {
+            totalIncome += _baseAmount(e);
+          }
+        }
+        final savingsRate =
+            totalIncome > 0 ? (totalIncome - monthExpense) / totalIncome : 0.0;
+
+        int? healthScore;
+        if (ageValue != null || totalBudget > 0 || totalIncome > 0) {
+          double score = 0;
+
+          // Age of money component (0-40)
+          if (ageValue != null) {
+            score += (ageValue / 30.0).clamp(0.0, 1.0) * 40;
+          }
+
+          // Budget adherence component (0-30)
+          if (totalBudget > 0 && monthExpense > 0) {
+            final adherence = 1.0 - ((projected - totalBudget) / totalBudget).clamp(-0.5, 0.5);
+            score += adherence.clamp(0.0, 1.0) * 30;
+          } else if (totalBudget > 0) {
+            score += 30; // No spending = perfect adherence
+          }
+
+          // Savings rate component (0-30)
+          if (totalIncome > 0) {
+            score += savingsRate.clamp(0.0, 1.0) * 30;
+          }
+
+          healthScore = score.round().clamp(0, 100);
+        }
+
+        // ── 6-month trend data for net worth chart ──
+        final months = <DateTime>[];
+        final incomeByMonth = <double>[];
+        final expenseByMonth = <double>[];
+        for (int i = 5; i >= 0; i--) {
+          final m = DateTime(now.year, now.month - i, 1);
+          final end = DateTime(m.year, m.month + 1, 1);
+          months.add(m);
+          double inc = 0, exp = 0;
+          for (final e in entries) {
+            final d = e.tx.createdAt;
+            if (d.isBefore(m) || !d.isBefore(end)) continue;
+            final amt = _baseAmount(e);
+            if (e.tx.type == 'income') inc += amt;
+            if (e.tx.type == 'expense') exp += amt;
+          }
+          incomeByMonth.add(inc);
+          expenseByMonth.add(exp);
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Financial Health Score ──
+              if (healthScore != null) ...[
+                _HealthScoreCard(score: healthScore),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Spending Velocity (full detail) ──
+              if (monthExpense > 0) ...[
+                _VelocityCard(
+                  dailyRate: dailyRate,
+                  projected: projected,
+                  totalBudget: totalBudget,
+                  velocityColor: velocityColor,
+                  velocityFraction: velocityFraction,
+                  baseCurrency: baseCurrency,
+                  daysElapsed: daysElapsed,
+                  daysInMonth: daysInMonth,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Biggest Expense ──
+              if (biggest != null) ...[
+                _BiggestExpenseCard(
+                  entry: biggest,
+                  amount: biggestAmt,
+                  categoryMap: categoryMap,
+                  baseCurrency: baseCurrency,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Subscription Summary ──
+              if (householdId != null)
+                _SubscriptionSummaryCard(
+                  db: db,
+                  householdId: householdId,
+                  baseCurrency: baseCurrency,
+                ),
+
+              // ── Age of Money (full detail) ──
+              if (ageValue != null) ...[
+                _AgeOfMoneyCard(age: ageValue),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Net Worth Over Time ──
+              _NetWorthChart(
+                entries: entries,
+                months: months,
+                incomeByMonth: incomeByMonth,
+                expenseByMonth: expenseByMonth,
+                baseCurrency: baseCurrency,
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SkeletonList(),
+      error: (e, _) => ErrorRetry(
+        message: "Couldn't load your data",
+        details: '$e',
+        onRetry: () => ref.invalidate(transactionEntriesProvider),
+      ),
+    );
+  }
+}
+
+// ── Financial Health Score Card ─────────────────────────────────────────────
+
+class _HealthScoreCard extends StatelessWidget {
+  final int score;
+  const _HealthScoreCard({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    final String label;
+    if (score >= 80) {
+      color = AppColors.healthy;
+      label = 'Excellent';
+    } else if (score >= 60) {
+      color = AppColors.caution;
+      label = 'Good';
+    } else if (score >= 40) {
+      color = const Color(0xFFF97316);
+      label = 'Fair';
+    } else {
+      color = AppColors.overspent;
+      label = 'Needs Work';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        children: [
+          Text('Financial Health',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.tp(context))),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: CircularProgressIndicator(
+                    value: score / 100.0,
+                    strokeWidth: 10,
+                    backgroundColor: AppColors.bd(context),
+                    valueColor: AlwaysStoppedAnimation(color),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$score',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      ),
+                    ),
+                    Text(label,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ts(context))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Based on age of money, budget adherence, and savings rate.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Spending Velocity Card (full detail) ────────────────────────────────────
+
+class _VelocityCard extends StatelessWidget {
+  final double dailyRate;
+  final double projected;
+  final double totalBudget;
+  final Color velocityColor;
+  final double velocityFraction;
+  final String baseCurrency;
+  final int daysElapsed;
+  final int daysInMonth;
+
+  const _VelocityCard({
+    required this.dailyRate,
+    required this.projected,
+    required this.totalBudget,
+    required this.velocityColor,
+    required this.velocityFraction,
+    required this.baseCurrency,
+    required this.daysElapsed,
+    required this.daysInMonth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.speed_rounded, size: 18, color: velocityColor),
+              const SizedBox(width: 8),
+              Text('Spending Velocity',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Progress bar
+          if (totalBudget > 0) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: velocityFraction.clamp(0.0, 1.0),
+                minHeight: 10,
+                backgroundColor: velocityColor.withValues(alpha: 0.1),
+                valueColor: AlwaysStoppedAnimation(velocityColor),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Projected',
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.ts(context))),
+                Text('Budget',
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.ts(context))),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(formatAmount(projected, currency: baseCurrency),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: velocityColor)),
+                Text(formatAmount(totalBudget, currency: baseCurrency),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            children: [
+              _VelocityStat(
+                  label: 'Daily rate',
+                  value:
+                      '${formatAmount(dailyRate, currency: baseCurrency)}/day'),
+              const SizedBox(width: 16),
+              _VelocityStat(
+                  label: 'Day',
+                  value: '$daysElapsed of $daysInMonth'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VelocityStat extends StatelessWidget {
+  final String label;
+  final String value;
+  const _VelocityStat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(fontSize: 11, color: AppColors.ts(context))),
+        Text(value,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.tp(context))),
+      ],
+    );
+  }
+}
+
+// ── Biggest Expense Card ────────────────────────────────────────────────────
+
+class _BiggestExpenseCard extends StatelessWidget {
+  final TransactionEntry entry;
+  final double amount;
+  final Map<String, Category> categoryMap;
+  final String baseCurrency;
+
+  const _BiggestExpenseCard({
+    required this.entry,
+    required this.amount,
+    required this.categoryMap,
+    required this.baseCurrency,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cat = entry.tx.categoryId != null
+        ? categoryMap[entry.tx.categoryId]
+        : null;
+    final catName = cat?.name ??
+        (entry.tx.note.isNotEmpty ? entry.tx.note : 'Expense');
+    final catColor = cat != null
+        ? _hexToColor(cat.colorHex)
+        : AppColors.overspent;
+
+    return GestureDetector(
+      onTap: () => context.push('/transactions/${entry.tx.id}'),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.bd(context)),
+        ),
+        child: Row(
+          children: [
+            CategoryIcon(
+              categoryName: cat?.name ?? '',
+              emoji: cat?.icon,
+              color: catColor,
+              size: 42,
+              circular: true,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Biggest Expense',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.ts(context))),
+                  Text(catName,
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context))),
+                  if (entry.tx.note.isNotEmpty && cat != null)
+                    Text(entry.tx.note,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.ts(context)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            Text(formatAmount(amount, currency: baseCurrency),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.overspent)),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded,
+                size: 18, color: AppColors.th(context)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Subscription Summary Card ───────────────────────────────────────────────
+
+class _SubscriptionSummaryCard extends ConsumerWidget {
+  final AppDatabase db;
+  final String householdId;
+  final String baseCurrency;
+
+  const _SubscriptionSummaryCard({
+    required this.db,
+    required this.householdId,
+    required this.baseCurrency,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<List<RecurringTransaction>>(
+      future: (db.select(db.recurringTransactions)
+            ..where((r) =>
+                r.householdId.equals(householdId) &
+                r.enabled.equals(true)))
+          .get(),
+      builder: (context, snap) {
+        final recs = snap.data;
+        if (recs == null || recs.isEmpty) return const SizedBox.shrink();
+
+        double total = 0;
+        for (final r in recs) {
+          double monthly = r.amount;
+          switch (r.frequency) {
+            case 'daily':
+              monthly = r.amount * 30 / r.interval;
+            case 'weekly':
+              monthly = r.amount * 4.33 / r.interval;
+            case 'monthly':
+              monthly = r.amount / r.interval;
+            case 'yearly':
+              monthly = r.amount / (12 * r.interval);
+          }
+          total += monthly;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: GestureDetector(
+            onTap: () => context.push('/recurring'),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.sf(context),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.bd(context)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.autorenew_rounded,
+                        size: 20, color: AppColors.accent),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Recurring Transactions',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tp(context))),
+                        Text(
+                            '${recs.length} active \u00b7 ${formatAmount(total, currency: baseCurrency)}/mo',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.ts(context))),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 18, color: AppColors.th(context)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Age of Money Card (full detail) ─────────────────────────────────────────
+
+class _AgeOfMoneyCard extends StatelessWidget {
+  final int age;
+  const _AgeOfMoneyCard({required this.age});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    final String label;
+    final String description;
+    if (age >= 30) {
+      color = AppColors.healthy;
+      label = 'Excellent';
+      description =
+          'You\'re spending last month\'s income -- a sign of financial stability.';
+    } else if (age >= 15) {
+      color = AppColors.caution;
+      label = 'Getting there';
+      description =
+          'You\'re building a buffer but not quite there yet. Keep it up!';
+    } else {
+      color = AppColors.overspent;
+      label = 'Needs work';
+      description =
+          'You\'re living paycheck to paycheck. Try to build up a buffer over time.';
+    }
+
+    // Gauge value (target is 30 days)
+    final gaugeFraction = (age / 30.0).clamp(0.0, 1.0);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.schedule_rounded, size: 18, color: color),
+              const SizedBox(width: 8),
+              Text('Age of Money',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const Spacer(),
+              Text('$age days',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: color)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Gauge bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: gaugeFraction,
+              minHeight: 10,
+              backgroundColor: color.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: color)),
+              Text('Goal: 30+ days',
+                  style: TextStyle(
+                      fontSize: 11, color: AppColors.ts(context))),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: TextStyle(
+                fontSize: 12,
+                color: AppColors.ts(context),
+                height: 1.4),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Age of Money measures how many days your money sits before '
+            'you spend it. It traces each expense back to the income that '
+            'funded it (oldest income first).',
+            style: TextStyle(
+                fontSize: 11,
+                color: AppColors.th(context),
+                height: 1.4),
+          ),
+        ],
       ),
     );
   }

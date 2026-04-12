@@ -21,6 +21,7 @@ import '../../core/providers/font_provider.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/providers/receipt_sync_provider.dart';
 import '../../core/providers/sync_provider.dart';
+import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
@@ -64,6 +65,9 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
+
+            // ── Backup Reminder Banner (moved from dashboard) ──
+            _SettingsBackupBanner(),
 
             // ── Household banner ──
             Container(
@@ -1534,6 +1538,87 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Backup Reminder Banner (moved from dashboard) ──────────────────────────
+
+class _SettingsBackupBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showReminder = ref.watch(showBackupReminderProvider);
+    final daysSince = ref.watch(daysSinceBackupProvider);
+
+    return showReminder.when(
+      data: (show) {
+        if (!show) return const SizedBox.shrink();
+        final days = daysSince.value ?? -1;
+        final message = days == -1
+            ? "You haven't backed up yet"
+            : "You haven't backed up in $days days";
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.caution.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                  color: AppColors.caution.withValues(alpha: 0.25)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.backup_rounded,
+                        size: 18, color: AppColors.caution),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        message,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await snoozeBackupReminder();
+                        ref.invalidate(showBackupReminderProvider);
+                      },
+                      child: Icon(Icons.close_rounded,
+                          size: 18, color: AppColors.ts(context)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 34,
+                  child: FilledButton.icon(
+                    onPressed: () => context.push('/backup'),
+                    icon: const Icon(Icons.backup_rounded, size: 16),
+                    label: const Text('Backup Now',
+                        style: TextStyle(fontSize: 12)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.caution,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

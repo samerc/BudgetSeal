@@ -10,7 +10,6 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/age_of_money_provider.dart';
-import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -54,7 +53,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         },
         child: CustomScrollView(
           slivers: [
-            // ── Header ───────────────────────────────────────────
+            // ── Zone 1: At-a-glance ─────────────────────────────
+            // Header (Greeting + Search)
             SliverToBoxAdapter(
               child: SafeArea(
                 bottom: false,
@@ -97,87 +97,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
 
-            // ── Budget Status Banner ──────────────────────────────
+            // Status Card (budget status + velocity + age of money combined)
             SliverToBoxAdapter(
-              child: allocationsAsync.when(
-                data: (allocations) {
-                  // Sum targets from allocations that have a target set
-                  double totalTarget = 0;
-                  bool hasTargets = false;
-                  for (final a in allocations) {
-                    final target = a.data.allocation.targetAmount;
-                    if (target != null && target > 0) {
-                      totalTarget += target;
-                      hasTargets = true;
-                    }
-                  }
-                  if (!hasTargets) return const SizedBox.shrink();
-
-                  // Get this month's total expenses
-                  final entries = txAsync.value ?? [];
-                  final now = DateTime.now();
-                  final monthStart = DateTime(now.year, now.month, 1);
-                  double monthExpense = 0;
-                  for (final e in entries) {
-                    if (e.tx.type == 'expense' &&
-                        e.tx.createdAt.isAfter(monthStart)) {
-                      if (e.lines.isNotEmpty) {
-                        for (final l in e.lines) {
-                          monthExpense += l.amount * l.exchangeRateToBase;
-                        }
-                      } else {
-                        monthExpense +=
-                            e.tx.amount * e.tx.exchangeRateToBase;
-                      }
-                    }
-                  }
-
-                  final diff = totalTarget - monthExpense;
-                  final isUnder = diff >= 0;
-                  final color =
-                      isUnder ? AppColors.healthy : AppColors.overspent;
-                  final bgColor = isUnder
-                      ? AppColors.healthyLight
-                      : AppColors.overspentLight;
-                  final icon = isUnder
-                      ? Icons.check_circle_outline_rounded
-                      : Icons.warning_amber_rounded;
-                  final label = isUnder
-                      ? "You're ${formatAmount(diff, currency: baseCurrency)} under budget"
-                      : "You're ${formatAmount(diff.abs(), currency: baseCurrency)} over budget";
-
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? color.withValues(alpha: 0.15)
-                            : bgColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(icon, size: 18, color: color),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: color,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+              child: _StatusCard(
+                allocationsAsync: allocationsAsync,
+                txAsync: txAsync,
+                baseCurrency: baseCurrency,
               ),
             ),
 
@@ -185,7 +110,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // ── Spending Donut + Month Summary ─────────────
+                  // Spending Overview with Donut + Toggle
                   txAsync.when(
                     data: (entries) {
                       final now = DateTime.now();
@@ -253,174 +178,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ── Spending Velocity ──────────────────────────
-                  txAsync.when(
-                    data: (entries) {
-                      final now = DateTime.now();
-                      final monthStart = DateTime(now.year, now.month, 1);
-                      final daysElapsed =
-                          now.difference(monthStart).inDays + 1;
-                      final daysInMonth =
-                          DateTime(now.year, now.month + 1, 0).day;
-
-                      double monthExpense = 0;
-                      for (final e in entries) {
-                        if (e.tx.type == 'expense' &&
-                            e.tx.createdAt.isAfter(monthStart)) {
-                          if (e.lines.isNotEmpty) {
-                            for (final l in e.lines) {
-                              monthExpense +=
-                                  l.amount * l.exchangeRateToBase;
-                            }
-                          } else {
-                            monthExpense +=
-                                e.tx.amount * e.tx.exchangeRateToBase;
-                          }
-                        }
-                      }
-
-                      if (monthExpense <= 0) {
-                        return const SizedBox.shrink();
-                      }
-
-                      final dailyRate = monthExpense / daysElapsed;
-                      final projected = dailyRate * daysInMonth;
-
-                      final allocs = allocationsAsync.value ?? [];
-                      double totalBudget = 0;
-                      for (final a in allocs) {
-                        final t = a.data.allocation.targetAmount;
-                        if (t != null && t > 0) totalBudget += t;
-                      }
-
-                      final Color color;
-                      if (totalBudget <= 0) {
-                        color = AppColors.accent;
-                      } else if (projected <= totalBudget * 0.85) {
-                        color = AppColors.healthy;
-                      } else if (projected <= totalBudget) {
-                        color = AppColors.caution;
-                      } else {
-                        color = AppColors.overspent;
-                      }
-
-                      return _InsightRow(
-                        icon: Icons.speed_rounded,
-                        color: color,
-                        text:
-                            'Spending ${formatAmount(dailyRate, currency: baseCurrency)}/day \u00b7 On track for ${formatAmount(projected, currency: baseCurrency)} this month',
-                      );
-                    },
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-
-                  // ── Biggest Expense ────────────────────────────
-                  txAsync.when(
-                    data: (entries) {
-                      final now = DateTime.now();
-                      final monthStart = DateTime(now.year, now.month, 1);
-
-                      TransactionEntry? biggest;
-                      double biggestAmt = 0;
-                      for (final e in entries) {
-                        if (e.tx.type == 'expense' &&
-                            e.tx.createdAt.isAfter(monthStart)) {
-                          double baseAmt = 0;
-                          if (e.lines.isNotEmpty) {
-                            for (final l in e.lines) {
-                              baseAmt += l.amount * l.exchangeRateToBase;
-                            }
-                          } else {
-                            baseAmt =
-                                e.tx.amount * e.tx.exchangeRateToBase;
-                          }
-                          if (baseAmt > biggestAmt) {
-                            biggestAmt = baseAmt;
-                            biggest = e;
-                          }
-                        }
-                      }
-
-                      if (biggest == null) return const SizedBox.shrink();
-
-                      final cat = biggest.tx.categoryId != null
-                          ? categoryMap[biggest.tx.categoryId]
-                          : null;
-                      final label = cat?.name ??
-                          (biggest.tx.note.isNotEmpty
-                              ? biggest.tx.note
-                              : 'Expense');
-
-                      return GestureDetector(
-                        onTap: () => context
-                            .push('/transactions/${biggest!.tx.id}'),
-                        child: _InsightRow(
-                          icon: Icons.local_fire_department_rounded,
-                          color: AppColors.overspent,
-                          text:
-                              'Biggest expense: ${formatAmount(biggestAmt, currency: baseCurrency)} \u2014 $label',
-                          trailing: Icon(Icons.chevron_right_rounded,
-                              size: 16, color: AppColors.th(context)),
-                        ),
-                      );
-                    },
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-
-                  // ── Subscription Summary ──────────────────────
-                  Builder(builder: (context) {
-                    final hId =
-                        ref.watch(currentHouseholdIdProvider);
-                    if (hId == null) return const SizedBox.shrink();
-                    final db = ref.watch(databaseProvider);
-                    return FutureBuilder<List<RecurringTransaction>>(
-                      future: (db.select(db.recurringTransactions)
-                            ..where((r) =>
-                                r.householdId.equals(hId) &
-                                r.enabled.equals(true)))
-                          .get(),
-                      builder: (context, snap) {
-                        final recs = snap.data;
-                        if (recs == null || recs.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        double total = 0;
-                        for (final r in recs) {
-                          double monthly = r.amount;
-                          switch (r.frequency) {
-                            case 'daily':
-                              monthly = r.amount * 30 / r.interval;
-                            case 'weekly':
-                              monthly = r.amount * 4.33 / r.interval;
-                            case 'monthly':
-                              monthly = r.amount / r.interval;
-                            case 'yearly':
-                              monthly = r.amount / (12 * r.interval);
-                          }
-                          total += monthly;
-                        }
-                        return GestureDetector(
-                          onTap: () => context.push('/recurring'),
-                          child: _InsightRow(
-                            icon: Icons.autorenew_rounded,
-                            color: AppColors.accent,
-                            text:
-                                'You spend ${formatAmount(total, currency: baseCurrency)}/mo on ${recs.length} recurring transaction${recs.length == 1 ? '' : 's'}',
-                            trailing: Icon(
-                                Icons.chevron_right_rounded,
-                                size: 16,
-                                color: AppColors.th(context)),
-                          ),
-                        );
-                      },
-                    );
-                  }),
-
-                  const SizedBox(height: 4),
-
-                  // ── Quick Actions ──────────────────────────────
+                  // Quick Actions
                   Row(
                     children: [
                       _QuickAction(
@@ -457,7 +215,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Net Worth Card ─────────────────────────────
+                  // ── Zone 2: Your money ────────────────────────────
+                  // Net Worth Card
                   accountsAsync.when(
                     data: (accounts) {
                       final Map<String, double> totals = {};
@@ -480,7 +239,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Envelope Health + Budget Insights ──────────
+                  // Envelope Health + Budget Insights (merged)
                   allocationsAsync.when(
                     data: (allocations) {
                       if (allocations.isEmpty) return const SizedBox.shrink();
@@ -518,20 +277,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         }
                       }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _AllocationHealthBar(
-                            total: allocations.length,
-                            healthy: healthy,
-                            caution: caution,
-                            overspent: overspent,
-                          ),
-                          if (insights.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _BudgetInsightsCard(insights: insights),
-                          ],
-                        ],
+                      return _EnvelopeHealthCard(
+                        total: allocations.length,
+                        healthy: healthy,
+                        caution: caution,
+                        overspent: overspent,
+                        insights: insights,
                       );
                     },
                     loading: () => const SizedBox(height: 48),
@@ -544,7 +295,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Unallocated ────────────────────────────────
+                  // Unallocated
                   unallocatedAsync.when(
                     data: (unallocated) {
                       final baseAmount = unallocated[baseCurrency] ?? 0.0;
@@ -569,13 +320,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Age of Money ───────────────────────────────
-                  _AgeOfMoneyRow(),
-                  // ── Backup Reminder ─────────────────────────────
-                  _BackupReminderBanner(),
-                  // ── Quick-use Templates ───────────────────────────
+                  // ── Zone 3: Activity ──────────────────────────────
+                  // Quick Templates (above recent transactions)
                   _QuickTemplatesSection(),
-                  // ── Recent Transactions ─────────────────────────
+
+                  // Recent Transactions
                   Text(
                     'Recent Transactions',
                     style: TextStyle(
@@ -649,6 +398,217 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   static Color _hexToColor(String hex) {
     final h = hex.replaceAll('#', '');
     return Color(int.parse('FF$h', radix: 16));
+  }
+}
+
+// ─── Status Card (combined: budget status + velocity + age of money) ────────
+
+class _StatusCard extends ConsumerWidget {
+  final AsyncValue<List<AllocationWithBalance>> allocationsAsync;
+  final AsyncValue<List<TransactionEntry>> txAsync;
+  final String baseCurrency;
+
+  const _StatusCard({
+    required this.allocationsAsync,
+    required this.txAsync,
+    required this.baseCurrency,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ageAsync = ref.watch(ageOfMoneyProvider);
+
+    // Compute budget status
+    String? budgetLine;
+    Color? budgetColor;
+    IconData? budgetIcon;
+
+    final allocations = allocationsAsync.value;
+    final entries = txAsync.value;
+
+    if (allocations != null && entries != null) {
+      double totalTarget = 0;
+      bool hasTargets = false;
+      for (final a in allocations) {
+        final target = a.data.allocation.targetAmount;
+        if (target != null && target > 0) {
+          totalTarget += target;
+          hasTargets = true;
+        }
+      }
+
+      if (hasTargets) {
+        final now = DateTime.now();
+        final monthStart = DateTime(now.year, now.month, 1);
+        double monthExpense = 0;
+        for (final e in entries) {
+          if (e.tx.type == 'expense' &&
+              e.tx.createdAt.isAfter(monthStart)) {
+            if (e.lines.isNotEmpty) {
+              for (final l in e.lines) {
+                monthExpense += l.amount * l.exchangeRateToBase;
+              }
+            } else {
+              monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+            }
+          }
+        }
+
+        final diff = totalTarget - monthExpense;
+        final isUnder = diff >= 0;
+        budgetColor = isUnder ? AppColors.healthy : AppColors.overspent;
+        budgetIcon = isUnder
+            ? Icons.check_circle_outline_rounded
+            : Icons.warning_amber_rounded;
+        budgetLine = isUnder
+            ? '${formatAmount(diff, currency: baseCurrency)} under budget'
+            : '${formatAmount(diff.abs(), currency: baseCurrency)} over budget';
+      }
+    }
+
+    // Compute velocity
+    String? velocityLine;
+    Color? velocityColor;
+    if (entries != null && allocations != null) {
+      final now = DateTime.now();
+      final monthStart = DateTime(now.year, now.month, 1);
+      final daysElapsed = now.difference(monthStart).inDays + 1;
+      final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+
+      double monthExpense = 0;
+      for (final e in entries) {
+        if (e.tx.type == 'expense' &&
+            e.tx.createdAt.isAfter(monthStart)) {
+          if (e.lines.isNotEmpty) {
+            for (final l in e.lines) {
+              monthExpense += l.amount * l.exchangeRateToBase;
+            }
+          } else {
+            monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+          }
+        }
+      }
+
+      if (monthExpense > 0) {
+        final dailyRate = monthExpense / daysElapsed;
+        final projected = dailyRate * daysInMonth;
+
+        double totalBudget = 0;
+        for (final a in allocations) {
+          final t = a.data.allocation.targetAmount;
+          if (t != null && t > 0) totalBudget += t;
+        }
+
+        if (totalBudget <= 0) {
+          velocityColor = AppColors.accent;
+        } else if (projected <= totalBudget * 0.85) {
+          velocityColor = AppColors.healthy;
+        } else if (projected <= totalBudget) {
+          velocityColor = AppColors.caution;
+        } else {
+          velocityColor = AppColors.overspent;
+        }
+
+        final projectedLabel = projected >= 1000
+            ? '${formatAmount(projected / 1000, currency: '')}K'
+            : formatAmount(projected, currency: baseCurrency);
+
+        velocityLine =
+            '${formatAmount(dailyRate, currency: baseCurrency)}/day \u00b7 on track for $projectedLabel';
+      }
+    }
+
+    // Age of money
+    String? ageLine;
+    final ageValue = ageAsync.value;
+    if (ageValue != null) {
+      ageLine = 'Age of Money: $ageValue days';
+    }
+
+    // If nothing to show, collapse
+    if (budgetLine == null && velocityLine == null && ageLine == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (budgetColor ?? AppColors.accent).withValues(alpha: 0.12)
+              : (budgetColor ?? AppColors.accent).withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: (budgetColor ?? AppColors.accent).withValues(alpha: 0.15),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (budgetLine != null)
+              _StatusLine(
+                icon: budgetIcon!,
+                color: budgetColor!,
+                text: budgetLine,
+              ),
+            if (velocityLine != null) ...[
+              if (budgetLine != null) const SizedBox(height: 4),
+              _StatusLine(
+                icon: Icons.speed_rounded,
+                color: velocityColor ?? AppColors.accent,
+                text: velocityLine,
+              ),
+            ],
+            if (ageLine != null) ...[
+              if (budgetLine != null || velocityLine != null)
+                const SizedBox(height: 4),
+              _StatusLine(
+                icon: Icons.schedule_rounded,
+                color: ageValue != null && ageValue >= 30
+                    ? AppColors.healthy
+                    : ageValue != null && ageValue >= 15
+                        ? AppColors.caution
+                        : AppColors.overspent,
+                text: ageLine,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusLine extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  const _StatusLine({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -1012,129 +972,6 @@ class _QuickAction extends StatelessWidget {
 
 // ─── Summary Row ────────────────────────────────────────────────────────────
 
-// ─── Age of Money Row ───────────────────────────────────────────────────────
-
-class _AgeOfMoneyRow extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ageAsync = ref.watch(ageOfMoneyProvider);
-    return ageAsync.when(
-      data: (age) {
-        if (age == null) return const SizedBox.shrink();
-
-        final Color color;
-        final String label;
-        if (age >= 30) {
-          color = AppColors.healthy;
-          label = 'Excellent';
-        } else if (age >= 15) {
-          color = AppColors.caution;
-          label = 'Getting there';
-        } else {
-          color = AppColors.overspent;
-          label = 'Needs work';
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.bd(context)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.schedule_rounded, color: color, size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Age of Money',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: color,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '$age days',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                GestureDetector(
-                  onTap: () => _showAgeOfMoneyInfo(context),
-                  child: Icon(
-                    Icons.help_outline_rounded,
-                    size: 18,
-                    color: AppColors.th(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  void _showAgeOfMoneyInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Age of Money'),
-        content: const Text(
-          'Age of Money measures how many days your money sits before '
-          'you spend it. It looks at your last 10 expenses and traces '
-          'each one back to the income that funded it (oldest income '
-          'first).\n\n'
-          '30+ days (green): You\'re spending last month\'s income -- '
-          'a sign of financial stability.\n\n'
-          '15-29 days (yellow): You\'re building a buffer but not '
-          'quite there yet.\n\n'
-          'Under 15 days (red): You\'re living paycheck to paycheck. '
-          'Try to build up a buffer over time.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SummaryRow extends StatelessWidget {
   final String label;
   final double amount;
@@ -1192,15 +1029,19 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-// ─── Allocation Health Bar ──────────────────────────────────────────────────
+// ─── Envelope Health Card (merged health bar + budget insights) ─────────────
 
-class _AllocationHealthBar extends StatelessWidget {
+class _EnvelopeHealthCard extends StatelessWidget {
   final int total, healthy, caution, overspent;
-  const _AllocationHealthBar(
-      {required this.total,
-      required this.healthy,
-      required this.caution,
-      required this.overspent});
+  final List<_BudgetInsight> insights;
+
+  const _EnvelopeHealthCard({
+    required this.total,
+    required this.healthy,
+    required this.caution,
+    required this.overspent,
+    required this.insights,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1246,6 +1087,44 @@ class _AllocationHealthBar extends StatelessWidget {
               label: 'Overspent',
               color: AppColors.overspent),
         ]),
+        // Budget insights inline
+        if (insights.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Divider(height: 1, color: AppColors.bd(context)),
+          const SizedBox(height: 10),
+          Row(children: [
+            Icon(Icons.notifications_active_rounded,
+                size: 14, color: AppColors.overspent),
+            const SizedBox(width: 6),
+            Text('Heads up',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.overspent)),
+          ]),
+          const SizedBox(height: 8),
+          ...insights.take(3).map((i) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                          i.severity >= 2
+                              ? Icons.warning_rounded
+                              : Icons.info_outline_rounded,
+                          size: 14,
+                          color: i.severity >= 2
+                              ? AppColors.overspent
+                              : AppColors.caution),
+                      const SizedBox(width: 6),
+                      Expanded(
+                          child: Text('${i.name} ${i.message}',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.tp(context)))),
+                    ]),
+              )),
+        ],
       ]),
     );
   }
@@ -1272,65 +1151,13 @@ class _HealthLabel extends StatelessWidget {
   }
 }
 
-// ─── Budget Insights Card ──────────────────────────────────────────────────
+// ─── Budget Insight ───────────────────────────────────────────────────────
 
 class _BudgetInsight {
   final String name, message;
   final int severity;
   const _BudgetInsight(
       {required this.name, required this.message, required this.severity});
-}
-
-class _BudgetInsightsCard extends StatelessWidget {
-  final List<_BudgetInsight> insights;
-  const _BudgetInsightsCard({required this.insights});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.overspent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: AppColors.overspent.withValues(alpha: 0.15)),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Icon(Icons.notifications_active_rounded,
-              size: 14, color: AppColors.overspent),
-          const SizedBox(width: 6),
-          Text('Heads up',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.overspent)),
-        ]),
-        const SizedBox(height: 8),
-        ...insights.take(3).map((i) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                        i.severity >= 2
-                            ? Icons.warning_rounded
-                            : Icons.info_outline_rounded,
-                        size: 14,
-                        color: i.severity >= 2
-                            ? AppColors.overspent
-                            : AppColors.caution),
-                    const SizedBox(width: 6),
-                    Expanded(
-                        child: Text('${i.name} ${i.message}',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.tp(context)))),
-                  ]),
-            )),
-      ]),
-    );
-  }
 }
 
 // ─── Recent Transaction Tile ────────────────────────────────────────────────
@@ -1499,7 +1326,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
                   Icon(Icons.credit_card_rounded, color: AppColors.accent),
               title: Text(a.account.name),
               subtitle: Text(
-                  '${a.account.currency} · ${formatAmount(a.balance, currency: a.account.currency)}'),
+                  '${a.account.currency} \u00b7 ${formatAmount(a.balance, currency: a.account.currency)}'),
               onTap: () {
                 close(context, null);
                 context.push('/accounts/${a.account.id}');
@@ -1547,7 +1374,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
             title: Text(cat?.name ??
                 (e.tx.note.isNotEmpty ? e.tx.note : e.tx.type)),
             subtitle: Text(
-                '${DateFormat('MMM d').format(e.tx.createdAt.toLocal())} · ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
+                '${DateFormat('MMM d').format(e.tx.createdAt.toLocal())} \u00b7 ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
             onTap: () {
               close(context, null);
               context.push('/transactions/${e.tx.id}');
@@ -1570,87 +1397,6 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
   Color _hex(String hex) {
     final h = hex.replaceAll('#', '');
     return Color(int.parse('FF$h', radix: 16));
-  }
-}
-
-// ─── Backup Reminder Banner ────────────────────────────────────────────────
-
-class _BackupReminderBanner extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showReminder = ref.watch(showBackupReminderProvider);
-    final daysSince = ref.watch(daysSinceBackupProvider);
-
-    return showReminder.when(
-      data: (show) {
-        if (!show) return const SizedBox.shrink();
-        final days = daysSince.value ?? -1;
-        final message = days == -1
-            ? "You haven't backed up yet"
-            : "You haven't backed up in $days days";
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.caution.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                  color: AppColors.caution.withValues(alpha: 0.25)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.backup_rounded,
-                        size: 18, color: AppColors.caution),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        message,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        await snoozeBackupReminder();
-                        ref.invalidate(showBackupReminderProvider);
-                      },
-                      child: Icon(Icons.close_rounded,
-                          size: 18, color: AppColors.ts(context)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 34,
-                  child: FilledButton.icon(
-                    onPressed: () => context.push('/backup'),
-                    icon: const Icon(Icons.backup_rounded, size: 16),
-                    label: const Text('Backup Now',
-                        style: TextStyle(fontSize: 12)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.caution,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
   }
 }
 
@@ -1788,48 +1534,6 @@ class _QuickTemplatesSection extends ConsumerWidget {
           ),
         );
       },
-    );
-  }
-}
-
-// ─── Insight Row ────────────────────────────────────────────────────────────
-
-class _InsightRow extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String text;
-  final Widget? trailing;
-
-  const _InsightRow({
-    required this.icon,
-    required this.color,
-    required this.text,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.ts(context),
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (trailing != null) trailing!,
-        ],
-      ),
     );
   }
 }
