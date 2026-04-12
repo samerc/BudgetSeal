@@ -473,7 +473,7 @@ class _AllocationDetailScreenState
               const SizedBox(height: 16),
               _buildSpendingHistory(),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -729,7 +729,7 @@ class _AllocationDetailScreenState
           _sectionHeader('SPENDING HISTORY', icon: Icons.bar_chart_rounded),
           const SizedBox(height: 4),
           SizedBox(
-            height: 120,
+            height: 100,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: months.map((m) {
@@ -743,17 +743,17 @@ class _AllocationDetailScreenState
                       children: [
                         Text(
                           formatAmount(val, currency: _targetCurrencyController.text),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: AppColors.ts(context),
                           ),
                         ),
                         const SizedBox(height: 4),
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeOut,
-                          height: (80 * fraction).clamp(4.0, 80.0),
+                          height: (60 * fraction).clamp(4.0, 60.0),
                           decoration: BoxDecoration(
                             color: AppColors.accent.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(6),
