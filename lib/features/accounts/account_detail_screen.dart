@@ -8,6 +8,8 @@ import 'package:uuid/uuid.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/accounts_dao.dart';
 import '../../core/engine/balance_calculator.dart';
+import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -785,6 +787,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         initialBalance: Value(balance),
         deviceId: 'local',
       ));
+      // Refresh account list and any balance-dependent screens
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountsWithBalanceProvider);
+      ref.invalidate(unallocatedProvider);
       if (mounted) context.pop();
     } finally {
       if (mounted) setState(() => _loading = false);
