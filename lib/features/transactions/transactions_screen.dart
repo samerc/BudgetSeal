@@ -1229,7 +1229,13 @@ class _TxTile extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            // ── Receipt indicator ────────────────────────────────
+            if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Icon(Icons.receipt_long_rounded,
+                    size: 14, color: AppColors.th(context)),
+              ),
             // ── Amount (right-aligned #3) ───────────────────────
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,

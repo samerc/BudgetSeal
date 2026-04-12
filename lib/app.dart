@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/providers/biometric_provider.dart';
 import 'core/providers/currency_symbol_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
@@ -273,12 +273,15 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
         themeMode: themeMode,
         debugShowCheckedModeBanner: false,
         home: SplashScreen(
-          onComplete: () {
-            final biometricEnabled = ref.read(biometricLockProvider);
-            setState(() {
-              _showSplash = false;
-              _showLock = biometricEnabled;
-            });
+          onComplete: () async {
+            final prefs = await SharedPreferences.getInstance();
+            final biometricEnabled = prefs.getBool('biometric_lock_enabled') ?? false;
+            if (mounted) {
+              setState(() {
+                _showSplash = false;
+                _showLock = biometricEnabled;
+              });
+            }
           },
         ),
       );

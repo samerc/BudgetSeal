@@ -36,8 +36,7 @@ class GoogleDriveProvider implements CloudProvider {
   @override
   Future<bool> get isConnected async {
     try {
-      await _ensureInitialized();
-      _account = await GoogleSignIn.instance.authenticate();
+      // Only check silently — never prompt the user.
       return _account != null;
     } catch (_) {
       return false;
@@ -154,8 +153,7 @@ class GoogleDriveProvider implements CloudProvider {
 
   Future<drive.DriveApi> _getDriveApi() async {
     if (_driveApi != null) return _driveApi!;
-    await _ensureInitialized();
-    _account = await GoogleSignIn.instance.authenticate();
+    // If no account cached, we're not connected — don't prompt.
     if (_account == null) throw StateError('Not connected to Google Drive');
 
     final authClient = _account!.authorizationClient;
