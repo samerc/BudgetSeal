@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
-/// Map of currency codes to their display symbols.
-const _currencySymbols = <String, String>{
+/// Default map of currency codes to their display symbols.
+const defaultCurrencySymbols = <String, String>{
   'USD': '\$',
   'EUR': '€',
   'GBP': '£',
@@ -18,8 +18,32 @@ const _currencySymbols = <String, String>{
   'BRL': 'R\$',
 };
 
+/// User overrides — populated from CurrencySymbolProvider at startup.
+/// Call [setCurrencySymbolOverrides] to update.
+Map<String, String> _userOverrides = {};
+
+/// Set user overrides for currency symbols. Called by the app when the
+/// provider state changes.
+void setCurrencySymbolOverrides(Map<String, String> overrides) {
+  _userOverrides = overrides;
+}
+
+/// Resolved symbols: user overrides take precedence over defaults.
+String? _resolveSymbol(String code) {
+  return _userOverrides[code] ?? defaultCurrencySymbols[code];
+}
+
 /// Symbols that require a space between symbol and amount.
-const _spacedSymbols = <String>{'ل.ل', 'د.إ', 'CHF', '﷼'};
+const _defaultSpacedSymbols = <String>{'ل.ل', 'د.إ', 'CHF', '﷼'};
+
+bool _needsSpace(String symbol) {
+  if (_defaultSpacedSymbols.contains(symbol)) return true;
+  // User overrides longer than 2 chars get a space (e.g. "LBP", "CHF")
+  if (symbol.length > 2 && !symbol.startsWith('\$') && !symbol.startsWith('€')) {
+    return true;
+  }
+  return false;
+}
 
 /// Format a number with comma separators and optional currency symbol.
 ///
@@ -47,9 +71,9 @@ String formatAmount(double value, {String? currency, int? decimals}) {
   final sign = isNeg ? '-' : '';
 
   if (currency != null) {
-    final symbol = _currencySymbols[currency];
+    final symbol = _resolveSymbol(currency);
     if (symbol != null) {
-      final space = _spacedSymbols.contains(symbol) ? ' ' : '';
+      final space = _needsSpace(symbol) ? ' ' : '';
       return '$sign$symbol$space$formatted';
     }
     return '$sign$currency $formatted';
@@ -66,7 +90,7 @@ String formatSignedAmount(
 }) {
   final absValue = value.abs();
   final sign = type == 'income' ? '+' : type == 'expense' ? '-' : '';
-  final symbol = _currencySymbols[currency];
+  final symbol = _resolveSymbol(currency);
 
   final hasDecimals = absValue % 1 != 0;
   final decimalDigits = hasDecimals ? 2 : 0;
@@ -74,7 +98,7 @@ String formatSignedAmount(
   final formatted = formatter.format(absValue).trim();
 
   if (symbol != null) {
-    final space = _spacedSymbols.contains(symbol) ? ' ' : '';
+    final space = _needsSpace(symbol) ? ' ' : '';
     return '$sign$symbol$space$formatted';
   }
   return '$sign$currency $formatted';

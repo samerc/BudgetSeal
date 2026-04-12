@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
+import 'category_icon.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -13,6 +14,11 @@ class AllocationCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onSpend;
 
+  /// Optional linked-category info for displaying a category icon.
+  final String? categoryName;
+  final String? categoryIcon;
+  final String? categoryColorHex;
+
   const AllocationCard({
     super.key,
     required this.name,
@@ -23,6 +29,9 @@ class AllocationCard extends StatelessWidget {
     this.targetAmount,
     this.onTap,
     this.onSpend,
+    this.categoryName,
+    this.categoryIcon,
+    this.categoryColorHex,
   });
 
   Color get _typeColor => switch (type) {
@@ -40,6 +49,11 @@ class AllocationCard extends StatelessWidget {
         hasTarget ? (mainBalance / targetAmount!).clamp(0.0, 1.0) : null;
     final isOverspent = mainBalance < 0;
 
+    final bool hasCategoryIcon = categoryName != null;
+    final Color iconColor = categoryColorHex != null
+        ? Color(int.parse('FF${categoryColorHex!.replaceAll('#', '')}', radix: 16))
+        : _typeColor;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
@@ -54,6 +68,16 @@ class AllocationCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
+              // Category icon (if linked)
+              if (hasCategoryIcon) ...[
+                CategoryIcon(
+                  categoryName: categoryName!,
+                  emoji: categoryIcon,
+                  color: iconColor,
+                  size: 36,
+                ),
+                const SizedBox(width: 10),
+              ],
               // Name + progress
               Expanded(
                 child: Column(

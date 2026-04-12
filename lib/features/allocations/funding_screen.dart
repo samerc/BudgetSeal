@@ -20,6 +20,7 @@ class FundingScreen extends ConsumerStatefulWidget {
 class _FundingScreenState extends ConsumerState<FundingScreen> {
   final Map<String, TextEditingController> _controllers = {};
   bool _isFunding = false;
+  bool _instructionsExpanded = false;
 
   @override
   void dispose() {
@@ -118,18 +119,35 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     final baseCurrency = household?.baseCurrency ?? 'USD';
 
     return Scaffold(
-      
       appBar: AppBar(
-        title: const Text('Fund Allocations'),
+        title: const Text('Fund Envelopes'),
         actions: [
           allocationsAsync.whenOrNull(
-                data: (allocations) => TextButton.icon(
-                  onPressed: () => _quickFill(allocations, baseCurrency),
-                  icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
-                  label: const Text('Quick fill'),
+                data: (allocations) => Tooltip(
+                  message:
+                      'Auto-fill each periodic envelope up to its target amount',
+                  child: FilledButton.icon(
+                    onPressed: () => _quickFill(allocations, baseCurrency),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      minimumSize: const Size(0, 36),
+                    ),
+                    icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
+                    label: const Text(
+                      'Quick fill',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ),
                 ),
               ) ??
               const SizedBox.shrink(),
+          const SizedBox(width: 12),
         ],
       ),
       body: allocationsAsync.when(
@@ -143,7 +161,14 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
 
           return Column(
             children: [
-              // -- Unallocated banner with running total --
+              // -- Collapsible instructions --
+              _InstructionsPanel(
+                expanded: _instructionsExpanded,
+                onToggle: () => setState(
+                    () => _instructionsExpanded = !_instructionsExpanded),
+              ),
+
+              // -- Funding banner with progress --
               _FundingBanner(
                 available: available,
                 distributed: total,
@@ -221,6 +246,141 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
 }
 
 // ---------------------------------------------------------------------------
+// Collapsible instructions panel
+// ---------------------------------------------------------------------------
+
+class _InstructionsPanel extends StatelessWidget {
+  final bool expanded;
+  final VoidCallback onToggle;
+
+  const _InstructionsPanel({
+    required this.expanded,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      decoration: BoxDecoration(
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onToggle,
+            borderRadius: expanded
+                ? const BorderRadius.vertical(top: Radius.circular(14))
+                : BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.help_outline_rounded,
+                      size: 18, color: AppColors.accent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'How does funding work?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: AppColors.ts(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (expanded) ...[
+            Divider(height: 1, color: AppColors.bd(context)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+              child: Column(
+                children: [
+                  _InstructionStep(
+                    number: '1',
+                    text:
+                        'Check your unallocated balance \u2014 this is money you haven\'t assigned to any envelope yet.',
+                  ),
+                  const SizedBox(height: 8),
+                  _InstructionStep(
+                    number: '2',
+                    text:
+                        'Enter how much to put in each envelope. Use "Quick fill" to auto-fill based on targets.',
+                  ),
+                  const SizedBox(height: 8),
+                  _InstructionStep(
+                    number: '3',
+                    text:
+                        'Tap "Fund All" to move the money into your envelopes.',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InstructionStep extends StatelessWidget {
+  final String number;
+  final String text;
+
+  const _InstructionStep({required this.number, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: AppColors.accent.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.accent,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.ts(context),
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Funding Banner
 // ---------------------------------------------------------------------------
 
@@ -242,6 +402,9 @@ class _FundingBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final remaining = available - distributed;
+    final progress = available > 0
+        ? (distributed / available).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -298,7 +461,51 @@ class _FundingBanner extends StatelessWidget {
                 ),
             ],
           ),
+          const SizedBox(height: 14),
+
+          // Progress indicator
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Distributing ${formatAmount(distributed, currency: baseCurrency)}'
+                    ' of ${formatAmount(available, currency: baseCurrency)}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (available > 0)
+                    Text(
+                      '${(progress * 100).toStringAsFixed(0)}%',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: Colors.white.withValues(alpha: 0.15),
+                  color: exceeds
+                      ? const Color(0xFFFFCDD2)
+                      : const Color(0xFFA5D6A7),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
+
           // Running total bar
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -334,8 +541,10 @@ class _FundingBanner extends StatelessWidget {
                     ),
                     Text(
                       exceeds
-                          ? formatSignedAmount(remaining.abs(), currency: baseCurrency, type: 'income')
-                          : formatAmount(remaining.abs(), currency: baseCurrency),
+                          ? formatSignedAmount(remaining.abs(),
+                              currency: baseCurrency, type: 'income')
+                          : formatAmount(remaining.abs(),
+                              currency: baseCurrency),
                       style: TextStyle(
                         color: exceeds
                             ? const Color(0xFFFFCDD2)
@@ -415,174 +624,211 @@ class _FundingAllocationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasSuggestion = suggestedAmount != null && suggestedAmount! > 0;
+    final hasTarget = targetAmount != null && targetAmount! > 0;
+    final targetProgress = hasTarget
+        ? (currentBalance / targetAmount!).clamp(0.0, 1.0)
+        : null;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top row: icon + name + balance
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _typeColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+    return AnimatedOpacity(
+      opacity: isFunded ? 0.55 : 1.0,
+      duration: const Duration(milliseconds: 200),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row: icon + name + balance/funded badge
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: _typeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(_typeIcon, color: _typeColor, size: 20),
                   ),
-                  child: Icon(_typeIcon, color: _typeColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          _SmallBadge(
-                            label: periodicity == 'periodic'
-                                ? 'Periodic'
-                                : 'Permanent',
-                            color: periodicity == 'periodic'
-                                ? AppColors.primary
-                                : AppColors.accent,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context),
                           ),
-                          const SizedBox(width: 6),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            _SmallBadge(
+                              label: periodicity == 'periodic'
+                                  ? 'Periodic'
+                                  : 'Permanent',
+                              color: periodicity == 'periodic'
+                                  ? AppColors.primary
+                                  : AppColors.accent,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              formatAmount(currentBalance, currency: currency),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (targetAmount != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (isFunded) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.healthy.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    size: 13, color: AppColors.healthy),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Funded',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.healthy,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else ...[
+                          const Text('Target',
+                              style: TextStyle(
+                                  fontSize: 10, color: AppColors.textHint)),
                           Text(
-                            formatAmount(currentBalance, currency: currency),
+                            formatAmount(targetAmount!, currency: currency),
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (targetAmount != null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (isFunded) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.healthy.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'Funded',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.healthy,
-                            ),
-                          ),
-                        ),
-                      ] else ...[
-                        const Text('Target',
-                            style: TextStyle(
-                                fontSize: 10, color: AppColors.textHint)),
-                        Text(
-                          formatAmount(targetAmount!, currency: currency),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
                       ],
-                    ],
-                  ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Input row
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,2}')),
-                    ],
-                    onChanged: (_) => onChanged(),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: '0.00',
-                      hintStyle:
-                          const TextStyle(color: AppColors.textHint),
-                      prefixText: '$currency ',
-                      prefixStyle: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.sfv(context),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                            color: AppColors.accent, width: 1.5),
-                      ),
                     ),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.tp(context),
-                    ),
+                ],
+              ),
+
+              // Progress toward target
+              if (hasTarget && targetProgress != null) ...[
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: targetProgress,
+                    minHeight: 4,
+                    backgroundColor: AppColors.bd(context),
+                    color: isFunded
+                        ? AppColors.healthy
+                        : targetProgress >= 0.7
+                            ? AppColors.caution
+                            : _typeColor,
                   ),
                 ),
-                if (hasSuggestion) ...[
-                  const SizedBox(width: 8),
-                  _SuggestionChip(
-                    amount: suggestedAmount!,
-                    currency: currency,
-                    onTap: () {
-                      controller.text = suggestedAmount!.toStringAsFixed(2);
-                      onChanged();
-                    },
-                  ),
-                ],
               ],
-            ),
-          ],
+
+              const SizedBox(height: 12),
+
+              // Input row
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      enabled: !isFunded,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d{0,2}')),
+                      ],
+                      onChanged: (_) => onChanged(),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: '0.00',
+                        hintStyle:
+                            const TextStyle(color: AppColors.textHint),
+                        prefixText: '$currency ',
+                        prefixStyle: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                        filled: true,
+                        fillColor: isFunded
+                            ? AppColors.bd(context)
+                            : AppColors.sfv(context),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: AppColors.accent, width: 1.5),
+                        ),
+                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                  if (hasSuggestion && !isFunded) ...[
+                    const SizedBox(width: 8),
+                    _SuggestionChip(
+                      amount: suggestedAmount!,
+                      currency: currency,
+                      onTap: () {
+                        controller.text = suggestedAmount!.toStringAsFixed(2);
+                        onChanged();
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -606,29 +852,41 @@ class _SuggestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.accentLight,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          children: [
-            const Icon(Icons.arrow_upward_rounded,
-                size: 14, color: AppColors.accent),
-            const SizedBox(height: 2),
-            Text(
-              amount.toStringAsFixed(0),
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.accent,
-              ),
+    return Tooltip(
+      message: 'Fill to target',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.accentLight,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: AppColors.accent.withValues(alpha: 0.3),
             ),
-          ],
+          ),
+          child: Column(
+            children: [
+              const Text(
+                'Suggested',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.accent,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                formatAmount(amount, currency: currency),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.accent,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

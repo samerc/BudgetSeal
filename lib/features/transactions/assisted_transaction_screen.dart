@@ -13,6 +13,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 
@@ -41,6 +42,7 @@ class _AssistedTransactionScreenState
   String _title = '';
   String? _accountId;
   String? _destinationAccountId;
+  double _transferExchangeRate = 1.0;
   DateTime _selectedDate = DateTime.now();
   bool _saving = false;
 
@@ -59,6 +61,18 @@ class _AssistedTransactionScreenState
     }
     return _baseCurrency;
   }
+
+  String get _destinationCurrency {
+    final accounts = ref.read(accountsProvider).value ?? [];
+    if (_destinationAccountId != null) {
+      final acc = accounts.where((a) => a.id == _destinationAccountId).firstOrNull;
+      if (acc != null) return acc.currency;
+    }
+    return _baseCurrency;
+  }
+
+  bool get _isTransferCrossCurrency =>
+      _type == 'transfer' && _selectedCurrency != _destinationCurrency;
 
   _LineItem get _activeLine => _lineItems[_activeLineIndex];
 
@@ -761,14 +775,15 @@ class _AssistedTransactionScreenState
       String? lastTxId;
 
       if (_type == 'transfer') {
-        // Use recordTransfer for transfer type
         final txId = await engine.recordTransfer(
           householdId: householdId,
           fromAccountId: _accountId!,
           toAccountId: _destinationAccountId!,
           amount: totalAmount,
           currency: _selectedCurrency,
-          exchangeRateToBase: 1.0,
+          exchangeRateToBase: _isTransferCrossCurrency
+              ? _transferExchangeRate
+              : 1.0,
           createdBy: 'user',
           deviceId: 'local',
           note: _title,
@@ -1049,6 +1064,80 @@ class _AssistedTransactionScreenState
                           ),
                         );
                       }),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            // Exchange rate field (cross-currency transfers)
+            if (_isTransferCrossCurrency) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.caution.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.caution.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.currency_exchange_rounded,
+                          size: 18, color: AppColors.caution),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '1 $_selectedCurrency = ? $_destinationCurrency',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.tp(context)),
+                            ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              height: 32,
+                              child: TextField(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.tp(context)),
+                                decoration: InputDecoration(
+                                  hintText: 'Exchange rate',
+                                  hintStyle: TextStyle(
+                                      color: AppColors.th(context),
+                                      fontSize: 13),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                onChanged: (v) {
+                                  final rate = double.tryParse(v);
+                                  if (rate != null && rate > 0) {
+                                    setState(
+                                        () => _transferExchangeRate = rate);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_transferExchangeRate > 0 && totalAmount > 0)
+                        Text(
+                          '≈ ${formatAmount(totalAmount * _transferExchangeRate, currency: _destinationCurrency)}',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.ts(context)),
+                        ),
                     ],
                   ),
                 ),

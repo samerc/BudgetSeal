@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -67,10 +68,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   final _amountMinCtrl = TextEditingController();
   final _amountMaxCtrl = TextEditingController();
 
+  // Quick category filter (#5)
+  String? _categoryFilter;
+  String? _categoryFilterName;
+
+  // Scroll-to-today (#10)
+  final _listScrollCtrl = ScrollController();
+  bool _showScrollToTop = false;
+
   @override
   void initState() {
     super.initState();
     _monthScrollCtrl = ScrollController();
+    _listScrollCtrl.addListener(_onListScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final offset = (_selectedMonth - 1) * 80.0;
       if (_monthScrollCtrl.hasClients) {
@@ -81,12 +91,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     });
   }
 
+  void _onListScroll() {
+    final show = _listScrollCtrl.hasClients && _listScrollCtrl.offset > 500;
+    if (show != _showScrollToTop) {
+      setState(() => _showScrollToTop = show);
+    }
+  }
+
   @override
   void dispose() {
     _searchCtrl.dispose();
     _monthScrollCtrl.dispose();
     _amountMinCtrl.dispose();
     _amountMaxCtrl.dispose();
+    _listScrollCtrl.removeListener(_onListScroll);
+    _listScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -159,11 +178,34 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_transactions',
-        tooltip: 'Add transaction',
-        onPressed: () => context.push('/add-transaction'),
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Scroll-to-today button (#10)
+          if (_showScrollToTop)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FloatingActionButton.small(
+                heroTag: 'fab_scroll_top',
+                tooltip: 'Scroll to top',
+                backgroundColor: AppColors.sf(context),
+                foregroundColor: AppColors.tp(context),
+                elevation: 2,
+                onPressed: () {
+                  _listScrollCtrl.animateTo(0,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOut);
+                },
+                child: const Icon(Icons.arrow_upward_rounded, size: 20),
+              ),
+            ),
+          FloatingActionButton(
+            heroTag: 'fab_transactions',
+            tooltip: 'Add transaction',
+            onPressed: () => context.push('/add-transaction'),
+            child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
@@ -223,7 +265,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             icon: Icon(
               Icons.filter_list_rounded,
               size: 22,
-              color: _showFilters || _typeFilter != null || _dateFrom != null || _dateTo != null || _amountMin != null || _amountMax != null
+              color: _showFilters || _typeFilter != null || _dateFrom != null || _dateTo != null || _amountMin != null || _amountMax != null || _categoryFilter != null
                   ? AppColors.accent
                   : AppColors.ts(context),
             ),
@@ -592,6 +634,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       filtered = filtered.where((e) => e.tx.type == _typeFilter).toList();
     }
 
+    // Category quick filter (#5)
+    if (_categoryFilter != null) {
+      filtered = filtered.where((e) {
+        if (e.tx.categoryId == _categoryFilter) return true;
+        for (final l in e.lines) {
+          if (l.categoryId == _categoryFilter) return true;
+        }
+        return false;
+      }).toList();
+    }
+
     // Amount range filter
     if (_amountMin != null || _amountMax != null) {
       filtered = filtered.where((e) {
@@ -625,7 +678,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     }
 
     if (filtered.isEmpty) {
-      final hasFilters = _searchQuery.isNotEmpty || _typeFilter != null || hasDateFilter || _amountMin != null || _amountMax != null;
+      final hasFilters = _searchQuery.isNotEmpty || _typeFilter != null || hasDateFilter || _amountMin != null || _amountMax != null || _categoryFilter != null;
       return EmptyState(
         icon: hasFilters
             ? Icons.search_off_rounded
@@ -658,6 +711,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final txColors = ref.watch(txColorsProvider);
     final net = monthIncome - monthExpense;
 
+    // Budget context bar (#2) — sum of allocation targets
+    final allocations = ref.watch(allocationsProvider).value ?? [];
+    double totalBudget = 0;
+    for (final a in allocations) {
+      totalBudget += a.data.allocation.targetAmount ?? 0;
+    }
+
     return Column(
       children: [
         // ── Summary strip ──────────────────────────────────────
@@ -686,9 +746,100 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             ],
           ),
         ),
+        // ── Budget progress bar (#2) ──────────────────────────
+        if (totalBudget > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Spent ${formatAmount(monthExpense, currency: baseCurrency)} of ${formatAmount(totalBudget, currency: baseCurrency)} budget',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.ts(context),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${(monthExpense / totalBudget * 100).clamp(0, 999).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: monthExpense > totalBudget
+                            ? AppColors.overspent
+                            : AppColors.ts(context),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: (monthExpense / totalBudget).clamp(0.0, 1.0),
+                    minHeight: 4,
+                    backgroundColor: AppColors.sfv(context),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      monthExpense > totalBudget
+                          ? AppColors.overspent
+                          : monthExpense > totalBudget * 0.8
+                              ? AppColors.caution
+                              : AppColors.healthy,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // ── Category quick filter chip (#5) ───────────────────
+        if (_categoryFilter != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _categoryFilter = null;
+                    _categoryFilterName = null;
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Filtered: ${_categoryFilterName ?? 'Category'}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(Icons.close_rounded,
+                            size: 14, color: AppColors.accent),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         // ── Transaction list ───────────────────────────────────
         Expanded(
           child: ListView.builder(
+            controller: _listScrollCtrl,
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
             itemCount: items.length + 1, // +1 for footer
             itemBuilder: (context, i) {
@@ -711,8 +862,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       date: d, dayTotal: total, baseCurrency: bc),
                 _TxItem(entry: final e) => Dismissible(
                       key: ValueKey(e.tx.id),
-                      direction: DismissDirection.endToStart,
+                      direction: DismissDirection.horizontal,
+                      // Left background (swipe right → edit) (#6)
                       background: Container(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.only(left: 20),
+                        margin: const EdgeInsets.only(bottom: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.edit_rounded,
+                            color: Colors.white),
+                      ),
+                      // Right background (swipe left → delete)
+                      secondaryBackground: Container(
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 20),
                         margin: const EdgeInsets.only(bottom: 2),
@@ -723,7 +887,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                         child: const Icon(Icons.delete_rounded,
                             color: Colors.white),
                       ),
-                      confirmDismiss: (_) async {
+                      confirmDismiss: (direction) async {
+                        if (direction == DismissDirection.startToEnd) {
+                          // Swipe right → edit (#6)
+                          context.push('/transactions/${e.tx.id}');
+                          return false; // don't dismiss
+                        }
+                        // Swipe left → delete
                         return await showDialog<bool>(
                               context: context,
                               builder: (_) => AlertDialog(
@@ -753,8 +923,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             .read(allocationEngineProvider)
                             .deleteTransaction(e.tx.id);
                       },
-                      child:
-                          _TxTile(entry: e, categoryMap: categoryMap),
+                      child: _TxTile(
+                        entry: e,
+                        categoryMap: categoryMap,
+                        onCategoryTap: (catId, catName) {
+                          hapticLight();
+                          setState(() {
+                            _categoryFilter = catId;
+                            _categoryFilterName = catName;
+                          });
+                        },
+                      ),
                     ),
               };
             },
@@ -872,18 +1051,47 @@ class _DateHeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isToday = _isToday(date);
+    // Solid background so it visually separates when scrolling (#1)
+    return Container(
+      color: AppColors.bg(context),
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            _label(date),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ts(context),
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Today indicator (#4)
+              if (isToday) ...[
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'TODAY',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                _label(date),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isToday ? AppColors.tp(context) : AppColors.ts(context),
+                ),
+              ),
+            ],
           ),
           if (dayTotal != 0)
             Text(
@@ -899,12 +1107,17 @@ class _DateHeaderTile extends StatelessWidget {
     );
   }
 
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && date.month == now.month && date.day == now.day;
+  }
+
   String _label(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return 'Today, ${DateFormat('MMMM d').format(date)}';
+    if (diff == 0) return DateFormat('MMMM d').format(date);
     if (diff == 1) return 'Yesterday, ${DateFormat('MMMM d').format(date)}';
     if (diff < 7) return '${DateFormat('EEEE').format(date)}, ${DateFormat('MMMM d').format(date)}';
     return DateFormat('MMMM d').format(date);
@@ -918,8 +1131,13 @@ class _DateHeaderTile extends StatelessWidget {
 class _TxTile extends ConsumerWidget {
   final TransactionEntry entry;
   final Map<String, Category> categoryMap;
+  final void Function(String catId, String catName)? onCategoryTap;
 
-  const _TxTile({required this.entry, required this.categoryMap});
+  const _TxTile({
+    required this.entry,
+    required this.categoryMap,
+    this.onCategoryTap,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -935,6 +1153,7 @@ class _TxTile extends ConsumerWidget {
 
     final displayName = _buildDisplayName(catName);
     final note = _buildNote(catName);
+    final notePreview = _buildNotePreview(catName, displayName);
 
     return Semantics(
       label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}',
@@ -949,13 +1168,21 @@ class _TxTile extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              // ── Circular category icon ──────────────────────────
-            CategoryIcon(
-              categoryName: catName ?? '',
-              emoji: cat?.icon,
-              color: catColor,
-              size: 46,
-              circular: true,
+              // ── Circular category icon (tap to filter #5) ─────
+            GestureDetector(
+              onTap: () {
+                final catId = cat?.id;
+                if (catId != null && onCategoryTap != null) {
+                  onCategoryTap!(catId, catName ?? 'Unknown');
+                }
+              },
+              child: CategoryIcon(
+                categoryName: catName ?? '',
+                emoji: cat?.icon,
+                color: catColor,
+                size: 46,
+                circular: true,
+              ),
             ),
             const SizedBox(width: 14),
             // ── Name + note ─────────────────────────────────────
@@ -985,14 +1212,28 @@ class _TxTile extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
+                  // Note preview (#7)
+                  if (notePreview != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      notePreview,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.th(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            // ── Amount ──────────────────────────────────────────
+            // ── Amount (right-aligned #3) ───────────────────────
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildAmountColumn(typeColor),
+              children: _buildAmountColumn(context, typeColor),
             ),
           ],
         ),
@@ -1061,7 +1302,29 @@ class _TxTile extends ConsumerWidget {
     return null;
   }
 
-  List<Widget> _buildAmountColumn(Color typeColor) {
+  /// Note preview (#7): show tx note as a third line if it isn't already
+  /// used as the display name or the subtitle from _buildNote.
+  String? _buildNotePreview(String? catName, String displayName) {
+    final tx = entry.tx;
+    final lines = entry.lines;
+    if (tx.note.isEmpty && (lines.isEmpty || lines.first.note.isEmpty)) {
+      return null;
+    }
+    // If note is already the display name, skip
+    if (tx.note == displayName) return null;
+    // If _buildNote already returns the tx.note as subtitle, skip
+    if (catName != null && tx.note.isNotEmpty) return null;
+    // Show line-level note if it exists and differs from display
+    if (lines.isNotEmpty && lines.first.note.isNotEmpty) {
+      final lineNote = lines.first.note;
+      if (lineNote != displayName) return lineNote;
+    }
+    // Show tx note as preview if it exists and not shown elsewhere
+    if (tx.note.isNotEmpty) return tx.note;
+    return null;
+  }
+
+  List<Widget> _buildAmountColumn(BuildContext context, Color typeColor) {
     final tx = entry.tx;
     final lines = entry.lines;
 
@@ -1082,36 +1345,68 @@ class _TxTile extends ConsumerWidget {
     final isSingleAccount = entry.involvedAccountNames.length <= 1;
 
     return [
+      // Amount right-aligned (#3)
       Text(
         formatSignedAmount(displayAmount, currency: displayCurrency, type: entry.tx.type),
+        textAlign: TextAlign.end,
         style: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 15,
           color: typeColor,
         ),
       ),
+      // Multi-currency badge (#8) — show pill instead of full conversion text
       if (showConversion)
-        Text(
-          formatAmount(baseAmount, currency: baseCurrency),
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.textHint,
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  displayCurrency,
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                formatAmount(baseAmount, currency: baseCurrency),
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.th(context),
+                ),
+              ),
+            ],
           ),
         ),
       if (isSingleAccount)
         Text(
           '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: baseCurrency)}',
-          style: const TextStyle(
+          textAlign: TextAlign.end,
+          style: TextStyle(
             fontSize: 11,
-            color: AppColors.textHint,
+            color: AppColors.th(context),
           ),
         ),
       if (!isSingleAccount)
         Text(
           '${entry.involvedAccountNames.length} accounts',
-          style: const TextStyle(
+          textAlign: TextAlign.end,
+          style: TextStyle(
             fontSize: 11,
-            color: AppColors.textHint,
+            color: AppColors.th(context),
           ),
         ),
     ];

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
 import '../../shared/widgets/balance_chip.dart';
@@ -22,6 +23,10 @@ class AllocationsScreen extends ConsumerStatefulWidget {
 class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
   static const _typeOrder = ['spending', 'saving', 'flexible'];
 
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
+  bool _showSearch = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +35,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   static String _sectionTitle(String type) => switch (type) {
@@ -60,22 +71,154 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
     final baseCurrency = household?.baseCurrency ?? 'USD';
 
     return Scaffold(
-      
-      appBar: AppBar(
-        
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Envelopes',
-          style: TextStyle(
-            color: AppColors.tp(context),
-            fontWeight: FontWeight.w700,
-            fontSize: 22,
-          ),
-        ),
-      ),
       body: CustomScrollView(
         slivers: [
+          // ── Header (dashboard style) ──
+          SliverToBoxAdapter(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Budget',
+                        style: TextStyle(
+                          color: AppColors.tp(context),
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Search envelopes',
+                      icon: Icon(
+                        _showSearch
+                            ? Icons.search_off_rounded
+                            : Icons.search_rounded,
+                        color: AppColors.ts(context),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _showSearch = !_showSearch;
+                          if (!_showSearch) {
+                            _searchQuery = '';
+                            _searchController.clear();
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Search bar ──
+          if (_showSearch)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: (v) => setState(() => _searchQuery = v),
+                  decoration: InputDecoration(
+                    hintText: 'Search envelopes...',
+                    hintStyle: const TextStyle(color: AppColors.textHint),
+                    prefixIcon:
+                        Icon(Icons.search_rounded, color: AppColors.ts(context)),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: AppColors.sfv(context),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.tp(context),
+                  ),
+                ),
+              ),
+            ),
+
+          // ── Budget Summary ──
+          SliverToBoxAdapter(
+            child: allocationsAsync.when(
+              data: (allocations) {
+                final totalBudgeted = allocations.fold<double>(
+                  0.0,
+                  (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0),
+                );
+                final totalSpent = allocations.fold<double>(
+                  0.0,
+                  (sum, a) {
+                    final bal = a.totalInBase;
+                    return bal < 0 ? sum + bal.abs() : sum;
+                  },
+                );
+                final totalRemaining = allocations.fold<double>(
+                  0.0,
+                  (sum, a) => sum + a.totalInBase,
+                );
+
+                if (allocations.isEmpty) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        _SummaryItem(
+                          label: 'Budgeted',
+                          amount: totalBudgeted,
+                          currency: baseCurrency,
+                          color: AppColors.tp(context),
+                        ),
+                        _SummaryDivider(context: context),
+                        _SummaryItem(
+                          label: 'Spent',
+                          amount: totalSpent,
+                          currency: baseCurrency,
+                          color: AppColors.overspent,
+                        ),
+                        _SummaryDivider(context: context),
+                        _SummaryItem(
+                          label: 'Remaining',
+                          amount: totalRemaining,
+                          currency: baseCurrency,
+                          color: AppColors.healthy,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ),
+
           // ── Unallocated Banner ──
           SliverToBoxAdapter(
             child: unallocatedAsync.when(
@@ -95,20 +238,51 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
                 return const SliverFillRemaining(child: _EmptyState());
               }
 
+              // Filter by search query.
+              final filtered = _searchQuery.isEmpty
+                  ? allocations
+                  : allocations
+                      .where((a) => a.data.allocation.name
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase()))
+                      .toList();
+
               // Group by type, preserving order.
               final grouped = <String, List<AllocationWithBalance>>{};
               for (final type in _typeOrder) {
-                final items = allocations
+                final items = filtered
                     .where((a) => a.data.allocation.type == type)
                     .toList();
                 if (items.isNotEmpty) grouped[type] = items;
               }
               // Catch any types not in the predefined order.
-              for (final a in allocations) {
+              for (final a in filtered) {
                 final t = a.data.allocation.type;
                 if (!_typeOrder.contains(t)) {
                   grouped.putIfAbsent(t, () => []).add(a);
                 }
+              }
+
+              if (filtered.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.search_off_rounded,
+                            size: 48, color: AppColors.th(context)),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No envelopes match "$_searchQuery"',
+                          style: TextStyle(
+                            color: AppColors.ts(context),
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
 
               return SliverPadding(
@@ -156,6 +330,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
       final type = entry.key;
       final items = entry.value;
 
+      // Compute section total balance.
+      final sectionTotal = items.fold<double>(
+        0.0,
+        (sum, a) => sum + a.totalInBase,
+      );
+
       widgets.add(
         Padding(
           padding: EdgeInsets.only(
@@ -189,12 +369,24 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
                   color: AppColors.textHint,
                 ),
               ),
+              const Spacer(),
+              Text(
+                formatAmount(sectionTotal, currency: baseCurrency),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: sectionTotal < 0
+                      ? AppColors.overspent
+                      : AppColors.ts(context),
+                ),
+              ),
             ],
           ),
         ),
       );
 
       for (final a in items) {
+        final cat = a.data.category;
         widgets.add(
           AllocationCard(
             name: a.data.allocation.name,
@@ -203,6 +395,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
             balanceByCurrency: a.balanceByCurrency,
             baseCurrency: baseCurrency,
             targetAmount: a.data.allocation.targetAmount,
+            categoryName: cat?.name,
+            categoryIcon: cat?.icon,
+            categoryColorHex: cat?.colorHex,
             onTap: () {
               hapticLight();
               context.push('/allocations/${a.data.allocation.id}');
@@ -231,6 +426,67 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
 }
 
 // ─────────────────────────────────────────────
+// Budget Summary Item
+// ─────────────────────────────────────────────
+class _SummaryItem extends StatelessWidget {
+  final String label;
+  final double amount;
+  final String currency;
+  final Color color;
+
+  const _SummaryItem({
+    required this.label,
+    required this.amount,
+    required this.currency,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.ts(context),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            formatAmount(amount, currency: currency),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryDivider extends StatelessWidget {
+  final BuildContext context;
+  const _SummaryDivider({required this.context});
+
+  @override
+  Widget build(BuildContext _) {
+    return Container(
+      width: 1,
+      height: 28,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      color: AppColors.bd(context),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
 // Unallocated Banner
 // ─────────────────────────────────────────────
 class _UnallocatedBanner extends StatelessWidget {
@@ -247,7 +503,7 @@ class _UnallocatedBanner extends StatelessWidget {
     final baseAmount = unallocated[baseCurrency] ?? 0.0;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(

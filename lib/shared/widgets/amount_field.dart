@@ -5,7 +5,9 @@ import 'calculator_amount_field.dart';
 /// A drop-in amount field that opens a calculator bottom sheet instead of the
 /// keyboard. Maintains the same public API as the old TextField-based widget
 /// so existing call-sites keep working.
-class AmountField extends StatelessWidget {
+/// A drop-in amount field backed by a calculator bottom sheet.
+/// Listens to the controller so pre-filled values always display.
+class AmountField extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final double fontSize;
@@ -19,25 +21,50 @@ class AmountField extends StatelessWidget {
     this.hintText = '0.00',
   });
 
-  double get _currentValue =>
-      double.tryParse(controller.text.replaceAll(',', '')) ?? 0.0;
+  @override
+  State<AmountField> createState() => _AmountFieldState();
+}
+
+class _AmountFieldState extends State<AmountField> {
+  double _value = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromController();
+    widget.controller.addListener(_syncFromController);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncFromController);
+    super.dispose();
+  }
+
+  void _syncFromController() {
+    final parsed =
+        double.tryParse(widget.controller.text.replaceAll(',', '')) ?? 0.0;
+    if (parsed != _value) {
+      setState(() => _value = parsed);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return CalculatorAmountField(
-      value: _currentValue,
-      fontSize: fontSize,
-      hintText: hintText,
+      value: _value,
+      fontSize: widget.fontSize,
+      hintText: widget.hintText,
       onChanged: (newValue) {
-        // Format: strip trailing .00 for round numbers, else 2 decimals.
+        setState(() => _value = newValue);
         if (newValue == 0) {
-          controller.text = '';
+          widget.controller.text = '';
         } else if (newValue == newValue.roundToDouble()) {
-          controller.text = newValue.toInt().toString();
+          widget.controller.text = newValue.toInt().toString();
         } else {
-          controller.text = newValue.toStringAsFixed(2);
+          widget.controller.text = newValue.toStringAsFixed(2);
         }
-        onChanged?.call();
+        widget.onChanged?.call();
       },
     );
   }
