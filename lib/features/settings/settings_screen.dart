@@ -18,6 +18,8 @@ import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/font_provider.dart';
 import '../../core/providers/theme_provider.dart';
+import '../../core/providers/receipt_sync_provider.dart';
+import '../../core/providers/sync_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
@@ -205,6 +207,66 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.picture_as_pdf_rounded, title: 'Export Report',
                 subtitle: 'Monthly PDF report', iconColor: const Color(0xFFEF5350),
                 onTap: () => context.push('/export-report')),
+            // ── Receipt Sync toggle ──
+            Builder(builder: (context) {
+              final syncState = ref.watch(syncProvider);
+              final isCloudConnected = syncState.activeProvider != null;
+              if (!isCloudConnected) return const SizedBox.shrink();
+              final receiptSyncEnabled = ref.watch(receiptSyncProvider);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.sf(context),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.bd(context)),
+                    ),
+                    child: SwitchListTile(
+                      secondary: Container(
+                        width: 36, height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.photo_library_rounded,
+                            size: 18, color: Color(0xFF7E57C2)),
+                      ),
+                      title: Text('Sync Receipts',
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context))),
+                      subtitle: Text(
+                        receiptSyncEnabled
+                            ? 'Upload receipt photos to cloud storage'
+                            : 'Receipts are stored on this device only',
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context)),
+                      ),
+                      value: receiptSyncEnabled,
+                      onChanged: (_) =>
+                          ref.read(receiptSyncProvider.notifier).toggle(),
+                      activeTrackColor: AppColors.accent,
+                    ),
+                  ),
+                  if (!receiptSyncEnabled)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded,
+                              size: 14, color: AppColors.caution),
+                          const SizedBox(width: 6),
+                          Text('Receipts are stored on this device only',
+                              style: TextStyle(
+                                  fontSize: 11, color: AppColors.caution)),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            }),
             const SizedBox(height: 20),
 
             // ── Security ──

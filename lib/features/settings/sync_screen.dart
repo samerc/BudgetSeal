@@ -132,13 +132,32 @@ class SyncScreen extends ConsumerWidget {
               ),
             ),
             ...notifier.providerOptions.map((option) {
+              final isOneDriveOrDropbox =
+                  option.iconKey == 'onedrive' || option.iconKey == 'dropbox';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _ProviderOptionTile(
-                  label: option.label,
-                  subtitle: option.subtitle,
-                  iconKey: option.iconKey,
-                  onTap: () => _connect(context, ref, option.provider),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ProviderOptionTile(
+                      label: option.label,
+                      subtitle: option.subtitle,
+                      iconKey: option.iconKey,
+                      onTap: () => _connect(context, ref, option.provider),
+                    ),
+                    if (isOneDriveOrDropbox)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(56, 4, 8, 0),
+                        child: Text(
+                          'Receipt sync coming soon for this provider',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                            color: AppColors.ts(context),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               );
             }),

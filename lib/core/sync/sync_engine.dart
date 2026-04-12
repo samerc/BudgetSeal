@@ -490,6 +490,7 @@ class SyncEngine {
         exchangeRateToBase: Value(
             (m['exchangeRateToBase'] as num?)?.toDouble() ?? 1.0),
         note: Value(m['note'] as String? ?? ''),
+        receiptPath: Value(m['receiptPath'] as String?),
         createdBy: m['createdBy'] as String? ?? 'sync',
         deviceId: m['deviceId'] as String? ?? 'sync',
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),

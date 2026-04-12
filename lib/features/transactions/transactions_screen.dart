@@ -14,6 +14,7 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -1233,8 +1234,39 @@ class _TxTile extends ConsumerWidget {
             if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: Icon(Icons.receipt_long_rounded,
-                    size: 14, color: AppColors.th(context)),
+                child: () {
+                  final receiptCount = parseReceiptPaths(tx.receiptPath).length;
+                  if (receiptCount > 1) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(Icons.receipt_long_rounded,
+                            size: 14, color: AppColors.th(context)),
+                        Positioned(
+                          top: -6,
+                          right: -8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$receiptCount',
+                              style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return Icon(Icons.receipt_long_rounded,
+                      size: 14, color: AppColors.th(context));
+                }(),
               ),
             // ── Amount (right-aligned #3) ───────────────────────
             Column(

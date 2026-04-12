@@ -482,7 +482,7 @@ class _DetailBody extends ConsumerWidget {
 
 // ─── Receipt Section ────────────────────────────────────────────────────────
 
-class _ReceiptSection extends ConsumerWidget {
+class _ReceiptSection extends ConsumerStatefulWidget {
   final String? receiptPath;
   final String transactionId;
 
@@ -492,9 +492,90 @@ class _ReceiptSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final hasReceipt =
-        receiptPath != null && File(receiptPath!).existsSync();
+  ConsumerState<_ReceiptSection> createState() => _ReceiptSectionState();
+}
+
+class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
+  List<String> _filenames = [];
+  List<String> _resolvedPaths = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filenames = parseReceiptPaths(widget.receiptPath);
+    _resolveFiles();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReceiptSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.receiptPath != widget.receiptPath) {
+      _filenames = parseReceiptPaths(widget.receiptPath);
+      _resolveFiles();
+    }
+  }
+
+  Future<void> _resolveFiles() async {
+    final paths = await resolveReceiptPaths(_filenames);
+    if (mounted) {
+      setState(() {
+        _resolvedPaths = paths;
+      });
+    }
+  }
+
+  Future<void> _addReceipts() async {
+    final newFilenames = await pickAndSaveReceipts(context);
+    if (newFilenames.isEmpty) return;
+
+    final updated = [..._filenames, ...newFilenames];
+    final encoded = encodeReceiptPaths(updated);
+
+    final db = ref.read(databaseProvider);
+    await (db.update(db.transactions)
+          ..where((t) => t.id.equals(widget.transactionId)))
+        .write(TransactionsCompanion(receiptPath: Value(encoded)));
+    ref.invalidate(transactionEntriesProvider);
+
+    _filenames = updated;
+    _resolveFiles();
+  }
+
+  Future<void> _removeReceipt(int index) async {
+    final updated = [..._filenames]..removeAt(index);
+    final encoded = updated.isEmpty ? null : encodeReceiptPaths(updated);
+
+    final db = ref.read(databaseProvider);
+    await (db.update(db.transactions)
+          ..where((t) => t.id.equals(widget.transactionId)))
+        .write(TransactionsCompanion(receiptPath: Value(encoded)));
+    ref.invalidate(transactionEntriesProvider);
+
+    _filenames = updated;
+    _resolveFiles();
+  }
+
+  void _viewReceipt(String path) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(ctx),
+          child: InteractiveViewer(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.file(File(path)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasReceipts = _resolvedPaths.isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
@@ -514,26 +595,20 @@ class _ReceiptSection extends ConsumerWidget {
                   Icon(Icons.receipt_long_rounded,
                       size: 16, color: AppColors.ts(context)),
                   const SizedBox(width: 8),
-                  Text('Receipt',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ts(context))),
+                  Text(
+                    hasReceipts
+                        ? 'Receipts (${_resolvedPaths.length})'
+                        : 'Receipt',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ts(context)),
+                  ),
                 ]),
                 GestureDetector(
-                  onTap: () async {
-                    final path = await pickAndSaveReceipt(context);
-                    if (path != null) {
-                      final db = ref.read(databaseProvider);
-                      await (db.update(db.transactions)
-                            ..where((t) => t.id.equals(transactionId)))
-                          .write(TransactionsCompanion(
-                              receiptPath: Value(path)));
-                      ref.invalidate(transactionEntriesProvider);
-                    }
-                  },
+                  onTap: _addReceipts,
                   child: Text(
-                    hasReceipt ? 'Replace' : 'Attach',
+                    'Attach',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -544,19 +619,51 @@ class _ReceiptSection extends ConsumerWidget {
               ],
             ),
           ),
-          if (hasReceipt) ...[
+          if (hasReceipts) ...[
             Padding(
               padding: const EdgeInsets.all(12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: GestureDetector(
-                  onTap: () => _viewReceipt(context, receiptPath!),
-                  child: Image.file(
-                    File(receiptPath!),
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+              child: SizedBox(
+                height: 120,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _resolvedPaths.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final path = _resolvedPaths[index];
+                    return Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _viewReceipt(path),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              File(path),
+                              width: 100,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _removeReceipt(index),
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close_rounded,
+                                  size: 14, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -568,24 +675,6 @@ class _ReceiptSection extends ConsumerWidget {
                       fontSize: 12, color: AppColors.th(context))),
             ),
         ],
-      ),
-    );
-  }
-
-  void _viewReceipt(BuildContext context, String path) {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GestureDetector(
-          onTap: () => Navigator.pop(ctx),
-          child: InteractiveViewer(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(File(path)),
-            ),
-          ),
-        ),
       ),
     );
   }

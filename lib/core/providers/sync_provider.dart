@@ -1,11 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../shared/utils/receipt_helper.dart';
 import '../sync/cloud_provider.dart';
 import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
 import '../sync/sync_engine.dart';
 import 'database_provider.dart';
+import 'receipt_sync_provider.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
@@ -137,7 +143,7 @@ class SyncNotifier extends Notifier<SyncState> {
     state = state.copyWith(clearProvider: true, status: SyncStatus.idle);
   }
 
-  /// Full sync: download remote → merge → upload local.
+  /// Full sync: download remote → merge → upload local → sync receipts.
   Future<void> sync() async {
     final provider = state.activeProvider;
     if (provider == null) return;
@@ -157,7 +163,15 @@ class SyncNotifier extends Notifier<SyncState> {
       final localJson = await _engine.exportToJson();
       await provider.upload(localJson);
 
-      // 3. Update last sync time
+      // 3. Sync receipts if enabled and provider supports it
+      if (provider is GoogleDriveProvider) {
+        final receiptSyncEnabled = ref.read(receiptSyncProvider);
+        if (receiptSyncEnabled) {
+          await _syncReceipts(provider);
+        }
+      }
+
+      // 4. Update last sync time
       final now = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefLastSync, now.toIso8601String());
@@ -174,6 +188,39 @@ class SyncNotifier extends Notifier<SyncState> {
         lastError: e.toString(),
       );
     }
+  }
+
+  /// Sync receipt files with Google Drive.
+  Future<void> _syncReceipts(GoogleDriveProvider provider) async {
+    final db = ref.read(databaseProvider);
+    final transactions = await db.select(db.transactions).get();
+
+    // Collect all receipt filenames from the database
+    final allFilenames = <String>{};
+    for (final tx in transactions) {
+      final filenames = parseReceiptPaths(tx.receiptPath);
+      allFilenames.addAll(filenames);
+    }
+    if (allFilenames.isEmpty) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final receiptsDir = p.join(appDir.path, 'receipts');
+
+    // Upload local receipts not yet on Drive
+    final localPaths = <String>[];
+    for (final filename in allFilenames) {
+      final fullPath = p.join(receiptsDir, filename);
+      if (await File(fullPath).exists()) {
+        localPaths.add(fullPath);
+      }
+    }
+    if (localPaths.isNotEmpty) {
+      await provider.uploadReceipts(localPaths);
+    }
+
+    // Download any Drive receipts not yet local
+    await provider.downloadMissingReceipts(
+        allFilenames.toList(), receiptsDir);
   }
 
   /// Full restore from the sync file (replaces all local data).

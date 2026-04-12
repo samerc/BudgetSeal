@@ -61,7 +61,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   bool _loading = false;
   final List<LineState> _lines = [];
   String? _validationError;
-  String? _receiptPath;
+  List<String> _receiptFilenames = [];
+  List<String> _resolvedReceiptPaths = [];
 
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
@@ -457,13 +458,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       }
 
-      // Save receipt path if attached.
-      if (_receiptPath != null) {
+      // Save receipt filenames if attached.
+      if (_receiptFilenames.isNotEmpty) {
         final db = ref.read(databaseProvider);
         await (db.update(db.transactions)
               ..where((t) => t.id.equals(txId)))
             .write(TransactionsCompanion(
-                receiptPath: Value(_receiptPath)));
+                receiptPath: Value(encodeReceiptPaths(_receiptFilenames))));
       }
 
       if (mounted) {
@@ -1094,34 +1095,61 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
+  Future<void> _resolveReceiptPaths() async {
+    final paths = await resolveReceiptPaths(_receiptFilenames);
+    if (mounted) {
+      setState(() => _resolvedReceiptPaths = paths);
+    }
+  }
+
   Widget _buildReceiptButton() {
-    if (_receiptPath != null) {
+    if (_receiptFilenames.isNotEmpty) {
       return TxCard(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(_receiptPath!),
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.cover,
+              if (_resolvedReceiptPaths.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(_resolvedReceiptPaths.first),
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _receiptFilenames.length == 1
+                      ? 'Receipt attached'
+                      : '${_receiptFilenames.length} receipts attached',
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.healthy),
                 ),
               ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text('Receipt attached',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.healthy)),
+              IconButton(
+                icon: const Icon(Icons.add_rounded,
+                    size: 18, color: AppColors.textHint),
+                tooltip: 'Add more',
+                onPressed: () async {
+                  final newFilenames = await pickAndSaveReceipts(context);
+                  if (newFilenames.isNotEmpty && mounted) {
+                    _receiptFilenames = [..._receiptFilenames, ...newFilenames];
+                    _resolveReceiptPaths();
+                  }
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.close_rounded,
                     size: 18, color: AppColors.textHint),
-                onPressed: () => setState(() => _receiptPath = null),
+                onPressed: () => setState(() {
+                  _receiptFilenames = [];
+                  _resolvedReceiptPaths = [];
+                }),
               ),
             ],
           ),
@@ -1131,9 +1159,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     return OutlinedButton.icon(
       onPressed: () async {
-        final path = await pickAndSaveReceipt(context);
-        if (path != null && mounted) {
-          setState(() => _receiptPath = path);
+        final filenames = await pickAndSaveReceipts(context);
+        if (filenames.isNotEmpty && mounted) {
+          _receiptFilenames = filenames;
+          _resolveReceiptPaths();
         }
       },
       icon: const Icon(Icons.receipt_long_rounded, size: 16),

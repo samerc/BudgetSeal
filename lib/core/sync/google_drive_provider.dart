@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
@@ -135,6 +136,97 @@ class GoogleDriveProvider implements CloudProvider {
     final api = await _getDriveApi();
     final folderId = await _getOrCreateFolder(api);
     return await _findSyncFile(api, folderId) != null;
+  }
+
+  // ── Receipt sync ──────────────────────────────────────────────
+
+  /// Upload receipt files to PocketPlan/receipts/ folder on Drive.
+  Future<void> uploadReceipts(List<String> filePaths) async {
+    final api = await _getDriveApi();
+    final parentFolderId = await _getOrCreateFolder(api);
+    final receiptsFolderId =
+        await _getOrCreateSubfolder(api, parentFolderId, 'receipts');
+
+    for (final filePath in filePaths) {
+      final file = io.File(filePath);
+      if (!file.existsSync()) continue;
+
+      final fileName = filePath.split('/').last.split('\\').last;
+
+      // Check if file already exists on Drive
+      final query =
+          "name = '$fileName' and '$receiptsFolderId' in parents and trashed = false";
+      final existing = await api.files.list(q: query, spaces: 'drive');
+      if (existing.files != null && existing.files!.isNotEmpty) continue;
+
+      final bytes = await file.readAsBytes();
+      final media = drive.Media(
+        Stream.value(bytes),
+        bytes.length,
+        contentType: 'image/jpeg',
+      );
+
+      final driveFile = drive.File()
+        ..name = fileName
+        ..parents = [receiptsFolderId];
+      await api.files.create(driveFile, uploadMedia: media);
+    }
+  }
+
+  /// Download any receipts that exist on Drive but not locally.
+  Future<void> downloadMissingReceipts(
+      List<String> filenames, String localReceiptsDir) async {
+    final api = await _getDriveApi();
+    final parentFolderId = await _getOrCreateFolder(api);
+    final receiptsFolderId =
+        await _getOrCreateSubfolder(api, parentFolderId, 'receipts');
+
+    // List all receipt files on Drive
+    final query =
+        "'$receiptsFolderId' in parents and trashed = false";
+    final driveFiles = await api.files.list(q: query, spaces: 'drive');
+
+    if (driveFiles.files == null) return;
+
+    for (final driveFile in driveFiles.files!) {
+      final name = driveFile.name;
+      if (name == null || driveFile.id == null) continue;
+      if (!filenames.contains(name)) continue;
+
+      final localPath = '$localReceiptsDir/$name';
+      if (io.File(localPath).existsSync()) continue;
+
+      // Download the file
+      final response = await api.files.get(
+        driveFile.id!,
+        downloadOptions: drive.DownloadOptions.fullMedia,
+      ) as drive.Media;
+
+      final bytes = <int>[];
+      await for (final chunk in response.stream) {
+        bytes.addAll(chunk);
+      }
+
+      final dir = io.Directory(localReceiptsDir);
+      if (!dir.existsSync()) dir.createSync(recursive: true);
+      await io.File(localPath).writeAsBytes(bytes);
+    }
+  }
+
+  Future<String> _getOrCreateSubfolder(
+      drive.DriveApi api, String parentId, String name) async {
+    final query =
+        "name = '$name' and '$parentId' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+    final list = await api.files.list(q: query, spaces: 'drive');
+    if (list.files != null && list.files!.isNotEmpty) {
+      return list.files!.first.id!;
+    }
+    final folder = drive.File()
+      ..name = name
+      ..parents = [parentId]
+      ..mimeType = 'application/vnd.google-apps.folder';
+    final created = await api.files.create(folder);
+    return created.id!;
   }
 
   // ── Internals ─────────────────────────────────────────────────
