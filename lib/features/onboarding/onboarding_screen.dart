@@ -7,6 +7,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
+import '../../core/sync/invite_code.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 
@@ -244,6 +245,11 @@ class _WelcomePageState extends State<_WelcomePage>
           FadeTransition(
             opacity: _fadeBtn,
             child: _RestoreFromCloudButton(),
+          ),
+          const SizedBox(height: 10),
+          FadeTransition(
+            opacity: _fadeBtn,
+            child: _JoinHouseholdButton(),
           ),
         ],
       ),
@@ -759,6 +765,252 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Join a Household button ────────────────────────────────────────────────
+
+class _JoinHouseholdButton extends ConsumerWidget {
+  const _JoinHouseholdButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: () => _showJoinSheet(context, ref),
+        icon: const Icon(Icons.people_outline_rounded, size: 20),
+        label: Text(
+          'Join a Household',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showJoinSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const _JoinHouseholdSheet(),
+    );
+  }
+}
+
+// ─── Join Household Sheet ───────────────────────────────────────────────────
+
+class _JoinHouseholdSheet extends ConsumerStatefulWidget {
+  const _JoinHouseholdSheet();
+
+  @override
+  ConsumerState<_JoinHouseholdSheet> createState() =>
+      _JoinHouseholdSheetState();
+}
+
+class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
+  final _codeController = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _join() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) {
+      setState(() => _error = 'Please enter an invite code');
+      return;
+    }
+
+    final folderId = decodeInviteCode(code);
+    if (folderId == null) {
+      setState(() => _error = 'Invalid invite code. It should start with PP-');
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final notifier = ref.read(syncProvider.notifier);
+      final googleDrive = notifier.googleDrive;
+
+      // Connect to the shared folder
+      final connected = await googleDrive.connectToSharedFolder(folderId);
+      if (!connected) {
+        setState(() {
+          _loading = false;
+          _error = 'Could not connect to Google Drive. '
+              'Make sure you are signed in and have access to the shared folder.';
+        });
+        return;
+      }
+
+      // Set as active provider
+      final providerOk = await notifier.connectProvider(googleDrive);
+      if (!providerOk) {
+        // connectProvider may re-authenticate; the folder ID is already set
+        // from connectToSharedFolder, so try restoring directly.
+      }
+
+      // Download and restore data from the shared folder
+      await notifier.restoreFromProvider(googleDrive);
+
+      final syncState = ref.read(syncProvider);
+      if (syncState.status == SyncStatus.error) {
+        setState(() {
+          _loading = false;
+          _error = syncState.lastError ?? 'No sync file found in the shared folder';
+        });
+        return;
+      }
+
+      // Load the restored household
+      await ref.read(householdServiceProvider).loadSavedHousehold();
+
+      if (mounted) {
+        Navigator.pop(context); // close sheet
+        context.go('/');
+      }
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Join a Household',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Enter the invite code shared with you to join an existing '
+              'PocketPlan household. This will sign you into Google Drive '
+              'and download the shared data.',
+              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+            ),
+            const SizedBox(height: 20),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                ),
+              )
+            else ...[
+              TextField(
+                controller: _codeController,
+                decoration: InputDecoration(
+                  labelText: 'Invite code',
+                  hintText: 'PP-...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  prefixIcon: const Icon(Icons.vpn_key_outlined),
+                ),
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: _join,
+                  icon: const Icon(Icons.login_rounded, size: 20),
+                  label: const Text(
+                    'Join Household',
+                    style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.overspent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        color: AppColors.overspent, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.overspent),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

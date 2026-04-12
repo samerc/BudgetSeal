@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,8 @@ import '../../core/providers/receipt_sync_provider.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
+import '../../core/sync/google_drive_provider.dart';
+import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
@@ -200,6 +203,19 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.cloud_sync_rounded, title: 'Cloud Sync',
                 subtitle: 'Sync across devices', iconColor: AppColors.accent,
                 onTap: () => context.push('/sync')),
+            Builder(builder: (context) {
+              final syncState = ref.watch(syncProvider);
+              if (syncState.activeProvider is! GoogleDriveProvider) {
+                return const SizedBox.shrink();
+              }
+              return _SettingsTile(
+                icon: Icons.people_outline_rounded,
+                title: 'Share Household',
+                subtitle: 'Invite someone to share your data',
+                iconColor: const Color(0xFF7E57C2),
+                onTap: () => _showShareHousehold(context, ref),
+              );
+            }),
             _SettingsTile(icon: Icons.backup_rounded, title: 'Backup & Restore',
                 subtitle: 'Export or restore database', iconColor: const Color(0xFF42A5F5),
                 onTap: () => context.push('/backup')),
@@ -351,6 +367,18 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => _confirmReset(context, ref)),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showShareHousehold(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(syncProvider.notifier);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ShareHouseholdSettingsSheet(
+        googleDrive: notifier.googleDrive,
       ),
     );
   }
@@ -1619,6 +1647,233 @@ class _SettingsBackupBanner extends ConsumerWidget {
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// ── Share Household Sheet (settings) ─────────────────────────────────────────
+
+class _ShareHouseholdSettingsSheet extends StatefulWidget {
+  final GoogleDriveProvider googleDrive;
+
+  const _ShareHouseholdSettingsSheet({required this.googleDrive});
+
+  @override
+  State<_ShareHouseholdSettingsSheet> createState() =>
+      _ShareHouseholdSettingsSheetState();
+}
+
+class _ShareHouseholdSettingsSheetState
+    extends State<_ShareHouseholdSettingsSheet> {
+  final _emailController = TextEditingController();
+  bool _loading = false;
+  String? _error;
+  String? _inviteCode;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _share() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() => _error = 'Please enter a valid email address');
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      await widget.googleDrive.shareFolder(email);
+      final folderId = await widget.googleDrive.getFolderId();
+      final code = generateInviteCode(folderId);
+      setState(() {
+        _inviteCode = code;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = 'Failed to share: ${e.toString()}';
+      });
+    }
+  }
+
+  void _shareCode() {
+    if (_inviteCode == null) return;
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Join my PocketPlan household! Enter this code in the app:\n$_inviteCode',
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Share Household',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Share your PocketPlan data with another person. '
+              'They will be able to sync to the same file on Google Drive.',
+              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+            ),
+            const SizedBox(height: 20),
+            if (_inviteCode == null) ...[
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Their email address',
+                  hintText: 'partner@gmail.com',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  prefixIcon: const Icon(Icons.email_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: _loading ? null : _share,
+                  icon: _loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.share_rounded, size: 20),
+                  label: Text(
+                    _loading ? 'Sharing...' : 'Generate Invite Code',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF7E57C2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Invite Code',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ts(context),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      _inviteCode!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'monospace',
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: _shareCode,
+                  icon: const Icon(Icons.share_rounded, size: 20),
+                  label: const Text(
+                    'Share Code',
+                    style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.overspent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        color: AppColors.overspent, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.overspent),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

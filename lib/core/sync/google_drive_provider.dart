@@ -226,6 +226,50 @@ class GoogleDriveProvider implements CloudProvider {
     return created.id!;
   }
 
+  // ── Household sharing ──────────────────────────────────────────
+
+  /// Share the PocketPlan folder with another user's email.
+  /// Adds them as a writer so they can sync to the same file.
+  Future<void> shareFolder(String email) async {
+    final api = await _getDriveApi();
+    final folderId = await _getOrCreateFolder(api);
+    final permission = drive.Permission()
+      ..type = 'user'
+      ..role = 'writer'
+      ..emailAddress = email;
+    await api.permissions.create(permission, folderId,
+        sendNotificationEmail: false);
+  }
+
+  /// Get the current folder ID for encoding into an invite code.
+  Future<String> getFolderId() async {
+    final api = await _getDriveApi();
+    return _getOrCreateFolder(api);
+  }
+
+  /// Connect to a specific shared folder by ID (used when joining via invite code).
+  Future<bool> connectToSharedFolder(String folderId) async {
+    try {
+      await _ensureInitialized();
+      _account = await GoogleSignIn.instance.authenticate();
+      if (_account == null) return false;
+
+      final authClient = _account!.authorizationClient;
+      final auth = await authClient.authorizeScopes(
+        [drive.DriveApi.driveFileScope],
+      );
+      _driveApi = drive.DriveApi(
+          _AuthClient(http.Client(), auth.accessToken));
+      _folderId = folderId;
+
+      // Verify we can access the folder
+      await _driveApi!.files.get(folderId);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ── Internals ─────────────────────────────────────────────────
 
   Future<void> _ensureInitialized() async {
