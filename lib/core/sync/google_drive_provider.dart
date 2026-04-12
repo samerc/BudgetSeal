@@ -10,14 +10,11 @@ import 'cloud_provider.dart';
 const _syncFileName = 'PocketPlan_Sync.json';
 const _folderName = 'PocketPlan';
 
-/// Your Web OAuth 2.0 client ID from Google Cloud Console.
-/// To set this up:
-/// 1. Go to console.cloud.google.com → APIs & Services → Credentials
-/// 2. Enable the Google Drive API
-/// 3. Create an OAuth 2.0 "Web application" client ID
-/// 4. Create an OAuth 2.0 "Android" client ID with your SHA-1 + package name
-/// 5. Paste the Web client ID below
-const _serverClientId = '87876782358-4a7gnh8dfgtl2q3vfk9l20c1r5ragakc.apps.googleusercontent.com';
+/// Web OAuth 2.0 client ID from Google Cloud Console.
+/// Loaded from .env file via --dart-define-from-file at build time.
+/// To set up: create .env in project root with:
+///   GOOGLE_SERVER_CLIENT_ID=your-client-id.apps.googleusercontent.com
+const _serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
 /// Google Drive adapter using google_sign_in v7 + googleapis.
 class GoogleDriveProvider implements CloudProvider {
