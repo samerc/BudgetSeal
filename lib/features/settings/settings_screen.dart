@@ -488,13 +488,16 @@ class SettingsScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+          ),
           decoration: BoxDecoration(
             color: AppColors.sf(context),
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
