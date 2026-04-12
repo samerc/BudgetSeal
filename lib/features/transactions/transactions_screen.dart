@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/allocations_provider.dart';
@@ -19,24 +20,6 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
-
-// ---------------------------------------------------------------------------
-// List item types for date-grouped rendering
-// ---------------------------------------------------------------------------
-
-sealed class _ListItem {}
-
-class _DateHeader extends _ListItem {
-  final DateTime date;
-  final double dayTotal;
-  final String baseCurrency;
-  _DateHeader(this.date, {this.dayTotal = 0, this.baseCurrency = 'USD'});
-}
-
-class _TxItem extends _ListItem {
-  final TransactionEntry entry;
-  _TxItem(this.entry);
-}
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -708,7 +691,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
-    final items = _buildItems(filtered);
+    final groups = _buildGroups(filtered);
     final txColors = ref.watch(txColorsProvider);
     final net = monthIncome - monthExpense;
 
@@ -837,154 +820,175 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               ],
             ),
           ),
-        // ── Transaction list ───────────────────────────────────
+        // ── Transaction list (sticky date headers) ──────────────
         Expanded(
-          child: ListView.builder(
+          child: CustomScrollView(
             controller: _listScrollCtrl,
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
-            itemCount: items.length + 1, // +1 for footer
-            itemBuilder: (context, i) {
-              if (i == items.length) {
-                // Footer
-                return _CashFlowFooter(
-                  total: net,
-                  count: filtered.length,
-                  baseCurrency: baseCurrency,
-                );
-              }
-              final item = items[i];
-              return switch (item) {
-                _DateHeader(
-                  date: final d,
-                  dayTotal: final total,
-                  baseCurrency: final bc,
-                ) =>
-                  _DateHeaderTile(
-                      date: d, dayTotal: total, baseCurrency: bc),
-                _TxItem(entry: final e) => Dismissible(
-                      key: ValueKey(e.tx.id),
-                      direction: DismissDirection.horizontal,
-                      // Left background (swipe right → edit) (#6)
-                      background: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 20),
-                        margin: const EdgeInsets.only(bottom: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(14),
+            slivers: [
+              // Top padding
+              const SliverPadding(padding: EdgeInsets.only(top: 4)),
+              // Date-grouped slivers with sticky headers
+              for (final group in groups)
+                MultiSliver(
+                  pushPinnedChildren: true,
+                  children: [
+                    SliverPinnedHeader(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _DateHeaderTile(
+                          date: group.date,
+                          dayTotal: group.dayTotal,
+                          baseCurrency: group.baseCurrency,
                         ),
-                        child: const Icon(Icons.edit_rounded,
-                            color: Colors.white),
-                      ),
-                      // Right background (swipe left → delete)
-                      secondaryBackground: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        margin: const EdgeInsets.only(bottom: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.overspent,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(Icons.delete_rounded,
-                            color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        if (direction == DismissDirection.startToEnd) {
-                          // Swipe right → edit (#6)
-                          context.push('/transactions/${e.tx.id}');
-                          return false; // don't dismiss
-                        }
-                        // Swipe left → delete
-                        return await showDialog<bool>(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Delete?'),
-                                content: const Text(
-                                    'This transaction will be permanently deleted.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    style: TextButton.styleFrom(
-                                        foregroundColor: AppColors.overspent),
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              ),
-                            ) ??
-                            false;
-                      },
-                      onDismissed: (_) {
-                        ref
-                            .read(allocationEngineProvider)
-                            .deleteTransaction(e.tx.id);
-                      },
-                      child: _TxTile(
-                        entry: e,
-                        categoryMap: categoryMap,
-                        onCategoryTap: (catId, catName) {
-                          hapticLight();
-                          setState(() {
-                            _categoryFilter = catId;
-                            _categoryFilterName = catName;
-                          });
-                        },
                       ),
                     ),
-              };
-            },
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, i) {
+                            final e = group.entries[i];
+                            return Dismissible(
+                              key: ValueKey(e.tx.id),
+                              direction: DismissDirection.horizontal,
+                              // Left background (swipe right → edit) (#6)
+                              background: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.only(left: 20),
+                                margin: const EdgeInsets.only(bottom: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(Icons.edit_rounded,
+                                    color: Colors.white),
+                              ),
+                              // Right background (swipe left → delete)
+                              secondaryBackground: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                margin: const EdgeInsets.only(bottom: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.overspent,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(Icons.delete_rounded,
+                                    color: Colors.white),
+                              ),
+                              confirmDismiss: (direction) async {
+                                if (direction == DismissDirection.startToEnd) {
+                                  // Swipe right → edit (#6)
+                                  context.push('/transactions/${e.tx.id}');
+                                  return false; // don't dismiss
+                                }
+                                // Swipe left → delete
+                                return await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Delete?'),
+                                        content: const Text(
+                                            'This transaction will be permanently deleted.'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            style: TextButton.styleFrom(
+                                                foregroundColor: AppColors.overspent),
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    ) ??
+                                    false;
+                              },
+                              onDismissed: (_) {
+                                ref
+                                    .read(allocationEngineProvider)
+                                    .deleteTransaction(e.tx.id);
+                              },
+                              child: _TxTile(
+                                entry: e,
+                                categoryMap: categoryMap,
+                                onCategoryTap: (catId, catName) {
+                                  hapticLight();
+                                  setState(() {
+                                    _categoryFilter = catId;
+                                    _categoryFilterName = catName;
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                          childCount: group.entries.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              // Footer
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                  child: _CashFlowFooter(
+                    total: net,
+                    count: filtered.length,
+                    baseCurrency: baseCurrency,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  List<_ListItem> _buildItems(List<TransactionEntry> entries) {
+  List<({DateTime date, double dayTotal, String baseCurrency, List<TransactionEntry> entries})>
+      _buildGroups(List<TransactionEntry> entries) {
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
     final dayGroups = <String, List<TransactionEntry>>{};
-    for (final entry in entries) {
-      final dateKey =
-          DateFormat('yyyy-MM-dd').format(entry.tx.createdAt.toLocal());
-      dayGroups.putIfAbsent(dateKey, () => []).add(entry);
-    }
-
-    final items = <_ListItem>[];
-    String? lastDateKey;
+    final dayDates = <String, DateTime>{};
     for (final entry in entries) {
       final local = entry.tx.createdAt.toLocal();
       final dateKey = DateFormat('yyyy-MM-dd').format(local);
-      if (dateKey != lastDateKey) {
-        final dayEntries = dayGroups[dateKey] ?? [];
-        double dayTotal = 0;
-        for (final e in dayEntries) {
-          double baseAmt = 0;
-          if (e.lines.isNotEmpty) {
-            for (final l in e.lines) {
-              baseAmt += l.amount * l.exchangeRateToBase;
-            }
-          } else {
-            baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
-          }
-          if (e.tx.type == 'income') {
-            dayTotal += baseAmt;
-          } else if (e.tx.type == 'expense') {
-            dayTotal -= baseAmt;
-          }
-        }
-        items.add(_DateHeader(local,
-            dayTotal: dayTotal, baseCurrency: baseCurrency));
-        lastDateKey = dateKey;
-      }
-      items.add(_TxItem(entry));
+      dayGroups.putIfAbsent(dateKey, () => []).add(entry);
+      dayDates.putIfAbsent(dateKey, () => local);
     }
-    return items;
+
+    final result = <({DateTime date, double dayTotal, String baseCurrency, List<TransactionEntry> entries})>[];
+    for (final dateKey in dayGroups.keys) {
+      final dayEntries = dayGroups[dateKey]!;
+      double dayTotal = 0;
+      for (final e in dayEntries) {
+        double baseAmt = 0;
+        if (e.lines.isNotEmpty) {
+          for (final l in e.lines) {
+            baseAmt += l.amount * l.exchangeRateToBase;
+          }
+        } else {
+          baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+        }
+        if (e.tx.type == 'income') {
+          dayTotal += baseAmt;
+        } else if (e.tx.type == 'expense') {
+          dayTotal -= baseAmt;
+        }
+      }
+      result.add((
+        date: dayDates[dateKey]!,
+        dayTotal: dayTotal,
+        baseCurrency: baseCurrency,
+        entries: dayEntries,
+      ));
+    }
+    return result;
   }
 }
 
