@@ -258,22 +258,31 @@ class _SpendingGauge extends StatelessWidget {
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
     final fractionOfMonth = dayOfMonth / daysInMonth;
 
-    // Expected spend so far (proportion of typical)
+    // Expected spend so far (proportion of typical for this point in month)
     final expectedSoFar = typical * fractionOfMonth;
-    final belowTypical = typical > 0 ? (typical - spent).clamp(0.0, typical) : 0.0;
 
-    // Gauge progress: spent / typical (capped at 1.5 for visual)
-    final gaugeProgress = typical > 0 ? (spent / typical).clamp(0.0, 1.5) : 0.0;
+    // Gauge progress: spent vs expected-so-far (not vs full typical)
+    // This makes the gauge meaningful: green = under pace, red = over pace
+    final gaugeBase = typical > 0 ? expectedSoFar : spent;
+    final gaugeProgress = gaugeBase > 0
+        ? (spent / gaugeBase).clamp(0.0, 1.5)
+        : (spent > 0 ? 1.0 : 0.0);
 
-    // Color: green if under expected, yellow if close, red if over
+    // Color based on pace: are you spending faster or slower than typical?
     Color gaugeColor;
-    if (typical == 0 || spent <= expectedSoFar * 0.9) {
-      gaugeColor = AppColors.healthy;
-    } else if (spent <= typical) {
-      gaugeColor = AppColors.caution;
+    if (typical == 0) {
+      // No historical data — neutral
+      gaugeColor = AppColors.accent;
+    } else if (spent <= expectedSoFar * 0.8) {
+      gaugeColor = AppColors.healthy; // Well under pace
+    } else if (spent <= expectedSoFar * 1.1) {
+      gaugeColor = AppColors.caution; // Close to pace
     } else {
-      gaugeColor = AppColors.overspent;
+      gaugeColor = AppColors.overspent; // Over pace
     }
+
+    final difference = typical > 0 ? (typical - spent).abs() : 0.0;
+    final isOver = spent > typical;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -306,12 +315,18 @@ class _SpendingGauge extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    formatAmount(spent),
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.tp(context),
+                  SizedBox(
+                    width: 130,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formatAmount(spent, currency: currency),
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
                     ),
                   ),
                   Text('SPENT SO FAR',
@@ -326,18 +341,20 @@ class _SpendingGauge extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          // Below typical / Typical spend
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (typical > 0) ...[
+          // Below/Over typical + Typical spend
+          if (typical > 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 Column(children: [
-                  Text(formatAmount(belowTypical),
+                  Text(formatAmount(difference, currency: currency),
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
-                  Text(spent <= typical ? 'BELOW TYPICAL' : 'OVER TYPICAL',
+                          color: isOver
+                              ? AppColors.overspent
+                              : AppColors.healthy)),
+                  Text(isOver ? 'OVER TYPICAL' : 'BELOW TYPICAL',
                       style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -345,22 +362,81 @@ class _SpendingGauge extends StatelessWidget {
                 ]),
                 const SizedBox(width: 32),
                 Column(children: [
-                  Text(formatAmount(typical),
+                  Text(formatAmount(typical, currency: currency),
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.tp(context))),
-                  Text('TYPICAL SPEND',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.ts(context))),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('TYPICAL SPEND',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.ts(context))),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () => _showTypicalInfo(context),
+                        child: Icon(Icons.help_outline_rounded,
+                            size: 14, color: AppColors.th(context)),
+                      ),
+                    ],
+                  ),
                 ]),
-              ] else
-                Text('Not enough data for typical spend',
-                    style: TextStyle(
-                        fontSize: 12, color: AppColors.ts(context))),
-            ],
+              ],
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.info_outline_rounded,
+                      size: 14, color: AppColors.th(context)),
+                  const SizedBox(width: 6),
+                  Text('Add a few months of data to see typical spending',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context))),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showTypicalInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.info_outline_rounded,
+                size: 20, color: AppColors.accent),
+            const SizedBox(width: 8),
+            const Text('Typical Spending'),
+          ],
+        ),
+        content: Text(
+          '"Typical Spend" is the average of your total expenses '
+          'over the previous 6 months. It gives you a benchmark to '
+          'compare this month\'s spending against.\n\n'
+          '"Below/Over Typical" shows the difference between what '
+          'you\'ve spent this month and your typical full-month total.\n\n'
+          'The gauge color reflects your spending pace:\n'
+          '• Green — spending slower than usual\n'
+          '• Yellow — on track with typical pace\n'
+          '• Red — spending faster than usual',
+          style: TextStyle(
+              fontSize: 13,
+              color: AppColors.ts(context),
+              height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
           ),
         ],
       ),
