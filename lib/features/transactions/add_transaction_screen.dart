@@ -468,18 +468,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        final messenger = ScaffoldMessenger.of(context);
+        final engineRef = ref.read(allocationEngineProvider);
+        context.pop();
+        messenger.clearSnackBars();
+        messenger.showSnackBar(SnackBar(
           content: const Text('Transaction saved'),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () {
-              ref.read(allocationEngineProvider).deleteTransaction(txId);
+              engineRef.deleteTransaction(txId);
             },
           ),
         ));
-        context.pop();
       }
     } finally {
       if (mounted) setState(() => _loading = false);

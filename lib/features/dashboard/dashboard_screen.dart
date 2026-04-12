@@ -461,11 +461,18 @@ class _SpendingOverviewCard extends StatelessWidget {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(formatAmount(expense, currency: currency),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.tp(context))),
+                              SizedBox(
+                                width: 60,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                      formatAmount(expense, currency: currency),
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.tp(context))),
+                                ),
+                              ),
                               Text('spent',
                                   style: TextStyle(
                                       fontSize: 10,

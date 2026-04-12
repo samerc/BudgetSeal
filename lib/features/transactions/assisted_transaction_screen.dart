@@ -822,7 +822,12 @@ class _AssistedTransactionScreenState
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        // Pop first, then show snackbar on the parent screen
+        final messenger = ScaffoldMessenger.of(context);
+        final engineRef = ref.read(allocationEngineProvider);
+        context.pop();
+        messenger.clearSnackBars();
+        messenger.showSnackBar(SnackBar(
           content: const Text('Transaction saved'),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
@@ -830,12 +835,11 @@ class _AssistedTransactionScreenState
             label: 'Undo',
             onPressed: () {
               if (lastTxId != null) {
-                ref.read(allocationEngineProvider).deleteTransaction(lastTxId);
+                engineRef.deleteTransaction(lastTxId);
               }
             },
           ),
         ));
-        context.pop();
       }
     } finally {
       if (mounted) setState(() => _saving = false);
