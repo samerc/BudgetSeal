@@ -15,6 +15,7 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 
 /// Assisted transaction entry: 3 popup steps.
@@ -1099,33 +1100,18 @@ class _AssistedTransactionScreenState
                                   color: AppColors.tp(context)),
                             ),
                             const SizedBox(height: 4),
-                            SizedBox(
-                              height: 32,
-                              child: TextField(
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.tp(context)),
-                                decoration: InputDecoration(
-                                  hintText: 'Exchange rate',
-                                  hintStyle: TextStyle(
-                                      color: AppColors.th(context),
-                                      fontSize: 13),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                onChanged: (v) {
-                                  final rate = double.tryParse(v);
-                                  if (rate != null && rate > 0) {
-                                    setState(
-                                        () => _transferExchangeRate = rate);
-                                  }
-                                },
-                              ),
+                            CalculatorAmountField(
+                              value: _transferExchangeRate == 1.0
+                                  ? 0
+                                  : _transferExchangeRate,
+                              fontSize: 14,
+                              hintText: 'Exchange rate',
+                              onChanged: (v) {
+                                if (v > 0) {
+                                  setState(
+                                      () => _transferExchangeRate = v);
+                                }
+                              },
                             ),
                           ],
                         ),
