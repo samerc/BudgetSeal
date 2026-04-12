@@ -9,6 +9,7 @@ import 'package:drift/drift.dart' hide Column;
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/age_of_money_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -250,7 +251,174 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ref.invalidate(transactionEntriesProvider),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+
+                  // ── Spending Velocity ──────────────────────────
+                  txAsync.when(
+                    data: (entries) {
+                      final now = DateTime.now();
+                      final monthStart = DateTime(now.year, now.month, 1);
+                      final daysElapsed =
+                          now.difference(monthStart).inDays + 1;
+                      final daysInMonth =
+                          DateTime(now.year, now.month + 1, 0).day;
+
+                      double monthExpense = 0;
+                      for (final e in entries) {
+                        if (e.tx.type == 'expense' &&
+                            e.tx.createdAt.isAfter(monthStart)) {
+                          if (e.lines.isNotEmpty) {
+                            for (final l in e.lines) {
+                              monthExpense +=
+                                  l.amount * l.exchangeRateToBase;
+                            }
+                          } else {
+                            monthExpense +=
+                                e.tx.amount * e.tx.exchangeRateToBase;
+                          }
+                        }
+                      }
+
+                      if (monthExpense <= 0) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final dailyRate = monthExpense / daysElapsed;
+                      final projected = dailyRate * daysInMonth;
+
+                      final allocs = allocationsAsync.value ?? [];
+                      double totalBudget = 0;
+                      for (final a in allocs) {
+                        final t = a.data.allocation.targetAmount;
+                        if (t != null && t > 0) totalBudget += t;
+                      }
+
+                      final Color color;
+                      if (totalBudget <= 0) {
+                        color = AppColors.accent;
+                      } else if (projected <= totalBudget * 0.85) {
+                        color = AppColors.healthy;
+                      } else if (projected <= totalBudget) {
+                        color = AppColors.caution;
+                      } else {
+                        color = AppColors.overspent;
+                      }
+
+                      return _InsightRow(
+                        icon: Icons.speed_rounded,
+                        color: color,
+                        text:
+                            'Spending ${formatAmount(dailyRate, currency: baseCurrency)}/day \u00b7 On track for ${formatAmount(projected, currency: baseCurrency)} this month',
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+
+                  // ── Biggest Expense ────────────────────────────
+                  txAsync.when(
+                    data: (entries) {
+                      final now = DateTime.now();
+                      final monthStart = DateTime(now.year, now.month, 1);
+
+                      TransactionEntry? biggest;
+                      double biggestAmt = 0;
+                      for (final e in entries) {
+                        if (e.tx.type == 'expense' &&
+                            e.tx.createdAt.isAfter(monthStart)) {
+                          double baseAmt = 0;
+                          if (e.lines.isNotEmpty) {
+                            for (final l in e.lines) {
+                              baseAmt += l.amount * l.exchangeRateToBase;
+                            }
+                          } else {
+                            baseAmt =
+                                e.tx.amount * e.tx.exchangeRateToBase;
+                          }
+                          if (baseAmt > biggestAmt) {
+                            biggestAmt = baseAmt;
+                            biggest = e;
+                          }
+                        }
+                      }
+
+                      if (biggest == null) return const SizedBox.shrink();
+
+                      final cat = biggest.tx.categoryId != null
+                          ? categoryMap[biggest.tx.categoryId]
+                          : null;
+                      final label = cat?.name ??
+                          (biggest.tx.note.isNotEmpty
+                              ? biggest.tx.note
+                              : 'Expense');
+
+                      return GestureDetector(
+                        onTap: () => context
+                            .push('/transactions/${biggest!.tx.id}'),
+                        child: _InsightRow(
+                          icon: Icons.local_fire_department_rounded,
+                          color: AppColors.overspent,
+                          text:
+                              'Biggest expense: ${formatAmount(biggestAmt, currency: baseCurrency)} \u2014 $label',
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              size: 16, color: AppColors.th(context)),
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+
+                  // ── Subscription Summary ──────────────────────
+                  Builder(builder: (context) {
+                    final hId =
+                        ref.watch(currentHouseholdIdProvider);
+                    if (hId == null) return const SizedBox.shrink();
+                    final db = ref.watch(databaseProvider);
+                    return FutureBuilder<List<RecurringTransaction>>(
+                      future: (db.select(db.recurringTransactions)
+                            ..where((r) =>
+                                r.householdId.equals(hId) &
+                                r.enabled.equals(true)))
+                          .get(),
+                      builder: (context, snap) {
+                        final recs = snap.data;
+                        if (recs == null || recs.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        double total = 0;
+                        for (final r in recs) {
+                          double monthly = r.amount;
+                          switch (r.frequency) {
+                            case 'daily':
+                              monthly = r.amount * 30 / r.interval;
+                            case 'weekly':
+                              monthly = r.amount * 4.33 / r.interval;
+                            case 'monthly':
+                              monthly = r.amount / r.interval;
+                            case 'yearly':
+                              monthly = r.amount / (12 * r.interval);
+                          }
+                          total += monthly;
+                        }
+                        return GestureDetector(
+                          onTap: () => context.push('/recurring'),
+                          child: _InsightRow(
+                            icon: Icons.autorenew_rounded,
+                            color: AppColors.accent,
+                            text:
+                                'You spend ${formatAmount(total, currency: baseCurrency)}/mo on ${recs.length} recurring transaction${recs.length == 1 ? '' : 's'}',
+                            trailing: Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: AppColors.th(context)),
+                          ),
+                        );
+                      },
+                    );
+                  }),
+
+                  const SizedBox(height: 4),
 
                   // ── Quick Actions ──────────────────────────────
                   Row(
@@ -401,6 +569,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // ── Age of Money ───────────────────────────────
+                  _AgeOfMoneyRow(),
                   // ── Backup Reminder ─────────────────────────────
                   _BackupReminderBanner(),
                   // ── Quick-use Templates ───────────────────────────
@@ -841,6 +1011,129 @@ class _QuickAction extends StatelessWidget {
 }
 
 // ─── Summary Row ────────────────────────────────────────────────────────────
+
+// ─── Age of Money Row ───────────────────────────────────────────────────────
+
+class _AgeOfMoneyRow extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ageAsync = ref.watch(ageOfMoneyProvider);
+    return ageAsync.when(
+      data: (age) {
+        if (age == null) return const SizedBox.shrink();
+
+        final Color color;
+        final String label;
+        if (age >= 30) {
+          color = AppColors.healthy;
+          label = 'Excellent';
+        } else if (age >= 15) {
+          color = AppColors.caution;
+          label = 'Getting there';
+        } else {
+          color = AppColors.overspent;
+          label = 'Needs work';
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.sf(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.bd(context)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.schedule_rounded, color: color, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Age of Money',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '$age days',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () => _showAgeOfMoneyInfo(context),
+                  child: Icon(
+                    Icons.help_outline_rounded,
+                    size: 18,
+                    color: AppColors.th(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  void _showAgeOfMoneyInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Age of Money'),
+        content: const Text(
+          'Age of Money measures how many days your money sits before '
+          'you spend it. It looks at your last 10 expenses and traces '
+          'each one back to the income that funded it (oldest income '
+          'first).\n\n'
+          '30+ days (green): You\'re spending last month\'s income -- '
+          'a sign of financial stability.\n\n'
+          '15-29 days (yellow): You\'re building a buffer but not '
+          'quite there yet.\n\n'
+          'Under 15 days (red): You\'re living paycheck to paycheck. '
+          'Try to build up a buffer over time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _SummaryRow extends StatelessWidget {
   final String label;
@@ -1495,6 +1788,48 @@ class _QuickTemplatesSection extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ─── Insight Row ────────────────────────────────────────────────────────────
+
+class _InsightRow extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String text;
+  final Widget? trailing;
+
+  const _InsightRow({
+    required this.icon,
+    required this.color,
+    required this.text,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.ts(context),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
+import '../../core/database/daos/ledger_dao.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -464,10 +465,14 @@ class _AllocationDetailScreenState
             ]),
             ], // end if (_isNew || _showSettings)
 
-            // --- Progress ring + recent transactions + spending history ---
+            // --- Progress ring + goal timeline + recent transactions + spending history ---
             if (!_isNew) ...[
               const SizedBox(height: 24),
               _buildProgressRing(),
+              if (_type == 'saving') ...[
+                const SizedBox(height: 16),
+                _buildGoalTimeline(),
+              ],
               const SizedBox(height: 16),
               _buildRecentTransactions(),
               const SizedBox(height: 16),
@@ -581,6 +586,183 @@ class _AllocationDetailScreenState
             style: TextStyle(
                 fontSize: 14, fontWeight: FontWeight.w700, color: color)),
       ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Goal Timeline: for savings envelopes with a target
+  // ---------------------------------------------------------------------------
+
+  Widget _buildGoalTimeline() {
+    if (_targetAmount <= 0) return const SizedBox.shrink();
+    final target = _targetAmount;
+    final currency = _targetCurrencyController.text;
+
+    final db = ref.read(databaseProvider);
+    final ledgerDao = LedgerDao(db);
+
+    return FutureBuilder<Map<String, double>>(
+      future: ledgerDao.getBalanceByCurrency(widget.allocationId),
+      builder: (context, balanceSnap) {
+        if (!balanceSnap.hasData) return const SizedBox.shrink();
+        final balances = balanceSnap.data!;
+        final balance = balances[currency] ?? 0.0;
+
+        if (balance >= target) {
+          return _sectionContainer(children: [
+            _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.healthy.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.healthy.withValues(alpha: 0.3)),
+              ),
+              child: Row(children: [
+                const Icon(Icons.celebration_rounded,
+                    size: 20, color: AppColors.healthy),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Goal reached! You\'ve saved ${formatAmount(balance, currency: currency)} of your ${formatAmount(target, currency: currency)} target.',
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.healthy),
+                  ),
+                ),
+              ]),
+            ),
+          ]);
+        }
+
+        return FutureBuilder<List<AllocationLedgerData>>(
+          future: (db.select(db.allocationLedger)
+                ..where(
+                    (t) => t.allocationId.equals(widget.allocationId))
+                ..where((t) => t.entryType.equals('funding')))
+              .get(),
+          builder: (context, ledgerSnap) {
+            if (!ledgerSnap.hasData) return const SizedBox.shrink();
+            final fundingEntries = ledgerSnap.data!;
+
+            if (fundingEntries.isEmpty) {
+              return _sectionContainer(children: [
+                _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(children: [
+                    Icon(Icons.info_outline_rounded,
+                        size: 16, color: AppColors.ts(context)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'No funding yet. Start funding this envelope to see a goal timeline.',
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.ts(context)),
+                      ),
+                    ),
+                  ]),
+                ),
+              ]);
+            }
+
+            // Calculate average monthly funding
+            final now = DateTime.now();
+            // Find earliest funding entry
+            DateTime earliest = now;
+            double totalFunded = 0;
+            for (final entry in fundingEntries) {
+              if (entry.currency == currency) {
+                totalFunded += entry.amount;
+                if (entry.createdAt.isBefore(earliest)) {
+                  earliest = entry.createdAt;
+                }
+              }
+            }
+
+            if (totalFunded <= 0) {
+              return const SizedBox.shrink();
+            }
+
+            // Months since first funding (at least 1)
+            final monthsSinceCreation = ((now.year - earliest.year) * 12 +
+                    (now.month - earliest.month))
+                .clamp(1, 999);
+            final avgMonthlyFunding = totalFunded / monthsSinceCreation;
+
+            final remaining = target - balance;
+            final monthsToGoal = avgMonthlyFunding > 0
+                ? (remaining / avgMonthlyFunding).ceil()
+                : -1;
+
+            final targetDate = monthsToGoal > 0
+                ? DateTime(now.year, now.month + monthsToGoal, 1)
+                : null;
+
+            return _sectionContainer(children: [
+              _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
+              // Progress summary
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _miniStat(
+                      'Saved',
+                      formatAmount(balance, currency: currency),
+                      AppColors.healthy),
+                  _miniStat(
+                      'Remaining',
+                      formatAmount(remaining, currency: currency),
+                      AppColors.ts(context)),
+                  _miniStat(
+                      'Avg/month',
+                      formatAmount(avgMonthlyFunding, currency: currency),
+                      AppColors.accent),
+                ],
+              ),
+              const SizedBox(height: 14),
+              // Timeline estimate
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.2)),
+                ),
+                child: Row(children: [
+                  const Icon(Icons.timeline_rounded,
+                      size: 20, color: AppColors.accent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: monthsToGoal > 0
+                        ? Text(
+                            'At your current pace, you\'ll reach your goal in '
+                            '$monthsToGoal month${monthsToGoal == 1 ? '' : 's'}'
+                            '${targetDate != null ? ' (${DateFormat('MMMM yyyy').format(targetDate)})' : ''}',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.tp(context)),
+                          )
+                        : Text(
+                            'Unable to estimate timeline',
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.ts(context)),
+                          ),
+                  ),
+                ]),
+              ),
+            ]);
+          },
+        );
+      },
     );
   }
 

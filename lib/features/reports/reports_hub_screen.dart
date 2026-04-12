@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/database/app_database.dart' show Category;
 import '../../core/providers/household_provider.dart';
@@ -220,6 +221,15 @@ class _OverviewTab extends ConsumerWidget {
               const SizedBox(height: 20),
               // 6-month trend
               _TrendChart(
+                months: months,
+                incomeByMonth: incomeByMonth,
+                expenseByMonth: expenseByMonth,
+                baseCurrency: baseCurrency,
+              ),
+              const SizedBox(height: 20),
+              // Net worth over time
+              _NetWorthChart(
+                entries: entries,
                 months: months,
                 incomeByMonth: incomeByMonth,
                 expenseByMonth: expenseByMonth,
@@ -746,6 +756,221 @@ class _TrendChart extends StatelessWidget {
   }
 }
 
+// ── Net Worth Over Time Chart ───────────────────────────────────────────────
+
+class _NetWorthChart extends ConsumerWidget {
+  final List<TransactionEntry> entries;
+  final List<DateTime> months;
+  final List<double> incomeByMonth;
+  final List<double> expenseByMonth;
+  final String baseCurrency;
+
+  const _NetWorthChart({
+    required this.entries,
+    required this.months,
+    required this.incomeByMonth,
+    required this.expenseByMonth,
+    required this.baseCurrency,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountsAsync = ref.watch(accountsWithBalanceProvider);
+
+    return accountsAsync.when(
+      data: (accountsWithBalance) {
+        if (accountsWithBalance.isEmpty) return const SizedBox.shrink();
+
+        // Current net worth (sum of all account balances converted to base)
+        double currentNetWorth = 0;
+        for (final awb in accountsWithBalance) {
+          currentNetWorth += awb.balance;
+        }
+
+        // Reconstruct historical net worth by working backwards from current
+        // For each month, net change = income - expense (already computed)
+        // month index 5 = current month, 0 = 5 months ago
+        final netByMonth = List.generate(
+            6, (i) => incomeByMonth[i] - expenseByMonth[i]);
+
+        // Build net worth at end of each month, working backwards
+        final netWorthByMonth = List.filled(6, 0.0);
+        netWorthByMonth[5] = currentNetWorth;
+        for (int i = 4; i >= 0; i--) {
+          // Subtract the next month's net to get the previous month-end balance
+          netWorthByMonth[i] = netWorthByMonth[i + 1] - netByMonth[i + 1];
+        }
+
+        final spots = <FlSpot>[];
+        double minY = double.infinity;
+        double maxY = double.negativeInfinity;
+        for (int i = 0; i < 6; i++) {
+          spots.add(FlSpot(i.toDouble(), netWorthByMonth[i]));
+          if (netWorthByMonth[i] < minY) minY = netWorthByMonth[i];
+          if (netWorthByMonth[i] > maxY) maxY = netWorthByMonth[i];
+        }
+
+        if (minY == maxY) {
+          minY -= 100;
+          maxY += 100;
+        }
+
+        final range = maxY - minY;
+        final chartMinY = minY - range * 0.1;
+        final chartMaxY = maxY + range * 0.1;
+
+        final netWorthColor = currentNetWorth >= 0
+            ? AppColors.healthy
+            : AppColors.overspent;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.sf(context),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.bd(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Net Worth',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context))),
+                  Text(
+                    formatAmount(currentNetWorth, currency: baseCurrency),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: netWorthColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 140,
+                child: LineChart(
+                  LineChartData(
+                    minX: 0,
+                    maxX: 5,
+                    minY: chartMinY,
+                    maxY: chartMaxY,
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval:
+                          range > 0 ? range / 3 : 100,
+                      getDrawingHorizontalLine: (v) => FlLine(
+                        color: AppColors.bd(context),
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    titlesData: FlTitlesData(
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            final idx = value.toInt();
+                            if (idx < 0 || idx >= months.length) {
+                              return const SizedBox.shrink();
+                            }
+                            return Text(
+                              DateFormat('MMM').format(months[idx]),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: AppColors.th(context)),
+                            );
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 50,
+                          getTitlesWidget: (value, meta) {
+                            return Text(
+                              formatAmount(value),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: AppColors.th(context)),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: spots,
+                        isCurved: true,
+                        color: netWorthColor,
+                        barWidth: 3,
+                        dotData: FlDotData(
+                          show: true,
+                          getDotPainter: (spot, _, __, ___) {
+                            if (spot.x == 5) {
+                              return FlDotCirclePainter(
+                                radius: 4,
+                                color: netWorthColor,
+                                strokeWidth: 2,
+                                strokeColor: Colors.white,
+                              );
+                            }
+                            return FlDotCirclePainter(
+                                radius: 0,
+                                color: Colors.transparent,
+                                strokeWidth: 0,
+                                strokeColor: Colors.transparent);
+                          },
+                        ),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: netWorthColor.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    ],
+                    lineTouchData: LineTouchData(
+                      touchTooltipData: LineTouchTooltipData(
+                        getTooltipItems: (spots) {
+                          return spots.map((spot) {
+                            final idx = spot.x.toInt();
+                            final label = idx >= 0 && idx < months.length
+                                ? DateFormat('MMM yyyy')
+                                    .format(months[idx])
+                                : '';
+                            return LineTooltipItem(
+                              '$label\n${formatAmount(spot.y, currency: baseCurrency)}',
+                              const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // Tab 2: Categories (Top spending + top transactions)
 // ═════════════════════════════════════════════════════════════════════════════
@@ -954,6 +1179,24 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           }
         }
 
+        // Compute last month's spend per category for comparison
+        final prevMonthStart = DateTime(
+            _periodStart.year, _periodStart.month - 1, 1);
+        final prevMonthEnd = DateTime(
+            prevMonthStart.year, prevMonthStart.month + 1, 0, 23, 59, 59);
+        final lastMonthSpend = <String, double>{};
+        for (final e in entries) {
+          if (e.tx.type != 'expense') continue;
+          final d = e.tx.createdAt;
+          if (d.isAfter(prevMonthStart) && d.isBefore(prevMonthEnd)) {
+            final catId = e.tx.categoryId;
+            final cat = catId != null ? categoryMap[catId] : null;
+            final name = cat?.name ?? 'Uncategorized';
+            lastMonthSpend[name] =
+                (lastMonthSpend[name] ?? 0) + _baseAmount(e);
+          }
+        }
+
         final sortedBySpend = catSpend.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
         final sortedByCount = catCount.entries.toList()
@@ -1027,6 +1270,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 '${entry.value} transaction${entry.value == 1 ? '' : 's'}',
                             amount: catSpend[entry.key] ?? 0,
                             color: color,
+                            lastMonthAmount: lastMonthSpend[entry.key],
                             onTap: () => _showCategoryTransactions(
                               context,
                               categoryName: entry.key,
@@ -1045,6 +1289,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 '${catCount[entry.key] ?? 0} transaction${(catCount[entry.key] ?? 0) == 1 ? '' : 's'}',
                             amount: entry.value,
                             color: color,
+                            lastMonthAmount: lastMonthSpend[entry.key],
                             onTap: () => _showCategoryTransactions(
                               context,
                               categoryName: entry.key,
@@ -1077,6 +1322,7 @@ class _CategoryRow extends StatelessWidget {
   final double amount;
   final Color color;
   final VoidCallback? onTap;
+  final double? lastMonthAmount;
 
   const _CategoryRow({
     required this.name,
@@ -1084,10 +1330,53 @@ class _CategoryRow extends StatelessWidget {
     required this.amount,
     required this.color,
     this.onTap,
+    this.lastMonthAmount,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Build comparison indicator
+    Widget? comparisonWidget;
+    if (lastMonthAmount != null) {
+      final last = lastMonthAmount!;
+      if (last > 0 && amount > 0) {
+        final pctChange = ((amount - last) / last * 100).round();
+        if (pctChange > 0) {
+          comparisonWidget = Text(
+            '\u2191 $pctChange%',
+            style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.overspent),
+          );
+        } else if (pctChange < 0) {
+          comparisonWidget = Text(
+            '\u2193 ${pctChange.abs()}%',
+            style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.healthy),
+          );
+        } else {
+          comparisonWidget = Text(
+            '\u2014',
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ts(context)),
+          );
+        }
+      } else if (last == 0 && amount > 0) {
+        comparisonWidget = const Text(
+          'NEW',
+          style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent),
+        );
+      }
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -1122,9 +1411,17 @@ class _CategoryRow extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.tp(context))),
-                Text(value,
-                    style: TextStyle(
-                        fontSize: 12, color: AppColors.ts(context))),
+                Row(
+                  children: [
+                    Text(value,
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context))),
+                    if (comparisonWidget != null) ...[
+                      const SizedBox(width: 8),
+                      comparisonWidget,
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
