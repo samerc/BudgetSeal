@@ -774,10 +774,8 @@ class _AssistedTransactionScreenState
       final validItems = _lineItems.where((item) => item.amount > 0).toList();
       if (validItems.isEmpty) return;
 
-      String? lastTxId;
-
       if (_type == 'transfer') {
-        final txId = await engine.recordTransfer(
+        await engine.recordTransfer(
           householdId: householdId,
           fromAccountId: _accountId!,
           toAccountId: _destinationAccountId!,
@@ -791,7 +789,7 @@ class _AssistedTransactionScreenState
           note: _title,
           date: _selectedDate,
         );
-        lastTxId = txId;
+
       } else {
         // Group by type — each type becomes its own transaction
         final byType = <String, List<_LineItem>>{};
@@ -809,7 +807,7 @@ class _AssistedTransactionScreenState
                   ))
               .toList();
 
-          final txId = await engine.recordTransaction(
+          await engine.recordTransaction(
             householdId: householdId,
             accountId: _accountId!,
             type: entry.key,
@@ -818,7 +816,7 @@ class _AssistedTransactionScreenState
             note: _title,
             date: _selectedDate,
           );
-          lastTxId = txId;
+  
         }
       }
 
@@ -851,21 +849,13 @@ class _AssistedTransactionScreenState
 
         // Pop first, then show snackbar on the parent screen
         final messenger = ScaffoldMessenger.of(context);
-        final engineRef = ref.read(allocationEngineProvider);
         context.pop();
         messenger.clearSnackBars();
         messenger.showSnackBar(SnackBar(
           content: Text(snackText),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 4),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () {
-              if (lastTxId != null) {
-                engineRef.deleteTransaction(lastTxId);
-              }
-            },
-          ),
+          duration: const Duration(seconds: 3),
+          dismissDirection: DismissDirection.horizontal,
         ));
       }
     } finally {

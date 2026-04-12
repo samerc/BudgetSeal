@@ -14,6 +14,9 @@ class TransactionEntry {
   /// Display name of the source account.
   final String accountName;
 
+  /// Currency of the source account (may differ from tx.currency).
+  final String accountCurrency;
+
   /// Per-line account names (for multi-account display).
   final Map<String, String> lineAccountNames;
 
@@ -22,6 +25,7 @@ class TransactionEntry {
     required this.lines,
     required this.accountBalanceAfter,
     required this.accountName,
+    this.accountCurrency = 'USD',
     this.lineAccountNames = const {},
   });
 
@@ -91,6 +95,7 @@ TransactionEntry _buildEntry(
     lines: txLines,
     accountBalanceAfter: running[tx.accountId] ?? 0,
     accountName: accountMap[tx.accountId]?.name ?? '',
+    accountCurrency: accountMap[tx.accountId]?.currency ?? tx.currency,
     lineAccountNames: lineAcctNames,
   );
 }
@@ -257,6 +262,7 @@ final recentTransactionsProvider =
         lines: txLines,
         accountBalanceAfter: 0,
         accountName: related.accountMap[tx.accountId]?.name ?? '',
+        accountCurrency: related.accountMap[tx.accountId]?.currency ?? tx.currency,
         lineAccountNames: lineAcctNames,
       ));
     }

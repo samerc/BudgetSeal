@@ -207,6 +207,32 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     return v.toStringAsFixed(2);
   }
 
+  /// Format a calculator expression for display, adding thousand separators
+  /// to each number token while preserving operators.
+  String _fmtExprForDisplay(String expr) {
+    if (expr.isEmpty) return '0';
+    final buf = StringBuffer();
+    final numBuf = StringBuffer();
+    for (int i = 0; i < expr.length; i++) {
+      final ch = expr[i];
+      if ('+-×÷'.contains(ch)) {
+        if (numBuf.isNotEmpty) {
+          final n = double.tryParse(numBuf.toString());
+          buf.write(n != null && n > 0 ? formatForDisplay(n) : numBuf);
+          numBuf.clear();
+        }
+        buf.write(' $ch ');
+      } else {
+        numBuf.write(ch);
+      }
+    }
+    if (numBuf.isNotEmpty) {
+      final n = double.tryParse(numBuf.toString());
+      buf.write(n != null && n > 0 ? formatForDisplay(n) : numBuf);
+    }
+    return buf.toString();
+  }
+
   double _evalExpr(String expr) {
     if (expr.isEmpty) return 0;
     try {
@@ -256,7 +282,9 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                _hasOperator ? _calcDisplay : (_amount > 0 ? formatForDisplay(_amount) : _calcDisplay),
+                _amount > 0 || _hasOperator
+                    ? _fmtExprForDisplay(_calcExpression)
+                    : _calcDisplay,
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w700,

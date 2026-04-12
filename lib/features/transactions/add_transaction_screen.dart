@@ -70,7 +70,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.editTransactionId != null) {
+    final hasPreFill = widget.editTransactionId != null ||
+        widget.editLines != null ||
+        widget.editType != null ||
+        widget.editNote != null;
+    if (hasPreFill) {
       _initFromEdit();
     } else {
       _addLine();
@@ -495,19 +499,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }
 
         final messenger = ScaffoldMessenger.of(context);
-        final engineRef = ref.read(allocationEngineProvider);
         context.pop();
         messenger.clearSnackBars();
         messenger.showSnackBar(SnackBar(
           content: Text(snackText),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 4),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () {
-              engineRef.deleteTransaction(txId);
-            },
-          ),
+          duration: const Duration(seconds: 3),
+          dismissDirection: DismissDirection.horizontal,
         ));
       }
     } finally {

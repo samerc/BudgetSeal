@@ -329,18 +329,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 onPressed: () => _submitQuickAdd(context),
               ),
             ),
-            const SizedBox(width: 4),
-            SizedBox(
-              width: 38,
-              height: 38,
-              child: IconButton(
-                tooltip: 'Full form',
-                padding: EdgeInsets.zero,
-                icon: Icon(Icons.add_rounded,
-                    size: 22, color: AppColors.ts(context)),
-                onPressed: () => context.push('/add-transaction'),
-              ),
-            ),
           ],
         ),
       ),
@@ -1675,7 +1663,7 @@ class _TxTile extends ConsumerWidget {
         ),
       if (isSingleAccount)
         Text(
-          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: baseCurrency)}',
+          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
           textAlign: TextAlign.end,
           style: TextStyle(
             fontSize: 11,

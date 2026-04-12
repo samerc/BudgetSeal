@@ -105,8 +105,10 @@ class SyncNotifier extends Notifier<SyncState> {
         lastSyncStr != null ? DateTime.tryParse(lastSyncStr) : null;
 
     CloudProvider? provider;
-    if (savedProvider == 'google_drive' && await googleDrive.isConnected) {
-      provider = googleDrive;
+    if (savedProvider == 'google_drive') {
+      // Try to silently restore the Google session without prompting.
+      final restored = await googleDrive.tryReconnectSilently();
+      if (restored) provider = googleDrive;
     } else if (savedProvider == 'file' && await filePicker.isConnected) {
       provider = filePicker;
     }

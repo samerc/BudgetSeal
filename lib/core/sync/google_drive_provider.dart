@@ -270,6 +270,30 @@ class GoogleDriveProvider implements CloudProvider {
     }
   }
 
+  /// Attempt to restore a previous Google Sign-In session silently (no prompt).
+  /// Returns true if the session was restored and Drive API is ready.
+  Future<bool> tryReconnectSilently() async {
+    try {
+      await _ensureInitialized();
+
+      // In google_sign_in v7, attemptLightweightAuthentication restores
+      // a cached session without showing any sign-in UI.
+      _account =
+          await GoogleSignIn.instance.attemptLightweightAuthentication();
+      if (_account == null) return false;
+
+      final authClient = _account!.authorizationClient;
+      final auth = await authClient.authorizeScopes(
+        [drive.DriveApi.driveFileScope],
+      );
+      _driveApi = drive.DriveApi(
+          _AuthClient(http.Client(), auth.accessToken));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ── Internals ─────────────────────────────────────────────────
 
   Future<void> _ensureInitialized() async {
