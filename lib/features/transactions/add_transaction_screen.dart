@@ -468,12 +468,38 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
 
       if (mounted) {
+        // Build envelope feedback message
+        String snackText = 'Transaction saved';
+        if (_type != _TxType.transfer) {
+          final categories = ref.read(categoriesProvider).value ?? [];
+          final allocations = ref.read(allocationsProvider).value ?? [];
+          final firstCatId = _lines
+              .where((l) => l.categoryId != null)
+              .map((l) => l.categoryId!)
+              .firstOrNull;
+          if (firstCatId != null) {
+            final catData = categories
+                .where((c) => c.id == firstCatId)
+                .firstOrNull;
+            if (catData?.allocationId != null) {
+              final alloc = allocations
+                  .where((a) =>
+                      a.data.allocation.id == catData!.allocationId)
+                  .firstOrNull;
+              if (alloc != null) {
+                snackText =
+                    'Transaction saved \u00b7 ${alloc.data.allocation.name} envelope updated';
+              }
+            }
+          }
+        }
+
         final messenger = ScaffoldMessenger.of(context);
         final engineRef = ref.read(allocationEngineProvider);
         context.pop();
         messenger.clearSnackBars();
         messenger.showSnackBar(SnackBar(
-          content: const Text('Transaction saved'),
+          content: Text(snackText),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           action: SnackBarAction(

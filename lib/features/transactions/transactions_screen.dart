@@ -61,6 +61,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   final _listScrollCtrl = ScrollController();
   bool _showScrollToTop = false;
 
+  // Quick-add bar
+  final _quickAddCtrl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +92,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     _monthScrollCtrl.dispose();
     _amountMinCtrl.dispose();
     _amountMaxCtrl.dispose();
+    _quickAddCtrl.dispose();
     _listScrollCtrl.removeListener(_onListScroll);
     _listScrollCtrl.dispose();
     super.dispose();
@@ -160,16 +164,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
               ),
             ),
+            // ── Quick-add bar ──────────────────────────────────
+            _buildQuickAddBar(context),
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Scroll-to-today button (#10)
-          if (_showScrollToTop)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+      // Scroll-to-today FAB only
+      floatingActionButton: _showScrollToTop
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 64),
               child: FloatingActionButton.small(
                 heroTag: 'fab_scroll_top',
                 tooltip: 'Scroll to top',
@@ -183,15 +186,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 },
                 child: const Icon(Icons.arrow_upward_rounded, size: 20),
               ),
-            ),
-          FloatingActionButton(
-            heroTag: 'fab_transactions',
-            tooltip: 'Add transaction',
-            onPressed: () => context.push('/add-transaction'),
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 
@@ -267,6 +263,105 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     );
   }
 
+  // ── Quick-add bar (replaces FAB) ─────────────────────────────
+  Widget _buildQuickAddBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        border: Border(top: BorderSide(color: AppColors.bd(context))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _quickAddCtrl,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.tp(context),
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Quick: Coffee 4.50',
+                  hintStyle: TextStyle(
+                    color: AppColors.th(context),
+                    fontSize: 14,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.sfv(context),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _submitQuickAdd(context),
+              ),
+            ),
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 38,
+              height: 38,
+              child: IconButton.filled(
+                tooltip: 'Send',
+                padding: EdgeInsets.zero,
+                style: IconButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.arrow_upward_rounded, size: 20),
+                onPressed: () => _submitQuickAdd(context),
+              ),
+            ),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: 38,
+              height: 38,
+              child: IconButton(
+                tooltip: 'Full form',
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.add_rounded,
+                    size: 22, color: AppColors.ts(context)),
+                onPressed: () => context.push('/add-transaction'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submitQuickAdd(BuildContext context) {
+    final text = _quickAddCtrl.text.trim();
+    if (text.isEmpty) return;
+
+    // Parse: last number token is the amount, rest is the note/title
+    final numPattern = RegExp(r'(\d+(?:\.\d+)?)\s*$');
+    final match = numPattern.firstMatch(text);
+
+    String note = text;
+    double? amount;
+    if (match != null) {
+      amount = double.tryParse(match.group(1)!);
+      note = text.substring(0, match.start).trim();
+    }
+
+    _quickAddCtrl.clear();
+
+    context.push('/add-transaction', extra: {
+      'editType': 'expense',
+      'editNote': note,
+      if (amount != null)
+        'editLines': [
+          {'amount': amount, 'note': note},
+        ],
+    });
+  }
+
   // ── Month tabs (with year tap) ───────────────────────────────
   Widget _buildMonthTabs(BuildContext context) {
     return Padding(
@@ -317,49 +412,110 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               ),
             ),
           ),
-          // Month row
+          // Month row with arrow buttons
           SizedBox(
             height: 38,
-            child: ListView.builder(
-              controller: _monthScrollCtrl,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: 12,
-              itemBuilder: (_, i) {
-                final month = i + 1;
-                final isSelected = month == _selectedMonth;
-                final label =
-                    DateFormat('MMMM').format(DateTime(2000, month));
-                return GestureDetector(
+            child: Row(
+              children: [
+                // Left arrow
+                GestureDetector(
                   onTap: () {
                     hapticLight();
-                    setState(() => _selectedMonth = month);
+                    setState(() {
+                      if (_selectedMonth == 1) {
+                        _selectedMonth = 12;
+                        _selectedYear--;
+                      } else {
+                        _selectedMonth--;
+                      }
+                    });
+                    final offset = (_selectedMonth - 1) * 80.0;
+                    if (_monthScrollCtrl.hasClients) {
+                      _monthScrollCtrl.animateTo(offset - 120,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut);
+                    }
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      border: isSelected
-                          ? Border(
-                              bottom: BorderSide(
-                                  color: AppColors.tp(context), width: 2.5))
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w400,
-                        color: isSelected
-                            ? AppColors.tp(context)
-                            : AppColors.ts(context),
-                      ),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(Icons.chevron_left_rounded,
+                        size: 22, color: AppColors.ts(context)),
                   ),
-                );
-              },
+                ),
+                // Month list
+                Expanded(
+                  child: ListView.builder(
+                    controller: _monthScrollCtrl,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    itemCount: 12,
+                    itemBuilder: (_, i) {
+                      final month = i + 1;
+                      final isSelected = month == _selectedMonth;
+                      final label =
+                          DateFormat('MMMM').format(DateTime(2000, month));
+                      return GestureDetector(
+                        onTap: () {
+                          hapticLight();
+                          setState(() => _selectedMonth = month);
+                        },
+                        child: Container(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 14),
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 2),
+                          decoration: BoxDecoration(
+                            border: isSelected
+                                ? Border(
+                                    bottom: BorderSide(
+                                        color: AppColors.tp(context),
+                                        width: 2.5))
+                                : null,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                              color: isSelected
+                                  ? AppColors.tp(context)
+                                  : AppColors.ts(context),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Right arrow
+                GestureDetector(
+                  onTap: () {
+                    hapticLight();
+                    setState(() {
+                      if (_selectedMonth == 12) {
+                        _selectedMonth = 1;
+                        _selectedYear++;
+                      } else {
+                        _selectedMonth++;
+                      }
+                    });
+                    final offset = (_selectedMonth - 1) * 80.0;
+                    if (_monthScrollCtrl.hasClients) {
+                      _monthScrollCtrl.animateTo(offset - 120,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(Icons.chevron_right_rounded,
+                        size: 22, color: AppColors.ts(context)),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1243,12 +1399,15 @@ class _TxTile extends ConsumerWidget {
                     onCategoryTap!(catId, catName ?? 'Unknown');
                   }
                 },
-                child: CategoryIcon(
-                  categoryName: catName ?? '',
-                  emoji: cat?.icon,
-                  color: catColor,
-                  size: 46,
-                  circular: true,
+                child: Hero(
+                  tag: 'tx_${tx.id}',
+                  child: CategoryIcon(
+                    categoryName: catName ?? '',
+                    emoji: cat?.icon,
+                    color: catColor,
+                    size: 46,
+                    circular: true,
+                  ),
                 ),
               ),
             const SizedBox(width: 14),

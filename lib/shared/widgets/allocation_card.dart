@@ -54,12 +54,24 @@ class AllocationCard extends StatelessWidget {
         ? Color(int.parse('FF${categoryColorHex!.replaceAll('#', '')}', radix: 16))
         : _typeColor;
 
+    // Determine urgency border color
+    final Color borderColor;
+    if (isOverspent) {
+      borderColor = AppColors.overspent.withValues(alpha: 0.5);
+    } else if (hasTarget && mainBalance > 0 && mainBalance < targetAmount! * 0.1) {
+      borderColor = AppColors.caution.withValues(alpha: 0.45);
+    } else if (hasTarget && mainBalance >= targetAmount!) {
+      borderColor = AppColors.healthy.withValues(alpha: 0.35);
+    } else {
+      borderColor = AppColors.bd(context);
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context)),
+        border: Border.all(color: borderColor),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -113,15 +125,26 @@ class AllocationCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    formatAmount(mainBalance, currency: mainCurrency),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: isOverspent
-                          ? AppColors.overspent
-                          : AppColors.tp(context),
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isOverspent)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Icon(Icons.warning_amber_rounded,
+                              size: 14, color: AppColors.overspent),
+                        ),
+                      Text(
+                        formatAmount(mainBalance, currency: mainCurrency),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: isOverspent
+                              ? AppColors.overspent
+                              : AppColors.tp(context),
+                        ),
+                      ),
+                    ],
                   ),
                   if (hasTarget)
                     Text(

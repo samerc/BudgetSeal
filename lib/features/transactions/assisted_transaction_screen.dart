@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -822,13 +823,39 @@ class _AssistedTransactionScreenState
       }
 
       if (mounted) {
+        // Build envelope feedback message
+        String snackText = 'Transaction saved';
+        if (_type != 'transfer') {
+          final categories = ref.read(categoriesProvider).value ?? [];
+          final allocations = ref.read(allocationsProvider).value ?? [];
+          final firstCat = validItems
+              .where((item) => item.category != null)
+              .map((item) => item.category!)
+              .firstOrNull;
+          if (firstCat != null) {
+            final catData = categories
+                .where((c) => c.id == firstCat.id)
+                .firstOrNull;
+            if (catData?.allocationId != null) {
+              final alloc = allocations
+                  .where((a) =>
+                      a.data.allocation.id == catData!.allocationId)
+                  .firstOrNull;
+              if (alloc != null) {
+                snackText =
+                    'Transaction saved \u00b7 ${alloc.data.allocation.name} envelope updated';
+              }
+            }
+          }
+        }
+
         // Pop first, then show snackbar on the parent screen
         final messenger = ScaffoldMessenger.of(context);
         final engineRef = ref.read(allocationEngineProvider);
         context.pop();
         messenger.clearSnackBars();
         messenger.showSnackBar(SnackBar(
-          content: const Text('Transaction saved'),
+          content: Text(snackText),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           action: SnackBarAction(

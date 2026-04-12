@@ -113,28 +113,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           indicatorColor: AppColors.accent.withValues(alpha: 0.12),
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined),
-              selectedIcon: Icon(Icons.receipt_long),
+              icon: Icon(Icons.swap_vert),
+              selectedIcon: Icon(Icons.swap_vert_rounded),
               label: 'Activity',
             ),
             NavigationDestination(
               icon: Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: Icon(Icons.account_balance_wallet),
+              selectedIcon: Icon(Icons.account_balance_wallet_rounded),
               label: 'Budget',
             ),
             NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights),
+              icon: Icon(Icons.pie_chart_outline_rounded),
+              selectedIcon: Icon(Icons.pie_chart_rounded),
               label: 'Reports',
             ),
             NavigationDestination(
-              icon: Icon(Icons.more_horiz_outlined),
-              selectedIcon: Icon(Icons.more_horiz),
+              icon: Icon(Icons.grid_view),
+              selectedIcon: Icon(Icons.grid_view_rounded),
               label: 'More',
             ),
           ],

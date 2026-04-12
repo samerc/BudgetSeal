@@ -21,11 +21,18 @@ import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  bool _showWeekly = false;
+
+  @override
+  Widget build(BuildContext context) {
     final household = ref.watch(householdProvider).value;
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
     final allocationsAsync = ref.watch(allocationsProvider);
@@ -89,6 +96,90 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
 
+            // ── Budget Status Banner ──────────────────────────────
+            SliverToBoxAdapter(
+              child: allocationsAsync.when(
+                data: (allocations) {
+                  // Sum targets from allocations that have a target set
+                  double totalTarget = 0;
+                  bool hasTargets = false;
+                  for (final a in allocations) {
+                    final target = a.data.allocation.targetAmount;
+                    if (target != null && target > 0) {
+                      totalTarget += target;
+                      hasTargets = true;
+                    }
+                  }
+                  if (!hasTargets) return const SizedBox.shrink();
+
+                  // Get this month's total expenses
+                  final entries = txAsync.value ?? [];
+                  final now = DateTime.now();
+                  final monthStart = DateTime(now.year, now.month, 1);
+                  double monthExpense = 0;
+                  for (final e in entries) {
+                    if (e.tx.type == 'expense' &&
+                        e.tx.createdAt.isAfter(monthStart)) {
+                      if (e.lines.isNotEmpty) {
+                        for (final l in e.lines) {
+                          monthExpense += l.amount * l.exchangeRateToBase;
+                        }
+                      } else {
+                        monthExpense +=
+                            e.tx.amount * e.tx.exchangeRateToBase;
+                      }
+                    }
+                  }
+
+                  final diff = totalTarget - monthExpense;
+                  final isUnder = diff >= 0;
+                  final color =
+                      isUnder ? AppColors.healthy : AppColors.overspent;
+                  final bgColor = isUnder
+                      ? AppColors.healthyLight
+                      : AppColors.overspentLight;
+                  final icon = isUnder
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.warning_amber_rounded;
+                  final label = isUnder
+                      ? "You're ${formatAmount(diff, currency: baseCurrency)} under budget"
+                      : "You're ${formatAmount(diff.abs(), currency: baseCurrency)} over budget";
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? color.withValues(alpha: 0.15)
+                            : bgColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(icon, size: 18, color: color),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+            ),
+
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               sliver: SliverList(
@@ -97,16 +188,21 @@ class DashboardScreen extends ConsumerWidget {
                   txAsync.when(
                     data: (entries) {
                       final now = DateTime.now();
-                      final monthStart = DateTime(now.year, now.month, 1);
-                      final thisMonth = entries
-                          .where((e) => e.tx.createdAt.isAfter(monthStart));
+                      final DateTime cutoff;
+                      if (_showWeekly) {
+                        cutoff = now.subtract(const Duration(days: 7));
+                      } else {
+                        cutoff = DateTime(now.year, now.month, 1);
+                      }
+                      final filtered = entries
+                          .where((e) => e.tx.createdAt.isAfter(cutoff));
 
                       double totalIncome = 0;
                       double totalExpense = 0;
                       final catSpend = <String, double>{};
                       final catColors = <String, Color>{};
 
-                      for (final e in thisMonth) {
+                      for (final e in filtered) {
                         double baseAmt = 0;
                         if (e.lines.isNotEmpty) {
                           for (final l in e.lines) {
@@ -141,6 +237,9 @@ class DashboardScreen extends ConsumerWidget {
                         currency: baseCurrency,
                         categorySpend: catSpend,
                         categoryColors: catColors,
+                        showWeekly: _showWeekly,
+                        onTogglePeriod: () =>
+                            setState(() => _showWeekly = !_showWeekly),
                       );
                     },
                     loading: () => const _ShimmerCard(height: 220),
@@ -391,6 +490,8 @@ class _SpendingOverviewCard extends StatelessWidget {
   final String currency;
   final Map<String, double> categorySpend;
   final Map<String, Color> categoryColors;
+  final bool showWeekly;
+  final VoidCallback onTogglePeriod;
 
   const _SpendingOverviewCard({
     required this.income,
@@ -398,12 +499,15 @@ class _SpendingOverviewCard extends StatelessWidget {
     required this.currency,
     required this.categorySpend,
     required this.categoryColors,
+    required this.showWeekly,
+    required this.onTogglePeriod,
   });
 
   @override
   Widget build(BuildContext context) {
     final net = income - expense;
-    final monthName = DateFormat('MMMM').format(DateTime.now());
+    final periodLabel =
+        showWeekly ? 'Last 7 Days' : DateFormat('MMMM').format(DateTime.now());
     final sorted = categorySpend.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final topCategories = sorted.take(5).toList();
@@ -420,17 +524,41 @@ class _SpendingOverviewCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(monthName,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ts(context))),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(periodLabel,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ts(context))),
+              GestureDetector(
+                onTap: onTogglePeriod,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    showWeekly ? 'This Month' : 'Last 7 Days',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -617,7 +745,7 @@ class _NetWorthCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -738,7 +866,7 @@ class _SummaryRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.bd(context)),
         ),
         child: Row(children: [
@@ -787,7 +915,7 @@ class _AllocationHealthBar extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -870,7 +998,7 @@ class _BudgetInsightsCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.overspent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border:
             Border.all(color: AppColors.overspent.withValues(alpha: 0.15)),
       ),
@@ -936,7 +1064,7 @@ class _RecentTxTile extends ConsumerWidget {
               const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Row(children: [
             CategoryIcon(
@@ -1383,7 +1511,7 @@ class _ShimmerCard extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
     );
   }

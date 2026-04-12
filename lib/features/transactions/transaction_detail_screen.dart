@@ -137,15 +137,18 @@ class _DetailBody extends ConsumerWidget {
               children: [
                 // Category icon or type icon
                 if (primaryCat != null)
-                  CategoryIcon(
-                    categoryName: primaryCat.name,
-                    emoji: primaryCat.icon.length <= 4 &&
-                            primaryCat.icon != 'category'
-                        ? primaryCat.icon
-                        : null,
-                    color: catColor,
-                    size: 56,
-                    circular: true,
+                  Hero(
+                    tag: 'tx_${tx.id}',
+                    child: CategoryIcon(
+                      categoryName: primaryCat.name,
+                      emoji: primaryCat.icon.length <= 4 &&
+                              primaryCat.icon != 'category'
+                          ? primaryCat.icon
+                          : null,
+                      color: catColor,
+                      size: 56,
+                      circular: true,
+                    ),
                   )
                 else
                   Container(

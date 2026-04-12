@@ -135,6 +135,13 @@ class CategoryIcon extends StatelessWidget {
     if (emoji != null && emoji!.length <= 4) {
       return Text(emoji!, style: TextStyle(fontSize: size * 0.45));
     }
-    return Icon(Icons.label_rounded, color: color, size: size * 0.45);
+    return Text(
+      categoryName.isNotEmpty ? categoryName[0].toUpperCase() : '?',
+      style: TextStyle(
+        color: color,
+        fontSize: size * 0.4,
+        fontWeight: FontWeight.w700,
+      ),
+    );
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers/categories_provider.dart';
+import '../../core/database/app_database.dart' show Category;
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -770,6 +771,158 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     return DateTime(start.year, start.month + 1, 0, 23, 59, 59);
   }
 
+  void _showCategoryTransactions(
+    BuildContext context, {
+    required String categoryName,
+    required Color color,
+    required List<TransactionEntry> transactions,
+    required Map<String, Category> categoryMap,
+  }) {
+    final catTxns = transactions.where((e) {
+      final catId = e.tx.categoryId;
+      final cat = catId != null ? categoryMap[catId] : null;
+      final name = cat?.name ?? 'Uncategorized';
+      return name == categoryName;
+    }).toList()
+      ..sort((a, b) => b.tx.createdAt.compareTo(a.tx.createdAt));
+
+    hapticLight();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.55,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        expand: false,
+        builder: (ctx, scrollCtrl) => Column(
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.bd(ctx),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        categoryName.isNotEmpty
+                            ? categoryName[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      categoryName,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(ctx),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${catTxns.length} transaction${catTxns.length == 1 ? '' : 's'}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.ts(ctx),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: catTxns.isEmpty
+                  ? Center(
+                      child: Text('No transactions',
+                          style: TextStyle(color: AppColors.ts(ctx))))
+                  : ListView.separated(
+                      controller: scrollCtrl,
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      itemCount: catTxns.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, i) {
+                        final e = catTxns[i];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      e.tx.note.isNotEmpty
+                                          ? e.tx.note
+                                          : 'No note',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: e.tx.note.isNotEmpty
+                                            ? AppColors.tp(ctx)
+                                            : AppColors.th(ctx),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      DateFormat.MMMd()
+                                          .format(e.tx.createdAt),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.ts(ctx),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                formatAmount(_baseAmount(e)),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.tp(ctx),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final txAsync = ref.watch(transactionEntriesProvider);
@@ -874,6 +1027,13 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 '${entry.value} transaction${entry.value == 1 ? '' : 's'}',
                             amount: catSpend[entry.key] ?? 0,
                             color: color,
+                            onTap: () => _showCategoryTransactions(
+                              context,
+                              categoryName: entry.key,
+                              color: color,
+                              transactions: filtered,
+                              categoryMap: categoryMap,
+                            ),
                           );
                         } else {
                           final entry = sortedBySpend[i];
@@ -885,6 +1045,13 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 '${catCount[entry.key] ?? 0} transaction${(catCount[entry.key] ?? 0) == 1 ? '' : 's'}',
                             amount: entry.value,
                             color: color,
+                            onTap: () => _showCategoryTransactions(
+                              context,
+                              categoryName: entry.key,
+                              color: color,
+                              transactions: filtered,
+                              categoryMap: categoryMap,
+                            ),
                           );
                         }
                       },
@@ -909,17 +1076,22 @@ class _CategoryRow extends StatelessWidget {
   final String value;
   final double amount;
   final Color color;
+  final VoidCallback? onTap;
 
   const _CategoryRow({
     required this.name,
     required this.value,
     required this.amount,
     required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
@@ -965,6 +1137,7 @@ class _CategoryRow extends StatelessWidget {
               size: 18, color: AppColors.th(context)),
         ],
       ),
+    ),
     );
   }
 }
