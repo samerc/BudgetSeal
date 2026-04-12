@@ -62,8 +62,8 @@ void main() {
         id: 'test-cat-1',
         householdId: 'hh-1',
         name: 'Test Category',
-        icon: '📦',
-        colorHex: '#FF0000',
+        icon: const Value('📦'),
+        colorHex: const Value('#FF0000'),
         // migration 3 columns
         parentId: const Value('parent-1'),
         transactionType: const Value('expense'),
