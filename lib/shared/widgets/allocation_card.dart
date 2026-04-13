@@ -40,6 +40,8 @@ class AllocationCard extends StatelessWidget {
         _ => AppColors.accent,
       };
 
+  bool get _isSaving => type == 'saving';
+  bool get _isSavingWithGoal => _isSaving && targetAmount != null && targetAmount! > 0;
   @override
   Widget build(BuildContext context) {
     final mainCurrency = balanceByCurrency.keys.firstOrNull ?? baseCurrency;
@@ -58,6 +60,8 @@ class AllocationCard extends StatelessWidget {
     final Color borderColor;
     if (isOverspent) {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
+    } else if (_isSavingWithGoal && mainBalance >= targetAmount!) {
+      borderColor = AppColors.healthy.withValues(alpha: 0.35);
     } else if (hasTarget && mainBalance > 0 && mainBalance < targetAmount! * 0.1) {
       borderColor = AppColors.caution.withValues(alpha: 0.45);
     } else if (hasTarget && mainBalance >= targetAmount!) {
@@ -65,6 +69,11 @@ class AllocationCard extends StatelessWidget {
     } else {
       borderColor = AppColors.bd(context);
     }
+
+    // Icon for savings envelopes when no category icon
+    final IconData savingsIcon = _isSavingWithGoal
+        ? Icons.track_changes_rounded
+        : Icons.savings_rounded;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
@@ -80,8 +89,28 @@ class AllocationCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
-              // Category icon (if linked)
-              if (hasCategoryIcon) ...[
+              // Icon: category icon for spending, savings icon for savings
+              if (hasCategoryIcon && !_isSaving) ...[
+                CategoryIcon(
+                  categoryName: categoryName!,
+                  emoji: categoryIcon,
+                  color: iconColor,
+                  size: 36,
+                ),
+                const SizedBox(width: 10),
+              ] else if (_isSaving) ...[
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(savingsIcon,
+                      size: 20, color: AppColors.accent),
+                ),
+                const SizedBox(width: 10),
+              ] else if (hasCategoryIcon) ...[
                 CategoryIcon(
                   categoryName: categoryName!,
                   emoji: categoryIcon,
@@ -101,7 +130,23 @@ class AllocationCard extends StatelessWidget {
                             color: AppColors.tp(context)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
-                    if (hasTarget && progress != null) ...[
+                    // For savings with goal: show progress bar
+                    if (_isSavingWithGoal && progress != null) ...[
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: AppColors.bd(context),
+                          color: progress >= 1.0
+                              ? AppColors.healthy
+                              : AppColors.accent,
+                        ),
+                      ),
+                    ]
+                    // For spending envelopes: show standard progress bar
+                    else if (!_isSaving && hasTarget && progress != null) ...[
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(3),
@@ -117,6 +162,7 @@ class AllocationCard extends StatelessWidget {
                         ),
                       ),
                     ],
+                    // For savings-open: no progress bar at all
                   ],
                 ),
               ),
@@ -134,6 +180,15 @@ class AllocationCard extends StatelessWidget {
                           child: Icon(Icons.warning_amber_rounded,
                               size: 14, color: AppColors.overspent),
                         ),
+                      if (_isSaving && !isOverspent)
+                        Text(
+                          'Saved: ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.ts(context),
+                          ),
+                        ),
                       Text(
                         formatAmount(mainBalance, currency: mainCurrency),
                         style: TextStyle(
@@ -146,7 +201,22 @@ class AllocationCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (hasTarget)
+                  if (_isSavingWithGoal) ...[
+                    Text(
+                      '${(progress! * 100).round()}% saved',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: progress >= 1.0
+                              ? AppColors.healthy
+                              : AppColors.accent),
+                    ),
+                    Text(
+                      '/ ${formatAmount(targetAmount!)}',
+                      style: const TextStyle(
+                          fontSize: 10, color: AppColors.textHint),
+                    ),
+                  ] else if (hasTarget && !_isSaving)
                     Text(
                       '/ ${formatAmount(targetAmount!)}',
                       style: const TextStyle(
@@ -154,8 +224,8 @@ class AllocationCard extends StatelessWidget {
                     ),
                 ],
               ),
-              // Spend button
-              if (onSpend != null) ...[
+              // Spend button (only for non-savings)
+              if (onSpend != null && !_isSaving) ...[
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: onSpend,

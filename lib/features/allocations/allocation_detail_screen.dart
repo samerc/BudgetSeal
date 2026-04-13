@@ -14,6 +14,7 @@ import '../../core/database/daos/ledger_dao.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -42,6 +43,8 @@ class _AllocationDetailScreenState
   bool _loading = false;
   bool _showSettings = false;
   List<Category> _linkedCategories = [];
+  /// For the creation flow: distinguishes saving-with-goal from saving-open.
+  bool _savingHasGoal = true;
 
   bool get _isNew => widget.allocationId == 'new';
 
@@ -72,6 +75,7 @@ class _AllocationDetailScreenState
             ref.read(householdProvider).value?.baseCurrency ??
             'USD';
         _linkedCategories = linked;
+        _savingHasGoal = alloc.type == 'saving' && alloc.targetAmount != null;
       });
     }
   }
@@ -176,13 +180,27 @@ class _AllocationDetailScreenState
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert_rounded),
               onSelected: (v) {
-                if (v == 'archive') {
+                if (v == 'revalue') {
+                  _showRevalueSheet();
+                } else if (v == 'archive') {
                   _confirmArchive();
                 } else if (v == 'delete') {
                   _confirmDelete();
                 }
               },
               itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'revalue',
+                  child: Row(
+                    children: [
+                      Icon(Icons.currency_exchange_rounded,
+                          size: 18, color: AppColors.accent),
+                      const SizedBox(width: 10),
+                      Text('Revalue Foreign Balances',
+                          style: TextStyle(color: AppColors.tp(context))),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'archive',
                   child: Row(
@@ -249,6 +267,23 @@ class _AllocationDetailScreenState
                     icon: Icons.receipt_long_rounded),
                 _buildEnvelopeTransactions(),
               ]),
+              // Withdraw button for savings envelopes
+              if (_type == 'saving') ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _showWithdrawSheet,
+                  icon: const Icon(Icons.output_rounded, size: 18),
+                  label: const Text('Withdraw to Unallocated'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: BorderSide(
+                        color: AppColors.accent.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               // Settings toggle
               GestureDetector(
@@ -300,210 +335,280 @@ class _AllocationDetailScreenState
             ]),
             const SizedBox(height: 16),
 
-            // Purpose
-            _sectionContainer(children: [
-              _sectionHeader('PURPOSE', icon: Icons.category_outlined),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  '• Spending: for regular expenses (groceries, dining)\n'
-                  '• Saving: for goals you\'re saving toward (vacation, emergency fund)\n'
-                  '• Flexible: for variable expenses that don\'t fit a fixed budget',
-                  style: TextStyle(
-                      fontSize: 11, color: AppColors.ts(context), height: 1.5),
+            // Envelope Type Selection
+            if (_isNew) ...[
+              _sectionContainer(children: [
+                _sectionHeader('ENVELOPE TYPE', icon: Icons.category_outlined),
+                _buildTypeOptionCard(
+                  icon: Icons.shopping_bag_rounded,
+                  title: 'Spending',
+                  description: 'For recurring expenses like groceries or fuel. Set a monthly budget and spend from it.',
+                  isSelected: _type == 'spending',
+                  onTap: () => setState(() {
+                    _type = 'spending';
+                    _periodicity = 'periodic';
+                  }),
                 ),
-              ),
-              _buildSegmentedSelector<String>(
-                options: const [
-                  ('spending', 'Spending', Icons.shopping_bag_outlined),
-                  ('saving', 'Saving', Icons.savings_outlined),
-                  ('flexible', 'Flexible', Icons.swap_horiz_rounded),
-                ],
-                selected: _type,
-                onChanged: (v) => setState(() => _type = v),
-              ),
-            ]),
-            const SizedBox(height: 16),
-
-            // Cycle
-            _sectionContainer(children: [
-              _sectionHeader('CYCLE', icon: Icons.autorenew_rounded),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  '• Periodic: resets each month (e.g. groceries budget)\n'
-                  '• Permanent: accumulates over time (e.g. emergency fund)',
-                  style: TextStyle(
-                      fontSize: 11, color: AppColors.ts(context), height: 1.5),
+                const SizedBox(height: 8),
+                _buildTypeOptionCard(
+                  icon: Icons.track_changes_rounded,
+                  title: 'Saving (with goal)',
+                  description: 'For a specific goal like taxes or vacation. Set a target and fund it over time.',
+                  isSelected: _type == 'saving' && _savingHasGoal,
+                  onTap: () => setState(() {
+                    _type = 'saving';
+                    _periodicity = 'permanent';
+                    _savingHasGoal = true;
+                  }),
                 ),
-              ),
-              _buildSegmentedSelector<String>(
-                options: const [
-                  ('periodic', 'Periodic', Icons.event_repeat_rounded),
-                  ('permanent', 'Permanent', Icons.all_inclusive_rounded),
-                ],
-                selected: _periodicity,
-                onChanged: (v) => setState(() => _periodicity = v),
-              ),
-              if (_periodicity == 'periodic') ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
+                _buildTypeOptionCard(
+                  icon: Icons.savings_rounded,
+                  title: 'Saving (open)',
+                  description: 'For general savings with no specific goal. Put money aside whenever you can.',
+                  isSelected: _type == 'saving' && !_savingHasGoal,
+                  onTap: () => setState(() {
+                    _type = 'saving';
+                    _periodicity = 'permanent';
+                    _savingHasGoal = false;
+                    _targetAmount = 0;
+                  }),
+                ),
+                const SizedBox(height: 12),
                 Container(
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: _inputRadius),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                  child: Row(children: [
-                    const Icon(Icons.replay_rounded,
-                        size: 20, color: AppColors.textSecondary),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Rollover balance',
-                                style: TextStyle(
-                                    color: AppColors.tp(context),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500)),
-                            Text('Carry remaining funds to the next period',
-                                style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12)),
-                          ]),
-                    ),
-                    Switch.adaptive(
-                      value: _rollover,
-                      onChanged: (v) => setState(() => _rollover = v),
-                      activeTrackColor: AppColors.accent,
-                    ),
-                  ]),
-                ),
-              ],
-            ]),
-            const SizedBox(height: 16),
-
-            // Budget
-            _sectionContainer(children: [
-              _sectionHeader('MONTHLY BUDGET',
-                  icon: Icons.track_changes_rounded),
-              const Text(
-                  'How much do you want to spend in this envelope each month?',
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
-              const SizedBox(height: 12),
-              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(
-                  flex: 3,
-                  child: CalculatorAmountField(
-                    value: _targetAmount,
-                    label: 'Budget amount',
-                    fontSize: 20,
-                    onChanged: (v) => setState(() => _targetAmount = v),
+                    color: AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 100,
-                  child: CurrencyPickerField(
-                    label: 'Currency',
-                    value: _targetCurrencyController.text,
-                    onChanged: (v) {
-                      if (v != null) {
-                        setState(() => _targetCurrencyController.text = v);
-                      }
-                    },
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.info_outline_rounded,
+                          size: 16, color: AppColors.ts(context)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Envelopes don\'t move money between accounts. They help you plan how to use the money you already have.',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.ts(context), height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ]),
-            ]),
-            const SizedBox(height: 16),
-
-            // Linked Categories
-            _sectionContainer(children: [
-              _sectionHeader('LINKED CATEGORIES',
-                  icon: Icons.label_outline_rounded),
-              const Text(
-                'Expenses with these categories will debit this envelope.',
-                style: TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 12),
-              if (_linkedCategories.isEmpty && !_isNew)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.cautionLight,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: AppColors.caution.withValues(alpha: 0.3)),
-                  ),
-                  child: const Row(children: [
-                    Icon(Icons.info_outline_rounded,
-                        size: 16, color: AppColors.caution),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'No categories linked. Tap + to link categories so expenses debit this envelope.',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.caution),
-                      ),
-                    ),
-                  ]),
+              const SizedBox(height: 16),
+            ] else ...[
+              // For existing envelopes: show the old-style selector
+              _sectionContainer(children: [
+                _sectionHeader('PURPOSE', icon: Icons.category_outlined),
+                _buildSegmentedSelector<String>(
+                  options: const [
+                    ('spending', 'Spending', Icons.shopping_bag_outlined),
+                    ('saving', 'Saving', Icons.savings_outlined),
+                    ('flexible', 'Flexible', Icons.swap_horiz_rounded),
+                  ],
+                  selected: _type,
+                  onChanged: (v) => setState(() {
+                    _type = v;
+                    if (v == 'saving') {
+                      _periodicity = 'permanent';
+                    }
+                  }),
                 ),
-              ..._linkedCategories.map((cat) => Container(
-                    margin: const EdgeInsets.only(bottom: 4),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+              ]),
+              const SizedBox(height: 16),
+            ],
+
+            // Cycle (only for spending/flexible envelopes)
+            if (_type != 'saving') ...[
+              _sectionContainer(children: [
+                _sectionHeader('CYCLE', icon: Icons.autorenew_rounded),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '• Periodic: resets each month (e.g. groceries budget)\n'
+                    '• Permanent: accumulates over time (e.g. emergency fund)',
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.ts(context), height: 1.5),
+                  ),
+                ),
+                _buildSegmentedSelector<String>(
+                  options: const [
+                    ('periodic', 'Periodic', Icons.event_repeat_rounded),
+                    ('permanent', 'Permanent', Icons.all_inclusive_rounded),
+                  ],
+                  selected: _periodicity,
+                  onChanged: (v) => setState(() => _periodicity = v),
+                ),
+                if (_periodicity == 'periodic') ...[
+                  const SizedBox(height: 14),
+                  Container(
                     decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                        color: AppColors.sfv(context),
+                        borderRadius: _inputRadius),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                     child: Row(children: [
-                      CircleAvatar(
-                        radius: 6,
-                        backgroundColor: _hexToColor(cat.colorHex),
-                      ),
+                      const Icon(Icons.replay_rounded,
+                          size: 20, color: AppColors.textSecondary),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(cat.name,
-                            style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Rollover balance',
+                                  style: TextStyle(
+                                      color: AppColors.tp(context),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                              Text('Carry remaining funds to the next period',
+                                  style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12)),
+                            ]),
                       ),
-                      GestureDetector(
-                        onTap: () => _unlinkCategory(cat.id),
-                        child: const Icon(Icons.close_rounded,
-                            size: 16, color: AppColors.textHint),
+                      Switch.adaptive(
+                        value: _rollover,
+                        onChanged: (v) => setState(() => _rollover = v),
+                        activeTrackColor: AppColors.accent,
                       ),
                     ]),
-                  )),
-              if (!_isNew) ...[
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _showLinkCategorySheet,
-                  icon: const Icon(Icons.add_rounded, size: 16),
-                  label: const Text('Link Category'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                        color: AppColors.accent.withValues(alpha: 0.4)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
                   ),
+                ],
+              ]),
+              const SizedBox(height: 16),
+            ],
+
+            // Budget / Target Amount
+            // Show for: spending (always), saving with goal, NOT saving-open when creating
+            if (!(_type == 'saving' && !_savingHasGoal && _isNew)) ...[
+              _sectionContainer(children: [
+                _sectionHeader(
+                  _type == 'saving' ? 'SAVINGS TARGET' : 'MONTHLY BUDGET',
+                  icon: Icons.track_changes_rounded,
                 ),
-              ] else
-                const Padding(
-                  padding: EdgeInsets.only(top: 4),
-                  child: Text(
-                    'A category will be auto-created when you save. You can link more after.',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textHint,
-                        fontStyle: FontStyle.italic),
+                Text(
+                  _type == 'saving'
+                      ? 'How much do you want to save in this envelope?'
+                      : 'How much do you want to spend in this envelope each month?',
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(
+                    flex: 3,
+                    child: CalculatorAmountField(
+                      value: _targetAmount,
+                      label: _type == 'saving' ? 'Target amount' : 'Budget amount',
+                      fontSize: 20,
+                      onChanged: (v) => setState(() => _targetAmount = v),
+                    ),
                   ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 100,
+                    child: CurrencyPickerField(
+                      label: 'Currency',
+                      value: _targetCurrencyController.text,
+                      onChanged: (v) {
+                        setState(() => _targetCurrencyController.text = v);
+                      },
+                    ),
+                  ),
+                ]),
+              ]),
+              const SizedBox(height: 16),
+            ],
+
+            // Linked Categories (hidden for savings envelopes)
+            if (_type != 'saving')
+              _sectionContainer(children: [
+                _sectionHeader('LINKED CATEGORIES',
+                    icon: Icons.label_outline_rounded),
+                const Text(
+                  'Expenses with these categories will debit this envelope.',
+                  style: TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary),
                 ),
-            ]),
+                const SizedBox(height: 12),
+                if (_linkedCategories.isEmpty && !_isNew)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cautionLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: AppColors.caution.withValues(alpha: 0.3)),
+                    ),
+                    child: const Row(children: [
+                      Icon(Icons.info_outline_rounded,
+                          size: 16, color: AppColors.caution),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'No categories linked. Tap + to link categories so expenses debit this envelope.',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.caution),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ..._linkedCategories.map((cat) => Container(
+                      margin: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(children: [
+                        CircleAvatar(
+                          radius: 6,
+                          backgroundColor: _hexToColor(cat.colorHex),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(cat.name,
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500)),
+                        ),
+                        GestureDetector(
+                          onTap: () => _unlinkCategory(cat.id),
+                          child: const Icon(Icons.close_rounded,
+                              size: 16, color: AppColors.textHint),
+                        ),
+                      ]),
+                    )),
+                if (!_isNew) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: _showLinkCategorySheet,
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text('Link Category'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      side: BorderSide(
+                          color: AppColors.accent.withValues(alpha: 0.4)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ] else
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text(
+                      'A category will be auto-created when you save. You can link more after.',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textHint,
+                          fontStyle: FontStyle.italic),
+                    ),
+                  ),
+              ]),
             ], // end if (_isNew || _showSettings)
 
             // --- Progress ring + goal timeline + recent transactions + spending history ---
@@ -1083,6 +1188,180 @@ class _AllocationDetailScreenState
   }
 
   // ---------------------------------------------------------------------------
+  // Type option card for creation flow
+  // ---------------------------------------------------------------------------
+
+  Widget _buildTypeOptionCard({
+    required IconData icon,
+    required String title,
+    required String description,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.accent.withValues(alpha: 0.08)
+              : AppColors.sfv(context),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.accent : AppColors.bd(context),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.accent.withValues(alpha: 0.15)
+                    : AppColors.bd(context).withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon,
+                  size: 22,
+                  color: isSelected ? AppColors.accent : AppColors.textSecondary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? AppColors.accent
+                            : AppColors.tp(context),
+                      )),
+                  const SizedBox(height: 4),
+                  Text(description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.ts(context),
+                        height: 1.4,
+                      )),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded,
+                  size: 20, color: AppColors.accent),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Withdraw from savings envelope
+  // ---------------------------------------------------------------------------
+
+  Future<void> _showWithdrawSheet() async {
+    double withdrawAmount = 0;
+    final currency = _targetCurrencyController.text;
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Container(
+          padding: EdgeInsets.fromLTRB(
+              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+          decoration: BoxDecoration(
+            color: AppColors.sf(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Withdraw from Savings',
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              Text(
+                'Move money from this envelope back to Unallocated.',
+                style: TextStyle(
+                    fontSize: 13, color: AppColors.ts(context)),
+              ),
+              const SizedBox(height: 16),
+              CalculatorAmountField(
+                value: withdrawAmount,
+                label: 'Amount to withdraw',
+                currency: currency,
+                fontSize: 22,
+                onChanged: (v) => setSheetState(() => withdrawAmount = v),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: withdrawAmount > 0
+                          ? () => Navigator.pop(ctx, true)
+                          : null,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Withdraw',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed == true && withdrawAmount > 0 && mounted) {
+      final engine = ref.read(allocationEngineProvider);
+      await engine.withdrawFromAllocation(
+        allocationId: widget.allocationId,
+        amount: withdrawAmount,
+        currency: currency,
+      );
+      ref.invalidate(allocationsProvider);
+      ref.invalidate(unallocatedProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Withdrew ${formatAmount(withdrawAmount, currency: currency)} to Unallocated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Category linking
   // ---------------------------------------------------------------------------
 
@@ -1166,6 +1445,109 @@ class _AllocationDetailScreenState
   Color _hexToColor(String hex) {
     final clean = hex.replaceAll('#', '');
     return Color(int.parse('FF$clean', radix: 16));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Revalue foreign balances
+  // ---------------------------------------------------------------------------
+
+  Future<void> _showRevalueSheet() async {
+    final db = ref.read(databaseProvider);
+    final targetCurrency = _targetCurrencyController.text;
+
+    // Get all ledger entries for this allocation
+    final entries = await (db.select(db.allocationLedger)
+          ..where((t) => t.allocationId.equals(widget.allocationId)))
+        .get();
+
+    // Group foreign-currency entries: currency -> list of entries
+    final Map<String, List<AllocationLedgerData>> foreignEntries = {};
+    for (final e in entries) {
+      if (e.currency != targetCurrency) {
+        foreignEntries.putIfAbsent(e.currency, () => []).add(e);
+      }
+    }
+
+    if (foreignEntries.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No foreign-currency balances to revalue'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Build data for the sheet: for each foreign currency, compute
+    // the net foreign amount and weighted-average original rate.
+    final List<_ForeignBalance> foreignBalances = [];
+    for (final entry in foreignEntries.entries) {
+      final currency = entry.key;
+      final ledgerList = entry.value;
+
+      double totalForeignAmount = 0;
+      double totalTargetValue = 0;
+
+      for (final e in ledgerList) {
+        totalForeignAmount += e.amount;
+        totalTargetValue += e.amount * e.exchangeRateToBase;
+      }
+
+      if (totalForeignAmount.abs() < 0.0001) continue;
+
+      final weightedAvgRate = totalForeignAmount != 0
+          ? totalTargetValue / totalForeignAmount
+          : 1.0;
+
+      foreignBalances.add(_ForeignBalance(
+        currency: currency,
+        amount: totalForeignAmount,
+        originalRate: weightedAvgRate,
+        originalValue: totalTargetValue,
+      ));
+    }
+
+    if (foreignBalances.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No foreign-currency balances to revalue'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    final fxService = ref.read(fxServiceProvider);
+
+    final applied = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _RevalueSheet(
+        foreignBalances: foreignBalances,
+        targetCurrency: targetCurrency,
+        allocationId: widget.allocationId,
+        fxService: fxService,
+        db: db,
+      ),
+    );
+
+    if (applied == true && mounted) {
+      ref.invalidate(allocationsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Revaluation applied'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      setState(() {}); // refresh
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1357,6 +1739,9 @@ class _AllocationDetailScreenState
       final targetAmount =
           _targetAmount > 0 ? _targetAmount : null;
       final targetCurrency = _targetCurrencyController.text.trim();
+      // Savings envelopes always carry forward.
+      final effectivePeriodicity =
+          _type == 'saving' ? 'permanent' : _periodicity;
 
       await dao.upsert(AllocationsCompanion.insert(
         id: allocId,
@@ -1364,7 +1749,7 @@ class _AllocationDetailScreenState
         name: name,
         categoryId: categoryId,
         type: Value(_type),
-        periodicity: Value(_periodicity),
+        periodicity: Value(effectivePeriodicity),
         rollover: Value(_rollover),
         targetAmount: Value(targetAmount),
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
@@ -1479,4 +1864,439 @@ class _ProgressRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ProgressRingPainter old) =>
       old.progress != progress || old.color != color;
+}
+
+// =============================================================================
+// Revalue Foreign Balances
+// =============================================================================
+
+class _ForeignBalance {
+  final String currency;
+  final double amount;
+  final double originalRate;
+  final double originalValue;
+
+  const _ForeignBalance({
+    required this.currency,
+    required this.amount,
+    required this.originalRate,
+    required this.originalValue,
+  });
+}
+
+class _RevalueSheet extends StatefulWidget {
+  final List<_ForeignBalance> foreignBalances;
+  final String targetCurrency;
+  final String allocationId;
+  final dynamic fxService; // FxService
+  final AppDatabase db;
+
+  const _RevalueSheet({
+    required this.foreignBalances,
+    required this.targetCurrency,
+    required this.allocationId,
+    required this.fxService,
+    required this.db,
+  });
+
+  @override
+  State<_RevalueSheet> createState() => _RevalueSheetState();
+}
+
+class _RevalueSheetState extends State<_RevalueSheet> {
+  // Map from currency -> new rate entered by user
+  final Map<String, double> _newRates = {};
+  bool _applying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill new rates with original rates
+    for (final fb in widget.foreignBalances) {
+      _newRates[fb.currency] = fb.originalRate;
+    }
+  }
+
+  double _newValue(_ForeignBalance fb) {
+    final rate = _newRates[fb.currency] ?? fb.originalRate;
+    return fb.amount * rate;
+  }
+
+  double _gain(_ForeignBalance fb) {
+    return _newValue(fb) - fb.originalValue;
+  }
+
+  double _totalGain() {
+    double total = 0;
+    for (final fb in widget.foreignBalances) {
+      total += _gain(fb);
+    }
+    return total;
+  }
+
+  bool _hasChanges() {
+    for (final fb in widget.foreignBalances) {
+      final gain = _gain(fb);
+      if (gain.abs() > 0.01) return true;
+    }
+    return false;
+  }
+
+  Future<void> _fetchRate(String foreignCurrency) async {
+    try {
+      final rate = await widget.fxService
+          .getRateWithCache(foreignCurrency, widget.targetCurrency);
+      if (mounted) {
+        setState(() {
+          _newRates[foreignCurrency] = rate;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not fetch rate for $foreignCurrency'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.overspent,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _apply() async {
+    if (_applying) return;
+    setState(() => _applying = true);
+
+    try {
+      final ledgerDao = LedgerDao(widget.db);
+      final uuid = const Uuid();
+
+      for (final fb in widget.foreignBalances) {
+        final gain = _gain(fb);
+        if (gain.abs() < 0.01) continue;
+
+        await ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+          id: uuid.v4(),
+          allocationId: widget.allocationId,
+          entryType: 'revaluation',
+          amount: gain,
+          currency: widget.targetCurrency,
+          exchangeRateToBase: Value(1.0),
+          note: Value(
+            'Revaluation: ${fb.currency} ${formatAmount(fb.amount, currency: fb.currency)} '
+            'at ${formatAmount(_newRates[fb.currency] ?? fb.originalRate)} '
+            '(was ${formatAmount(fb.originalRate)})',
+          ),
+          deviceId: 'local',
+        ));
+      }
+
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error applying revaluation: $e'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.overspent,
+          ),
+        );
+        setState(() => _applying = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _totalGain();
+    final hasChanges = _hasChanges();
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 4),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.bd(context),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            child: Row(
+              children: [
+                const Icon(Icons.currency_exchange_rounded,
+                    size: 22, color: AppColors.accent),
+                const SizedBox(width: 10),
+                Text(
+                  'Revalue Foreign Balances',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tp(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Content
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              children: [
+                for (final fb in widget.foreignBalances) ...[
+                  _buildCurrencyCard(fb),
+                  const SizedBox(height: 12),
+                ],
+                // Total summary
+                if (widget.foreignBalances.length > 1) ...[
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total adjustment',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                      Text(
+                        '${total >= 0 ? '+' : ''}${formatAmount(total, currency: widget.targetCurrency)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: total >= 0
+                              ? AppColors.healthy
+                              : AppColors.overspent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ],
+            ),
+          ),
+          // Apply button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: (hasChanges && !_applying) ? _apply : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: _applying
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Text('Apply Revaluation',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrencyCard(_ForeignBalance fb) {
+    final newRate = _newRates[fb.currency] ?? fb.originalRate;
+    final newValue = _newValue(fb);
+    final gain = _gain(fb);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Currency header
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  fb.currency,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'balance in this envelope',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.ts(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Foreign amount
+          Text(
+            formatAmount(fb.amount, currency: fb.currency),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.tp(context),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Original rate & value
+          _infoRow(
+            'Original rate',
+            formatAmount(fb.originalRate),
+          ),
+          const SizedBox(height: 4),
+          _infoRow(
+            'Original value',
+            formatAmount(fb.originalValue, currency: widget.targetCurrency),
+          ),
+          const SizedBox(height: 14),
+          // New rate input
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: CalculatorAmountField(
+                  value: newRate,
+                  label: 'New rate',
+                  fontSize: 18,
+                  onChanged: (v) {
+                    setState(() {
+                      _newRates[fb.currency] = v;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 42,
+                child: OutlinedButton.icon(
+                  onPressed: () => _fetchRate(fb.currency),
+                  icon: const Icon(Icons.sync_rounded, size: 16),
+                  label: const Text('Fetch'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: BorderSide(
+                        color: AppColors.accent.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // New value
+          _infoRow(
+            'New value',
+            formatAmount(newValue, currency: widget.targetCurrency),
+            bold: true,
+          ),
+          const SizedBox(height: 6),
+          // Gain/loss
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: gain >= 0
+                  ? AppColors.healthy.withValues(alpha: 0.08)
+                  : AppColors.overspent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  gain >= 0 ? 'Gain' : 'Loss',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        gain >= 0 ? AppColors.healthy : AppColors.overspent,
+                  ),
+                ),
+                Text(
+                  '${gain >= 0 ? '+' : ''}${formatAmount(gain, currency: widget.targetCurrency)}',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color:
+                        gain >= 0 ? AppColors.healthy : AppColors.overspent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value, {bool bold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.ts(context),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+            color: AppColors.tp(context),
+          ),
+        ),
+      ],
+    );
+  }
 }

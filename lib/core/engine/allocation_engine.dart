@@ -415,6 +415,25 @@ class AllocationEngine {
     });
   }
 
+  /// Withdraw funds from an allocation back to Unallocated.
+  Future<void> withdrawFromAllocation({
+    required String allocationId,
+    required double amount,
+    required String currency,
+    String deviceId = 'local',
+    String note = '',
+  }) async {
+    await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+      id: _uuid.v4(),
+      allocationId: allocationId,
+      entryType: 'withdrawal',
+      amount: -amount, // negative = money leaving the allocation
+      currency: currency,
+      note: Value(note.isNotEmpty ? note : 'Withdrawn to Unallocated'),
+      deviceId: deviceId,
+    ));
+  }
+
   /// Look up the allocation (envelope) linked to a category.
   /// Uses categories.allocationId (many categories → one envelope).
   /// Falls back to legacy allocations.categoryId for backward compatibility.

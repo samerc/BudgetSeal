@@ -8,7 +8,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
-import '../../shared/widgets/balance_chip.dart';
+
 import '../../shared/widgets/currency_display.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
