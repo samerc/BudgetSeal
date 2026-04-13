@@ -7,7 +7,6 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/allocations_provider.dart';
-import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -1399,18 +1398,14 @@ class _TxTile extends ConsumerWidget {
     final String displayName;
     final String? note;
     if (isTransferSplit) {
-      final accounts = ref.read(accountsProvider).value ?? [];
-      final acctMap = {for (final a in accounts) a.id: a};
-      final fromAcct = acctMap[tx.accountId];
-      final toAcct = tx.destinationAccountId != null
-          ? acctMap[tx.destinationAccountId]
-          : null;
+      final fromName = entry.accountName.isNotEmpty ? entry.accountName : 'account';
+      final toName = entry.destinationAccountName ?? 'account';
       if (isFrom) {
-        displayName = 'To ${toAcct?.name ?? 'account'}';
-        note = 'From ${fromAcct?.name ?? 'account'}';
+        displayName = 'To $toName';
+        note = 'From $fromName';
       } else {
-        displayName = 'From ${fromAcct?.name ?? 'account'}';
-        note = 'To ${toAcct?.name ?? 'account'}';
+        displayName = 'From $fromName';
+        note = 'To $toName';
       }
     } else {
       displayName = _buildDisplayName(catName);
@@ -1660,13 +1655,8 @@ class _TxTile extends ConsumerWidget {
 
     // For transfer "to" side: show the converted amount in destination currency
     if (isTransferSplit && !isFrom) {
-      // The destination gets amount * exchangeRate
-      final accounts = ref.read(accountsProvider).value ?? [];
-      final destAcct = tx.destinationAccountId != null
-          ? accounts.where((a) => a.id == tx.destinationAccountId).firstOrNull
-          : null;
       displayAmount = tx.amount * tx.exchangeRateToBase;
-      displayCurrency = destAcct?.currency ?? tx.currency;
+      displayCurrency = entry.destinationAccountCurrency ?? tx.currency;
     }
 
     final baseCurrency = tx.currency;
@@ -1731,16 +1721,20 @@ class _TxTile extends ConsumerWidget {
         ),
       if (isSingleAccount || isTransferSplit)
         Builder(builder: (_) {
-          // For transfer "to" side, show destination account info
           if (isTransferSplit && !isFrom) {
-            final accounts = ref.read(accountsProvider).value ?? [];
-            final destAcct = tx.destinationAccountId != null
-                ? accounts.where((a) => a.id == tx.destinationAccountId).firstOrNull
-                : null;
-            final destName = destAcct?.name ?? 'account';
-            final destCurrency = destAcct?.currency ?? tx.currency;
+            // Transfer "to" side: show destination account name + currency
+            final destName = entry.destinationAccountName ?? 'account';
+            final destCurrency = entry.destinationAccountCurrency ?? tx.currency;
             return Text(
-              '$destName: ${formatAmount(entry.accountBalanceAfter * tx.exchangeRateToBase, currency: destCurrency)}',
+              '$destName: $destCurrency',
+              textAlign: TextAlign.end,
+              style: TextStyle(fontSize: 11, color: AppColors.th(context)),
+            );
+          }
+          if (isTransferSplit && isFrom) {
+            // Transfer "from" side: show source account
+            return Text(
+              '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
               textAlign: TextAlign.end,
               style: TextStyle(fontSize: 11, color: AppColors.th(context)),
             );

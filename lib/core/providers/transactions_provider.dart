@@ -17,6 +17,12 @@ class TransactionEntry {
   /// Currency of the source account (may differ from tx.currency).
   final String accountCurrency;
 
+  /// Display name of the destination account (transfers only).
+  final String? destinationAccountName;
+
+  /// Currency of the destination account (transfers only).
+  final String? destinationAccountCurrency;
+
   /// Per-line account names (for multi-account display).
   final Map<String, String> lineAccountNames;
 
@@ -26,6 +32,8 @@ class TransactionEntry {
     required this.accountBalanceAfter,
     required this.accountName,
     this.accountCurrency = 'USD',
+    this.destinationAccountName,
+    this.destinationAccountCurrency,
     this.lineAccountNames = const {},
   });
 
@@ -90,12 +98,17 @@ TransactionEntry _buildEntry(
       lineAcctNames[id] = accountMap[id]?.name ?? '';
     }
   }
+  final destAcct = tx.destinationAccountId != null
+      ? accountMap[tx.destinationAccountId]
+      : null;
   return TransactionEntry(
     tx: tx,
     lines: txLines,
     accountBalanceAfter: running[tx.accountId] ?? 0,
     accountName: accountMap[tx.accountId]?.name ?? '',
     accountCurrency: accountMap[tx.accountId]?.currency ?? tx.currency,
+    destinationAccountName: destAcct?.name,
+    destinationAccountCurrency: destAcct?.currency,
     lineAccountNames: lineAcctNames,
   );
 }
@@ -257,12 +270,17 @@ final recentTransactionsProvider =
           lineAcctNames[id] = related.accountMap[id]?.name ?? '';
         }
       }
+      final destAcct2 = tx.destinationAccountId != null
+          ? related.accountMap[tx.destinationAccountId]
+          : null;
       result.add(TransactionEntry(
         tx: tx,
         lines: txLines,
         accountBalanceAfter: 0,
         accountName: related.accountMap[tx.accountId]?.name ?? '',
         accountCurrency: related.accountMap[tx.accountId]?.currency ?? tx.currency,
+        destinationAccountName: destAcct2?.name,
+        destinationAccountCurrency: destAcct2?.currency,
         lineAccountNames: lineAcctNames,
       ));
     }
