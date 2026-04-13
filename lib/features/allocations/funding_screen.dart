@@ -108,34 +108,6 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fund Envelopes'),
-        actions: [
-          allocationsAsync.whenOrNull(
-                data: (allocations) => Tooltip(
-                  message:
-                      'Auto-fill each periodic envelope up to its target amount',
-                  child: FilledButton.icon(
-                    onPressed: () => _quickFill(allocations, baseCurrency),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      minimumSize: const Size(0, 36),
-                    ),
-                    icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
-                    label: const Text(
-                      'Quick fill',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
-                  ),
-                ),
-              ) ??
-              const SizedBox.shrink(),
-          const SizedBox(width: 12),
-        ],
       ),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -145,6 +117,18 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
           final unallocated = unallocatedAsync.value ?? {};
           final available = unallocated[baseCurrency] ?? 0.0;
           final exceeds = total > available;
+
+          // Count how many periodic envelopes have unfilled targets.
+          final fillableCount = allocations.where((a) {
+            final alloc = a.data.allocation;
+            if (alloc.periodicity != 'periodic' ||
+                alloc.targetAmount == null) {
+              return false;
+            }
+            final currency = alloc.targetCurrency ?? baseCurrency;
+            final bal = a.balanceByCurrency[currency] ?? 0.0;
+            return alloc.targetAmount! - bal > 0;
+          }).length;
 
           return Column(
             children: [
@@ -177,9 +161,20 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
-                        itemCount: allocations.length,
+                        // +1 for the quick-fill tile at the top
+                        itemCount: allocations.length + 1,
                         itemBuilder: (context, i) {
-                          final a = allocations[i];
+                          // First item: Quick Fill tile
+                          if (i == 0) {
+                            return _QuickFillTile(
+                              fillableCount: fillableCount,
+                              onQuickFill: () =>
+                                  _quickFill(allocations, baseCurrency),
+                            );
+                          }
+
+                          final idx = i - 1;
+                          final a = allocations[idx];
                           final alloc = a.data.allocation;
                           final currency =
                               alloc.targetCurrency ?? baseCurrency;
@@ -305,7 +300,7 @@ class _InstructionsPanel extends StatelessWidget {
                   _InstructionStep(
                     number: '2',
                     text:
-                        'Enter how much to put in each envelope. Use "Quick fill" to auto-fill based on targets.',
+                        'Enter how much to put in each envelope, or use "Quick Fill" to auto-fill periodic envelopes up to their target.',
                   ),
                   const SizedBox(height: 8),
                   _InstructionStep(
@@ -515,6 +510,99 @@ class _FundingBanner extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Quick Fill tile (replaces the AppBar button)
+// ---------------------------------------------------------------------------
+
+class _QuickFillTile extends StatelessWidget {
+  final int fillableCount;
+  final VoidCallback onQuickFill;
+
+  const _QuickFillTile({
+    required this.fillableCount,
+    required this.onQuickFill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasEnvelopes = fillableCount > 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.accent.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: hasEnvelopes ? onQuickFill : null,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.auto_fix_high_rounded,
+                    size: 18,
+                    color: AppColors.accent,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Quick Fill',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: hasEnvelopes
+                              ? AppColors.accent
+                              : AppColors.ts(context),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        hasEnvelopes
+                            ? 'Auto-fill $fillableCount periodic ${fillableCount == 1 ? 'envelope' : 'envelopes'} up to ${fillableCount == 1 ? 'its' : 'their'} target'
+                            : 'All periodic envelopes are at their target',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.ts(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (hasEnvelopes)
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: AppColors.accent.withValues(alpha: 0.6),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Allocation Funding Tile (redesigned — clean, minimal)
 // ---------------------------------------------------------------------------
 
@@ -649,11 +737,29 @@ class _FundingAllocationTile extends StatelessWidget {
               ),
             ],
 
-            // Row 3: input + fill button (hidden when fully funded)
+            // Row 3: currency label + input + fill button (hidden when fully funded)
             if (!isFunded) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
+                  // Currency label (read-only, determined by envelope)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      currency,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ts(context),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -663,7 +769,6 @@ class _FundingAllocationTile extends StatelessWidget {
                       child: CalculatorAmountField(
                         value: amount,
                         onChanged: onAmountChanged,
-                        currency: currency,
                         hintText: 'Amount',
                         fontSize: 16,
                         style: TextStyle(
@@ -734,30 +839,34 @@ class _BottomFundBar extends StatelessWidget {
     final canFund = hasAnyAmount && !exceeds && !isFunding;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
             offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
         top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
         child: SizedBox(
           width: double.infinity,
-          height: 52,
+          height: 54,
           child: FilledButton(
             onPressed: canFund ? onFund : null,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.accent,
-              disabledBackgroundColor: AppColors.surfaceVariant,
+              disabledBackgroundColor: AppColors.sfv(context),
+              disabledForegroundColor: AppColors.th(context),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
+              elevation: canFund ? 2 : 0,
+              shadowColor: AppColors.accent.withValues(alpha: 0.4),
             ),
             child: isFunding
                 ? const SizedBox(
@@ -773,14 +882,14 @@ class _BottomFundBar extends StatelessWidget {
                     children: [
                       const Icon(Icons.account_balance_wallet_rounded,
                           size: 20),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Text(
                         hasAnyAmount
                             ? 'Fund All  (${formatAmount(total, currency: baseCurrency)})'
                             : 'Enter amounts to fund',
                         style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],

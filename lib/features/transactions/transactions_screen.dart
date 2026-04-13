@@ -1405,11 +1405,11 @@ class _TxTile extends ConsumerWidget {
           ? acctMap[tx.destinationAccountId]
           : null;
       if (isFrom) {
-        displayName = 'Transfer to ${toAcct?.name ?? 'account'}';
-        note = fromAcct?.name;
+        displayName = 'To ${toAcct?.name ?? 'account'}';
+        note = 'From ${fromAcct?.name ?? 'account'}';
       } else {
-        displayName = 'Transfer from ${fromAcct?.name ?? 'account'}';
-        note = toAcct?.name;
+        displayName = 'From ${fromAcct?.name ?? 'account'}';
+        note = 'To ${toAcct?.name ?? 'account'}';
       }
     } else {
       displayName = _buildDisplayName(catName);

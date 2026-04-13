@@ -32,6 +32,7 @@ import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
+import 'features/settings/import_export_screen.dart';
 import 'features/settings/sync_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
@@ -189,6 +190,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/import',
           pageBuilder: (_, state) =>
               slideUpPage(child: const ImportScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/import-export',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const ImportExportScreen(), state: state),
         ),
         GoRoute(
           path: '/backup',

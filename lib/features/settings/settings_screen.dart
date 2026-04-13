@@ -129,40 +129,37 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // ── Quick tools grid ──
+            // ── Manage ──
             _SectionHeader(title: 'MANAGE'),
             const SizedBox(height: 8),
-            GridView.count(
-              crossAxisCount: 4,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 0.85,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              children: [
-                _GridTile(icon: Icons.credit_card_rounded, label: 'Accounts',
-                    color: const Color(0xFF1565C0),
-                    onTap: () => context.push('/accounts')),
-                _GridTile(icon: Icons.label_rounded, label: 'Categories',
-                    color: const Color(0xFFBA68C8),
-                    onTap: () => context.push('/categories')),
-                _GridTile(icon: Icons.repeat_rounded, label: 'Recurring',
-                    color: const Color(0xFFFF7043),
-                    onTap: () => context.push('/recurring')),
-                _GridTile(icon: Icons.bolt_rounded, label: 'Templates',
-                    color: const Color(0xFFFFB74D),
-                    onTap: () => context.push('/templates')),
-                _GridTile(icon: Icons.calendar_month_rounded, label: 'Bill Cal',
-                    color: const Color(0xFF66BB6A),
-                    onTap: () => context.push('/bill-calendar')),
-                _GridTile(icon: Icons.currency_exchange_rounded, label: 'FX Rates',
-                    color: const Color(0xFF4DB6AC),
-                    onTap: () => context.push('/exchange-rates')),
-                _GridTile(icon: Icons.refresh_rounded, label: 'Period',
-                    color: AppColors.accent,
-                    onTap: () => context.push('/period-transition')),
-              ],
-            ),
+            _SettingsTile(icon: Icons.credit_card_rounded, title: 'Accounts',
+                subtitle: 'Manage your accounts and balances',
+                iconColor: const Color(0xFF1565C0),
+                onTap: () => context.push('/accounts')),
+            _SettingsTile(icon: Icons.label_rounded, title: 'Categories',
+                subtitle: 'Manage groups and categories',
+                iconColor: const Color(0xFFBA68C8),
+                onTap: () => context.push('/categories')),
+            _SettingsTile(icon: Icons.repeat_rounded, title: 'Recurring',
+                subtitle: 'Manage recurring transactions',
+                iconColor: const Color(0xFFFF7043),
+                onTap: () => context.push('/recurring')),
+            _SettingsTile(icon: Icons.bolt_rounded, title: 'Templates',
+                subtitle: 'Save frequent transactions',
+                iconColor: const Color(0xFFFFB74D),
+                onTap: () => context.push('/templates')),
+            _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
+                subtitle: 'View upcoming recurring bills',
+                iconColor: const Color(0xFF66BB6A),
+                onTap: () => context.push('/bill-calendar')),
+            _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
+                subtitle: 'View and refresh currency rates',
+                iconColor: const Color(0xFF4DB6AC),
+                onTap: () => context.push('/exchange-rates')),
+            _SettingsTile(icon: Icons.refresh_rounded, title: 'Period Transition',
+                subtitle: 'End period and resolve leftovers',
+                iconColor: AppColors.accent,
+                onTap: () => context.push('/period-transition')),
             const SizedBox(height: 20),
 
             // ── Appearance ──
@@ -177,10 +174,9 @@ class SettingsScreen extends ConsumerWidget {
             Builder(builder: (context) {
               final mode = ref.watch(entryModeProvider);
               return _SettingsTile(icon: Icons.touch_app_outlined, title: 'Entry Mode',
-                  subtitle: mode == 'assisted' ? 'Assisted' : 'Classic',
+                  subtitle: mode == 'assisted' ? 'Assisted (step-by-step)' : 'Classic (single form)',
                   iconColor: const Color(0xFF42A5F5),
-                  onTap: () => ref.read(entryModeProvider.notifier).setMode(
-                      mode == 'assisted' ? 'classic' : 'assisted'));
+                  onTap: () => _showEntryModePicker(context, ref));
             }),
             Builder(builder: (context) {
               final homeTab = ref.watch(homeTabProvider);
@@ -205,29 +201,34 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => context.push('/sync')),
             Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);
-              if (syncState.activeProvider is! GoogleDriveProvider) {
-                return const SizedBox.shrink();
-              }
+              final isConnected = syncState.activeProvider is GoogleDriveProvider;
               return _SettingsTile(
                 icon: Icons.people_outline_rounded,
                 title: 'Share Household',
-                subtitle: 'Invite someone to share your data',
+                subtitle: isConnected
+                    ? 'Invite someone to share your data'
+                    : 'Connect Cloud Sync first to share',
                 iconColor: const Color(0xFF7E57C2),
-                onTap: () => _showShareHousehold(context, ref),
+                onTap: () {
+                  if (isConnected) {
+                    _showShareHousehold(context, ref);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Set up Cloud Sync with Google Drive first to share your household.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
               );
             }),
             _SettingsTile(icon: Icons.backup_rounded, title: 'Backup & Restore',
                 subtitle: 'Export or restore database', iconColor: const Color(0xFF42A5F5),
                 onTap: () => context.push('/backup')),
-            _SettingsTile(icon: Icons.download_rounded, title: 'Export CSV',
-                subtitle: 'Transactions as spreadsheet', iconColor: const Color(0xFF66BB6A),
-                onTap: () => context.push('/export')),
-            _SettingsTile(icon: Icons.upload_file_rounded, title: 'Import CSV',
-                subtitle: 'Import from bank export', iconColor: const Color(0xFF26A69A),
-                onTap: () => context.push('/import')),
-            _SettingsTile(icon: Icons.picture_as_pdf_rounded, title: 'Export Report',
-                subtitle: 'Monthly PDF report', iconColor: const Color(0xFFEF5350),
-                onTap: () => context.push('/export-report')),
+            _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
+                subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
+                onTap: () => context.push('/import-export')),
             // ── Receipt Sync toggle ──
             Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);
@@ -288,12 +289,6 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               );
             }),
-            const SizedBox(height: 20),
-
-            // ── Security ──
-            _SectionHeader(title: 'SECURITY'),
-            const SizedBox(height: 8),
-            _BiometricTile(),
             const SizedBox(height: 20),
 
             // ── Household settings ──
@@ -357,6 +352,12 @@ class SettingsScreen extends ConsumerWidget {
             }),
             const SizedBox(height: 20),
 
+            // ── Security ──
+            _SectionHeader(title: 'SECURITY'),
+            const SizedBox(height: 8),
+            _BiometricTile(),
+            const SizedBox(height: 20),
+
             // ── About + Reset ──
             _SettingsTile(icon: Icons.info_outline_rounded, title: 'About PocketPlan',
                 subtitle: 'Version 1.0.0', iconColor: AppColors.ts(context),
@@ -380,6 +381,15 @@ class SettingsScreen extends ConsumerWidget {
       builder: (_) => _ShareHouseholdSettingsSheet(
         googleDrive: notifier.googleDrive,
       ),
+    );
+  }
+
+  void _showEntryModePicker(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _EntryModeSheet(),
     );
   }
 
@@ -930,18 +940,90 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-// ─── Grid tile for Manage section ──────────────────────────────────────────
+// ─── Entry Mode Selection Sheet ───────────────────────────────────────────
 
-class _GridTile extends StatelessWidget {
+class _EntryModeSheet extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentMode = ref.watch(entryModeProvider);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.sfv(context),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text('Entry Mode',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.tp(context))),
+          const SizedBox(height: 6),
+          Text('Choose how you add new transactions.',
+              style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.ts(context),
+                  height: 1.4)),
+          const SizedBox(height: 20),
+          _EntryModeCard(
+            icon: Icons.auto_fix_high_rounded,
+            title: 'Assisted (Step-by-step)',
+            description:
+                'Guides you through adding a transaction step by step. '
+                'First pick a title, then a category, then enter the amount. '
+                'Best for beginners.',
+            isSelected: currentMode == 'assisted',
+            onTap: () {
+              ref.read(entryModeProvider.notifier).setMode('assisted');
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(height: 12),
+          _EntryModeCard(
+            icon: Icons.list_alt_rounded,
+            title: 'Classic (Single form)',
+            description:
+                'All fields on one screen. Fill in what you need and save. '
+                'Faster for experienced users.',
+            isSelected: currentMode == 'classic',
+            onTap: () {
+              ref.read(entryModeProvider.notifier).setMode('classic');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EntryModeCard extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final Color color;
+  final String title;
+  final String description;
+  final bool isSelected;
   final VoidCallback onTap;
 
-  const _GridTile({
+  const _EntryModeCard({
     required this.icon,
-    required this.label,
-    required this.color,
+    required this.title,
+    required this.description,
+    required this.isSelected,
     required this.onTap,
   });
 
@@ -950,28 +1032,65 @@ class _GridTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.bd(context)),
+          color: isSelected
+              ? AppColors.accent.withValues(alpha: 0.08)
+              : AppColors.sfv(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.accent
+                : AppColors.bd(context),
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+                color: isSelected
+                    ? AppColors.accent.withValues(alpha: 0.15)
+                    : AppColors.th(context).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 18, color: color),
+              child: Icon(icon,
+                  size: 20,
+                  color: isSelected
+                      ? AppColors.accent
+                      : AppColors.ts(context)),
             ),
-            const SizedBox(height: 6),
-            Text(label, style: TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w500,
-                color: AppColors.tp(context)),
-                textAlign: TextAlign.center),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(title,
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.tp(context))),
+                      ),
+                      if (isSelected)
+                        Icon(Icons.check_circle_rounded,
+                            size: 20, color: AppColors.accent),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(description,
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.ts(context),
+                          height: 1.4)),
+                ],
+              ),
+            ),
           ],
         ),
       ),
