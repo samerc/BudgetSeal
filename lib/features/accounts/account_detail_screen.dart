@@ -173,7 +173,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -450,6 +452,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ],
           ],
         ),
+      ),
       ),
     );
   }

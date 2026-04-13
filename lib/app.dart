@@ -318,6 +318,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
       themeMode: themeMode,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
+      // Dismiss keyboard when tapping outside any text field (globally).
+      builder: (context, child) => GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: child,
+      ),
     );
   }
 }

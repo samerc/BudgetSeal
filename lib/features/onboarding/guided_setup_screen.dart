@@ -146,7 +146,9 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
       ('wallet', 'Digital Wallet', Icons.account_balance_wallet),
     ];
 
-    return _StepContainer(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: _StepContainer(
       icon: Icons.account_balance_rounded,
       title: 'Create your first account',
       subtitle: 'Where does your money live?',
@@ -268,6 +270,7 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
