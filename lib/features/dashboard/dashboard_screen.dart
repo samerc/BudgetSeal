@@ -20,7 +20,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
-import '../../shared/widgets/hint_banner.dart';
+import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -31,6 +31,22 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _showWeekly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showHintIfNeeded(
+        context,
+        hintId: 'dashboard_welcome',
+        icon: Icons.waving_hand_rounded,
+        title: 'Welcome to PocketPlan!',
+        body:
+            'This is your financial overview. Tap the quick actions below to start recording transactions.',
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +113,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
-              ),
-            ),
-
-            // ── Welcome hint (first visit) ──
-            const SliverToBoxAdapter(
-              child: HintBanner(
-                hintId: 'dashboard_welcome',
-                icon: Icons.waving_hand_rounded,
-                title: 'Welcome to PocketPlan!',
-                body:
-                    'This is your financial overview. Tap the quick actions below to start recording transactions.',
               ),
             ),
 

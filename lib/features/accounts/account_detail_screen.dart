@@ -722,6 +722,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         }
 
         await _loadAccount(); // Refresh current balance.
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountsWithBalanceProvider);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -250,58 +250,54 @@ class _CurrencySheetState extends State<CurrencySheet> {
 
     return ListTile(
       leading: SizedBox(
-        width: 56,
+        width: 72,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (flag != null) ...[
               Text(flag, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
             ],
-            Text(
-              code,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: isSelected
-                    ? AppColors.accent
-                    : AppColors.tp(context),
+            Flexible(
+              child: Text(
+                code,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: isSelected
+                      ? AppColors.accent
+                      : AppColors.tp(context),
+                ),
               ),
             ),
           ],
         ),
       ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              name,
-              style: TextStyle(
-                fontSize: 14,
-                color: isSelected
-                    ? AppColors.accent
-                    : AppColors.tp(context),
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ),
-          if (symbol != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(
-                symbol,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.accent.withValues(alpha: 0.7)
-                      : AppColors.ts(context),
-                ),
-              ),
-            ),
-        ],
+      title: Text(
+        name,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 14,
+          color: isSelected
+              ? AppColors.accent
+              : AppColors.tp(context),
+          fontWeight:
+              isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
       ),
+      subtitle: symbol != null
+          ? Text(
+              symbol,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isSelected
+                    ? AppColors.accent.withValues(alpha: 0.7)
+                    : AppColors.ts(context),
+              ),
+            )
+          : null,
       trailing: isSelected
           ? Container(
               width: 24,

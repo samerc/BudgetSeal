@@ -18,7 +18,7 @@ abstract final class AppColors {
   // ── Theme-aware surface/text colors ────────────────────────
   // Call these from build() methods where you have a BuildContext.
   static Color bg(BuildContext c) =>
-      _dark(c) ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+      _dark(c) ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
   static Color sf(BuildContext c) =>
       _dark(c) ? const Color(0xFF1E293B) : const Color(0xFFFFFFFF);
   static Color sfv(BuildContext c) =>
@@ -37,7 +37,7 @@ abstract final class AppColors {
 
   // ── Legacy const values (for const contexts / hint styles) ─
   // These return light-mode values. Use the methods above when possible.
-  static const background = Color(0xFFF8FAFC);
+  static const background = Color(0xFFF1F5F9);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceVariant = Color(0xFFF1F5F9);
   static const textPrimary = Color(0xFF1A1A2E);

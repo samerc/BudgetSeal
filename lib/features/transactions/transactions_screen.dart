@@ -20,7 +20,7 @@ import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
-import '../../shared/widgets/hint_banner.dart';
+import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 
 // ---------------------------------------------------------------------------
@@ -77,6 +77,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut);
       }
+      if (!mounted) return;
+      showHintIfNeeded(
+        context,
+        hintId: 'transactions_intro',
+        icon: Icons.receipt_long_rounded,
+        title: 'Your transactions',
+        body:
+            'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.',
+      );
     });
   }
 
@@ -113,14 +122,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           children: [
             // ── Header area ──────────────────────────────────────
             _buildHeader(context),
-            // ── First-visit hint ────────────────────────────────
-            const HintBanner(
-              hintId: 'transactions_intro',
-              icon: Icons.receipt_long_rounded,
-              title: 'Your transactions',
-              body:
-                  'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.',
-            ),
             // ── Month tabs ───────────────────────────────────────
             _buildMonthTabs(context),
             // ── Filter chips (collapsible) ───────────────────────

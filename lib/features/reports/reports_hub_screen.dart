@@ -22,7 +22,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
-import '../../shared/widgets/hint_banner.dart';
+import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 
 Color _hexToColor(String hex) {
@@ -89,6 +89,17 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 5, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showHintIfNeeded(
+        context,
+        hintId: 'reports_intro',
+        icon: Icons.insights_rounded,
+        title: 'Explore your spending patterns',
+        body:
+            'Switch between tabs to see different views. The Insights tab shows your financial health.',
+      );
+    });
   }
 
   @override
@@ -115,14 +126,6 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                   color: AppColors.tp(context),
                 ),
               ),
-            ),
-            // ── First-visit hint ──
-            const HintBanner(
-              hintId: 'reports_intro',
-              icon: Icons.insights_rounded,
-              title: 'Explore your spending patterns',
-              body:
-                  'Switch between tabs to see different views. The Insights tab shows your financial health.',
             ),
             // ── Tab bar ──
             TabBar(
@@ -416,9 +419,11 @@ class _SpendingGauge extends StatelessWidget {
                   Icon(Icons.info_outline_rounded,
                       size: 14, color: AppColors.th(context)),
                   const SizedBox(width: 6),
-                  Text('Add a few months of data to see typical spending',
-                      style: TextStyle(
-                          fontSize: 12, color: AppColors.ts(context))),
+                  Expanded(
+                    child: Text('Add a few months of data to see typical spending',
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context))),
+                  ),
                 ],
               ),
             ),

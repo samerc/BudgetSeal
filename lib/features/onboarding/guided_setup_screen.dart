@@ -279,6 +279,18 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
               if (householdId == null) return;
 
               final db = ref.read(databaseProvider);
+
+              // Guard: skip seeding if categories already exist
+              final existing = await (db.select(db.categories)
+                    ..where((c) => c.householdId.equals(householdId)))
+                  .get();
+              if (existing.isNotEmpty) {
+                setState(() => _catsCreated = true);
+                Future.delayed(
+                    const Duration(milliseconds: 500), _next);
+                return;
+              }
+
               final groupIds = <String, String>{};
 
               // Create groups first
