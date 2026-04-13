@@ -285,7 +285,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             try {
               date = _parseDate(dateStr, fmt);
               break;
-            } catch (_) {}
+            } catch (e) {
+              // Expected: trying multiple date formats until one works.
+              debugPrint('Date format $fmt did not match "$dateStr": $e');
+            }
           }
         }
         date ??= DateTime.now();

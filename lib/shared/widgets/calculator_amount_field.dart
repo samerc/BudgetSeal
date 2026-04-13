@@ -259,7 +259,8 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
         }
       }
       return result;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Calculator expression eval failed for "$expr": $e');
       return 0;
     }
   }

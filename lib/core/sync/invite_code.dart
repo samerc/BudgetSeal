@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 /// Encode a Drive folder ID into a short invite code.
 /// Format: `PP-` followed by the base64url encoded folder ID.
 String generateInviteCode(String folderId) {
@@ -14,7 +16,8 @@ String? decodeInviteCode(String code) {
   try {
     final encoded = code.substring(3);
     return utf8.decode(base64Url.decode(encoded));
-  } catch (_) {
+  } catch (e) {
+    debugPrint('Failed to decode invite code: $e');
     return null;
   }
 }

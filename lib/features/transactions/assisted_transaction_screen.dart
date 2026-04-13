@@ -666,7 +666,8 @@ class _AssistedTransactionScreenState
         }
       }
       return result;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Expression eval failed for "$expr": $e');
       return 0;
     }
   }

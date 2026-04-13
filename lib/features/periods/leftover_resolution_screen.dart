@@ -47,7 +47,8 @@ class _LeftoverResolutionScreenState
       return list.firstWhere(
         (a) => a.data.allocation.id == _args!.allocationId,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Allocation not found: $e');
       return null;
     }
   }

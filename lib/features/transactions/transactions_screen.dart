@@ -1767,7 +1767,8 @@ class _TxTile extends ConsumerWidget {
     try {
       return Color(
           int.parse(hex.replaceFirst('#', ''), radix: 16) | 0xFF000000);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Failed to parse color "$hex": $e');
       return AppColors.accent;
     }
   }

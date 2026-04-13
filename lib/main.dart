@@ -18,7 +18,9 @@ void main() async {
   try {
     final recurring = container.read(recurringEngineProvider);
     await recurring.processRecurring();
-  } catch (_) {}
+  } catch (e) {
+    debugPrint('Recurring processing failed: $e');
+  }
 
   // Check envelopes and upcoming bills for notifications.
   try {
@@ -28,7 +30,9 @@ void main() async {
       await NotificationService.checkEnvelopes(db, householdId);
       await NotificationService.checkRecurring(db, householdId);
     }
-  } catch (_) {}
+  } catch (e) {
+    debugPrint('Notification check failed: $e');
+  }
 
   runApp(
     UncontrolledProviderScope(

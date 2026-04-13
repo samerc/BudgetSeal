@@ -48,8 +48,8 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
           final rate =
               await fxService.getRateWithCache(baseCurrency, currency);
           fetched[currency] = rate;
-        } catch (_) {
-          // Skip currencies that fail.
+        } catch (e) {
+          debugPrint('Failed to fetch rate for $currency: $e');
         }
       }
       if (mounted) {

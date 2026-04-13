@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
@@ -36,7 +37,8 @@ class GoogleDriveProvider implements CloudProvider {
     try {
       // Only check silently — never prompt the user.
       return _account != null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('isConnected check failed: $e');
       return false;
     }
   }
@@ -77,7 +79,9 @@ class GoogleDriveProvider implements CloudProvider {
   Future<void> disconnect() async {
     try {
       await GoogleSignIn.instance.signOut();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Google Sign-Out failed: $e');
+    }
     _account = null;
     _driveApi = null;
     _syncFileId = null;
@@ -265,7 +269,8 @@ class GoogleDriveProvider implements CloudProvider {
       // Verify we can access the folder
       await _driveApi!.files.get(folderId);
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('connectToSharedFolder failed: $e');
       return false;
     }
   }
@@ -289,7 +294,8 @@ class GoogleDriveProvider implements CloudProvider {
       _driveApi = drive.DriveApi(
           _AuthClient(http.Client(), auth.accessToken));
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('tryReconnectSilently failed: $e');
       return false;
     }
   }
@@ -303,7 +309,8 @@ class GoogleDriveProvider implements CloudProvider {
         serverClientId: _serverClientId.isNotEmpty ? _serverClientId : null,
       );
       _initialized = true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('GoogleSignIn.initialize failed (may already be initialized): $e');
       _initialized = true; // Already initialized
     }
   }

@@ -201,7 +201,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _lines[lineIndex].exchangeRateToBase = 1.0 / rate;
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to fetch FX rate: $e');
+    }
   }
 
   /// Fetch transfer exchange rate when both accounts are selected.
@@ -228,7 +230,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _lines.first.exchangeRateToBase = rate;
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to fetch transfer FX rate: $e');
+    }
   }
 
   // ---------------------------------------------------------------------------

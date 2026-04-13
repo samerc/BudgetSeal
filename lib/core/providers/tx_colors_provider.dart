@@ -54,7 +54,9 @@ class TxColorsNotifier extends Notifier<TxColors> {
       try {
         state = TxColors.fromJson(
             jsonDecode(json) as Map<String, dynamic>);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Failed to load tx_colors prefs: $e');
+      }
     }
   }
 

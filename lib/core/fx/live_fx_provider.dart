@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import 'fx_provider.dart';
 
@@ -38,7 +39,8 @@ class LiveFxProvider implements FxProvider {
             return (rates[toLower] as num).toDouble();
           }
         }
-      } catch (_) {
+      } catch (e) {
+        debugPrint('FX provider $base failed for $from->$to: $e');
         // Try fallback on next iteration.
       }
     }

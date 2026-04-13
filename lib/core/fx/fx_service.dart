@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../database/app_database.dart';
@@ -50,7 +51,8 @@ class FxService {
             ),
           );
       return rate;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('FX rate fetch failed for $from->$to: $e');
       // Return cached rate even if stale
       if (cached != null) return cached.rate;
       rethrow;
