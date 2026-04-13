@@ -45,6 +45,7 @@ class _SubscriptionDetailScreenState
     ).get();
 
     if (rows.isEmpty) {
+      debugPrint('[SubscriptionDetail] No recurring_transaction found for id=${widget.subscriptionId}');
       if (mounted) setState(() => _loading = false);
       return;
     }
@@ -70,13 +71,20 @@ class _SubscriptionDetailScreenState
 
     // Load past transactions matching this subscription by title and type
     final title = sub['title'] as String? ?? '';
+    final subType = sub['type'] as String? ?? 'expense';
+    final householdId = sub['household_id'] as String;
     final pastRows = await db.customSelect(
-      'SELECT * FROM transactions WHERE household_id = ? AND note LIKE ? ORDER BY date DESC LIMIT 20',
+      'SELECT * FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
       variables: [
-        drift.Variable.withString(sub['household_id'] as String),
+        drift.Variable.withString(householdId),
         drift.Variable.withString('%$title%'),
+        drift.Variable.withString(title),
+        drift.Variable.withString(subType),
       ],
     ).get();
+
+    final pastData = pastRows.map((r) => r.data).toList();
+    debugPrint('[SubscriptionDetail] Loaded sub id=${widget.subscriptionId}, title="$title", pastTx=${pastData.length}');
 
     if (mounted) {
       setState(() {
@@ -84,7 +92,7 @@ class _SubscriptionDetailScreenState
         _categoryName = catName;
         _categoryIcon = catIcon;
         _categoryColor = catColor;
-        _pastTransactions = pastRows.map((r) => r.data).toList();
+        _pastTransactions = pastData;
         _loading = false;
       });
     }
@@ -181,13 +189,65 @@ class _SubscriptionDetailScreenState
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
-    if (picked == null) return;
+    if (picked == null || _sub == null) return;
 
     final db = ref.read(databaseProvider);
+    final title = _sub!['title'] as String? ?? '';
+    final householdId = _sub!['household_id'] as String;
+    final now = DateTime.now();
+
+    // Count future transactions that will be removed
+    final futureRows = await db.customSelect(
+      'SELECT COUNT(*) as cnt FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
+      variables: [
+        drift.Variable.withString(householdId),
+        drift.Variable.withString('%$title%'),
+        drift.Variable.withString(title),
+        drift.Variable.withDateTime(now),
+      ],
+    ).get();
+    final futureCount = (futureRows.firstOrNull?.data['cnt'] as int?) ?? 0;
+
+    if (!mounted) return;
+
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel subscription'),
+        content: Text(
+          futureCount > 0
+              ? 'This will cancel future billing and remove $futureCount upcoming transaction${futureCount == 1 ? '' : 's'}.'
+              : 'This will set the cancellation date. No upcoming transactions to remove.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Back'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    // Set end_date on the recurring transaction
     await db.customStatement(
       'UPDATE recurring_transactions SET end_date = ? WHERE id = ?',
       [picked.millisecondsSinceEpoch ~/ 1000, widget.subscriptionId],
     );
+
+    // Delete future transactions generated from this subscription
+    if (futureCount > 0) {
+      await db.customStatement(
+        'DELETE FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
+        [householdId, '%$title%', title, now.millisecondsSinceEpoch ~/ 1000],
+      );
+    }
+
     _load();
   }
 
@@ -284,7 +344,8 @@ class _SubscriptionDetailScreenState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.bd(context)),
             ),
             child: Column(
               children: [
@@ -322,6 +383,7 @@ class _SubscriptionDetailScreenState
             decoration: BoxDecoration(
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.bd(context)),
             ),
             child: Column(
               children: [
@@ -389,6 +451,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(
                 children: [
@@ -495,6 +558,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(
                 children: [
@@ -524,6 +588,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(
                 children: [
@@ -601,7 +666,7 @@ class _PastTransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = parseDate(tx['date']);
+    final date = parseDate(tx['created_at']);
     final amount = (tx['amount'] as num?)?.toDouble() ?? 0;
     final currency = tx['currency'] as String?;
 

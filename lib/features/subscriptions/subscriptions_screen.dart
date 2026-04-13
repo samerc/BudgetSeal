@@ -68,6 +68,19 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
     }
   }
 
+  /// Toggle enabled/disabled state for a subscription (Bug 2 fix)
+  Future<void> _toggleEnabled(Map<String, dynamic> sub) async {
+    final db = ref.read(databaseProvider);
+    final subId = sub['id'] as String;
+    final currentlyEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
+    final enabled = !currentlyEnabled;
+    await db.customStatement(
+      'UPDATE recurring_transactions SET enabled = ? WHERE id = ?',
+      [enabled ? 1 : 0, subId],
+    );
+    _load();
+  }
+
   double _monthlyEquivalent(double amount, String frequency, int interval) {
     return switch (frequency) {
       'daily' => amount * (30.0 / interval),
@@ -231,6 +244,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                               final id = sub['id'] as String;
                               context.push('/subscriptions/$id');
                             },
+                            onToggleEnabled: () => _toggleEnabled(sub),
                           )),
                     ],
                   ),
@@ -248,6 +262,7 @@ class _SubscriptionTile extends StatelessWidget {
   final String status;
   final DateTime? Function(dynamic) parseDate;
   final VoidCallback onTap;
+  final VoidCallback onToggleEnabled;
 
   const _SubscriptionTile({
     required this.sub,
@@ -258,6 +273,7 @@ class _SubscriptionTile extends StatelessWidget {
     required this.status,
     required this.parseDate,
     required this.onTap,
+    required this.onToggleEnabled,
   });
 
   @override
@@ -267,6 +283,7 @@ class _SubscriptionTile extends StatelessWidget {
     final currency = sub['currency'] as String?;
     final nextDue = parseDate(sub['next_due_date']);
     final isCancelled = status == 'cancelled';
+    final isEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
 
     final catColor = categoryColor != null
         ? Color(int.parse(categoryColor!.replaceFirst('#', '0xFF')))
@@ -284,6 +301,7 @@ class _SubscriptionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
       ),
       child: ListTile(
         onTap: onTap,
@@ -304,15 +322,15 @@ class _SubscriptionTile extends StatelessWidget {
             decoration: isCancelled ? TextDecoration.lineThrough : null,
           ),
         ),
-        subtitle: nextDue != null
-            ? Text(
-                'Next: ${DateFormat.yMMMd().format(nextDue)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.ts(context),
-                ),
-              )
-            : null,
+        subtitle: Text(
+          nextDue != null
+              ? 'Next: ${DateFormat.yMMMd().format(nextDue)} $frequencySuffix'
+              : frequencySuffix,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.ts(context),
+          ),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -321,7 +339,7 @@ class _SubscriptionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${formatAmount(amount, currency: currency)}$frequencySuffix',
+                  formatAmount(amount, currency: currency),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -360,6 +378,25 @@ class _SubscriptionTile extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 20,
+                tooltip: isEnabled ? 'Pause' : 'Resume',
+                icon: Icon(
+                  isEnabled
+                      ? Icons.pause_circle_outline_rounded
+                      : Icons.play_circle_outline_rounded,
+                  color: isEnabled
+                      ? AppColors.ts(context)
+                      : AppColors.overspent,
+                ),
+                onPressed: onToggleEnabled,
+              ),
             ),
           ],
         ),
