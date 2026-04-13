@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/app_info.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onComplete;
@@ -132,7 +133,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: FadeTransition(
               opacity: _fadeIn,
               child: Text(
-                'v1.0.0',
+                'v$appVersion',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 12,

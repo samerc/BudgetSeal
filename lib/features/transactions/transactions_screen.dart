@@ -306,7 +306,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   color: AppColors.tp(context),
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Quick: Coffee 4.50',
+                  hintText: 'Type name and amount, e.g. Coffee 4.50',
                   hintStyle: TextStyle(
                     color: AppColors.th(context),
                     fontSize: 14,
@@ -882,6 +882,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     ? 'No matching transactions'
                     : 'No transactions yet',
             subtitle: hasFilters ? null : 'Tap + to record one',
+            actionLabel: hasFilters ? null : 'Add your first transaction',
+            onAction: hasFilters ? null : () => context.push('/add-transaction'),
           ),
         ],
       );
@@ -922,22 +924,37 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
           child: Row(
             children: [
-              _SummaryDot(
-                color: txColors.income,
-                label: formatSignedAmount(monthIncome, currency: baseCurrency, type: 'income'),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _SummaryDot(
+                    color: txColors.income,
+                    label: formatSignedAmount(monthIncome, currency: baseCurrency, type: 'income'),
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
-              _SummaryDot(
-                color: txColors.expense,
-                label: formatSignedAmount(monthExpense, currency: baseCurrency, type: 'expense'),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _SummaryDot(
+                    color: txColors.expense,
+                    label: formatSignedAmount(monthExpense, currency: baseCurrency, type: 'expense'),
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
-              Text(
-                '= ${formatAmount(net, currency: baseCurrency)}',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: net >= 0 ? AppColors.healthy : AppColors.overspent,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '= ${formatAmount(net, currency: baseCurrency)}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: net >= 0 ? AppColors.healthy : AppColors.overspent,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1111,12 +1128,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                   return false; // don't dismiss
                                 }
                                 // Swipe left → delete
+                                final catName = e.tx.categoryId != null
+                                    ? categoryMap[e.tx.categoryId]?.name
+                                    : null;
+                                final deleteLabel =
+                                    '${formatSignedAmount(e.tx.amount, currency: e.tx.currency, type: e.tx.type)} ${catName ?? e.tx.note}';
                                 return await showDialog<bool>(
                                       context: context,
                                       builder: (_) => AlertDialog(
                                         title: const Text('Delete?'),
-                                        content: const Text(
-                                            'This transaction will be permanently deleted.'),
+                                        content: Text(
+                                            'Delete $deleteLabel? This will reverse any envelope deductions.'),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>

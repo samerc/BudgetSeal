@@ -29,6 +29,7 @@ import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/app_info.dart';
 import '../../shared/utils/format_number.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -62,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                   const Spacer(),
                   GestureDetector(
                     onTap: () => context.push('/about'),
-                    child: Text('v1.0.0',
+                    child: Text('v$appVersion',
                         style: TextStyle(
                             fontSize: 12, color: AppColors.th(context))),
                   ),
@@ -361,7 +362,7 @@ class SettingsScreen extends ConsumerWidget {
 
             // ── About + Reset ──
             _SettingsTile(icon: Icons.info_outline_rounded, title: 'About PocketPlan',
-                subtitle: 'Version 1.0.0', iconColor: AppColors.ts(context),
+                subtitle: 'Version $appVersion', iconColor: AppColors.ts(context),
                 onTap: () => context.push('/about')),
             const SizedBox(height: 8),
             _SettingsTile(icon: Icons.delete_forever_rounded, title: 'Reset Everything',
