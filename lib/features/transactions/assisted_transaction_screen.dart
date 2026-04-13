@@ -1112,55 +1112,113 @@ class _AssistedTransactionScreenState
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.caution.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
+                    color: _transferExchangeRate <= 1.0
+                        ? AppColors.overspent.withValues(alpha: 0.08)
+                        : AppColors.healthy.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: AppColors.caution.withValues(alpha: 0.3)),
+                        color: _transferExchangeRate <= 1.0
+                            ? AppColors.overspent.withValues(alpha: 0.4)
+                            : AppColors.healthy.withValues(alpha: 0.3),
+                        width: 1.5),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.currency_exchange_rounded,
-                          size: 18, color: AppColors.caution),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        children: [
+                          Icon(Icons.currency_exchange_rounded,
+                              size: 18,
+                              color: _transferExchangeRate <= 1.0
+                                  ? AppColors.overspent
+                                  : AppColors.healthy),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Exchange Rate Required',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _transferExchangeRate <= 1.0
+                                    ? AppColors.overspent
+                                    : AppColors.healthy),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'How many $_destinationCurrency per 1 $_selectedCurrency?',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.ts(context)),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.sf(context),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.bd(context)),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              '1 $_selectedCurrency = ? $_destinationCurrency',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.tp(context)),
+                            Text('1 $_selectedCurrency = ',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.ts(context))),
+                            Expanded(
+                              child: CalculatorAmountField(
+                                value: _transferExchangeRate <= 1.0
+                                    ? 0
+                                    : _transferExchangeRate,
+                                fontSize: 18,
+                                hintText: 'Tap to enter rate',
+                                onChanged: (v) {
+                                  if (v > 0) {
+                                    setState(
+                                        () => _transferExchangeRate = v);
+                                  }
+                                },
+                              ),
                             ),
-                            const SizedBox(height: 4),
-                            CalculatorAmountField(
-                              value: _transferExchangeRate == 1.0
-                                  ? 0
-                                  : _transferExchangeRate,
-                              fontSize: 14,
-                              hintText: 'Exchange rate',
-                              onChanged: (v) {
-                                if (v > 0) {
-                                  setState(
-                                      () => _transferExchangeRate = v);
-                                }
-                              },
-                            ),
+                            Text(' $_destinationCurrency',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.ts(context))),
                           ],
                         ),
                       ),
-                      if (_transferExchangeRate > 0 && totalAmount > 0)
-                        Text(
-                          '≈ ${formatAmount(totalAmount * _transferExchangeRate, currency: _destinationCurrency)}',
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.ts(context)),
+                      if (_transferExchangeRate > 1.0 && totalAmount > 0) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.healthy.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  size: 16, color: AppColors.healthy),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Recipient gets ≈ ${formatAmount(totalAmount * _transferExchangeRate, currency: _destinationCurrency)}',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.healthy),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      ],
                     ],
                   ),
                 ),
