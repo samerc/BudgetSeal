@@ -546,8 +546,13 @@ class _UnallocatedBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: unallocated.entries
                       .where((e) => e.key != baseCurrency)
-                      .map((e) =>
-                          BalanceChip(balance: e.value, currency: e.key))
+                      .map((e) => Text(
+                            formatAmount(e.value, currency: e.key),
+                            style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600),
+                          ))
                       .toList(),
                 ),
             ],
