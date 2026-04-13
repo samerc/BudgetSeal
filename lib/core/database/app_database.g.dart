@@ -5076,6 +5076,22 @@ class $RecurringTransactionsTable extends RecurringTransactions
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("enabled" IN (0, 1))'),
       defaultValue: const Constant(true));
+  static const VerificationMeta _isSubscriptionMeta =
+      const VerificationMeta('isSubscription');
+  @override
+  late final GeneratedColumn<bool> isSubscription = GeneratedColumn<bool>(
+      'is_subscription', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_subscription" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _priceHistoryMeta =
+      const VerificationMeta('priceHistory');
+  @override
+  late final GeneratedColumn<String> priceHistory = GeneratedColumn<String>(
+      'price_history', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -5102,6 +5118,8 @@ class $RecurringTransactionsTable extends RecurringTransactions
         lastGeneratedDate,
         endDate,
         enabled,
+        isSubscription,
+        priceHistory,
         createdAt
       ];
   @override
@@ -5204,6 +5222,18 @@ class $RecurringTransactionsTable extends RecurringTransactions
       context.handle(_enabledMeta,
           enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta));
     }
+    if (data.containsKey('is_subscription')) {
+      context.handle(
+          _isSubscriptionMeta,
+          isSubscription.isAcceptableOrUnknown(
+              data['is_subscription']!, _isSubscriptionMeta));
+    }
+    if (data.containsKey('price_history')) {
+      context.handle(
+          _priceHistoryMeta,
+          priceHistory.isAcceptableOrUnknown(
+              data['price_history']!, _priceHistoryMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -5250,6 +5280,10 @@ class $RecurringTransactionsTable extends RecurringTransactions
           .read(DriftSqlType.dateTime, data['${effectivePrefix}end_date']),
       enabled: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}enabled'])!,
+      isSubscription: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_subscription'])!,
+      priceHistory: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}price_history']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -5291,6 +5325,14 @@ class RecurringTransaction extends DataClass
 
   /// Whether auto-generation is active.
   final bool enabled;
+
+  /// Whether this recurring transaction is a subscription (Netflix, Spotify, etc.)
+  final bool isSubscription;
+
+  /// JSON-encoded price history for subscriptions.
+  /// Format: [{"amount": 15.0, "from": "2025-01-01"}, {"amount": 18.0, "from": "2026-06-01"}]
+  /// When generating transactions, the engine uses the price active on the due date.
+  final String? priceHistory;
   final DateTime createdAt;
   const RecurringTransaction(
       {required this.id,
@@ -5309,6 +5351,8 @@ class RecurringTransaction extends DataClass
       this.lastGeneratedDate,
       this.endDate,
       required this.enabled,
+      required this.isSubscription,
+      this.priceHistory,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5337,6 +5381,10 @@ class RecurringTransaction extends DataClass
       map['end_date'] = Variable<DateTime>(endDate);
     }
     map['enabled'] = Variable<bool>(enabled);
+    map['is_subscription'] = Variable<bool>(isSubscription);
+    if (!nullToAbsent || priceHistory != null) {
+      map['price_history'] = Variable<String>(priceHistory);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -5367,6 +5415,10 @@ class RecurringTransaction extends DataClass
           ? const Value.absent()
           : Value(endDate),
       enabled: Value(enabled),
+      isSubscription: Value(isSubscription),
+      priceHistory: priceHistory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(priceHistory),
       createdAt: Value(createdAt),
     );
   }
@@ -5393,6 +5445,8 @@ class RecurringTransaction extends DataClass
           serializer.fromJson<DateTime?>(json['lastGeneratedDate']),
       endDate: serializer.fromJson<DateTime?>(json['endDate']),
       enabled: serializer.fromJson<bool>(json['enabled']),
+      isSubscription: serializer.fromJson<bool>(json['isSubscription']),
+      priceHistory: serializer.fromJson<String?>(json['priceHistory']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -5416,6 +5470,8 @@ class RecurringTransaction extends DataClass
       'lastGeneratedDate': serializer.toJson<DateTime?>(lastGeneratedDate),
       'endDate': serializer.toJson<DateTime?>(endDate),
       'enabled': serializer.toJson<bool>(enabled),
+      'isSubscription': serializer.toJson<bool>(isSubscription),
+      'priceHistory': serializer.toJson<String?>(priceHistory),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -5437,6 +5493,8 @@ class RecurringTransaction extends DataClass
           Value<DateTime?> lastGeneratedDate = const Value.absent(),
           Value<DateTime?> endDate = const Value.absent(),
           bool? enabled,
+          bool? isSubscription,
+          Value<String?> priceHistory = const Value.absent(),
           DateTime? createdAt}) =>
       RecurringTransaction(
         id: id ?? this.id,
@@ -5459,6 +5517,9 @@ class RecurringTransaction extends DataClass
             : this.lastGeneratedDate,
         endDate: endDate.present ? endDate.value : this.endDate,
         enabled: enabled ?? this.enabled,
+        isSubscription: isSubscription ?? this.isSubscription,
+        priceHistory:
+            priceHistory.present ? priceHistory.value : this.priceHistory,
         createdAt: createdAt ?? this.createdAt,
       );
   RecurringTransaction copyWithCompanion(RecurringTransactionsCompanion data) {
@@ -5486,6 +5547,12 @@ class RecurringTransaction extends DataClass
           : this.lastGeneratedDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
       enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      isSubscription: data.isSubscription.present
+          ? data.isSubscription.value
+          : this.isSubscription,
+      priceHistory: data.priceHistory.present
+          ? data.priceHistory.value
+          : this.priceHistory,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -5509,6 +5576,8 @@ class RecurringTransaction extends DataClass
           ..write('lastGeneratedDate: $lastGeneratedDate, ')
           ..write('endDate: $endDate, ')
           ..write('enabled: $enabled, ')
+          ..write('isSubscription: $isSubscription, ')
+          ..write('priceHistory: $priceHistory, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -5532,6 +5601,8 @@ class RecurringTransaction extends DataClass
       lastGeneratedDate,
       endDate,
       enabled,
+      isSubscription,
+      priceHistory,
       createdAt);
   @override
   bool operator ==(Object other) =>
@@ -5553,6 +5624,8 @@ class RecurringTransaction extends DataClass
           other.lastGeneratedDate == this.lastGeneratedDate &&
           other.endDate == this.endDate &&
           other.enabled == this.enabled &&
+          other.isSubscription == this.isSubscription &&
+          other.priceHistory == this.priceHistory &&
           other.createdAt == this.createdAt);
 }
 
@@ -5574,6 +5647,8 @@ class RecurringTransactionsCompanion
   final Value<DateTime?> lastGeneratedDate;
   final Value<DateTime?> endDate;
   final Value<bool> enabled;
+  final Value<bool> isSubscription;
+  final Value<String?> priceHistory;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const RecurringTransactionsCompanion({
@@ -5593,6 +5668,8 @@ class RecurringTransactionsCompanion
     this.lastGeneratedDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.enabled = const Value.absent(),
+    this.isSubscription = const Value.absent(),
+    this.priceHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5613,6 +5690,8 @@ class RecurringTransactionsCompanion
     this.lastGeneratedDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.enabled = const Value.absent(),
+    this.isSubscription = const Value.absent(),
+    this.priceHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -5640,6 +5719,8 @@ class RecurringTransactionsCompanion
     Expression<DateTime>? lastGeneratedDate,
     Expression<DateTime>? endDate,
     Expression<bool>? enabled,
+    Expression<bool>? isSubscription,
+    Expression<String>? priceHistory,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -5661,6 +5742,8 @@ class RecurringTransactionsCompanion
       if (lastGeneratedDate != null) 'last_generated_date': lastGeneratedDate,
       if (endDate != null) 'end_date': endDate,
       if (enabled != null) 'enabled': enabled,
+      if (isSubscription != null) 'is_subscription': isSubscription,
+      if (priceHistory != null) 'price_history': priceHistory,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5683,6 +5766,8 @@ class RecurringTransactionsCompanion
       Value<DateTime?>? lastGeneratedDate,
       Value<DateTime?>? endDate,
       Value<bool>? enabled,
+      Value<bool>? isSubscription,
+      Value<String?>? priceHistory,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
     return RecurringTransactionsCompanion(
@@ -5702,6 +5787,8 @@ class RecurringTransactionsCompanion
       lastGeneratedDate: lastGeneratedDate ?? this.lastGeneratedDate,
       endDate: endDate ?? this.endDate,
       enabled: enabled ?? this.enabled,
+      isSubscription: isSubscription ?? this.isSubscription,
+      priceHistory: priceHistory ?? this.priceHistory,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -5759,6 +5846,12 @@ class RecurringTransactionsCompanion
     if (enabled.present) {
       map['enabled'] = Variable<bool>(enabled.value);
     }
+    if (isSubscription.present) {
+      map['is_subscription'] = Variable<bool>(isSubscription.value);
+    }
+    if (priceHistory.present) {
+      map['price_history'] = Variable<String>(priceHistory.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5787,6 +5880,8 @@ class RecurringTransactionsCompanion
           ..write('lastGeneratedDate: $lastGeneratedDate, ')
           ..write('endDate: $endDate, ')
           ..write('enabled: $enabled, ')
+          ..write('isSubscription: $isSubscription, ')
+          ..write('priceHistory: $priceHistory, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -12251,6 +12346,8 @@ typedef $$RecurringTransactionsTableCreateCompanionBuilder
   Value<DateTime?> lastGeneratedDate,
   Value<DateTime?> endDate,
   Value<bool> enabled,
+  Value<bool> isSubscription,
+  Value<String?> priceHistory,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -12272,6 +12369,8 @@ typedef $$RecurringTransactionsTableUpdateCompanionBuilder
   Value<DateTime?> lastGeneratedDate,
   Value<DateTime?> endDate,
   Value<bool> enabled,
+  Value<bool> isSubscription,
+  Value<String?> priceHistory,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -12388,6 +12487,13 @@ class $$RecurringTransactionsTableFilterComposer
 
   ColumnFilters<bool> get enabled => $composableBuilder(
       column: $table.enabled, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSubscription => $composableBuilder(
+      column: $table.isSubscription,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get priceHistory => $composableBuilder(
+      column: $table.priceHistory, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -12519,6 +12625,14 @@ class $$RecurringTransactionsTableOrderingComposer
   ColumnOrderings<bool> get enabled => $composableBuilder(
       column: $table.enabled, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isSubscription => $composableBuilder(
+      column: $table.isSubscription,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get priceHistory => $composableBuilder(
+      column: $table.priceHistory,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -12647,6 +12761,12 @@ class $$RecurringTransactionsTableAnnotationComposer
 
   GeneratedColumn<bool> get enabled =>
       $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSubscription => $composableBuilder(
+      column: $table.isSubscription, builder: (column) => column);
+
+  GeneratedColumn<String> get priceHistory => $composableBuilder(
+      column: $table.priceHistory, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -12779,6 +12899,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<DateTime?> lastGeneratedDate = const Value.absent(),
             Value<DateTime?> endDate = const Value.absent(),
             Value<bool> enabled = const Value.absent(),
+            Value<bool> isSubscription = const Value.absent(),
+            Value<String?> priceHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12799,6 +12921,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             lastGeneratedDate: lastGeneratedDate,
             endDate: endDate,
             enabled: enabled,
+            isSubscription: isSubscription,
+            priceHistory: priceHistory,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -12819,6 +12943,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<DateTime?> lastGeneratedDate = const Value.absent(),
             Value<DateTime?> endDate = const Value.absent(),
             Value<bool> enabled = const Value.absent(),
+            Value<bool> isSubscription = const Value.absent(),
+            Value<String?> priceHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12839,6 +12965,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             lastGeneratedDate: lastGeneratedDate,
             endDate: endDate,
             enabled: enabled,
+            isSubscription: isSubscription,
+            priceHistory: priceHistory,
             createdAt: createdAt,
             rowid: rowid,
           ),

@@ -40,6 +40,14 @@ class RecurringTransactions extends Table {
   /// Whether auto-generation is active.
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
 
+  /// Whether this recurring transaction is a subscription (Netflix, Spotify, etc.)
+  BoolColumn get isSubscription => boolean().withDefault(const Constant(false))();
+
+  /// JSON-encoded price history for subscriptions.
+  /// Format: [{"amount": 15.0, "from": "2025-01-01"}, {"amount": 18.0, "from": "2026-06-01"}]
+  /// When generating transactions, the engine uses the price active on the due date.
+  TextColumn get priceHistory => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

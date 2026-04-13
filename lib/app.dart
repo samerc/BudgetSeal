@@ -28,6 +28,8 @@ import 'features/templates/templates_screen.dart';
 import 'features/periods/period_transition_screen.dart';
 import 'features/reports/export_report_screen.dart';
 import 'features/reports/reports_hub_screen.dart';
+import 'features/subscriptions/subscriptions_screen.dart';
+import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
@@ -220,6 +222,19 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/leftover-resolution',
           pageBuilder: (_, state) => slideUpPage(
               child: const LeftoverResolutionScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/subscriptions',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const SubscriptionsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/subscriptions/:id',
+          pageBuilder: (_, state) => slideUpPage(
+            child: SubscriptionDetailScreen(
+                subscriptionId: state.pathParameters['id']!),
+            state: state,
+          ),
         ),
         GoRoute(
           path: '/about',

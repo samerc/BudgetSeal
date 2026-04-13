@@ -380,6 +380,8 @@ class SyncEngine {
         'endDate': r.endDate?.toIso8601String(),
         'lastGeneratedDate': r.lastGeneratedDate?.toIso8601String(),
         'enabled': r.enabled,
+        'isSubscription': r.isSubscription,
+        'priceHistory': r.priceHistory,
         'createdAt': r.createdAt.toIso8601String(),
       };
 
@@ -546,6 +548,8 @@ class SyncEngine {
         endDate: Value(_parseDate(m['endDate'])),
         lastGeneratedDate: Value(_parseDate(m['lastGeneratedDate'])),
         enabled: Value(m['enabled'] as bool? ?? true),
+        isSubscription: Value(m['isSubscription'] as bool? ?? false),
+        priceHistory: Value(m['priceHistory'] as String?),
       );
 
   TransactionTemplatesCompanion _templateFromMap(Map<String, dynamic> m) =>

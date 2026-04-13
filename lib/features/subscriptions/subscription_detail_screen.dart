@@ -1,0 +1,626 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' as drift;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+import '../../core/providers/database_provider.dart';
+import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/category_icon.dart';
+
+class SubscriptionDetailScreen extends ConsumerStatefulWidget {
+  final String subscriptionId;
+  const SubscriptionDetailScreen({super.key, required this.subscriptionId});
+
+  @override
+  ConsumerState<SubscriptionDetailScreen> createState() =>
+      _SubscriptionDetailScreenState();
+}
+
+class _SubscriptionDetailScreenState
+    extends ConsumerState<SubscriptionDetailScreen> {
+  Map<String, dynamic>? _sub;
+  String? _categoryName;
+  String? _categoryIcon;
+  String? _categoryColor;
+  List<Map<String, dynamic>> _pastTransactions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final db = ref.read(databaseProvider);
+
+    // Load subscription
+    final rows = await db.customSelect(
+      'SELECT * FROM recurring_transactions WHERE id = ?',
+      variables: [drift.Variable.withString(widget.subscriptionId)],
+    ).get();
+
+    if (rows.isEmpty) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    final sub = rows.first.data;
+
+    // Load category
+    String? catName;
+    String? catIcon;
+    String? catColor;
+    final catId = sub['category_id'] as String?;
+    if (catId != null) {
+      final catRows = await db.customSelect(
+        'SELECT name, icon, color_hex FROM categories WHERE id = ?',
+        variables: [drift.Variable.withString(catId)],
+      ).get();
+      if (catRows.isNotEmpty) {
+        catName = catRows.first.data['name'] as String?;
+        catIcon = catRows.first.data['icon'] as String?;
+        catColor = catRows.first.data['color_hex'] as String?;
+      }
+    }
+
+    // Load past transactions matching this subscription by title and type
+    final title = sub['title'] as String? ?? '';
+    final pastRows = await db.customSelect(
+      'SELECT * FROM transactions WHERE household_id = ? AND note LIKE ? ORDER BY date DESC LIMIT 20',
+      variables: [
+        drift.Variable.withString(sub['household_id'] as String),
+        drift.Variable.withString('%$title%'),
+      ],
+    ).get();
+
+    if (mounted) {
+      setState(() {
+        _sub = sub;
+        _categoryName = catName;
+        _categoryIcon = catIcon;
+        _categoryColor = catColor;
+        _pastTransactions = pastRows.map((r) => r.data).toList();
+        _loading = false;
+      });
+    }
+  }
+
+  DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+
+  String _frequencySuffix(String frequency, int interval) {
+    if (interval == 1) {
+      return switch (frequency) {
+        'daily' => '/day',
+        'weekly' => '/week',
+        'monthly' => '/month',
+        'yearly' => '/year',
+        _ => '/$frequency',
+      };
+    }
+    return switch (frequency) {
+      'daily' => '/$interval days',
+      'weekly' => '/$interval weeks',
+      'monthly' => '/$interval months',
+      'yearly' => '/$interval years',
+      _ => '/$interval $frequency',
+    };
+  }
+
+  double _monthlyEquivalent(double amount, String frequency, int interval) {
+    return switch (frequency) {
+      'daily' => amount * (30.0 / interval),
+      'weekly' => amount * (52.0 / (12.0 * interval)),
+      'monthly' => amount / interval,
+      'yearly' => amount / (12.0 * interval),
+      _ => amount,
+    };
+  }
+
+  /// Calculate upcoming billing dates from nextDueDate
+  List<DateTime> _upcomingDates(
+      DateTime nextDue, String frequency, int interval, int count) {
+    final dates = <DateTime>[];
+    var current = nextDue;
+    for (var i = 0; i < count; i++) {
+      dates.add(current);
+      current = _advanceDate(current, frequency, interval);
+    }
+    return dates;
+  }
+
+  DateTime _advanceDate(DateTime d, String frequency, int interval) {
+    return switch (frequency) {
+      'daily' => d.add(Duration(days: interval)),
+      'weekly' => d.add(Duration(days: 7 * interval)),
+      'monthly' => DateTime(d.year, d.month + interval, d.day),
+      'yearly' => DateTime(d.year + interval, d.month, d.day),
+      _ => d.add(Duration(days: 30 * interval)),
+    };
+  }
+
+  /// Parse price history JSON
+  List<Map<String, dynamic>> _parsePriceHistory(String? json) {
+    if (json == null || json.isEmpty) return [];
+    try {
+      final list = jsonDecode(json) as List;
+      return list.cast<Map<String, dynamic>>();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Determine subscription status
+  String _status() {
+    if (_sub == null) return 'active';
+    final enabled = _sub!['enabled'] == 1 || _sub!['enabled'] == true;
+    final endDate = _parseDate(_sub!['end_date']);
+    if (!enabled || (endDate != null && endDate.isBefore(DateTime.now()))) {
+      return 'cancelled';
+    }
+    if (endDate != null && endDate.difference(DateTime.now()).inDays <= 30) {
+      return 'ending_soon';
+    }
+    return 'active';
+  }
+
+  Future<void> _setCancellationDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 30)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    );
+    if (picked == null) return;
+
+    final db = ref.read(databaseProvider);
+    await db.customStatement(
+      'UPDATE recurring_transactions SET end_date = ? WHERE id = ?',
+      [picked.millisecondsSinceEpoch ~/ 1000, widget.subscriptionId],
+    );
+    _load();
+  }
+
+  Future<void> _togglePause() async {
+    if (_sub == null) return;
+    final currentlyEnabled =
+        _sub!['enabled'] == 1 || _sub!['enabled'] == true;
+    final db = ref.read(databaseProvider);
+    await db.customStatement(
+      'UPDATE recurring_transactions SET enabled = ? WHERE id = ?',
+      [currentlyEnabled ? 0 : 1, widget.subscriptionId],
+    );
+    _load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_sub == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Subscription not found')),
+      );
+    }
+
+    final sub = _sub!;
+    final title = sub['title'] as String? ?? 'Untitled';
+    final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
+    final currency = sub['currency'] as String?;
+    final frequency = sub['frequency'] as String? ?? 'monthly';
+    final interval = (sub['interval'] as int?) ?? 1;
+    final nextDue = _parseDate(sub['next_due_date']);
+    final createdAt = _parseDate(sub['created_at']);
+    final endDate = _parseDate(sub['end_date']);
+    final priceHistoryJson = sub['price_history'] as String?;
+    final priceHistory = _parsePriceHistory(priceHistoryJson);
+    final status = _status();
+    final enabled = sub['enabled'] == 1 || sub['enabled'] == true;
+
+    final monthlyAmount = _monthlyEquivalent(amount, frequency, interval);
+    final annualCost = monthlyAmount * 12;
+
+    // Calculate total paid (rough: monthly * months since created)
+    double totalPaid = 0;
+    if (createdAt != null) {
+      final monthsSince = DateTime.now().difference(createdAt).inDays / 30.0;
+      totalPaid = monthlyAmount * monthsSince;
+    }
+
+    final catColor = _categoryColor != null
+        ? Color(int.parse(_categoryColor!.replaceFirst('#', '0xFF')))
+        : AppColors.accent;
+
+    final statusDotColor = switch (status) {
+      'active' => AppColors.healthy,
+      'ending_soon' => AppColors.caution,
+      'cancelled' => AppColors.overspent,
+      _ => AppColors.healthy,
+    };
+
+    final statusLabel = switch (status) {
+      'active' => 'Active',
+      'ending_soon' => 'Ending soon',
+      'cancelled' => 'Cancelled',
+      _ => '',
+    };
+
+    // Upcoming dates
+    final upcoming = nextDue != null && status != 'cancelled'
+        ? _upcomingDates(nextDue, frequency, interval, 3)
+        : <DateTime>[];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_rounded),
+            onPressed: () => context.push('/recurring'),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        children: [
+          // ── Amount + frequency header ──
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.sf(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                CategoryIcon(
+                  categoryName: _categoryName ?? title,
+                  emoji: _categoryIcon,
+                  color: catColor,
+                  size: 56,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${formatAmount(amount, currency: currency)}${_frequencySuffix(frequency, interval)}',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.tp(context),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Annual cost: ${formatAmount(annualCost, currency: currency)}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.ts(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Status details ──
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.sf(context),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              children: [
+                _DetailRow(
+                  label: 'Status',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(statusLabel,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context))),
+                      const SizedBox(width: 6),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: statusDotColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (createdAt != null)
+                  _DetailRow(
+                    label: 'Active since',
+                    value: DateFormat.yMMMd().format(createdAt),
+                  ),
+                if (nextDue != null)
+                  _DetailRow(
+                    label: 'Next billing',
+                    value: DateFormat.yMMMd().format(nextDue),
+                  ),
+                if (endDate != null)
+                  _DetailRow(
+                    label: 'Ends on',
+                    value: DateFormat.yMMMd().format(endDate),
+                  ),
+                _DetailRow(
+                  label: 'Total paid (est.)',
+                  value: formatAmount(totalPaid, currency: currency),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Price History ──
+          if (priceHistory.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+              child: Text(
+                'PRICE HISTORY',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.1,
+                  color: AppColors.ts(context),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.sf(context),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < priceHistory.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: i == priceHistory.length - 1
+                                  ? AppColors.accent
+                                  : AppColors.th(context),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${formatAmount((priceHistory[i]['amount'] as num).toDouble(), currency: currency)}${_frequencySuffix(frequency, interval)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${priceHistory[i]['from'] ?? ''}${i < priceHistory.length - 1 ? ' - ${priceHistory[i + 1]['from'] ?? ''}' : ' - present'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.ts(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // ── Action buttons ──
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _setCancellationDate,
+                  icon: const Icon(Icons.event_rounded, size: 18),
+                  label: Text(endDate != null
+                      ? 'Change Cancel Date'
+                      : 'Set Cancellation Date'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.overspent,
+                    side: const BorderSide(color: AppColors.overspent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _togglePause,
+                  icon: Icon(
+                    enabled
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    size: 18,
+                  ),
+                  label: Text(enabled ? 'Pause' : 'Resume'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: const BorderSide(color: AppColors.accent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // ── Past Transactions ──
+          if (_pastTransactions.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+              child: Text(
+                'PAST TRANSACTIONS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.1,
+                  color: AppColors.ts(context),
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.sf(context),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  for (final tx in _pastTransactions)
+                    _PastTransactionTile(tx: tx, parseDate: _parseDate),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // ── Upcoming ──
+          if (upcoming.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+              child: Text(
+                'UPCOMING',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.1,
+                  color: AppColors.ts(context),
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.sf(context),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  for (final date in upcoming)
+                    ListTile(
+                      dense: true,
+                      leading: Icon(Icons.schedule_rounded,
+                          size: 18, color: AppColors.th(context)),
+                      title: Text(
+                        DateFormat.yMMMd().format(date),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                      trailing: Text(
+                        '-${formatAmount(amount, currency: currency)}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.ts(context),
+                        ),
+                      ),
+                      subtitle: Text(
+                        'scheduled',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.th(context),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String? value;
+  final Widget? child;
+
+  const _DetailRow({required this.label, this.value, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
+          child ??
+              Text(value ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context),
+                  )),
+        ],
+      ),
+    );
+  }
+}
+
+class _PastTransactionTile extends StatelessWidget {
+  final Map<String, dynamic> tx;
+  final DateTime? Function(dynamic) parseDate;
+
+  const _PastTransactionTile({required this.tx, required this.parseDate});
+
+  @override
+  Widget build(BuildContext context) {
+    final date = parseDate(tx['date']);
+    final amount = (tx['amount'] as num?)?.toDouble() ?? 0;
+    final currency = tx['currency'] as String?;
+
+    return ListTile(
+      dense: true,
+      leading: Icon(Icons.check_circle_rounded,
+          size: 18, color: AppColors.healthy),
+      title: Text(
+        date != null ? DateFormat.yMMMd().format(date) : '—',
+        style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
+      ),
+      trailing: Text(
+        '-${formatAmount(amount, currency: currency)}',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.tp(context),
+        ),
+      ),
+    );
+  }
+}

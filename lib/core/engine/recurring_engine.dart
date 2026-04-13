@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -48,8 +50,35 @@ class RecurringEngine {
     return generated;
   }
 
+  /// Resolve the effective amount for a recurring transaction on a given date,
+  /// taking price history into account for subscriptions.
+  double _getAmountForDate(RecurringTransaction rec, DateTime date) {
+    if (rec.priceHistory == null || rec.priceHistory!.isEmpty) {
+      return rec.amount;
+    }
+    try {
+      final history = (jsonDecode(rec.priceHistory!) as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList()
+        ..sort((a, b) => (a['from'] as String).compareTo(b['from'] as String));
+
+      double activeAmount = rec.amount;
+      for (final entry in history) {
+        final from = DateTime.parse(entry['from'] as String);
+        if (!date.isBefore(from)) {
+          activeAmount = (entry['amount'] as num).toDouble();
+        }
+      }
+      return activeAmount;
+    } catch (_) {
+      return rec.amount;
+    }
+  }
+
   Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate]) async {
     final householdId = rec.householdId;
+    final effectiveDate = forDate ?? rec.nextDueDate;
+    final amount = _getAmountForDate(rec, effectiveDate);
 
     // Determine base currency from household.
     final household = await (_db.select(_db.households)
@@ -62,18 +91,18 @@ class RecurringEngine {
         householdId: householdId,
         fromAccountId: rec.accountId,
         toAccountId: rec.destinationAccountId!,
-        amount: rec.amount,
+        amount: amount,
         currency: rec.currency,
         exchangeRateToBase: 1.0,
         createdBy: 'recurring',
         deviceId: 'local',
         note: rec.title.isNotEmpty ? rec.title : rec.note,
-        date: forDate ?? rec.nextDueDate,
+        date: effectiveDate,
       );
     } else {
       final lines = [
         TxLine(
-          amount: rec.amount,
+          amount: amount,
           currency: rec.currency,
           categoryId: rec.categoryId,
           accountId: rec.accountId,
@@ -86,7 +115,7 @@ class RecurringEngine {
         lines: lines,
         baseCurrency: baseCurrency,
         note: rec.title.isNotEmpty ? rec.title : rec.note,
-        date: forDate ?? rec.nextDueDate,
+        date: effectiveDate,
       );
     }
   }
@@ -124,6 +153,8 @@ class RecurringEngine {
     required DateTime startDate,
     DateTime? endDate,
     String note = '',
+    bool isSubscription = false,
+    String? priceHistory,
   }) async {
     final id = _uuid.v4();
     await _db.into(_db.recurringTransactions).insert(
@@ -142,6 +173,8 @@ class RecurringEngine {
             interval: Value(interval),
             nextDueDate: startDate,
             endDate: Value(endDate),
+            isSubscription: Value(isSubscription),
+            priceHistory: Value(priceHistory),
           ),
         );
     return id;

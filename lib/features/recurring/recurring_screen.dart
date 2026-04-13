@@ -176,14 +176,35 @@ class _RecurringTile extends StatelessWidget {
       child: ListTile(
         onTap: onEdit,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(Icons.repeat_rounded, color: color, size: 18),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.repeat_rounded, color: color, size: 18),
+            ),
+            if (item.isSubscription)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.sf(context), width: 1.5),
+                  ),
+                  child: const Icon(Icons.subscriptions_rounded,
+                      size: 9, color: Colors.white),
+                ),
+              ),
+          ],
         ),
         title: Text(
           item.title.isNotEmpty ? item.title : item.note,
@@ -241,6 +262,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
   String? _accountId;
   String _currency = 'USD';
   DateTime? _endDate;
+  bool _isSubscription = false;
   bool _saving = false;
   bool _submitted = false;
 
@@ -366,7 +388,18 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
                   ? 'Ends: ${DateFormat('MMMM d, yyyy').format(_endDate!)}'
                   : 'Ends: Never (tap to set)'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('This is a subscription',
+                  style: TextStyle(fontSize: 14)),
+              subtitle: const Text('e.g. Netflix, Spotify',
+                  style: TextStyle(fontSize: 12, color: AppColors.textHint)),
+              value: _isSubscription,
+              onChanged: (v) => setState(() => _isSubscription = v),
+              activeTrackColor: AppColors.accent,
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
               style: FilledButton.styleFrom(
@@ -415,6 +448,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
         frequency: _frequency,
         startDate: _startDate,
         endDate: _endDate,
+        isSubscription: _isSubscription,
       );
       if (mounted) Navigator.pop(context, true);
     } finally {
@@ -445,6 +479,7 @@ class _EditRecurringSheetState extends ConsumerState<_EditRecurringSheet> {
   late String? _accountId;
   late String _currency;
   late DateTime? _endDate;
+  late bool _isSubscription;
   bool _saving = false;
   bool _submitted = false;
 
@@ -459,6 +494,7 @@ class _EditRecurringSheetState extends ConsumerState<_EditRecurringSheet> {
     _accountId = item.accountId;
     _currency = item.currency;
     _endDate = item.endDate;
+    _isSubscription = item.isSubscription;
   }
 
   @override
@@ -582,7 +618,18 @@ class _EditRecurringSheetState extends ConsumerState<_EditRecurringSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('This is a subscription',
+                  style: TextStyle(fontSize: 14)),
+              subtitle: const Text('e.g. Netflix, Spotify',
+                  style: TextStyle(fontSize: 12, color: AppColors.textHint)),
+              value: _isSubscription,
+              onChanged: (v) => setState(() => _isSubscription = v),
+              activeTrackColor: AppColors.accent,
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -646,6 +693,7 @@ class _EditRecurringSheetState extends ConsumerState<_EditRecurringSheet> {
         frequency: Value(_frequency),
         nextDueDate: Value(_startDate),
         endDate: Value(_endDate),
+        isSubscription: Value(_isSubscription),
       ));
       if (mounted) Navigator.pop(context, true);
     } finally {
