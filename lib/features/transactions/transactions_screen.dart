@@ -1553,7 +1553,7 @@ class _TxTile extends ConsumerWidget {
             // ── Amount (right-aligned #3) ───────────────────────
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildAmountColumn(context, typeColor),
+              children: _buildAmountColumn(context, ref, typeColor),
             ),
           ],
         ),
@@ -1644,7 +1644,7 @@ class _TxTile extends ConsumerWidget {
     return null;
   }
 
-  List<Widget> _buildAmountColumn(BuildContext context, Color typeColor) {
+  List<Widget> _buildAmountColumn(BuildContext context, WidgetRef ref, Color typeColor) {
     final tx = entry.tx;
     final lines = entry.lines;
     final isTransferSplit = transferSide != null;
@@ -1658,9 +1658,20 @@ class _TxTile extends ConsumerWidget {
       displayAmount = lines.first.amount;
     }
 
+    // For transfer "to" side: show the converted amount in destination currency
+    if (isTransferSplit && !isFrom) {
+      // The destination gets amount * exchangeRate
+      final accounts = ref.read(accountsProvider).value ?? [];
+      final destAcct = tx.destinationAccountId != null
+          ? accounts.where((a) => a.id == tx.destinationAccountId).firstOrNull
+          : null;
+      displayAmount = tx.amount * tx.exchangeRateToBase;
+      displayCurrency = destAcct?.currency ?? tx.currency;
+    }
+
     final baseCurrency = tx.currency;
     final showConversion =
-        displayCurrency != baseCurrency && lines.isNotEmpty;
+        !isTransferSplit && displayCurrency != baseCurrency && lines.isNotEmpty;
     final baseAmount = tx.amount;
 
     // For transfer splits, show as expense (from) or income (to)
@@ -1718,15 +1729,28 @@ class _TxTile extends ConsumerWidget {
             ],
           ),
         ),
-      if (isSingleAccount)
-        Text(
-          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
-          textAlign: TextAlign.end,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppColors.th(context),
-          ),
-        ),
+      if (isSingleAccount || isTransferSplit)
+        Builder(builder: (_) {
+          // For transfer "to" side, show destination account info
+          if (isTransferSplit && !isFrom) {
+            final accounts = ref.read(accountsProvider).value ?? [];
+            final destAcct = tx.destinationAccountId != null
+                ? accounts.where((a) => a.id == tx.destinationAccountId).firstOrNull
+                : null;
+            final destName = destAcct?.name ?? 'account';
+            final destCurrency = destAcct?.currency ?? tx.currency;
+            return Text(
+              '$destName: ${formatAmount(entry.accountBalanceAfter * tx.exchangeRateToBase, currency: destCurrency)}',
+              textAlign: TextAlign.end,
+              style: TextStyle(fontSize: 11, color: AppColors.th(context)),
+            );
+          }
+          return Text(
+            '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
+            textAlign: TextAlign.end,
+            style: TextStyle(fontSize: 11, color: AppColors.th(context)),
+          );
+        }),
       if (!isSingleAccount)
         Text(
           '${entry.involvedAccountNames.length} accounts',

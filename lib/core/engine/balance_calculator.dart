@@ -88,6 +88,9 @@ class BalanceCalculator {
     }
 
     // 3. Handle transfers (always use transaction-level fields).
+    //    Source: deduct amount (in source currency).
+    //    Destination: add amount * exchangeRate (converted to dest currency).
+    //    For same-currency transfers, exchangeRate = 1.0 so both sides are equal.
     final transfersFrom = await (_db.select(_db.transactions)
           ..where((t) =>
               t.accountId.equals(accountId) & t.type.equals('transfer')))
@@ -102,7 +105,7 @@ class BalanceCalculator {
               t.type.equals('transfer')))
         .get();
     for (final tx in transfersTo) {
-      balance += tx.amount;
+      balance += tx.amount * tx.exchangeRateToBase;
     }
 
     return balance;
