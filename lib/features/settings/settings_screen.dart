@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -434,9 +435,18 @@ class SettingsScreen extends ConsumerWidget {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
 
-      // Restart app
+      // Force restart the app — navigating to onboarding after db.close()
+      // leaves stale provider references to the closed database.
       if (context.mounted) {
-        context.go('/onboarding');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All data erased. Restarting...'),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        await Future.delayed(const Duration(seconds: 2));
+        SystemNavigator.pop();
       }
     }
   }
