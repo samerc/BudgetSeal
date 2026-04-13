@@ -1342,20 +1342,15 @@ class _AllocationDetailScreenState
       final dao = AllocationsDao(db);
       final allocId = _isNew ? const Uuid().v4() : widget.allocationId;
 
+      // For existing envelopes, preserve the linked category.
+      // For new envelopes, use allocId as placeholder categoryId
+      // (required by schema). User should link real categories after creation.
       String categoryId;
       if (_isNew) {
-        // Auto-create a matching category and link it to this envelope.
-        categoryId = const Uuid().v4();
-        await db.into(db.categories).insert(CategoriesCompanion.insert(
-              id: categoryId,
-              householdId: householdId,
-              name: name,
-              transactionType: const Value('expense'),
-              allocationId: Value(allocId),
-            ));
+        categoryId = allocId; // placeholder, will be replaced when user links categories
       } else {
         final existing = await dao.getById(allocId);
-        categoryId = existing?.categoryId ?? const Uuid().v4();
+        categoryId = existing?.categoryId ?? allocId;
       }
 
       final targetAmount =

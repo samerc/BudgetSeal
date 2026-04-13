@@ -225,6 +225,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
               data: (unallocated) => _UnallocatedBanner(
                 unallocated: unallocated,
                 baseCurrency: baseCurrency,
+                hasAllocations: (allocationsAsync.value?.isNotEmpty ?? false),
               ),
               loading: () => const SizedBox(height: 80),
               error: (_, __) => const SizedBox.shrink(),
@@ -492,10 +493,12 @@ class _SummaryDivider extends StatelessWidget {
 class _UnallocatedBanner extends StatelessWidget {
   final Map<String, double> unallocated;
   final String baseCurrency;
+  final bool hasAllocations;
 
   const _UnallocatedBanner({
     required this.unallocated,
     required this.baseCurrency,
+    this.hasAllocations = false,
   });
 
   @override
@@ -553,7 +556,7 @@ class _UnallocatedBanner extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => context.push('/funding'),
+              onPressed: hasAllocations ? () => context.push('/funding') : null,
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white.withValues(alpha: 0.18),
                 foregroundColor: Colors.white,
