@@ -181,11 +181,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ],
         ),
       ),
-      // Scroll-to-today FAB only
-      floatingActionButton: _showScrollToTop
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 64),
-              child: FloatingActionButton.small(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 60),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_showScrollToTop) ...[
+              FloatingActionButton.small(
                 heroTag: 'fab_scroll_top',
                 tooltip: 'Scroll to top',
                 backgroundColor: AppColors.sf(context),
@@ -198,8 +200,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 },
                 child: const Icon(Icons.arrow_upward_rounded, size: 20),
               ),
-            )
-          : null,
+              const SizedBox(height: 8),
+            ],
+            FloatingActionButton(
+              heroTag: 'fab_add_tx',
+              tooltip: 'Add transaction',
+              onPressed: () => context.push('/add-transaction'),
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

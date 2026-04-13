@@ -325,7 +325,9 @@ class _EntryModeRouter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(entryModeProvider);
     if (mode == 'assisted') {
-      return const AssistedTransactionScreen();
+      return AssistedTransactionScreen(
+        initialType: extra?['editType'] as String?,
+      );
     }
     return AddTransactionScreen(
       editType: extra?['editType'] as String?,

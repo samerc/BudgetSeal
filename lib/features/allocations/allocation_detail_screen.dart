@@ -951,7 +951,7 @@ class _AllocationDetailScreenState
           _sectionHeader('SPENDING HISTORY', icon: Icons.bar_chart_rounded),
           const SizedBox(height: 4),
           SizedBox(
-            height: 100,
+            height: 85,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: months.map((m) {

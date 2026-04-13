@@ -22,7 +22,8 @@ import '../../shared/widgets/category_icon.dart';
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
 class AssistedTransactionScreen extends ConsumerStatefulWidget {
-  const AssistedTransactionScreen({super.key});
+  final String? initialType;
+  const AssistedTransactionScreen({super.key, this.initialType});
 
   @override
   ConsumerState<AssistedTransactionScreen> createState() =>
@@ -40,7 +41,7 @@ class _LineItem {
 
 class _AssistedTransactionScreenState
     extends ConsumerState<AssistedTransactionScreen> {
-  String _type = 'expense';
+  late String _type;
   String _title = '';
   String? _accountId;
   String? _destinationAccountId;
@@ -81,6 +82,7 @@ class _AssistedTransactionScreenState
   @override
   void initState() {
     super.initState();
+    _type = widget.initialType ?? 'expense';
     _lineItems.add(_LineItem());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final accounts = ref.read(accountsProvider).value ?? [];
@@ -617,6 +619,19 @@ class _AssistedTransactionScreenState
     return v.toStringAsFixed(2);
   }
 
+  /// Format the calc display with commas if it's a pure number.
+  String _fmtCalcForDisplay(String raw) {
+    if (raw == '0' || raw.isEmpty) return raw;
+    // If it contains operators, don't format (user is mid-expression)
+    if (raw.contains('+') || raw.contains('-') ||
+        raw.contains('×') || raw.contains('÷')) {
+      return raw;
+    }
+    final n = double.tryParse(raw);
+    if (n != null && n > 0) return formatForDisplay(n);
+    return raw;
+  }
+
   String _formatDateLabel(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -934,7 +949,7 @@ class _AssistedTransactionScreenState
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '$_selectedCurrency ${_activeLine.calcDisplay}',
+                          '$_selectedCurrency ${_fmtCalcForDisplay(_activeLine.calcDisplay)}',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w700,

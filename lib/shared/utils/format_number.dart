@@ -104,10 +104,17 @@ String formatAmount(double value, {String? currency, int? decimals}) {
   if (currency != null) {
     final symbol = _resolveSymbol(currency);
     if (symbol != null) {
-      final space = _needsSpace(symbol) ? ' ' : '';
-      return _wrapNegative('$symbol$space$formatted', isNeg);
+      if (_needsSpace(symbol)) {
+        // Spaced symbols: "LBP -1,200,000" (sign after symbol)
+        final sign = isNeg ? '-' : '';
+        return '$symbol $sign$formatted';
+      }
+      // Tight symbols: "-$1,200" (sign before symbol)
+      return _wrapNegative('$symbol$formatted', isNeg);
     }
-    return _wrapNegative('$currency $formatted', isNeg);
+    // Code fallback: "USD -1,200" (sign after code)
+    final sign = isNeg ? '-' : '';
+    return '$currency $sign$formatted';
   }
   return _wrapNegative(formatted, isNeg);
 }
@@ -126,12 +133,15 @@ String formatSignedAmount(
   final decimalDigits = hasDecimals ? 2 : 0;
   final formatted = _formatNumber(absValue, decimalDigits);
 
-  // For signed amounts, always use sign prefix (not parentheses)
   if (symbol != null) {
-    final space = _needsSpace(symbol) ? ' ' : '';
-    return '$sign$symbol$space$formatted';
+    if (_needsSpace(symbol)) {
+      // Spaced: "LBP +1,200" or "LBP -1,200"
+      return '$symbol $sign$formatted';
+    }
+    // Tight: "+$1,200" or "-$1,200"
+    return '$sign$symbol$formatted';
   }
-  return '$sign$currency $formatted';
+  return '$currency $sign$formatted';
 }
 
 /// Format a number for display in calculator/input fields.
