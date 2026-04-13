@@ -17,6 +17,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
@@ -403,15 +404,15 @@ class _AllocationDetailScreenState
                 ),
                 const SizedBox(width: 10),
                 SizedBox(
-                  width: 88,
-                  child: TextField(
-                    controller: _targetCurrencyController,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: _inputDecoration('Currency'),
-                    style: TextStyle(
-                        color: AppColors.tp(context),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600),
+                  width: 100,
+                  child: CurrencyPickerField(
+                    label: 'Currency',
+                    value: _targetCurrencyController.text,
+                    onChanged: (v) {
+                      if (v != null) {
+                        setState(() => _targetCurrencyController.text = v);
+                      }
+                    },
                   ),
                 ),
               ]),
