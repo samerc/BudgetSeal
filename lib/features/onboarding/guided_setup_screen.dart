@@ -11,6 +11,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/calculator_amount_field.dart';
 
 /// Post-household-creation guided setup.
 /// Steps: Account → Categories → Entry Mode → Feature Tour → Done
@@ -32,6 +33,8 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
   String _acctType = 'cash';
   String _acctCurrency = 'USD';
   bool _acctCreated = false;
+
+  double _acctInitialBalance = 0;
 
   // Step 2: Categories
   String? _selectedPack; // 'essential', 'detailed', null
@@ -196,6 +199,45 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
               );
             }).toList(),
           ),
+          const SizedBox(height: 16),
+          // Initial balance
+          Text('Opening balance',
+              style: GoogleFonts.inter(
+                  color: Colors.white70, fontSize: 13)),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Text('$_acctCurrency  ',
+                    style: const TextStyle(
+                        color: Colors.white60,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16)),
+                Expanded(
+                  child: CalculatorAmountField(
+                    value: _acctInitialBalance,
+                    fontSize: 20,
+                    hintText: '0',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    onChanged: (v) =>
+                        setState(() => _acctInitialBalance = v),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           _WhiteButton(
             label: _acctCreated ? 'Account Created ✓' : 'Create Account',
@@ -215,6 +257,7 @@ class _GuidedSetupScreenState extends ConsumerState<GuidedSetupScreen> {
                       name: name,
                       type: _acctType,
                       currency: _acctCurrency,
+                      initialBalance: Value(_acctInitialBalance),
                       deviceId: 'local',
                     ),
                   );
