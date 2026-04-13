@@ -831,14 +831,59 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
     if (filtered.isEmpty) {
       final hasFilters = _searchQuery.isNotEmpty || _typeFilter != null || hasDateFilter || _amountMin != null || _amountMax != null || _categoryFilter != null;
-      return EmptyState(
-        icon: hasFilters
-            ? Icons.search_off_rounded
-            : Icons.receipt_long_rounded,
-        title: hasFilters
-            ? 'No matching transactions'
-            : 'No transactions yet',
-        subtitle: hasFilters ? null : 'Tap + to record one',
+      final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final monthLabel = '${monthNames[_selectedMonth - 1]} $_selectedYear';
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (_categoryFilter != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _categoryFilter = null;
+                  _categoryFilterName = null;
+                }),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Filtered: ${_categoryFilterName ?? 'Category'}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(Icons.close_rounded,
+                          size: 14, color: AppColors.accent),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          EmptyState(
+            icon: hasFilters
+                ? Icons.search_off_rounded
+                : Icons.receipt_long_rounded,
+            title: _categoryFilter != null
+                ? 'No ${_categoryFilterName ?? 'category'} transactions in $monthLabel'
+                : hasFilters
+                    ? 'No matching transactions'
+                    : 'No transactions yet',
+            subtitle: hasFilters ? null : 'Tap + to record one',
+          ),
+        ],
       );
     }
 

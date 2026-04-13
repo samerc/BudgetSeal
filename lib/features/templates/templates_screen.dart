@@ -105,7 +105,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         : null;
 
     if (mounted) {
-      context.pop();
       context.push('/add-transaction', extra: {
         'editType': t.type,
         'editNote': t.title,
@@ -432,22 +431,27 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               ),
               const SizedBox(width: 8),
               // Amount + use count
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatAmount(t.amount, currency: t.currency),
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: color),
-                  ),
-                  Text(
-                    '${t.useCount} use${t.useCount == 1 ? '' : 's'}',
-                    style: TextStyle(
-                        fontSize: 10, color: AppColors.th(context)),
-                  ),
-                ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formatAmount(t.amount, currency: t.currency),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: color),
+                      ),
+                    ),
+                    Text(
+                      '${t.useCount} use${t.useCount == 1 ? '' : 's'}',
+                      style: TextStyle(
+                          fontSize: 10, color: AppColors.th(context)),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
