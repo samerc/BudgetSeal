@@ -11,6 +11,9 @@ import 'cloud_provider.dart';
 const _syncFileName = 'PocketPlan_Sync.json';
 const _folderName = 'PocketPlan';
 
+/// Escape single quotes for Google Drive query language to prevent injection.
+String _escGdql(String s) => s.replaceAll("'", "\\'");
+
 /// Web OAuth 2.0 client ID from Google Cloud Console.
 /// Loaded from .env file via --dart-define-from-file at build time.
 /// To set up: create .env in project root with:
@@ -156,7 +159,7 @@ class GoogleDriveProvider implements CloudProvider {
 
       // Check if file already exists on Drive
       final query =
-          "name = '$fileName' and '$receiptsFolderId' in parents and trashed = false";
+          "name = '${_escGdql(fileName)}' and '${_escGdql(receiptsFolderId)}' in parents and trashed = false";
       final existing = await api.files.list(q: query, spaces: 'drive');
       if (existing.files != null && existing.files!.isNotEmpty) continue;
 
@@ -217,7 +220,7 @@ class GoogleDriveProvider implements CloudProvider {
   Future<String> _getOrCreateSubfolder(
       drive.DriveApi api, String parentId, String name) async {
     final query =
-        "name = '$name' and '$parentId' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        "name = '${_escGdql(name)}' and '${_escGdql(parentId)}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
     final list = await api.files.list(q: query, spaces: 'drive');
     if (list.files != null && list.files!.isNotEmpty) {
       return list.files!.first.id!;
@@ -332,7 +335,7 @@ class GoogleDriveProvider implements CloudProvider {
   Future<String> _getOrCreateFolder(drive.DriveApi api) async {
     if (_folderId != null) return _folderId!;
     final query =
-        "name = '$_folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        "name = '${_escGdql(_folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
     final list = await api.files.list(q: query, spaces: 'drive');
     if (list.files != null && list.files!.isNotEmpty) {
       _folderId = list.files!.first.id!;
@@ -350,7 +353,7 @@ class GoogleDriveProvider implements CloudProvider {
       drive.DriveApi api, String folderId) async {
     if (_syncFileId != null) return _syncFileId;
     final query =
-        "name = '$_syncFileName' and '$folderId' in parents and trashed = false";
+        "name = '${_escGdql(_syncFileName)}' and '${_escGdql(folderId)}' in parents and trashed = false";
     final list = await api.files.list(q: query, spaces: 'drive');
     if (list.files != null && list.files!.isNotEmpty) {
       _syncFileId = list.files!.first.id;

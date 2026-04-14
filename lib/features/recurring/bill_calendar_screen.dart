@@ -28,11 +28,16 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
   }
 
   Future<void> _load() async {
-    final householdId = ref.read(currentHouseholdIdProvider);
-    if (householdId == null) return;
-    final engine = ref.read(recurringEngineProvider);
-    final items = await engine.getAll(householdId);
-    if (mounted) setState(() { _items = items; _loading = false; });
+    try {
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+      final engine = ref.read(recurringEngineProvider);
+      final items = await engine.getAll(householdId);
+      if (mounted) setState(() { _items = items; _loading = false; });
+    } catch (e) {
+      debugPrint('[BillCalendar] Error loading: $e');
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   List<RecurringTransaction> _itemsForDay(int day) {

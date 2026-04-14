@@ -61,25 +61,28 @@ class CurrencyPickerField extends StatelessWidget {
         child: Row(
           children: [
             if (flag != null) ...[
-              Text(flag, style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
+              Text(flag, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 6),
             ],
-            Text(
-              value,
-              style: TextStyle(
-                color: textColor ?? AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: textColor ?? AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (symbol != null) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               Text(
                 symbol,
                 style: TextStyle(
                   color: (textColor ?? AppColors.textPrimary)
                       .withValues(alpha: 0.5),
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),

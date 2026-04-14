@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PocketPlan** — A YNAB-style envelope budgeting app for Android and iOS. Offline-first, built in Flutter with Drift (SQLite), Riverpod state management, and GoRouter navigation. Single-user consumer app with optional cloud sync via Google Drive or system file picker (Dropbox/OneDrive).
+**PocketPlan** — A YNAB-style envelope budgeting app for Android and iOS. Offline-first, built in Flutter with Drift (SQLite), Riverpod state management, and GoRouter navigation. Single-user consumer app with optional cloud sync via Google Drive or system file picker (Dropbox/OneDrive). Includes subscription tracking, savings envelopes, age-of-money analytics, and CSV import/export.
 
 ## Development Commands
 
@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v9)
+│   │   ├── app_database.dart   # Drift database definition (schema v10)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (11 tables)
@@ -54,8 +54,10 @@ lib/
 │   │   ├── allocation_engine.dart   # Central money flow engine (all writes go through here)
 │   │   ├── balance_calculator.dart  # Computes balances dynamically from ledger
 │   │   ├── period_engine.dart       # Period transitions and leftover resolution
-│   │   └── recurring_engine.dart    # Auto-posts recurring transactions
-│   ├── providers/              # Riverpod providers
+│   │   ├── recurring_engine.dart    # Auto-posts recurring transactions
+│   │   ├── age_of_money.dart        # Age-of-money metric computation
+│   │   └── invariant_checker.dart   # Validates balance invariants
+│   ├── providers/              # Riverpod providers (~20 files)
 │   │   ├── database_provider.dart
 │   │   ├── engine_provider.dart
 │   │   ├── household_provider.dart  # Current household ID + service
@@ -66,7 +68,16 @@ lib/
 │   │   ├── sync_provider.dart       # Cloud sync orchestration
 │   │   ├── theme_provider.dart
 │   │   ├── biometric_provider.dart
-│   │   └── ...
+│   │   ├── age_of_money_provider.dart
+│   │   ├── backup_reminder_provider.dart
+│   │   ├── currency_symbol_provider.dart
+│   │   ├── entry_mode_provider.dart # Transaction entry mode preference
+│   │   ├── font_provider.dart
+│   │   ├── hints_provider.dart
+│   │   ├── home_tab_provider.dart   # Remembers preferred home tab
+│   │   ├── number_format_provider.dart
+│   │   ├── receipt_sync_provider.dart
+│   │   └── tx_colors_provider.dart  # Transaction type color coding
 │   ├── sync/
 │   │   ├── sync_engine.dart         # JSON export/import/merge
 │   │   ├── cloud_provider.dart      # Abstract cloud storage interface
@@ -77,10 +88,12 @@ lib/
 │       └── notification_service.dart
 ├── features/                   # Screen-level code, one folder per feature
 │   ├── dashboard/
+│   ├── main/                   # Main screen with bottom nav bar
 │   ├── transactions/           # List, add, detail, assisted flow
-│   ├── allocations/            # Envelopes: list, detail, funding
+│   ├── allocations/            # Envelopes: list, detail, funding, savings
 │   ├── accounts/
 │   ├── categories/
+│   ├── subscriptions/          # Subscription tracker: list, detail, price history
 │   ├── reports/                # Hub with 4 tabs: Overview, Categories, History, Cumulative
 │   ├── recurring/
 │   ├── templates/
@@ -97,17 +110,25 @@ lib/
     │   ├── format_number.dart  # Amount formatting with currency symbols
     │   ├── haptics.dart
     │   ├── receipt_helper.dart
-    │   └── page_transitions.dart
+    │   ├── page_transitions.dart
+    │   ├── app_info.dart
+    │   └── responsive.dart
     └── widgets/                # Reusable widgets
         ├── allocation_card.dart
         ├── amount_field.dart         # Opens calculator sheet (not keyboard)
+        ├── animated_amount.dart      # Animated number transitions
+        ├── balance_chip.dart
         ├── calculator_amount_field.dart
+        ├── category_grid.dart
         ├── category_icon.dart        # Maps category names to PNG icons
+        ├── currency_display.dart
+        ├── currency_picker_field.dart
         ├── empty_state.dart
         ├── error_retry.dart
+        ├── hint_banner.dart
+        ├── pocketplan_logo.dart
         ├── skeleton_loader.dart
-        ├── staggered_list.dart
-        └── ...
+        └── staggered_list.dart
 ```
 
 ## Core Concepts
@@ -128,6 +149,9 @@ Sum(account balances) = Unallocated + Sum(allocation balances)
 - `transaction_lines` table — split lines (amount, currency, category, per-line account)
 - `allocation_ledger` table — envelope debits/credits linked to transactions
 - Each line can reference a different account (multi-account splits)
+
+### Subscriptions
+Recurring transactions can be flagged as subscriptions (`isSubscription` column). The `subscriptions/` feature provides a dedicated list and detail view with price history tracking (`priceHistory` JSON column). Subscriptions are still recurring transactions under the hood — the flag enables the separate UI.
 
 ### Cloud Sync
 Single-file sync approach (`PocketPlan_Sync.json`):
@@ -158,8 +182,10 @@ All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages
 
 ## Database
 
-### Schema Version: 9
+### Schema Version: 10
 11 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates.
+
+v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -172,17 +198,30 @@ Every table has `id` (UUID text primary key). Most have `createdAt`, `lastModifi
 
 ## Dependencies (key ones)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| drift | ^2.31 | SQLite ORM |
-| flutter_riverpod | ^3.1 | State management |
-| go_router | ^17.2 | Navigation |
-| fl_chart | ^1.2 | Charts (pie, line, bar) |
-| google_sign_in | ^6.2 | Google Drive auth |
-| googleapis | ^14.0 | Google Drive API |
-| local_auth | ^3.0 | Biometric lock |
-| flutter_local_notifications | ^18.0 | Bill/envelope alerts |
-| shared_preferences | ^2.5 | Simple key-value settings |
+Versions below are pubspec.yaml constraints. All packages are at the latest
+compatible resolved versions (blocked by riverpod_generator ↔ drift_dev
+analyzer conflict — waiting on upstream releases).
+
+| Package | Constraint | Purpose |
+|---------|------------|---------|
+| drift | ^2.22.0 | SQLite ORM |
+| drift_flutter | ^0.2.0 | Drift Flutter integration |
+| flutter_riverpod | ^3.0.0 | State management |
+| riverpod_annotation | ^4.0.0 | Riverpod code generation |
+| go_router | ^17.0.0 | Navigation |
+| fl_chart | ^1.2.0 | Charts (pie, line, bar) |
+| google_sign_in | ^7.0.0 | Google Drive auth |
+| googleapis | ^16.0.0 | Google Drive API |
+| googleapis_auth | ^2.0.0 | Google API OAuth |
+| local_auth | ^3.0.0 | Biometric lock |
+| flutter_local_notifications | ^21.0.0 | Bill/envelope alerts |
+| shared_preferences | ^2.5.0 | Simple key-value settings |
+| csv | ^8.0.0 | CSV import/export |
+| share_plus | ^12.0.0 | Share files/data |
+| file_picker | ^11.0.0 | System file picker for sync |
+| haptic_feedback | ^0.6.0 | Haptic feedback |
+| sliver_tools | ^0.2.12 | Advanced sliver widgets |
+| google_fonts | ^8.0.0 | Custom fonts |
 
 ## Testing
 
@@ -205,6 +244,38 @@ Tests use `AppDatabase.forTesting(NativeDatabase.memory())` for in-memory databa
 
 ### Google Drive Setup
 Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `android/app/src/main/res/values/strings.xml` (or via google-services.json).
+
+## Security
+
+### Google Drive Queries
+All Drive API queries use `_escGdql()` to escape single quotes in parameters, preventing GDQL injection. Always use this helper when interpolating values into Drive query strings.
+
+### Biometric Lock
+`local_auth` handles authentication. If the device has no biometrics/PIN, the lock screen still calls `authenticate()` (which prompts the user to set up credentials) rather than bypassing.
+
+### Temp File Cleanup
+Backup `.db` and export `.csv` files are written to the system temp directory for sharing, then deleted in a `finally` block. Never leave financial data in temp.
+
+### Sync File
+The sync file (`PocketPlan_Sync.json`) is plaintext JSON on Google Drive. Not yet encrypted — future improvement.
+
+## Error Handling
+
+All `_load()` methods in StatefulWidget screens must be wrapped in try-catch. If an async load fails without catching, `_loading` stays `true` and the screen shows an infinite spinner. Pattern:
+
+```dart
+Future<void> _load() async {
+  try {
+    // ... database/API calls ...
+    if (mounted) setState(() => _loading = false);
+  } catch (e) {
+    debugPrint('[ScreenName] Error loading: $e');
+    if (mounted) setState(() => _loading = false);
+  }
+}
+```
+
+For user-initiated actions (save, delete, toggle), show a SnackBar on both success and failure.
 
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More

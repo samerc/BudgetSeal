@@ -933,9 +933,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       Icon(_accountIcon(a.type),
                           size: 18, color: AppColors.textSecondary),
                       const SizedBox(width: 12),
-                      Text(a.name,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w500)),
+                      Expanded(
+                        child: Text(a.name,
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
                       const SizedBox(width: 6),
                       Text(a.currency,
                           style: const TextStyle(

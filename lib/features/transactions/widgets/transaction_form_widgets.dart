@@ -442,12 +442,16 @@ class LineCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (line.amount > 0)
-                    Text(
-                      '= ${line.baseAmount.toStringAsFixed(2)} $baseCurrency',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accent.withValues(alpha: 0.8),
+                    Flexible(
+                      child: Text(
+                        '= ${line.baseAmount.toStringAsFixed(2)} $baseCurrency',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent.withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                 ],

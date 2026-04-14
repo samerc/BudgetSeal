@@ -42,13 +42,18 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   }
 
   Future<void> _load() async {
-    final db = ref.read(databaseProvider);
-    final householdId = ref.read(currentHouseholdIdProvider);
-    if (householdId == null) return;
-    final items = await (db.select(db.transactionTemplates)
-          ..where((t) => t.householdId.equals(householdId)))
-        .get();
-    if (mounted) setState(() { _templates = items; _loading = false; });
+    try {
+      final db = ref.read(databaseProvider);
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+      final items = await (db.select(db.transactionTemplates)
+            ..where((t) => t.householdId.equals(householdId)))
+          .get();
+      if (mounted) setState(() { _templates = items; _loading = false; });
+    } catch (e) {
+      debugPrint('[Templates] Error loading: $e');
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   List<TransactionTemplate> get _filtered {
@@ -90,35 +95,47 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   }
 
   Future<void> _useTemplate(TransactionTemplate t) async {
-    hapticLight();
-    final db = ref.read(databaseProvider);
-    await (db.update(db.transactionTemplates)
-          ..where((r) => r.id.equals(t.id)))
-        .write(TransactionTemplatesCompanion(
-      useCount: Value(t.useCount + 1),
-      lastUsedAt: Value(DateTime.now()),
-    ));
+    try {
+      hapticLight();
+      final db = ref.read(databaseProvider);
+      await (db.update(db.transactionTemplates)
+            ..where((r) => r.id.equals(t.id)))
+          .write(TransactionTemplatesCompanion(
+        useCount: Value(t.useCount + 1),
+        lastUsedAt: Value(DateTime.now()),
+      ));
 
-    final cats = ref.read(categoriesProvider).value ?? [];
-    final cat = t.categoryId != null
-        ? cats.where((c) => c.id == t.categoryId).firstOrNull
-        : null;
+      final cats = ref.read(categoriesProvider).value ?? [];
+      final cat = t.categoryId != null
+          ? cats.where((c) => c.id == t.categoryId).firstOrNull
+          : null;
 
-    if (mounted) {
-      context.push('/add-transaction', extra: {
-        'editType': t.type,
-        'editNote': t.title,
-        'editLines': [
-          {
-            'amount': t.amount,
-            'currency': t.currency,
-            'accountId': t.accountId,
-            'categoryId': t.categoryId,
-            'categoryName': cat?.name,
-            'note': '',
-          }
-        ],
-      });
+      if (mounted) {
+        context.push('/add-transaction', extra: {
+          'editType': t.type,
+          'editNote': t.title,
+          'editLines': [
+            {
+              'amount': t.amount,
+              'currency': t.currency,
+              'accountId': t.accountId,
+              'categoryId': t.categoryId,
+              'categoryName': cat?.name,
+              'note': '',
+            }
+          ],
+        });
+      }
+    } catch (e) {
+      debugPrint('[Templates] Error using template: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not apply template'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -142,11 +159,23 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       ),
     );
     if (confirmed == true) {
-      final db = ref.read(databaseProvider);
-      await (db.delete(db.transactionTemplates)
-            ..where((t) => t.id.equals(id)))
-          .go();
-      _load();
+      try {
+        final db = ref.read(databaseProvider);
+        await (db.delete(db.transactionTemplates)
+              ..where((t) => t.id.equals(id)))
+            .go();
+        _load();
+      } catch (e) {
+        debugPrint('[Templates] Error deleting: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not delete template'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -321,11 +350,15 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
               child: Row(
                 children: [
-                  Text(entry.key,
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ts(context))),
+                  Expanded(
+                    child: Text(entry.key,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ts(context)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
                   const SizedBox(width: 6),
                   Text('${entry.value.length}',
                       style: TextStyle(

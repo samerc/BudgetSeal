@@ -28,6 +28,7 @@ class _SubscriptionDetailScreenState
   String? _categoryColor;
   List<Map<String, dynamic>> _pastTransactions = [];
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -36,65 +37,81 @@ class _SubscriptionDetailScreenState
   }
 
   Future<void> _load() async {
-    final db = ref.read(databaseProvider);
+    try {
+      final db = ref.read(databaseProvider);
 
-    // Load subscription
-    final rows = await db.customSelect(
-      'SELECT * FROM recurring_transactions WHERE id = ?',
-      variables: [drift.Variable.withString(widget.subscriptionId)],
-    ).get();
-
-    if (rows.isEmpty) {
-      debugPrint('[SubscriptionDetail] No recurring_transaction found for id=${widget.subscriptionId}');
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-
-    final sub = rows.first.data;
-
-    // Load category
-    String? catName;
-    String? catIcon;
-    String? catColor;
-    final catId = sub['category_id'] as String?;
-    if (catId != null) {
-      final catRows = await db.customSelect(
-        'SELECT name, icon, color_hex FROM categories WHERE id = ?',
-        variables: [drift.Variable.withString(catId)],
+      // Load subscription
+      final rows = await db.customSelect(
+        'SELECT * FROM recurring_transactions WHERE id = ?',
+        variables: [drift.Variable.withString(widget.subscriptionId)],
       ).get();
-      if (catRows.isNotEmpty) {
-        catName = catRows.first.data['name'] as String?;
-        catIcon = catRows.first.data['icon'] as String?;
-        catColor = catRows.first.data['color_hex'] as String?;
+
+      if (rows.isEmpty) {
+        debugPrint(
+            '[SubscriptionDetail] No recurring_transaction found for id=${widget.subscriptionId}');
+        if (mounted) setState(() => _loading = false);
+        return;
       }
-    }
 
-    // Load past transactions matching this subscription by title and type
-    final title = sub['title'] as String? ?? '';
-    final subType = sub['type'] as String? ?? 'expense';
-    final householdId = sub['household_id'] as String;
-    final pastRows = await db.customSelect(
-      'SELECT * FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
-      variables: [
-        drift.Variable.withString(householdId),
-        drift.Variable.withString('%$title%'),
-        drift.Variable.withString(title),
-        drift.Variable.withString(subType),
-      ],
-    ).get();
+      final sub = rows.first.data;
 
-    final pastData = pastRows.map((r) => r.data).toList();
-    debugPrint('[SubscriptionDetail] Loaded sub id=${widget.subscriptionId}, title="$title", pastTx=${pastData.length}');
+      // Load category
+      String? catName;
+      String? catIcon;
+      String? catColor;
+      final catId = sub['category_id']?.toString();
+      if (catId != null) {
+        final catRows = await db.customSelect(
+          'SELECT name, icon, color_hex FROM categories WHERE id = ?',
+          variables: [drift.Variable.withString(catId)],
+        ).get();
+        if (catRows.isNotEmpty) {
+          catName = catRows.first.data['name']?.toString();
+          catIcon = catRows.first.data['icon']?.toString();
+          catColor = catRows.first.data['color_hex']?.toString();
+        }
+      }
 
-    if (mounted) {
-      setState(() {
-        _sub = sub;
-        _categoryName = catName;
-        _categoryIcon = catIcon;
-        _categoryColor = catColor;
-        _pastTransactions = pastData;
-        _loading = false;
-      });
+      // Load past transactions matching this subscription by title and type
+      final title = sub['title']?.toString() ?? '';
+      final subType = sub['type']?.toString() ?? 'expense';
+      final householdId = sub['household_id']?.toString() ?? '';
+
+      List<Map<String, dynamic>> pastData = [];
+      if (householdId.isNotEmpty && title.isNotEmpty) {
+        final pastRows = await db.customSelect(
+          'SELECT * FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
+          variables: [
+            drift.Variable.withString(householdId),
+            drift.Variable.withString('%$title%'),
+            drift.Variable.withString(title),
+            drift.Variable.withString(subType),
+          ],
+        ).get();
+        pastData = pastRows.map((r) => r.data).toList();
+      }
+
+      debugPrint(
+          '[SubscriptionDetail] Loaded sub id=${widget.subscriptionId}, title="$title", pastTx=${pastData.length}');
+
+      if (mounted) {
+        setState(() {
+          _sub = sub;
+          _categoryName = catName;
+          _categoryIcon = catIcon;
+          _categoryColor = catColor;
+          _pastTransactions = pastData;
+          _loading = false;
+        });
+      }
+    } catch (e, st) {
+      debugPrint('[SubscriptionDetail] Error loading: $e\n$st');
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = '$e';
+        });
+      }
     }
   }
 
@@ -272,6 +289,41 @@ class _SubscriptionDetailScreenState
       );
     }
 
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline_rounded,
+                    size: 48, color: AppColors.overspent),
+                const SizedBox(height: 12),
+                const Text('Could not load subscription'),
+                const SizedBox(height: 8),
+                Text(_error!,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                FilledButton.tonal(
+                  onPressed: () {
+                    setState(() {
+                      _loading = true;
+                      _error = null;
+                    });
+                    _load();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (_sub == null) {
       return Scaffold(
         appBar: AppBar(),
@@ -280,11 +332,13 @@ class _SubscriptionDetailScreenState
     }
 
     final sub = _sub!;
-    final title = sub['title'] as String? ?? 'Untitled';
+    final title = sub['title']?.toString() ?? 'Untitled';
     final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
-    final currency = sub['currency'] as String?;
-    final frequency = sub['frequency'] as String? ?? 'monthly';
-    final interval = (sub['interval'] as int?) ?? 1;
+    final currency = sub['currency']?.toString();
+    final frequency = sub['frequency']?.toString() ?? 'monthly';
+    final interval = (sub['interval'] is int)
+        ? sub['interval'] as int
+        : int.tryParse(sub['interval']?.toString() ?? '') ?? 1;
     final nextDue = _parseDate(sub['next_due_date']);
     final createdAt = _parseDate(sub['created_at']);
     final endDate = _parseDate(sub['end_date']);
@@ -363,6 +417,8 @@ class _SubscriptionDetailScreenState
                     fontWeight: FontWeight.w800,
                     color: AppColors.tp(context),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(

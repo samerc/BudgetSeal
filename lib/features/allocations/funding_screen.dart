@@ -26,12 +26,17 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     return _amounts[allocationId] ?? 0.0;
   }
 
-  double _totalDistributed(List<AllocationWithBalance> allocations) {
-    double total = 0.0;
+  /// Returns total distributed amounts grouped by currency.
+  Map<String, double> _totalDistributedByCurrency(
+      List<AllocationWithBalance> allocations, String baseCurrency) {
+    final totals = <String, double>{};
     for (final a in allocations) {
-      total += _parsedAmount(a.data.allocation.id);
+      final amount = _parsedAmount(a.data.allocation.id);
+      if (amount <= 0) continue;
+      final currency = a.data.allocation.targetCurrency ?? baseCurrency;
+      totals[currency] = (totals[currency] ?? 0.0) + amount;
     }
-    return total;
+    return totals;
   }
 
   /// Auto-fill periodic allocations that have a target: fill up to (target - balance).
@@ -113,10 +118,20 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (allocations) {
-          final total = _totalDistributed(allocations);
+          final distributedByCurrency =
+              _totalDistributedByCurrency(allocations, baseCurrency);
           final unallocated = unallocatedAsync.value ?? {};
+
+          // Check if ANY currency exceeds its available unallocated amount
+          bool exceeds = false;
+          for (final entry in distributedByCurrency.entries) {
+            final availableForCurrency = unallocated[entry.key] ?? 0.0;
+            if (entry.value > availableForCurrency + 0.005) {
+              exceeds = true;
+              break;
+            }
+          }
           final available = unallocated[baseCurrency] ?? 0.0;
-          final exceeds = total > available;
 
           // Count how many periodic envelopes have unfilled targets.
           final fillableCount = allocations.where((a) {
@@ -142,7 +157,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
               // -- Funding banner with progress --
               _FundingBanner(
                 available: available,
-                distributed: total,
+                distributedByCurrency: distributedByCurrency,
                 baseCurrency: baseCurrency,
                 unallocated: unallocated,
                 exceeds: exceeds,
@@ -213,11 +228,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
 
               // -- Bottom action bar --
               _BottomFundBar(
-                total: total,
+                distributedByCurrency: distributedByCurrency,
                 baseCurrency: baseCurrency,
                 exceeds: exceeds,
                 isFunding: _isFunding,
-                hasAnyAmount: total > 0,
+                hasAnyAmount: distributedByCurrency.isNotEmpty,
                 onFund: () => _fundAll(allocations, baseCurrency),
               ),
             ],
@@ -369,14 +384,14 @@ class _InstructionStep extends StatelessWidget {
 
 class _FundingBanner extends StatelessWidget {
   final double available;
-  final double distributed;
+  final Map<String, double> distributedByCurrency;
   final String baseCurrency;
   final Map<String, double> unallocated;
   final bool exceeds;
 
   const _FundingBanner({
     required this.available,
-    required this.distributed,
+    required this.distributedByCurrency,
     required this.baseCurrency,
     required this.unallocated,
     required this.exceeds,
@@ -384,9 +399,15 @@ class _FundingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final baseDistributed = distributedByCurrency[baseCurrency] ?? 0.0;
     final progress = available > 0
-        ? (distributed / available).clamp(0.0, 1.0)
+        ? (baseDistributed / available).clamp(0.0, 1.0)
         : 0.0;
+
+    // Collect non-base currencies being distributed
+    final otherDistributed = distributedByCurrency.entries
+        .where((e) => e.key != baseCurrency && e.value > 0)
+        .toList();
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -445,20 +466,24 @@ class _FundingBanner extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Progress indicator
+          // Progress indicator (base currency)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Distributing ${formatAmount(distributed, currency: baseCurrency)}'
-                    ' of ${formatAmount(available, currency: baseCurrency)}',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      'Distributing ${formatAmount(baseDistributed, currency: baseCurrency)}'
+                      ' of ${formatAmount(available, currency: baseCurrency)}',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   if (available > 0)
@@ -484,6 +509,34 @@ class _FundingBanner extends StatelessWidget {
                       : const Color(0xFFA5D6A7),
                 ),
               ),
+              // Show per-currency distribution for non-base currencies
+              for (final entry in otherDistributed)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${entry.key}: ${formatAmount(entry.value, currency: entry.key)}'
+                        ' of ${formatAmount(unallocated[entry.key] ?? 0, currency: entry.key)}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if ((unallocated[entry.key] ?? 0) > 0)
+                        Text(
+                          '${((entry.value / (unallocated[entry.key] ?? 1)) * 100).clamp(0, 999).toStringAsFixed(0)}%',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
             ],
           ),
 
@@ -818,7 +871,7 @@ class _FundingAllocationTile extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _BottomFundBar extends StatelessWidget {
-  final double total;
+  final Map<String, double> distributedByCurrency;
   final String baseCurrency;
   final bool exceeds;
   final bool isFunding;
@@ -826,13 +879,30 @@ class _BottomFundBar extends StatelessWidget {
   final VoidCallback onFund;
 
   const _BottomFundBar({
-    required this.total,
+    required this.distributedByCurrency,
     required this.baseCurrency,
     required this.exceeds,
     required this.isFunding,
     required this.hasAnyAmount,
     required this.onFund,
   });
+
+  String _fundLabel() {
+    if (!hasAnyAmount) return 'Enter amounts to fund';
+    // Build a label like "Fund All  ($500 + LBP 100,000)"
+    final parts = <String>[];
+    // Base currency first
+    final baseAmount = distributedByCurrency[baseCurrency];
+    if (baseAmount != null && baseAmount > 0) {
+      parts.add(formatAmount(baseAmount, currency: baseCurrency));
+    }
+    // Other currencies
+    for (final entry in distributedByCurrency.entries) {
+      if (entry.key == baseCurrency || entry.value <= 0) continue;
+      parts.add(formatAmount(entry.value, currency: entry.key));
+    }
+    return 'Fund All  (${parts.join(' + ')})';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -883,13 +953,15 @@ class _BottomFundBar extends StatelessWidget {
                       const Icon(Icons.account_balance_wallet_rounded,
                           size: 20),
                       const SizedBox(width: 10),
-                      Text(
-                        hasAnyAmount
-                            ? 'Fund All  (${formatAmount(total, currency: baseCurrency)})'
-                            : 'Enter amounts to fund',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: Text(
+                          _fundLabel(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

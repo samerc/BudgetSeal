@@ -129,7 +129,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Spending Overview with Donut + Toggle
+                  // ── Spending Overview with Donut + Toggle ──
                   txAsync.when(
                     data: (entries) {
                       final now = DateTime.now();
@@ -235,6 +235,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 20),
 
                   // ── Zone 2: Your money ────────────────────────────
+                  _SectionHeader(label: 'YOUR MONEY'),
+                  const SizedBox(height: 8),
                   // Net Worth Card
                   accountsAsync.when(
                     data: (accounts) {
@@ -276,7 +278,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           insights.add(_BudgetInsight(
                             name: a.data.allocation.name,
                             message:
-                                'overspent by ${formatAmount(bal.abs())}',
+                                'is ${formatAmount(bal.abs())} over its limit',
                             severity: 2,
                           ));
                         } else if (bal < 10) {
@@ -289,7 +291,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             insights.add(_BudgetInsight(
                               name: a.data.allocation.name,
                               message:
-                                  '${(bal / target * 100).round()}% remaining',
+                                  'has only ${(bal / target * 100).round()}% left',
                               severity: 1,
                             ));
                           }
@@ -319,7 +321,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     data: (unallocated) {
                       final baseAmount = unallocated[baseCurrency] ?? 0.0;
                       return _SummaryRow(
-                        label: 'Unallocated',
+                        label: 'Ready to assign',
+                        subtitle: 'Money not yet in an envelope',
                         amount: baseAmount,
                         currency: baseCurrency,
                         color: baseAmount >= 0
@@ -340,12 +343,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 20),
 
                   // ── Zone 3: Activity ──────────────────────────────
+                  _SectionHeader(label: 'ACTIVITY'),
+                  const SizedBox(height: 8),
                   // Quick Templates (above recent transactions)
                   _QuickTemplatesSection(),
 
                   // Recent Transactions
                   Text(
-                    'Recent Transactions',
+                    'Recent',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -480,8 +485,8 @@ class _StatusCard extends ConsumerWidget {
             ? Icons.check_circle_outline_rounded
             : Icons.warning_amber_rounded;
         budgetLine = isUnder
-            ? '${formatAmount(diff, currency: baseCurrency)} under budget'
-            : '${formatAmount(diff.abs(), currency: baseCurrency)} over budget';
+            ? '${formatAmount(diff, currency: baseCurrency)} left to spend this month'
+            : '${formatAmount(diff.abs(), currency: baseCurrency)} over budget this month';
       }
     }
 
@@ -533,7 +538,7 @@ class _StatusCard extends ConsumerWidget {
             : formatAmount(projected, currency: baseCurrency);
 
         velocityLine =
-            '${formatAmount(dailyRate, currency: baseCurrency)}/day \u00b7 on track for $projectedLabel';
+            'Spending ${formatAmount(dailyRate, currency: baseCurrency)}/day \u00b7 ~$projectedLabel by month end';
       }
     }
 
@@ -541,7 +546,9 @@ class _StatusCard extends ConsumerWidget {
     String? ageLine;
     final ageValue = ageAsync.value;
     if (ageValue != null) {
-      ageLine = 'Age of Money: $ageValue days';
+      ageLine = ageValue == 1
+          ? 'Money sits 1 day before being spent'
+          : 'Money sits $ageValue days before being spent';
     }
 
     // If nothing to show, collapse
@@ -903,7 +910,7 @@ class _NetWorthCard extends StatelessWidget {
             Icon(Icons.account_balance_rounded,
                 size: 14, color: Colors.white60),
             SizedBox(width: 6),
-            Text('Net Worth',
+            Text('Total across all accounts',
                 style: TextStyle(color: Colors.white70, fontSize: 12)),
           ]),
           const SizedBox(height: 8),
@@ -917,12 +924,17 @@ class _NetWorthCard extends StatelessWidget {
                             color: Colors.white60,
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
-                    Text(formatAmount(e.value, currency: e.key),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5)),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(formatAmount(e.value, currency: e.key),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                    ),
                   ],
                 ),
               )),
@@ -993,6 +1005,7 @@ class _QuickAction extends StatelessWidget {
 
 class _SummaryRow extends StatelessWidget {
   final String label;
+  final String? subtitle;
   final double amount;
   final String currency;
   final Color color;
@@ -1001,6 +1014,7 @@ class _SummaryRow extends StatelessWidget {
 
   const _SummaryRow(
       {required this.label,
+      this.subtitle,
       required this.amount,
       required this.currency,
       required this.color,
@@ -1029,11 +1043,21 @@ class _SummaryRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-              child: Text(label,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.tp(context)))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: AppColors.tp(context))),
+                  if (subtitle != null)
+                    Text(subtitle!,
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.ts(context))),
+                ],
+              )),
           Text(formatAmount(amount, currency: currency),
               style: TextStyle(
                   fontWeight: FontWeight.w700, fontSize: 16, color: color)),
@@ -1072,7 +1096,7 @@ class _EnvelopeHealthCard extends StatelessWidget {
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Envelope Health',
+        Text('Envelopes',
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -1098,9 +1122,9 @@ class _EnvelopeHealthCard extends StatelessWidget {
         const SizedBox(height: 8),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           _HealthLabel(
-              count: healthy, label: 'Funded', color: AppColors.healthy),
+              count: healthy, label: 'On track', color: AppColors.healthy),
           _HealthLabel(
-              count: caution, label: 'Low', color: AppColors.caution),
+              count: caution, label: 'Running low', color: AppColors.caution),
           _HealthLabel(
               count: overspent,
               label: 'Overspent',
@@ -1238,11 +1262,15 @@ class _RecentTxTile extends ConsumerWidget {
                             color: AppColors.th(context))),
                   ]),
             ),
-            Text(formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: typeColor)),
+            Flexible(
+              child: Text(formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: typeColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+            ),
           ]),
         ),
       ),
@@ -1553,6 +1581,29 @@ class _QuickTemplatesSection extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ─── Section Header ────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+  const _SectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+          color: AppColors.th(context),
+        ),
+      ),
     );
   }
 }

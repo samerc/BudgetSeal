@@ -33,52 +33,70 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   }
 
   Future<void> _load() async {
-    final householdId = ref.read(currentHouseholdIdProvider);
-    if (householdId == null) return;
-    final db = ref.read(databaseProvider);
+    try {
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+      final db = ref.read(databaseProvider);
 
-    final rows = await db.customSelect(
-      'SELECT * FROM recurring_transactions WHERE household_id = ? AND is_subscription = 1 ORDER BY title ASC',
-      variables: [drift.Variable.withString(householdId)],
-    ).get();
+      final rows = await db.customSelect(
+        'SELECT * FROM recurring_transactions WHERE household_id = ? AND is_subscription = 1 ORDER BY title ASC',
+        variables: [drift.Variable.withString(householdId)],
+      ).get();
 
-    final subs = rows.map((r) => r.data).toList();
+      final subs = rows.map((r) => r.data).toList();
 
-    // Load categories for icons
-    final cats = await (db.select(db.categories)
-          ..where((c) => c.householdId.equals(householdId)))
-        .get();
-    final catNames = <String, String>{};
-    final catIcons = <String, String>{};
-    final catColors = <String, String>{};
-    for (final c in cats) {
-      catNames[c.id] = c.name;
-      catIcons[c.id] = c.icon;
-      catColors[c.id] = c.colorHex;
-    }
+      // Load categories for icons
+      final cats = await (db.select(db.categories)
+            ..where((c) => c.householdId.equals(householdId)))
+          .get();
+      final catNames = <String, String>{};
+      final catIcons = <String, String>{};
+      final catColors = <String, String>{};
+      for (final c in cats) {
+        catNames[c.id] = c.name;
+        catIcons[c.id] = c.icon;
+        catColors[c.id] = c.colorHex;
+      }
 
-    if (mounted) {
-      setState(() {
-        _subs = subs;
-        _categoryNames = catNames;
-        _categoryIcons = catIcons;
-        _categoryColors = catColors;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _subs = subs;
+          _categoryNames = catNames;
+          _categoryIcons = catIcons;
+          _categoryColors = catColors;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Subscriptions] Error loading: $e');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   /// Toggle enabled/disabled state for a subscription (Bug 2 fix)
   Future<void> _toggleEnabled(Map<String, dynamic> sub) async {
-    final db = ref.read(databaseProvider);
-    final subId = sub['id'] as String;
-    final currentlyEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
-    final enabled = !currentlyEnabled;
-    await db.customStatement(
-      'UPDATE recurring_transactions SET enabled = ? WHERE id = ?',
-      [enabled ? 1 : 0, subId],
-    );
-    _load();
+    try {
+      final db = ref.read(databaseProvider);
+      final subId = sub['id']?.toString() ?? '';
+      if (subId.isEmpty) return;
+      final currentlyEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
+      final enabled = !currentlyEnabled;
+      await db.customStatement(
+        'UPDATE recurring_transactions SET enabled = ? WHERE id = ?',
+        [enabled ? 1 : 0, subId],
+      );
+      _load();
+    } catch (e) {
+      debugPrint('[Subscriptions] Error toggling: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not update subscription'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   double _monthlyEquivalent(double amount, String frequency, int interval) {
@@ -197,6 +215,8 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                 fontSize: 28,
                                 fontWeight: FontWeight.w800,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -321,6 +341,8 @@ class _SubscriptionTile extends StatelessWidget {
             color: AppColors.tp(context),
             decoration: isCancelled ? TextDecoration.lineThrough : null,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
           nextDue != null
@@ -349,6 +371,8 @@ class _SubscriptionTile extends StatelessWidget {
                     decoration:
                         isCancelled ? TextDecoration.lineThrough : null,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Row(

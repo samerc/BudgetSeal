@@ -75,6 +75,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   Future<void> _exportBackup() async {
     setState(() => _working = true);
+    String? backupPath;
     try {
       final dbDir = await getApplicationDocumentsDirectory();
       final dbFile = File(p.join(dbDir.path, 'pocketplan.db'));
@@ -95,7 +96,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .replaceAll(':', '-')
           .split('.')
           .first;
-      final backupPath =
+      backupPath =
           p.join(tempDir.path, 'pocketplan_backup_$timestamp.db');
       await dbFile.copy(backupPath);
 
@@ -109,6 +110,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         ref.invalidate(showBackupReminderProvider);
       }
     } finally {
+      // Clean up temp file containing sensitive financial data
+      if (backupPath != null) {
+        try {
+          final tempFile = File(backupPath);
+          if (await tempFile.exists()) await tempFile.delete();
+        } catch (_) {}
+      }
       if (mounted) setState(() => _working = false);
     }
   }

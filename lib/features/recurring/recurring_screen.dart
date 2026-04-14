@@ -113,6 +113,14 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       if (confirmed != true) return;
                       final engine = ref.read(recurringEngineProvider);
                       await engine.delete(_items[i].id);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Recurring transaction deleted'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
                       _load();
                     },
                     onEdit: () => _showEditSheet(_items[i]),
@@ -209,6 +217,8 @@ class _RecurringTile extends StatelessWidget {
         title: Text(
           item.title.isNotEmpty ? item.title : item.note,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +460,15 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
         endDate: _endDate,
         isSubscription: _isSubscription,
       );
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recurring transaction created'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context, true);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -695,7 +713,15 @@ class _EditRecurringSheetState extends ConsumerState<_EditRecurringSheet> {
         endDate: Value(_endDate),
         isSubscription: Value(_isSubscription),
       ));
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recurring transaction updated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context, true);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

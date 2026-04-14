@@ -508,8 +508,8 @@ class _AllocationDetailScreenState
                     ),
                   ),
                   const SizedBox(width: 10),
-                  SizedBox(
-                    width: 100,
+                  Expanded(
+                    flex: 2,
                     child: CurrencyPickerField(
                       label: 'Currency',
                       value: _targetCurrencyController.text,
@@ -1583,7 +1583,15 @@ class _AllocationDetailScreenState
       final db = ref.read(databaseProvider);
       await AllocationsDao(db).archive(widget.allocationId);
       ref.invalidate(allocationsProvider);
-      if (mounted) context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Envelope archived'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.pop();
+      }
     }
   }
 
@@ -1755,7 +1763,15 @@ class _AllocationDetailScreenState
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
         deviceId: 'local',
       ));
-      if (mounted) context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isNew ? 'Envelope created' : 'Envelope updated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.pop();
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

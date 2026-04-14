@@ -71,7 +71,13 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
     final baseCurrency = household?.baseCurrency ?? 'USD';
 
     return Scaffold(
-      body: CustomScrollView(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(allocationsProvider);
+          ref.invalidate(unallocatedProvider);
+          await Future.delayed(const Duration(milliseconds: 300));
+        },
+        child: CustomScrollView(
         slivers: [
           // ── Header (dashboard style) ──
           SliverToBoxAdapter(
@@ -310,6 +316,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
           // Bottom padding so FAB doesn't cover last card.
           const SliverPadding(padding: EdgeInsets.only(bottom: 88)),
         ],
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_allocations',

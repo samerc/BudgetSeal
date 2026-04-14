@@ -625,7 +625,15 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ),
           );
 
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isNew ? 'Category created' : 'Category updated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -634,12 +642,21 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   Future<void> _toggleArchive() async {
     final cat = widget.existing!;
     final db = ref.read(databaseProvider);
+    final wasArchived = cat.archived;
     await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
         .write(CategoriesCompanion(
       archived: Value(!cat.archived),
       lastModified: Value(DateTime.now()),
     ));
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(wasArchived ? 'Category restored' : 'Category archived'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -717,14 +734,30 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           archived: const Value(true),
           lastModified: Value(DateTime.now()),
         ));
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category archived'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
       } else if (action == 'delete') {
         // Category FK is onDelete: SetNull, so transactions will be uncategorized.
         await (db.delete(db.categories)..where((c) => c.id.equals(cat.id)))
             .go();
         ref.invalidate(categoriesProvider);
         ref.invalidate(allocationsProvider);
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category deleted'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
       }
     } else {
       // No references -- simple confirmation.
@@ -756,7 +789,15 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
         await (db.delete(db.categories)..where((c) => c.id.equals(cat.id)))
             .go();
         ref.invalidate(categoriesProvider);
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category deleted'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
       }
     }
   }

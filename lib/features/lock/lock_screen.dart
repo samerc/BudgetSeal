@@ -30,9 +30,14 @@ class _LockScreenState extends State<LockScreen> {
       final canAuth = await _auth.canCheckBiometrics ||
           await _auth.isDeviceSupported();
       if (!canAuth) {
-        // No biometrics available — still require device credentials
-        // (PIN/pattern/password) as fallback.
-        widget.onUnlocked();
+        // Device has no biometrics and no credentials (PIN/pattern) set up.
+        // Attempt device-credential auth anyway — local_auth will prompt
+        // the user to set up a screen lock if none exists.
+        final didAuth = await _auth.authenticate(
+          localizedReason: 'Set up a screen lock to protect Pocket Plan',
+          biometricOnly: false,
+        );
+        if (didAuth && mounted) widget.onUnlocked();
         return;
       }
 

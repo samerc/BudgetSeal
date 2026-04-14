@@ -96,6 +96,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           ShareParams(files: [XFile(file.path)], text: 'Pocket Plan export'),
         );
       }
+
+      // Clean up temp file
+      try {
+        if (await file.exists()) await file.delete();
+      } catch (_) {}
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

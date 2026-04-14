@@ -527,12 +527,16 @@ class _AssistedTransactionScreenState
               circular: true,
             ),
             const SizedBox(width: 12),
-            Text(
-              cat.name,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.tp(context),
+            Expanded(
+              child: Text(
+                cat.name,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.tp(context),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
