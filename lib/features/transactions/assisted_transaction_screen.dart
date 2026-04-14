@@ -187,8 +187,13 @@ class _AssistedTransactionScreenState
                       textCapitalization: TextCapitalization.sentences,
                       style: const TextStyle(fontSize: 16),
                       decoration: InputDecoration(
-                        hintText: 'Title',
-                        suffixIcon: Icon(Icons.title_rounded,
+                        hintText: localType == 'transfer'
+                            ? 'Note (e.g. rent, savings)'
+                            : 'Title',
+                        suffixIcon: Icon(
+                            localType == 'transfer'
+                                ? Icons.notes_rounded
+                                : Icons.title_rounded,
                             color: AppColors.th(context)),
                       ),
                       onSubmitted: (_) {
@@ -368,7 +373,7 @@ class _AssistedTransactionScreenState
 
                         final parent = parents[i];
                         final subs = subsByParent[parent.id] ?? [];
-                        final color = _hexToColor(parent.colorHex);
+                        final color = AppColors.fromHex(parent.colorHex);
                         final isExpanded = expandedParentId == parent.id;
 
                         if (subs.isEmpty) {
@@ -459,7 +464,7 @@ class _AssistedTransactionScreenState
                                   children: subs
                                       .map((sub) => _buildCategoryTile(
                                             sub,
-                                            _hexToColor(sub.colorHex),
+                                            AppColors.fromHex(sub.colorHex),
                                             () {
                                               hapticLight();
                                               _activeLine.category = sub;
@@ -783,6 +788,48 @@ class _AssistedTransactionScreenState
       if (proceed != true) return;
     }
 
+    final validItems = _lineItems.where((item) => item.amount > 0).toList();
+    if (validItems.isEmpty) return;
+
+    // Check for mixed types and show summary before saving
+    if (_type != 'transfer') {
+      final byType = <String, List<_LineItem>>{};
+      for (final item in validItems) {
+        byType.putIfAbsent(item.type, () => []).add(item);
+      }
+
+      if (byType.length > 1 && mounted) {
+        final summaryLines = byType.entries.map((e) {
+          final total = e.value.fold<double>(0, (s, i) => s + i.amount);
+          final typeLabel = e.key == 'income' ? 'Income' : 'Expense';
+          return '$typeLabel: ${formatAmount(total, currency: _selectedCurrency)} (${e.value.length} ${e.value.length == 1 ? 'item' : 'items'})';
+        }).join('\n');
+
+        final proceed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Mixed transaction'),
+            content: Text(
+              'This will create ${byType.length} linked transactions:\n\n'
+              '$summaryLines\n\n'
+              'They will appear as separate transactions but linked together.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+        );
+        if (proceed != true) return;
+      }
+    }
+
     setState(() => _saving = true);
     hapticMedium();
 
@@ -791,8 +838,10 @@ class _AssistedTransactionScreenState
       if (householdId == null) return;
 
       final engine = ref.read(allocationEngineProvider);
-      final validItems = _lineItems.where((item) => item.amount > 0).toList();
-      if (validItems.isEmpty) return;
+
+      // Use a fixed timestamp so linked transactions share the exact same
+      // createdAt — this is how we find related transactions later.
+      final saveDate = _selectedDate;
 
       if (_type == 'transfer') {
         await engine.recordTransfer(
@@ -807,7 +856,7 @@ class _AssistedTransactionScreenState
           createdBy: 'user',
           deviceId: 'local',
           note: _title,
-          date: _selectedDate,
+          date: saveDate,
         );
 
       } else {
@@ -834,9 +883,8 @@ class _AssistedTransactionScreenState
             lines: lines,
             baseCurrency: _baseCurrency,
             note: _title,
-            date: _selectedDate,
+            date: saveDate,
           );
-  
         }
       }
 
@@ -906,7 +954,7 @@ class _AssistedTransactionScreenState
     // Amount screen with calculator
     final color = isTransfer
         ? typeColor
-        : _hexToColor(_activeLine.category!.colorHex);
+        : AppColors.fromHex(_activeLine.category!.colorHex);
     final totalAmount =
         _lineItems.fold(0.0, (sum, l) => sum + l.amount);
 
@@ -1017,23 +1065,27 @@ class _AssistedTransactionScreenState
             if (_lineItems.length > 1) _buildLineItemsSummary(typeColor),
             // Account chips (labeled "From Account" for transfers)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  isTransfer ? 'From Account' : 'Account',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ts(context),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  Icon(Icons.account_balance_wallet_outlined,
+                      size: 14, color: AppColors.ts(context)),
+                  const SizedBox(width: 6),
+                  Text(
+                    isTransfer ? 'From Account' : 'Account',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ts(context),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
               child: SizedBox(
-                height: 36,
+                height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -1041,23 +1093,71 @@ class _AssistedTransactionScreenState
                       final isSelected = a.id == _accountId;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text('${a.name} (${a.currency})',
-                              style: const TextStyle(fontSize: 12)),
-                          selected: isSelected,
-                          onSelected: (_) =>
-                              setState(() => _accountId = a.id),
-                          selectedColor:
-                              AppColors.accent.withValues(alpha: 0.2),
-                          showCheckmark: false,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _accountId = a.id),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.accent.withValues(alpha: 0.15)
+                                  : AppColors.sfv(context),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.accent
+                                    : AppColors.bd(context),
+                                width: isSelected ? 1.5 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                if (isSelected)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Icon(Icons.check_circle_rounded,
+                                        size: 16, color: AppColors.accent),
+                                  ),
+                                Text(
+                                  a.name,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? AppColors.accent
+                                        : AppColors.tp(context),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  a.currency,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isSelected
+                                        ? AppColors.accent.withValues(alpha: 0.7)
+                                        : AppColors.ts(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     }),
                     GestureDetector(
                       onTap: () => context.push('/accounts/new'),
-                      child: Chip(
-                        label: const Icon(Icons.add, size: 14),
-                        backgroundColor: AppColors.sfv(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.bd(context)),
+                        ),
+                        child: Icon(Icons.add_rounded,
+                            size: 18, color: AppColors.ts(context)),
                       ),
                     ),
                   ],
@@ -1067,23 +1167,27 @@ class _AssistedTransactionScreenState
             // Destination account chips (transfers only)
             if (isTransfer) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'To Account',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ts(context),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
+                  children: [
+                    Icon(Icons.arrow_forward_rounded,
+                        size: 14, color: AppColors.ts(context)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'To Account',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ts(context),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                 child: SizedBox(
-                  height: 36,
+                  height: 44,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
@@ -1094,15 +1198,61 @@ class _AssistedTransactionScreenState
                             a.id == _destinationAccountId;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text('${a.name} (${a.currency})',
-                                style: const TextStyle(fontSize: 12)),
-                            selected: isSelected,
-                            onSelected: (_) => setState(
+                          child: GestureDetector(
+                            onTap: () => setState(
                                 () => _destinationAccountId = a.id),
-                            selectedColor:
-                                typeColor.withValues(alpha: 0.2),
-                            showCheckmark: false,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? typeColor.withValues(alpha: 0.15)
+                                    : AppColors.sfv(context),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? typeColor
+                                      : AppColors.bd(context),
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 6),
+                                      child: Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 16,
+                                          color: typeColor),
+                                    ),
+                                  Text(
+                                    a.name,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? typeColor
+                                          : AppColors.tp(context),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    a.currency,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isSelected
+                                          ? typeColor
+                                              .withValues(alpha: 0.7)
+                                          : AppColors.ts(context),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       }),
@@ -1509,8 +1659,4 @@ class _AssistedTransactionScreenState
     );
   }
 
-  Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
 }

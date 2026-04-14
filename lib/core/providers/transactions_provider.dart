@@ -23,6 +23,9 @@ class TransactionEntry {
   /// Currency of the destination account (transfers only).
   final String? destinationAccountCurrency;
 
+  /// Running balance of the destination account after this transfer.
+  final double? destinationAccountBalanceAfter;
+
   /// Per-line account names (for multi-account display).
   final Map<String, String> lineAccountNames;
 
@@ -34,6 +37,7 @@ class TransactionEntry {
     this.accountCurrency = 'USD',
     this.destinationAccountName,
     this.destinationAccountCurrency,
+    this.destinationAccountBalanceAfter,
     this.lineAccountNames = const {},
   });
 
@@ -109,6 +113,9 @@ TransactionEntry _buildEntry(
     accountCurrency: accountMap[tx.accountId]?.currency ?? tx.currency,
     destinationAccountName: destAcct?.name,
     destinationAccountCurrency: destAcct?.currency,
+    destinationAccountBalanceAfter: tx.destinationAccountId != null
+        ? running[tx.destinationAccountId] ?? 0
+        : null,
     lineAccountNames: lineAcctNames,
   );
 }

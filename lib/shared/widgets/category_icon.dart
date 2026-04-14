@@ -131,8 +131,16 @@ class CategoryIcon extends StatelessWidget {
     );
   }
 
+  /// Check if a string is likely an emoji (short, non-ASCII).
+  static bool _isEmoji(String? s) {
+    if (s == null || s.isEmpty || s == 'category') return false;
+    // Emojis are typically 1-2 characters (up to 4 UTF-16 code units)
+    // and contain non-ASCII codepoints.
+    return s.length <= 4 && s.codeUnits.any((c) => c > 127);
+  }
+
   Widget _fallback() {
-    if (emoji != null && emoji!.length <= 4) {
+    if (_isEmoji(emoji)) {
       return Text(emoji!, style: TextStyle(fontSize: size * 0.45));
     }
     return Text(

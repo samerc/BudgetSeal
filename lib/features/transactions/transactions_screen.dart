@@ -1744,11 +1744,14 @@ class _TxTile extends ConsumerWidget {
       if (isSingleAccount || isTransferSplit)
         Builder(builder: (_) {
           if (isTransferSplit && !isFrom) {
-            // Transfer "to" side: show destination account name + currency
+            // Transfer "to" side: show destination account name + balance
             final destName = entry.destinationAccountName ?? 'account';
             final destCurrency = entry.destinationAccountCurrency ?? tx.currency;
+            final destBalance = entry.destinationAccountBalanceAfter;
             return Text(
-              '$destName: $destCurrency',
+              destBalance != null
+                  ? '$destName: ${formatAmount(destBalance, currency: destCurrency)}'
+                  : '$destName: $destCurrency',
               textAlign: TextAlign.end,
               style: TextStyle(fontSize: 11, color: AppColors.th(context)),
             );

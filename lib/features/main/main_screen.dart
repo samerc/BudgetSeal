@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -76,8 +77,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       _initialized = true;
     }
 
+    final canGoBack = GoRouter.of(context).canPop();
+
     return PopScope(
-      canPop: false,
+      canPop: canGoBack,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         // Back goes to the preferred home tab, not always index 0
@@ -104,6 +107,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         body: PageView(
           controller: _pageController,
           onPageChanged: _onPageChanged,
+          physics: const NeverScrollableScrollPhysics(),
           children: _tabs,
         ),
         bottomNavigationBar: NavigationBar(

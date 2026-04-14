@@ -100,7 +100,7 @@ class _DetailBody extends ConsumerWidget {
     // Resolve primary category for hero display
     final primaryCat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
     final catColor = primaryCat != null
-        ? _hexToColor(primaryCat.colorHex)
+        ? AppColors.fromHex(primaryCat.colorHex)
         : typeColor;
 
     return Scaffold(
@@ -211,9 +211,12 @@ class _DetailBody extends ConsumerWidget {
                   DateFormat('h:mm a').format(tx.createdAt.toLocal()),
                   icon: Icons.access_time_rounded),
               _divider(context),
-              _detailRow(context, 'Account',
-                  entry.accountName.isNotEmpty ? entry.accountName : 'Unknown',
-                  icon: Icons.account_balance_wallet_outlined),
+              GestureDetector(
+                onTap: () => context.push('/accounts/${tx.accountId}'),
+                child: _detailRow(context, 'Account',
+                    '${entry.accountName.isNotEmpty ? entry.accountName : 'Unknown'} ›',
+                    icon: Icons.account_balance_wallet_outlined),
+              ),
               _divider(context),
               _detailRow(context, 'Balance after',
                   formatAmount(entry.accountBalanceAfter, currency: tx.currency),
@@ -277,6 +280,9 @@ class _DetailBody extends ConsumerWidget {
             ),
             _buildSingleLineCard(context, entry.lines.first, categoryMap),
           ],
+
+          // -- Related transactions (linked mixed-type entries) --
+          _RelatedTransactions(tx: tx, categoryMap: categoryMap),
         ],
       ),
     );
@@ -443,6 +449,10 @@ class _DetailBody extends ConsumerWidget {
       'editNote': tx.note,
       'editDate': tx.createdAt,
       'editLines': editLines,
+      if (tx.type == 'transfer') ...{
+        'editFromAccountId': tx.accountId,
+        'editDestAccountId': tx.destinationAccountId,
+      },
     });
   }
 
@@ -479,13 +489,161 @@ class _DetailBody extends ConsumerWidget {
     }
   }
 
-  static Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
 }
 
 // ─── Receipt Section ────────────────────────────────────────────────────────
+
+/// Shows linked transactions that were created together (same note + timestamp,
+/// different type). This happens when the assisted flow splits mixed
+/// expense+income items into separate transactions.
+class _RelatedTransactions extends ConsumerStatefulWidget {
+  final Transaction tx;
+  final Map<String, Category> categoryMap;
+
+  const _RelatedTransactions({required this.tx, required this.categoryMap});
+
+  @override
+  ConsumerState<_RelatedTransactions> createState() =>
+      _RelatedTransactionsState();
+}
+
+class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
+  late final Future<List<Transaction>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _loadRelated();
+  }
+
+  Future<List<Transaction>> _loadRelated() async {
+    final tx = widget.tx;
+    if (tx.note.isEmpty) return [];
+    final db = ref.read(databaseProvider);
+    return (db.select(db.transactions)
+          ..where((t) => t.householdId.equals(tx.householdId))
+          ..where((t) => t.note.equals(tx.note))
+          ..where((t) => t.createdAt.equals(tx.createdAt))
+          ..where((t) => t.id.isNotIn([tx.id])))
+        .get();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.tx.note.isEmpty) return const SizedBox.shrink();
+
+    final categoryMap = widget.categoryMap;
+
+    return FutureBuilder<List<Transaction>>(
+      future: _future,
+      builder: (context, snapshot) {
+        final related = snapshot.data;
+        if (related == null || related.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.link_rounded,
+                      size: 14, color: AppColors.ts(context)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'RELATED ${related.length == 1 ? 'TRANSACTION' : 'TRANSACTIONS'}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: AppColors.ts(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...related.map((r) {
+              final isIncome = r.type == 'income';
+              final color = isIncome ? AppColors.healthy : AppColors.overspent;
+              final typeLabel =
+                  r.type[0].toUpperCase() + r.type.substring(1);
+              final cat =
+                  r.categoryId != null ? categoryMap[r.categoryId] : null;
+
+              return GestureDetector(
+                onTap: () => context.push('/transactions/${r.id}'),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.sf(context),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.bd(context)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          isIncome
+                              ? Icons.arrow_downward_rounded
+                              : Icons.arrow_upward_rounded,
+                          color: color,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cat?.name ?? typeLabel,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.tp(context),
+                              ),
+                            ),
+                            Text(
+                              typeLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.ts(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        formatSignedAmount(r.amount,
+                            currency: r.currency, type: r.type),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right_rounded,
+                          size: 18, color: AppColors.th(context)),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+}
 
 class _ReceiptSection extends ConsumerStatefulWidget {
   final String? receiptPath;

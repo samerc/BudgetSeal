@@ -174,7 +174,8 @@ class _AllocationDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New Envelope' : envelopeName),
+        title: Text(_isNew ? 'New Envelope' : envelopeName,
+            maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           if (!_isNew)
             PopupMenuButton<String>(
@@ -328,6 +329,7 @@ class _AllocationDetailScreenState
                 decoration:
                     _inputDecoration('Envelope name (e.g. Groceries)'),
                 textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.done,
                 autofocus: _isNew,
                 style: TextStyle(
                     color: AppColors.tp(context), fontSize: 15),
@@ -567,7 +569,7 @@ class _AllocationDetailScreenState
                       child: Row(children: [
                         CircleAvatar(
                           radius: 6,
-                          backgroundColor: _hexToColor(cat.colorHex),
+                          backgroundColor: AppColors.fromHex(cat.colorHex),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -956,7 +958,7 @@ class _AllocationDetailScreenState
                   ? tx.note
                   : cat?.name ?? tx.type;
               final catColor = cat != null
-                  ? _hexToColor(cat.colorHex)
+                  ? AppColors.fromHex(cat.colorHex)
                   : AppColors.textSecondary;
 
               return Padding(
@@ -1415,7 +1417,7 @@ class _AllocationDetailScreenState
                     .map((cat) => ListTile(
                           leading: CircleAvatar(
                             radius: 10,
-                            backgroundColor: _hexToColor(cat.colorHex),
+                            backgroundColor: AppColors.fromHex(cat.colorHex),
                           ),
                           title: Text(cat.name),
                           onTap: () => Navigator.pop(ctx, cat.id),
@@ -1440,11 +1442,6 @@ class _AllocationDetailScreenState
     final db = ref.read(databaseProvider);
     await AllocationsDao(db).unlinkCategory(categoryId);
     await _loadAllocation();
-  }
-
-  Color _hexToColor(String hex) {
-    final clean = hex.replaceAll('#', '');
-    return Color(int.parse('FF$clean', radix: 16));
   }
 
   // ---------------------------------------------------------------------------

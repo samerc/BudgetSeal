@@ -129,6 +129,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
+                  textInputAction: TextInputAction.search,
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
                     hintText: 'Search envelopes...',

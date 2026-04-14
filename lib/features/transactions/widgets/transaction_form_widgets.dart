@@ -407,6 +407,7 @@ class LineCard extends StatelessWidget {
                       controller: line.rateCtrl,
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true),
+                      textInputAction: TextInputAction.done,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

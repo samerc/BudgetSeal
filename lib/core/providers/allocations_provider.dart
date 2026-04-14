@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
 import '../engine/balance_calculator.dart';
@@ -34,12 +35,28 @@ final allocationsProvider =
   final ledgerDao = LedgerDao(db);
 
   await for (final list in dao.watchAll(householdId)) {
-    final result = <AllocationWithBalance>[];
-    for (final awc in list) {
-      final balances = await ledgerDao.getBalanceByCurrency(awc.allocation.id);
-      result.add(AllocationWithBalance(data: awc, balanceByCurrency: balances));
+    // Batch: one query for ALL allocation balances
+    final allocIds = list.map((awc) => awc.allocation.id).toList();
+    List<AllocationLedgerData> allEntries = [];
+    if (allocIds.isNotEmpty) {
+      allEntries = await ledgerDao.getAllForHousehold(allocIds);
     }
-    yield result;
+
+    // Group by allocation
+    final balancesByAlloc = <String, Map<String, double>>{};
+    for (final e in allEntries) {
+      balancesByAlloc.putIfAbsent(e.allocationId, () => {});
+      balancesByAlloc[e.allocationId]![e.currency] =
+          (balancesByAlloc[e.allocationId]![e.currency] ?? 0) + e.amount;
+    }
+
+    yield [
+      for (final awc in list)
+        AllocationWithBalance(
+          data: awc,
+          balanceByCurrency: balancesByAlloc[awc.allocation.id] ?? {},
+        ),
+    ];
   }
 });
 

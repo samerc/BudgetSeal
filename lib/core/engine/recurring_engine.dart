@@ -131,9 +131,16 @@ class RecurringEngine {
   }
 
   /// Get all recurring transactions for a household.
-  Future<List<RecurringTransaction>> getAll(String householdId) async {
+  Future<List<RecurringTransaction>> getAll(String householdId,
+      {bool excludeSubscriptions = false}) async {
     return (_db.select(_db.recurringTransactions)
-          ..where((r) => r.householdId.equals(householdId))
+          ..where((r) {
+            final base = r.householdId.equals(householdId);
+            if (excludeSubscriptions) {
+              return base & r.isSubscription.equals(false);
+            }
+            return base;
+          })
           ..orderBy([(r) => OrderingTerm.asc(r.nextDueDate)]))
         .get();
   }

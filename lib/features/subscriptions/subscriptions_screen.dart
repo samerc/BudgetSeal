@@ -150,8 +150,21 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
     return 'active';
   }
 
+  String? _statusFilter; // null = all, 'active', 'cancelled'
+
+  List<Map<String, dynamic>> get _filtered {
+    if (_statusFilter == null) return _subs;
+    return _subs.where((s) => _status(s) == _statusFilter).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filtered = _filtered;
+    final activeCount =
+        _subs.where((s) => _status(s) == 'active').length;
+    final cancelledCount =
+        _subs.where((s) => _status(s) == 'cancelled').length;
+
     final monthlyTotal = _subs.fold<double>(0.0, (sum, s) {
       final status = _status(s);
       if (status == 'cancelled') return sum;
@@ -163,112 +176,316 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
     final annualTotal = monthlyTotal * 12;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Subscriptions')),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add subscription',
         onPressed: () async {
-          // Open recurring screen — user creates a recurring + marks as subscription
-          context.push('/recurring');
+          await context.push('/recurring');
+          _load();
         },
         child: const Icon(Icons.add),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _subs.isEmpty
-              ? const EmptyState(
-                  icon: Icons.subscriptions_rounded,
-                  title: 'No subscriptions',
-                  subtitle:
-                      'Add a recurring transaction and mark it as a subscription',
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: _load,
+          child: CustomScrollView(
+            slivers: [
+              // ── Header ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+                  child: Row(
                     children: [
-                      // ── Annual total card ──
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppColors.accent, AppColors.primaryLight],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          'Subscriptions',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.tp(context),
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'You spend',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${formatAmount(annualTotal)}/year',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'on subscriptions',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${formatAmount(monthlyTotal)}/month',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-
-                      // ── Subscription list ──
-                      ..._subs.map((sub) => _SubscriptionTile(
-                            sub: sub,
-                            categoryName: _categoryNames[sub['category_id']],
-                            categoryIcon: _categoryIcons[sub['category_id']],
-                            categoryColor: _categoryColors[sub['category_id']],
-                            frequencySuffix: _frequencySuffix(
-                              sub['frequency'] as String? ?? 'monthly',
-                              (sub['interval'] as int?) ?? 1,
-                            ),
-                            status: _status(sub),
-                            parseDate: _parseDate,
-                            onTap: () {
-                              final id = sub['id'] as String;
-                              context.push('/subscriptions/$id');
-                            },
-                            onToggleEnabled: () => _toggleEnabled(sub),
-                          )),
                     ],
                   ),
                 ),
+              ),
+
+              // ── Summary banner ──
+              if (_subs.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.accent, AppColors.primaryLight],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${formatAmount(monthlyTotal)}/month',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${formatAmount(annualTotal)}/year',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '$activeCount active',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // ── Count summary ──
+              if (_subs.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          _CountChip(
+                            icon: Icons.subscriptions_rounded,
+                            label: '${_subs.length}',
+                            subtitle: 'Total',
+                            color: AppColors.accent,
+                          ),
+                          const SizedBox(width: 16),
+                          _CountChip(
+                            icon: Icons.play_arrow_rounded,
+                            label: '$activeCount',
+                            subtitle: 'Active',
+                            color: AppColors.healthy,
+                          ),
+                          if (cancelledCount > 0) ...[
+                            const SizedBox(width: 16),
+                            _CountChip(
+                              icon: Icons.cancel_outlined,
+                              label: '$cancelledCount',
+                              subtitle: 'Cancelled',
+                              color: AppColors.overspent,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // ── Status filter chips ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                  child: Row(
+                    children: [
+                      _StatusChip(
+                        label: 'All',
+                        selected: _statusFilter == null,
+                        onTap: () =>
+                            setState(() => _statusFilter = null),
+                      ),
+                      const SizedBox(width: 8),
+                      _StatusChip(
+                        label: 'Active',
+                        selected: _statusFilter == 'active',
+                        color: AppColors.healthy,
+                        onTap: () =>
+                            setState(() => _statusFilter = 'active'),
+                      ),
+                      if (cancelledCount > 0) ...[
+                        const SizedBox(width: 8),
+                        _StatusChip(
+                          label: 'Cancelled',
+                          selected: _statusFilter == 'cancelled',
+                          color: AppColors.overspent,
+                          onTap: () =>
+                              setState(() => _statusFilter = 'cancelled'),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── List ──
+              if (_loading)
+                const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_subs.isEmpty)
+                const SliverFillRemaining(
+                  child: EmptyState(
+                    icon: Icons.subscriptions_rounded,
+                    title: 'No subscriptions',
+                    subtitle:
+                        'Add a recurring transaction and mark it as a subscription',
+                  ),
+                )
+              else if (filtered.isEmpty)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Text(
+                      'No ${_statusFilter ?? ''} subscriptions',
+                      style: TextStyle(color: AppColors.ts(context)),
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, i) => _SubscriptionTile(
+                        sub: filtered[i],
+                        categoryName:
+                            _categoryNames[filtered[i]['category_id']],
+                        categoryIcon:
+                            _categoryIcons[filtered[i]['category_id']],
+                        categoryColor:
+                            _categoryColors[filtered[i]['category_id']],
+                        frequencySuffix: _frequencySuffix(
+                          filtered[i]['frequency'] as String? ?? 'monthly',
+                          (filtered[i]['interval'] as int?) ?? 1,
+                        ),
+                        status: _status(filtered[i]),
+                        parseDate: _parseDate,
+                        onTap: () async {
+                          final id = filtered[i]['id'] as String;
+                          await context.push('/subscriptions/$id');
+                          _load();
+                        },
+                        onToggleEnabled: () => _toggleEnabled(filtered[i]),
+                      ),
+                      childCount: filtered.length,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  const _CountChip({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 6),
+        Text(label,
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context))),
+        const SizedBox(width: 4),
+        Text(subtitle,
+            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+      ],
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color? color;
+  final VoidCallback onTap;
+  const _StatusChip({
+    required this.label,
+    required this.selected,
+    this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chipColor = color ?? AppColors.accent;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected
+              ? chipColor.withValues(alpha: 0.15)
+              : AppColors.sfv(context),
+          borderRadius: BorderRadius.circular(20),
+          border: selected
+              ? Border.all(color: chipColor.withValues(alpha: 0.4))
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? chipColor : AppColors.ts(context),
+          ),
+        ),
+      ),
     );
   }
 }

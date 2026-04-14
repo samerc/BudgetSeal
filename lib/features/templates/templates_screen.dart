@@ -243,6 +243,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: TextField(
                 onChanged: (v) => setState(() => _search = v),
+                textInputAction: TextInputAction.search,
                 style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
                 decoration: InputDecoration(
                   hintText: 'Search templates...',
@@ -384,7 +385,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     final acct = t.accountId != null ? acctMap[t.accountId] : null;
     final color = txColors.forType(t.type);
     final catColor = cat != null
-        ? _hexToColor(cat.colorHex)
+        ? AppColors.fromHex(cat.colorHex)
         : color;
 
     return Padding(
@@ -440,22 +441,21 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                                 color: color),
                           ),
                         ),
-                        if (cat != null) ...[
+                        if (cat != null || acct != null) ...[
                           const SizedBox(width: 6),
-                          Text(cat.name,
+                          Expanded(
+                            child: Text(
+                              [
+                                if (cat != null) cat.name,
+                                if (acct != null) acct.name,
+                              ].join(' · '),
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.ts(context))),
-                        ],
-                        if (acct != null) ...[
-                          Text(' · ',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.th(context))),
-                          Text(acct.name,
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.ts(context))),
+                                  color: AppColors.ts(context)),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -580,11 +580,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ],
       ),
     );
-  }
-
-  Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
   }
 
   // ── Add template sheet ───────────────────────────────────────

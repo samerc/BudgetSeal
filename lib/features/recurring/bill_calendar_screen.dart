@@ -90,6 +90,129 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
     }).toList();
   }
 
+  void _showDayDetail(
+      BuildContext context, int day, List<RecurringTransaction> items) {
+    final date = DateTime(_viewMonth.year, _viewMonth.month, day);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              DateFormat('EEEE, MMMM d').format(date),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${items.length} ${items.length == 1 ? 'bill' : 'bills'} due',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.ts(context),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...items.map((r) {
+              final isIncome = r.type == 'income';
+              final color = isIncome ? AppColors.healthy : AppColors.overspent;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child:
+                          Icon(Icons.repeat_rounded, color: color, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            r.title.isNotEmpty ? r.title : r.note,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            _frequencyLabel(r.frequency, r.interval),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.ts(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      formatSignedAmount(r.amount,
+                          currency: r.currency, type: r.type),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _frequencyLabel(String freq, int interval) {
+    if (interval == 1) {
+      return switch (freq) {
+        'daily' => 'Daily',
+        'weekly' => 'Weekly',
+        'monthly' => 'Monthly',
+        'yearly' => 'Yearly',
+        _ => freq,
+      };
+    }
+    return 'Every $interval $freq';
+  }
+
   @override
   Widget build(BuildContext context) {
     final daysInMonth =
@@ -161,66 +284,73 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                           DateTime.now().month == _viewMonth.month &&
                           DateTime.now().year == _viewMonth.year;
 
-                      return Container(
-                        margin: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: isToday
-                              ? AppColors.accent.withValues(alpha: 0.1)
-                              : null,
-                          borderRadius: BorderRadius.circular(8),
-                          border: isToday
-                              ? Border.all(color: AppColors.accent)
-                              : null,
-                        ),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 4),
-                            Text(
-                              '$day',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
-                                color: isToday
-                                    ? AppColors.accent
-                                    : AppColors.tp(context),
+                      return GestureDetector(
+                        onTap: dayItems.isNotEmpty
+                            ? () => _showDayDetail(context, day, dayItems)
+                            : null,
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: isToday
+                                ? AppColors.accent.withValues(alpha: 0.1)
+                                : dayItems.isNotEmpty
+                                    ? AppColors.sf(context)
+                                    : null,
+                            borderRadius: BorderRadius.circular(8),
+                            border: isToday
+                                ? Border.all(color: AppColors.accent)
+                                : null,
+                          ),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                '$day',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isToday
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                  color: isToday
+                                      ? AppColors.accent
+                                      : AppColors.tp(context),
+                                ),
                               ),
-                            ),
-                            ...dayItems.take(2).map((r) => Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 1),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 2),
-                                  decoration: BoxDecoration(
-                                    color: r.type == 'income'
-                                        ? AppColors.healthy
-                                            .withValues(alpha: 0.15)
-                                        : AppColors.overspent
-                                            .withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                  child: Text(
-                                    r.title.isNotEmpty
-                                        ? r.title
-                                        : formatAmount(r.amount),
-                                    style: TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.w600,
+                              ...dayItems.take(2).map((r) => Container(
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 1),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 2),
+                                    decoration: BoxDecoration(
                                       color: r.type == 'income'
                                           ? AppColors.healthy
-                                          : AppColors.overspent,
+                                              .withValues(alpha: 0.15)
+                                          : AppColors.overspent
+                                              .withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(3),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                )),
-                            if (dayItems.length > 2)
-                              Text('+${dayItems.length - 2}',
-                                  style: TextStyle(
-                                      fontSize: 8,
-                                      color: AppColors.th(context))),
-                          ],
+                                    child: Text(
+                                      r.title.isNotEmpty
+                                          ? r.title
+                                          : formatAmount(r.amount),
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w600,
+                                        color: r.type == 'income'
+                                            ? AppColors.healthy
+                                            : AppColors.overspent,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )),
+                              if (dayItems.length > 2)
+                                Text('+${dayItems.length - 2}',
+                                    style: TextStyle(
+                                        fontSize: 8,
+                                        color: AppColors.th(context))),
+                            ],
+                          ),
                         ),
                       );
                     },

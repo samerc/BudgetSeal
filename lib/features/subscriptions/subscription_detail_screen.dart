@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers/database_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../recurring/recurring_screen.dart' show EditRecurringSheet;
 
 class SubscriptionDetailScreen extends ConsumerStatefulWidget {
   final String subscriptionId;
@@ -209,18 +209,18 @@ class _SubscriptionDetailScreenState
     if (picked == null || _sub == null) return;
 
     final db = ref.read(databaseProvider);
-    final title = _sub!['title'] as String? ?? '';
-    final householdId = _sub!['household_id'] as String;
-    final now = DateTime.now();
+    final title = _sub!['title']?.toString() ?? '';
+    final householdId = _sub!['household_id']?.toString() ?? '';
+    if (householdId.isEmpty) return;
 
-    // Count future transactions that will be removed
+    // Count transactions AFTER the picked cancellation date
     final futureRows = await db.customSelect(
       'SELECT COUNT(*) as cnt FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
       variables: [
         drift.Variable.withString(householdId),
         drift.Variable.withString('%$title%'),
         drift.Variable.withString(title),
-        drift.Variable.withDateTime(now),
+        drift.Variable.withDateTime(picked),
       ],
     ).get();
     final futureCount = (futureRows.firstOrNull?.data['cnt'] as int?) ?? 0;
@@ -234,8 +234,8 @@ class _SubscriptionDetailScreenState
         title: const Text('Cancel subscription'),
         content: Text(
           futureCount > 0
-              ? 'This will cancel future billing and remove $futureCount upcoming transaction${futureCount == 1 ? '' : 's'}.'
-              : 'This will set the cancellation date. No upcoming transactions to remove.',
+              ? 'This will cancel future billing and remove $futureCount transaction${futureCount == 1 ? '' : 's'} after ${DateFormat.yMMMd().format(picked)}.'
+              : 'This will set the cancellation date to ${DateFormat.yMMMd().format(picked)}.',
         ),
         actions: [
           TextButton(
@@ -257,11 +257,11 @@ class _SubscriptionDetailScreenState
       [picked.millisecondsSinceEpoch ~/ 1000, widget.subscriptionId],
     );
 
-    // Delete future transactions generated from this subscription
+    // Delete transactions generated AFTER the cancellation date
     if (futureCount > 0) {
       await db.customStatement(
         'DELETE FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
-        [householdId, '%$title%', title, now.millisecondsSinceEpoch ~/ 1000],
+        [householdId, '%$title%', title, picked.millisecondsSinceEpoch ~/ 1000],
       );
     }
 
@@ -278,6 +278,25 @@ class _SubscriptionDetailScreenState
       [currentlyEnabled ? 0 : 1, widget.subscriptionId],
     );
     _load();
+  }
+
+  Future<void> _editSubscription() async {
+    final db = ref.read(databaseProvider);
+    // Load the typed RecurringTransaction object for the edit sheet
+    final item = await (db.select(db.recurringTransactions)
+          ..where((r) => r.id.equals(widget.subscriptionId)))
+        .getSingleOrNull();
+    if (item == null || !mounted) return;
+
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => EditRecurringSheet(item: item),
+    );
+    if (result == true) _load();
   }
 
   @override
@@ -382,11 +401,11 @@ class _SubscriptionDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_rounded),
-            onPressed: () => context.push('/recurring'),
+            onPressed: () => _editSubscription(),
           ),
         ],
       ),

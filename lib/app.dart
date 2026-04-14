@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/providers/currency_symbol_provider.dart';
+import 'core/services/auto_backup_service.dart';
 import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
@@ -140,6 +141,10 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
                 editDate: extra['editDate'] as DateTime?,
                 editLines:
                     extra['editLines'] as List<Map<String, dynamic>>?,
+                editFromAccountId:
+                    extra['editFromAccountId'] as String?,
+                editDestAccountId:
+                    extra['editDestAccountId'] as String?,
               ),
               state: state,
             );
@@ -257,6 +262,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     if (state == AppLifecycleState.resumed) {
       // Sync on app resume (download remote changes)
       _autoSync();
+      // Auto-backup if due
+      AutoBackupService.runIfDue();
     } else if (state == AppLifecycleState.paused) {
       // Sync on app pause (upload local changes)
       _autoSync();

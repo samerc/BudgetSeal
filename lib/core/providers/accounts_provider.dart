@@ -41,11 +41,11 @@ final accountsWithBalanceProvider =
       .watch();
 
   await for (final accounts in accountStream) {
-    final result = <AccountWithBalance>[];
-    for (final acc in accounts) {
-      final balance = await calculator.accountBalance(acc.id);
-      result.add(AccountWithBalance(account: acc, balance: balance));
-    }
-    yield result;
+    // Batch: compute ALL account balances in ~7 queries total
+    final balances = await calculator.allAccountBalances(householdId);
+    yield [
+      for (final acc in accounts)
+        AccountWithBalance(account: acc, balance: balances[acc.id] ?? 0),
+    ];
   }
 });

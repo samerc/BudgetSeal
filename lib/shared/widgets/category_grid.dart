@@ -21,11 +21,6 @@ class CategoryGrid extends StatelessWidget {
     required this.onCreateNew,
   });
 
-  Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
-
   @override
   Widget build(BuildContext context) {
     // Filter by type and get subcategories (or standalone)
@@ -90,7 +85,7 @@ class CategoryGrid extends StatelessWidget {
                 return _AddNewTile(onTap: onCreateNew);
               }
               final cat = selectableCategories[i];
-              final color = _hexToColor(cat.colorHex);
+              final color = AppColors.fromHex(cat.colorHex);
               final hasEmoji =
                   cat.icon.length <= 4 && cat.icon != 'category';
 

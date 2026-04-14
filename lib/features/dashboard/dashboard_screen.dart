@@ -63,9 +63,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
+          // Invalidate root providers — dependents (unallocatedProvider, etc.)
+          // refresh automatically via Riverpod's dependency graph.
           ref.invalidate(accountsWithBalanceProvider);
           ref.invalidate(allocationsProvider);
-          ref.invalidate(unallocatedProvider);
           ref.invalidate(currentMonthTransactionsProvider);
           ref.invalidate(recentTransactionsProvider);
           await Future.delayed(const Duration(milliseconds: 300));
@@ -167,7 +168,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 (catSpend[name] ?? 0) + baseAmt;
                             if (cat != null &&
                                 !catColors.containsKey(name)) {
-                              catColors[name] = _hexToColor(cat.colorHex);
+                              catColors[name] = AppColors.fromHex(cat.colorHex);
                             }
                           } else {
                             catSpend['Other'] =
@@ -419,10 +420,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     showSearch(context: context, delegate: _GlobalSearchDelegate(ref));
   }
 
-  static Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
 }
 
 // ─── Status Card (combined: budget status + velocity + age of money) ────────
@@ -1217,7 +1214,7 @@ class _RecentTxTile extends ConsumerWidget {
     final typeColor = txColors.forType(tx.type);
     final cat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
     final catColor =
-        cat != null ? _hexToColor(cat.colorHex) : AppColors.accent;
+        cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent;
     return GestureDetector(
       onTap: () => context.push('/transactions/${tx.id}'),
       child: Padding(
@@ -1277,10 +1274,6 @@ class _RecentTxTile extends ConsumerWidget {
     );
   }
 
-  static Color _hexToColor(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
 }
 
 // ─── Global Search ──────────────────────────────────────────────────────────

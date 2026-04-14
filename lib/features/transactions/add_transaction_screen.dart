@@ -35,6 +35,8 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   final String? editNote;
   final DateTime? editDate;
   final List<Map<String, dynamic>>? editLines;
+  final String? editFromAccountId;
+  final String? editDestAccountId;
 
   const AddTransactionScreen({
     super.key,
@@ -43,6 +45,8 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
     this.editNote,
     this.editDate,
     this.editLines,
+    this.editFromAccountId,
+    this.editDestAccountId,
   });
 
   @override
@@ -93,6 +97,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (widget.editDate != null) {
       _selectedDate = widget.editDate!;
       _selectedTime = TimeOfDay.fromDateTime(widget.editDate!);
+    }
+
+    // Pre-fill transfer accounts
+    if (widget.editFromAccountId != null) {
+      _fromAccountId = widget.editFromAccountId;
+    }
+    if (widget.editDestAccountId != null) {
+      _destAccountId = widget.editDestAccountId;
     }
 
     // Pre-fill note/title

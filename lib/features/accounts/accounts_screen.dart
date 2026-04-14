@@ -25,41 +25,52 @@ class AccountsScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      body: accountsAsync.when(
-        data: (accounts) {
-          if (accounts.isEmpty) {
-            return const EmptyState(
-              icon: Icons.credit_card_rounded,
-              title: 'No accounts yet',
-              subtitle: 'Tap + to add one',
-            );
-          }
-
-          // Compute total balance per currency
-          final Map<String, double> totals = {};
-          for (final ab in accounts) {
-            totals[ab.account.currency] =
-                (totals[ab.account.currency] ?? 0) + ab.balance;
-          }
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-            children: [
-              // Total balance header
-              _TotalBalanceCard(totals: totals),
-              const SizedBox(height: 16),
-              ...accounts.map((ab) => _AccountTile(
-                    accountWithBalance: ab,
-                    onTap: () => context.push('/accounts/${ab.account.id}'),
-                  )),
-            ],
-          );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(accountsWithBalanceProvider);
+          await Future.delayed(const Duration(milliseconds: 300));
         },
-        loading: () => const SkeletonList(),
-        error: (e, _) => ErrorRetry(
-          message: "Couldn't load your data",
-          details: '$e',
-          onRetry: () => ref.invalidate(accountsWithBalanceProvider),
+        child: accountsAsync.when(
+          data: (accounts) {
+            if (accounts.isEmpty) {
+              return ListView(
+                children: const [
+                  SizedBox(height: 200),
+                  EmptyState(
+                    icon: Icons.credit_card_rounded,
+                    title: 'No accounts yet',
+                    subtitle: 'Tap + to add one',
+                  ),
+                ],
+              );
+            }
+
+            // Compute total balance per currency
+            final Map<String, double> totals = {};
+            for (final ab in accounts) {
+              totals[ab.account.currency] =
+                  (totals[ab.account.currency] ?? 0) + ab.balance;
+            }
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+              children: [
+                // Total balance header
+                _TotalBalanceCard(totals: totals),
+                const SizedBox(height: 16),
+                ...accounts.map((ab) => _AccountTile(
+                      accountWithBalance: ab,
+                      onTap: () => context.push('/accounts/${ab.account.id}'),
+                    )),
+              ],
+            );
+          },
+          loading: () => const SkeletonList(),
+          error: (e, _) => ErrorRetry(
+            message: "Couldn't load your data",
+            details: '$e',
+            onRetry: () => ref.invalidate(accountsWithBalanceProvider),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

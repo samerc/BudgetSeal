@@ -51,4 +51,14 @@ abstract final class AppColors {
   static const darkTextPrimary = Color(0xFFF1F5F9);
   static const darkTextSecondary = Color(0xFF94A3B8);
   static const darkTextHint = Color(0xFF64748B);
+
+  /// Parse a hex color string (e.g. '#FF5733' or 'FF5733') to a Color.
+  /// Results are cached to avoid re-parsing during rebuilds.
+  static final _hexCache = <String, Color>{};
+  static Color fromHex(String hex) {
+    return _hexCache.putIfAbsent(hex, () {
+      final h = hex.replaceAll('#', '');
+      return Color(int.parse('FF$h', radix: 16));
+    });
+  }
 }

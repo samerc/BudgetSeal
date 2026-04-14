@@ -57,7 +57,7 @@ lib/
 │   │   ├── recurring_engine.dart    # Auto-posts recurring transactions
 │   │   ├── age_of_money.dart        # Age-of-money metric computation
 │   │   └── invariant_checker.dart   # Validates balance invariants
-│   ├── providers/              # Riverpod providers (~20 files)
+│   ├── providers/              # Riverpod providers (~21 files)
 │   │   ├── database_provider.dart
 │   │   ├── engine_provider.dart
 │   │   ├── household_provider.dart  # Current household ID + service
@@ -77,6 +77,7 @@ lib/
 │   │   ├── home_tab_provider.dart   # Remembers preferred home tab
 │   │   ├── number_format_provider.dart
 │   │   ├── receipt_sync_provider.dart
+│   │   ├── report_stats_provider.dart  # Pre-aggregated monthly stats (O(N) single pass)
 │   │   └── tx_colors_provider.dart  # Transaction type color coding
 │   ├── sync/
 │   │   ├── sync_engine.dart         # JSON export/import/merge
@@ -85,7 +86,8 @@ lib/
 │   │   └── file_picker_provider.dart
 │   ├── fx/                     # Currency exchange rates
 │   └── services/
-│       └── notification_service.dart
+│       ├── notification_service.dart
+│       └── auto_backup_service.dart # Scheduled local DB backups
 ├── features/                   # Screen-level code, one folder per feature
 │   ├── dashboard/
 │   ├── main/                   # Main screen with bottom nav bar
@@ -143,6 +145,7 @@ Balances are computed dynamically from the ledger, never stored. Core invariant 
 ```
 Sum(account balances) = Unallocated + Sum(allocation balances)
 ```
+`BalanceCalculator` has batch methods (`allAccountBalances`, `allAllocationBalancesByCurrency`) that compute all balances in ~7 fixed queries regardless of count. Providers use these batch methods — never loop `accountBalance()` per account.
 
 ### Transaction Model
 - `transactions` table — header (type, amount, account, date)
@@ -165,6 +168,9 @@ Single-file sync approach (`PocketPlan_Sync.json`):
 
 ### Theme-Aware Colors
 Always use `AppColors.tp(context)`, `AppColors.ts(context)`, `AppColors.sf(context)`, etc. instead of hardcoded `AppColors.textPrimary`, `Colors.grey.shade200`, etc. The app supports light and dark mode.
+
+### Hex Color Parsing
+Always use `AppColors.fromHex(hex)` — cached, single implementation. Never define local `_hexToColor()` functions.
 
 ### Riverpod 3 Providers
 - `Notifier<T>` + `NotifierProvider` (not the old `StateNotifier`)
@@ -276,6 +282,50 @@ Future<void> _load() async {
 ```
 
 For user-initiated actions (save, delete, toggle), show a SnackBar on both success and failure.
+
+## Performance
+
+### Batch Balance Computation
+`BalanceCalculator.allAccountBalances()` computes all account balances in 7 fixed queries (not per-account). `allAllocationBalancesByCurrency()` uses a single query via `LedgerDao.getAllForHousehold()`. Providers (`accountsWithBalanceProvider`, `allocationsProvider`) use these batch methods.
+
+### Report Stats
+`reportStatsProvider` aggregates all transactions into monthly buckets in one O(N) pass. Report tabs look up pre-computed `MonthlyStats` by month key instead of re-scanning the full list. `_typicalMonthlySpend` is a method on `ReportStats`, not an inline loop.
+
+### Color Cache
+`AppColors.fromHex()` caches parsed colors in a static map. Never re-parse hex strings on rebuild.
+
+## Auto Backup
+
+`AutoBackupService` in `lib/core/services/auto_backup_service.dart`:
+- Copies `pocketplan.db` to `app_documents/backups/` with timestamped filenames
+- Runs on app resume via `AutoBackupService.runIfDue()` in `app.dart`
+- User settings: enable/disable, frequency (6h–weekly), retention (3–30 backups)
+- Old backups auto-deleted beyond retention limit
+- Backup history visible on the Backup & Restore screen with per-file restore/delete
+
+## Linked Transactions
+
+Mixed-type items from the assisted flow (e.g., expense + income in one session) are split into separate transactions but linked via matching `note` + `createdAt` timestamp. The transaction detail screen queries for siblings and shows a "RELATED TRANSACTIONS" section.
+
+## UI Consistency
+
+### Screen Design Patterns
+- **Tab screens** (Dashboard, Activity, Budget, Reports, More): Custom SafeArea header, 24-28px bold title, no back button
+- **Sub-screens** (Recurring, Subscriptions, Templates, Categories): Custom SafeArea header, 24px bold title, back IconButton, filter chips, summary banner, pull-to-refresh
+- **Detail/form screens** (Account detail, Allocation detail, etc.): Standard AppBar with auto back
+
+### Standard Widgets
+- Loading: `SkeletonList` for lists, `CircularProgressIndicator` for detail screens
+- Empty: `EmptyState` widget everywhere
+- Error: `ErrorRetry` widget everywhere
+- Cards: `BorderRadius.circular(14)`, `AppColors.sf(context)` background
+- Chips: Pill-shaped (20px radius), colored border+bg when selected
+- SnackBars: Always `behavior: SnackBarBehavior.floating`
+- All list screens have `RefreshIndicator`
+
+### Navigation
+- `PageView` in `MainScreen` uses `NeverScrollableScrollPhysics` — tab switching is via bottom bar only (no swipe conflict with content gestures)
+- `PopScope` checks `GoRouter.canPop()` so pushed routes (funding, accounts, etc.) pop correctly instead of exiting the app
 
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More

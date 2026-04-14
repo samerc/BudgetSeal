@@ -16,6 +16,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
@@ -24,11 +25,6 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
-
-Color _hexToColor(String hex) {
-  final h = hex.replaceAll('#', '');
-  return Color(int.parse('FF$h', radix: 16));
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -42,32 +38,6 @@ double _baseAmount(TransactionEntry e) {
     return sum;
   }
   return e.tx.amount * e.tx.exchangeRateToBase;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helper: compute "typical" monthly spending (average of previous months).
-// ─────────────────────────────────────────────────────────────────────────────
-double _typicalMonthlySpend(List<TransactionEntry> allEntries, DateTime month,
-    {int lookback = 6}) {
-  double total = 0;
-  int counted = 0;
-  for (int i = 1; i <= lookback; i++) {
-    final m = DateTime(month.year, month.month - i, 1);
-    final end = DateTime(m.year, m.month + 1, 1);
-    double monthTotal = 0;
-    for (final e in allEntries) {
-      if (e.tx.type != 'expense') continue;
-      final d = e.tx.createdAt;
-      if (!d.isBefore(m) && d.isBefore(end)) {
-        monthTotal += _baseAmount(e);
-      }
-    }
-    if (monthTotal > 0) {
-      total += monthTotal;
-      counted++;
-    }
-  }
-  return counted > 0 ? total / counted : 0;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -183,42 +153,32 @@ class _OverviewTab extends ConsumerWidget {
     final baseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
 
+    final statsAsync = ref.watch(reportStatsProvider);
+
     return txAsync.when(
       data: (entries) {
+        final stats = statsAsync.value;
         final now = DateTime.now();
         final monthStart = DateTime(now.year, now.month, 1);
-        final thisMonth =
-            entries.where((e) => e.tx.createdAt.isAfter(monthStart));
 
-        double totalIncome = 0;
-        double totalExpense = 0;
-        for (final e in thisMonth) {
-          final amt = _baseAmount(e);
-          if (e.tx.type == 'income') totalIncome += amt;
-          if (e.tx.type == 'expense') totalExpense += amt;
-        }
-
-        final typical = _typicalMonthlySpend(entries, monthStart);
+        // Use pre-computed stats when available, fall back to inline
+        final currentMonth = stats?.monthly[monthStart];
+        final double totalIncome = currentMonth?.income ?? 0;
+        final double totalExpense = currentMonth?.expense ?? 0;
+        final typical = stats?.typicalMonthlySpend(monthStart) ?? 0;
         final net = totalIncome - totalExpense;
 
-        // 6-month trend data
-        final months = <DateTime>[];
-        final incomeByMonth = <double>[];
-        final expenseByMonth = <double>[];
-        for (int i = 5; i >= 0; i--) {
-          final m = DateTime(now.year, now.month - i, 1);
-          final end = DateTime(m.year, m.month + 1, 1);
-          months.add(m);
-          double inc = 0, exp = 0;
-          for (final e in entries) {
-            final d = e.tx.createdAt;
-            if (d.isBefore(m) || !d.isBefore(end)) continue;
-            final amt = _baseAmount(e);
-            if (e.tx.type == 'income') inc += amt;
-            if (e.tx.type == 'expense') exp += amt;
-          }
-          incomeByMonth.add(inc);
-          expenseByMonth.add(exp);
+        // 6-month trend from pre-computed stats
+        final trend = stats?.monthRange(6) ?? [];
+        final months = trend.map((e) => e.key).toList();
+        final incomeByMonth = trend.map((e) => e.value.income).toList();
+        final expenseByMonth = trend.map((e) => e.value.expense).toList();
+
+        // Pad if stats aren't ready yet
+        while (months.length < 6) {
+          months.insert(0, DateTime(now.year, now.month - months.length, 1));
+          incomeByMonth.insert(0, 0);
+          expenseByMonth.insert(0, 0);
         }
 
         return SingleChildScrollView(
@@ -1190,7 +1150,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           catSpend[name] = (catSpend[name] ?? 0) + _baseAmount(e);
           catCount[name] = (catCount[name] ?? 0) + 1;
           if (cat != null && !catColors.containsKey(name)) {
-            catColors[name] = _hexToColor(cat.colorHex);
+            catColors[name] = AppColors.fromHex(cat.colorHex);
           }
         }
 
@@ -1524,9 +1484,12 @@ class _HistoryTab extends ConsumerWidget {
                   itemCount: yearEntry.value.length,
                   itemBuilder: (_, i) {
                     final month = yearEntry.value[i];
+                    final stats = ref.watch(reportStatsProvider).value;
+                    final ms = stats?.monthly[month];
                     return _MonthGaugeCard(
                       month: month,
-                      entries: entries,
+                      spent: ms?.expense ?? 0,
+                      typical: stats?.typicalMonthlySpend(month) ?? 0,
                     );
                   },
                 ),
@@ -1547,23 +1510,17 @@ class _HistoryTab extends ConsumerWidget {
 
 class _MonthGaugeCard extends StatelessWidget {
   final DateTime month;
-  final List<TransactionEntry> entries;
+  final double spent;
+  final double typical;
 
-  const _MonthGaugeCard({required this.month, required this.entries});
+  const _MonthGaugeCard({
+    required this.month,
+    required this.spent,
+    required this.typical,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final end = DateTime(month.year, month.month + 1, 1);
-    double spent = 0;
-    for (final e in entries) {
-      if (e.tx.type != 'expense') continue;
-      final d = e.tx.createdAt;
-      if (!d.isBefore(month) && d.isBefore(end)) {
-        spent += _baseAmount(e);
-      }
-    }
-
-    final typical = _typicalMonthlySpend(entries, month);
     final ratio = typical > 0 ? (spent / typical).clamp(0.0, 1.5) : 0.0;
 
     Color gaugeColor;
@@ -1724,8 +1681,9 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
           dailyCumulative[i] += dailyCumulative[i - 1];
         }
 
-        // Typical cumulative: compute average daily spending from previous months
-        final typicalMonthly = _typicalMonthlySpend(entries, month);
+        // Typical cumulative: use pre-computed stats
+        final stats = ref.watch(reportStatsProvider).value;
+        final typicalMonthly = stats?.typicalMonthlySpend(month) ?? 0;
         final typicalDaily = typicalMonthly / daysInMonth;
         final typicalCumulative = List.generate(
             daysInMonth + 1, (i) => typicalDaily * i);
@@ -2393,7 +2351,7 @@ class _BiggestExpenseCard extends StatelessWidget {
     final catName = cat?.name ??
         (entry.tx.note.isNotEmpty ? entry.tx.note : 'Expense');
     final catColor = cat != null
-        ? _hexToColor(cat.colorHex)
+        ? AppColors.fromHex(cat.colorHex)
         : AppColors.overspent;
 
     return GestureDetector(

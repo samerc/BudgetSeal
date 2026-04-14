@@ -120,6 +120,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               : _nameController.text.isNotEmpty
                   ? _nameController.text
                   : 'Account',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         actions: [
           if (!_isNew)
@@ -308,6 +310,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     controller: _nameController,
                     decoration: _inputDecoration('Account name'),
                     textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.done,
                     autofocus: _isNew,
                     style: TextStyle(color: AppColors.tp(context)),
                   ),
@@ -457,11 +460,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     );
   }
 
-  Color _hexToColor(String hex) {
-    final clean = hex.replaceAll('#', '');
-    return Color(int.parse('FF$clean', radix: 16));
-  }
-
   Widget _buildAccountTransactions() {
     final entriesAsync = ref.watch(transactionEntriesProvider);
     final categories = ref.watch(categoriesProvider).value ?? [];
@@ -510,7 +508,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     ? catName
                     : tx.type;
             final catColor = cat != null
-                ? _hexToColor(cat.colorHex)
+                ? AppColors.fromHex(cat.colorHex)
                 : AppColors.textSecondary;
 
             // Determine display amount from lines
