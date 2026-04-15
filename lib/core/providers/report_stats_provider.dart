@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/utils/format_number.dart';
+import 'household_provider.dart';
 import 'transactions_provider.dart';
 
 /// Pre-aggregated monthly statistics, computed once per data change in O(N).
@@ -51,19 +53,25 @@ class ReportStats {
   }
 }
 
-double _baseAmount(TransactionEntry e) {
+double _safeBaseAmount(TransactionEntry e, String baseCurrency) {
   if (e.lines.isNotEmpty) {
     double sum = 0;
     for (final l in e.lines) {
+      if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
       sum += l.amount * l.exchangeRateToBase;
     }
     return sum;
   }
+  if (!isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) return 0;
   return e.tx.amount * e.tx.exchangeRateToBase;
 }
 
 /// Single-pass O(N) aggregation of all transactions into monthly buckets.
 final reportStatsProvider = Provider<AsyncValue<ReportStats>>((ref) {
+  final baseCurrency =
+      ref.watch(currentHouseholdIdProvider) != null
+          ? (ref.watch(householdProvider).value?.baseCurrency ?? 'USD')
+          : 'USD';
   final txAsync = ref.watch(transactionEntriesProvider);
 
   return txAsync.whenData((entries) {
@@ -74,7 +82,7 @@ final reportStatsProvider = Provider<AsyncValue<ReportStats>>((ref) {
       final d = e.tx.createdAt;
       final key = DateTime(d.year, d.month, 1);
       final m = monthly.putIfAbsent(key, () => _MutableMonth());
-      final amt = _baseAmount(e);
+      final amt = _safeBaseAmount(e, baseCurrency);
 
       if (e.tx.type == 'income') {
         m.income += amt;

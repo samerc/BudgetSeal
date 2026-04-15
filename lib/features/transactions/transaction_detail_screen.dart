@@ -170,15 +170,31 @@ class _DetailBody extends ConsumerWidget {
                           color: AppColors.tp(context))),
                   const SizedBox(height: 4),
                 ],
-                // Amount
+                // Amount — show in line currency if available, otherwise tx currency
                 Text(
-                  formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
+                  entry.lines.isNotEmpty
+                      ? formatSignedAmount(entry.lines.first.amount,
+                          currency: entry.lines.first.currency, type: tx.type)
+                      : formatSignedAmount(tx.amount,
+                          currency: entry.accountCurrency, type: tx.type),
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: typeColor,
                   ),
                 ),
+                // Show base currency conversion if line is in a different currency
+                if (entry.lines.isNotEmpty &&
+                    entry.lines.first.currency != baseCurrency) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '= ${formatAmount(tx.amount, currency: baseCurrency)}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.ts(context),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -219,7 +235,7 @@ class _DetailBody extends ConsumerWidget {
               ),
               _divider(context),
               _detailRow(context, 'Balance after',
-                  formatAmount(entry.accountBalanceAfter, currency: tx.currency),
+                  formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency),
                   icon: Icons.account_balance_outlined),
               if (tx.note.isNotEmpty) ...[
                 _divider(context),
@@ -518,14 +534,22 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
 
   Future<List<Transaction>> _loadRelated() async {
     final tx = widget.tx;
-    if (tx.note.isEmpty) return [];
     final db = ref.read(databaseProvider);
-    return (db.select(db.transactions)
+    // Find transactions with same note + same createdAt + same household
+    // but different ID. For empty notes, also require matching type to
+    // avoid false positives (many transactions could have empty notes).
+    final candidates = await (db.select(db.transactions)
           ..where((t) => t.householdId.equals(tx.householdId))
           ..where((t) => t.note.equals(tx.note))
           ..where((t) => t.createdAt.equals(tx.createdAt))
           ..where((t) => t.id.isNotIn([tx.id])))
         .get();
+    // For empty notes, only show related if the types differ
+    // (income+expense pair from the same assisted flow session)
+    if (tx.note.isEmpty) {
+      return candidates.where((c) => c.type != tx.type).toList();
+    }
+    return candidates;
   }
 
   @override

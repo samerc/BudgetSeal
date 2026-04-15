@@ -283,6 +283,9 @@ Future<void> _load() async {
 
 For user-initiated actions (save, delete, toggle), show a SnackBar on both success and failure.
 
+### Multi-Currency Amount Safety
+When computing base-currency totals (summaries, reports, dashboard), always use `isRealRate()` from `format_number.dart` to skip lines where the currency differs from base but `exchangeRateToBase` is 1.0 (rate not set). Without this check, foreign-currency amounts inflate totals (e.g., LBP 1,200,000 counted as $1,200,000).
+
 ## Performance
 
 ### Batch Balance Computation
@@ -305,7 +308,10 @@ For user-initiated actions (save, delete, toggle), show a SnackBar on both succe
 
 ## Linked Transactions
 
-Mixed-type items from the assisted flow (e.g., expense + income in one session) are split into separate transactions but linked via matching `note` + `createdAt` timestamp. The transaction detail screen queries for siblings and shows a "RELATED TRANSACTIONS" section.
+Mixed-type items from the assisted flow (e.g., expense + income in one session) are split into separate transactions but linked via matching `note` + `createdAt` timestamp. The transaction detail screen queries for siblings and shows a "RELATED TRANSACTIONS" section. For transactions with empty notes, the query additionally requires different `type` to avoid false positives.
+
+### Category Icons
+Users can pick from 120+ curated emojis organized by group, OR type/paste any emoji from the system keyboard via the text field at the top of the picker. The `CategoryIcon` widget resolves display priority: PNG asset by name match → emoji → first-letter fallback.
 
 ## UI Consistency
 

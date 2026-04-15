@@ -889,16 +889,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       );
     }
 
-    // Compute month summary
+    // Compute month summary — skip lines where currency differs from base
+    // but rate is 1.0 (exchange rate not set), as those would inflate totals.
+    final baseCurrencyForSummary =
+        ref.read(householdProvider).value?.baseCurrency ?? 'USD';
     double monthExpense = 0, monthIncome = 0;
     for (final e in filtered) {
       double baseAmt = 0;
       if (e.lines.isNotEmpty) {
         for (final l in e.lines) {
+          // Skip lines with bogus rate (foreign currency with rate=1.0)
+          if (l.currency != baseCurrencyForSummary &&
+              (l.exchangeRateToBase - 1.0).abs() < 0.001) {
+            continue;
+          }
           baseAmt += l.amount * l.exchangeRateToBase;
         }
       } else {
-        baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+        if (e.tx.currency == baseCurrencyForSummary ||
+            (e.tx.exchangeRateToBase - 1.0).abs() >= 0.001) {
+          baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+        }
       }
       if (e.tx.type == 'expense') monthExpense += baseAmt;
       if (e.tx.type == 'income') monthIncome += baseAmt;
@@ -1682,9 +1693,14 @@ class _TxTile extends ConsumerWidget {
     }
 
     final baseCurrency = tx.currency;
-    final showConversion =
-        !isTransferSplit && displayCurrency != baseCurrency && lines.isNotEmpty;
     final baseAmount = tx.amount;
+    // Only show conversion badge if currencies differ AND the rate actually
+    // changed the amount (rate != 1.0). When rate is 1.0 the "conversion"
+    // shows the same number with a different symbol, which is confusing.
+    final hasRealConversion = lines.isNotEmpty &&
+        (lines.first.exchangeRateToBase - 1.0).abs() > 0.001;
+    final showConversion =
+        !isTransferSplit && displayCurrency != baseCurrency && hasRealConversion;
 
     // For transfer splits, show as expense (from) or income (to)
     final effectiveType = isTransferSplit

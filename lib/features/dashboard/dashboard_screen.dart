@@ -152,10 +152,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         double baseAmt = 0;
                         if (e.lines.isNotEmpty) {
                           for (final l in e.lines) {
+                            if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
                             baseAmt += l.amount * l.exchangeRateToBase;
                           }
                         } else {
-                          baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+                          if (isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
+                            baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+                          }
                         }
                         if (e.tx.type == 'income') totalIncome += baseAmt;
                         if (e.tx.type == 'expense') {
@@ -467,10 +470,13 @@ class _StatusCard extends ConsumerWidget {
               e.tx.createdAt.isAfter(monthStart)) {
             if (e.lines.isNotEmpty) {
               for (final l in e.lines) {
+                if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
                 monthExpense += l.amount * l.exchangeRateToBase;
               }
             } else {
-              monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+              if (isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
+                monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+              }
             }
           }
         }
@@ -502,10 +508,13 @@ class _StatusCard extends ConsumerWidget {
             e.tx.createdAt.isAfter(monthStart)) {
           if (e.lines.isNotEmpty) {
             for (final l in e.lines) {
+              if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
               monthExpense += l.amount * l.exchangeRateToBase;
             }
           } else {
-            monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+            if (isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
+              monthExpense += e.tx.amount * e.tx.exchangeRateToBase;
+            }
           }
         }
       }

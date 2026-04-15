@@ -153,6 +153,12 @@ String formatForDisplay(double value) {
   return _formatNumber(value, decimalDigits);
 }
 
+/// Check if an exchange rate is real (not the default 1.0 for a foreign currency).
+bool isRealRate(String lineCurrency, String baseCurrency, double rate) {
+  if (lineCurrency == baseCurrency) return true;
+  return (rate - 1.0).abs() >= 0.001;
+}
+
 /// Round an exchange rate to a practical value.
 double roundRate(double rate) {
   if (rate >= 10000) return (rate / 500).round() * 500.0;

@@ -844,11 +844,47 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   Color _color = _categoryColors[0];
   bool _loading = false;
 
-  static const _emojis = [
-    '🛒', '🍕', '🏠', '🚗', '⛽', '💊', '🎬', '✈️', '👕', '💇',
-    '📱', '💡', '🎓', '🏋️', '🎁', '🐾', '👶', '🔧', '📦', '💰',
-    '💳', '🏦', '📊', '🎯', '☕', '🍺', '🛍️', '🧹', '🎵', '📚',
-  ];
+  static const _emojiGroups = <String, List<String>>{
+    'Food & Drink': [
+      '🛒', '🍕', '🍔', '🍗', '🥗', '🍣', '🍜', '🌮', '🥐', '🍰',
+      '☕', '🍺', '🥤', '🍷', '🧁', '🍩', '🥡', '🧃',
+    ],
+    'Transport': [
+      '🚗', '⛽', '🚕', '🚌', '🚇', '🚲', '✈️', '🛳️', '🚁', '🅿️',
+      '🛞', '🏍️',
+    ],
+    'Home & Bills': [
+      '🏠', '💡', '💧', '🔌', '📡', '🛏️', '🪑', '🧹', '🧺', '🔧',
+      '🏗️', '🔑',
+    ],
+    'Shopping': [
+      '🛍️', '👕', '👗', '👟', '👜', '💄', '🕶️', '💎', '🧴', '🛒',
+    ],
+    'Health & Fitness': [
+      '💊', '🏥', '🩺', '🏋️', '🧘', '🏊', '🚴', '🦷', '🩹', '💉',
+    ],
+    'Entertainment': [
+      '🎬', '🎮', '🎵', '🎤', '🎭', '🎨', '📺', '🎧', '🎪', '🎲',
+      '🍿', '📷',
+    ],
+    'Education & Work': [
+      '🎓', '📚', '💻', '📱', '🖨️', '📊', '💼', '🏢', '📝', '✏️',
+      '🔬', '📐',
+    ],
+    'Money': [
+      '💰', '💳', '🏦', '📈', '💵', '🪙', '💲', '🧾', '📑', '🏧',
+    ],
+    'Family & Pets': [
+      '👶', '🧒', '👨‍👩‍👧', '🐾', '🐕', '🐈', '🧸', '🍼', '🎁', '❤️',
+    ],
+    'Travel & Leisure': [
+      '✈️', '🏖️', '🏔️', '🗺️', '🧳', '⛺', '🏨', '🎢', '🎣', '⛷️',
+    ],
+    'Other': [
+      '📦', '🎯', '🔖', '⭐', '🌱', '♻️', '🤝', '🙏', '🚀', '🏷️',
+      '📌', '🗂️',
+    ],
+  };
 
   bool get _isNew => widget.existing == null;
 
@@ -967,35 +1003,33 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ),
             const SizedBox(height: 16),
 
-            // Color picker (compact row)
-            SizedBox(
-              height: 36,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: _categoryColors.map((c) {
-                  final isSelected =
-                      c.toARGB32() == _color.toARGB32();
-                  return GestureDetector(
-                    onTap: () => setState(() => _color = c),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: c,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(color: AppColors.tp(context), width: 2.5)
-                            : null,
-                      ),
-                      child: isSelected
-                          ? const Icon(Icons.check,
-                              size: 14, color: Colors.white)
+            // Color picker (scrollable row)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _categoryColors.map((c) {
+                final isSelected =
+                    c.toARGB32() == _color.toARGB32();
+                return GestureDetector(
+                  onTap: () => setState(() => _color = c),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: c,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: AppColors.tp(context), width: 2.5)
                           : null,
                     ),
-                  );
-                }).toList(),
-              ),
+                    child: isSelected
+                        ? const Icon(Icons.check,
+                            size: 14, color: Colors.white)
+                        : null,
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 16),
 
@@ -1005,6 +1039,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 Expanded(
                   child: DropdownButtonFormField<String?>(
                     initialValue: _parentId,
+                    isExpanded: true,
                     decoration: InputDecoration(
                       labelText: 'Parent',
                       labelStyle: const TextStyle(fontSize: 13),
@@ -1036,6 +1071,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                         ref.watch(accountsProvider).value ?? [];
                     return DropdownButtonFormField<String?>(
                       initialValue: _defaultAccountId,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: 'Account',
                         labelStyle: const TextStyle(fontSize: 13),
@@ -1097,65 +1133,159 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   }
 
   void _showEmojiPicker() {
+    final customCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.sf(context),
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.85,
+        minChildSize: 0.4,
+        builder: (_, scrollCtrl) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.th(context),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text('Choose Icon',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _emojis.map((e) {
-                final isSelected = e == _emoji;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _emoji = e);
-                    Navigator.pop(ctx);
-                  },
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.accent.withValues(alpha: 0.15)
-                          : AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(12),
-                      border: isSelected
-                          ? Border.all(color: AppColors.accent, width: 2)
-                          : null,
-                    ),
-                    child: Center(
-                      child: Text(e, style: const TextStyle(fontSize: 22)),
+              const SizedBox(height: 12),
+              Text('Choose Icon',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const SizedBox(height: 12),
+              // Custom emoji input — opens system emoji keyboard
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: customCtrl,
+                      style: const TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText: 'Type or paste any emoji',
+                        hintStyle: TextStyle(
+                            fontSize: 14, color: AppColors.th(context)),
+                        filled: true,
+                        fillColor: AppColors.sfv(context),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        isDense: true,
+                      ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () {
+                      final text = customCtrl.text.trim();
+                      if (text.isNotEmpty) {
+                        // Take just the first emoji character(s)
+                        final emoji = text.characters.first;
+                        setState(() => _emoji = emoji);
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Use'),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Row(
+                  children: [
+                    Expanded(child: Divider(color: AppColors.bd(context))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or pick below',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.th(context))),
+                    ),
+                    Expanded(child: Divider(color: AppColors.bd(context))),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollCtrl,
+                  children: _emojiGroups.entries.map((group) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12, bottom: 8),
+                          child: Text(
+                            group.key,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ts(context),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: group.value.map((e) {
+                            final isSelected = e == _emoji;
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() => _emoji = e);
+                                Navigator.pop(ctx);
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.accent
+                                          .withValues(alpha: 0.15)
+                                      : AppColors.sfv(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: AppColors.accent, width: 2)
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text(e,
+                                      style: const TextStyle(fontSize: 20)),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

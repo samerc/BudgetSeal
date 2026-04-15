@@ -613,9 +613,13 @@ class _AllocationDetailScreenState
               ]),
             ], // end if (_isNew || _showSettings)
 
-            // --- Progress ring + goal timeline + recent transactions + spending history ---
+            // --- Fund + Withdraw quick actions ---
             if (!_isNew) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              _buildFundButton(),
+
+              // --- Progress ring + goal timeline + recent transactions + spending history ---
+              const SizedBox(height: 16),
               _buildProgressRing(),
               if (_type == 'saving') ...[
                 const SizedBox(height: 16),
@@ -631,6 +635,170 @@ class _AllocationDetailScreenState
         ),
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Quick fund button
+  // ---------------------------------------------------------------------------
+
+  Widget _buildFundButton() {
+    final currency = _targetCurrencyController.text.isNotEmpty
+        ? _targetCurrencyController.text
+        : ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _showFundSheet(currency),
+        icon: const Icon(Icons.add_rounded, size: 18),
+        label: const Text('Fund this envelope'),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFundSheet(String currency) async {
+    double amount = 0;
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+            20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Fund ${_nameController.text}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'From your unallocated $currency balance',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.ts(context),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    currency,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ts(context),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: CalculatorAmountField(
+                      value: 0,
+                      onChanged: (v) => amount = v,
+                      hintText: 'Amount',
+                      fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(ctx, amount),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Fund',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (amount <= 0 || !mounted) return;
+
+    try {
+      final engine = ref.read(allocationEngineProvider);
+      await engine.fundAllocation(
+        allocationId: widget.allocationId,
+        amount: amount,
+        currency: currency,
+        deviceId: 'local',
+        note: 'Funded from Unallocated',
+      );
+      ref.invalidate(allocationsProvider);
+      ref.invalidate(unallocatedProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Funded ${formatAmount(amount, currency: currency)} to ${_nameController.text}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not fund: $e'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.overspent,
+          ),
+        );
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1059,7 +1227,7 @@ class _AllocationDetailScreenState
           _sectionHeader('SPENDING HISTORY', icon: Icons.bar_chart_rounded),
           const SizedBox(height: 4),
           SizedBox(
-            height: 85,
+            height: 105,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: months.map((m) {

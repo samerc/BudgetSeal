@@ -971,6 +971,11 @@ class _AssistedTransactionScreenState
         ),
         body: Column(
           children: [
+            // Scrollable content above the keypad
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
             // Category / Transfer banner
             Container(
               padding:
@@ -1378,7 +1383,11 @@ class _AssistedTransactionScreenState
                 ),
               ),
             ],
-            // Calculator keypad — no Expanded, fixed height
+                  ],
+                ),
+              ),
+            ),
+            // Calculator keypad — fixed at bottom
             Container(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
               decoration: BoxDecoration(

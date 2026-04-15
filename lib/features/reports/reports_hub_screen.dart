@@ -28,15 +28,20 @@ import '../../shared/widgets/skeleton_loader.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
+// Skips lines where currency differs from base but rate is 1.0 (not set).
 // ─────────────────────────────────────────────────────────────────────────────
+String _reportsBaseCurrency = 'USD'; // set from provider before use
+
 double _baseAmount(TransactionEntry e) {
   if (e.lines.isNotEmpty) {
     double sum = 0;
     for (final l in e.lines) {
+      if (!isRealRate(l.currency, _reportsBaseCurrency, l.exchangeRateToBase)) continue;
       sum += l.amount * l.exchangeRateToBase;
     }
     return sum;
   }
+  if (!isRealRate(e.tx.currency, _reportsBaseCurrency, e.tx.exchangeRateToBase)) return 0;
   return e.tx.amount * e.tx.exchangeRateToBase;
 }
 
@@ -80,6 +85,9 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Set the module-level base currency for _baseAmount helper
+    _reportsBaseCurrency =
+        ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
     return Scaffold(
       body: SafeArea(
         child: Column(
