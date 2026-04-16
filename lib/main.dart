@@ -5,11 +5,13 @@ import 'app.dart';
 import 'core/providers/database_provider.dart';
 import 'core/providers/engine_provider.dart';
 import 'core/providers/household_provider.dart';
+import 'core/services/daily_reminder_service.dart';
 import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.init();
+  await DailyReminderService.init();
 
   final container = ProviderContainer();
   await container.read(householdServiceProvider).loadSavedHousehold();

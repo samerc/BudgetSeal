@@ -87,7 +87,8 @@ lib/
 │   ├── fx/                     # Currency exchange rates
 │   └── services/
 │       ├── notification_service.dart
-│       └── auto_backup_service.dart # Scheduled local DB backups
+│       ├── auto_backup_service.dart  # Scheduled local DB backups
+│       └── daily_reminder_service.dart # Daily transaction logging reminder
 ├── features/                   # Screen-level code, one folder per feature
 │   ├── dashboard/
 │   ├── main/                   # Main screen with bottom nav bar
@@ -309,6 +310,10 @@ When computing base-currency totals (summaries, reports, dashboard), always use 
 ## Linked Transactions
 
 Mixed-type items from the assisted flow (e.g., expense + income in one session) are split into separate transactions but linked via matching `note` + `createdAt` timestamp. The transaction detail screen queries for siblings and shows a "RELATED TRANSACTIONS" section. For transactions with empty notes, the query additionally requires different `type` to avoid false positives.
+
+## Daily Reminder
+
+`DailyReminderService` schedules a daily local notification via `flutter_local_notifications`. Users configure in Settings: toggle on/off, pick time (default 7 PM), optional custom message. If no custom message, rotates between 5 default prompts. Initialized in `main()` via `DailyReminderService.init()` which re-schedules if enabled. Uses `timezone` package for `zonedSchedule` with `matchDateTimeComponents.time`.
 
 ### Category Icons
 Users can pick from 120+ curated emojis organized by group, OR type/paste any emoji from the system keyboard via the text field at the top of the picker. The `CategoryIcon` widget resolves display priority: PNG asset by name match → emoji → first-letter fallback.

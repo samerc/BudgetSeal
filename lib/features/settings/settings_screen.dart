@@ -25,6 +25,7 @@ import '../../core/providers/receipt_sync_provider.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
+import '../../core/services/daily_reminder_service.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
@@ -235,6 +236,8 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
                 subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
                 onTap: () => context.push('/import-export')),
+            // ── Daily Reminder ──
+            const _DailyReminderTile(),
             // ── Receipt Sync toggle ──
             Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);
@@ -1699,6 +1702,155 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── Backup Reminder Banner (moved from dashboard) ──────────────────────────
+
+// ─── Daily Reminder Tile ─────────────────────────────────────────────────────
+
+class _DailyReminderTile extends StatefulWidget {
+  const _DailyReminderTile();
+
+  @override
+  State<_DailyReminderTile> createState() => _DailyReminderTileState();
+}
+
+class _DailyReminderTileState extends State<_DailyReminderTile> {
+  bool _enabled = false;
+  TimeOfDay _time = const TimeOfDay(hour: 19, minute: 0);
+  String _message = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final enabled = await DailyReminderService.isEnabled();
+    final time = await DailyReminderService.getTime();
+    final message = await DailyReminderService.getMessage();
+    if (mounted) {
+      setState(() {
+        _enabled = enabled;
+        _time = time;
+        _message = message;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        children: [
+          SwitchListTile.adaptive(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            secondary: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF9800).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.notifications_active_rounded,
+                  size: 18, color: Color(0xFFFF9800)),
+            ),
+            title: const Text('Daily Reminder',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            subtitle: Text(
+              _enabled
+                  ? 'Every day at ${_time.format(context)}'
+                  : 'Remind me to log transactions',
+              style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+            ),
+            value: _enabled,
+            onChanged: (v) async {
+              await DailyReminderService.setEnabled(v);
+              setState(() => _enabled = v);
+            },
+            activeTrackColor: AppColors.accent,
+          ),
+          if (_enabled) ...[
+            Divider(height: 1, color: AppColors.bd(context)),
+            // Time picker
+            ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16),
+              dense: true,
+              leading: Icon(Icons.schedule_rounded,
+                  size: 18, color: AppColors.ts(context)),
+              title: Text('Time',
+                  style: TextStyle(
+                      fontSize: 13, color: AppColors.tp(context))),
+              trailing: TextButton(
+                onPressed: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: _time,
+                  );
+                  if (picked != null) {
+                    await DailyReminderService.setTime(picked);
+                    setState(() => _time = picked);
+                  }
+                },
+                child: Text(
+                  _time.format(context),
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            // Custom message
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: TextField(
+                controller: TextEditingController(text: _message),
+                style: TextStyle(
+                    fontSize: 13, color: AppColors.tp(context)),
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: 'Custom message (optional)',
+                  hintStyle: TextStyle(
+                      fontSize: 13, color: AppColors.th(context)),
+                  filled: true,
+                  fillColor: AppColors.sfv(context),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                  isDense: true,
+                  suffixIcon: _message.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear_rounded,
+                              size: 16, color: AppColors.th(context)),
+                          onPressed: () async {
+                            await DailyReminderService.setMessage('');
+                            setState(() => _message = '');
+                          },
+                        )
+                      : null,
+                ),
+                onSubmitted: (v) async {
+                  await DailyReminderService.setMessage(v);
+                  setState(() => _message = v.trim());
+                },
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
