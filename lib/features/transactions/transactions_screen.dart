@@ -1234,10 +1234,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         double baseAmt = 0;
         if (e.lines.isNotEmpty) {
           for (final l in e.lines) {
+            if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
             baseAmt += l.amount * l.exchangeRateToBase;
           }
         } else {
-          baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+          if (isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
+            baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+          }
         }
         if (e.tx.type == 'income') {
           dayTotal += baseAmt;

@@ -46,6 +46,7 @@ class _AssistedTransactionScreenState
   String? _accountId;
   String? _destinationAccountId;
   double _transferExchangeRate = 1.0;
+  double _expenseExchangeRate = 1.0; // rate for non-transfer cross-currency
   DateTime _selectedDate = DateTime.now();
   bool _saving = false;
 
@@ -76,6 +77,34 @@ class _AssistedTransactionScreenState
 
   bool get _isTransferCrossCurrency =>
       _type == 'transfer' && _selectedCurrency != _destinationCurrency;
+
+  /// True when the account currency differs from the household base currency
+  /// (for non-transfer transactions).
+  bool get _isExpenseCrossCurrency =>
+      _type != 'transfer' && _selectedCurrency != _baseCurrency;
+
+  /// Fetch exchange rate when account currency differs from base.
+  Future<void> _fetchExpenseRate(String accountCurrency) async {
+    if (accountCurrency == _baseCurrency) {
+      setState(() => _expenseExchangeRate = 1.0);
+      return;
+    }
+    try {
+      final fxService = ref.read(fxServiceProvider);
+      final rawRate =
+          await fxService.getRateWithCache(_baseCurrency, accountCurrency);
+      final rate = roundRate(rawRate);
+      if (mounted) {
+        setState(() {
+          // Store as "1 accountCurrency = X baseCurrency"
+          // i.e. exchangeRateToBase = 1/rate
+          _expenseExchangeRate = 1.0 / rate;
+        });
+      }
+    } catch (e) {
+      debugPrint('[AssistedTx] Failed to fetch FX rate: $e');
+    }
+  }
 
   _LineItem get _activeLine => _lineItems[_activeLineIndex];
 
@@ -873,6 +902,9 @@ class _AssistedTransactionScreenState
                     currency: _selectedCurrency,
                     categoryId: item.category?.id,
                     accountId: _accountId,
+                    exchangeRateToBase: _isExpenseCrossCurrency
+                        ? _expenseExchangeRate
+                        : 1.0,
                   ))
               .toList();
 
@@ -1099,7 +1131,10 @@ class _AssistedTransactionScreenState
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: GestureDetector(
-                          onTap: () => setState(() => _accountId = a.id),
+                          onTap: () {
+                            setState(() => _accountId = a.id);
+                            _fetchExpenseRate(a.currency);
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 8),
@@ -1387,6 +1422,39 @@ class _AssistedTransactionScreenState
                 ),
               ),
             ),
+            // Exchange rate info (non-transfer cross-currency)
+            if (_isExpenseCrossCurrency && !isTransfer)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.currency_exchange_rounded,
+                          size: 16, color: AppColors.accent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _expenseExchangeRate > 0 && _expenseExchangeRate != 1.0
+                              ? '1 $_selectedCurrency ≈ ${formatAmount(1.0 / _expenseExchangeRate, currency: '')} $_baseCurrency'
+                              : 'Fetching rate for $_selectedCurrency...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // Calculator keypad — fixed at bottom
             Container(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),

@@ -1196,10 +1196,12 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     onPressed: () {
                       final text = customCtrl.text.trim();
                       if (text.isNotEmpty) {
-                        // Take just the first emoji character(s)
                         final emoji = text.characters.first;
-                        setState(() => _emoji = emoji);
                         Navigator.pop(ctx);
+                        // Update state after the sheet is fully dismissed
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) setState(() => _emoji = emoji);
+                        });
                       }
                     },
                     style: FilledButton.styleFrom(
@@ -1254,8 +1256,11 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                             final isSelected = e == _emoji;
                             return GestureDetector(
                               onTap: () {
-                                setState(() => _emoji = e);
                                 Navigator.pop(ctx);
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (mounted) setState(() => _emoji = e);
+                                });
                               },
                               child: Container(
                                 width: 42,
