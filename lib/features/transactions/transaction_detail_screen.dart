@@ -172,38 +172,41 @@ class _DetailBody extends ConsumerWidget {
                           color: AppColors.tp(context))),
                   const SizedBox(height: 4),
                 ],
-                // Amount — long press to copy
-                GestureDetector(
-                  onLongPress: () {
-                    final text = entry.lines.isNotEmpty
-                        ? formatSignedAmount(entry.lines.first.amount,
-                            currency: entry.lines.first.currency, type: tx.type)
-                        : formatSignedAmount(tx.amount,
-                            currency: entry.accountCurrency, type: tx.type);
-                    Clipboard.setData(ClipboardData(text: text));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Copied $text'),
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 2),
+                // Amount — show total; for single-line foreign currency show
+                // the line amount, for multi-line show base currency total.
+                Builder(builder: (_) {
+                  final String amountText;
+                  if (entry.lines.length == 1) {
+                    amountText = formatSignedAmount(entry.lines.first.amount,
+                        currency: entry.lines.first.currency, type: tx.type);
+                  } else {
+                    // Multi-line: show base currency total
+                    amountText = formatSignedAmount(tx.amount,
+                        currency: baseCurrency, type: tx.type);
+                  }
+                  return GestureDetector(
+                    onLongPress: () {
+                      Clipboard.setData(ClipboardData(text: amountText));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Copied $amountText'),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      amountText,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: typeColor,
                       ),
-                    );
-                  },
-                  child: Text(
-                    entry.lines.isNotEmpty
-                        ? formatSignedAmount(entry.lines.first.amount,
-                            currency: entry.lines.first.currency, type: tx.type)
-                        : formatSignedAmount(tx.amount,
-                            currency: entry.accountCurrency, type: tx.type),
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: typeColor,
                     ),
-                  ),
-                ),
-                // Show base currency conversion if line is in a different currency
-                if (entry.lines.isNotEmpty &&
+                  );
+                }),
+                // Show base currency conversion if single line in a different currency
+                if (entry.lines.length == 1 &&
                     entry.lines.first.currency != baseCurrency) ...[
                   const SizedBox(height: 2),
                   Text(
@@ -246,16 +249,21 @@ class _DetailBody extends ConsumerWidget {
                   DateFormat('h:mm a').format(tx.createdAt.toLocal()),
                   icon: Icons.access_time_rounded),
               _divider(context),
-              GestureDetector(
-                onTap: () => context.push('/accounts/${tx.accountId}'),
-                child: _detailRow(context, 'Account',
-                    '${entry.accountName.isNotEmpty ? entry.accountName : 'Unknown'} ›',
-                    icon: Icons.account_balance_wallet_outlined),
-              ),
-              _divider(context),
-              _detailRow(context, 'Balance after',
-                  formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency),
-                  icon: Icons.account_balance_outlined),
+              Builder(builder: (_) {
+                final involvedNames = entry.involvedAccountNames;
+                if (involvedNames.length > 1) {
+                  // Multi-account: show all account names
+                  return _detailRow(context, 'Accounts',
+                      involvedNames.join(', '),
+                      icon: Icons.account_balance_wallet_outlined);
+                }
+                return GestureDetector(
+                  onTap: () => context.push('/accounts/${tx.accountId}'),
+                  child: _detailRow(context, 'Account',
+                      '${entry.accountName.isNotEmpty ? entry.accountName : 'Unknown'} ›',
+                      icon: Icons.account_balance_wallet_outlined),
+                );
+              }),
               if (tx.note.isNotEmpty) ...[
                 _divider(context),
                 _detailRow(context, 'Note', tx.note,
