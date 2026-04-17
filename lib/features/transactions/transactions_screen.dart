@@ -1772,7 +1772,6 @@ class _TxTile extends ConsumerWidget {
       if (isSingleAccount || isTransferSplit)
         Builder(builder: (_) {
           if (isTransferSplit && !isFrom) {
-            // Transfer "to" side: show destination account name + balance
             final destName = entry.destinationAccountName ?? 'account';
             final destCurrency = entry.destinationAccountCurrency ?? tx.currency;
             final destBalance = entry.destinationAccountBalanceAfter;
@@ -1785,15 +1784,18 @@ class _TxTile extends ConsumerWidget {
             );
           }
           if (isTransferSplit && isFrom) {
-            // Transfer "from" side: show source account
             return Text(
               '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
               textAlign: TextAlign.end,
               style: TextStyle(fontSize: 11, color: AppColors.th(context)),
             );
           }
+          // For single-line with per-line account, show the line's account
+          final displayAcctName = (lines.isNotEmpty && lines.first.accountId != null)
+              ? (entry.lineAccountNames[lines.first.accountId] ?? entry.accountName)
+              : entry.accountName;
           return Text(
-            '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
+            '$displayAcctName: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
             textAlign: TextAlign.end,
             style: TextStyle(fontSize: 11, color: AppColors.th(context)),
           );

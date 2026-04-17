@@ -330,32 +330,54 @@ class _AssistedTransactionScreenState
         var localType = _type;
         String? expandedParentId;
         var searchQuery = '';
+        final searchFocus = FocusNode();
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
-            var filtered = categories
+            final allForType = categories
                 .where((c) => c.transactionType == localType)
                 .toList();
-            // Apply search filter
-            if (searchQuery.isNotEmpty) {
-              final q = searchQuery.toLowerCase();
-              filtered = filtered
-                  .where((c) => c.name.toLowerCase().contains(q))
-                  .toList();
-            }
-            final parents =
-                filtered.where((c) => c.parentId == null).toList();
-            final subsByParent = <String, List<Category>>{};
-            for (final c in filtered) {
+
+            // Build parent/sub structure first, then filter
+            final allParents =
+                allForType.where((c) => c.parentId == null).toList();
+            final allSubsByParent = <String, List<Category>>{};
+            for (final c in allForType) {
               if (c.parentId != null) {
-                subsByParent
+                allSubsByParent
                     .putIfAbsent(c.parentId!, () => [])
                     .add(c);
               }
             }
 
+            // Apply search: keep a parent if it matches OR any of its subs match
+            List<Category> parents;
+            Map<String, List<Category>> subsByParent;
+            if (searchQuery.isEmpty) {
+              parents = allParents;
+              subsByParent = allSubsByParent;
+            } else {
+              final q = searchQuery.toLowerCase();
+              parents = [];
+              subsByParent = {};
+              for (final p in allParents) {
+                final matchingSubs = (allSubsByParent[p.id] ?? [])
+                    .where((s) => s.name.toLowerCase().contains(q))
+                    .toList();
+                if (p.name.toLowerCase().contains(q) ||
+                    matchingSubs.isNotEmpty) {
+                  parents.add(p);
+                  if (matchingSubs.isNotEmpty) {
+                    subsByParent[p.id] = matchingSubs;
+                  } else if (allSubsByParent.containsKey(p.id)) {
+                    subsByParent[p.id] = allSubsByParent[p.id]!;
+                  }
+                }
+              }
+            }
+
             return Container(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+                maxHeight: MediaQuery.of(ctx).size.height * 0.85,
               ),
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
@@ -417,9 +439,11 @@ class _AssistedTransactionScreenState
                                 color: AppColors.tp(context))),
                         const SizedBox(height: 10),
                         TextField(
+                          focusNode: searchFocus,
                           onChanged: (v) =>
                               setSheetState(() => searchQuery = v),
                           textInputAction: TextInputAction.search,
+                          onSubmitted: (_) => searchFocus.unfocus(),
                           style: TextStyle(
                               fontSize: 14,
                               color: AppColors.tp(context)),
@@ -430,6 +454,18 @@ class _AssistedTransactionScreenState
                             prefixIcon: Icon(Icons.search_rounded,
                                 size: 18,
                                 color: AppColors.th(context)),
+                            suffixIcon: searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear_rounded,
+                                        size: 16,
+                                        color: AppColors.th(context)),
+                                    onPressed: () {
+                                      setSheetState(
+                                          () => searchQuery = '');
+                                      searchFocus.unfocus();
+                                    },
+                                  )
+                                : null,
                             filled: true,
                             fillColor: AppColors.sfv(context),
                             border: OutlineInputBorder(
@@ -448,6 +484,8 @@ class _AssistedTransactionScreenState
                   ),
                   Expanded(
                     child: ListView.builder(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                       itemCount: parents.length + 1, // +1 for "New"
                       itemBuilder: (_, i) {
@@ -1097,9 +1135,17 @@ class _AssistedTransactionScreenState
 
       if (byType.length > 1 && mounted) {
         final summaryLines = byType.entries.map((e) {
-          final total = e.value.fold<double>(0, (s, i) => s + i.amount);
           final typeLabel = e.key == 'income' ? 'Income' : 'Expense';
-          return '$typeLabel: ${formatAmount(total, currency: _selectedCurrency)} (${e.value.length} ${e.value.length == 1 ? 'item' : 'items'})';
+          // Group amounts by currency within this type
+          final byCur = <String, double>{};
+          for (final item in e.value) {
+            final cur = item.currency ?? _selectedCurrency;
+            byCur[cur] = (byCur[cur] ?? 0) + item.amount;
+          }
+          final amountLabel = byCur.entries
+              .map((c) => formatAmount(c.value, currency: c.key))
+              .join(' + ');
+          return '$typeLabel: $amountLabel (${e.value.length} ${e.value.length == 1 ? 'item' : 'items'})';
         }).join('\n');
 
         final proceed = await showDialog<bool>(

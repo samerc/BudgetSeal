@@ -287,6 +287,12 @@ For user-initiated actions (save, delete, toggle), show a SnackBar on both succe
 ### Multi-Currency Amount Safety
 When computing base-currency totals (summaries, reports, dashboard), always use `isRealRate()` from `format_number.dart` to skip lines where the currency differs from base but `exchangeRateToBase` is 1.0 (rate not set). Without this check, foreign-currency amounts inflate totals (e.g., LBP 1,200,000 counted as $1,200,000).
 
+### Running Balances for Transfers
+In `_applyTxToRunning()` (transactions_provider.dart), transfer destinations must use `tx.amount * tx.exchangeRateToBase` to convert to the destination currency. Using raw `tx.amount` adds the source currency amount to the destination account's running balance.
+
+### Per-Line Currency in Assisted Flow
+Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase` — captured via `_captureLineContext()` when adding another item or saving. The save logic uses each item's stored values, not the global `_selectedCurrency`.
+
 ## Performance
 
 ### Batch Balance Computation
