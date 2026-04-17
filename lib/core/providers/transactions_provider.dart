@@ -107,12 +107,21 @@ TransactionEntry _buildEntry(
   final destAcct = tx.destinationAccountId != null
       ? accountMap[tx.destinationAccountId]
       : null;
+
+  // For single-line transactions with a per-line account, use the line's
+  // account for display (name, currency, running balance).
+  final effectiveAccountId =
+      (txLines.length == 1 && txLines.first.accountId != null)
+          ? txLines.first.accountId!
+          : tx.accountId;
+  final effectiveAcct = accountMap[effectiveAccountId];
+
   return TransactionEntry(
     tx: tx,
     lines: txLines,
-    accountBalanceAfter: running[tx.accountId] ?? 0,
-    accountName: accountMap[tx.accountId]?.name ?? '',
-    accountCurrency: accountMap[tx.accountId]?.currency ?? tx.currency,
+    accountBalanceAfter: running[effectiveAccountId] ?? 0,
+    accountName: effectiveAcct?.name ?? accountMap[tx.accountId]?.name ?? '',
+    accountCurrency: effectiveAcct?.currency ?? tx.currency,
     destinationAccountName: destAcct?.name,
     destinationAccountCurrency: destAcct?.currency,
     destinationAccountBalanceAfter: tx.destinationAccountId != null

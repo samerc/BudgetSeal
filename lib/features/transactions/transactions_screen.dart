@@ -1790,20 +1790,6 @@ class _TxTile extends ConsumerWidget {
               style: TextStyle(fontSize: 11, color: AppColors.th(context)),
             );
           }
-          // For single-line with per-line account different from header,
-          // show the line's account name without balance (we don't track
-          // running balance for per-line accounts).
-          if (lines.isNotEmpty &&
-              lines.first.accountId != null &&
-              lines.first.accountId != tx.accountId) {
-            final lineAcctName =
-                entry.lineAccountNames[lines.first.accountId] ?? 'account';
-            return Text(
-              '$lineAcctName: ${lines.first.currency}',
-              textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-            );
-          }
           return Text(
             '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
             textAlign: TextAlign.end,
