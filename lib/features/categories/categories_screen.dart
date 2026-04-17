@@ -60,6 +60,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_categories',
+        tooltip: 'Add category',
         onPressed: () => _showForm(categories: categories),
         child: const Icon(Icons.add),
       ),

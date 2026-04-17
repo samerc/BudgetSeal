@@ -762,7 +762,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
   late DateTime? _endDate;
   late bool _isSubscription;
   bool _saving = false;
-  bool _submitted = false;
+  final bool _submitted = false;
 
   @override
   void initState() {

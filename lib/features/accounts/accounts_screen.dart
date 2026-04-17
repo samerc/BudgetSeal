@@ -75,6 +75,7 @@ class AccountsScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_accounts',
+        tooltip: 'Add account',
         onPressed: () => context.push('/accounts/new'),
         child: const Icon(Icons.add),
       ),

@@ -37,6 +37,9 @@ class _LineItem {
   double amount = 0;
   String calcDisplay = '0';
   String calcExpression = '';
+  String? currency;   // captured from account at entry time
+  String? accountId;  // captured from account at entry time
+  double exchangeRateToBase = 1.0;
 }
 
 class _AssistedTransactionScreenState
@@ -173,6 +176,7 @@ class _AssistedTransactionScreenState
       builder: (ctx) {
         // Use local state for type so tapping expense/income/transfer works
         var localType = _type;
+        var filteredSuggestions = <String>[];
         return StatefulBuilder(
           builder: (ctx, setSheetState) => Container(
             padding: EdgeInsets.fromLTRB(
@@ -198,48 +202,81 @@ class _AssistedTransactionScreenState
                         fontWeight: FontWeight.w700,
                         color: AppColors.tp(context))),
                 const SizedBox(height: 16),
-                Autocomplete<String>(
-                  optionsBuilder: (val) {
-                    if (val.text.isEmpty) return const [];
-                    final q = val.text.toLowerCase();
-                    return suggestions
-                        .where((s) => s.toLowerCase().contains(q))
-                        .take(5);
+                TextField(
+                  controller: ctrl,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: const TextStyle(fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: localType == 'transfer'
+                        ? 'Note (e.g. rent, savings)'
+                        : 'Title',
+                    suffixIcon: Icon(
+                        localType == 'transfer'
+                            ? Icons.notes_rounded
+                            : Icons.title_rounded,
+                        color: AppColors.th(context)),
+                  ),
+                  onChanged: (val) {
+                    final q = val.toLowerCase();
+                    setSheetState(() {
+                      filteredSuggestions = q.isEmpty
+                          ? []
+                          : suggestions
+                              .where((s) => s.toLowerCase().contains(q))
+                              .take(5)
+                              .toList();
+                    });
                   },
-                  onSelected: (s) => ctrl.text = s,
-                  fieldViewBuilder: (_, controller, focusNode, __) {
-                    controller.text = ctrl.text;
-                    return TextField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      autofocus: true,
-                      textCapitalization: TextCapitalization.sentences,
-                      style: const TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                        hintText: localType == 'transfer'
-                            ? 'Note (e.g. rent, savings)'
-                            : 'Title',
-                        suffixIcon: Icon(
-                            localType == 'transfer'
-                                ? Icons.notes_rounded
-                                : Icons.title_rounded,
-                            color: AppColors.th(context)),
-                      ),
-                      onSubmitted: (_) {
-                        _title = controller.text.trim();
-                        movedForward = _title.isNotEmpty;
-                        Navigator.pop(ctx);
-                        if (_title.isNotEmpty) {
+                  onSubmitted: (_) {
+                    _title = ctrl.text.trim();
+                    movedForward = _title.isNotEmpty;
+                    Navigator.pop(ctx);
+                    if (_title.isNotEmpty) {
+                      if (localType == 'transfer') {
+                        _showAmountScreen();
+                      } else {
+                        _showCategoryPopup();
+                      }
+                    }
+                  },
+                ),
+                // Inline suggestions (visible, tappable)
+                if (filteredSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: filteredSuggestions.map((s) {
+                      return GestureDetector(
+                        onTap: () {
+                          _title = s;
+                          movedForward = true;
+                          Navigator.pop(ctx);
                           if (localType == 'transfer') {
                             _showAmountScreen();
                           } else {
                             _showCategoryPopup();
                           }
-                        }
-                      },
-                    );
-                  },
-                ),
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.sfv(context),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: AppColors.bd(context)),
+                          ),
+                          child: Text(s,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.tp(context))),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () {
@@ -292,11 +329,19 @@ class _AssistedTransactionScreenState
       builder: (ctx) {
         var localType = _type;
         String? expandedParentId;
+        var searchQuery = '';
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
-            final filtered = categories
+            var filtered = categories
                 .where((c) => c.transactionType == localType)
                 .toList();
+            // Apply search filter
+            if (searchQuery.isNotEmpty) {
+              final q = searchQuery.toLowerCase();
+              filtered = filtered
+                  .where((c) => c.name.toLowerCase().contains(q))
+                  .toList();
+            }
             final parents =
                 filtered.where((c) => c.parentId == null).toList();
             final subsByParent = <String, List<Category>>{};
@@ -370,6 +415,34 @@ class _AssistedTransactionScreenState
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.tp(context))),
+                        const SizedBox(height: 10),
+                        TextField(
+                          onChanged: (v) =>
+                              setSheetState(() => searchQuery = v),
+                          textInputAction: TextInputAction.search,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.tp(context)),
+                          decoration: InputDecoration(
+                            hintText: 'Search categories...',
+                            hintStyle: TextStyle(
+                                color: AppColors.th(context)),
+                            prefixIcon: Icon(Icons.search_rounded,
+                                size: 18,
+                                color: AppColors.th(context)),
+                            filled: true,
+                            fillColor: AppColors.sfv(context),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(
+                                    vertical: 10),
+                            isDense: true,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -581,6 +654,189 @@ class _AssistedTransactionScreenState
 
   // ── Screen 3: Amount + Calculator + Save ───────────────────
 
+  // ── Account selector (tap to pick from bottom sheet) ──────────
+
+  Widget _buildAccountSelector({
+    required String label,
+    required String? selectedId,
+    required List<Account> accounts,
+    required Color color,
+    required void Function(Account) onSelected,
+  }) {
+    final selected =
+        selectedId != null
+            ? accounts.where((a) => a.id == selectedId).firstOrNull
+            : null;
+
+    return GestureDetector(
+      onTap: () => _showAccountPicker(
+        label: label,
+        accounts: accounts,
+        selectedId: selectedId,
+        color: color,
+        onSelected: onSelected,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: selected != null
+                ? color.withValues(alpha: 0.08)
+                : AppColors.sfv(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected != null
+                  ? color.withValues(alpha: 0.4)
+                  : AppColors.bd(context),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                label.contains('To')
+                    ? Icons.arrow_forward_rounded
+                    : Icons.account_balance_wallet_outlined,
+                size: 18,
+                color: selected != null ? color : AppColors.ts(context),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.ts(context),
+                      ),
+                    ),
+                    if (selected != null)
+                      Text(
+                        '${selected.name} · ${selected.currency}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context),
+                        ),
+                      )
+                    else
+                      Text(
+                        'Tap to select',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.th(context),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.unfold_more_rounded,
+                  size: 18, color: AppColors.ts(context)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAccountPicker({
+    required String label,
+    required List<Account> accounts,
+    required String? selectedId,
+    required Color color,
+    required void Function(Account) onSelected,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const SizedBox(height: 12),
+              ...accounts.map((a) {
+                final isSelected = a.id == selectedId;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? color.withValues(alpha: 0.1)
+                        : AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(14),
+                    border: isSelected
+                        ? Border.all(color: color.withValues(alpha: 0.4))
+                        : null,
+                  ),
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      onSelected(a);
+                    },
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 14),
+                    leading: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.account_balance_wallet_rounded,
+                          size: 18, color: color),
+                    ),
+                    title: Text(a.name,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    subtitle: Text(a.currency,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.ts(context))),
+                    trailing: isSelected
+                        ? Icon(Icons.check_circle_rounded,
+                            size: 20, color: color)
+                        : null,
+                  ),
+                );
+              }),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.push('/accounts/new');
+                },
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('Add Account'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showAmountScreen() {
     setState(() {
       _activeLine.calcDisplay = '0';
@@ -633,6 +889,16 @@ class _AssistedTransactionScreenState
     });
   }
 
+  /// Capture the current account/currency/rate on the active line item.
+  void _captureLineContext() {
+    final line = _activeLine;
+    line.accountId = _accountId;
+    line.currency = _selectedCurrency;
+    line.exchangeRateToBase = _isExpenseCrossCurrency
+        ? _expenseExchangeRate
+        : 1.0;
+  }
+
   void _addAnotherItem() {
     // Save current line and open category picker for next item
     if (_activeLine.amount <= 0) {
@@ -644,6 +910,8 @@ class _AssistedTransactionScreenState
       );
       return;
     }
+    // Capture currency/account on the current line before moving on
+    _captureLineContext();
     hapticMedium();
     setState(() {
       _lineItems.add(_LineItem());
@@ -859,6 +1127,9 @@ class _AssistedTransactionScreenState
       }
     }
 
+    // Capture context on the active line before saving
+    _captureLineContext();
+
     setState(() => _saving = true);
     hapticMedium();
 
@@ -899,12 +1170,10 @@ class _AssistedTransactionScreenState
           final lines = entry.value
               .map((item) => TxLine(
                     amount: item.amount,
-                    currency: _selectedCurrency,
+                    currency: item.currency ?? _selectedCurrency,
                     categoryId: item.category?.id,
-                    accountId: _accountId,
-                    exchangeRateToBase: _isExpenseCrossCurrency
-                        ? _expenseExchangeRate
-                        : 1.0,
+                    accountId: item.accountId ?? _accountId,
+                    exchangeRateToBase: item.exchangeRateToBase,
                   ))
               .toList();
 
@@ -1100,207 +1369,29 @@ class _AssistedTransactionScreenState
             ),
             // Line items summary (if multiple)
             if (_lineItems.length > 1) _buildLineItemsSummary(typeColor),
-            // Account chips (labeled "From Account" for transfers)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Row(
-                children: [
-                  Icon(Icons.account_balance_wallet_outlined,
-                      size: 14, color: AppColors.ts(context)),
-                  const SizedBox(width: 6),
-                  Text(
-                    isTransfer ? 'From Account' : 'Account',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ts(context),
-                    ),
-                  ),
-                ],
-              ),
+            // Account selector (labeled "From Account" for transfers)
+            _buildAccountSelector(
+              label: isTransfer ? 'From Account' : 'Account',
+              selectedId: _accountId,
+              accounts: accounts,
+              color: AppColors.accent,
+              onSelected: (a) {
+                setState(() => _accountId = a.id);
+                _fetchExpenseRate(a.currency);
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-              child: SizedBox(
-                height: 44,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    ...accounts.map((a) {
-                      final isSelected = a.id == _accountId;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() => _accountId = a.id);
-                            _fetchExpenseRate(a.currency);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.accent.withValues(alpha: 0.15)
-                                  : AppColors.sfv(context),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.accent
-                                    : AppColors.bd(context),
-                                width: isSelected ? 1.5 : 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                if (isSelected)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 6),
-                                    child: Icon(Icons.check_circle_rounded,
-                                        size: 16, color: AppColors.accent),
-                                  ),
-                                Text(
-                                  a.name,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    color: isSelected
-                                        ? AppColors.accent
-                                        : AppColors.tp(context),
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  a.currency,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: isSelected
-                                        ? AppColors.accent.withValues(alpha: 0.7)
-                                        : AppColors.ts(context),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                    GestureDetector(
-                      onTap: () => context.push('/accounts/new'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.bd(context)),
-                        ),
-                        child: Icon(Icons.add_rounded,
-                            size: 18, color: AppColors.ts(context)),
-                      ),
-                    ),
-                  ],
-                ),
+            // Destination account (transfers only)
+            if (isTransfer)
+              _buildAccountSelector(
+                label: 'To Account',
+                selectedId: _destinationAccountId,
+                accounts: accounts
+                    .where((a) => a.id != _accountId)
+                    .toList(),
+                color: typeColor,
+                onSelected: (a) =>
+                    setState(() => _destinationAccountId = a.id),
               ),
-            ),
-            // Destination account chips (transfers only)
-            if (isTransfer) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
-                  children: [
-                    Icon(Icons.arrow_forward_rounded,
-                        size: 14, color: AppColors.ts(context)),
-                    const SizedBox(width: 6),
-                    Text(
-                      'To Account',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ts(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                child: SizedBox(
-                  height: 44,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      ...accounts
-                          .where((a) => a.id != _accountId)
-                          .map((a) {
-                        final isSelected =
-                            a.id == _destinationAccountId;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onTap: () => setState(
-                                () => _destinationAccountId = a.id),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? typeColor.withValues(alpha: 0.15)
-                                    : AppColors.sfv(context),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? typeColor
-                                      : AppColors.bd(context),
-                                  width: isSelected ? 1.5 : 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  if (isSelected)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 6),
-                                      child: Icon(
-                                          Icons.check_circle_rounded,
-                                          size: 16,
-                                          color: typeColor),
-                                    ),
-                                  Text(
-                                    a.name,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
-                                      color: isSelected
-                                          ? typeColor
-                                          : AppColors.tp(context),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    a.currency,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: isSelected
-                                          ? typeColor
-                                              .withValues(alpha: 0.7)
-                                          : AppColors.ts(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ),
-            ],
             // Exchange rate field (cross-currency transfers)
             if (_isTransferCrossCurrency) ...[
               Padding(
@@ -1491,7 +1582,7 @@ class _AssistedTransactionScreenState
                           icon: const Icon(Icons.add_rounded, size: 18),
                           label: Text(
                             _lineItems.length > 1
-                                ? 'Add another item (${_lineItems.length} items · ${_fmtCalc(totalAmount)})'
+                                ? 'Add another item (${_lineItems.length} items · ${_itemsTotalLabel()})'
                                 : 'Add another item',
                             style: const TextStyle(fontSize: 14),
                           ),
@@ -1548,6 +1639,18 @@ class _AssistedTransactionScreenState
     );
   }
 
+  /// Build a label showing totals per currency for the "Add another" button.
+  String _itemsTotalLabel() {
+    final byCurrency = <String, double>{};
+    for (final item in _lineItems) {
+      final cur = item.currency ?? _selectedCurrency;
+      byCurrency[cur] = (byCurrency[cur] ?? 0) + item.amount;
+    }
+    return byCurrency.entries
+        .map((e) => formatAmount(e.value, currency: e.key))
+        .join(' + ');
+  }
+
   Widget _buildLineItemsSummary(Color typeColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -1576,7 +1679,7 @@ class _AssistedTransactionScreenState
                 ),
                 child: Center(
                   child: Text(
-                    '${item.category?.name ?? 'Item ${i + 1}'}: ${_fmtCalc(item.amount)}',
+                    '${item.category?.name ?? 'Item ${i + 1}'}: ${formatAmount(item.amount, currency: item.currency ?? _selectedCurrency)}',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight:

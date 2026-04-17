@@ -386,13 +386,47 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         );
                       }
                       final recent = entries.take(5).toList();
+                      final hasToday = recent.any((e) {
+                        final d = e.tx.createdAt.toLocal();
+                        final now = DateTime.now();
+                        return d.year == now.year &&
+                            d.month == now.month &&
+                            d.day == now.day;
+                      });
                       return Column(
-                        children: recent
-                            .map((e) => _RecentTxTile(
-                                  entry: e,
-                                  categoryMap: categoryMap,
-                                ))
-                            .toList(),
+                        children: [
+                          if (!hasToday)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent
+                                      .withValues(alpha: 0.06),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.wb_sunny_rounded,
+                                        size: 16, color: AppColors.accent),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'No transactions today — tap + to add one',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.accent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ...recent.map((e) => _RecentTxTile(
+                                entry: e,
+                                categoryMap: categoryMap,
+                              )),
+                        ],
                       );
                     },
                     loading: () => const _ShimmerCard(height: 200),
@@ -413,10 +447,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    final now = DateTime.now();
+    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final day = days[now.weekday - 1];
+    if (now.hour < 12) return 'Good morning, $day';
+    if (now.hour < 17) return 'Good afternoon, $day';
+    return 'Good evening, $day';
   }
 
   void _showGlobalSearch(BuildContext context, WidgetRef ref) {

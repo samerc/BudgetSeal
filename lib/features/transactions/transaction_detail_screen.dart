@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../shared/utils/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -170,17 +172,34 @@ class _DetailBody extends ConsumerWidget {
                           color: AppColors.tp(context))),
                   const SizedBox(height: 4),
                 ],
-                // Amount — show in line currency if available, otherwise tx currency
-                Text(
-                  entry.lines.isNotEmpty
-                      ? formatSignedAmount(entry.lines.first.amount,
-                          currency: entry.lines.first.currency, type: tx.type)
-                      : formatSignedAmount(tx.amount,
-                          currency: entry.accountCurrency, type: tx.type),
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: typeColor,
+                // Amount — long press to copy
+                GestureDetector(
+                  onLongPress: () {
+                    final text = entry.lines.isNotEmpty
+                        ? formatSignedAmount(entry.lines.first.amount,
+                            currency: entry.lines.first.currency, type: tx.type)
+                        : formatSignedAmount(tx.amount,
+                            currency: entry.accountCurrency, type: tx.type);
+                    Clipboard.setData(ClipboardData(text: text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Copied $text'),
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    entry.lines.isNotEmpty
+                        ? formatSignedAmount(entry.lines.first.amount,
+                            currency: entry.lines.first.currency, type: tx.type)
+                        : formatSignedAmount(tx.amount,
+                            currency: entry.accountCurrency, type: tx.type),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: typeColor,
+                    ),
                   ),
                 ),
                 // Show base currency conversion if line is in a different currency
@@ -473,6 +492,7 @@ class _DetailBody extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    hapticHeavy();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(

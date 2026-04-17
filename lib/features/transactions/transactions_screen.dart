@@ -1684,9 +1684,19 @@ class _TxTile extends ConsumerWidget {
     String displayCurrency = tx.currency;
     double displayAmount = tx.amount;
 
-    if (lines.isNotEmpty) {
+    if (lines.length == 1) {
+      // Single line: show in the line's native currency
       displayCurrency = lines.first.currency;
       displayAmount = lines.first.amount;
+    } else if (lines.length > 1) {
+      // Multi-line: check if all lines share the same currency
+      final currencies = lines.map((l) => l.currency).toSet();
+      if (currencies.length == 1 && currencies.first != tx.currency) {
+        // All lines same foreign currency — show total in that currency
+        displayCurrency = currencies.first;
+        displayAmount = lines.fold(0.0, (s, l) => s + l.amount);
+      }
+      // Otherwise keep tx.amount in tx.currency (base currency total)
     }
 
     // For transfer "to" side: show the converted amount in destination currency
@@ -1697,11 +1707,10 @@ class _TxTile extends ConsumerWidget {
 
     final baseCurrency = tx.currency;
     final baseAmount = tx.amount;
-    // Only show conversion badge if currencies differ AND the rate actually
-    // changed the amount (rate != 1.0). When rate is 1.0 the "conversion"
-    // shows the same number with a different symbol, which is confusing.
+    // Only show conversion badge if currencies differ AND at least one line
+    // has a real exchange rate (not the default 1.0).
     final hasRealConversion = lines.isNotEmpty &&
-        (lines.first.exchangeRateToBase - 1.0).abs() > 0.001;
+        lines.any((l) => (l.exchangeRateToBase - 1.0).abs() > 0.001);
     final showConversion =
         !isTransferSplit && displayCurrency != baseCurrency && hasRealConversion;
 
