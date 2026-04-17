@@ -293,6 +293,9 @@ In `_applyTxToRunning()` (transactions_provider.dart), transfer destinations mus
 ### Per-Line Currency in Assisted Flow
 Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase` — captured via `_captureLineContext()` when adding another item or saving. The save logic uses each item's stored values, not the global `_selectedCurrency`.
 
+### Per-Line Account in TransactionEntry
+`_buildEntry()` in `transactions_provider.dart` uses the line's `accountId` (not the header's `tx.accountId`) for single-line transactions where the line has a per-line account. This ensures the transaction list and detail screen show the correct account name, currency, and running balance.
+
 ## Performance
 
 ### Batch Balance Computation
