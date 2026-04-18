@@ -85,6 +85,42 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     super.dispose();
   }
 
+  Widget _formSection(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: AppColors.ts(context)),
+              const SizedBox(width: 6),
+              Text(title,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: AppColors.ts(context),
+                  )),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
   InputDecoration _inputDecoration(String label, {String? hint}) {
     return InputDecoration(
       labelText: label,
@@ -296,110 +332,112 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             if (_isNew || _showSettings) ...[
               const SizedBox(height: 8),
             ],
-            if (_isNew || _showSettings)
-              Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(16),
+            if (_isNew || _showSettings) ...[
+              // ── Name ──
+              _formSection(
+                context,
+                icon: Icons.label_outline_rounded,
+                title: 'NAME',
+                child: TextField(
+                  controller: _nameController,
+                  decoration: _inputDecoration('Account name'),
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.done,
+                  autofocus: _isNew,
+                  style: TextStyle(color: AppColors.tp(context)),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: _nameController,
-                    decoration: _inputDecoration('Account name'),
-                    textCapitalization: TextCapitalization.words,
-                    textInputAction: TextInputAction.done,
-                    autofocus: _isNew,
-                    style: TextStyle(color: AppColors.tp(context)),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Account type',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _accountTypes.map((entry) {
-                      final (value, label, icon) = entry;
-                      final selected = _type == value;
-                      return GestureDetector(
-                        onTap: () => setState(() => _type = value),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
+              const SizedBox(height: 12),
+
+              // ── Type ──
+              _formSection(
+                context,
+                icon: Icons.category_outlined,
+                title: 'TYPE',
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _accountTypes.map((entry) {
+                    final (value, label, icon) = entry;
+                    final selected = _type == value;
+                    return GestureDetector(
+                      onTap: () => setState(() => _type = value),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? AppColors.accent.withValues(alpha: 0.12)
+                              : AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
                             color: selected
-                                ? AppColors.accent.withValues(alpha: 0.1)
-                                : AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: selected
-                                  ? AppColors.accent
-                                  : Colors.transparent,
-                              width: 1.5,
-                            ),
+                                ? AppColors.accent
+                                : AppColors.bd(context),
+                            width: selected ? 1.5 : 1,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                icon,
-                                size: 20,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(icon,
+                                size: 18,
                                 color: selected
                                     ? AppColors.accent
-                                    : AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                label,
+                                    : AppColors.ts(context)),
+                            const SizedBox(width: 8),
+                            Text(label,
                                 style: TextStyle(
                                   color: selected
                                       ? AppColors.accent
-                                      : AppColors.textSecondary,
+                                      : AppColors.tp(context),
                                   fontWeight: selected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  fontSize: 13,
+                                )),
+                          ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  CurrencyPickerField(
-                    label: 'Currency',
-                    value: _currencyController.text.isEmpty
-                        ? 'USD'
-                        : _currencyController.text,
-                    onChanged: (v) =>
-                        setState(() => _currencyController.text = v),
-                  ),
-                  if (_isNew) ...[
-                    const SizedBox(height: 16),
-                    CalculatorAmountField(
-                      value: _initialBalance,
-                      label: 'Opening balance',
-                      fontSize: 20,
-                      onChanged: (v) => setState(() => _initialBalance = v),
-                    ),
-                  ],
-                ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+
+              // ── Currency ──
+              _formSection(
+                context,
+                icon: Icons.attach_money_rounded,
+                title: 'CURRENCY',
+                child: CurrencyPickerField(
+                  label: 'Select currency',
+                  value: _currencyController.text.isEmpty
+                      ? 'USD'
+                      : _currencyController.text,
+                  onChanged: (v) =>
+                      setState(() => _currencyController.text = v),
+                ),
+              ),
+
+              // ── Opening balance (new only) ──
+              if (_isNew) ...[
+                const SizedBox(height: 12),
+                _formSection(
+                  context,
+                  icon: Icons.account_balance_rounded,
+                  title: 'OPENING BALANCE',
+                  child: CalculatorAmountField(
+                    value: _initialBalance,
+                    hintText: '0.00',
+                    fontSize: 20,
+                    onChanged: (v) => setState(() => _initialBalance = v),
+                  ),
+                ),
+              ],
+            ],
             if (_isNew || _showSettings) ...[
             const SizedBox(height: 16),
             SizedBox(

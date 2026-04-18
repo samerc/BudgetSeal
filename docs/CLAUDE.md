@@ -184,6 +184,12 @@ GoRouter with `context.push()` / `context.pop()` / `context.go()`. Routes define
 ### Amount Entry
 All amount fields use the calculator bottom sheet (`CalculatorAmountField`), not the system keyboard. The `AmountField` widget wraps this automatically.
 
+### Category Selection
+Both the assisted flow and classic form use the same `CategorySheet` with: search field, type toggle (Expense/Income), parent/subcategory hierarchy with `CategoryIcon`, keyboard dismiss on scroll. Never use plain chip grids without search.
+
+### Exchange Rate Input
+Both forms have a swap button (↕) on the exchange rate field to toggle between "1 USD = X LBP" and "1 LBP = X USD". The `rateInverted` flag tracks direction; `exchangeRateToBase` is stored correctly regardless.
+
 ### Error Handling
 All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages and expandable technical details.
 

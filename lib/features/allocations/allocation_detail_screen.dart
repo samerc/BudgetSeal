@@ -1233,82 +1233,93 @@ class _AllocationDetailScreenState
   // ---------------------------------------------------------------------------
 
   Widget _buildRecentTransactions() {
-    final entriesAsync = ref.watch(transactionEntriesProvider);
-    final linkedCatIds = _linkedCategories.map((c) => c.id).toSet();
-    final categories = ref.watch(categoriesProvider).value ?? [];
-    final catMap = {for (final c in categories) c.id: c};
-
-    if (linkedCatIds.isEmpty) return const SizedBox.shrink();
+    final db = ref.watch(databaseProvider);
+    final ledgerDao = LedgerDao(db);
 
     return _sectionContainer(children: [
-      _sectionHeader('RECENT TRANSACTIONS', icon: Icons.receipt_outlined),
-      entriesAsync.when(
-        data: (entries) {
-          final filtered = entries.where((e) {
-            if (linkedCatIds.contains(e.tx.categoryId)) return true;
-            for (final l in e.lines) {
-              if (linkedCatIds.contains(l.categoryId)) return true;
-            }
-            return false;
-          }).take(5).toList();
+      _sectionHeader('RECENT ACTIVITY', icon: Icons.receipt_outlined),
+      StreamBuilder<List<AllocationLedgerData>>(
+        stream: ledgerDao.watchByAllocation(widget.allocationId),
+        builder: (context, snapshot) {
+          final ledgerEntries = snapshot.data;
+          if (ledgerEntries == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          if (filtered.isEmpty) {
+          final recent = ledgerEntries.take(8).toList();
+
+          if (recent.isEmpty) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(
-                child: Text('No transactions yet',
-                    style: TextStyle(fontSize: 13, color: AppColors.textHint)),
+                child: Text('No activity yet',
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.textHint)),
               ),
             );
           }
 
           return Column(
-            children: filtered.map((e) {
-              final tx = e.tx;
-              final isIncome = tx.type == 'income';
-              final color = isIncome ? AppColors.healthy : AppColors.overspent;
-              final cat = tx.categoryId != null ? catMap[tx.categoryId] : null;
-              final label = tx.note.isNotEmpty
-                  ? tx.note
-                  : cat?.name ?? tx.type;
-              final catColor = cat != null
-                  ? AppColors.fromHex(cat.colorHex)
-                  : AppColors.textSecondary;
+            children: recent.map((entry) {
+              final isPositive = entry.amount > 0;
+              final color =
+                  isPositive ? AppColors.healthy : AppColors.overspent;
+
+              final label = switch (entry.entryType) {
+                'funding' => 'Funded',
+                'consumption' => 'Spent',
+                'adjustment' => 'Adjustment',
+                'period_reset' => 'Period Reset',
+                'carry_forward' => 'Carried Forward',
+                _ => entry.entryType,
+              };
+
+              final icon = switch (entry.entryType) {
+                'funding' => Icons.add_circle_outline_rounded,
+                'consumption' => Icons.remove_circle_outline_rounded,
+                'adjustment' => Icons.tune_rounded,
+                'period_reset' => Icons.refresh_rounded,
+                'carry_forward' => Icons.forward_rounded,
+                _ => Icons.circle_outlined,
+              };
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    CategoryIcon(
-                      categoryName: cat?.name ?? '',
-                      color: catColor,
-                      size: 36,
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, size: 18, color: color),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(label,
-                              style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w500),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
                           Text(
-                            DateFormat('MMM d, yyyy').format(tx.createdAt.toLocal()),
+                            entry.note.isNotEmpty ? entry.note : label,
                             style: const TextStyle(
-                                fontSize: 10, color: AppColors.textHint),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '${DateFormat('MMM d').format(entry.createdAt.toLocal())} · $label',
+                            style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textHint),
                           ),
                         ],
                       ),
                     ),
                     Text(
-                      e.lines.isNotEmpty
-                          ? formatSignedAmount(e.lines.first.amount,
-                              currency: e.lines.first.currency,
-                              type: tx.type)
-                          : formatSignedAmount(tx.amount,
-                              currency: tx.currency, type: tx.type),
+                      '${isPositive ? '+' : ''}${formatAmount(entry.amount, currency: entry.currency)}',
                       style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -1320,8 +1331,6 @@ class _AllocationDetailScreenState
             }).toList(),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const SizedBox.shrink(),
       ),
     ]);
   }

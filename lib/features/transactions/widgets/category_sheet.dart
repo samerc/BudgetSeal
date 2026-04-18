@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../shared/theme/app_colors.dart';
-
-Color hexToColor(String hex) {
-  final h = hex.replaceAll('#', '');
-  return Color(int.parse('FF$h', radix: 16));
-}
+import '../../../shared/widgets/category_icon.dart';
 
 const categoryPresetColors = [
   Color(0xFFE57373),
@@ -26,7 +22,6 @@ class CategorySheet extends StatefulWidget {
   final void Function(String id, String name, Color color, String txType)
       onSelected;
   final void Function(String name) onCreated;
-  /// Map of allocationId → envelope display string (e.g. "Groceries — USD 500")
   final Map<String, String> envelopeInfo;
 
   const CategorySheet({
@@ -46,6 +41,8 @@ class CategorySheet extends StatefulWidget {
 class _CategorySheetState extends State<CategorySheet> {
   bool _creating = false;
   final _newCatCtrl = TextEditingController();
+  String _search = '';
+  String _typeFilter = 'expense'; // 'expense' or 'income'
 
   @override
   void dispose() {
@@ -55,22 +52,53 @@ class _CategorySheetState extends State<CategorySheet> {
 
   @override
   Widget build(BuildContext context) {
-    final groups =
-        widget.categories.where((c) => c.parentId == null).toList();
-    final subsByParent = <String, List<Category>>{};
-    for (final cat in widget.categories) {
-      if (cat.parentId != null) {
-        subsByParent.putIfAbsent(cat.parentId!, () => []).add(cat);
+    // Filter by type
+    var filtered = widget.categories
+        .where((c) => c.transactionType == _typeFilter)
+        .toList();
+
+    // Build parent/sub structure
+    final allParents = filtered.where((c) => c.parentId == null).toList();
+    final allSubsByParent = <String, List<Category>>{};
+    for (final c in filtered) {
+      if (c.parentId != null) {
+        allSubsByParent.putIfAbsent(c.parentId!, () => []).add(c);
+      }
+    }
+
+    // Apply search
+    List<Category> parents;
+    Map<String, List<Category>> subsByParent;
+    if (_search.isEmpty) {
+      parents = allParents;
+      subsByParent = allSubsByParent;
+    } else {
+      final q = _search.toLowerCase();
+      parents = [];
+      subsByParent = {};
+      for (final p in allParents) {
+        final matchingSubs = (allSubsByParent[p.id] ?? [])
+            .where((s) => s.name.toLowerCase().contains(q))
+            .toList();
+        if (p.name.toLowerCase().contains(q) || matchingSubs.isNotEmpty) {
+          parents.add(p);
+          if (matchingSubs.isNotEmpty) {
+            subsByParent[p.id] = matchingSubs;
+          } else if (allSubsByParent.containsKey(p.id)) {
+            subsByParent[p.id] = allSubsByParent[p.id]!;
+          }
+        }
       }
     }
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
+        initialChildSize: 0.7,
         minChildSize: 0.4,
         maxChildSize: 0.92,
         expand: false,
@@ -88,17 +116,21 @@ class _CategorySheetState extends State<CategorySheet> {
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.sfv(context),
+                          color: AppColors.th(context),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
                     const SizedBox(height: 14),
+                    // Title + New button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Category',
-                            style: Theme.of(context).textTheme.titleMedium),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tp(context))),
                         if (!_creating)
                           TextButton.icon(
                             icon: const Icon(Icons.add_rounded, size: 16),
@@ -108,64 +140,105 @@ class _CategorySheetState extends State<CategorySheet> {
                           ),
                       ],
                     ),
+                    // New category input
                     if (_creating) ...[
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _newCatCtrl,
                               autofocus: true,
-                              decoration: const InputDecoration(
-                                  hintText: 'Category name',
-                                  isDense: true),
-                              textCapitalization:
-                                  TextCapitalization.words,
+                              decoration: InputDecoration(
+                                hintText: 'Category name',
+                                isDense: true,
+                                filled: true,
+                                fillColor: AppColors.sfv(context),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              textCapitalization: TextCapitalization.words,
                               onSubmitted: _submitNew,
                             ),
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
-                            onPressed: () =>
-                                _submitNew(_newCatCtrl.text),
+                            onPressed: () => _submitNew(_newCatCtrl.text),
                             style: FilledButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 10)),
                             child: const Text('Add'),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded,
-                                size: 18),
+                            icon: const Icon(Icons.close_rounded, size: 18),
                             onPressed: () =>
                                 setState(() => _creating = false),
                           ),
                         ],
                       ),
                     ],
+                    const SizedBox(height: 10),
+                    // Type toggle
+                    Row(
+                      children: [
+                        _typeChip('Expense', 'expense', AppColors.overspent),
+                        const SizedBox(width: 8),
+                        _typeChip('Income', 'income', AppColors.healthy),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Search field
+                    TextField(
+                      onChanged: (v) => setState(() => _search = v),
+                      textInputAction: TextInputAction.search,
+                      style: TextStyle(
+                          fontSize: 14, color: AppColors.tp(context)),
+                      decoration: InputDecoration(
+                        hintText: 'Search categories...',
+                        hintStyle:
+                            TextStyle(color: AppColors.th(context)),
+                        prefixIcon: Icon(Icons.search_rounded,
+                            size: 18, color: AppColors.th(context)),
+                        filled: true,
+                        fillColor: AppColors.sfv(context),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 10),
+                        isDense: true,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    const Divider(height: 1),
                   ],
                 ),
               ),
               Expanded(
-                child: widget.categories.isEmpty
-                    ? const Center(
+                child: parents.isEmpty
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(24),
                           child: Text(
-                            'No categories yet.\nCreate one above or manage in Settings → Categories.',
+                            _search.isNotEmpty
+                                ? 'No matching categories'
+                                : 'No categories yet.\nTap "New" above to create one.',
                             textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: AppColors.textSecondary),
+                            style: TextStyle(
+                                color: AppColors.ts(context)),
                           ),
                         ),
                       )
                     : ListView(
                         controller: scrollCtrl,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         padding:
-                            const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                            const EdgeInsets.fromLTRB(20, 4, 20, 24),
                         children:
-                            _buildGroupedChips(groups, subsByParent),
+                            _buildCategoryList(parents, subsByParent),
                       ),
               ),
             ],
@@ -175,112 +248,142 @@ class _CategorySheetState extends State<CategorySheet> {
     );
   }
 
-  List<Widget> _buildGroupedChips(
-    List<Category> groups,
+  Widget _typeChip(String label, String value, Color color) {
+    final selected = _typeFilter == value;
+    return GestureDetector(
+      onTap: () => setState(() => _typeFilter = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected
+              ? color.withValues(alpha: 0.15)
+              : AppColors.sfv(context),
+          borderRadius: BorderRadius.circular(20),
+          border: selected
+              ? Border.all(color: color.withValues(alpha: 0.4))
+              : null,
+        ),
+        child: Text(label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? color : AppColors.ts(context),
+            )),
+      ),
+    );
+  }
+
+  List<Widget> _buildCategoryList(
+    List<Category> parents,
     Map<String, List<Category>> subsByParent,
   ) {
     final widgets = <Widget>[];
 
-    for (final txType in ['expense', 'income']) {
-      final sectionGroups =
-          groups.where((g) => g.transactionType == txType).toList();
-      if (sectionGroups.isEmpty) continue;
+    for (final group in parents) {
+      final subs = subsByParent[group.id] ?? [];
+      final groupColor = AppColors.fromHex(group.colorHex);
+      final hasEmoji =
+          group.icon.length <= 4 && group.icon != 'category';
 
+      // Parent tile
       widgets.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 12, 0, 6),
-          child: Text(
-            txType == 'expense' ? 'EXPENSE' : 'INCOME',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.1,
-              color: txType == 'expense'
-                  ? AppColors.overspent
-                  : AppColors.healthy,
+        GestureDetector(
+          onTap: subs.isEmpty
+              ? () => widget.onSelected(
+                  group.id, group.name, groupColor, group.transactionType)
+              : null,
+          child: Container(
+            margin: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: group.id == widget.selectedId
+                  ? groupColor.withValues(alpha: 0.12)
+                  : null,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                CategoryIcon(
+                  categoryName: group.name,
+                  emoji: hasEmoji ? group.icon : null,
+                  color: groupColor,
+                  size: 32,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(group.name,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context),
+                          )),
+                      if (subs.isNotEmpty)
+                        Text('${subs.length} subcategories',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.ts(context))),
+                    ],
+                  ),
+                ),
+                if (group.id == widget.selectedId)
+                  Icon(Icons.check_circle_rounded,
+                      size: 18, color: groupColor),
+              ],
             ),
           ),
         ),
       );
 
-      for (final group in sectionGroups) {
-        final subs = subsByParent[group.id] ?? [];
-        final groupColor = hexToColor(group.colorHex);
-
-        // Always show group name as a header.
+      // Subcategories
+      for (final sub in subs) {
+        final subColor = AppColors.fromHex(sub.colorHex);
+        final subEmoji =
+            sub.icon.length <= 4 && sub.icon != 'category';
         widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 4),
-            child: Text(
-              group.name,
-              style: TextStyle(
-                fontSize: 12,
-                color: groupColor,
-                fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () => widget.onSelected(
+                sub.id, sub.name, subColor, sub.transactionType),
+            child: Container(
+              margin: const EdgeInsets.only(left: 28),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: sub.id == widget.selectedId
+                    ? subColor.withValues(alpha: 0.12)
+                    : null,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  CategoryIcon(
+                    categoryName: sub.name,
+                    emoji: subEmoji ? sub.icon : null,
+                    color: subColor,
+                    size: 26,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(sub.name,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.tp(context),
+                        )),
+                  ),
+                  if (sub.id == widget.selectedId)
+                    Icon(Icons.check_circle_rounded,
+                        size: 16, color: subColor),
+                ],
               ),
             ),
           ),
         );
-
-        if (subs.isEmpty) {
-          // Standalone category (no subs) — still selectable as itself.
-          widgets.add(_buildChipsRow([group]));
-        } else {
-          // Has subcategories — only subs are selectable.
-          widgets.add(_buildChipsRow(subs));
-        }
       }
     }
 
     return widgets;
-  }
-
-  Widget _buildChipsRow(List<Category> cats) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: cats.map((cat) {
-          final color = hexToColor(cat.colorHex);
-          final isSelected = cat.id == widget.selectedId;
-          final envInfo = cat.allocationId != null
-              ? widget.envelopeInfo[cat.allocationId]
-              : null;
-          return FilterChip(
-            selected: isSelected,
-            showCheckmark: false,
-            avatar: CircleAvatar(radius: 8, backgroundColor: color),
-            label: envInfo != null
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(cat.name),
-                      Text(envInfo,
-                          style: TextStyle(
-                              fontSize: 9,
-                              color: color.withValues(alpha: 0.7))),
-                    ],
-                  )
-                : Text(cat.name),
-            backgroundColor: color.withValues(alpha: 0.08),
-            selectedColor: color.withValues(alpha: 0.22),
-            side: BorderSide(
-              color: isSelected ? color : color.withValues(alpha: 0.3),
-              width: isSelected ? 1.5 : 1,
-            ),
-            labelStyle: TextStyle(
-              color: color,
-              fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
-            onSelected: (_) => widget.onSelected(
-                cat.id, cat.name, color, cat.transactionType),
-          );
-        }).toList(),
-      ),
-    );
   }
 
   void _submitNew(String name) {

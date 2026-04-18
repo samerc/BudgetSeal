@@ -210,6 +210,7 @@ class LineState {
   String? categoryName;
   Color categoryColor;
   double exchangeRateToBase;
+  bool rateInverted = false;
 
   LineState({required this.currency})
       : amountCtrl = TextEditingController(),
@@ -392,15 +393,17 @@ class LineCard extends StatelessWidget {
                 children: [
                   Icon(Icons.currency_exchange_rounded,
                       size: 14, color: AppColors.accent),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Text(
-                    '1 $baseCurrency =',
+                    line.rateInverted
+                        ? '1 ${line.currency} ='
+                        : '1 $baseCurrency =',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   SizedBox(
                     width: 80,
                     child: TextField(
@@ -425,20 +428,52 @@ class LineCard extends StatelessWidget {
                         final rate =
                             double.tryParse(val.replaceAll(',', ''));
                         if (rate != null && rate > 0) {
-                          // Store 1/rate: rateCtrl shows "1 BASE = X LINE_CURRENCY"
-                          // so exchangeRateToBase = 1/rate (line_amount * (1/rate) = base_amount)
-                          line.exchangeRateToBase = 1.0 / rate;
+                          if (line.rateInverted) {
+                            // User entered "1 LINE = X BASE", so rate IS exchangeRateToBase
+                            line.exchangeRateToBase = rate;
+                          } else {
+                            // User entered "1 BASE = X LINE", so exchangeRateToBase = 1/rate
+                            line.exchangeRateToBase = 1.0 / rate;
+                          }
                         }
                         onChanged();
                       },
                     ),
                   ),
                   Text(
-                    line.currency,
+                    line.rateInverted ? baseCurrency : line.currency,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    onTap: () {
+                      // Swap direction and invert the displayed rate
+                      final currentText = line.rateCtrl.text;
+                      final currentRate =
+                          double.tryParse(currentText.replaceAll(',', ''));
+                      line.rateInverted = !line.rateInverted;
+                      if (currentRate != null && currentRate > 0) {
+                        final inverted = 1.0 / currentRate;
+                        line.rateCtrl.text = inverted >= 100
+                            ? inverted.toStringAsFixed(0)
+                            : inverted >= 1
+                                ? inverted.toStringAsFixed(2)
+                                : inverted.toStringAsFixed(6);
+                      }
+                      onChanged();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Icon(Icons.swap_vert_rounded,
+                          size: 14, color: AppColors.accent),
                     ),
                   ),
                   const Spacer(),
