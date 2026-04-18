@@ -296,6 +296,13 @@ Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase
 ### Per-Line Account in TransactionEntry
 `_buildEntry()` in `transactions_provider.dart` uses the line's `accountId` (not the header's `tx.accountId`) for single-line transactions where the line has a per-line account. This ensures the transaction list and detail screen show the correct account name, currency, and running balance.
 
+### Envelope Currency Handling
+- `tx.amount` and `tx.currency` are always in the household's **base currency** — never use them directly for display in envelope contexts.
+- For envelope progress/spent calculations, sum **line amounts** that match the envelope's `targetCurrency`, not `tx.amount`.
+- Budget summary on the allocations screen only sums base-currency envelopes to avoid mixing currencies.
+- The spend button pre-fills the envelope's `targetCurrency`, not `baseCurrency`.
+- `AllocationWithBalance.totalInBase` sums raw balances across currencies without conversion — use `balanceByCurrency[currency]` for accurate per-currency display.
+
 ## Performance
 
 ### Batch Balance Computation

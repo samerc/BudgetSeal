@@ -167,20 +167,25 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
           SliverToBoxAdapter(
             child: allocationsAsync.when(
               data: (allocations) {
-                final totalBudgeted = allocations.fold<double>(
+                // Only sum base-currency envelopes for the summary
+                // to avoid mixing currencies (e.g., USD + LBP raw).
+                final baseAllocs = allocations.where((a) =>
+                    (a.data.allocation.targetCurrency ?? baseCurrency) ==
+                    baseCurrency);
+                final totalBudgeted = baseAllocs.fold<double>(
                   0.0,
                   (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0),
                 );
-                final totalSpent = allocations.fold<double>(
+                final totalSpent = baseAllocs.fold<double>(
                   0.0,
                   (sum, a) {
-                    final bal = a.totalInBase;
+                    final bal = a.balanceByCurrency[baseCurrency] ?? 0;
                     return bal < 0 ? sum + bal.abs() : sum;
                   },
                 );
-                final totalRemaining = allocations.fold<double>(
+                final totalRemaining = baseAllocs.fold<double>(
                   0.0,
-                  (sum, a) => sum + a.totalInBase,
+                  (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0),
                 );
 
                 if (allocations.isEmpty) return const SizedBox.shrink();
@@ -339,10 +344,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
       final type = entry.key;
       final items = entry.value;
 
-      // Compute section total balance.
+      // Compute section total in base currency only (avoid mixing).
       final sectionTotal = items.fold<double>(
         0.0,
-        (sum, a) => sum + a.totalInBase,
+        (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0),
       );
 
       widgets.add(
@@ -420,7 +425,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
                   {
                     'categoryId': cat.id,
                     'categoryName': cat.name,
-                    'currency': baseCurrency,
+                    'currency': a.data.allocation.targetCurrency ?? baseCurrency,
                   }
                 ],
               } : null);

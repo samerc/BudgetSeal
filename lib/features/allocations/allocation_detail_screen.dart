@@ -814,19 +814,23 @@ class _AllocationDetailScreenState
 
     return entriesAsync.when(
       data: (entries) {
+        final targetCurrency = _targetCurrencyController.text;
         double spent = 0;
         for (final e in entries) {
-          bool match = linkedCatIds.contains(e.tx.categoryId);
-          if (!match) {
+          if (e.tx.type != 'expense') continue;
+          // Check category match at header or line level
+          if (e.lines.isNotEmpty) {
             for (final l in e.lines) {
-              if (linkedCatIds.contains(l.categoryId)) {
-                match = true;
-                break;
+              if (linkedCatIds.contains(l.categoryId) &&
+                  l.currency == targetCurrency) {
+                spent += l.amount;
               }
             }
-          }
-          if (match && e.tx.type == 'expense') {
-            spent += e.tx.amount;
+          } else if (linkedCatIds.contains(e.tx.categoryId)) {
+            // Header-level: use tx.amount if currency matches
+            if (e.tx.currency == targetCurrency) {
+              spent += e.tx.amount;
+            }
           }
         }
 
@@ -1157,7 +1161,12 @@ class _AllocationDetailScreenState
                       ),
                     ),
                     Text(
-                      formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
+                      e.lines.isNotEmpty
+                          ? formatSignedAmount(e.lines.first.amount,
+                              currency: e.lines.first.currency,
+                              type: tx.type)
+                          : formatSignedAmount(tx.amount,
+                              currency: tx.currency, type: tx.type),
                       style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -1199,23 +1208,31 @@ class _AllocationDetailScreenState
           totals[m] = 0;
         }
 
+        final targetCurrency = _targetCurrencyController.text;
         for (final e in entries) {
-          bool match = linkedCatIds.contains(e.tx.categoryId);
-          if (!match) {
+          if (e.tx.type != 'expense') continue;
+          final txDate = e.tx.createdAt.toLocal();
+
+          // Sum matching line amounts in the envelope's target currency
+          if (e.lines.isNotEmpty) {
             for (final l in e.lines) {
-              if (linkedCatIds.contains(l.categoryId)) {
-                match = true;
-                break;
+              if (linkedCatIds.contains(l.categoryId) &&
+                  l.currency == targetCurrency) {
+                for (final m in months) {
+                  if (txDate.year == m.year && txDate.month == m.month) {
+                    totals[m] = (totals[m] ?? 0) + l.amount;
+                    break;
+                  }
+                }
               }
             }
-          }
-          if (!match || e.tx.type != 'expense') continue;
-
-          final txDate = e.tx.createdAt.toLocal();
-          for (final m in months) {
-            if (txDate.year == m.year && txDate.month == m.month) {
-              totals[m] = (totals[m] ?? 0) + e.tx.amount;
-              break;
+          } else if (linkedCatIds.contains(e.tx.categoryId) &&
+              e.tx.currency == targetCurrency) {
+            for (final m in months) {
+              if (txDate.year == m.year && txDate.month == m.month) {
+                totals[m] = (totals[m] ?? 0) + e.tx.amount;
+                break;
+              }
             }
           }
         }
