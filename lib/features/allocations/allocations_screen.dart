@@ -409,6 +409,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
             balanceByCurrency: a.balanceByCurrency,
             baseCurrency: baseCurrency,
             targetAmount: a.data.allocation.targetAmount,
+            targetCurrency: a.data.allocation.targetCurrency,
             categoryName: cat?.name,
             categoryIcon: cat?.icon,
             categoryColorHex: cat?.colorHex,

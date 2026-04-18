@@ -296,6 +296,12 @@ Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase
 ### Per-Line Account in TransactionEntry
 `_buildEntry()` in `transactions_provider.dart` uses the line's `accountId` (not the header's `tx.accountId`) for single-line transactions where the line has a per-line account. This ensures the transaction list and detail screen show the correct account name, currency, and running balance.
 
+### Envelope Detail Layout
+The envelope detail screen shows: balance hero card (gradient, with progress bar and integrated fund button) → settings form (hidden, via 3-dot menu) → recent transactions → spending history. Settings, withdraw, revalue, archive, and delete are in the 3-dot menu. No duplicate transaction lists.
+
+### Multi-Currency Envelopes
+Envelopes can hold balances in multiple currencies. The fund sheet offers a currency picker showing all available unallocated currencies. The balance hero card shows the target currency balance prominently, with other currencies as `+ $50`. The allocation card does the same.
+
 ### Envelope Currency Handling
 - `tx.amount` and `tx.currency` are always in the household's **base currency** — never use them directly for display in envelope contexts.
 - For envelope progress/spent calculations, sum **line amounts** that match the envelope's `targetCurrency`, not `tx.amount`.

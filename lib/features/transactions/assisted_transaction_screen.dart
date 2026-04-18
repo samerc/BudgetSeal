@@ -49,6 +49,7 @@ class _AssistedTransactionScreenState
   String? _accountId;
   String? _destinationAccountId;
   double _transferExchangeRate = 1.0;
+  bool _rateInverted = false; // true = showing "1 DEST = X SOURCE"
   double _expenseExchangeRate = 1.0; // rate for non-transfer cross-currency
   DateTime _selectedDate = DateTime.now();
   bool _saving = false;
@@ -1197,7 +1198,9 @@ class _AssistedTransactionScreenState
           amount: totalAmount,
           currency: _selectedCurrency,
           exchangeRateToBase: _isTransferCrossCurrency
-              ? _transferExchangeRate
+              ? (_rateInverted
+                  ? 1.0 / _transferExchangeRate
+                  : _transferExchangeRate)
               : 1.0,
           createdBy: 'user',
           deviceId: 'local',
@@ -1478,11 +1481,41 @@ class _AssistedTransactionScreenState
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'How many $_destinationCurrency per 1 $_selectedCurrency?',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.ts(context)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _rateInverted
+                                  ? 'How many $_selectedCurrency per 1 $_destinationCurrency?'
+                                  : 'How many $_destinationCurrency per 1 $_selectedCurrency?',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.ts(context)),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                // Swap: invert the rate
+                                if (_transferExchangeRate > 0 &&
+                                    _transferExchangeRate != 1.0) {
+                                  _transferExchangeRate =
+                                      1.0 / _transferExchangeRate;
+                                }
+                                _rateInverted = !_rateInverted;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: AppColors.accent.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(Icons.swap_vert_rounded,
+                                  size: 18, color: AppColors.accent),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Container(
@@ -1495,7 +1528,10 @@ class _AssistedTransactionScreenState
                         ),
                         child: Row(
                           children: [
-                            Text('1 $_selectedCurrency = ',
+                            Text(
+                                _rateInverted
+                                    ? '1 $_destinationCurrency = '
+                                    : '1 $_selectedCurrency = ',
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -1515,7 +1551,10 @@ class _AssistedTransactionScreenState
                                 },
                               ),
                             ),
-                            Text(' $_destinationCurrency',
+                            Text(
+                                _rateInverted
+                                    ? ' $_selectedCurrency'
+                                    : ' $_destinationCurrency',
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -1523,23 +1562,28 @@ class _AssistedTransactionScreenState
                           ],
                         ),
                       ),
-                      if (_transferExchangeRate > 1.0 && totalAmount > 0) ...[
+                      if (_transferExchangeRate > 0 && _transferExchangeRate != 1.0 && totalAmount > 0) ...[
                         const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.healthy.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.check_circle_rounded,
-                                  size: 16, color: AppColors.healthy),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Recipient gets ≈ ${formatAmount(totalAmount * _transferExchangeRate, currency: _destinationCurrency)}',
+                        () {
+                          // Compute recipient amount: always source * (dest per source)
+                          final destPerSource = _rateInverted
+                              ? 1.0 / _transferExchangeRate
+                              : _transferExchangeRate;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.healthy.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    size: 16, color: AppColors.healthy),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Recipient gets = ${formatAmount(totalAmount * destPerSource, currency: _destinationCurrency)}',
                                   style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
@@ -1548,7 +1592,8 @@ class _AssistedTransactionScreenState
                               ),
                             ],
                           ),
-                        ),
+                        );
+                        }(),
                       ],
                     ],
                   ),

@@ -11,6 +11,7 @@ class AllocationCard extends StatelessWidget {
   final Map<String, double> balanceByCurrency;
   final String baseCurrency;
   final double? targetAmount;
+  final String? targetCurrency;
   final VoidCallback? onTap;
   final VoidCallback? onSpend;
 
@@ -27,6 +28,7 @@ class AllocationCard extends StatelessWidget {
     required this.balanceByCurrency,
     required this.baseCurrency,
     this.targetAmount,
+    this.targetCurrency,
     this.onTap,
     this.onSpend,
     this.categoryName,
@@ -44,8 +46,10 @@ class AllocationCard extends StatelessWidget {
   bool get _isSavingWithGoal => _isSaving && targetAmount != null && targetAmount! > 0;
   @override
   Widget build(BuildContext context) {
-    final mainCurrency = balanceByCurrency.keys.firstOrNull ?? baseCurrency;
-    final mainBalance = balanceByCurrency[mainCurrency] ?? 0.0;
+    final effectiveTargetCurrency = targetCurrency ?? baseCurrency;
+    final mainBalance = balanceByCurrency[effectiveTargetCurrency] ?? 0.0;
+    final otherBalances = Map.of(balanceByCurrency)
+      ..remove(effectiveTargetCurrency);
     final hasTarget = targetAmount != null && targetAmount! > 0;
     final progress =
         hasTarget ? (mainBalance / targetAmount!).clamp(0.0, 1.0) : null;
@@ -190,7 +194,7 @@ class AllocationCard extends StatelessWidget {
                           ),
                         ),
                       Text(
-                        formatAmount(mainBalance, currency: mainCurrency),
+                        formatAmount(mainBalance, currency: effectiveTargetCurrency),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -199,6 +203,16 @@ class AllocationCard extends StatelessWidget {
                               : AppColors.tp(context),
                         ),
                       ),
+                      // Show other currency balances
+                      for (final entry in otherBalances.entries)
+                        if (entry.value.abs() > 0.001)
+                          Text(
+                            ' + ${formatAmount(entry.value, currency: entry.key)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.ts(context),
+                            ),
+                          ),
                     ],
                   ),
                   if (_isSavingWithGoal) ...[
@@ -212,13 +226,13 @@ class AllocationCard extends StatelessWidget {
                               : AppColors.accent),
                     ),
                     Text(
-                      '/ ${formatAmount(targetAmount!, currency: mainCurrency)}',
+                      '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
                       style: const TextStyle(
                           fontSize: 10, color: AppColors.textHint),
                     ),
                   ] else if (hasTarget && !_isSaving)
                     Text(
-                      '/ ${formatAmount(targetAmount!, currency: mainCurrency)}',
+                      '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
                       style: const TextStyle(
                           fontSize: 10, color: AppColors.textHint),
                     ),

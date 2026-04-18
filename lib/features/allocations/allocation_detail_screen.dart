@@ -181,7 +181,11 @@ class _AllocationDetailScreenState
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert_rounded),
               onSelected: (v) {
-                if (v == 'revalue') {
+                if (v == 'settings') {
+                  setState(() => _showSettings = !_showSettings);
+                } else if (v == 'withdraw') {
+                  _showWithdrawSheet();
+                } else if (v == 'revalue') {
                   _showRevalueSheet();
                 } else if (v == 'archive') {
                   _confirmArchive();
@@ -191,40 +195,52 @@ class _AllocationDetailScreenState
               },
               itemBuilder: (_) => [
                 PopupMenuItem(
-                  value: 'revalue',
-                  child: Row(
-                    children: [
-                      Icon(Icons.currency_exchange_rounded,
+                  value: 'settings',
+                  child: Row(children: [
+                    Icon(Icons.settings_outlined,
+                        size: 18, color: AppColors.ts(context)),
+                    const SizedBox(width: 10),
+                    const Text('Edit Settings'),
+                  ]),
+                ),
+                if (_type == 'saving')
+                  PopupMenuItem(
+                    value: 'withdraw',
+                    child: Row(children: [
+                      Icon(Icons.output_rounded,
                           size: 18, color: AppColors.accent),
                       const SizedBox(width: 10),
-                      Text('Revalue Foreign Balances',
-                          style: TextStyle(color: AppColors.tp(context))),
-                    ],
+                      const Text('Withdraw'),
+                    ]),
                   ),
+                PopupMenuItem(
+                  value: 'revalue',
+                  child: Row(children: [
+                    Icon(Icons.currency_exchange_rounded,
+                        size: 18, color: AppColors.accent),
+                    const SizedBox(width: 10),
+                    const Text('Revalue Balances'),
+                  ]),
                 ),
                 PopupMenuItem(
                   value: 'archive',
-                  child: Row(
-                    children: [
-                      Icon(Icons.archive_outlined,
-                          size: 18, color: AppColors.overspent),
-                      const SizedBox(width: 10),
-                      Text('Archive Envelope',
-                          style: TextStyle(color: AppColors.overspent)),
-                    ],
-                  ),
+                  child: Row(children: [
+                    Icon(Icons.archive_outlined,
+                        size: 18, color: AppColors.caution),
+                    const SizedBox(width: 10),
+                    Text('Archive',
+                        style: TextStyle(color: AppColors.caution)),
+                  ]),
                 ),
                 PopupMenuItem(
                   value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_forever_rounded,
-                          size: 18, color: AppColors.overspent),
-                      const SizedBox(width: 10),
-                      Text('Delete Permanently',
-                          style: TextStyle(color: AppColors.overspent)),
-                    ],
-                  ),
+                  child: Row(children: [
+                    Icon(Icons.delete_forever_rounded,
+                        size: 18, color: AppColors.overspent),
+                    const SizedBox(width: 10),
+                    Text('Delete',
+                        style: TextStyle(color: AppColors.overspent)),
+                  ]),
                 ),
               ],
             ),
@@ -260,63 +276,9 @@ class _AllocationDetailScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // For existing envelopes: show transactions first, settings collapsible
+            // For existing envelopes: balance hero + fund + recent
             if (!_isNew) ...[
-              // Envelope transactions
-              _sectionContainer(children: [
-                _sectionHeader('TRANSACTIONS THIS PERIOD',
-                    icon: Icons.receipt_long_rounded),
-                _buildEnvelopeTransactions(),
-              ]),
-              // Withdraw button for savings envelopes
-              if (_type == 'saving') ...[
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _showWithdrawSheet,
-                  icon: const Icon(Icons.output_rounded, size: 18),
-                  label: const Text('Withdraw to Unallocated'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                        color: AppColors.accent.withValues(alpha: 0.4)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              // Settings toggle
-              GestureDetector(
-                onTap: () => setState(() => _showSettings = !_showSettings),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.bd(context)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.settings_outlined,
-                          size: 18, color: AppColors.textSecondary),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text('Envelope Settings',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w600)),
-                      ),
-                      Icon(
-                        _showSettings
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        color: AppColors.textHint,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildBalanceHero(),
               const SizedBox(height: 12),
             ],
             // Settings (always shown for new, toggled for existing)
@@ -613,18 +575,7 @@ class _AllocationDetailScreenState
               ]),
             ], // end if (_isNew || _showSettings)
 
-            // --- Fund + Withdraw quick actions ---
             if (!_isNew) ...[
-              const SizedBox(height: 16),
-              _buildFundButton(),
-
-              // --- Progress ring + goal timeline + recent transactions + spending history ---
-              const SizedBox(height: 16),
-              _buildProgressRing(),
-              if (_type == 'saving') ...[
-                const SizedBox(height: 16),
-                _buildGoalTimeline(),
-              ],
               const SizedBox(height: 16),
               _buildRecentTransactions(),
               const SizedBox(height: 16),
@@ -638,142 +589,308 @@ class _AllocationDetailScreenState
   }
 
   // ---------------------------------------------------------------------------
-  // Quick fund button
+  // Balance hero card
   // ---------------------------------------------------------------------------
 
-  Widget _buildFundButton() {
-    final currency = _targetCurrencyController.text.isNotEmpty
+  Widget _buildBalanceHero() {
+    final targetCurrency = _targetCurrencyController.text.isNotEmpty
         ? _targetCurrencyController.text
         : ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    final allocAsync = ref.watch(allocationsProvider);
+    final alloc = allocAsync.value
+        ?.where((a) => a.data.allocation.id == widget.allocationId)
+        .firstOrNull;
+    final balances = alloc?.balanceByCurrency ?? {};
+    final mainBalance = balances[targetCurrency] ?? 0;
+    final otherBalances = Map.of(balances)..remove(targetCurrency);
+    final hasTarget = _targetAmount > 0;
+    final progress =
+        hasTarget ? (mainBalance / _targetAmount).clamp(0.0, 1.0) : null;
+    final progressColor = progress != null
+        ? (progress >= 1.0
+            ? AppColors.healthy
+            : progress > 0.8
+                ? AppColors.caution
+                : AppColors.accent)
+        : AppColors.accent;
 
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton.icon(
-        onPressed: () => _showFundSheet(currency),
-        icon: const Icon(Icons.add_rounded, size: 18),
-        label: const Text('Fund this envelope'),
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, const Color(0xFF2A3F6A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          // Balance
+          Text(
+            formatAmount(mainBalance, currency: targetCurrency),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          // Other currency balances
+          for (final entry in otherBalances.entries)
+            if (entry.value.abs() > 0.001)
+              Text(
+                '+ ${formatAmount(entry.value, currency: entry.key)}',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                ),
+              ),
+          const SizedBox(height: 4),
+          Text(
+            _type == 'saving' ? 'Saved' : 'Available',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 13,
+            ),
+          ),
+          // Progress bar + target
+          if (hasTarget) ...[
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                color: progressColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${(progress! * 100).round()}% of ${formatAmount(_targetAmount, currency: targetCurrency)}',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  '${formatAmount((_targetAmount - mainBalance).clamp(0, double.infinity), currency: targetCurrency)} left',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          // Fund button
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => _showFundSheet(targetCurrency),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Fund'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _showFundSheet(String currency) async {
+
+
+  Future<void> _showFundSheet(String defaultCurrency) async {
     double amount = 0;
-    await showModalBottomSheet(
+    var selectedCurrency = defaultCurrency;
+
+    // Get available currencies from unallocated balances
+    final unallocated = ref.read(unallocatedProvider).value ?? {};
+    final availableCurrencies = unallocated.keys.toList();
+    if (!availableCurrencies.contains(defaultCurrency)) {
+      availableCurrencies.insert(0, defaultCurrency);
+    }
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       backgroundColor: AppColors.sf(context),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-            20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Fund ${_nameController.text}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'From your unallocated $currency balance',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.ts(context),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    currency,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ts(context),
-                    ),
+                    color: AppColors.th(context),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Fund ${_nameController.text}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.tp(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'From your unallocated balance',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.ts(context),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Currency selector
+              if (availableCurrencies.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: availableCurrencies.map((c) {
+                      final isSelected = c == selectedCurrency;
+                      final bal = unallocated[c] ?? 0;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () =>
+                              setSheetState(() => selectedCurrency = c),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.accent.withValues(alpha: 0.12)
+                                  : AppColors.sfv(context),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.accent
+                                    : AppColors.bd(context),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(c,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSelected
+                                          ? AppColors.accent
+                                          : AppColors.tp(context),
+                                    )),
+                                Text(
+                                  formatAmount(bal, currency: c),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.ts(context),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: CalculatorAmountField(
-                      value: 0,
-                      onChanged: (v) => amount = v,
-                      hintText: 'Amount',
-                      fontSize: 16,
+                    child: Text(
+                      selectedCurrency,
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ts(context),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(ctx, amount),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Fund',
-                    style:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: CalculatorAmountField(
+                        value: 0,
+                        onChanged: (v) => amount = v,
+                        hintText: 'Amount',
+                        fontSize: 16,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(
+                      ctx, {'amount': amount, 'currency': selectedCurrency}),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Fund',
+                      style: TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
 
-    if (amount <= 0 || !mounted) return;
+    if (result == null || !mounted) return;
+    final fundAmount = (result['amount'] as double?) ?? 0;
+    final fundCurrency = result['currency'] as String? ?? defaultCurrency;
+    if (fundAmount <= 0) return;
 
     try {
       final engine = ref.read(allocationEngineProvider);
       await engine.fundAllocation(
         allocationId: widget.allocationId,
-        amount: amount,
-        currency: currency,
+        amount: fundAmount,
+        currency: fundCurrency,
         deviceId: 'local',
         note: 'Funded from Unallocated',
       );
@@ -783,7 +900,7 @@ class _AllocationDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Funded ${formatAmount(amount, currency: currency)} to ${_nameController.text}'),
+                'Funded ${formatAmount(fundAmount, currency: fundCurrency)} to ${_nameController.text}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -802,7 +919,7 @@ class _AllocationDetailScreenState
   }
 
   // ---------------------------------------------------------------------------
-  // Progress ring: spent vs target
+  // Progress ring (kept for potential future use)
   // ---------------------------------------------------------------------------
 
   Widget _buildProgressRing() {
@@ -884,10 +1001,35 @@ class _AllocationDetailScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _miniStat('Spent', formatAmount(spent, currency: _targetCurrencyController.text), color),
-              _miniStat('Remaining', formatAmount((target - spent).clamp(0, double.infinity), currency: _targetCurrencyController.text), AppColors.healthy),
+              _miniStat('Spent', formatAmount(spent, currency: targetCurrency), color),
+              _miniStat('Remaining', formatAmount((target - spent).clamp(0, double.infinity), currency: targetCurrency), AppColors.healthy),
             ],
           ),
+          // Show other currency balances held in this envelope
+          Builder(builder: (_) {
+            final allocAsync = ref.watch(allocationsProvider);
+            final alloc = allocAsync.value
+                ?.where((a) => a.data.allocation.id == widget.allocationId)
+                .firstOrNull;
+            if (alloc == null) return const SizedBox.shrink();
+            final otherBalances = Map.of(alloc.balanceByCurrency)
+              ..remove(targetCurrency);
+            final nonZero = otherBalances.entries
+                .where((e) => e.value.abs() > 0.001)
+                .toList();
+            if (nonZero.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'Also holding: ${nonZero.map((e) => formatAmount(e.value, currency: e.key)).join(', ')}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.ts(context),
+                ),
+              ),
+            );
+          }),
         ]);
       },
       loading: () => const SizedBox.shrink(),

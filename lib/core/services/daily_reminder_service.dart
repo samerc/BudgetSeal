@@ -89,14 +89,26 @@ class DailyReminderService {
 
   /// Re-schedule the notification if enabled. Call this from main().
   static Future<void> init() async {
-    if (await isEnabled()) {
-      await _schedule();
+    try {
+      if (await isEnabled()) {
+        await _schedule();
+      }
+    } catch (e) {
+      debugPrint('[DailyReminder] Init failed: $e');
     }
   }
 
   // ── Core ────────────────────────────────────────────────────────
 
   static Future<void> _schedule() async {
+    _ensureTz();
+
+    // Request notification permission on Android 13+
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
     final time = await getTime();
     final customMessage = await getMessage();
 

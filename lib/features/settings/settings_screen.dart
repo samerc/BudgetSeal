@@ -1745,11 +1745,10 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.bd(context)),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
