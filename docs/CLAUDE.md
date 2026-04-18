@@ -97,7 +97,7 @@ lib/
 │   ├── accounts/
 │   ├── categories/
 │   ├── subscriptions/          # Subscription tracker: list, detail, price history
-│   ├── reports/                # Hub with 4 tabs: Overview, Categories, History, Cumulative
+│   ├── reports/                # Hub with 4 tabs: Overview, Categories, Insights, Balance Sheet
 │   ├── recurring/
 │   ├── templates/
 │   ├── periods/                # Period transition + leftover resolution

@@ -63,7 +63,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 5, vsync: this);
+    _tabCtrl = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showHintIfNeeded(
@@ -123,9 +123,8 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
               tabs: const [
                 Tab(text: 'Overview'),
                 Tab(text: 'Categories'),
-                Tab(text: 'History'),
-                Tab(text: 'Cumulative'),
                 Tab(text: 'Insights'),
+                Tab(text: 'Balance Sheet'),
               ],
             ),
             // ── Tab content ──
@@ -135,9 +134,8 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                 children: const [
                   _OverviewTab(),
                   _CategoriesTab(),
-                  _HistoryTab(),
-                  _CumulativeTab(),
                   _InsightsTab(),
+                  _BalanceSheetTab(),
                 ],
               ),
             ),
@@ -152,11 +150,18 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
 // Tab 1: Overview (Spending gauge + cashflow summary)
 // ═════════════════════════════════════════════════════════════════════════════
 
-class _OverviewTab extends ConsumerWidget {
+class _OverviewTab extends ConsumerStatefulWidget {
   const _OverviewTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_OverviewTab> createState() => _OverviewTabState();
+}
+
+class _OverviewTabState extends ConsumerState<_OverviewTab> {
+  bool _showDailyPace = false;
+
+  @override
+  Widget build(BuildContext context) {
     final txAsync = ref.watch(transactionEntriesProvider);
     final baseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
@@ -169,20 +174,17 @@ class _OverviewTab extends ConsumerWidget {
         final now = DateTime.now();
         final monthStart = DateTime(now.year, now.month, 1);
 
-        // Use pre-computed stats when available, fall back to inline
         final currentMonth = stats?.monthly[monthStart];
         final double totalIncome = currentMonth?.income ?? 0;
         final double totalExpense = currentMonth?.expense ?? 0;
         final typical = stats?.typicalMonthlySpend(monthStart) ?? 0;
         final net = totalIncome - totalExpense;
 
-        // 6-month trend from pre-computed stats
         final trend = stats?.monthRange(6) ?? [];
         final months = trend.map((e) => e.key).toList();
         final incomeByMonth = trend.map((e) => e.value.income).toList();
         final expenseByMonth = trend.map((e) => e.value.expense).toList();
 
-        // Pad if stats aren't ready yet
         while (months.length < 6) {
           months.insert(0, DateTime(now.year, now.month - months.length, 1));
           incomeByMonth.insert(0, 0);
@@ -193,29 +195,87 @@ class _OverviewTab extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             children: [
-              // Spending gauge
               _SpendingGauge(
                 spent: totalExpense,
                 typical: typical,
                 currency: baseCurrency,
               ),
               const SizedBox(height: 20),
-              // Income/Expense/Net summary
               _CashflowSummary(
                 income: totalIncome,
                 expense: totalExpense,
                 net: net,
                 currency: baseCurrency,
               ),
-              const SizedBox(height: 20),
-              // 6-month trend
-              _TrendChart(
-                months: months,
-                incomeByMonth: incomeByMonth,
-                expenseByMonth: expenseByMonth,
-                baseCurrency: baseCurrency,
+              const SizedBox(height: 16),
+              // Toggle: Trend vs Daily Pace
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _showDailyPace = false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: !_showDailyPace
+                              ? AppColors.accent.withValues(alpha: 0.12)
+                              : AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text('6-Month Trend',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: !_showDailyPace
+                                    ? AppColors.accent
+                                    : AppColors.ts(context),
+                              )),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _showDailyPace = true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _showDailyPace
+                              ? AppColors.accent.withValues(alpha: 0.12)
+                              : AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text('Daily Pace',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _showDailyPace
+                                    ? AppColors.accent
+                                    : AppColors.ts(context),
+                              )),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              // Net worth chart moved to Insights tab
+              const SizedBox(height: 12),
+              if (!_showDailyPace)
+                _TrendChart(
+                  months: months,
+                  incomeByMonth: incomeByMonth,
+                  expenseByMonth: expenseByMonth,
+                  baseCurrency: baseCurrency,
+                )
+              else
+                _DailyPaceChart(
+                  entries: entries,
+                  baseCurrency: baseCurrency,
+                  typical: typical,
+                ),
             ],
           ),
         );
@@ -226,6 +286,112 @@ class _OverviewTab extends ConsumerWidget {
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
       ),
+    );
+  }
+}
+
+/// Inline daily pace chart (absorbed from Cumulative tab).
+class _DailyPaceChart extends StatelessWidget {
+  final List<TransactionEntry> entries;
+  final String baseCurrency;
+  final double typical;
+
+  const _DailyPaceChart({
+    required this.entries,
+    required this.baseCurrency,
+    required this.typical,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final month = DateTime(now.year, now.month, 1);
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final lastDay = now.day;
+
+    final dailyCumulative = List.filled(daysInMonth + 1, 0.0);
+    for (final e in entries) {
+      if (e.tx.type != 'expense') continue;
+      final d = e.tx.createdAt.toLocal();
+      if (d.year == month.year && d.month == month.month) {
+        dailyCumulative[d.day] += _baseAmount(e);
+      }
+    }
+    for (int i = 1; i <= daysInMonth; i++) {
+      dailyCumulative[i] += dailyCumulative[i - 1];
+    }
+
+    final typicalDaily = typical / daysInMonth;
+    final typicalCumulative =
+        List.generate(daysInMonth + 1, (i) => typicalDaily * i);
+
+    final allValues = [
+      ...dailyCumulative.take(lastDay + 1),
+      ...typicalCumulative,
+    ];
+    final maxY = allValues.fold(0.0, (a, b) => a > b ? a : b);
+
+    if (maxY == 0) {
+      return Center(
+          child: Text('No spending this month',
+              style: TextStyle(color: AppColors.ts(context))));
+    }
+
+    return SizedBox(
+      height: 200,
+      child: LineChart(LineChartData(
+        minX: 1,
+        maxX: daysInMonth.toDouble(),
+        minY: 0,
+        maxY: maxY * 1.1,
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 7,
+              getTitlesWidget: (v, _) => Text('${v.toInt()}',
+                  style: TextStyle(
+                      fontSize: 10, color: AppColors.th(context))),
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          // Actual cumulative
+          LineChartBarData(
+            spots: [
+              for (int d = 1; d <= lastDay; d++)
+                FlSpot(d.toDouble(), dailyCumulative[d]),
+            ],
+            isCurved: true,
+            color: AppColors.accent,
+            barWidth: 2.5,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.accent.withValues(alpha: 0.08),
+            ),
+          ),
+          // Typical pace (dashed)
+          LineChartBarData(
+            spots: [
+              for (int d = 1; d <= daysInMonth; d++)
+                FlSpot(d.toDouble(), typicalCumulative[d]),
+            ],
+            isCurved: false,
+            color: AppColors.th(context),
+            barWidth: 1,
+            dotData: const FlDotData(show: false),
+            dashArray: [4, 4],
+          ),
+        ],
+      )),
     );
   }
 }
@@ -1990,8 +2156,7 @@ class _InsightsTab extends ConsumerWidget {
         // ── Age of money ──
         final ageValue = ageAsync.value;
 
-        // ── Financial health score ──
-        // Combine: age of money (0-40), budget adherence (0-30), savings rate (0-30)
+        // ── Income + savings rate ──
         double totalIncome = 0;
         for (final e in entries) {
           if (e.tx.type == 'income' &&
@@ -2002,49 +2167,20 @@ class _InsightsTab extends ConsumerWidget {
         final savingsRate =
             totalIncome > 0 ? (totalIncome - monthExpense) / totalIncome : 0.0;
 
-        int? healthScore;
-        if (ageValue != null || totalBudget > 0 || totalIncome > 0) {
-          double score = 0;
-
-          // Age of money component (0-40)
-          if (ageValue != null) {
-            score += (ageValue / 30.0).clamp(0.0, 1.0) * 40;
-          }
-
-          // Budget adherence component (0-30)
-          if (totalBudget > 0 && monthExpense > 0) {
-            final adherence = 1.0 - ((projected - totalBudget) / totalBudget).clamp(-0.5, 0.5);
-            score += adherence.clamp(0.0, 1.0) * 30;
-          } else if (totalBudget > 0) {
-            score += 30; // No spending = perfect adherence
-          }
-
-          // Savings rate component (0-30)
-          if (totalIncome > 0) {
-            score += savingsRate.clamp(0.0, 1.0) * 30;
-          }
-
-          healthScore = score.round().clamp(0, 100);
+        // ── Actionable tips ──
+        final tips = <String>[];
+        if (totalBudget > 0 && projected > totalBudget) {
+          tips.add('At your current pace, you\'ll exceed your budget by ${formatAmount(projected - totalBudget, currency: baseCurrency)}. Try to slow down.');
+        } else if (totalBudget > 0 && projected <= totalBudget * 0.85) {
+          tips.add('Great pace! You\'re on track to stay ${formatAmount(totalBudget - projected, currency: baseCurrency)} under budget.');
         }
-
-        // ── 6-month trend data for net worth chart ──
-        final months = <DateTime>[];
-        final incomeByMonth = <double>[];
-        final expenseByMonth = <double>[];
-        for (int i = 5; i >= 0; i--) {
-          final m = DateTime(now.year, now.month - i, 1);
-          final end = DateTime(m.year, m.month + 1, 1);
-          months.add(m);
-          double inc = 0, exp = 0;
-          for (final e in entries) {
-            final d = e.tx.createdAt;
-            if (d.isBefore(m) || !d.isBefore(end)) continue;
-            final amt = _baseAmount(e);
-            if (e.tx.type == 'income') inc += amt;
-            if (e.tx.type == 'expense') exp += amt;
-          }
-          incomeByMonth.add(inc);
-          expenseByMonth.add(exp);
+        if (savingsRate > 0.2) {
+          tips.add('You\'re saving ${(savingsRate * 100).round()}% of your income this month. Keep it up!');
+        } else if (savingsRate < 0.05 && totalIncome > 0) {
+          tips.add('Your savings rate is low (${(savingsRate * 100).round()}%). Try to set aside at least 10-20%.');
+        }
+        if (ageValue != null && ageValue < 15) {
+          tips.add('Your money sits only $ageValue days before being spent. A buffer of 30+ days is healthier.');
         }
 
         return SingleChildScrollView(
@@ -2052,13 +2188,7 @@ class _InsightsTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Financial Health Score ──
-              if (healthScore != null) ...[
-                _HealthScoreCard(score: healthScore),
-                const SizedBox(height: 16),
-              ],
-
-              // ── Spending Velocity (full detail) ──
+              // ── Spending Velocity ──
               if (monthExpense > 0) ...[
                 _VelocityCard(
                   dailyRate: dailyRate,
@@ -2084,6 +2214,67 @@ class _InsightsTab extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
 
+              // ── Savings Rate ──
+              if (totalIncome > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.sf(context),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.bd(context)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: (savingsRate >= 0.1
+                                  ? AppColors.healthy
+                                  : AppColors.caution)
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.savings_rounded,
+                            size: 20,
+                            color: savingsRate >= 0.1
+                                ? AppColors.healthy
+                                : AppColors.caution),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Savings Rate',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.ts(context))),
+                            Text('${(savingsRate * 100).round()}%',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.tp(context))),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        formatAmount(totalIncome - monthExpense,
+                            currency: baseCurrency),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: savingsRate >= 0
+                              ? AppColors.healthy
+                              : AppColors.overspent,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // ── Subscription Summary ──
               if (householdId != null)
                 _SubscriptionSummaryCard(
@@ -2092,20 +2283,50 @@ class _InsightsTab extends ConsumerWidget {
                   baseCurrency: baseCurrency,
                 ),
 
-              // ── Age of Money (full detail) ──
+              // ── Age of Money ──
               if (ageValue != null) ...[
                 _AgeOfMoneyCard(age: ageValue),
                 const SizedBox(height: 16),
               ],
 
-              // ── Net Worth Over Time ──
-              _NetWorthChart(
-                entries: entries,
-                months: months,
-                incomeByMonth: incomeByMonth,
-                expenseByMonth: expenseByMonth,
-                baseCurrency: baseCurrency,
-              ),
+              // ── Actionable Tips ──
+              if (tips.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text('TIPS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                        color: AppColors.th(context),
+                      )),
+                ),
+                ...tips.map((tip) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: AppColors.accent.withValues(alpha: 0.15)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.lightbulb_outline_rounded,
+                              size: 16, color: AppColors.accent),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(tip,
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.tp(context),
+                                    height: 1.4)),
+                          ),
+                        ],
+                      ),
+                    )),
+              ],
             ],
           ),
         );
@@ -2700,5 +2921,536 @@ class _ToggleChip extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Balance Sheet Tab
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _BalanceSheetTab extends ConsumerStatefulWidget {
+  const _BalanceSheetTab();
+
+  @override
+  ConsumerState<_BalanceSheetTab> createState() => _BalanceSheetTabState();
+}
+
+class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
+  late DateTime _compareDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default: end of last month
+    final now = DateTime.now();
+    _compareDate = DateTime(now.year, now.month, 0); // last day of prev month
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accountsAsync = ref.watch(accountsWithBalanceProvider);
+    final baseCurrency =
+        ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    final today = DateTime.now();
+
+    return accountsAsync.when(
+      data: (accounts) {
+        if (accounts.isEmpty) {
+          return Center(
+              child: Text('No accounts',
+                  style: TextStyle(color: AppColors.ts(context))));
+        }
+
+        // We need transaction data to compute historical balances
+        return FutureBuilder<Map<String, double>>(
+          future: _computeHistoricalBalances(accounts, _compareDate),
+          builder: (context, snapshot) {
+            final historicalBalances = snapshot.data ?? {};
+
+            // Group accounts by type
+            final assetTypes = ['cash', 'bank', 'wallet'];
+            final liabilityTypes = ['credit'];
+
+            final assets = accounts
+                .where((a) => assetTypes.contains(a.account.type))
+                .toList();
+            final liabilities = accounts
+                .where((a) => liabilityTypes.contains(a.account.type))
+                .toList();
+
+            // Totals
+            double totalAssetsNow = 0, totalAssetsCompare = 0;
+            double totalLiabilitiesNow = 0, totalLiabilitiesCompare = 0;
+            for (final a in assets) {
+              totalAssetsNow += a.balance;
+              totalAssetsCompare += historicalBalances[a.account.id] ?? a.balance;
+            }
+            for (final a in liabilities) {
+              totalLiabilitiesNow += a.balance;
+              totalLiabilitiesCompare +=
+                  historicalBalances[a.account.id] ?? a.balance;
+            }
+            final netWorthNow = totalAssetsNow - totalLiabilitiesNow.abs();
+            final netWorthCompare =
+                totalAssetsCompare - totalLiabilitiesCompare.abs();
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+              children: [
+                // Date selector
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _compareDate,
+                          firstDate:
+                              DateTime.now().subtract(const Duration(days: 730)),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setState(() => _compareDate = picked);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.bd(context)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.calendar_today_rounded,
+                                size: 14, color: AppColors.ts(context)),
+                            const SizedBox(width: 8),
+                            Text(
+                              DateFormat('MMM d, yyyy').format(_compareDate),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.tp(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        DateFormat('MMM d, yyyy').format(today),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Assets section
+                if (assets.isNotEmpty) ...[
+                  _bsSectionHeader(context, 'ASSETS',
+                      totalAssetsCompare, totalAssetsNow, baseCurrency),
+                  ..._groupByType(assets).entries.map((group) =>
+                      _bsGroup(context, group.key, group.value,
+                          historicalBalances, baseCurrency, totalAssetsNow)),
+                ],
+
+                // Liabilities section
+                if (liabilities.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _bsSectionHeader(context, 'LIABILITIES',
+                      totalLiabilitiesCompare, totalLiabilitiesNow,
+                      baseCurrency),
+                  ..._groupByType(liabilities).entries.map((group) =>
+                      _bsGroup(context, group.key, group.value,
+                          historicalBalances, baseCurrency,
+                          totalLiabilitiesNow)),
+                ],
+
+                // Net Worth
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primary, const Color(0xFF2A3F6A)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('NET WORTH',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          )),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(children: [
+                            Text(
+                              formatAmount(netWorthCompare,
+                                  currency: baseCurrency),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withValues(alpha: 0.7),
+                              ),
+                            ),
+                            Text(
+                              DateFormat('MMM d').format(_compareDate),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.white.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ]),
+                          Icon(Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: Colors.white.withValues(alpha: 0.4)),
+                          Column(children: [
+                            Text(
+                              formatAmount(netWorthNow, currency: baseCurrency),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Text('Today',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.white60)),
+                          ]),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _bsChangeChip(netWorthCompare, netWorthNow),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      loading: () => const SkeletonList(),
+      error: (e, _) => ErrorRetry(
+        message: "Couldn't load accounts",
+        details: '$e',
+        onRetry: () => ref.invalidate(accountsWithBalanceProvider),
+      ),
+    );
+  }
+
+  Map<String, List<AccountWithBalance>> _groupByType(
+      List<AccountWithBalance> accounts) {
+    final groups = <String, List<AccountWithBalance>>{};
+    for (final a in accounts) {
+      final type = a.account.type[0].toUpperCase() + a.account.type.substring(1);
+      groups.putIfAbsent(type, () => []).add(a);
+    }
+    return groups;
+  }
+
+  Widget _bsSectionHeader(BuildContext context, String label,
+      double compareTotal, double nowTotal, String currency) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                color: label == 'ASSETS' ? AppColors.healthy : AppColors.overspent,
+              )),
+          const Spacer(),
+          Text(formatAmount(compareTotal, currency: currency),
+              style: TextStyle(
+                  fontSize: 11, color: AppColors.ts(context))),
+          const SizedBox(width: 16),
+          Text(formatAmount(nowTotal, currency: currency),
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.tp(context))),
+        ],
+      ),
+    );
+  }
+
+  Widget _bsGroup(
+    BuildContext context,
+    String typeName,
+    List<AccountWithBalance> accounts,
+    Map<String, double> historicalBalances,
+    String baseCurrency,
+    double sectionTotal,
+  ) {
+    // Group total
+    double groupNow = 0, groupCompare = 0;
+    for (final a in accounts) {
+      groupNow += a.balance;
+      groupCompare += historicalBalances[a.account.id] ?? a.balance;
+    }
+    final pct = sectionTotal != 0
+        ? ((groupNow / sectionTotal) * 100).round()
+        : 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        children: [
+          // Group header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+            child: Row(
+              children: [
+                Icon(
+                  _typeIcon(typeName),
+                  size: 16,
+                  color: AppColors.accent,
+                ),
+                const SizedBox(width: 8),
+                Text(typeName,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+                const SizedBox(width: 6),
+                Text('$pct%',
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.ts(context))),
+                const Spacer(),
+                Text(formatAmount(groupCompare, currency: baseCurrency),
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.ts(context))),
+                const SizedBox(width: 12),
+                Text(formatAmount(groupNow, currency: baseCurrency),
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context))),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: AppColors.bd(context)),
+          // Account rows
+          ...accounts.map((a) {
+            final now = a.balance;
+            final compare = historicalBalances[a.account.id] ?? now;
+            final acctPct = sectionTotal != 0
+                ? ((now / sectionTotal) * 100).round()
+                : 0;
+            final isNonBase = a.account.currency != baseCurrency;
+
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(a.account.name,
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.tp(context)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                            const SizedBox(width: 6),
+                            Text('$acctPct%',
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.ts(context))),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Compare date balance
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        formatAmount(compare, currency: a.account.currency),
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
+                  // Current balance + base equivalent
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        formatAmount(now, currency: a.account.currency),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context)),
+                      ),
+                      if (isNonBase && now != 0)
+                        Text(
+                          formatAmount(now * a.account.initialBalance,
+                              currency: baseCurrency),
+                          style: TextStyle(
+                              fontSize: 9, color: AppColors.th(context)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 6),
+                  _bsChangeIndicator(compare, now),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _bsChangeIndicator(double compare, double now) {
+    if (compare == 0 && now == 0) {
+      return Text('—',
+          style: TextStyle(fontSize: 10, color: AppColors.th(context)));
+    }
+    final diff = now - compare;
+    if (diff.abs() < 0.01) {
+      return Text('—',
+          style: TextStyle(fontSize: 10, color: AppColors.th(context)));
+    }
+    return Icon(
+      diff > 0 ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+      size: 14,
+      color: diff > 0 ? AppColors.healthy : AppColors.overspent,
+    );
+  }
+
+  Widget _bsChangeChip(double compare, double now) {
+    final diff = now - compare;
+    final isUp = diff >= 0;
+    final pct = compare != 0 ? ((diff / compare.abs()) * 100) : 0.0;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: (isUp ? AppColors.healthy : AppColors.overspent)
+            .withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+            size: 14,
+            color: isUp ? AppColors.healthy : AppColors.overspent,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${isUp ? '+' : ''}${pct.toStringAsFixed(1)}%',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: isUp ? AppColors.healthy : AppColors.overspent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _typeIcon(String type) {
+    return switch (type.toLowerCase()) {
+      'bank' => Icons.account_balance_rounded,
+      'cash' => Icons.payments_rounded,
+      'credit' => Icons.credit_card_rounded,
+      'wallet' => Icons.account_balance_wallet_rounded,
+      _ => Icons.account_balance_rounded,
+    };
+  }
+
+  /// Compute what each account's balance was at a historical date.
+  /// Takes current balance and subtracts all transactions after that date.
+  Future<Map<String, double>> _computeHistoricalBalances(
+      List<AccountWithBalance> accounts, DateTime asOfDate) async {
+    final db = ref.read(databaseProvider);
+    final result = <String, double>{};
+
+    for (final ab in accounts) {
+      double balance = ab.balance;
+      final acctId = ab.account.id;
+
+      // Get all transactions after the comparison date
+      final txsAfter = await (db.select(db.transactions)
+            ..where((t) => t.createdAt.isBiggerThanValue(asOfDate)))
+          .get();
+
+      for (final tx in txsAfter) {
+        // Lines referencing this account
+        final lines = await (db.select(db.transactionLines)
+              ..where((l) => l.transactionId.equals(tx.id))
+              ..where((l) => l.accountId.equals(acctId)))
+            .get();
+
+        if (lines.isNotEmpty) {
+          for (final l in lines) {
+            if (tx.type == 'income') balance -= l.amount;
+            if (tx.type == 'expense') balance += l.amount;
+          }
+        } else if (tx.accountId == acctId) {
+          // Header-level (no per-line account)
+          // Check if ANY lines have accountId set
+          final allLines = await (db.select(db.transactionLines)
+                ..where((l) => l.transactionId.equals(tx.id)))
+              .get();
+          final hasPerLine = allLines.any((l) => l.accountId != null);
+          if (!hasPerLine) {
+            if (tx.type == 'income') balance -= tx.amount;
+            if (tx.type == 'expense') balance += tx.amount;
+          }
+        }
+
+        // Transfers
+        if (tx.type == 'transfer') {
+          if (tx.accountId == acctId) balance += tx.amount;
+          if (tx.destinationAccountId == acctId) {
+            balance -= tx.amount * tx.exchangeRateToBase;
+          }
+        }
+      }
+
+      result[acctId] = balance;
+    }
+    return result;
   }
 }
