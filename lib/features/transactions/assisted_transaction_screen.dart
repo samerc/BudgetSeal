@@ -49,6 +49,7 @@ class _AssistedTransactionScreenState
   String? _accountId;
   String? _destinationAccountId;
   double _transferExchangeRate = 1.0;
+  double? _originalTransferRate; // stored before inversion to avoid precision loss
   bool _rateInverted = false; // true = showing "1 DEST = X SOURCE"
   double _expenseExchangeRate = 1.0; // rate for non-transfer cross-currency
   DateTime _selectedDate = DateTime.now();
@@ -1496,11 +1497,21 @@ class _AssistedTransactionScreenState
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                // Swap: invert the rate
                                 if (_transferExchangeRate > 0 &&
                                     _transferExchangeRate != 1.0) {
-                                  _transferExchangeRate =
-                                      1.0 / _transferExchangeRate;
+                                  if (!_rateInverted) {
+                                    // Store original before inverting
+                                    _originalTransferRate =
+                                        _transferExchangeRate;
+                                    _transferExchangeRate =
+                                        1.0 / _transferExchangeRate;
+                                  } else {
+                                    // Restore original
+                                    _transferExchangeRate =
+                                        _originalTransferRate ??
+                                            (1.0 / _transferExchangeRate);
+                                    _originalTransferRate = null;
+                                  }
                                 }
                                 _rateInverted = !_rateInverted;
                               });

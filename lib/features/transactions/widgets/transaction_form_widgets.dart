@@ -211,6 +211,7 @@ class LineState {
   Color categoryColor;
   double exchangeRateToBase;
   bool rateInverted = false;
+  double? _originalRate; // stored before first inversion to avoid precision loss
 
   LineState({required this.currency})
       : amountCtrl = TextEditingController(),
@@ -451,19 +452,28 @@ class LineCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () {
-                      // Swap direction and invert the displayed rate
                       final currentText = line.rateCtrl.text;
                       final currentRate =
                           double.tryParse(currentText.replaceAll(',', ''));
-                      line.rateInverted = !line.rateInverted;
+
                       if (currentRate != null && currentRate > 0) {
-                        final inverted = 1.0 / currentRate;
-                        line.rateCtrl.text = inverted >= 100
-                            ? inverted.toStringAsFixed(0)
-                            : inverted >= 1
-                                ? inverted.toStringAsFixed(2)
-                                : inverted.toStringAsFixed(6);
+                        if (!line.rateInverted) {
+                          // Going from normal → inverted: store original
+                          line._originalRate = currentRate;
+                          final inverted = 1.0 / currentRate;
+                          line.rateCtrl.text = inverted >= 1
+                              ? inverted.toStringAsFixed(6)
+                              : inverted.toStringAsFixed(6);
+                        } else {
+                          // Going from inverted → normal: restore original
+                          final restored = line._originalRate ?? (1.0 / currentRate);
+                          line.rateCtrl.text = restored >= 100
+                              ? restored.toStringAsFixed(0)
+                              : restored.toStringAsFixed(2);
+                          line._originalRate = null;
+                        }
                       }
+                      line.rateInverted = !line.rateInverted;
                       onChanged();
                     },
                     child: Container(
