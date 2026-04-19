@@ -236,8 +236,12 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
                 subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
                 onTap: () => context.push('/import-export')),
-            // ── Daily Reminder ──
-            const _DailyReminderTile(),
+            _SettingsTile(
+                icon: Icons.notifications_active_rounded,
+                title: 'Notifications',
+                subtitle: 'Daily reminder, envelope & bill alerts',
+                iconColor: const Color(0xFFFF9800),
+                onTap: () => context.push('/notifications')),
             // ── Receipt Sync toggle ──
             Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);

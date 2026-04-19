@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
@@ -12,6 +13,12 @@ class NotificationService {
   static const _channelName = 'PocketPlan Alerts';
   static const _channelDesc = 'Low envelope and upcoming bill alerts';
 
+  static const _envelopeNotifId = 1001;
+  static const _billNotifId = 1002;
+
+  static const _cooldownKey = 'notif_last_check';
+  static const _cooldownHours = 6;
+
   static Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
@@ -20,65 +27,65 @@ class NotificationService {
     );
   }
 
-  static Future<void> showLowEnvelope(String name, double balance) async {
-    final id = name.hashCode & 0x7FFFFFFF;
-    await _plugin.show(
-      id: id,
-      title: 'Low Envelope: $name',
-      body: '$name balance is \$${balance.toStringAsFixed(2)}. Consider adding funds.',
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-    );
+  /// Check if enough time has passed since the last notification check.
+  static Future<bool> _shouldCheck() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheck = prefs.getString(_cooldownKey);
+    if (lastCheck != null) {
+      final last = DateTime.tryParse(lastCheck);
+      if (last != null &&
+          DateTime.now().difference(last).inHours < _cooldownHours) {
+        return false;
+      }
+    }
+    await prefs.setString(_cooldownKey, DateTime.now().toIso8601String());
+    return true;
   }
 
-  static Future<void> showUpcomingBill(String title, DateTime dueDate) async {
-    final id = '$title${dueDate.toIso8601String()}'.hashCode & 0x7FFFFFFF;
-    final daysUntil = dueDate.difference(DateTime.now()).inDays;
-    final urgency = daysUntil <= 0
-        ? 'due today'
-        : 'due in $daysUntil day${daysUntil == 1 ? '' : 's'}';
-
-    await _plugin.show(
-      id: id,
-      title: 'Upcoming: $title',
-      body: '$title is $urgency.',
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-    );
-  }
-
+  /// Check all envelopes and show a single grouped notification if any are overspent.
   static Future<void> checkEnvelopes(
       AppDatabase db, String householdId) async {
+    if (!await _shouldCheck()) return;
+
     final dao = AllocationsDao(db);
     final ledgerDao = LedgerDao(db);
 
     final allocations = await dao.watchAll(householdId).first;
+    final overspent = <String>[];
+
     for (final awc in allocations) {
       final balances =
           await ledgerDao.getBalanceByCurrency(awc.allocation.id);
       final total = balances.values.fold(0.0, (a, b) => a + b);
       if (total < 0) {
-        await showLowEnvelope(awc.allocation.name, total);
+        overspent.add(awc.allocation.name);
       }
     }
+
+    if (overspent.isEmpty) return;
+
+    final body = overspent.length == 1
+        ? '${overspent.first} is overspent. Consider adding funds.'
+        : '${overspent.length} envelopes are overspent: ${overspent.take(3).join(', ')}${overspent.length > 3 ? ' and ${overspent.length - 3} more' : ''}.';
+
+    await _plugin.show(
+      id: _envelopeNotifId,
+      title: 'Low Envelopes',
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDesc,
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
   }
 
+  /// Check upcoming bills and show a single grouped notification.
   static Future<void> checkRecurring(
       AppDatabase db, String householdId) async {
     final now = DateTime.now();
@@ -90,10 +97,30 @@ class NotificationService {
           ..where((t) => t.nextDueDate.isSmallerOrEqualValue(cutoff)))
         .get();
 
-    for (final r in rows) {
-      final title =
-          r.title.isNotEmpty ? r.title : '${r.type} (${r.currency})';
-      await showUpcomingBill(title, r.nextDueDate);
-    }
+    if (rows.isEmpty) return;
+
+    final titles = rows
+        .map((r) => r.title.isNotEmpty ? r.title : r.type)
+        .toList();
+
+    final body = titles.length == 1
+        ? '${titles.first} is due soon.'
+        : '${titles.length} bills due: ${titles.take(3).join(', ')}${titles.length > 3 ? ' and more' : ''}.';
+
+    await _plugin.show(
+      id: _billNotifId,
+      title: 'Upcoming Bills',
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDesc,
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
   }
 }

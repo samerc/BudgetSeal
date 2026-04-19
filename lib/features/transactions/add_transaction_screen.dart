@@ -487,9 +487,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 receiptPath: Value(encodeReceiptPaths(_receiptFilenames))));
       }
 
-      if (mounted) {
-        // Build envelope feedback message
-        String snackText = 'Transaction saved';
+      if (!mounted) return;
+
+      // Build envelope feedback message
+      String snackText = 'Transaction saved';
+      try {
         if (_type != _TxType.transfer) {
           final categories = ref.read(categoriesProvider).value ?? [];
           final allocations = ref.read(allocationsProvider).value ?? [];
@@ -513,17 +515,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           }
         }
-
-        final messenger = ScaffoldMessenger.of(context);
-        context.pop();
-        messenger.clearSnackBars();
-        messenger.showSnackBar(SnackBar(
-          content: Text(snackText),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-          dismissDirection: DismissDirection.horizontal,
-        ));
+      } catch (_) {
+        // Provider might be unavailable if widget tree is torn down
       }
+
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      context.pop();
+      messenger.clearSnackBars();
+      messenger.showSnackBar(SnackBar(
+        content: Text(snackText),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+        dismissDirection: DismissDirection.horizontal,
+      ));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

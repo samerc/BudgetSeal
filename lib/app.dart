@@ -33,6 +33,7 @@ import 'features/subscriptions/subscriptions_screen.dart';
 import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
+import 'features/settings/notifications_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
 import 'features/settings/import_export_screen.dart';
@@ -207,6 +208,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/backup',
           pageBuilder: (_, state) =>
               slideUpPage(child: const BackupScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/notifications',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const NotificationsScreen(), state: state),
         ),
         GoRoute(
           path: '/export',
