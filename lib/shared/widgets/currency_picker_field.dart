@@ -45,18 +45,18 @@ class CurrencyPickerField extends StatelessWidget {
           labelText: label,
           labelStyle: TextStyle(
               color: textColor?.withValues(alpha: 0.6) ??
-                  AppColors.textSecondary),
+                  AppColors.ts(context)),
           filled: true,
           fillColor: textColor != null
               ? Colors.white.withValues(alpha: 0.07)
-              : AppColors.surfaceVariant,
+              : AppColors.sfv(context),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           suffixIcon: Icon(Icons.expand_more_rounded,
               color: textColor?.withValues(alpha: 0.5) ??
-                  AppColors.textHint),
+                  AppColors.th(context)),
         ),
         child: Row(
           children: [
@@ -68,7 +68,7 @@ class CurrencyPickerField extends StatelessWidget {
               child: Text(
                 value,
                 style: TextStyle(
-                  color: textColor ?? AppColors.textPrimary,
+                  color: textColor ?? AppColors.tp(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -80,7 +80,7 @@ class CurrencyPickerField extends StatelessWidget {
               Text(
                 symbol,
                 style: TextStyle(
-                  color: (textColor ?? AppColors.textPrimary)
+                  color: (textColor ?? AppColors.tp(context))
                       .withValues(alpha: 0.5),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

@@ -19,6 +19,8 @@ class Allocations extends Table {
   // Optional savings target amount
   RealColumn get targetAmount => real().nullable()();
   TextColumn get targetCurrency => text().nullable()();
+  /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
+  TextColumn get icon => text().nullable()();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

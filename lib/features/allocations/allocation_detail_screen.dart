@@ -40,6 +40,7 @@ class _AllocationDetailScreenState
   String _type = 'spending';
   String _periodicity = 'periodic';
   bool _rollover = false;
+  String? _icon; // emoji icon for this envelope
   bool _loading = false;
   bool _showSettings = false;
   List<Category> _linkedCategories = [];
@@ -68,6 +69,7 @@ class _AllocationDetailScreenState
         _type = alloc.type;
         _periodicity = alloc.periodicity;
         _rollover = alloc.rollover;
+        _icon = alloc.icon;
         if (alloc.targetAmount != null) {
           _targetAmount = alloc.targetAmount!;
         }
@@ -283,18 +285,45 @@ class _AllocationDetailScreenState
             ],
             // Settings (always shown for new, toggled for existing)
             if (_isNew || _showSettings) ...[
-            // Name
+            // Icon + Name
             _sectionContainer(children: [
-              _sectionHeader('NAME', icon: Icons.label_outline_rounded),
-              TextField(
-                controller: _nameController,
-                decoration:
-                    _inputDecoration('Envelope name (e.g. Groceries)'),
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.done,
-                autofocus: _isNew,
-                style: TextStyle(
-                    color: AppColors.tp(context), fontSize: 15),
+              _sectionHeader('NAME & ICON', icon: Icons.label_outline_rounded),
+              Row(
+                children: [
+                  // Icon picker
+                  GestureDetector(
+                    onTap: _showIconPicker,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: AppColors.accent.withValues(alpha: 0.3)),
+                      ),
+                      child: Center(
+                        child: _icon != null
+                            ? Text(_icon!, style: const TextStyle(fontSize: 24))
+                            : Icon(Icons.add_reaction_outlined,
+                                size: 22, color: AppColors.accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _nameController,
+                      decoration:
+                          _inputDecoration('Envelope name (e.g. Groceries)'),
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.done,
+                      autofocus: _isNew,
+                      style: TextStyle(
+                          color: AppColors.tp(context), fontSize: 15),
+                    ),
+                  ),
+                ],
               ),
             ]),
             const SizedBox(height: 16),
@@ -546,32 +575,20 @@ class _AllocationDetailScreenState
                         ),
                       ]),
                     )),
-                if (!_isNew) ...[
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: _showLinkCategorySheet,
-                    icon: const Icon(Icons.add_rounded, size: 16),
-                    label: const Text('Link Category'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.accent,
-                      side: BorderSide(
-                          color: AppColors.accent.withValues(alpha: 0.4)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _showLinkCategorySheet,
+                  icon: const Icon(Icons.add_rounded, size: 16),
+                  label: const Text('Link Category'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: BorderSide(
+                        color: AppColors.accent.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                ] else
-                  const Padding(
-                    padding: EdgeInsets.only(top: 4),
-                    child: Text(
-                      'A category will be auto-created when you save. You can link more after.',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textHint,
-                          fontStyle: FontStyle.italic),
-                    ),
-                  ),
+                ),
               ]),
             ], // end if (_isNew || _showSettings)
 
@@ -583,6 +600,230 @@ class _AllocationDetailScreenState
             ],
             const SizedBox(height: 80),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Icon picker
+  // ---------------------------------------------------------------------------
+
+  static const _emojiGroups = <String, List<String>>{
+    'Money & Budget': [
+      '💰', '💳', '🏦', '📈', '💵', '🪙', '💲', '🧾', '🏧', '📊',
+    ],
+    'Food & Drink': [
+      '🛒', '🍕', '🍔', '☕', '🍺', '🥗', '🍣', '🌮', '🍩', '🥤',
+    ],
+    'Transport': [
+      '🚗', '⛽', '🚕', '🚌', '🚇', '✈️', '🚲', '🅿️', '🏍️', '🛞',
+    ],
+    'Home': [
+      '🏠', '💡', '💧', '🔌', '🛏️', '🧹', '🔧', '🔑', '🪑', '📡',
+    ],
+    'Shopping & Style': [
+      '🛍️', '👕', '👗', '💄', '👟', '💎', '🕶️', '👜', '🧴', '💇',
+    ],
+    'Health & Fitness': [
+      '💊', '🏥', '🏋️', '🧘', '🦷', '🩺', '🏊', '🚴', '🩹', '💉',
+    ],
+    'Fun & Travel': [
+      '🎬', '🎮', '🎵', '✈️', '🏖️', '🏔️', '🎭', '📷', '🎧', '🍿',
+    ],
+    'Education & Work': [
+      '🎓', '📚', '💻', '📱', '💼', '🏢', '📝', '✏️', '🔬', '📐',
+    ],
+    'Family & Pets': [
+      '👶', '🐾', '🐕', '🧸', '🍼', '🎁', '❤️', '👨‍👩‍👧', '🎂', '🏡',
+    ],
+    'Other': [
+      '📦', '🎯', '⭐', '🌱', '♻️', '🚀', '🏷️', '📌', '🗂️', '🔖',
+    ],
+  };
+
+  void _showIconPicker() {
+    final customCtrl = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.85,
+        minChildSize: 0.4,
+        builder: (_, scrollCtrl) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.th(context),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Choose Icon',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const SizedBox(height: 12),
+              // Custom emoji input
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: customCtrl,
+                      style: const TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText: 'Type or paste emoji',
+                        hintStyle: TextStyle(
+                            fontSize: 14, color: AppColors.th(context)),
+                        filled: true,
+                        fillColor: AppColors.sfv(context),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () {
+                      final text = customCtrl.text.trim();
+                      if (text.isNotEmpty) {
+                        final emoji = text.characters.first;
+                        Navigator.pop(ctx);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) setState(() => _icon = emoji);
+                        });
+                      }
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Use'),
+                  ),
+                ],
+              ),
+              if (_icon != null) ...[
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) setState(() => _icon = null);
+                      });
+                    },
+                    child: const Text('Remove icon',
+                        style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ],
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Divider(color: AppColors.bd(context))),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or pick below',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.th(context))),
+                    ),
+                    Expanded(
+                        child: Divider(color: AppColors.bd(context))),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollCtrl,
+                  children: _emojiGroups.entries.map((group) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(top: 12, bottom: 8),
+                          child: Text(group.key,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.ts(context),
+                                letterSpacing: 0.5,
+                              )),
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: group.value.map((e) {
+                            final isSelected = e == _icon;
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.pop(ctx);
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (mounted) {
+                                    setState(() => _icon = e);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.accent
+                                          .withValues(alpha: 0.15)
+                                      : AppColors.sfv(context),
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: AppColors.accent,
+                                          width: 2)
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text(e,
+                                      style: const TextStyle(
+                                          fontSize: 20)),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1705,7 +1946,6 @@ class _AllocationDetailScreenState
 
   Future<void> _showLinkCategorySheet() async {
     final allCategories = ref.read(categoriesProvider).value ?? [];
-    // Filter: show only unlinked categories (no allocationId or linked to this).
     final linkedIds = _linkedCategories.map((c) => c.id).toSet();
     final available = allCategories
         .where((c) =>
@@ -1728,42 +1968,157 @@ class _AllocationDetailScreenState
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(ctx).size.height * 0.6,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: Text('Link a Category',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                children: available
-                    .map((cat) => ListTile(
-                          leading: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: AppColors.fromHex(cat.colorHex),
-                          ),
-                          title: Text(cat.name),
-                          onTap: () => Navigator.pop(ctx, cat.id),
-                        ))
-                    .toList(),
+      builder: (ctx) {
+        var search = '';
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            final filtered = search.isEmpty
+                ? available
+                : available
+                    .where((c) =>
+                        c.name.toLowerCase().contains(search.toLowerCase()))
+                    .toList();
+
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(ctx).size.height * 0.7,
               ),
-            ),
-          ],
-        ),
-      ),
+              decoration: BoxDecoration(
+                color: AppColors.sf(context),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.th(context),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text('Link a Category',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tp(context))),
+                        const SizedBox(height: 10),
+                        TextField(
+                          onChanged: (v) =>
+                              setSheetState(() => search = v),
+                          textInputAction: TextInputAction.search,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.tp(context)),
+                          decoration: InputDecoration(
+                            hintText: 'Search categories...',
+                            hintStyle: TextStyle(
+                                color: AppColors.th(context)),
+                            prefixIcon: Icon(Icons.search_rounded,
+                                size: 18,
+                                color: AppColors.th(context)),
+                            filled: true,
+                            fillColor: AppColors.sfv(context),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 10),
+                            isDense: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text('No matching categories',
+                                style: TextStyle(
+                                    color: AppColors.ts(context))))
+                        : ListView.builder(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            padding:
+                                const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                            itemCount: filtered.length,
+                            itemBuilder: (_, i) {
+                              final cat = filtered[i];
+                              final color =
+                                  AppColors.fromHex(cat.colorHex);
+                              final hasEmoji = cat.icon.length <= 4 &&
+                                  cat.icon != 'category';
+                              return GestureDetector(
+                                onTap: () =>
+                                    Navigator.pop(ctx, cat.id),
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.only(bottom: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CategoryIcon(
+                                        categoryName: cat.name,
+                                        emoji: hasEmoji
+                                            ? cat.icon
+                                            : null,
+                                        color: color,
+                                        size: 32,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(cat.name,
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w500,
+                                                    color:
+                                                        AppColors.tp(
+                                                            context))),
+                                            Text(
+                                              cat.transactionType[0]
+                                                      .toUpperCase() +
+                                                  cat.transactionType
+                                                      .substring(1),
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: AppColors.ts(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
 
     if (selected != null && mounted) {
@@ -2092,6 +2447,7 @@ class _AllocationDetailScreenState
         type: Value(_type),
         periodicity: Value(effectivePeriodicity),
         rollover: Value(_rollover),
+        icon: Value(_icon),
         targetAmount: Value(targetAmount),
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
         deviceId: 'local',
@@ -2135,18 +2491,18 @@ class _SegmentChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.accent.withValues(alpha: 0.12)
-              : AppColors.surfaceVariant,
+              : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.accent : Colors.transparent,
-            width: 1.5,
+            color: isSelected ? AppColors.accent : AppColors.bd(context),
+            width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon,
               size: 22,
               color:
-                  isSelected ? AppColors.accent : AppColors.textSecondary),
+                  isSelected ? AppColors.accent : AppColors.ts(context)),
           const SizedBox(height: 4),
           Text(label,
               style: TextStyle(

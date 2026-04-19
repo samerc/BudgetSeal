@@ -173,6 +173,9 @@ Always use `AppColors.tp(context)`, `AppColors.ts(context)`, `AppColors.sf(conte
 ### Hex Color Parsing
 Always use `AppColors.fromHex(hex)` — cached, single implementation. Never define local `_hexToColor()` functions.
 
+### Theme-Aware Widget Colors
+Never use hardcoded `AppColors.surfaceVariant`, `AppColors.textSecondary`, `AppColors.textPrimary`, or `AppColors.textHint` in widget build methods. Use the context-aware methods: `AppColors.sfv(context)`, `AppColors.ts(context)`, `AppColors.tp(context)`, `AppColors.th(context)`. The const versions exist only for const contexts (e.g., default parameter values).
+
 ### Riverpod 3 Providers
 - `Notifier<T>` + `NotifierProvider` (not the old `StateNotifier`)
 - `AsyncValue.value` (not the old `.valueOrNull`)
@@ -195,10 +198,11 @@ All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages
 
 ## Database
 
-### Schema Version: 10
+### Schema Version: 11
 11 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
+v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:

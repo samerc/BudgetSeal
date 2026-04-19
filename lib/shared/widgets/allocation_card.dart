@@ -12,6 +12,7 @@ class AllocationCard extends StatelessWidget {
   final String baseCurrency;
   final double? targetAmount;
   final String? targetCurrency;
+  final String? envelopeIcon; // emoji icon set on the envelope itself
   final VoidCallback? onTap;
   final VoidCallback? onSpend;
 
@@ -29,6 +30,7 @@ class AllocationCard extends StatelessWidget {
     required this.baseCurrency,
     this.targetAmount,
     this.targetCurrency,
+    this.envelopeIcon,
     this.onTap,
     this.onSpend,
     this.categoryName,
@@ -93,36 +95,54 @@ class AllocationCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
-              // Icon: category icon for spending, savings icon for savings
-              if (hasCategoryIcon && !_isSaving) ...[
-                CategoryIcon(
-                  categoryName: categoryName!,
-                  emoji: categoryIcon,
-                  color: iconColor,
-                  size: 36,
-                ),
-                const SizedBox(width: 10),
-              ] else if (_isSaving) ...[
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(savingsIcon,
-                      size: 20, color: AppColors.accent),
-                ),
-                const SizedBox(width: 10),
-              ] else if (hasCategoryIcon) ...[
-                CategoryIcon(
-                  categoryName: categoryName!,
-                  emoji: categoryIcon,
-                  color: iconColor,
-                  size: 36,
-                ),
-                const SizedBox(width: 10),
-              ],
+              // Icon: envelope emoji > category icon > savings icon > default
+              () {
+                // Envelope's own icon takes priority
+                if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _typeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(envelopeIcon!,
+                            style: const TextStyle(fontSize: 20)),
+                      ),
+                    ),
+                  );
+                }
+                if (hasCategoryIcon) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: CategoryIcon(
+                      categoryName: categoryName!,
+                      emoji: categoryIcon,
+                      color: iconColor,
+                      size: 36,
+                    ),
+                  );
+                }
+                if (_isSaving) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(savingsIcon,
+                          size: 20, color: AppColors.accent),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }(),
               // Name + progress
               Expanded(
                 child: Column(
@@ -203,14 +223,18 @@ class AllocationCard extends StatelessWidget {
                               : AppColors.tp(context),
                         ),
                       ),
-                      // Show other currency balances
+                      // Show other currency balances with context
                       for (final entry in otherBalances.entries)
                         if (entry.value.abs() > 0.001)
                           Text(
-                            ' + ${formatAmount(entry.value, currency: entry.key)}',
+                            entry.value > 0
+                                ? ' + ${formatAmount(entry.value, currency: entry.key)}'
+                                : ' · ${formatAmount(entry.value.abs(), currency: entry.key)} spent',
                             style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.ts(context),
+                              fontSize: 10,
+                              color: entry.value > 0
+                                  ? AppColors.ts(context)
+                                  : AppColors.overspent,
                             ),
                           ),
                     ],

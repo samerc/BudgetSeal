@@ -275,7 +275,7 @@ class _CurrencySheetState extends State<CurrencySheet> {
         ),
       ),
       title: Text(
-        name,
+        symbol != null ? '$name ($symbol)' : name,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 14,
@@ -286,18 +286,6 @@ class _CurrencySheetState extends State<CurrencySheet> {
               isSelected ? FontWeight.w600 : FontWeight.normal,
         ),
       ),
-      subtitle: symbol != null
-          ? Text(
-              symbol,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: isSelected
-                    ? AppColors.accent.withValues(alpha: 0.7)
-                    : AppColors.ts(context),
-              ),
-            )
-          : null,
       trailing: isSelected
           ? Container(
               width: 24,

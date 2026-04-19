@@ -50,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -99,6 +99,9 @@ class AppDatabase extends _$AppDatabase {
                 recurringTransactions, recurringTransactions.isSubscription);
             await m.addColumn(
                 recurringTransactions, recurringTransactions.priceHistory);
+          }
+          if (from < 11) {
+            await m.addColumn(allocations, allocations.icon);
           }
         },
       );

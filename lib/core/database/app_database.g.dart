@@ -1559,6 +1559,11 @@ class $AllocationsTable extends Allocations
   late final GeneratedColumn<String> targetCurrency = GeneratedColumn<String>(
       'target_currency', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+      'icon', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _archivedMeta =
       const VerificationMeta('archived');
   @override
@@ -1602,6 +1607,7 @@ class $AllocationsTable extends Allocations
         rollover,
         targetAmount,
         targetCurrency,
+        icon,
         archived,
         deviceId,
         createdAt,
@@ -1670,6 +1676,10 @@ class $AllocationsTable extends Allocations
           targetCurrency.isAcceptableOrUnknown(
               data['target_currency']!, _targetCurrencyMeta));
     }
+    if (data.containsKey('icon')) {
+      context.handle(
+          _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+    }
     if (data.containsKey('archived')) {
       context.handle(_archivedMeta,
           archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta));
@@ -1717,6 +1727,8 @@ class $AllocationsTable extends Allocations
           .read(DriftSqlType.double, data['${effectivePrefix}target_amount']),
       targetCurrency: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}target_currency']),
+      icon: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon']),
       archived: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}archived'])!,
       deviceId: attachedDatabase.typeMapping
@@ -1744,6 +1756,9 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   final bool rollover;
   final double? targetAmount;
   final String? targetCurrency;
+
+  /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
+  final String? icon;
   final bool archived;
   final String deviceId;
   final DateTime createdAt;
@@ -1758,6 +1773,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       required this.rollover,
       this.targetAmount,
       this.targetCurrency,
+      this.icon,
       required this.archived,
       required this.deviceId,
       required this.createdAt,
@@ -1777,6 +1793,9 @@ class Allocation extends DataClass implements Insertable<Allocation> {
     }
     if (!nullToAbsent || targetCurrency != null) {
       map['target_currency'] = Variable<String>(targetCurrency);
+    }
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<String>(icon);
     }
     map['archived'] = Variable<bool>(archived);
     map['device_id'] = Variable<String>(deviceId);
@@ -1800,6 +1819,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       targetCurrency: targetCurrency == null && nullToAbsent
           ? const Value.absent()
           : Value(targetCurrency),
+      icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       archived: Value(archived),
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
@@ -1820,6 +1840,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       rollover: serializer.fromJson<bool>(json['rollover']),
       targetAmount: serializer.fromJson<double?>(json['targetAmount']),
       targetCurrency: serializer.fromJson<String?>(json['targetCurrency']),
+      icon: serializer.fromJson<String?>(json['icon']),
       archived: serializer.fromJson<bool>(json['archived']),
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -1839,6 +1860,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       'rollover': serializer.toJson<bool>(rollover),
       'targetAmount': serializer.toJson<double?>(targetAmount),
       'targetCurrency': serializer.toJson<String?>(targetCurrency),
+      'icon': serializer.toJson<String?>(icon),
       'archived': serializer.toJson<bool>(archived),
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -1856,6 +1878,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           bool? rollover,
           Value<double?> targetAmount = const Value.absent(),
           Value<String?> targetCurrency = const Value.absent(),
+          Value<String?> icon = const Value.absent(),
           bool? archived,
           String? deviceId,
           DateTime? createdAt,
@@ -1872,6 +1895,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
             targetAmount.present ? targetAmount.value : this.targetAmount,
         targetCurrency:
             targetCurrency.present ? targetCurrency.value : this.targetCurrency,
+        icon: icon.present ? icon.value : this.icon,
         archived: archived ?? this.archived,
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
@@ -1895,6 +1919,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       targetCurrency: data.targetCurrency.present
           ? data.targetCurrency.value
           : this.targetCurrency,
+      icon: data.icon.present ? data.icon.value : this.icon,
       archived: data.archived.present ? data.archived.value : this.archived,
       deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -1916,6 +1941,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           ..write('rollover: $rollover, ')
           ..write('targetAmount: $targetAmount, ')
           ..write('targetCurrency: $targetCurrency, ')
+          ..write('icon: $icon, ')
           ..write('archived: $archived, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
@@ -1935,6 +1961,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       rollover,
       targetAmount,
       targetCurrency,
+      icon,
       archived,
       deviceId,
       createdAt,
@@ -1952,6 +1979,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           other.rollover == this.rollover &&
           other.targetAmount == this.targetAmount &&
           other.targetCurrency == this.targetCurrency &&
+          other.icon == this.icon &&
           other.archived == this.archived &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
@@ -1968,6 +1996,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
   final Value<bool> rollover;
   final Value<double?> targetAmount;
   final Value<String?> targetCurrency;
+  final Value<String?> icon;
   final Value<bool> archived;
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
@@ -1983,6 +2012,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.rollover = const Value.absent(),
     this.targetAmount = const Value.absent(),
     this.targetCurrency = const Value.absent(),
+    this.icon = const Value.absent(),
     this.archived = const Value.absent(),
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1999,6 +2029,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.rollover = const Value.absent(),
     this.targetAmount = const Value.absent(),
     this.targetCurrency = const Value.absent(),
+    this.icon = const Value.absent(),
     this.archived = const Value.absent(),
     required String deviceId,
     this.createdAt = const Value.absent(),
@@ -2019,6 +2050,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     Expression<bool>? rollover,
     Expression<double>? targetAmount,
     Expression<String>? targetCurrency,
+    Expression<String>? icon,
     Expression<bool>? archived,
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
@@ -2035,6 +2067,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       if (rollover != null) 'rollover': rollover,
       if (targetAmount != null) 'target_amount': targetAmount,
       if (targetCurrency != null) 'target_currency': targetCurrency,
+      if (icon != null) 'icon': icon,
       if (archived != null) 'archived': archived,
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
@@ -2053,6 +2086,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       Value<bool>? rollover,
       Value<double?>? targetAmount,
       Value<String?>? targetCurrency,
+      Value<String?>? icon,
       Value<bool>? archived,
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
@@ -2068,6 +2102,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       rollover: rollover ?? this.rollover,
       targetAmount: targetAmount ?? this.targetAmount,
       targetCurrency: targetCurrency ?? this.targetCurrency,
+      icon: icon ?? this.icon,
       archived: archived ?? this.archived,
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
@@ -2106,6 +2141,9 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     if (targetCurrency.present) {
       map['target_currency'] = Variable<String>(targetCurrency.value);
     }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
     }
@@ -2136,6 +2174,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
           ..write('rollover: $rollover, ')
           ..write('targetAmount: $targetAmount, ')
           ..write('targetCurrency: $targetCurrency, ')
+          ..write('icon: $icon, ')
           ..write('archived: $archived, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
@@ -8810,6 +8849,7 @@ typedef $$AllocationsTableCreateCompanionBuilder = AllocationsCompanion
   Value<bool> rollover,
   Value<double?> targetAmount,
   Value<String?> targetCurrency,
+  Value<String?> icon,
   Value<bool> archived,
   required String deviceId,
   Value<DateTime> createdAt,
@@ -8827,6 +8867,7 @@ typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
   Value<bool> rollover,
   Value<double?> targetAmount,
   Value<String?> targetCurrency,
+  Value<String?> icon,
   Value<bool> archived,
   Value<String> deviceId,
   Value<DateTime> createdAt,
@@ -8920,6 +8961,9 @@ class $$AllocationsTableFilterComposer
   ColumnFilters<String> get targetCurrency => $composableBuilder(
       column: $table.targetCurrency,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get archived => $composableBuilder(
       column: $table.archived, builder: (column) => ColumnFilters(column));
@@ -9031,6 +9075,9 @@ class $$AllocationsTableOrderingComposer
       column: $table.targetCurrency,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get archived => $composableBuilder(
       column: $table.archived, builder: (column) => ColumnOrderings(column));
 
@@ -9097,6 +9144,9 @@ class $$AllocationsTableAnnotationComposer
 
   GeneratedColumn<String> get targetCurrency => $composableBuilder(
       column: $table.targetCurrency, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
 
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
@@ -9208,6 +9258,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<bool> rollover = const Value.absent(),
             Value<double?> targetAmount = const Value.absent(),
             Value<String?> targetCurrency = const Value.absent(),
+            Value<String?> icon = const Value.absent(),
             Value<bool> archived = const Value.absent(),
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -9224,6 +9275,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             rollover: rollover,
             targetAmount: targetAmount,
             targetCurrency: targetCurrency,
+            icon: icon,
             archived: archived,
             deviceId: deviceId,
             createdAt: createdAt,
@@ -9240,6 +9292,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<bool> rollover = const Value.absent(),
             Value<double?> targetAmount = const Value.absent(),
             Value<String?> targetCurrency = const Value.absent(),
+            Value<String?> icon = const Value.absent(),
             Value<bool> archived = const Value.absent(),
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
@@ -9256,6 +9309,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             rollover: rollover,
             targetAmount: targetAmount,
             targetCurrency: targetCurrency,
+            icon: icon,
             archived: archived,
             deviceId: deviceId,
             createdAt: createdAt,
