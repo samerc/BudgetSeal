@@ -335,11 +335,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           });
           Navigator.of(ctx).pop();
           // Auto-fill account from category's default if line has no account.
-          if (_lines[lineIndex].accountId == null) {
-            final cat = categories.firstWhere((c) => c.id == id,
-                orElse: () => categories.first);
-            if (cat.defaultAccountId != null) {
-              _onLineAccountChanged(lineIndex, cat.defaultAccountId);
+          if (_lines[lineIndex].accountId == null && categories.isNotEmpty) {
+            final cat = categories
+                .where((c) => c.id == id)
+                .firstOrNull;
+            if (cat?.defaultAccountId != null) {
+              _onLineAccountChanged(lineIndex, cat!.defaultAccountId);
             }
           }
         },
@@ -480,11 +481,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
       // Save receipt filenames if attached.
       if (_receiptFilenames.isNotEmpty) {
-        final db = ref.read(databaseProvider);
-        await (db.update(db.transactions)
-              ..where((t) => t.id.equals(txId)))
-            .write(TransactionsCompanion(
-                receiptPath: Value(encodeReceiptPaths(_receiptFilenames))));
+        try {
+          final db = ref.read(databaseProvider);
+          await (db.update(db.transactions)
+                ..where((t) => t.id.equals(txId)))
+              .write(TransactionsCompanion(
+                  receiptPath: Value(encodeReceiptPaths(_receiptFilenames))));
+        } catch (e) {
+          debugPrint('[AddTransaction] Failed to save receipt paths: $e');
+        }
       }
 
       if (!mounted) return;

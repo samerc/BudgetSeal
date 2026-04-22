@@ -2346,22 +2346,29 @@ class _AllocationDetailScreenState
         ref.invalidate(allocationsProvider);
         if (mounted) context.pop();
       } else if (action == 'delete') {
-        // Unlink all categories.
-        for (final cat in linked) {
-          await dao.unlinkCategory(cat.id);
+        try {
+          for (final cat in linked) {
+            await dao.unlinkCategory(cat.id);
+          }
+          await (db.delete(db.allocationLedger)
+                ..where(
+                    (l) => l.allocationId.equals(widget.allocationId)))
+              .go();
+          await (db.delete(db.allocations)
+                ..where((a) => a.id.equals(widget.allocationId)))
+              .go();
+          ref.invalidate(allocationsProvider);
+          ref.invalidate(categoriesProvider);
+          if (mounted) context.pop();
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Could not delete: $e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.overspent,
+            ));
+          }
         }
-        // Delete ledger entries.
-        await (db.delete(db.allocationLedger)
-              ..where(
-                  (l) => l.allocationId.equals(widget.allocationId)))
-            .go();
-        // Delete the allocation itself.
-        await (db.delete(db.allocations)
-              ..where((a) => a.id.equals(widget.allocationId)))
-            .go();
-        ref.invalidate(allocationsProvider);
-        ref.invalidate(categoriesProvider);
-        if (mounted) context.pop();
       }
     } else {
       // No linked categories -- simple confirmation.
@@ -2390,17 +2397,25 @@ class _AllocationDetailScreenState
       );
 
       if (confirmed == true && mounted) {
-        // Delete ledger entries.
-        await (db.delete(db.allocationLedger)
-              ..where(
-                  (l) => l.allocationId.equals(widget.allocationId)))
-            .go();
-        // Delete the allocation.
-        await (db.delete(db.allocations)
-              ..where((a) => a.id.equals(widget.allocationId)))
-            .go();
-        ref.invalidate(allocationsProvider);
-        if (mounted) context.pop();
+        try {
+          await (db.delete(db.allocationLedger)
+                ..where(
+                    (l) => l.allocationId.equals(widget.allocationId)))
+              .go();
+          await (db.delete(db.allocations)
+                ..where((a) => a.id.equals(widget.allocationId)))
+              .go();
+          ref.invalidate(allocationsProvider);
+          if (mounted) context.pop();
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Could not delete: $e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.overspent,
+            ));
+          }
+        }
       }
     }
   }
