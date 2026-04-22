@@ -423,6 +423,15 @@ class AllocationEngine {
     String deviceId = 'local',
     String note = '',
   }) async {
+    // Validate sufficient balance in this currency
+    final balances = await _ledgerDao.getBalanceByCurrency(allocationId);
+    final available = balances[currency] ?? 0;
+    if (amount > available + 0.005) {
+      throw StateError(
+          'Insufficient balance: $currency ${available.toStringAsFixed(2)} '
+          'available, ${amount.toStringAsFixed(2)} requested');
+    }
+
     await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
       id: _uuid.v4(),
       allocationId: allocationId,
