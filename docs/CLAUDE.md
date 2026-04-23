@@ -312,6 +312,12 @@ The envelope detail screen shows: balance hero card (gradient, with progress bar
 ### Multi-Currency Envelopes
 Envelopes can hold balances in multiple currencies. The fund sheet offers a currency picker showing all available unallocated currencies. The balance hero card shows the target currency balance prominently, with other currencies as `+ $50`. The allocation card does the same.
 
+### Withdrawal Validation
+`withdrawFromAllocation()` checks sufficient balance before debiting. Throws `StateError` if the allocation doesn't have enough in the requested currency. Callers must catch and show an error.
+
+### Notification Grouping
+`NotificationService` groups multiple low-envelope alerts into one notification and multiple upcoming-bill alerts into one. Uses fixed notification IDs (1001, 1002) so each check replaces the previous. 6-hour cooldown between checks via SharedPreferences.
+
 ### Envelope Currency Handling
 - `tx.amount` and `tx.currency` are always in the household's **base currency** — never use them directly for display in envelope contexts.
 - For envelope progress/spent calculations, sum **line amounts** that match the envelope's `targetCurrency`, not `tx.amount`.
@@ -369,6 +375,13 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 ### Navigation
 - `PageView` in `MainScreen` uses `NeverScrollableScrollPhysics` — tab switching is via bottom bar only (no swipe conflict with content gestures)
 - `PopScope` checks `GoRouter.canPop()` so pushed routes (funding, accounts, etc.) pop correctly instead of exiting the app
+
+## Health Check (planned)
+
+A Settings screen to detect, diagnose, and repair balance inconsistencies:
+- Level 1: Run `checkInvariant()` per currency, count orphan ledger entries, show backup status
+- Level 2: Show which currency is off and by how much, list accounts/envelopes with discrepancies
+- Level 3: Recalculate all balances from raw data, create adjustment entries, export diagnostic report
 
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More
