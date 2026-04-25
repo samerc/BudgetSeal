@@ -825,11 +825,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
     // Count transactions referencing this account.
     final txAsSource = await (db.select(db.transactions)
-          ..where((t) => t.accountId.equals(widget.accountId)))
+          ..where((t) => t.accountId.equals(widget.accountId))
+          ..where((t) => t.deleted.equals(false)))
         .get();
 
     final txAsDest = await (db.select(db.transactions)
-          ..where((t) => t.destinationAccountId.equals(widget.accountId)))
+          ..where((t) => t.destinationAccountId.equals(widget.accountId))
+          ..where((t) => t.deleted.equals(false)))
         .get();
 
     final txLineRefs = await (db.select(db.transactionLines)

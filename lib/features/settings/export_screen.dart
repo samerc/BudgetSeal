@@ -32,6 +32,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       // Fetch all transactions with lines.
       final txs = await (db.select(db.transactions)
             ..where((t) => t.householdId.equals(householdId))
+            ..where((t) => t.deleted.equals(false))
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();
 

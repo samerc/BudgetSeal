@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -34,12 +37,19 @@ class TransactionsScreen extends ConsumerStatefulWidget {
       _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
+    with AutomaticKeepAliveClientMixin {
   String _searchQuery = '';
   String? _typeFilter;
   bool _showSearch = false;
   bool _showFilters = false;
   final _searchCtrl = TextEditingController();
+  String? _highlightedTxId;
+  Timer? _searchDebounce;
+
+  // Selection mode
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
   // Month navigation
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -69,6 +79,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     super.initState();
     _monthScrollCtrl = ScrollController();
     _listScrollCtrl.addListener(_onListScroll);
+    _restoreFilters();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final offset = (_selectedMonth - 1) * 80.0;
       if (_monthScrollCtrl.hasClients) {
@@ -97,6 +108,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     _monthScrollCtrl.dispose();
     _amountMinCtrl.dispose();
@@ -107,8 +119,68 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     super.dispose();
   }
 
+  Future<void> _deleteSelected() async {
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete selected?'),
+        content: Text('Delete $count transaction(s)? This will reverse '
+            'any envelope deductions.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final engine = ref.read(allocationEngineProvider);
+    for (final id in _selectedIds) {
+      await engine.deleteTransaction(id);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('$count transaction(s) deleted'),
+        behavior: SnackBarBehavior.floating,
+      ));
+      setState(() {
+        _selectionMode = false;
+        _selectedIds.clear();
+      });
+    }
+  }
+
+  Future<void> _restoreFilters() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _typeFilter = prefs.getString('tx_filter_type');
+    });
+  }
+
+  Future<void> _saveFilters() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_typeFilter != null) {
+      await prefs.setString('tx_filter_type', _typeFilter!);
+    } else {
+      await prefs.remove('tx_filter_type');
+    }
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final entriesAsync = ref.watch(monthlyTransactionsProvider(
         (year: _selectedYear, month: _selectedMonth)));
     final categories = ref.watch(categoriesProvider).value ?? [];
@@ -119,6 +191,33 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Selection action bar ──
+            if (_selectionMode)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: AppColors.accent.withValues(alpha: 0.08),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => setState(() {
+                        _selectionMode = false;
+                        _selectedIds.clear();
+                      }),
+                    ),
+                    Text('${_selectedIds.length} selected',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      tooltip: 'Delete selected',
+                      color: AppColors.overspent,
+                      onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
+                    ),
+                  ],
+                ),
+              ),
             // ── Header area ──────────────────────────────────────
             _buildHeader(context),
             // ── Month tabs ───────────────────────────────────────
@@ -205,7 +304,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             FloatingActionButton(
               heroTag: 'fab_add_tx',
               tooltip: 'Add transaction',
-              onPressed: () => context.push('/add-transaction'),
+              onPressed: () async {
+                final txId = await context.push<String?>('/add-transaction');
+                if (txId != null && mounted) {
+                  setState(() => _highlightedTxId = txId);
+                  Future.delayed(const Duration(milliseconds: 1500), () {
+                    if (mounted) setState(() => _highlightedTxId = null);
+                  });
+                }
+              },
               child: const Icon(Icons.add),
             ),
           ],
@@ -232,7 +339,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                onChanged: (v) => setState(() => _searchQuery = v),
+                onChanged: (v) {
+                  _searchDebounce?.cancel();
+                  _searchDebounce = Timer(
+                    const Duration(milliseconds: 400),
+                    () { if (mounted) setState(() => _searchQuery = v); },
+                  );
+                },
               ),
             ),
             IconButton(
@@ -550,28 +663,28 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               _FilterChip(
                 label: 'All',
                 selected: _typeFilter == null,
-                onTap: () => setState(() => _typeFilter = null),
+                onTap: () { setState(() => _typeFilter = null); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: 'Income',
                 selected: _typeFilter == 'income',
                 color: AppColors.healthy,
-                onTap: () => setState(() => _typeFilter = 'income'),
+                onTap: () { setState(() => _typeFilter = 'income'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: 'Expense',
                 selected: _typeFilter == 'expense',
                 color: AppColors.overspent,
-                onTap: () => setState(() => _typeFilter = 'expense'),
+                onTap: () { setState(() => _typeFilter = 'expense'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: 'Transfer',
                 selected: _typeFilter == 'transfer',
                 color: AppColors.accent,
-                onTap: () => setState(() => _typeFilter = 'transfer'),
+                onTap: () { setState(() => _typeFilter = 'transfer'); _saveFilters(); },
               ),
             ],
           ),
@@ -1105,7 +1218,65 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             final tileKey = item.transferSide != null
                                 ? '${e.tx.id}_${item.transferSide}'
                                 : e.tx.id;
-                            return Dismissible(
+                            // Selection mode: show checkboxes instead of dismissible
+                            if (_selectionMode) {
+                              final isSelected = _selectedIds.contains(e.tx.id);
+                              return GestureDetector(
+                                onTap: () {
+                                  hapticLight();
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedIds.remove(e.tx.id);
+                                      if (_selectedIds.isEmpty) _selectionMode = false;
+                                    } else {
+                                      _selectedIds.add(e.tx.id);
+                                    }
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.accent.withValues(alpha: 0.1)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 4),
+                                        child: Icon(
+                                          isSelected
+                                              ? Icons.check_circle_rounded
+                                              : Icons.circle_outlined,
+                                          size: 20,
+                                          color: isSelected
+                                              ? AppColors.accent
+                                              : AppColors.th(context),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: _TxTile(
+                                          entry: e,
+                                          categoryMap: categoryMap,
+                                          transferSide: item.transferSide,
+                                          onCategoryTap: null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                            return GestureDetector(
+                              onLongPress: () {
+                                hapticLight();
+                                setState(() {
+                                  _selectionMode = true;
+                                  _selectedIds.add(e.tx.id);
+                                });
+                              },
+                              child: Dismissible(
                               key: ValueKey(tileKey),
                               direction: DismissDirection.horizontal,
                               // Left background (swipe right → edit) (#6)
@@ -1173,18 +1344,28 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                     .read(allocationEngineProvider)
                                     .deleteTransaction(e.tx.id);
                               },
-                              child: _TxTile(
-                                entry: e,
-                                categoryMap: categoryMap,
-                                transferSide: item.transferSide,
-                                onCategoryTap: (catId, catName) {
-                                  hapticLight();
-                                  setState(() {
-                                    _categoryFilter = catId;
-                                    _categoryFilterName = catName;
-                                  });
-                                },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 1500),
+                                decoration: BoxDecoration(
+                                  color: _highlightedTxId == e.tx.id
+                                      ? AppColors.accent.withValues(alpha: 0.12)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: _TxTile(
+                                  entry: e,
+                                  categoryMap: categoryMap,
+                                  transferSide: item.transferSide,
+                                  onCategoryTap: (catId, catName) {
+                                    hapticLight();
+                                    setState(() {
+                                      _categoryFilter = catId;
+                                      _categoryFilterName = catName;
+                                    });
+                                  },
+                                ),
                               ),
+                            ),
                             );
                           },
                           childCount: group.entries.fold<int>(0, (sum, e) =>

@@ -19,7 +19,11 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../core/providers/dashboard_layout_provider.dart';
+import '../../shared/widgets/animated_amount.dart';
+import '../../shared/widgets/breathing_widget.dart';
 import '../../shared/widgets/error_retry.dart';
+import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -29,8 +33,12 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with AutomaticKeepAliveClientMixin {
   bool _showWeekly = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -50,7 +58,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final household = ref.watch(householdProvider).value;
+    final layout = ref.watch(dashboardLayoutProvider);
+    bool sectionVisible(DashboardSection s) =>
+        layout.firstWhere((c) => c.section == s,
+            orElse: () => DashboardSectionConfig(section: s)).visible;
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
     final allocationsAsync = ref.watch(allocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
@@ -106,6 +119,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                       ),
                       IconButton(
+                        tooltip: 'Customize',
+                        icon: Icon(Icons.tune_rounded,
+                            color: AppColors.ts(context), size: 20),
+                        onPressed: () => showDashboardCustomizeSheet(context),
+                      ),
+                      IconButton(
                         tooltip: 'Search',
                         icon: Icon(Icons.search_rounded,
                             color: AppColors.ts(context)),
@@ -118,6 +137,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
 
             // Status Card (budget status + velocity + age of money combined)
+            if (sectionVisible(DashboardSection.status))
             SliverToBoxAdapter(
               child: _StatusCard(
                 allocationsAsync: allocationsAsync,
@@ -131,6 +151,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // ── Spending Overview with Donut + Toggle ──
+                  if (sectionVisible(DashboardSection.spending))
                   txAsync.when(
                     data: (entries) {
                       final now = DateTime.now();
@@ -202,6 +223,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 12),
 
                   // Quick Actions
+                  if (sectionVisible(DashboardSection.quickActions))
                   Row(
                     children: [
                       _QuickAction(
@@ -239,6 +261,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 20),
 
                   // ── Zone 2: Your money ────────────────────────────
+                  if (sectionVisible(DashboardSection.money)) ...[
                   _SectionHeader(label: 'YOUR MONEY'),
                   const SizedBox(height: 8),
                   // Net Worth Card
@@ -319,8 +342,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  ], // end Zone 2
 
                   // Unallocated
+                  if (sectionVisible(DashboardSection.unallocated))
                   unallocatedAsync.when(
                     data: (unallocated) {
                       final baseAmount = unallocated[baseCurrency] ?? 0.0;
@@ -347,6 +372,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 20),
 
                   // ── Zone 3: Activity ──────────────────────────────
+                  if (sectionVisible(DashboardSection.activity)) ...[
                   _SectionHeader(label: 'ACTIVITY'),
                   const SizedBox(height: 8),
                   // Quick Templates (above recent transactions)
@@ -437,6 +463,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ref.invalidate(recentTransactionsProvider),
                     ),
                   ),
+                  ], // end Zone 3 (Activity)
                 ]),
               ),
             ),
@@ -791,8 +818,9 @@ class _SpendingOverviewCard extends StatelessWidget {
                                 width: 60,
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
-                                  child: Text(
-                                      formatAmount(expense, currency: currency),
+                                  child: AnimatedAmount(
+                                      amount: expense,
+                                      currency: currency,
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w800,
@@ -915,7 +943,10 @@ class _MiniStat extends StatelessWidget {
         Text(label,
             style:
                 TextStyle(fontSize: 13, color: AppColors.ts(context))),
-        Text('$prefix${formatAmount(amount, currency: currency)}',
+        AnimatedAmount(
+            amount: amount,
+            currency: currency,
+            prefix: prefix.isNotEmpty ? prefix : null,
             style: TextStyle(
                 fontSize: bold ? 16 : 14,
                 fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
@@ -968,14 +999,14 @@ class _NetWorthCard extends StatelessWidget {
                             fontWeight: FontWeight.w600)),
                     const SizedBox(width: 8),
                     Flexible(
-                      child: Text(formatAmount(e.value, currency: e.key),
+                      child: AnimatedAmount(
+                          amount: e.value,
+                          currency: e.key,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                              letterSpacing: -0.5)),
                     ),
                   ],
                 ),
@@ -1100,7 +1131,9 @@ class _SummaryRow extends StatelessWidget {
                             color: AppColors.ts(context))),
                 ],
               )),
-          Text(formatAmount(amount, currency: currency),
+          AnimatedAmount(
+              amount: amount,
+              currency: currency,
               style: TextStyle(
                   fontWeight: FontWeight.w700, fontSize: 16, color: color)),
           if (onTap != null) ...[
@@ -1193,14 +1226,18 @@ class _EnvelopeHealthCard extends StatelessWidget {
                 child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                          i.severity >= 2
-                              ? Icons.warning_rounded
-                              : Icons.info_outline_rounded,
-                          size: 14,
-                          color: i.severity >= 2
-                              ? AppColors.overspent
-                              : AppColors.caution),
+                      BreathingWidget(
+                        active: i.severity >= 2,
+                        maxScale: 1.15,
+                        child: Icon(
+                            i.severity >= 2
+                                ? Icons.warning_rounded
+                                : Icons.info_outline_rounded,
+                            size: 14,
+                            color: i.severity >= 2
+                                ? AppColors.overspent
+                                : AppColors.caution),
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                           child: Text('${i.name} ${i.message}',

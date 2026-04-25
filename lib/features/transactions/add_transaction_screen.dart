@@ -525,15 +525,27 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
 
       if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      context.pop();
-      messenger.clearSnackBars();
-      messenger.showSnackBar(SnackBar(
+      // Capture navigator and messenger before any async/pop calls
+      final nav = GoRouter.of(context);
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      // Pop first — this unmounts the widget
+      nav.pop(txId);
+      // Show snackbar via previously-captured messenger
+      messenger?.clearSnackBars();
+      messenger?.showSnackBar(SnackBar(
         content: Text(snackText),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
         dismissDirection: DismissDirection.horizontal,
       ));
+      return; // skip finally setState since we're already popped
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error saving: $e'),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -1174,6 +1186,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     width: 48,
                     height: 48,
                     fit: BoxFit.cover,
+                    cacheWidth: 96,
+                    cacheHeight: 96,
                   ),
                 ),
               const SizedBox(width: 12),

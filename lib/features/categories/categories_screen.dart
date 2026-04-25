@@ -304,7 +304,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
     // Count references
     final txRows = await (db.select(db.transactions)
-          ..where((t) => t.categoryId.equals(cat.id)))
+          ..where((t) => t.categoryId.equals(cat.id))
+          ..where((t) => t.deleted.equals(false)))
         .get();
     final lineRows = await (db.select(db.transactionLines)
           ..where((t) => t.categoryId.equals(cat.id)))

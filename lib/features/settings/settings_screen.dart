@@ -155,6 +155,10 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Track recurring subscriptions',
                 iconColor: AppColors.accent,
                 onTap: () => context.push('/subscriptions')),
+            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
+                subtitle: 'Split bills with friends',
+                iconColor: const Color(0xFF26A69A),
+                onTap: () => context.push('/bill-splitter')),
             _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
                 subtitle: 'View upcoming recurring bills',
                 iconColor: const Color(0xFF66BB6A),
@@ -242,6 +246,12 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Daily reminder, envelope & bill alerts',
                 iconColor: const Color(0xFFFF9800),
                 onTap: () => context.push('/notifications')),
+            _SettingsTile(
+                icon: Icons.monitor_heart_rounded,
+                title: 'Health Check',
+                subtitle: 'Verify data integrity & repair',
+                iconColor: const Color(0xFF4DB6AC),
+                onTap: () => context.push('/health-check')),
             // ── Receipt Sync toggle ──
             Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);

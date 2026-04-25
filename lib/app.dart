@@ -33,6 +33,8 @@ import 'features/subscriptions/subscriptions_screen.dart';
 import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
+import 'features/settings/health_check_screen.dart';
+import 'features/transactions/bill_splitter_screen.dart';
 import 'features/settings/notifications_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
@@ -246,6 +248,16 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
                 subscriptionId: state.pathParameters['id']!),
             state: state,
           ),
+        ),
+        GoRoute(
+          path: '/bill-splitter',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const BillSplitterScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/health-check',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const HealthCheckScreen(), state: state),
         ),
         GoRoute(
           path: '/about',

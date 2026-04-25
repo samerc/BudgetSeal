@@ -1267,10 +1267,10 @@ class _AssistedTransactionScreenState
         }
 
         // Pop first, then show snackbar on the parent screen
-        final messenger = ScaffoldMessenger.of(context);
+        final messenger = ScaffoldMessenger.maybeOf(context);
         context.pop();
-        messenger.clearSnackBars();
-        messenger.showSnackBar(SnackBar(
+        messenger?.clearSnackBars();
+        messenger?.showSnackBar(SnackBar(
           content: Text(snackText),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),

@@ -20,22 +20,13 @@ class AllocationsScreen extends ConsumerStatefulWidget {
   ConsumerState<AllocationsScreen> createState() => _AllocationsScreenState();
 }
 
-class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
+class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
+    with AutomaticKeepAliveClientMixin {
   static const _typeOrder = ['spending', 'saving', 'flexible'];
 
   String _searchQuery = '';
   final _searchController = TextEditingController();
   bool _showSearch = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Force refresh allocations and unallocated balances when page opens.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(allocationsProvider);
-      ref.invalidate(unallocatedProvider);
-    });
-  }
 
   @override
   void dispose() {
@@ -64,7 +55,11 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen> {
       };
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final allocationsAsync = ref.watch(allocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
     final household = ref.watch(householdProvider).value;

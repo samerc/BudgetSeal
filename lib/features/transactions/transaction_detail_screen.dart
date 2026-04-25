@@ -568,6 +568,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
     // avoid false positives (many transactions could have empty notes).
     final candidates = await (db.select(db.transactions)
           ..where((t) => t.householdId.equals(tx.householdId))
+          ..where((t) => t.deleted.equals(false))
           ..where((t) => t.note.equals(tx.note))
           ..where((t) => t.createdAt.equals(tx.createdAt))
           ..where((t) => t.id.isNotIn([tx.id])))
@@ -856,6 +857,8 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                               width: 100,
                               height: 120,
                               fit: BoxFit.cover,
+                              cacheWidth: 200,
+                              cacheHeight: 240,
                             ),
                           ),
                         ),

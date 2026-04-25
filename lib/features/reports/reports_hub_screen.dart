@@ -22,7 +22,9 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../core/providers/daily_spending_provider.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/spending_heatmap.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 
@@ -57,7 +59,7 @@ class ReportsHubScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late final TabController _tabCtrl;
 
   @override
@@ -84,7 +86,11 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     // Set the module-level base currency for _baseAmount helper
     _reportsBaseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
@@ -207,6 +213,9 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
                 net: net,
                 currency: baseCurrency,
               ),
+              const SizedBox(height: 16),
+              // Spending Heatmap
+              _HeatmapSection(baseCurrency: baseCurrency),
               const SizedBox(height: 16),
               // Toggle: Trend vs Daily Pace
               Row(
@@ -392,6 +401,93 @@ class _DailyPaceChart extends StatelessWidget {
           ),
         ],
       )),
+    );
+  }
+}
+
+// ── Spending Heatmap Section ─────────────────────────────────────────────────
+
+class _HeatmapSection extends ConsumerWidget {
+  final String baseCurrency;
+  const _HeatmapSection({required this.baseCurrency});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final year = DateTime.now().year;
+    final heatmapAsync = ref.watch(dailySpendingProvider(year));
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.grid_view_rounded, size: 16,
+                color: AppColors.ts(context)),
+            const SizedBox(width: 8),
+            Text('Spending Activity',
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const Spacer(),
+            Text('$year',
+                style: TextStyle(
+                    fontSize: 11, color: AppColors.th(context))),
+          ]),
+          const SizedBox(height: 12),
+          heatmapAsync.when(
+            data: (data) => SpendingHeatmap(
+              data: data,
+              baseCurrency: baseCurrency,
+            ),
+            loading: () => const SizedBox(
+              height: 100,
+              child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            ),
+            error: (_, __) => const SizedBox(
+              height: 100,
+              child: Center(child: Text('Failed to load')),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Legend
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _legendDot(AppColors.sfv(context), 'None'),
+              const SizedBox(width: 12),
+              _legendDot(AppColors.overspent.withValues(alpha: 0.4), 'Expense'),
+              const SizedBox(width: 12),
+              _legendDot(AppColors.healthy.withValues(alpha: 0.4), 'Income'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _legendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+      ],
     );
   }
 }
@@ -3412,6 +3508,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
 
       // Get all transactions after the comparison date
       final txsAfter = await (db.select(db.transactions)
+            ..where((t) => t.deleted.equals(false))
             ..where((t) => t.createdAt.isBiggerThanValue(asOfDate)))
           .get();
 

@@ -170,7 +170,7 @@ final transactionEntriesProvider =
   }
 
   final txStream = (db.select(db.transactions)
-        ..where((t) => t.householdId.equals(householdId))
+        ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false))
         ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
       .watch();
 
@@ -213,27 +213,11 @@ final monthlyTransactionsProvider = StreamProvider.family<
   await for (final monthTxList in monthStream) {
     final related = await _fetchRelated(db, householdId, monthTxList);
 
-    // Build running balances from initial balances + all prior transactions.
-    final running = <String, double>{
-      for (final a in related.accountMap.values) a.id: a.initialBalance,
-    };
-
-    final priorTxList =
-        await dao.getBeforeMonth(householdId, param.year, param.month);
-    // We only need the lines for prior transactions to update running balances.
-    final priorLines = priorTxList.isEmpty
-        ? <TransactionLine>[]
-        : await (db.select(db.transactionLines)
-              ..where(
-                  (l) => l.transactionId.isIn(priorTxList.map((t) => t.id))))
-            .get();
-    final priorLinesByTx = <String, List<TransactionLine>>{};
-    for (final line in priorLines) {
-      priorLinesByTx.putIfAbsent(line.transactionId, () => []).add(line);
-    }
-    for (final tx in priorTxList) {
-      _applyTxToRunning(tx, priorLinesByTx[tx.id] ?? [], running);
-    }
+    // Compute running balances up to this month using SQL aggregation
+    // instead of loading all prior transactions into memory.
+    final monthStart = DateTime(param.year, param.month, 1);
+    final running =
+        await dao.getRunningBalancesBeforeDate(householdId, monthStart);
 
     // Now process the target month's transactions.
     final result = <TransactionEntry>[];

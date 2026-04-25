@@ -38,16 +38,45 @@ class CategorySheet extends StatefulWidget {
   State<CategorySheet> createState() => _CategorySheetState();
 }
 
-class _CategorySheetState extends State<CategorySheet> {
+class _CategorySheetState extends State<CategorySheet>
+    with WidgetsBindingObserver {
   bool _creating = false;
   final _newCatCtrl = TextEditingController();
+  final _sheetCtrl = DraggableScrollableController();
   String _search = '';
   String _typeFilter = 'expense'; // 'expense' or 'income'
+  bool _keyboardVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _sheetCtrl.dispose();
     _newCatCtrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    final bottomInset =
+        WidgetsBinding.instance.platformDispatcher.views.first.viewInsets.bottom;
+    final nowVisible = bottomInset > 100;
+    if (nowVisible && !_keyboardVisible) {
+      _keyboardVisible = true;
+      // Expand sheet to max so results are visible above the keyboard
+      if (_sheetCtrl.isAttached) {
+        _sheetCtrl.animateTo(0.92,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut);
+      }
+    } else if (!nowVisible && _keyboardVisible) {
+      _keyboardVisible = false;
+    }
   }
 
   @override
@@ -98,14 +127,14 @@ class _CategorySheetState extends State<CategorySheet> {
             const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: DraggableScrollableSheet(
+        controller: _sheetCtrl,
         initialChildSize: 0.7,
         minChildSize: 0.4,
         maxChildSize: 0.92,
         expand: false,
-        builder: (_, scrollCtrl) => Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Column(
+        snap: true,
+        snapSizes: const [0.7, 0.92],
+        builder: (_, scrollCtrl) => Column(
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -243,7 +272,6 @@ class _CategorySheetState extends State<CategorySheet> {
               ),
             ],
           ),
-        ),
       ),
     );
   }

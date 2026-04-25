@@ -394,24 +394,20 @@ class AllocationEngine {
     return txId;
   }
 
-  /// Delete a transaction and reverse its allocation ledger entries.
+  /// Soft-delete a transaction and reverse its allocation ledger entries.
   ///
-  /// Runs inside a database transaction so that the deletion of the
-  /// transaction, its lines, and the related ledger entries are atomic.
+  /// Sets the `deleted` flag instead of removing the row, so that sync
+  /// can detect the deletion and avoid re-importing the transaction.
+  /// Ledger entries are still hard-deleted (they are reconstructable).
   Future<void> deleteTransaction(String txId) async {
     await _db.transaction(() async {
       // 1. Remove any allocation ledger entries linked to this transaction.
       await _ledgerDao.deleteByTransactionId(txId);
 
-      // 2. Remove transaction lines (cascade should handle this, but be explicit).
-      await (_db.delete(_db.transactionLines)
-            ..where((l) => l.transactionId.equals(txId)))
-          .go();
-
-      // 3. Remove the transaction itself.
-      await (_db.delete(_db.transactions)
+      // 2. Soft-delete the transaction (keep row for sync).
+      await (_db.update(_db.transactions)
             ..where((t) => t.id.equals(txId)))
-          .go();
+          .write(const TransactionsCompanion(deleted: Value(true)));
     });
   }
 

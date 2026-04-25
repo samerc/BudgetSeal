@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
+import 'animated_circular_progress.dart';
 import 'category_icon.dart';
 
 class AllocationCard extends StatelessWidget {
@@ -46,6 +47,63 @@ class AllocationCard extends StatelessWidget {
 
   bool get _isSaving => type == 'saving';
   bool get _isSavingWithGoal => _isSaving && targetAmount != null && targetAmount! > 0;
+
+  Widget _buildIcon(BuildContext context, bool hasTarget, double? progress,
+      bool isOverspent, bool hasCategoryIcon, Color iconColor, IconData savingsIcon) {
+    // Build the inner icon widget
+    Widget? inner;
+    if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
+      inner = Text(envelopeIcon!, style: const TextStyle(fontSize: 18));
+    } else if (hasCategoryIcon) {
+      inner = CategoryIcon(
+        categoryName: categoryName!,
+        emoji: categoryIcon,
+        color: iconColor,
+        size: hasTarget ? 24 : 36,
+      );
+    } else if (_isSaving) {
+      inner = Icon(savingsIcon, size: 18, color: AppColors.accent);
+    }
+
+    if (inner == null) return const SizedBox.shrink();
+
+    // Wrap in circular progress ring when there's a target
+    if (hasTarget && progress != null) {
+      final ringColor = isOverspent
+          ? AppColors.overspent
+          : progress >= 1.0
+              ? AppColors.healthy
+              : _typeColor;
+      return Padding(
+        padding: const EdgeInsets.only(right: 10),
+        child: AnimatedCircularProgress(
+          progress: progress,
+          color: ringColor,
+          overspendColor: AppColors.overspent,
+          trackColor: AppColors.bd(context),
+          strokeWidth: 3,
+          size: 40,
+          child: inner,
+        ),
+      );
+    }
+
+    // No target — show icon in a rounded container
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: (hasCategoryIcon ? iconColor : _typeColor)
+              .withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(child: inner),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final effectiveTargetCurrency = targetCurrency ?? baseCurrency;
@@ -95,54 +153,9 @@ class AllocationCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
-              // Icon: envelope emoji > category icon > savings icon > default
-              () {
-                // Envelope's own icon takes priority
-                if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: _typeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(envelopeIcon!,
-                            style: const TextStyle(fontSize: 20)),
-                      ),
-                    ),
-                  );
-                }
-                if (hasCategoryIcon) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: CategoryIcon(
-                      categoryName: categoryName!,
-                      emoji: categoryIcon,
-                      color: iconColor,
-                      size: 36,
-                    ),
-                  );
-                }
-                if (_isSaving) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(savingsIcon,
-                          size: 20, color: AppColors.accent),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }(),
+              // Icon: with circular progress ring when target exists
+              _buildIcon(context, hasTarget, progress, isOverspent,
+                  hasCategoryIcon, iconColor, savingsIcon),
               // Name + progress
               Expanded(
                 child: Column(

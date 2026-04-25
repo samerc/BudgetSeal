@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v10)
+│   │   ├── app_database.dart   # Drift database definition (schema v12)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (11 tables)
@@ -117,8 +117,11 @@ lib/
     │   ├── app_info.dart
     │   └── responsive.dart
     └── widgets/                # Reusable widgets
-        ├── allocation_card.dart
+        ├── allocation_card.dart         # Envelope card with circular progress
         ├── amount_field.dart         # Opens calculator sheet (not keyboard)
+        ├── animated_amount.dart      # Count-up/down currency animation
+        ├── animated_circular_progress.dart # Custom-painted progress ring
+        ├── breathing_widget.dart     # Pulsing attention animation
         ├── animated_amount.dart      # Animated number transitions
         ├── balance_chip.dart
         ├── calculator_amount_field.dart
@@ -131,6 +134,7 @@ lib/
         ├── hint_banner.dart
         ├── pocketplan_logo.dart
         ├── skeleton_loader.dart
+        ├── spending_heatmap.dart     # GitHub-style daily spending grid
         └── staggered_list.dart
 ```
 
@@ -198,11 +202,12 @@ All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages
 
 ## Database
 
-### Schema Version: 11
+### Schema Version: 12
 11 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
+v11→v12 added `deleted` (BOOLEAN, default false) to `transactions` for soft-delete support.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -239,6 +244,8 @@ analyzer conflict — waiting on upstream releases).
 | haptic_feedback | ^0.6.0 | Haptic feedback |
 | sliver_tools | ^0.2.12 | Advanced sliver widgets |
 | google_fonts | ^8.0.0 | Custom fonts |
+| confetti | ^0.8.0 | Celebration effects (goal completion) |
+| google_mlkit_text_recognition | ^0.15.1 | Offline receipt OCR (bill splitter) |
 
 ## Testing
 
@@ -336,6 +343,15 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 ### Color Cache
 `AppColors.fromHex()` caches parsed colors in a static map. Never re-parse hex strings on rebuild.
 
+### SQL Running Balances
+`TransactionsDao.getRunningBalancesBeforeDate()` computes per-account running balance totals using 4 SQL `GROUP BY` queries instead of loading all prior transactions into memory. Used by `monthlyTransactionsProvider` for O(1) memory regardless of history size.
+
+### Tab Keep-Alive
+All 4 main tabs (Dashboard, Transactions, Allocations, Reports) use `AutomaticKeepAliveClientMixin` so switching tabs doesn't destroy/rebuild widget trees.
+
+### Sync Batching
+`SyncEngine.restoreFromJson()` uses Drift `batch()` for bulk inserts (one DB round-trip instead of N). `_mergeTable()` bulk-fetches all existing IDs in one query instead of N+1 per-row lookups.
+
 ## Auto Backup
 
 `AutoBackupService` in `lib/core/services/auto_backup_service.dart`:
@@ -376,12 +392,74 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 - `PageView` in `MainScreen` uses `NeverScrollableScrollPhysics` — tab switching is via bottom bar only (no swipe conflict with content gestures)
 - `PopScope` checks `GoRouter.canPop()` so pushed routes (funding, accounts, etc.) pop correctly instead of exiting the app
 
-## Health Check (planned)
+## Health Check
 
-A Settings screen to detect, diagnose, and repair balance inconsistencies:
-- Level 1: Run `checkInvariant()` per currency, count orphan ledger entries, show backup status
-- Level 2: Show which currency is off and by how much, list accounts/envelopes with discrepancies
-- Level 3: Recalculate all balances from raw data, create adjustment entries, export diagnostic report
+`lib/features/settings/health_check_screen.dart` — accessible from Settings > Health Check (`/health-check` route).
+
+Three levels in one screen:
+- **Level 1 (Detect):** Balance invariant per currency (green/red), orphan ledger count, backup status, transaction/ledger counts
+- **Level 2 (Diagnose):** Per-currency expected vs actual unallocated, list accounts with balances, list envelopes with ledger sums, highlight mismatches
+- **Level 3 (Repair):** "Repair Balances" button creates adjustment ledger entries for the largest allocation in each affected currency. "Purge Deleted" hard-deletes soft-deleted transactions. Export diagnostic JSON via share sheet.
+
+## Soft Delete
+
+Transactions use a `deleted` boolean column (schema v12) instead of hard deletion. `AllocationEngine.deleteTransaction()` sets `deleted = true` and removes ledger entries. All transaction queries filter `deleted = false` except sync export (which includes deleted rows so they propagate across devices). The Health Check screen offers a "Purge" action to permanently remove soft-deleted transactions.
+
+## Animation Widgets
+
+### AnimatedAmount
+`lib/shared/widgets/animated_amount.dart` — count-up/down effect for currency amounts using `IntTween` on cents for smooth integer stepping. `lazyFirstRender: true` (default) skips animation on first build — only animates on subsequent value changes. Used on dashboard totals (income, expense, net worth, unallocated).
+
+### AnimatedCircularProgress
+`lib/shared/widgets/animated_circular_progress.dart` — custom-painted circular progress ring with overspend indicator. Main arc (0-100%) in `color`, second arc overlay in `overspendColor` for values > 100%. AnimationController at 1500ms with `easeInOutCubicEmphasized`. Used on allocation cards for envelopes with targets.
+
+### BreathingWidget
+`lib/shared/widgets/breathing_widget.dart` — pulsing scale animation (1.0→1.15, 2500ms, repeating). Set `active: false` to render statically. Used on dashboard for overspent envelope warning icons.
+
+### Platform Curves
+`lib/shared/utils/platform_curves.dart` — `PlatformCurves.page`, `.standard`, `.emphasis` return platform-appropriate curves (iOS: snappy easeInOut, Android: easeInOutCubicEmphasized). Matching duration helpers.
+
+## Spending Heatmap
+
+`lib/shared/widgets/spending_heatmap.dart` — GitHub-style activity grid showing daily spending intensity. Green = net positive (income > expense), red = net negative, gray = no activity. Horizontal scroll, month labels, tooltips on tap. Data from `dailySpendingProvider` (SQL query grouped by day). Displayed in Reports Overview tab.
+
+## Bill Splitter
+
+`lib/features/transactions/bill_splitter_screen.dart` — accessible from More > Bill Splitter (`/bill-splitter` route).
+
+Two modes:
+- **Manual**: Enter total + number of people, even or custom split
+- **Scan Receipt**: Camera/gallery → offline OCR via `google_mlkit_text_recognition` → extracted line items with amounts → assign each item to people → per-person totals
+
+OCR service at `lib/shared/utils/ocr_service.dart` — regex parsing of receipt text to extract `(name, amount)` pairs. Filters out non-item lines (totals, tax, headers). Fully offline, no internet needed.
+
+Tip slider (0-30%), per-person summary, "Create Transaction" button pre-fills an expense transaction with split details in the note.
+
+## Customizable Dashboard
+
+`lib/core/providers/dashboard_layout_provider.dart` — `DashboardSection` enum with 6 sections (status, spending, quickActions, money, unallocated, activity). Each section has visibility toggle. Order + visibility persisted to SharedPreferences as JSON. `DashboardLayoutNotifier` provides reorder/toggle/reset methods.
+
+`lib/features/dashboard/dashboard_customize_sheet.dart` — bottom sheet with `ReorderableListView`, drag handles, and visibility switches. Opened via the tune icon in the dashboard header.
+
+## Transaction Selection
+
+Long-press a transaction to enter selection mode. Tap tiles to select/deselect (with checkboxes). Action bar shows count + bulk delete button. Dismissible swipe gestures are disabled during selection mode. Haptic feedback on selection changes.
+
+## Transaction Flash
+
+When adding a transaction via the classic form, the new transaction ID is passed back via `context.pop(txId)`. The transactions screen highlights the matching tile with a 1.5-second accent glow fade-out using `AnimatedContainer`.
+
+## Search Debounce
+
+Transaction search uses a 400ms `Timer` debounce to avoid excessive `setState` calls during typing. Timer is properly disposed.
+
+## Filter Persistence
+
+Transaction type filter (All/Income/Expense/Transfer) is saved to SharedPreferences and restored on screen init. Persists across sessions.
+
+## Confetti Celebration
+
+Savings envelopes trigger a 2-second confetti burst (via `confetti` package) when their balance reaches the target amount. Plays once per screen visit. `ConfettiWidget` overlaid at top-center of the allocation detail screen with explosive blast direction.
 
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More

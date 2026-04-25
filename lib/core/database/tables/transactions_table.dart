@@ -31,6 +31,9 @@ class Transactions extends Table {
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();
+  /// Soft-delete flag. Deleted transactions are excluded from all balance
+  /// calculations and queries but retained for sync conflict resolution.
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

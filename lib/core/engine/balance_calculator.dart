@@ -44,7 +44,7 @@ class BalanceCalculator {
     List<Transaction> lineTxList = [];
     if (lineTxIds.isNotEmpty) {
       lineTxList = await (_db.select(_db.transactions)
-            ..where((t) => t.id.isIn(lineTxIds)))
+            ..where((t) => t.id.isIn(lineTxIds) & t.deleted.equals(false)))
           .get();
     }
     final txMap = {for (final t in lineTxList) t.id: t};
@@ -65,6 +65,7 @@ class BalanceCalculator {
     final headerTxs = await (_db.select(_db.transactions)
           ..where((t) =>
               t.accountId.isIn(accountIds) &
+              t.deleted.equals(false) &
               t.type.isIn(['income', 'expense'])))
         .get();
 
@@ -94,7 +95,7 @@ class BalanceCalculator {
     // 6. All outgoing transfers
     final transfersFrom = await (_db.select(_db.transactions)
           ..where(
-              (t) => t.accountId.isIn(accountIds) & t.type.equals('transfer')))
+              (t) => t.accountId.isIn(accountIds) & t.deleted.equals(false) & t.type.equals('transfer')))
         .get();
     for (final tx in transfersFrom) {
       if (!balances.containsKey(tx.accountId)) continue;
@@ -105,6 +106,7 @@ class BalanceCalculator {
     final transfersTo = await (_db.select(_db.transactions)
           ..where((t) =>
               t.destinationAccountId.isIn(accountIds) &
+              t.deleted.equals(false) &
               t.type.equals('transfer')))
         .get();
     for (final tx in transfersTo) {
@@ -157,7 +159,7 @@ class BalanceCalculator {
     if (lines.isNotEmpty) {
       final txIds = lines.map((l) => l.transactionId).toSet();
       final txs = await (_db.select(_db.transactions)
-            ..where((t) => t.id.isIn(txIds)))
+            ..where((t) => t.id.isIn(txIds) & t.deleted.equals(false)))
           .get();
       final txMap2 = {for (final t in txs) t.id: t};
 
@@ -176,6 +178,7 @@ class BalanceCalculator {
     final headerTxs = await (_db.select(_db.transactions)
           ..where((t) =>
               t.accountId.equals(accountId) &
+              t.deleted.equals(false) &
               t.type.isIn(['income', 'expense'])))
         .get();
 
@@ -204,7 +207,7 @@ class BalanceCalculator {
     // 3. Transfers
     final transfersFrom = await (_db.select(_db.transactions)
           ..where((t) =>
-              t.accountId.equals(accountId) & t.type.equals('transfer')))
+              t.accountId.equals(accountId) & t.deleted.equals(false) & t.type.equals('transfer')))
         .get();
     for (final tx in transfersFrom) {
       balance -= tx.amount;
@@ -213,6 +216,7 @@ class BalanceCalculator {
     final transfersTo = await (_db.select(_db.transactions)
           ..where((t) =>
               t.destinationAccountId.equals(accountId) &
+              t.deleted.equals(false) &
               t.type.equals('transfer')))
         .get();
     for (final tx in transfersTo) {

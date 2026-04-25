@@ -2923,6 +2923,16 @@ class $TransactionsTable extends Transactions
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2939,7 +2949,8 @@ class $TransactionsTable extends Transactions
         createdBy,
         deviceId,
         createdAt,
-        lastModified
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3038,6 +3049,10 @@ class $TransactionsTable extends Transactions
           lastModified.isAcceptableOrUnknown(
               data['last_modified']!, _lastModifiedMeta));
     }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -3078,6 +3093,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -3105,6 +3122,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final String deviceId;
   final DateTime createdAt;
   final DateTime lastModified;
+
+  /// Soft-delete flag. Deleted transactions are excluded from all balance
+  /// calculations and queries but retained for sync conflict resolution.
+  final bool deleted;
   const Transaction(
       {required this.id,
       required this.householdId,
@@ -3120,7 +3141,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       required this.createdBy,
       required this.deviceId,
       required this.createdAt,
-      required this.lastModified});
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3145,6 +3167,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     map['device_id'] = Variable<String>(deviceId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -3171,6 +3194,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -3195,6 +3219,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -3216,6 +3241,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -3234,7 +3260,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           String? createdBy,
           String? deviceId,
           DateTime? createdAt,
-          DateTime? lastModified}) =>
+          DateTime? lastModified,
+          bool? deleted}) =>
       Transaction(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -3253,6 +3280,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   Transaction copyWithCompanion(TransactionsCompanion data) {
     return Transaction(
@@ -3280,6 +3308,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -3300,7 +3329,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('createdBy: $createdBy, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastModified: $lastModified')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -3321,7 +3351,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       createdBy,
       deviceId,
       createdAt,
-      lastModified);
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3340,7 +3371,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.createdBy == this.createdBy &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
-          other.lastModified == this.lastModified);
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
@@ -3359,6 +3391,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -3376,6 +3409,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -3394,6 +3428,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required String deviceId,
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -3419,6 +3454,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3439,6 +3475,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3459,6 +3496,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return TransactionsCompanion(
       id: id ?? this.id,
@@ -3476,6 +3514,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3529,6 +3568,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3553,6 +3595,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10283,6 +10326,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   required String deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
@@ -10302,6 +10346,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<String> deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -10448,6 +10493,9 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -10616,6 +10664,9 @@ class $$TransactionsTableOrderingComposer
       column: $table.lastModified,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -10738,6 +10789,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -10906,6 +10960,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionsCompanion(
@@ -10924,6 +10979,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -10942,6 +10998,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionsCompanion.insert(
@@ -10960,6 +11017,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:confetti/confetti.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,6 +44,8 @@ class _AllocationDetailScreenState
   String? _icon; // emoji icon for this envelope
   bool _loading = false;
   bool _showSettings = false;
+  final _confettiCtrl = ConfettiController(duration: const Duration(seconds: 2));
+  bool _confettiPlayed = false;
   List<Category> _linkedCategories = [];
   /// For the creation flow: distinguishes saving-with-goal from saving-open.
   bool _savingHasGoal = true;
@@ -86,6 +89,7 @@ class _AllocationDetailScreenState
   void dispose() {
     _nameController.dispose();
     _targetCurrencyController.dispose();
+    _confettiCtrl.dispose();
     super.dispose();
   }
 
@@ -174,7 +178,9 @@ class _AllocationDetailScreenState
         ? _nameController.text
         : 'Envelope';
 
-    return Scaffold(
+    return Stack(
+      children: [
+        Scaffold(
       appBar: AppBar(
         title: Text(_isNew ? 'New Envelope' : envelopeName,
             maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -602,6 +608,20 @@ class _AllocationDetailScreenState
           ],
         ),
       ),
+    ),
+        // Confetti overlay for savings goal completion
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiCtrl,
+            blastDirectionality: BlastDirectionality.explosive,
+            gravity: 0.2,
+            numberOfParticles: 20,
+            maximumSize: const Size(12, 12),
+            minimumSize: const Size(6, 6),
+          ),
+        ),
+      ],
     );
   }
 
@@ -847,6 +867,16 @@ class _AllocationDetailScreenState
     final hasTarget = _targetAmount > 0;
     final progress =
         hasTarget ? (mainBalance / _targetAmount).clamp(0.0, 1.0) : null;
+
+    // Trigger confetti when savings goal is reached
+    if (_type == 'saving' && hasTarget && mainBalance >= _targetAmount &&
+        !_confettiPlayed) {
+      _confettiPlayed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _confettiCtrl.play();
+      });
+    }
+
     final progressColor = progress != null
         ? (progress >= 1.0
             ? AppColors.healthy

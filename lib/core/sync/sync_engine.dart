@@ -70,50 +70,53 @@ class SyncEngine {
       await _db.delete(_db.users).go();
       await _db.delete(_db.households).go();
 
-      // Insert in dependency order
-      for (final h in _list(data, 'households')) {
-        await _db.into(_db.households).insertOnConflictUpdate(
-            _householdFromMap(h));
-      }
-      for (final u in _list(data, 'users')) {
-        await _db.into(_db.users).insertOnConflictUpdate(_userFromMap(u));
-      }
-      for (final a in _list(data, 'accounts')) {
-        await _db.into(_db.accounts).insertOnConflictUpdate(
-            _accountFromMap(a));
-      }
-      for (final a in _list(data, 'allocations')) {
-        await _db.into(_db.allocations).insertOnConflictUpdate(
-            _allocationFromMap(a));
-      }
-      for (final c in _list(data, 'categories')) {
-        await _db.into(_db.categories).insertOnConflictUpdate(
-            _categoryFromMap(c));
-      }
-      for (final t in _list(data, 'transactions')) {
-        await _db.into(_db.transactions).insertOnConflictUpdate(
-            _transactionFromMap(t));
-      }
-      for (final l in _list(data, 'transactionLines')) {
-        await _db.into(_db.transactionLines).insertOnConflictUpdate(
-            _txLineFromMap(l));
-      }
-      for (final l in _list(data, 'allocationLedger')) {
-        await _db.into(_db.allocationLedger).insertOnConflictUpdate(
-            _ledgerFromMap(l));
-      }
-      for (final r in _list(data, 'recurringTransactions')) {
-        await _db.into(_db.recurringTransactions).insertOnConflictUpdate(
-            _recurringFromMap(r));
-      }
-      for (final t in _list(data, 'transactionTemplates')) {
-        await _db.into(_db.transactionTemplates).insertOnConflictUpdate(
-            _templateFromMap(t));
-      }
-      for (final f in _list(data, 'fxRates')) {
-        await _db.into(_db.fxRates).insertOnConflictUpdate(
-            _fxRateFromMap(f));
-      }
+      // Insert in dependency order using batch for performance
+      await _db.batch((b) {
+        for (final h in _list(data, 'households')) {
+          b.insert(_db.households, _householdFromMap(h),
+              onConflict: DoUpdate((_) => _householdFromMap(h)));
+        }
+        for (final u in _list(data, 'users')) {
+          b.insert(_db.users, _userFromMap(u),
+              onConflict: DoUpdate((_) => _userFromMap(u)));
+        }
+        for (final a in _list(data, 'accounts')) {
+          b.insert(_db.accounts, _accountFromMap(a),
+              onConflict: DoUpdate((_) => _accountFromMap(a)));
+        }
+        for (final a in _list(data, 'allocations')) {
+          b.insert(_db.allocations, _allocationFromMap(a),
+              onConflict: DoUpdate((_) => _allocationFromMap(a)));
+        }
+        for (final c in _list(data, 'categories')) {
+          b.insert(_db.categories, _categoryFromMap(c),
+              onConflict: DoUpdate((_) => _categoryFromMap(c)));
+        }
+        for (final t in _list(data, 'transactions')) {
+          b.insert(_db.transactions, _transactionFromMap(t),
+              onConflict: DoUpdate((_) => _transactionFromMap(t)));
+        }
+        for (final l in _list(data, 'transactionLines')) {
+          b.insert(_db.transactionLines, _txLineFromMap(l),
+              onConflict: DoUpdate((_) => _txLineFromMap(l)));
+        }
+        for (final l in _list(data, 'allocationLedger')) {
+          b.insert(_db.allocationLedger, _ledgerFromMap(l),
+              onConflict: DoUpdate((_) => _ledgerFromMap(l)));
+        }
+        for (final r in _list(data, 'recurringTransactions')) {
+          b.insert(_db.recurringTransactions, _recurringFromMap(r),
+              onConflict: DoUpdate((_) => _recurringFromMap(r)));
+        }
+        for (final t in _list(data, 'transactionTemplates')) {
+          b.insert(_db.transactionTemplates, _templateFromMap(t),
+              onConflict: DoUpdate((_) => _templateFromMap(t)));
+        }
+        for (final f in _list(data, 'fxRates')) {
+          b.insert(_db.fxRates, _fxRateFromMap(f),
+              onConflict: DoUpdate((_) => _fxRateFromMap(f)));
+        }
+      });
     });
   }
 
@@ -187,6 +190,8 @@ class SyncEngine {
   }
 
   /// Generic merge for any table with a text primary key.
+  /// Bulk-fetches all existing rows' IDs and timestamps in one query,
+  /// then only inserts/updates rows that are new or newer.
   Future<int> _mergeTable(
     TableInfo<dynamic, dynamic> table,
     List<dynamic> remoteRows,
@@ -194,38 +199,45 @@ class SyncEngine {
     required String Function(Map<String, dynamic>) getId,
     required DateTime? Function(Map<String, dynamic>) getModified,
   }) async {
+    if (remoteRows.isEmpty) return 0;
+
+    // Bulk-fetch all local rows' IDs + timestamp columns in one query.
+    final localRows = await (_db.customSelect(
+      'SELECT id, last_modified, created_at, fetched_at, last_used_at '
+      'FROM ${table.actualTableName}',
+    )).get();
+
+    final localTimestamps = <String, DateTime?>{};
+    for (final row in localRows) {
+      final id = row.data['id'] as String;
+      final tsStr = row.data['last_modified'] ??
+          row.data['created_at'] ??
+          row.data['fetched_at'] ??
+          row.data['last_used_at'];
+      DateTime? ts;
+      if (tsStr != null) {
+        ts = tsStr is int
+            ? DateTime.fromMillisecondsSinceEpoch(tsStr * 1000)
+            : DateTime.tryParse(tsStr.toString());
+      }
+      localTimestamps[id] = ts;
+    }
+
     int changed = 0;
     for (final row in remoteRows) {
       final map = row as Map<String, dynamic>;
       final id = getId(map);
       final remoteModified = getModified(map);
 
-      // Check if row exists locally
-      final existing = await (_db.customSelect(
-        'SELECT * FROM ${table.actualTableName} WHERE id = ?',
-        variables: [Variable.withString(id)],
-      )).get();
-
-      if (existing.isEmpty) {
-        // Insert new row
+      if (!localTimestamps.containsKey(id)) {
+        // New row — insert
         await _insertOrUpdate(table, fromMap(map));
         changed++;
       } else if (remoteModified != null) {
-        // Compare timestamps — update if remote is newer
-        final localRow = existing.first;
-        final localModifiedStr = localRow.data['last_modified'] ??
-            localRow.data['created_at'] ??
-            localRow.data['fetched_at'] ??
-            localRow.data['last_used_at'];
-        if (localModifiedStr != null) {
-          final localModified = localModifiedStr is int
-              ? DateTime.fromMillisecondsSinceEpoch(localModifiedStr * 1000)
-              : DateTime.tryParse(localModifiedStr.toString());
-          if (localModified != null &&
-              remoteModified.isAfter(localModified)) {
-            await _insertOrUpdate(table, fromMap(map));
-            changed++;
-          }
+        final localModified = localTimestamps[id];
+        if (localModified != null && remoteModified.isAfter(localModified)) {
+          await _insertOrUpdate(table, fromMap(map));
+          changed++;
         }
       }
     }
@@ -336,6 +348,7 @@ class SyncEngine {
         'deviceId': t.deviceId,
         'createdAt': t.createdAt.toIso8601String(),
         'lastModified': t.lastModified.toIso8601String(),
+        'deleted': t.deleted,
       };
 
   Map<String, dynamic> _txLineToMap(TransactionLine l) => {
@@ -497,6 +510,7 @@ class SyncEngine {
         deviceId: m['deviceId'] as String? ?? 'sync',
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   TransactionLinesCompanion _txLineFromMap(Map<String, dynamic> m) =>

@@ -195,7 +195,9 @@ class SyncNotifier extends Notifier<SyncState> {
   /// Sync receipt files with Google Drive.
   Future<void> _syncReceipts(GoogleDriveProvider provider) async {
     final db = ref.read(databaseProvider);
-    final transactions = await db.select(db.transactions).get();
+    final transactions = await (db.select(db.transactions)
+          ..where((t) => t.deleted.equals(false)))
+        .get();
 
     // Collect all receipt filenames from the database
     final allFilenames = <String>{};
