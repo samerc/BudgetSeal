@@ -331,8 +331,12 @@ class AllocationEngine {
 
     final txId = _uuid.v4();
     // Total in base currency (sum of each line converted via its rate).
-    final totalBaseAmount =
-        lines.fold(0.0, (sum, l) => sum + l.baseAmount);
+    // Skip lines with bogus rate (different currency but rate=1.0 means not set).
+    final totalBaseAmount = lines.fold(0.0, (sum, l) {
+      if (l.currency == baseCurrency) return sum + l.amount;
+      if ((l.exchangeRateToBase - 1.0).abs() < 0.001) return sum; // rate not set
+      return sum + l.baseAmount;
+    });
     final singleCategoryId =
         lines.length == 1 ? lines.first.categoryId : null;
     final effectiveDate = date ?? DateTime.now();

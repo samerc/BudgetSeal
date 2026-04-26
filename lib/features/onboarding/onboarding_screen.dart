@@ -41,7 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
@@ -73,7 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    3,
+                    4,
                     (i) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -98,6 +98,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   children: [
                     _WelcomePage(onNext: _nextPage),
                     _HowItWorksPage(onNext: _nextPage),
+                    _TipsPage(onNext: _nextPage),
                     _SetupPage(
                       nameController: _nameController,
                       baseCurrency: _baseCurrency,
@@ -305,6 +306,69 @@ class _HowItWorksPage extends StatelessWidget {
             title: 'Spend with confidence',
             subtitle: 'Record expenses — each one draws from its envelope',
             icon: Icons.check_circle_rounded,
+          ),
+          const SizedBox(height: 40),
+          _OnboardingButton(label: 'Continue', onTap: onNext),
+        ],
+      ),
+    );
+  }
+}
+
+class _TipsPage extends StatelessWidget {
+  final VoidCallback onNext;
+  const _TipsPage({required this.onNext});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Good to know',
+            style: GoogleFonts.inter(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 32),
+          _StepRow(
+            number: '💡',
+            title: 'Split bills with friends',
+            subtitle:
+                'Scan a receipt and assign items to people. '
+                'Find it on the Dashboard or long-press the + button',
+            icon: Icons.call_split_rounded,
+          ),
+          const SizedBox(height: 16),
+          _StepRow(
+            number: '💡',
+            title: 'Customize your dashboard',
+            subtitle:
+                'Tap the tune icon on the Home screen to show, '
+                'hide, or reorder sections',
+            icon: Icons.tune_rounded,
+          ),
+          const SizedBox(height: 16),
+          _StepRow(
+            number: '💡',
+            title: 'Bulk actions',
+            subtitle:
+                'Long-press a transaction to select it, '
+                'then tap others to select more. Delete in bulk',
+            icon: Icons.checklist_rounded,
+          ),
+          const SizedBox(height: 16),
+          _StepRow(
+            number: '💡',
+            title: 'Health Check',
+            subtitle:
+                'Go to More > Health Check to verify your data '
+                'integrity and repair any issues',
+            icon: Icons.monitor_heart_rounded,
           ),
           const SizedBox(height: 40),
           _OnboardingButton(label: 'Continue', onTap: onNext),

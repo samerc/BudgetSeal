@@ -122,20 +122,15 @@ lib/
         ├── animated_amount.dart      # Count-up/down currency animation
         ├── animated_circular_progress.dart # Custom-painted progress ring
         ├── breathing_widget.dart     # Pulsing attention animation
-        ├── animated_amount.dart      # Animated number transitions
-        ├── balance_chip.dart
         ├── calculator_amount_field.dart
-        ├── category_grid.dart
         ├── category_icon.dart        # Maps category names to PNG icons
         ├── currency_display.dart
         ├── currency_picker_field.dart
         ├── empty_state.dart
         ├── error_retry.dart
         ├── hint_banner.dart
-        ├── pocketplan_logo.dart
         ├── skeleton_loader.dart
-        ├── spending_heatmap.dart     # GitHub-style daily spending grid
-        └── staggered_list.dart
+        └── spending_heatmap.dart     # GitHub-style daily spending grid
 ```
 
 ## Core Concepts
@@ -460,6 +455,34 @@ Transaction type filter (All/Income/Expense/Transfer) is saved to SharedPreferen
 ## Confetti Celebration
 
 Savings envelopes trigger a 2-second confetti burst (via `confetti` package) when their balance reaches the target amount. Plays once per screen visit. `ConfettiWidget` overlaid at top-center of the allocation detail screen with explosive blast direction.
+
+## Duplicate Detection
+
+Both the assisted flow and classic form check for duplicate transactions before saving. If a transaction with the same amount, category, and date already exists, a "Possible Duplicate" dialog asks the user to confirm. Skipped when editing existing transactions or for transfers.
+
+## Transfer Display
+
+Transfers render as a single row in the transaction list (not two rows). Shows "Source → Destination" as the title with two sub-lines: source account with amount (red dot) and destination account with converted amount (green dot). Amounts shown in each account's native currency.
+
+## Theme System
+
+`buildLightTheme(fontName)` and `buildDarkTheme(fontName)` in `app_theme.dart` generate full ThemeData with the selected font applied everywhere (AppBar, buttons, inputs, nav bar, text theme). Font selection is dynamic via `fontProvider`. Default font: Inter. Available: DM Sans, Poppins, Nunito, Rubik, Space Grotesk.
+
+## More Tab Structure
+
+Settings screen organized into sections:
+- **TOOLS**: Accounts, Categories, Bill Splitter, Bill Calendar, Exchange Rates
+- **AUTOMATION**: Recurring, Templates, Subscriptions, Period Transition
+- **APPEARANCE**: Theme, Colors, Entry Mode, Start Screen, Font
+- **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
+- **PREFERENCES**: Base Currency, Period Start Day, Currency Symbols, Number Format
+- **SECURITY**: Biometric Lock
+
+Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
+
+## Onboarding
+
+4-page flow: Welcome → How it works (4 steps) → Good to know (tips about bill splitter, dashboard customization, bulk actions, health check) → Setup (name, currency, period start day).
 
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More

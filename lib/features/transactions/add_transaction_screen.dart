@@ -60,6 +60,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   TimeOfDay _selectedTime = TimeOfDay.now();
   String? _fromAccountId;
   String? _destAccountId;
+  bool _rateInverted = false;
+  double? _originalRate;
   final _noteCtrl = TextEditingController();
   final _titleCtrl = TextEditingController();
   bool _loading = false;
@@ -411,6 +413,42 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return null;
   }
 
+  /// Check if a transaction with the same amount, category, and date exists.
+  bool _checkForDuplicate() {
+    final existingEntries =
+        ref.read(transactionEntriesProvider).value ?? [];
+    final selectedDay = DateTime(
+        _selectedDate.year, _selectedDate.month, _selectedDate.day);
+
+    for (final line in _lines) {
+      if (line.amount <= 0 || line.categoryId == null) continue;
+      for (final existing in existingEntries) {
+        final txDate = existing.tx.createdAt.toLocal();
+        final txDay = DateTime(txDate.year, txDate.month, txDate.day);
+        if (txDay != selectedDay) continue;
+
+        // Check amount match
+        bool amountMatch = (existing.tx.amount - line.amount).abs() < 0.01;
+        if (!amountMatch) {
+          for (final el in existing.lines) {
+            if ((el.amount - line.amount).abs() < 0.01) {
+              amountMatch = true;
+              break;
+            }
+          }
+        }
+        if (!amountMatch) continue;
+
+        // Check category match
+        if (existing.tx.categoryId == line.categoryId) return true;
+        for (final el in existing.lines) {
+          if (el.categoryId == line.categoryId) return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Future<void> _save() async {
     final error = _validate();
     if (error != null) {
@@ -418,6 +456,74 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       hapticHeavy();
       return;
     }
+
+    // Warn if any line has a foreign currency with no exchange rate set
+    final missingRateLines = <int>[];
+    for (var i = 0; i < _lines.length; i++) {
+      final l = _lines[i];
+      if (l.currency != _baseCurrency &&
+          (l.exchangeRateToBase - 1.0).abs() < 0.001) {
+        missingRateLines.add(i);
+      }
+    }
+    if (missingRateLines.isNotEmpty) {
+      final items = missingRateLines
+          .map((i) => _lines.length > 1
+              ? 'Item ${i + 1} (${_lines[i].currency})'
+              : _lines[i].currency)
+          .join(', ');
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Exchange rate not set'),
+          content: Text(
+            '$items has no exchange rate to $_baseCurrency. '
+            'The amount won\'t be included in your base currency totals.\n\n'
+            'Save anyway, or go back to set the rate?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Go Back'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Save Anyway'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !mounted) return;
+    }
+
+    // Duplicate detection (skip when editing existing transaction)
+    if (widget.editTransactionId == null && _type != _TxType.transfer) {
+      final isDuplicate = _checkForDuplicate();
+      if (isDuplicate && mounted) {
+        final proceed = await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Possible Duplicate'),
+            content: const Text(
+              'A similar transaction with the same amount, category, '
+              'and date already exists. Save anyway?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Save Anyway'),
+              ),
+            ],
+          ),
+        );
+        if (proceed != true || !mounted) return;
+      }
+    }
+
     hapticMedium();
     setState(() => _validationError = null);
 
@@ -779,11 +885,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildTransferSection(List<Account> accounts) {
-    final fromAcc = _fromAccountId != null
+    final fromAcc = _fromAccountId != null && accounts.isNotEmpty
         ? accounts.firstWhere((a) => a.id == _fromAccountId,
             orElse: () => accounts.first)
         : null;
-    final toAcc = _destAccountId != null
+    final toAcc = _destAccountId != null && accounts.isNotEmpty
         ? accounts.firstWhere((a) => a.id == _destAccountId,
             orElse: () => accounts.first)
         : null;
@@ -862,13 +968,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         Icon(Icons.currency_exchange_rounded,
                             size: 14, color: AppColors.accent),
                         const SizedBox(width: 8),
-                        Text('1 ${fromAcc.currency} =',
+                        Text(
+                            '1 ${_rateInverted ? toAcc.currency : fromAcc.currency} =',
                             style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary)),
                         const SizedBox(width: 6),
                         SizedBox(
-                          width: 80,
+                          width: 90,
                           child: TextField(
                             controller: _lines.first.rateCtrl,
                             keyboardType:
@@ -890,17 +997,55 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               final r =
                                   double.tryParse(val.replaceAll(',', ''));
                               if (r != null && r > 0) {
-                                _lines.first.exchangeRateToBase = r;
+                                if (_rateInverted) {
+                                  _lines.first.exchangeRateToBase = 1.0 / r;
+                                } else {
+                                  _lines.first.exchangeRateToBase = r;
+                                }
+                                _originalRate = null; // user typed manually
                               }
                               setState(() {});
                             },
                           ),
                         ),
-                        Text(toAcc.currency,
+                        Text(
+                            _rateInverted ? fromAcc.currency : toAcc.currency,
                             style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary)),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (!_rateInverted) {
+                                // Save original before inverting
+                                _originalRate = _lines.first.exchangeRateToBase;
+                                final inverted = _originalRate != null && _originalRate! > 0
+                                    ? 1.0 / _originalRate!
+                                    : 0.0;
+                                _lines.first.rateCtrl.text =
+                                    formatRateForInput(roundRate(inverted));
+                              } else {
+                                // Restore original rate
+                                if (_originalRate != null) {
+                                  _lines.first.rateCtrl.text =
+                                      formatRateForInput(roundRate(_originalRate!));
+                                }
+                              }
+                              _rateInverted = !_rateInverted;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(Icons.swap_vert_rounded,
+                                size: 16, color: AppColors.accent),
+                          ),
+                        ),
                       ],
                     ),
                     if (_lines.first.amount > 0) ...[
@@ -961,7 +1106,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           icon: const Icon(Icons.chevron_right_rounded,
               size: 18, color: AppColors.textHint),
           items: accounts
-              .map((a) => DropdownMenuItem(
+              .map((a) {
+                final balances = ref.read(accountsWithBalanceProvider).value ?? [];
+                final ab = balances.where((b) => b.account.id == a.id).firstOrNull;
+                final balance = ab?.balance;
+                return DropdownMenuItem(
                     value: a.id,
                     child: Row(children: [
                       Icon(_accountIcon(a.type),
@@ -975,12 +1124,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             overflow: TextOverflow.ellipsis),
                       ),
                       const SizedBox(width: 6),
-                      Text(a.currency,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary)),
+                      if (balance != null)
+                        Text(formatAmount(balance, currency: a.currency),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: balance >= 0
+                                    ? AppColors.textSecondary
+                                    : AppColors.overspent))
+                      else
+                        Text(a.currency,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary)),
                     ]),
-                  ))
+                  );
+              })
               .toList(),
           onChanged: onChanged,
         ),
@@ -1066,43 +1224,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Widget _buildTitleField() {
-    // Get unique previous transaction titles for autocomplete.
+    // Get unique previous transaction titles for inline pills.
     final entries =
         ref.read(transactionEntriesProvider).value ?? [];
     final previousTitles = <String>{};
     for (final e in entries) {
       final note = e.tx.note;
       if (note.isNotEmpty) {
-        // Extract title part (before " — " if present)
         final title = note.contains(' — ') ? note.split(' — ').first : note;
         if (title.isNotEmpty) previousTitles.add(title);
       }
     }
-    final suggestions = previousTitles.toList()..sort();
+    final allSuggestions = previousTitles.toList()..sort();
 
-    return Autocomplete<String>(
-      optionsBuilder: (textEditingValue) {
-        if (textEditingValue.text.isEmpty) return const Iterable.empty();
-        final query = textEditingValue.text.toLowerCase();
-        return suggestions
+    // Filter suggestions based on current input
+    final query = _titleCtrl.text.toLowerCase();
+    final filtered = query.isEmpty
+        ? <String>[]
+        : allSuggestions
             .where((s) => s.toLowerCase().contains(query))
-            .take(5);
-      },
-      onSelected: (selection) {
-        _titleCtrl.text = selection;
-      },
-      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-        // Sync with our _titleCtrl
-        controller.text = _titleCtrl.text;
-        controller.addListener(() {
-          if (_titleCtrl.text != controller.text) {
-            _titleCtrl.text = controller.text;
-          }
-        });
-        return TextField(
-          controller: controller,
-          focusNode: focusNode,
+            .take(5)
+            .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _titleCtrl,
           textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}), // rebuild pills
           decoration: const InputDecoration(
             hintText: 'Title (e.g. Coffee, Groceries)',
             hintStyle: TextStyle(color: AppColors.textHint),
@@ -1112,35 +1262,46 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             contentPadding:
                 EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-        );
-      },
-      optionsViewBuilder: (context, onSelected, options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200, maxWidth: 300),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (_, i) {
-                  final option = options.elementAt(i);
-                  return ListTile(
-                    dense: true,
-                    title: Text(option, style: const TextStyle(fontSize: 14)),
-                    leading: const Icon(Icons.history_rounded,
-                        size: 16, color: AppColors.textHint),
-                    onTap: () => onSelected(option),
-                  );
-                },
-              ),
+        ),
+        if (filtered.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: filtered.map((s) {
+                return GestureDetector(
+                  onTap: () {
+                    _titleCtrl.text = s;
+                    _titleCtrl.selection = TextSelection.fromPosition(
+                        TextPosition(offset: s.length));
+                    setState(() {});
+                  },
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.42,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.bd(context)),
+                      ),
+                      child: Text(s,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.tp(context))),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
-        );
-      },
+      ],
     );
   }
 

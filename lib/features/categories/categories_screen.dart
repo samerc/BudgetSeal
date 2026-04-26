@@ -1134,9 +1134,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
     );
   }
 
-  void _showEmojiPicker() {
+  Future<void> _showEmojiPicker() async {
     final customCtrl = TextEditingController();
-    showModalBottomSheet(
+    final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.sf(context),
       isScrollControlled: true,
@@ -1198,12 +1198,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     onPressed: () {
                       final text = customCtrl.text.trim();
                       if (text.isNotEmpty) {
-                        final emoji = text.characters.first;
-                        Navigator.pop(ctx);
-                        // Update state after the sheet is fully dismissed
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) setState(() => _emoji = emoji);
-                        });
+                        Navigator.pop(ctx, text.characters.first);
                       }
                     },
                     style: FilledButton.styleFrom(
@@ -1258,11 +1253,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                             final isSelected = e == _emoji;
                             return GestureDetector(
                               onTap: () {
-                                Navigator.pop(ctx);
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  if (mounted) setState(() => _emoji = e);
-                                });
+                                Navigator.pop(ctx, e);
                               },
                               child: Container(
                                 width: 42,
@@ -1296,6 +1287,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
         ),
       ),
     );
+    if (result != null && mounted) {
+      setState(() => _emoji = result);
+    }
   }
 
   Future<void> _save() async {

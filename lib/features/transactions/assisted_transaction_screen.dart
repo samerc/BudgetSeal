@@ -53,6 +53,7 @@ class _AssistedTransactionScreenState
   bool _rateInverted = false; // true = showing "1 DEST = X SOURCE"
   double _expenseExchangeRate = 1.0; // rate for non-transfer cross-currency
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
   bool _saving = false;
 
   // Multi-line support
@@ -261,7 +262,11 @@ class _AssistedTransactionScreenState
                             _showCategoryPopup();
                           }
                         },
-                        child: Container(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.42,
+                          ),
+                          child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
@@ -271,9 +276,12 @@ class _AssistedTransactionScreenState
                                 color: AppColors.bd(context)),
                           ),
                           child: Text(s,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   fontSize: 14,
                                   color: AppColors.tp(context))),
+                        ),
                         ),
                       );
                     }).toList(),
@@ -850,10 +858,25 @@ class _AssistedTransactionScreenState
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
-                    subtitle: Text(a.currency,
-                        style: TextStyle(
+                    subtitle: () {
+                      final balances = ref.read(accountsWithBalanceProvider).value ?? [];
+                      final ab = balances.where((b) => b.account.id == a.id).firstOrNull;
+                      if (ab != null) {
+                        return Text(
+                          '${a.currency} · ${formatAmount(ab.balance, currency: a.currency)}',
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.ts(context))),
+                            color: ab.balance >= 0
+                                ? AppColors.ts(context)
+                                : AppColors.overspent,
+                          ),
+                        );
+                      }
+                      return Text(a.currency,
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.ts(context)));
+                    }(),
                     trailing: isSelected
                         ? Icon(Icons.check_circle_rounded,
                             size: 20, color: color)
@@ -1189,7 +1212,10 @@ class _AssistedTransactionScreenState
 
       // Use a fixed timestamp so linked transactions share the exact same
       // createdAt — this is how we find related transactions later.
-      final saveDate = _selectedDate;
+      final saveDate = DateTime(
+        _selectedDate.year, _selectedDate.month, _selectedDate.day,
+        _selectedTime.hour, _selectedTime.minute,
+      );
 
       if (_type == 'transfer') {
         await engine.recordTransfer(
@@ -1408,6 +1434,34 @@ class _AssistedTransactionScreenState
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColors.tp(context),
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: _selectedTime,
+                        );
+                        if (picked != null) {
+                          setState(() => _selectedTime = picked);
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.access_time_rounded,
+                              size: 16, color: AppColors.ts(context)),
+                          const SizedBox(width: 6),
+                          Text(
+                            _selectedTime.format(context),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.tp(context),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const Spacer(),

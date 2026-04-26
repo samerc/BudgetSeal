@@ -8,7 +8,6 @@ import 'core/services/auto_backup_service.dart';
 import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
-import 'core/providers/entry_mode_provider.dart';
 import 'core/providers/font_provider.dart';
 import 'core/providers/household_provider.dart';
 import 'core/providers/theme_provider.dart';
@@ -307,13 +306,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final numFormat = ref.watch(numberFormatProvider);
     setNumberFormatPrefs(numFormat);
 
-    // Rebuild themes with the selected font.
-    final lightTheme = appTheme.copyWith(
-      textTheme: buildTextTheme(selectedFont),
-    );
-    final darkTheme = appDarkTheme.copyWith(
-      textTheme: buildTextTheme(selectedFont, Brightness.dark),
-    );
+    // Rebuild themes with the selected font (applies to all text styles).
+    final lightTheme = buildLightTheme(selectedFont);
+    final darkTheme = buildDarkTheme(selectedFont);
 
     if (_showSplash) {
       return MaterialApp(
@@ -368,22 +363,48 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
 }
 
 /// Routes to either assisted or classic transaction entry based on user preference.
-class _EntryModeRouter extends ConsumerWidget {
+class _EntryModeRouter extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const _EntryModeRouter({this.extra});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(entryModeProvider);
+  ConsumerState<_EntryModeRouter> createState() => _EntryModeRouterState();
+}
+
+class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
+  String? _resolvedMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveMode();
+  }
+
+  Future<void> _resolveMode() async {
+    // Read directly from SharedPreferences to avoid the provider race.
+    final prefs = await SharedPreferences.getInstance();
+    final mode = prefs.getString('entry_mode') ?? 'assisted';
+    if (mounted) setState(() => _resolvedMode = mode);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = _resolvedMode;
+    if (mode == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (mode == 'assisted') {
       return AssistedTransactionScreen(
-        initialType: extra?['editType'] as String?,
+        initialType: widget.extra?['editType'] as String?,
       );
     }
     return AddTransactionScreen(
-      editType: extra?['editType'] as String?,
-      editNote: extra?['editNote'] as String?,
-      editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
+      editType: widget.extra?['editType'] as String?,
+      editNote: widget.extra?['editNote'] as String?,
+      editLines: widget.extra?['editLines'] as List<Map<String, dynamic>>?,
     );
   }
 }

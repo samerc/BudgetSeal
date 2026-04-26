@@ -132,8 +132,8 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // ── Manage ──
-            _SectionHeader(title: 'MANAGE'),
+            // ── Tools ──
+            _SectionHeader(title: 'TOOLS'),
             const SizedBox(height: 8),
             _SettingsTile(icon: Icons.credit_card_rounded, title: 'Accounts',
                 subtitle: 'Manage your accounts and balances',
@@ -143,6 +143,23 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Manage groups and categories',
                 iconColor: const Color(0xFFBA68C8),
                 onTap: () => context.push('/categories')),
+            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
+                subtitle: 'Split bills & scan receipts',
+                iconColor: const Color(0xFF26A69A),
+                onTap: () => context.push('/bill-splitter')),
+            _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
+                subtitle: 'View upcoming recurring bills',
+                iconColor: const Color(0xFF66BB6A),
+                onTap: () => context.push('/bill-calendar')),
+            _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
+                subtitle: 'View and refresh currency rates',
+                iconColor: const Color(0xFF4DB6AC),
+                onTap: () => context.push('/exchange-rates')),
+            const SizedBox(height: 20),
+
+            // ── Automation ──
+            _SectionHeader(title: 'AUTOMATION'),
+            const SizedBox(height: 8),
             _SettingsTile(icon: Icons.repeat_rounded, title: 'Recurring',
                 subtitle: 'Manage recurring transactions',
                 iconColor: const Color(0xFFFF7043),
@@ -155,18 +172,6 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Track recurring subscriptions',
                 iconColor: AppColors.accent,
                 onTap: () => context.push('/subscriptions')),
-            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
-                subtitle: 'Split bills with friends',
-                iconColor: const Color(0xFF26A69A),
-                onTap: () => context.push('/bill-splitter')),
-            _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
-                subtitle: 'View upcoming recurring bills',
-                iconColor: const Color(0xFF66BB6A),
-                onTap: () => context.push('/bill-calendar')),
-            _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
-                subtitle: 'View and refresh currency rates',
-                iconColor: const Color(0xFF4DB6AC),
-                onTap: () => context.push('/exchange-rates')),
             _SettingsTile(icon: Icons.refresh_rounded, title: 'Period Transition',
                 subtitle: 'End period and resolve leftovers',
                 iconColor: AppColors.accent,
@@ -314,8 +319,8 @@ class SettingsScreen extends ConsumerWidget {
             }),
             const SizedBox(height: 20),
 
-            // ── Household settings ──
-            _SectionHeader(title: 'HOUSEHOLD'),
+            // ── Preferences ──
+            _SectionHeader(title: 'PREFERENCES'),
             const SizedBox(height: 8),
             _SettingsTile(
               icon: Icons.monetization_on_rounded,

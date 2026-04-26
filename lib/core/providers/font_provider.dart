@@ -7,11 +7,11 @@ const _key = 'app_font';
 
 /// Available font families.
 const appFonts = <String, String>{
+  'DM Sans': 'DM Sans',
   'Inter': 'Inter',
   'Poppins': 'Poppins',
   'Nunito': 'Nunito',
   'Rubik': 'Rubik',
-  'DM Sans': 'DM Sans',
   'Space Grotesk': 'Space Grotesk',
 };
 

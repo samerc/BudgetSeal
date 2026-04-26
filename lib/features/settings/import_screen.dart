@@ -103,6 +103,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
   /// Scans headers + first data rows and assigns a best-guess role to each column.
   List<ColumnRole> _autoDetectRoles(List<List<dynamic>> data) {
+    if (data.isEmpty) return [];
     final colCount = data.first.length;
     final roles = List.filled(colCount, ColumnRole.skip);
 

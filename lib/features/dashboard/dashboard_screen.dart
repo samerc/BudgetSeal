@@ -256,6 +256,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         color: AppColors.healthy,
                         onTap: () => context.push('/funding'),
                       ),
+                      const SizedBox(width: 10),
+                      _QuickAction(
+                        icon: Icons.call_split_rounded,
+                        label: 'Split',
+                        color: const Color(0xFF26A69A),
+                        onTap: () => context.push('/bill-splitter'),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),

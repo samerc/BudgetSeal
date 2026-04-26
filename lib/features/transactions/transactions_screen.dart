@@ -47,6 +47,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   String? _highlightedTxId;
   Timer? _searchDebounce;
 
+  bool get _isFutureMonth {
+    final now = DateTime.now();
+    return _selectedYear > now.year ||
+        (_selectedYear == now.year && _selectedMonth > now.month);
+  }
+
   // Selection mode
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
@@ -280,7 +286,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           ],
         ),
       ),
-      floatingActionButton: Padding(
+      floatingActionButton: _isFutureMonth ? null : Padding(
         padding: const EdgeInsets.only(bottom: 60),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -301,19 +307,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
               const SizedBox(height: 8),
             ],
-            FloatingActionButton(
-              heroTag: 'fab_add_tx',
-              tooltip: 'Add transaction',
-              onPressed: () async {
-                final txId = await context.push<String?>('/add-transaction');
-                if (txId != null && mounted) {
-                  setState(() => _highlightedTxId = txId);
-                  Future.delayed(const Duration(milliseconds: 1500), () {
-                    if (mounted) setState(() => _highlightedTxId = null);
-                  });
-                }
-              },
-              child: const Icon(Icons.add),
+            GestureDetector(
+              onLongPress: () => context.push('/bill-splitter'),
+              child: FloatingActionButton(
+                heroTag: 'fab_add_tx',
+                tooltip: 'Add transaction (long-press to split bill)',
+                onPressed: () async {
+                  final txId = await context.push<String?>('/add-transaction');
+                  if (txId != null && mounted) {
+                    setState(() => _highlightedTxId = txId);
+                    Future.delayed(const Duration(milliseconds: 1500), () {
+                      if (mounted) setState(() => _highlightedTxId = null);
+                    });
+                  }
+                },
+                child: const Icon(Icons.add),
+              ),
             ),
           ],
         ),
@@ -1201,23 +1210,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
-                            // Build visual items: transfers get 2 rows (from + to)
-                            final visualItems = <({TransactionEntry entry, String? transferSide})>[];
-                            for (final e in group.entries) {
-                              if (e.tx.type == 'transfer') {
-                                visualItems.add((entry: e, transferSide: 'from'));
-                                visualItems.add((entry: e, transferSide: 'to'));
-                              } else {
-                                visualItems.add((entry: e, transferSide: null));
-                              }
-                            }
-                            if (i >= visualItems.length) return const SizedBox.shrink();
-                            final item = visualItems[i];
-                            final e = item.entry;
-                            // Use a unique key for transfer halves
-                            final tileKey = item.transferSide != null
-                                ? '${e.tx.id}_${item.transferSide}'
-                                : e.tx.id;
+                            // Each transaction = 1 row (transfers too)
+                            if (i >= group.entries.length) return const SizedBox.shrink();
+                            final e = group.entries[i];
+                            final tileKey = e.tx.id;
                             // Selection mode: show checkboxes instead of dismissible
                             if (_selectionMode) {
                               final isSelected = _selectedIds.contains(e.tx.id);
@@ -1259,8 +1255,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                         child: _TxTile(
                                           entry: e,
                                           categoryMap: categoryMap,
-                                          transferSide: item.transferSide,
                                           onCategoryTap: null,
+                                          disableTap: true,
                                         ),
                                       ),
                                     ],
@@ -1355,7 +1351,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                 child: _TxTile(
                                   entry: e,
                                   categoryMap: categoryMap,
-                                  transferSide: item.transferSide,
                                   onCategoryTap: (catId, catName) {
                                     hapticLight();
                                     setState(() {
@@ -1368,8 +1363,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                             ),
                             );
                           },
-                          childCount: group.entries.fold<int>(0, (sum, e) =>
-                              sum + (e.tx.type == 'transfer' ? 2 : 1)),
+                          childCount: group.entries.length,
                         ),
                       ),
                     ),
@@ -1585,25 +1579,22 @@ class _TxTile extends ConsumerWidget {
   final TransactionEntry entry;
   final Map<String, Category> categoryMap;
   final void Function(String catId, String catName)? onCategoryTap;
-  /// null for normal transactions, 'from' or 'to' for transfer visual split.
-  final String? transferSide;
+  /// When true, disables navigation on tap (selection mode handles taps).
+  final bool disableTap;
 
   const _TxTile({
     required this.entry,
     required this.categoryMap,
     this.onCategoryTap,
-    this.transferSide,
+    this.disableTap = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tx = entry.tx;
     final txColors = ref.watch(txColorsProvider);
-    final isTransferSplit = transferSide != null;
-    final isFrom = transferSide == 'from';
-    final typeColor = isTransferSplit
-        ? (isFrom ? txColors.expense : txColors.income)
-        : txColors.forType(tx.type);
+    final isTransfer = tx.type == 'transfer';
+    final typeColor = txColors.forType(tx.type);
 
     // Resolve category
     final cat = _resolveCategory();
@@ -1611,20 +1602,25 @@ class _TxTile extends ConsumerWidget {
     final catColor =
         cat != null ? _parseColor(cat.colorHex) : AppColors.accent;
 
-    // For transfers, override display name and note
+    // For transfers, build a Cashew-style 2-line display
     final String displayName;
     final String? note;
-    if (isTransferSplit) {
-      final fromName = entry.accountName.isNotEmpty ? entry.accountName : 'account';
-      final toName = entry.destinationAccountName ?? 'account';
-      if (isFrom) {
-        displayName = 'To $toName';
-        note = 'From $fromName';
-      } else {
-        displayName = 'From $fromName';
-        note = 'To $toName';
-      }
+    final String? transferFrom;
+    final String? transferTo;
+    final double? transferDestAmt;
+    final String? transferDestCcy;
+    if (isTransfer) {
+      transferFrom = entry.accountName.isNotEmpty ? entry.accountName : 'account';
+      transferTo = entry.destinationAccountName ?? 'account';
+      displayName = '$transferFrom → $transferTo';
+      note = tx.note.isNotEmpty ? tx.note : null;
+      transferDestAmt = tx.amount * tx.exchangeRateToBase;
+      transferDestCcy = entry.destinationAccountCurrency ?? tx.currency;
     } else {
+      transferFrom = null;
+      transferTo = null;
+      transferDestAmt = null;
+      transferDestCcy = null;
       displayName = _buildDisplayName(catName);
       note = _buildNote(catName);
     }
@@ -1634,8 +1630,8 @@ class _TxTile extends ConsumerWidget {
       label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}',
       button: true,
       child: GestureDetector(
-        onTap: () => context.push('/transactions/${tx.id}'),
-        onLongPress: () {
+        onTap: disableTap ? null : () => context.push('/transactions/${tx.id}'),
+        onLongPress: disableTap ? null : () {
           hapticMedium();
           _showContextMenu(context, ref);
         },
@@ -1644,7 +1640,7 @@ class _TxTile extends ConsumerWidget {
           child: Row(
             children: [
               // ── Circular category icon (tap to filter #5) ─────
-            if (isTransferSplit)
+            if (isTransfer)
               Container(
                 width: 46,
                 height: 46,
@@ -1653,9 +1649,7 @@ class _TxTile extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isFrom
-                      ? Icons.arrow_upward_rounded
-                      : Icons.arrow_downward_rounded,
+                  Icons.swap_horiz_rounded,
                   color: typeColor,
                   size: 22,
                 ),
@@ -1680,49 +1674,91 @@ class _TxTile extends ConsumerWidget {
                 ),
               ),
             const SizedBox(width: 14),
-            // ── Name + note ─────────────────────────────────────
+            // ── Name + note (or transfer sub-rows) ──────────────
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayName,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.tp(context),
+              child: isTransfer
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title: "AccountA → AccountB"
+                        Text(
+                          displayName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        // Source account line
+                        _transferSubRow(
+                          context,
+                          transferFrom!,
+                          tx.amount,
+                          tx.currency,
+                          txColors.expense,
+                        ),
+                        const SizedBox(height: 2),
+                        // Destination account line
+                        _transferSubRow(
+                          context,
+                          transferTo!,
+                          transferDestAmt!,
+                          transferDestCcy!,
+                          txColors.income,
+                        ),
+                        if (note != null) ...[
+                          const SizedBox(height: 2),
+                          Text(note,
+                              style: TextStyle(
+                                  fontSize: 11, color: AppColors.th(context)),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
+                        ],
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (note != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            note,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.ts(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (notePreview != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            notePreview,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              color: AppColors.th(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (note != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      note,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.ts(context),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  // Note preview (#7)
-                  if (notePreview != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      notePreview,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontStyle: FontStyle.italic,
-                        color: AppColors.th(context),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
             ),
             // ── Receipt indicator ────────────────────────────────
             if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
@@ -1762,7 +1798,8 @@ class _TxTile extends ConsumerWidget {
                       size: 14, color: AppColors.th(context));
                 }(),
               ),
-            // ── Amount (right-aligned #3) ───────────────────────
+            // ── Amount (right-aligned #3) — hidden for transfers (shown inline)
+            if (!isTransfer)
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: _buildAmountColumn(context, ref, typeColor),
@@ -1856,11 +1893,48 @@ class _TxTile extends ConsumerWidget {
     return null;
   }
 
+  Widget _transferSubRow(
+    BuildContext context,
+    String accountName,
+    double amount,
+    String currency,
+    Color dotColor,
+  ) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: dotColor.withValues(alpha: 0.7),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            accountName,
+            style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Text(
+          '• ${formatAmount(amount, currency: currency)}',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.tp(context),
+          ),
+        ),
+      ],
+    );
+  }
+
   List<Widget> _buildAmountColumn(BuildContext context, WidgetRef ref, Color typeColor) {
     final tx = entry.tx;
     final lines = entry.lines;
-    final isTransferSplit = transferSide != null;
-    final isFrom = transferSide == 'from';
+    final isTransfer = tx.type == 'transfer';
 
     String displayCurrency = tx.currency;
     double displayAmount = tx.amount;
@@ -1876,15 +1950,26 @@ class _TxTile extends ConsumerWidget {
         // All lines same foreign currency — show total in that currency
         displayCurrency = currencies.first;
         displayAmount = lines.fold(0.0, (s, l) => s + l.amount);
+      } else {
+        // Mixed currencies: compute base total, skipping lines with unset rate
+        double baseTotal = 0;
+        for (final l in lines) {
+          if (l.currency == tx.currency) {
+            baseTotal += l.amount;
+          } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
+            baseTotal += l.amount * l.exchangeRateToBase;
+          }
+        }
+        displayAmount = baseTotal;
       }
-      // Otherwise keep tx.amount in tx.currency (base currency total)
     }
 
-    // For transfer "to" side: show the converted amount in destination currency
-    if (isTransferSplit && !isFrom) {
-      displayAmount = tx.amount * tx.exchangeRateToBase;
-      displayCurrency = entry.destinationAccountCurrency ?? tx.currency;
-    }
+    // For transfers: show source amount in source currency
+    // with destination amount as conversion badge
+    final destAmount = isTransfer ? tx.amount * tx.exchangeRateToBase : 0.0;
+    final destCurrency = isTransfer
+        ? (entry.destinationAccountCurrency ?? tx.currency)
+        : tx.currency;
 
     final baseCurrency = tx.currency;
     final baseAmount = tx.amount;
@@ -1893,12 +1978,13 @@ class _TxTile extends ConsumerWidget {
     final hasRealConversion = lines.isNotEmpty &&
         lines.any((l) => (l.exchangeRateToBase - 1.0).abs() > 0.001);
     final showConversion =
-        !isTransferSplit && displayCurrency != baseCurrency && hasRealConversion;
+        !isTransfer && displayCurrency != baseCurrency && hasRealConversion;
+    // For transfers: show destination currency if different
+    final showTransferConversion = isTransfer &&
+        destCurrency != displayCurrency &&
+        (tx.exchangeRateToBase - 1.0).abs() > 0.001;
 
-    // For transfer splits, show as expense (from) or income (to)
-    final effectiveType = isTransferSplit
-        ? (isFrom ? 'expense' : 'income')
-        : tx.type;
+    final effectiveType = tx.type;
 
     // Show running balance only when a single account is involved
     final isSingleAccount = entry.involvedAccountNames.length <= 1;
@@ -1950,33 +2036,19 @@ class _TxTile extends ConsumerWidget {
             ],
           ),
         ),
-      if (isSingleAccount || isTransferSplit)
-        Builder(builder: (_) {
-          if (isTransferSplit && !isFrom) {
-            final destName = entry.destinationAccountName ?? 'account';
-            final destCurrency = entry.destinationAccountCurrency ?? tx.currency;
-            final destBalance = entry.destinationAccountBalanceAfter;
-            return Text(
-              destBalance != null
-                  ? '$destName: ${formatAmount(destBalance, currency: destCurrency)}'
-                  : '$destName: $destCurrency',
-              textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-            );
-          }
-          if (isTransferSplit && isFrom) {
-            return Text(
-              '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
-              textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-            );
-          }
-          return Text(
-            '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
-            textAlign: TextAlign.end,
-            style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-          );
-        }),
+      // Transfer: show destination amount if cross-currency
+      if (showTransferConversion)
+        Text(
+          '→ ${formatAmount(destAmount, currency: destCurrency)}',
+          textAlign: TextAlign.end,
+          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
+        ),
+      if (isSingleAccount || isTransfer)
+        Text(
+          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
+          textAlign: TextAlign.end,
+          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
+        ),
       if (!isSingleAccount)
         Text(
           '${entry.involvedAccountNames.length} accounts',

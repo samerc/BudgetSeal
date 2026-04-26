@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 import 'animated_circular_progress.dart';
-import 'category_icon.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -50,22 +49,27 @@ class AllocationCard extends StatelessWidget {
 
   Widget _buildIcon(BuildContext context, bool hasTarget, double? progress,
       bool isOverspent, bool hasCategoryIcon, Color iconColor, IconData savingsIcon) {
-    // Build the inner icon widget
-    Widget? inner;
+    // Determine the inner content — always render something
+    Widget inner;
     if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
       inner = Text(envelopeIcon!, style: const TextStyle(fontSize: 18));
-    } else if (hasCategoryIcon) {
-      inner = CategoryIcon(
-        categoryName: categoryName!,
-        emoji: categoryIcon,
-        color: iconColor,
-        size: hasTarget ? 24 : 36,
-      );
+    } else if (hasCategoryIcon && categoryIcon != null &&
+        categoryIcon!.isNotEmpty && categoryIcon != 'category') {
+      // Show the category emoji directly (not wrapped in CategoryIcon)
+      inner = Text(categoryIcon!, style: const TextStyle(fontSize: 18));
     } else if (_isSaving) {
       inner = Icon(savingsIcon, size: 18, color: AppColors.accent);
+    } else {
+      // Fallback: first letter of name
+      inner = Text(
+        name.isNotEmpty ? name[0].toUpperCase() : '?',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: _typeColor,
+        ),
+      );
     }
-
-    if (inner == null) return const SizedBox.shrink();
 
     // Wrap in circular progress ring when there's a target
     if (hasTarget && progress != null) {
@@ -88,15 +92,14 @@ class AllocationCard extends StatelessWidget {
       );
     }
 
-    // No target — show icon in a rounded container
+    // No target — show icon in a consistent rounded container
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: (hasCategoryIcon ? iconColor : _typeColor)
-              .withValues(alpha: 0.1),
+          color: _typeColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Center(child: inner),

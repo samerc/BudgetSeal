@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../database/app_database.dart';
@@ -23,26 +25,28 @@ class AllocationWithBalance {
 }
 
 final allocationsProvider =
-    StreamProvider<List<AllocationWithBalance>>((ref) async* {
+    StreamProvider<List<AllocationWithBalance>>((ref) {
   final db = ref.watch(databaseProvider);
   final householdId = ref.watch(currentHouseholdIdProvider);
-  if (householdId == null) {
-    yield [];
-    return;
-  }
+  if (householdId == null) return const Stream.empty();
 
   final dao = AllocationsDao(db);
   final ledgerDao = LedgerDao(db);
 
-  await for (final list in dao.watchAll(householdId)) {
-    // Batch: one query for ALL allocation balances
+  // Controller to merge both allocation and ledger change events
+  final controller = StreamController<List<AllocationWithBalance>>();
+  List<AllocationWithCategory>? cachedList;
+
+  Future<void> recompute() async {
+    final list = cachedList;
+    if (list == null) return;
+
     final allocIds = list.map((awc) => awc.allocation.id).toList();
     List<AllocationLedgerData> allEntries = [];
     if (allocIds.isNotEmpty) {
       allEntries = await ledgerDao.getAllForHousehold(allocIds);
     }
 
-    // Group by allocation
     final balancesByAlloc = <String, Map<String, double>>{};
     for (final e in allEntries) {
       balancesByAlloc.putIfAbsent(e.allocationId, () => {});
@@ -50,14 +54,35 @@ final allocationsProvider =
           (balancesByAlloc[e.allocationId]![e.currency] ?? 0) + e.amount;
     }
 
-    yield [
-      for (final awc in list)
-        AllocationWithBalance(
-          data: awc,
-          balanceByCurrency: balancesByAlloc[awc.allocation.id] ?? {},
-        ),
-    ];
+    if (!controller.isClosed) {
+      controller.add([
+        for (final awc in list)
+          AllocationWithBalance(
+            data: awc,
+            balanceByCurrency: balancesByAlloc[awc.allocation.id] ?? {},
+          ),
+      ]);
+    }
   }
+
+  // Watch allocations table — re-compute when allocations change
+  final allocSub = dao.watchAll(householdId).listen((list) {
+    cachedList = list;
+    recompute();
+  });
+
+  // Watch ledger table — re-compute when balances change
+  final ledgerSub = db.select(db.allocationLedger).watch().listen((_) {
+    recompute();
+  });
+
+  ref.onDispose(() {
+    allocSub.cancel();
+    ledgerSub.cancel();
+    controller.close();
+  });
+
+  return controller.stream;
 });
 
 final unallocatedProvider =

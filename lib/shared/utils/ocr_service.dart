@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
@@ -9,79 +11,144 @@ class ExtractedItem {
   ExtractedItem({required this.name, required this.amount});
 }
 
+/// A recognized text line with its bounding box on the image.
+class OcrLine {
+  final String text;
+  final ui.Rect boundingBox;
+  final double? parsedAmount;
+  final String? parsedName;
+
+  OcrLine({
+    required this.text,
+    required this.boundingBox,
+    this.parsedAmount,
+    this.parsedName,
+  });
+
+  /// Whether this line looks like a billable item (has a price).
+  bool get hasPrice => parsedAmount != null && parsedAmount! > 0;
+}
+
+/// Result of scanning a receipt.
+class OcrResult {
+  final List<OcrLine> lines;
+  final int imageWidth;
+  final int imageHeight;
+  final String rawText;
+
+  const OcrResult({
+    required this.lines,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.rawText,
+  });
+}
+
 /// Offline receipt OCR using Google ML Kit.
 class OcrService {
-  /// Extract line items (name + amount) from a receipt image.
-  ///
-  /// Uses on-device text recognition — no internet required.
-  /// Returns a best-effort list of items; the user should review and edit.
-  static Future<List<ExtractedItem>> extractLineItems(String imagePath) async {
+  /// Scan a receipt and return all recognized lines with bounding boxes.
+  static Future<OcrResult> scanReceipt(String imagePath) async {
     final textRecognizer = TextRecognizer();
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
       final recognized = await textRecognizer.processImage(inputImage);
 
-      final items = <ExtractedItem>[];
+      // Get image dimensions from metadata
+      final inputImg = InputImage.fromFilePath(imagePath);
+      final imageData = inputImg.metadata;
+      int imgW = 1000, imgH = 1400; // fallback
+      if (imageData?.size != null) {
+        imgW = imageData!.size.width.toInt();
+        imgH = imageData.size.height.toInt();
+      }
 
+      final lines = <OcrLine>[];
       for (final block in recognized.blocks) {
         for (final line in block.lines) {
-          final item = _parseLine(line.text);
-          if (item != null) items.add(item);
+          final bbox = line.boundingBox;
+          final parsed = _parseLine(line.text);
+          lines.add(OcrLine(
+            text: line.text,
+            boundingBox: ui.Rect.fromLTRB(
+              bbox.left.toDouble(),
+              bbox.top.toDouble(),
+              bbox.right.toDouble(),
+              bbox.bottom.toDouble(),
+            ),
+            parsedAmount: parsed?.amount,
+            parsedName: parsed?.name,
+          ));
         }
       }
 
-      // If no structured items found, try line-by-line across blocks
-      if (items.isEmpty) {
-        for (final block in recognized.blocks) {
-          final item = _parseLine(block.text);
-          if (item != null) items.add(item);
-        }
-      }
+      debugPrint('[OcrService] Scanned ${lines.length} lines, '
+          '${lines.where((l) => l.hasPrice).length} with prices');
 
-      return items;
+      return OcrResult(
+        lines: lines,
+        imageWidth: imgW,
+        imageHeight: imgH,
+        rawText: recognized.text,
+      );
     } catch (e) {
       debugPrint('[OcrService] Error: $e');
-      return [];
+      return const OcrResult(lines: [], imageWidth: 1000, imageHeight: 1400, rawText: '');
     } finally {
       textRecognizer.close();
     }
   }
 
   /// Try to parse a line into (name, amount).
-  ///
-  /// Matches patterns like:
-  ///   "Coffee          $4.50"
-  ///   "Burger 12.99"
-  ///   "Tax   2.00"
-  ///   "Subtotal $15.49"
   static ExtractedItem? _parseLine(String line) {
-    // Skip common non-item lines
-    final lower = line.toLowerCase().trim();
-    if (lower.isEmpty) return null;
-    if (lower.length < 3) return null;
-    // Skip header/footer lines
+    final trimmed = line.trim();
+    if (trimmed.length < 2) return null;
+
+    final lower = trimmed.toLowerCase();
     if (_isNonItemLine(lower)) return null;
 
-    // Match: text followed by a price pattern
-    // Supports: $12.50, 12.50, 12,50, $1,234.56
-    final pricePattern = RegExp(
-        r'[\$€£¥]?\s*(\d{1,3}(?:[,\.]\d{3})*[,\.]\d{2})\s*$');
-    final match = pricePattern.firstMatch(line.trim());
-    if (match == null) return null;
+    // Strategy 1: Price at end (most common)
+    final endPrice = RegExp(
+      r'(.+?)\s+[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s*$',
+    );
+    var match = endPrice.firstMatch(trimmed);
+    if (match != null) return _buildItem(match.group(1)!, match.group(2)!);
 
-    final priceStr = match.group(1)!
-        .replaceAll(RegExp(r'[^\d.]'), '')
-        .replaceAll(',', '.');
+    // Strategy 2: Whole number price at end
+    final wholePrice = RegExp(r'(.+?)\s+[\$€£¥]?\s*(\d{1,6})\s*$');
+    match = wholePrice.firstMatch(trimmed);
+    if (match != null) {
+      final name = match.group(1)!;
+      if (name.length > 2 && !RegExp(r'^\d+$').hasMatch(name.trim())) {
+        return _buildItem(name, match.group(2)!);
+      }
+    }
+
+    // Strategy 3: Price at start
+    final startPrice = RegExp(r'^[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s+(.+)');
+    match = startPrice.firstMatch(trimmed);
+    if (match != null) return _buildItem(match.group(2)!, match.group(1)!);
+
+    // Strategy 4: "qty x item price"
+    final qtyPattern = RegExp(
+      r'^\d+\s*[xX×]\s*(.+?)\s+[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s*$',
+    );
+    match = qtyPattern.firstMatch(trimmed);
+    if (match != null) return _buildItem(match.group(1)!, match.group(2)!);
+
+    return null;
+  }
+
+  static ExtractedItem? _buildItem(String rawName, String rawPrice) {
+    final priceStr = rawPrice.replaceAll(',', '.');
     final amount = double.tryParse(priceStr);
     if (amount == null || amount <= 0) return null;
 
-    // Extract name: everything before the price
-    var name = line.substring(0, match.start).trim();
-    // Clean up common prefixes
-    name = name.replaceAll(RegExp(r'^[\d]+[.\s]+'), ''); // remove leading numbers
-    name = name.replaceAll(RegExp(r'[.\-_]+$'), '').trim(); // trailing dots/dashes
+    var name = rawName.trim();
+    name = name.replaceAll(RegExp(r'^[\d]+[.\s]+'), '');
+    name = name.replaceAll(RegExp(r'[.\-_:]+$'), '').trim();
+    name = name.replaceAll(RegExp(r'\s{2,}'), ' ');
 
-    if (name.isEmpty) return null;
+    if (name.isEmpty || name.length < 2) return null;
     if (name.length > 80) name = name.substring(0, 80);
 
     return ExtractedItem(name: name, amount: amount);
@@ -90,15 +157,17 @@ class OcrService {
   static bool _isNonItemLine(String lower) {
     const skip = [
       'total', 'subtotal', 'sub total', 'grand total',
-      'tax', 'vat', 'tip', 'gratuity', 'change',
-      'cash', 'credit', 'debit', 'visa', 'mastercard',
+      'tax ', 'vat ', 'tip ', 'gratuity', 'change ',
+      'cash ', 'credit card', 'debit card', 'visa ', 'mastercard',
       'thank you', 'receipt', 'invoice',
-      'date', 'time', 'table', 'server', 'cashier',
-      'tel', 'phone', 'fax', 'www', 'http',
+      'table ', 'server ', 'cashier',
+      'tel ', 'phone', 'fax ', 'www.', 'http',
+      'balance', 'payment', 'amount due',
     ];
     for (final s in skip) {
       if (lower.startsWith(s)) return true;
     }
+    if (RegExp(r'^\d[\d/\-.:, ]+$').hasMatch(lower)) return true;
     return false;
   }
 }

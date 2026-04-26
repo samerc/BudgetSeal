@@ -468,6 +468,13 @@ class _HeatmapSection extends ConsumerWidget {
               _legendDot(AppColors.healthy.withValues(alpha: 0.4), 'Income'),
             ],
           ),
+          const SizedBox(height: 6),
+          Text(
+            'Each square is one day. Darker = higher amount. '
+            'Scroll left to see past months.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 10, color: AppColors.th(context)),
+          ),
         ],
       ),
     );

@@ -9,7 +9,9 @@ import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
-import '../../shared/widgets/calculator_amount_field.dart';
+import 'dart:ui' as ui;
+
+import '../../shared/widgets/currency_picker_field.dart';
 
 class BillSplitterScreen extends ConsumerStatefulWidget {
   const BillSplitterScreen({super.key});
@@ -23,16 +25,26 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   final _personCtrl = TextEditingController();
   final _items = <_BillItem>[];
   double _tipPercent = 0;
-  String? _receiptPath;
   bool _scanning = false;
-  bool _manualMode = true;
 
-  // Manual mode fields
-  double _totalAmount = 0;
-  bool _evenSplit = true;
+  // Bill currency (may differ from base)
+  late String _billCurrency;
+  double _exchangeRate = 1.0; // billCurrency → baseCurrency
+
+  // OCR state
+  String? _receiptPath;
+  OcrResult? _ocrResult;
+  final _selectedLineIndices = <int, String>{}; // lineIndex → personName
+  String? _activePersonForSelection; // pre-selected person for tap assignment
 
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
+
+  @override
+  void initState() {
+    super.initState();
+    _billCurrency = ref.read(householdProvider).value?.baseCurrency ?? 'USD';
+  }
 
   @override
   void dispose() {
@@ -40,7 +52,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     super.dispose();
   }
 
-  // ─── OCR Scan ──────────────────────────────────────────────────────────────
+  // ─── Receipt Scan ──────────────────────────────────────────────────────────
 
   Future<void> _scanReceipt() async {
     final picker = ImagePicker();
@@ -70,41 +82,115 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       source: source,
       maxWidth: 1600,
       maxHeight: 1600,
-      imageQuality: 80,
+      imageQuality: 85,
     );
     if (image == null) return;
 
     setState(() {
       _scanning = true;
       _receiptPath = image.path;
-      _manualMode = false;
     });
 
-    final items = await OcrService.extractLineItems(image.path);
+    final result = await OcrService.scanReceipt(image.path);
 
     if (mounted) {
       setState(() {
         _scanning = false;
+        _ocrResult = result;
+        _selectedLineIndices.clear();
         _items.clear();
-        for (final item in items) {
-          _items.add(_BillItem(
-            name: item.name,
-            amount: item.amount,
-            assignedTo: {},
-          ));
-        }
       });
 
-      if (items.isEmpty) {
+      if (result.lines.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('No items detected. Try adding manually.'),
+          content: Text('No text detected. Try a clearer photo.'),
           behavior: SnackBarBehavior.floating,
         ));
       }
     }
   }
 
-  // ─── People Management ─────────────────────────────────────────────────────
+  // ─── Line Selection ────────────────────────────────────────────────────────
+
+  void _onLineTapped(int lineIndex) {
+    final line = _ocrResult!.lines[lineIndex];
+
+    // Already selected? Deselect
+    if (_selectedLineIndices.containsKey(lineIndex)) {
+      setState(() {
+        _selectedLineIndices.remove(lineIndex);
+        _items.removeWhere((item) => item.ocrLineIndex == lineIndex);
+      });
+      return;
+    }
+
+    // If a person is pre-selected, assign directly
+    if (_activePersonForSelection != null) {
+      _assignLineToPersons(lineIndex, line, _activePersonForSelection!);
+      return;
+    }
+
+    // No person pre-selected: show popup to pick person
+    _showPersonPickerForLine(lineIndex, line);
+  }
+
+  void _assignLineToPersons(int lineIndex, OcrLine line, String person) {
+    setState(() {
+      _selectedLineIndices[lineIndex] = person;
+      _items.add(_BillItem(
+        name: line.parsedName ?? line.text,
+        amount: line.parsedAmount ?? 0,
+        assignedTo: {person},
+        ocrLineIndex: lineIndex,
+      ));
+    });
+  }
+
+  void _showPersonPickerForLine(int lineIndex, OcrLine line) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Assign to:',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tp(ctx))),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _people.map((p) {
+                  final color = _personColor(p);
+                  return ActionChip(
+                    label: Text(p),
+                    backgroundColor: color.withValues(alpha: 0.15),
+                    side: BorderSide(color: color.withValues(alpha: 0.3)),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _assignLineToPersons(lineIndex, line, p);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── People ────────────────────────────────────────────────────────────────
 
   void _addPerson() {
     final name = _personCtrl.text.trim();
@@ -118,30 +204,29 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final removed = _people[index];
     setState(() {
       _people.removeAt(index);
-      for (final item in _items) {
-        item.assignedTo.remove(removed);
+      if (_activePersonForSelection == removed) {
+        _activePersonForSelection = null;
       }
+      // Remove items assigned to this person
+      _selectedLineIndices.removeWhere((_, p) => p == removed);
+      _items.removeWhere((item) => item.assignedTo.contains(removed));
     });
   }
 
-  // ─── Item Management ───────────────────────────────────────────────────────
+  // ─── Manual Item ───────────────────────────────────────────────────────────
 
-  void _addItem() {
-    setState(() => _items.add(_BillItem(name: '', amount: 0, assignedTo: {})));
+  void _addManualItem() {
+    setState(() => _items.add(_BillItem(
+        name: '', amount: 0, assignedTo: {}, ocrLineIndex: null)));
   }
 
   void _removeItem(int index) {
-    setState(() => _items.removeAt(index));
-  }
-
-  void _toggleAssignment(int itemIdx, String person) {
+    final item = _items[index];
     setState(() {
-      final item = _items[itemIdx];
-      if (item.assignedTo.contains(person)) {
-        item.assignedTo.remove(person);
-      } else {
-        item.assignedTo.add(person);
+      if (item.ocrLineIndex != null) {
+        _selectedLineIndices.remove(item.ocrLineIndex);
       }
+      _items.removeAt(index);
     });
   }
 
@@ -153,23 +238,14 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       splits[p] = 0;
     }
 
-    if (_manualMode && _evenSplit && _people.isNotEmpty) {
-      final perPerson = _totalAmount / _people.length;
-      for (final p in _people) {
-        splits[p] = perPerson;
-      }
-    } else {
-      // Item-based: each item split among assigned people
-      for (final item in _items) {
-        if (item.assignedTo.isEmpty || item.amount <= 0) continue;
-        final share = item.amount / item.assignedTo.length;
-        for (final person in item.assignedTo) {
-          splits[person] = (splits[person] ?? 0) + share;
-        }
+    for (final item in _items) {
+      if (item.assignedTo.isEmpty || item.amount <= 0) continue;
+      final share = item.amount / item.assignedTo.length;
+      for (final person in item.assignedTo) {
+        splits[person] = (splits[person] ?? 0) + share;
       }
     }
 
-    // Apply tip
     if (_tipPercent > 0) {
       final tipMultiplier = 1 + _tipPercent / 100;
       for (final key in splits.keys) {
@@ -180,27 +256,47 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return splits;
   }
 
+  double _toBase(double amount) {
+    if (_billCurrency == _baseCurrency) return amount;
+    if ((_exchangeRate - 1.0).abs() < 0.001) return amount; // rate not set
+    return amount * _exchangeRate;
+  }
+
   // ─── Create Transaction ────────────────────────────────────────────────────
 
   void _createTransaction() {
     final splits = _calculateSplits();
+    final myName = _people.first;
+    final myShare = splits[myName] ?? 0;
     final total = splits.values.fold(0.0, (s, v) => s + v);
-    final splitDetails = splits.entries
-        .map((e) =>
-            '${e.key}: ${formatAmount(e.value, currency: _baseCurrency)}')
-        .join(', ');
-    final note = 'Bill split ($splitDetails)';
+    final otherPeople = _people.where((p) => p != myName).toList();
+    final note = otherPeople.isEmpty
+        ? 'Bill: ${formatAmount(total, currency: _billCurrency)}'
+        : 'Split with ${otherPeople.join(", ")} — '
+            'Total: ${formatAmount(total, currency: _billCurrency)}';
 
     context.push('/add-transaction', extra: {
       'editType': 'expense',
       'editNote': note,
       'editLines': [
         {
-          'amount': total,
-          'currency': _baseCurrency,
+          'amount': myShare,
+          'currency': _billCurrency,
+          'exchangeRateToBase': _billCurrency == _baseCurrency ? 1.0 : _exchangeRate,
         },
       ],
     });
+  }
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+
+  Color _personColor(String person) {
+    const colors = [
+      Color(0xFF6366F1), Color(0xFF10B981), Color(0xFFF59E0B),
+      Color(0xFFEF4444), Color(0xFF8B5CF6), Color(0xFF06B6D4),
+      Color(0xFFEC4899), Color(0xFFFF7043),
+    ];
+    return colors[_people.indexOf(person) % colors.length];
   }
 
   // ─── Build ─────────────────────────────────────────────────────────────────
@@ -209,6 +305,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget build(BuildContext context) {
     final splits = _calculateSplits();
     final grandTotal = splits.values.fold(0.0, (s, v) => s + v);
+    final isCrossCurrency = _billCurrency != _baseCurrency;
 
     return Scaffold(
       appBar: AppBar(
@@ -235,40 +332,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Receipt preview
-                if (_receiptPath != null)
-                  Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: FileImage(File(_receiptPath!)),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-
-                // Mode toggle
-                _card(
-                  context,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _modeChip('Manual', _manualMode, () {
-                          setState(() => _manualMode = true);
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _modeChip('Items', !_manualMode, () {
-                          setState(() => _manualMode = false);
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
+                // ── Receipt Image with OCR overlay ──
+                if (_receiptPath != null && _ocrResult != null)
+                  _buildReceiptOverlay(),
+                if (_receiptPath != null) const SizedBox(height: 16),
 
                 // ── People ──
                 _sectionHeader(context, 'PEOPLE'),
@@ -277,25 +344,76 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   context,
                   child: Column(
                     children: [
+                      // Active person selector (for tap-to-assign mode)
+                      if (_ocrResult != null) ...[
+                        Text('Tap a person, then tap items on the receipt:',
+                            style: TextStyle(
+                                fontSize: 11, color: AppColors.ts(context))),
+                        const SizedBox(height: 8),
+                      ],
                       Wrap(
                         spacing: 8,
-                        runSpacing: 4,
+                        runSpacing: 6,
                         children: [
                           for (var i = 0; i < _people.length; i++)
-                            Chip(
-                              label: Text(_people[i],
-                                  style: const TextStyle(fontSize: 13)),
-                              deleteIcon: _people.length > 1
-                                  ? const Icon(Icons.close, size: 16)
-                                  : null,
-                              onDeleted: _people.length > 1
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _activePersonForSelection =
+                                      _activePersonForSelection == _people[i]
+                                          ? null
+                                          : _people[i];
+                                });
+                              },
+                              onLongPress: _people.length > 1
                                   ? () => _removePerson(i)
                                   : null,
-                              backgroundColor: AppColors.sfv(context),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _activePersonForSelection == _people[i]
+                                      ? _personColor(_people[i])
+                                          .withValues(alpha: 0.2)
+                                      : AppColors.sfv(context),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: _activePersonForSelection == _people[i]
+                                        ? _personColor(_people[i])
+                                        : AppColors.bd(context),
+                                    width: _activePersonForSelection == _people[i]
+                                        ? 2
+                                        : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: _personColor(_people[i]),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(_people[i],
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight:
+                                                _activePersonForSelection ==
+                                                        _people[i]
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                            color: AppColors.tp(context))),
+                                  ],
+                                ),
+                              ),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
@@ -320,8 +438,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                             onPressed: _addPerson,
                             icon: const Icon(Icons.add, size: 18),
                             style: IconButton.styleFrom(
-                              backgroundColor: AppColors.accent,
-                            ),
+                                backgroundColor: AppColors.accent),
                           ),
                         ],
                       ),
@@ -330,47 +447,73 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Manual Mode ──
-                if (_manualMode) ...[
-                  _sectionHeader(context, 'AMOUNT'),
-                  const SizedBox(height: 8),
-                  _card(
-                    context,
-                    child: Column(
-                      children: [
-                        CalculatorAmountField(
-                          value: _totalAmount,
-                          currency: _baseCurrency,
-                          label: 'Total bill',
-                          onChanged: (v) =>
-                              setState(() => _totalAmount = v),
-                        ),
+                // ── Bill Currency ──
+                _sectionHeader(context, 'BILL CURRENCY'),
+                const SizedBox(height: 8),
+                _card(
+                  context,
+                  child: Column(
+                    children: [
+                      CurrencyPickerField(
+                        value: _billCurrency,
+                        label: 'Bill currency',
+                        onChanged: (c) => setState(() {
+                          _billCurrency = c;
+                          if (c == _baseCurrency) _exchangeRate = 1.0;
+                        }),
+                      ),
+                      if (isCrossCurrency) ...[
                         const SizedBox(height: 12),
-                        SwitchListTile.adaptive(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Even split',
-                              style: TextStyle(fontSize: 14)),
-                          value: _evenSplit,
-                          onChanged: (v) =>
-                              setState(() => _evenSplit = v),
+                        Row(
+                          children: [
+                            Text('1 $_billCurrency = ',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.ts(context))),
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: _exchangeRate != 1.0
+                                    ? _exchangeRate.toString()
+                                    : '',
+                                decoration: InputDecoration(
+                                  hintText: 'Rate to $_baseCurrency',
+                                  isDense: true,
+                                  filled: true,
+                                  fillColor: AppColors.sfv(context),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                keyboardType: const TextInputType
+                                    .numberWithOptions(decimal: true),
+                                onChanged: (v) {
+                                  _exchangeRate = double.tryParse(v) ?? 1.0;
+                                },
+                              ),
+                            ),
+                            Text(' $_baseCurrency',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.ts(context))),
+                          ],
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
+                ),
+                const SizedBox(height: 16),
 
-                // ── Items Mode ──
-                if (!_manualMode) ...[
-                  _sectionHeader(context, 'ITEMS'),
-                  const SizedBox(height: 8),
-                  for (var i = 0; i < _items.length; i++)
-                    _buildItemCard(context, i),
-                  TextButton.icon(
-                    onPressed: _addItem,
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Add item'),
-                  ),
-                ],
+                // ── Selected Items ──
+                _sectionHeader(context, 'ITEMS (${_items.length})'),
+                const SizedBox(height: 8),
+                for (var i = 0; i < _items.length; i++)
+                  _buildItemCard(context, i),
+                TextButton.icon(
+                  onPressed: _addManualItem,
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: const Text('Add item manually'),
+                ),
                 const SizedBox(height: 16),
 
                 // ── Tip ──
@@ -387,8 +530,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                           max: 30,
                           divisions: 6,
                           label: '${_tipPercent.round()}%',
-                          onChanged: (v) =>
-                              setState(() => _tipPercent = v),
+                          onChanged: (v) => setState(() => _tipPercent = v),
                         ),
                       ),
                       SizedBox(
@@ -413,43 +555,79 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     children: [
                       for (final entry in splits.entries)
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(entry.key,
-                                  style: const TextStyle(fontSize: 14)),
-                              Text(
-                                formatAmount(entry.value,
-                                    currency: _baseCurrency),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.tp(context),
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: _personColor(entry.key),
+                                  shape: BoxShape.circle,
                                 ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(entry.key,
+                                    style: const TextStyle(fontSize: 14)),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    formatAmount(entry.value,
+                                        currency: _billCurrency),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.tp(context),
+                                    ),
+                                  ),
+                                  if (isCrossCurrency &&
+                                      (_exchangeRate - 1.0).abs() >= 0.001)
+                                    Text(
+                                      '≈ ${formatAmount(_toBase(entry.value), currency: _baseCurrency)}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.ts(context),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                       const Divider(),
                       Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total',
-                              style: TextStyle(
+                          const Expanded(
+                            child: Text('Total',
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                formatAmount(grandTotal,
+                                    currency: _billCurrency),
+                                style: TextStyle(
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w700)),
-                          Text(
-                            formatAmount(grandTotal,
-                                currency: _baseCurrency),
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.tp(context),
-                            ),
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.tp(context),
+                                ),
+                              ),
+                              if (isCrossCurrency &&
+                                  (_exchangeRate - 1.0).abs() >= 0.001)
+                                Text(
+                                  '≈ ${formatAmount(_toBase(grandTotal), currency: _baseCurrency)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.ts(context),
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -458,11 +636,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Create Transaction ──
                 FilledButton.icon(
                   onPressed: grandTotal > 0 ? _createTransaction : null,
                   icon: const Icon(Icons.receipt_long_rounded),
-                  label: const Text('Create Transaction'),
+                  label: Text(
+                      'Create Transaction (${formatAmount(splits[_people.first] ?? 0, currency: _billCurrency)})'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),
@@ -473,112 +651,236 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     );
   }
 
-  Widget _buildItemCard(BuildContext context, int index) {
-    final item = _items[index];
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context)),
-      ),
+  // ─── Receipt Image with Tappable OCR Overlay ───────────────────────────────
+
+  Widget _buildReceiptOverlay() {
+    final result = _ocrResult!;
+    return _card(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: TextFormField(
-                  initialValue: item.name,
-                  decoration: InputDecoration(
-                    hintText: 'Item name',
-                    isDense: true,
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: (v) => item.name = v,
-                ),
-              ),
+              Icon(Icons.document_scanner_rounded,
+                  size: 16, color: AppColors.ts(context)),
               const SizedBox(width: 8),
-              SizedBox(
-                width: 90,
-                child: TextFormField(
-                  initialValue: item.amount > 0
-                      ? item.amount.toStringAsFixed(2)
-                      : '',
-                  decoration: InputDecoration(
-                    hintText: '0.00',
-                    isDense: true,
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    prefixText: '\$ ',
-                  ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (v) {
-                    item.amount = double.tryParse(v) ?? 0;
-                    setState(() {});
-                  },
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 18),
-                onPressed: () => _removeItem(index),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                    minWidth: 28, minHeight: 28),
+              Text('Tap items to assign them',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tp(context))),
+              const Spacer(),
+              TextButton(
+                onPressed: _scanReceipt,
+                child: const Text('Re-scan', style: TextStyle(fontSize: 12)),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          // Person assignment chips
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: _people
-                .map((p) => GestureDetector(
-                      onTap: () => _toggleAssignment(index, p),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: item.assignedTo.contains(p)
-                              ? AppColors.accent.withValues(alpha: 0.15)
-                              : AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(20),
-                          border: item.assignedTo.contains(p)
-                              ? Border.all(
-                                  color: AppColors.accent
-                                      .withValues(alpha: 0.4))
-                              : null,
-                        ),
-                        child: Text(p,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: item.assignedTo.contains(p)
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: item.assignedTo.contains(p)
-                                  ? AppColors.accent
-                                  : AppColors.ts(context),
-                            )),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stack(
+                  children: [
+                    // Receipt image
+                    Image.file(
+                      File(_receiptPath!),
+                      width: constraints.maxWidth,
+                      fit: BoxFit.fitWidth,
+                    ),
+                    // OCR line overlays
+                    Positioned.fill(
+                      child: LayoutBuilder(
+                        builder: (_, imageConstraints) {
+                          // We need the actual rendered image size to scale bounding boxes
+                          return FutureBuilder<Size>(
+                            future: _getImageSize(),
+                            builder: (_, snapshot) {
+                              if (!snapshot.hasData) return const SizedBox();
+                              final imageSize = snapshot.data!;
+                              final scaleX =
+                                  imageConstraints.maxWidth / imageSize.width;
+                              final scaleY =
+                                  (imageConstraints.maxHeight > 0
+                                      ? imageConstraints.maxHeight
+                                      : imageConstraints.maxWidth *
+                                          imageSize.height /
+                                          imageSize.width) /
+                                  imageSize.height;
+
+                              return Stack(
+                                children: [
+                                  for (var i = 0; i < result.lines.length; i++)
+                                    _buildLineOverlay(
+                                        i, result.lines[i], scaleX, scaleY),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       ),
-                    ))
-                .toList(),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
+
+  Future<Size>? _imageSizeCache;
+
+  Future<Size> _getImageSize() {
+    _imageSizeCache ??= () async {
+      final file = File(_receiptPath!);
+      final bytes = await file.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      return Size(
+          frame.image.width.toDouble(), frame.image.height.toDouble());
+    }();
+    return _imageSizeCache!;
+  }
+
+  Widget _buildLineOverlay(
+      int index, OcrLine line, double scaleX, double scaleY) {
+    final isSelected = _selectedLineIndices.containsKey(index);
+    final assignedPerson =
+        isSelected ? _selectedLineIndices[index] : null;
+    final color = assignedPerson != null
+        ? _personColor(assignedPerson)
+        : AppColors.accent;
+
+    final rect = Rect.fromLTRB(
+      line.boundingBox.left * scaleX,
+      line.boundingBox.top * scaleY,
+      line.boundingBox.right * scaleX,
+      line.boundingBox.bottom * scaleY,
+    );
+
+    return Positioned(
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      child: GestureDetector(
+        onTap: () => _onLineTapped(index),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.3)
+                : Colors.transparent,
+            border: isSelected
+                ? Border.all(color: color, width: 2)
+                : line.hasPrice
+                    ? Border.all(
+                        color: Colors.white.withValues(alpha: 0.4), width: 1)
+                    : null,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Item Card ─────────────────────────────────────────────────────────────
+
+  Widget _buildItemCard(BuildContext context, int index) {
+    final item = _items[index];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Row(
+        children: [
+          // Person color dot
+          if (item.assignedTo.isNotEmpty)
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: _personColor(item.assignedTo.first),
+                shape: BoxShape.circle,
+              ),
+            ),
+          // Name
+          Expanded(
+            child: item.ocrLineIndex != null
+                ? Text(item.name,
+                    style: const TextStyle(fontSize: 13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis)
+                : TextFormField(
+                    initialValue: item.name,
+                    decoration: const InputDecoration(
+                      hintText: 'Item name',
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                    onChanged: (v) => item.name = v,
+                  ),
+          ),
+          const SizedBox(width: 8),
+          // Amount — flexible width to fit large amounts
+          Flexible(
+            flex: 0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 70, maxWidth: 140),
+              child: item.ocrLineIndex != null
+                ? Text(
+                    formatAmount(item.amount, currency: _billCurrency),
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context)),
+                    textAlign: TextAlign.end,
+                  )
+                : IntrinsicWidth(
+                    child: TextFormField(
+                    initialValue:
+                        item.amount > 0 ? item.amount.toStringAsFixed(2) : '',
+                    decoration: const InputDecoration(
+                      hintText: '0.00',
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                    textAlign: TextAlign.end,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                    onChanged: (v) {
+                      item.amount = double.tryParse(v) ?? 0;
+                      setState(() {});
+                    },
+                  ),
+                  ),
+            ),
+          ),
+          // Delete
+          IconButton(
+            icon: Icon(Icons.close, size: 16, color: AppColors.th(context)),
+            onPressed: () => _removeItem(index),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Shared Widgets ────────────────────────────────────────────────────────
 
   Widget _card(BuildContext context, {required Widget child}) {
     return Container(
@@ -601,43 +903,18 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           letterSpacing: 0.5,
         ));
   }
-
-  Widget _modeChip(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.accent.withValues(alpha: 0.12)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(10),
-          border: selected
-              ? Border.all(color: AppColors.accent.withValues(alpha: 0.4))
-              : null,
-        ),
-        child: Center(
-          child: Text(label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? AppColors.accent : AppColors.ts(context),
-              )),
-        ),
-      ),
-    );
-  }
-
 }
 
 class _BillItem {
   String name;
   double amount;
   final Set<String> assignedTo;
+  final int? ocrLineIndex;
 
   _BillItem({
     required this.name,
     required this.amount,
     required this.assignedTo,
+    required this.ocrLineIndex,
   });
 }

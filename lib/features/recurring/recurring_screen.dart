@@ -267,8 +267,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
+                            _load();
                           }
-                          _load();
                         },
                         onEdit: () => _showEditSheet(filtered[i]),
                       ),

@@ -180,8 +180,17 @@ class _DetailBody extends ConsumerWidget {
                     amountText = formatSignedAmount(entry.lines.first.amount,
                         currency: entry.lines.first.currency, type: tx.type);
                   } else {
-                    // Multi-line: show base currency total
-                    amountText = formatSignedAmount(tx.amount,
+                    // Multi-line: compute base total from lines, skipping bogus rates
+                    double baseTotal = 0;
+                    for (final l in entry.lines) {
+                      if (l.currency == baseCurrency) {
+                        baseTotal += l.amount;
+                      } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
+                        baseTotal += l.amount * l.exchangeRateToBase;
+                      }
+                      // else: skip lines with unset rate
+                    }
+                    amountText = formatSignedAmount(baseTotal,
                         currency: baseCurrency, type: tx.type);
                   }
                   return GestureDetector(
