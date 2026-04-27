@@ -7,6 +7,7 @@ import '../../core/providers/sync_provider.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
+import '../../core/sync/sync_encryption.dart';
 import '../../shared/theme/app_colors.dart';
 
 class SyncScreen extends ConsumerWidget {
@@ -125,6 +126,9 @@ class SyncScreen extends ConsumerWidget {
               color: AppColors.overspent,
               onTap: () => _confirmDisconnect(context, notifier),
             ),
+            const SizedBox(height: 16),
+            // ── Sync Encryption ──
+            _SyncEncryptionCard(),
             const SizedBox(height: 24),
           ],
 
@@ -639,6 +643,202 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Sync Encryption Card ────────────────────────────────────────────────────
+
+class _SyncEncryptionCard extends StatefulWidget {
+  @override
+  State<_SyncEncryptionCard> createState() => _SyncEncryptionCardState();
+}
+
+class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
+  bool _hasPassword = false;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPassword();
+  }
+
+  Future<void> _checkPassword() async {
+    final has = await SyncEncryption.hasPassword();
+    if (mounted) setState(() { _hasPassword = has; _loading = false; });
+  }
+
+  Future<void> _setPassword() async {
+    final ctrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Set Sync Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'This password encrypts your sync file on Google Drive. '
+              'You\'ll need the same password on any other device that syncs '
+              'with this household.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                hintText: 'Enter a strong password',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: confirmCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Confirm Password',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (ctrl.text.isEmpty) return;
+              if (ctrl.text != confirmCtrl.text) {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                  content: Text('Passwords don\'t match'),
+                  behavior: SnackBarBehavior.floating,
+                ));
+                return;
+              }
+              Navigator.pop(ctx, ctrl.text);
+            },
+            child: const Text('Set Password'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      await SyncEncryption.setPassword(result);
+      await _checkPassword();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Sync encryption enabled. Next sync will be encrypted.'),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+  }
+
+  Future<void> _removePassword() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Encryption?'),
+        content: const Text(
+          'Future sync files will be unencrypted. '
+          'Other devices will need to remove their password too.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await SyncEncryption.clearPassword();
+      await _checkPassword();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Sync encryption removed'),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                _hasPassword ? Icons.lock_rounded : Icons.lock_open_rounded,
+                size: 18,
+                color: _hasPassword ? AppColors.healthy : AppColors.caution,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Sync Encryption',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    Text(
+                      _hasPassword
+                          ? 'Your sync file is encrypted with AES-256'
+                          : 'Sync file is not encrypted',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context)),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: _hasPassword ? _removePassword : _setPassword,
+                child: Text(_hasPassword ? 'Change' : 'Enable'),
+              ),
+            ],
+          ),
+          if (!_hasPassword) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded,
+                    size: 14, color: AppColors.caution),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Anyone with access to your Google Drive can read your financial data',
+                    style: TextStyle(fontSize: 11, color: AppColors.caution),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

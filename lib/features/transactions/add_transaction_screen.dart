@@ -130,6 +130,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         line.categoryId = lineData['categoryId'] as String?;
         line.categoryName = lineData['categoryName'] as String?;
         line.noteCtrl.text = lineData['note'] as String? ?? '';
+        // Restore exchange rate for foreign currency lines
+        final rate = lineData['exchangeRateToBase'] as double?;
+        if (rate != null && rate != 1.0) {
+          line.exchangeRateToBase = rate;
+          line.rateCtrl.text = formatRateForInput(roundRate(rate));
+        }
         _lines.add(line);
       }
     }
@@ -1105,41 +1111,41 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ),
           icon: const Icon(Icons.chevron_right_rounded,
               size: 18, color: AppColors.textHint),
-          items: accounts
-              .map((a) {
-                final balances = ref.read(accountsWithBalanceProvider).value ?? [];
-                final ab = balances.where((b) => b.account.id == a.id).firstOrNull;
-                final balance = ab?.balance;
-                return DropdownMenuItem(
-                    value: a.id,
-                    child: Row(children: [
-                      Icon(_accountIcon(a.type),
-                          size: 18, color: AppColors.textSecondary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(a.name,
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w500),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                      const SizedBox(width: 6),
-                      if (balance != null)
-                        Text(formatAmount(balance, currency: a.currency),
+          items: () {
+              final balances = ref.watch(accountsWithBalanceProvider).value ?? [];
+              final balanceMap = {for (final ab in balances) ab.account.id: ab.balance};
+              return accounts
+                  .map((a) {
+                    final balance = balanceMap[a.id];
+                    return DropdownMenuItem(
+                        value: a.id,
+                        child: Row(children: [
+                          Icon(_accountIcon(a.type),
+                              size: 18, color: AppColors.textSecondary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(a.name,
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w500),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            balance != null
+                                ? formatAmount(balance, currency: a.currency)
+                                : a.currency,
                             style: TextStyle(
                                 fontSize: 12,
-                                color: balance >= 0
-                                    ? AppColors.textSecondary
-                                    : AppColors.overspent))
-                      else
-                        Text(a.currency,
-                            style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary)),
-                    ]),
-                  );
-              })
-              .toList(),
+                                color: balance != null && balance < 0
+                                    ? AppColors.overspent
+                                    : AppColors.textSecondary),
+                          ),
+                        ]),
+                      );
+                  })
+                  .toList();
+          }(),
           onChanged: onChanged,
         ),
       ),

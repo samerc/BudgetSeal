@@ -823,7 +823,11 @@ class _AssistedTransactionScreenState
                       fontWeight: FontWeight.w700,
                       color: AppColors.tp(context))),
               const SizedBox(height: 12),
-              ...accounts.map((a) {
+              ...() {
+                // Pre-fetch balances once for all accounts
+                final allBalances = ref.read(accountsWithBalanceProvider).value ?? [];
+                final balanceMap = {for (final ab in allBalances) ab.account.id: ab.balance};
+                return accounts.map((a) {
                 final isSelected = a.id == selectedId;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 6),
@@ -859,14 +863,13 @@ class _AssistedTransactionScreenState
                             fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
                     subtitle: () {
-                      final balances = ref.read(accountsWithBalanceProvider).value ?? [];
-                      final ab = balances.where((b) => b.account.id == a.id).firstOrNull;
-                      if (ab != null) {
+                      final bal = balanceMap[a.id];
+                      if (bal != null) {
                         return Text(
-                          '${a.currency} · ${formatAmount(ab.balance, currency: a.currency)}',
+                          '${a.currency} · ${formatAmount(bal, currency: a.currency)}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: ab.balance >= 0
+                            color: bal >= 0
                                 ? AppColors.ts(context)
                                 : AppColors.overspent,
                           ),
@@ -883,7 +886,8 @@ class _AssistedTransactionScreenState
                         : null,
                   ),
                 );
-              }),
+              });
+              }(),
               const SizedBox(height: 4),
               TextButton.icon(
                 onPressed: () {

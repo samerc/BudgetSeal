@@ -178,9 +178,8 @@ class _AllocationDetailScreenState
         ? _nameController.text
         : 'Envelope';
 
-    return Stack(
-      children: [
-        Scaffold(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(_isNew ? 'New Envelope' : envelopeName,
             maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -279,7 +278,9 @@ class _AllocationDetailScreenState
               ),
             )
           : null,
-      body: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -608,20 +609,20 @@ class _AllocationDetailScreenState
           ],
         ),
       ),
-    ),
-        // Confetti overlay for savings goal completion
-        Align(
-          alignment: Alignment.topCenter,
-          child: ConfettiWidget(
-            confettiController: _confettiCtrl,
-            blastDirectionality: BlastDirectionality.explosive,
-            gravity: 0.2,
-            numberOfParticles: 20,
-            maximumSize: const Size(12, 12),
-            minimumSize: const Size(6, 6),
+          // Confetti overlay for savings goal completion
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiCtrl,
+              blastDirectionality: BlastDirectionality.explosive,
+              gravity: 0.2,
+              numberOfParticles: 20,
+              maximumSize: const Size(12, 12),
+              minimumSize: const Size(6, 6),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -662,9 +663,10 @@ class _AllocationDetailScreenState
     ],
   };
 
-  void _showIconPicker() {
+  Future<void> _showIconPicker() async {
     final customCtrl = TextEditingController();
-    showModalBottomSheet(
+    // Use empty string to signal "remove icon"
+    final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.sf(context),
       isScrollControlled: true,
@@ -726,11 +728,7 @@ class _AllocationDetailScreenState
                     onPressed: () {
                       final text = customCtrl.text.trim();
                       if (text.isNotEmpty) {
-                        final emoji = text.characters.first;
-                        Navigator.pop(ctx);
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) setState(() => _icon = emoji);
-                        });
+                        Navigator.pop(ctx, text.characters.first);
                       }
                     },
                     style: FilledButton.styleFrom(
@@ -749,12 +747,7 @@ class _AllocationDetailScreenState
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) setState(() => _icon = null);
-                      });
-                    },
+                    onPressed: () => Navigator.pop(ctx, ''),
                     child: const Text('Remove icon',
                         style: TextStyle(fontSize: 12)),
                   ),
@@ -803,15 +796,7 @@ class _AllocationDetailScreenState
                           children: group.value.map((e) {
                             final isSelected = e == _icon;
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.pop(ctx);
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  if (mounted) {
-                                    setState(() => _icon = e);
-                                  }
-                                });
-                              },
+                              onTap: () => Navigator.pop(ctx, e),
                               child: Container(
                                 width: 42,
                                 height: 42,
@@ -847,6 +832,11 @@ class _AllocationDetailScreenState
         ),
       ),
     );
+    // Dismiss keyboard focus after sheet closes
+    if (mounted) FocusScope.of(context).unfocus();
+    if (result != null && mounted) {
+      setState(() => _icon = result.isEmpty ? null : result);
+    }
   }
 
   // ---------------------------------------------------------------------------

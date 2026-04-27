@@ -248,16 +248,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     });
                     hapticLight();
                   } else if (dx < 0) {
-                    // Swipe left → next month
-                    setState(() {
-                      if (_selectedMonth == 12) {
-                        _selectedMonth = 1;
-                        _selectedYear++;
-                      } else {
-                        _selectedMonth++;
-                      }
-                    });
-                    hapticLight();
+                    // Swipe left → next month (capped at current)
+                    final now = DateTime.now();
+                    if (_selectedYear < now.year || _selectedMonth < now.month) {
+                      setState(() {
+                        if (_selectedMonth == 12) {
+                          _selectedMonth = 1;
+                          _selectedYear++;
+                        } else {
+                          _selectedMonth++;
+                        }
+                      });
+                      hapticLight();
+                    }
                   }
                 },
                 child: RefreshIndicator(
@@ -307,22 +310,29 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
               const SizedBox(height: 8),
             ],
-            GestureDetector(
-              onLongPress: () => context.push('/bill-splitter'),
-              child: FloatingActionButton(
-                heroTag: 'fab_add_tx',
-                tooltip: 'Add transaction (long-press to split bill)',
-                onPressed: () async {
-                  final txId = await context.push<String?>('/add-transaction');
-                  if (txId != null && mounted) {
-                    setState(() => _highlightedTxId = txId);
-                    Future.delayed(const Duration(milliseconds: 1500), () {
-                      if (mounted) setState(() => _highlightedTxId = null);
-                    });
-                  }
-                },
-                child: const Icon(Icons.add),
-              ),
+            FloatingActionButton.small(
+              heroTag: 'fab_split',
+              tooltip: 'Split Bill',
+              backgroundColor: const Color(0xFFFF8A65),
+              foregroundColor: Colors.white,
+              elevation: 2,
+              onPressed: () => context.push('/bill-splitter'),
+              child: const Icon(Icons.call_split_rounded, size: 18),
+            ),
+            const SizedBox(height: 8),
+            FloatingActionButton(
+              heroTag: 'fab_add_tx',
+              tooltip: 'Add transaction',
+              onPressed: () async {
+                final txId = await context.push<String?>('/add-transaction');
+                if (txId != null && mounted) {
+                  setState(() => _highlightedTxId = txId);
+                  Future.delayed(const Duration(milliseconds: 1500), () {
+                    if (mounted) setState(() => _highlightedTxId = null);
+                  });
+                }
+              },
+              child: const Icon(Icons.add),
             ),
           ],
         ),
@@ -340,7 +350,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             Expanded(
               child: TextField(
                 controller: _searchCtrl,
-                autofocus: true,
+                autofocus: false,
                 style: const TextStyle(fontSize: 16),
                 decoration: const InputDecoration(
                   hintText: 'Search transactions...',
@@ -508,7 +518,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 context: context,
                 builder: (ctx) => SimpleDialog(
                   title: const Text('Select Year'),
-                  children: List.generate(10, (i) {
+                  children: List.generate(DateTime.now().year - (DateTime.now().year - 5) + 1, (i) {
                     final y = DateTime.now().year - 5 + i;
                     return SimpleDialogOption(
                       onPressed: () => Navigator.pop(ctx, y),
@@ -581,7 +591,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    itemCount: 12,
+                    itemCount: _selectedYear == DateTime.now().year
+                        ? DateTime.now().month
+                        : 12,
                     itemBuilder: (_, i) {
                       final month = i + 1;
                       final isSelected = month == _selectedMonth;
@@ -623,16 +635,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     },
                   ),
                 ),
-                // Right arrow
+                // Right arrow (hidden if at current month)
+                if (!_isFutureMonth && !(_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month))
                 GestureDetector(
                   onTap: () {
+                    final now = DateTime.now();
                     hapticLight();
                     setState(() {
                       if (_selectedMonth == 12) {
-                        _selectedMonth = 1;
-                        _selectedYear++;
+                        if (_selectedYear < now.year) {
+                          _selectedMonth = 1;
+                          _selectedYear++;
+                        }
                       } else {
-                        _selectedMonth++;
+                        if (_selectedYear < now.year || _selectedMonth < now.month) {
+                          _selectedMonth++;
+                        }
                       }
                     });
                     final offset = (_selectedMonth - 1) * 80.0;
@@ -1043,11 +1061,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final txColors = ref.watch(txColorsProvider);
     final net = monthIncome - monthExpense;
 
-    // Budget context bar (#2) — sum of allocation targets
+    // Budget context bar (#2) — sum of base-currency allocation targets only
     final allocations = ref.watch(allocationsProvider).value ?? [];
     double totalBudget = 0;
     for (final a in allocations) {
-      totalBudget += a.data.allocation.targetAmount ?? 0;
+      final target = a.data.allocation.targetAmount ?? 0;
+      if (target <= 0) continue;
+      final targetCcy = a.data.allocation.targetCurrency ?? baseCurrency;
+      // Only include envelopes in base currency to avoid mixing
+      if (targetCcy == baseCurrency) {
+        totalBudget += target;
+      }
     }
 
     return Column(
@@ -1535,7 +1559,7 @@ class _DateHeaderTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: isToday ? AppColors.tp(context) : AppColors.ts(context),
+                  color: AppColors.tp(context),
                 ),
               ),
             ],

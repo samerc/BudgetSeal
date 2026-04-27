@@ -198,7 +198,7 @@ class _AccountTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          acc.type[0].toUpperCase() + acc.type.substring(1),
+          '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
           style:
               TextStyle(color: AppColors.ts(context), fontSize: 12),
         ),

@@ -7,8 +7,12 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 class ExtractedItem {
   String name;
   double amount;
+  int quantity;
 
-  ExtractedItem({required this.name, required this.amount});
+  ExtractedItem({required this.name, required this.amount, this.quantity = 1});
+
+  /// Per-unit price when quantity > 1.
+  double get unitPrice => quantity > 1 ? amount / quantity : amount;
 }
 
 /// A recognized text line with its bounding box on the image.
@@ -17,12 +21,14 @@ class OcrLine {
   final ui.Rect boundingBox;
   final double? parsedAmount;
   final String? parsedName;
+  final int parsedQuantity;
 
   OcrLine({
     required this.text,
     required this.boundingBox,
     this.parsedAmount,
     this.parsedName,
+    this.parsedQuantity = 1,
   });
 
   /// Whether this line looks like a billable item (has a price).
@@ -62,27 +68,73 @@ class OcrService {
         imgH = imageData.size.height.toInt();
       }
 
-      final lines = <OcrLine>[];
+      // Collect all raw lines from all blocks
+      final rawLines = <_RawLine>[];
       for (final block in recognized.blocks) {
         for (final line in block.lines) {
           final bbox = line.boundingBox;
-          final parsed = _parseLine(line.text);
-          lines.add(OcrLine(
+          rawLines.add(_RawLine(
             text: line.text,
-            boundingBox: ui.Rect.fromLTRB(
+            rect: ui.Rect.fromLTRB(
               bbox.left.toDouble(),
               bbox.top.toDouble(),
               bbox.right.toDouble(),
               bbox.bottom.toDouble(),
             ),
-            parsedAmount: parsed?.amount,
-            parsedName: parsed?.name,
           ));
         }
       }
 
-      debugPrint('[OcrService] Scanned ${lines.length} lines, '
+      // Merge lines at the same vertical position (same receipt row).
+      // ML Kit often splits "Item name    $4.50" into separate blocks.
+      rawLines.sort((a, b) => a.rect.top.compareTo(b.rect.top));
+      final merged = <_RawLine>[];
+      for (final raw in rawLines) {
+        if (merged.isNotEmpty) {
+          final last = merged.last;
+          final verticalOverlap =
+              raw.rect.top < last.rect.bottom - (last.rect.height * 0.3);
+          if (verticalOverlap) {
+            // Same visual row — merge text and expand bounding box
+            final combinedRect = ui.Rect.fromLTRB(
+              last.rect.left < raw.rect.left ? last.rect.left : raw.rect.left,
+              last.rect.top < raw.rect.top ? last.rect.top : raw.rect.top,
+              last.rect.right > raw.rect.right ? last.rect.right : raw.rect.right,
+              last.rect.bottom > raw.rect.bottom ? last.rect.bottom : raw.rect.bottom,
+            );
+            // Order text left-to-right
+            final leftFirst = last.rect.left < raw.rect.left;
+            merged[merged.length - 1] = _RawLine(
+              text: leftFirst
+                  ? '${last.text}  ${raw.text}'
+                  : '${raw.text}  ${last.text}',
+              rect: combinedRect,
+            );
+            continue;
+          }
+        }
+        merged.add(raw);
+      }
+
+      // Parse merged lines
+      final lines = <OcrLine>[];
+      for (final raw in merged) {
+        final parsed = _parseLine(raw.text);
+        lines.add(OcrLine(
+          text: raw.text,
+          boundingBox: raw.rect,
+          parsedAmount: parsed?.amount,
+          parsedName: parsed?.name,
+          parsedQuantity: parsed?.quantity ?? 1,
+        ));
+      }
+
+      debugPrint('[OcrService] Raw: ${rawLines.length} lines, '
+          'merged: ${merged.length}, '
           '${lines.where((l) => l.hasPrice).length} with prices');
+      for (final l in lines) {
+        debugPrint('  ${l.hasPrice ? "✓" : "·"} "${l.text}"');
+      }
 
       return OcrResult(
         lines: lines,
@@ -98,7 +150,7 @@ class OcrService {
     }
   }
 
-  /// Try to parse a line into (name, amount).
+  /// Try to parse a line into (name, amount) using multiple strategies.
   static ExtractedItem? _parseLine(String line) {
     final trimmed = line.trim();
     if (trimmed.length < 2) return null;
@@ -106,16 +158,23 @@ class OcrService {
     final lower = trimmed.toLowerCase();
     if (_isNonItemLine(lower)) return null;
 
-    // Strategy 1: Price at end (most common)
-    final endPrice = RegExp(
-      r'(.+?)\s+[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s*$',
-    );
-    var match = endPrice.firstMatch(trimmed);
-    if (match != null) return _buildItem(match.group(1)!, match.group(2)!);
+    // Find ALL price-like numbers in the line
+    final priceMatches = RegExp(
+      r'[\$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*[.,]\d{1,2})',
+    ).allMatches(trimmed).toList();
 
-    // Strategy 2: Whole number price at end
+    if (priceMatches.isNotEmpty) {
+      // Use the LAST price in the line (rightmost = most likely the item price)
+      final lastMatch = priceMatches.last;
+      final priceStr = lastMatch.group(1)!;
+      final namepart = trimmed.substring(0, lastMatch.start).trim();
+      final item = _buildItem(namepart, priceStr);
+      if (item != null) return item;
+    }
+
+    // Strategy 2: Whole number price at end (e.g., "Water 3")
     final wholePrice = RegExp(r'(.+?)\s+[\$€£¥]?\s*(\d{1,6})\s*$');
-    match = wholePrice.firstMatch(trimmed);
+    var match = wholePrice.firstMatch(trimmed);
     if (match != null) {
       final name = match.group(1)!;
       if (name.length > 2 && !RegExp(r'^\d+$').hasMatch(name.trim())) {
@@ -123,7 +182,7 @@ class OcrService {
       }
     }
 
-    // Strategy 3: Price at start
+    // Strategy 3: Price at start (e.g., "$4.50 Coffee")
     final startPrice = RegExp(r'^[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s+(.+)');
     match = startPrice.firstMatch(trimmed);
     if (match != null) return _buildItem(match.group(2)!, match.group(1)!);
@@ -139,35 +198,91 @@ class OcrService {
   }
 
   static ExtractedItem? _buildItem(String rawName, String rawPrice) {
-    final priceStr = rawPrice.replaceAll(',', '.');
+    // Clean price: remove spaces, normalize separators
+    var priceStr = rawPrice.replaceAll(' ', '');
+    // Handle "1,234.56" or "1.234,56" or "1 234.56"
+    if (priceStr.contains(',') && priceStr.indexOf(',') > priceStr.lastIndexOf('.')) {
+      priceStr = priceStr.replaceAll('.', '').replaceAll(',', '.');
+    } else {
+      priceStr = priceStr.replaceAll(',', '');
+    }
     final amount = double.tryParse(priceStr);
     if (amount == null || amount <= 0) return null;
 
     var name = rawName.trim();
-    name = name.replaceAll(RegExp(r'^[\d]+[.\s]+'), '');
-    name = name.replaceAll(RegExp(r'[.\-_:]+$'), '').trim();
+    int quantity = 1;
+
+    // Extract leading quantity: "2 x Mango", "3x Coffee", "2  AVOCADO"
+    final leadingQty = RegExp(r'^(\d{1,2})\s*[xX×]?\s+(.+)').firstMatch(name);
+    if (leadingQty != null) {
+      final q = int.tryParse(leadingQty.group(1)!);
+      final rest = leadingQty.group(2)!;
+      // Only treat as quantity if the rest looks like a name (has letters)
+      if (q != null && q >= 1 && q <= 99 &&
+          rest.contains(RegExp(r'[a-zA-Z]'))) {
+        quantity = q;
+        name = rest;
+      }
+    }
+
+    // Strip leading product/barcode codes: "2745P", "37470", "SKU123"
+    name = name.replaceAll(
+        RegExp(r'^[A-Z]?[\dA-Z]{3,10}\s+', caseSensitive: false), '');
+
+    // Extract trailing quantity: "AVOCADO EXTRA  2" or "Mango  1"
+    final trailingQty = RegExp(r'^(.+?)\s+(\d{1,2})$').firstMatch(name);
+    if (trailingQty != null && quantity == 1) {
+      final q = int.tryParse(trailingQty.group(2)!);
+      if (q != null && q >= 1 && q <= 99) {
+        quantity = q;
+        name = trailingQty.group(1)!;
+      }
+    }
+
+    // Strip trailing punctuation
+    name = name.replaceAll(RegExp(r'[.\-_:;,*#]+$'), '').trim();
+    // Strip leading special chars
+    name = name.replaceAll(RegExp(r'^[#*\-]+'), '').trim();
+    // Collapse whitespace
     name = name.replaceAll(RegExp(r'\s{2,}'), ' ');
 
     if (name.isEmpty || name.length < 2) return null;
+    // Skip if name is all digits (not an item name)
+    if (RegExp(r'^\d+$').hasMatch(name)) return null;
     if (name.length > 80) name = name.substring(0, 80);
 
-    return ExtractedItem(name: name, amount: amount);
+    return ExtractedItem(name: name, amount: amount, quantity: quantity);
   }
 
   static bool _isNonItemLine(String lower) {
-    const skip = [
+    // Only skip lines that are EXACTLY these labels (with optional trailing content)
+    const exactSkip = [
       'total', 'subtotal', 'sub total', 'grand total',
-      'tax ', 'vat ', 'tip ', 'gratuity', 'change ',
-      'cash ', 'credit card', 'debit card', 'visa ', 'mastercard',
-      'thank you', 'receipt', 'invoice',
-      'table ', 'server ', 'cashier',
-      'tel ', 'phone', 'fax ', 'www.', 'http',
-      'balance', 'payment', 'amount due',
+      'gratuity', 'thank you', 'receipt', 'invoice',
+      'amount due', 'balance due', 'payment',
     ];
-    for (final s in skip) {
+    for (final s in exactSkip) {
       if (lower.startsWith(s)) return true;
     }
-    if (RegExp(r'^\d[\d/\-.:, ]+$').hasMatch(lower)) return true;
+    // Skip lines that are clearly non-items
+    const containsSkip = [
+      'credit card', 'debit card', 'visa ', 'mastercard',
+      'www.', 'http', 'tel:', 'fax:',
+    ];
+    for (final s in containsSkip) {
+      if (lower.contains(s)) return true;
+    }
+    // Skip lines that are just numbers, dates, or codes
+    if (RegExp(r'^[\d/\-.:, ]+$').hasMatch(lower)) return true;
+    // Skip very short lines (likely headers/noise)
+    if (lower.replaceAll(RegExp(r'[^a-z]'), '').length < 2) return true;
     return false;
   }
+}
+
+/// Internal helper for pre-merge OCR lines.
+class _RawLine {
+  final String text;
+  final ui.Rect rect;
+  const _RawLine({required this.text, required this.rect});
 }

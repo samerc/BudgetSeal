@@ -123,7 +123,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: TextField(
                   controller: _searchController,
-                  autofocus: true,
+                  autofocus: false,
                   textInputAction: TextInputAction.search,
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(

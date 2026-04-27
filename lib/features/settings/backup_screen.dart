@@ -130,9 +130,36 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       final path = result.files.single.path;
       if (path == null) return;
 
+      // Validate the backup file before restoring
+      final backupFile = File(path);
+      final fileSize = await backupFile.length();
+      if (fileSize > 100 * 1024 * 1024) { // 100MB limit
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Backup file too large (max 100MB)'),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
+        return;
+      }
+      // Check SQLite magic bytes
+      final header = await backupFile.openRead(0, 16).first;
+      final magic = String.fromCharCodes(header.take(15));
+      if (!magic.startsWith('SQLite format 3')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Invalid backup file — not a valid database'),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
+        return;
+      }
+
       final dbDir = await getApplicationDocumentsDirectory();
       final dbFile = File(p.join(dbDir.path, 'pocketplan.db'));
-      await File(path).copy(dbFile.path);
+      // Auto-backup current DB before overwriting
+      await AutoBackupService.backupNow();
+      await backupFile.copy(dbFile.path);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

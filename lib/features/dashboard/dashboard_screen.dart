@@ -149,9 +149,41 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               sliver: SliverList(
-                delegate: SliverChildListDelegate([
+                delegate: SliverChildListDelegate(_buildOrderedSections(
+                  layout: layout,
+                  txAsync: txAsync,
+                  accountsAsync: accountsAsync,
+                  allocationsAsync: allocationsAsync,
+                  unallocatedAsync: unallocatedAsync,
+                  recentTxAsync: recentTxAsync,
+                  baseCurrency: baseCurrency,
+                  categoryMap: categoryMap,
+                  context: context,
+                )),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildOrderedSections({
+    required List<DashboardSectionConfig> layout,
+    required AsyncValue<List<TransactionEntry>> txAsync,
+    required AsyncValue<List<AccountWithBalance>> accountsAsync,
+    required AsyncValue<List<AllocationWithBalance>> allocationsAsync,
+    required AsyncValue<Map<String, double>> unallocatedAsync,
+    required AsyncValue<List<TransactionEntry>> recentTxAsync,
+    required String baseCurrency,
+    required Map<String, Category> categoryMap,
+    required BuildContext context,
+  }) {
+    final sectionWidgets = <DashboardSection, List<Widget>>{};
+
+    // Build all section widget lists
+    sectionWidgets[DashboardSection.spending] = [
                   // ── Spending Overview with Donut + Toggle ──
-                  if (sectionVisible(DashboardSection.spending))
                   txAsync.when(
                     data: (entries) {
                       final now = DateTime.now();
@@ -221,9 +253,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     ),
                   ),
                   const SizedBox(height: 12),
+    ];
 
-                  // Quick Actions
-                  if (sectionVisible(DashboardSection.quickActions))
+    sectionWidgets[DashboardSection.quickActions] = [
                   Row(
                     children: [
                       _QuickAction(
@@ -253,22 +285,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: Icons.savings_rounded,
                         label: 'Fund',
-                        color: AppColors.healthy,
+                        color: const Color(0xFF7E57C2),
                         onTap: () => context.push('/funding'),
                       ),
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.call_split_rounded,
                         label: 'Split',
-                        color: const Color(0xFF26A69A),
+                        color: const Color(0xFFFF8A65),
                         onTap: () => context.push('/bill-splitter'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
+    ];
 
-                  // ── Zone 2: Your money ────────────────────────────
-                  if (sectionVisible(DashboardSection.money)) ...[
+    sectionWidgets[DashboardSection.money] = [
                   _SectionHeader(label: 'YOUR MONEY'),
                   const SizedBox(height: 8),
                   // Net Worth Card
@@ -303,8 +335,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       int healthy = 0, caution = 0, overspent = 0;
 
                       for (final a in allocations) {
-                        final bal = a.balanceByCurrency.values
-                            .fold(0.0, (s, v) => s + v);
+                        final targetCcy = a.data.allocation.targetCurrency ?? baseCurrency;
+                        final bal = a.balanceByCurrency[targetCcy] ?? 0.0;
                         final target = a.data.allocation.targetAmount;
 
                         if (bal < 0) {
@@ -349,10 +381,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ], // end Zone 2
+    ];
 
-                  // Unallocated
-                  if (sectionVisible(DashboardSection.unallocated))
+    sectionWidgets[DashboardSection.unallocated] = [
                   unallocatedAsync.when(
                     data: (unallocated) {
                       final baseAmount = unallocated[baseCurrency] ?? 0.0;
@@ -377,9 +408,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     ),
                   ),
                   const SizedBox(height: 20),
+    ];
 
-                  // ── Zone 3: Activity ──────────────────────────────
-                  if (sectionVisible(DashboardSection.activity)) ...[
+    sectionWidgets[DashboardSection.activity] = [
                   _SectionHeader(label: 'ACTIVITY'),
                   const SizedBox(height: 8),
                   // Quick Templates (above recent transactions)
@@ -470,14 +501,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           ref.invalidate(recentTransactionsProvider),
                     ),
                   ),
-                  ], // end Zone 3 (Activity)
-                ]),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    ];
+
+    // Build ordered list from provider layout
+    final result = <Widget>[];
+    for (final config in layout) {
+      if (config.visible && sectionWidgets.containsKey(config.section)) {
+        result.addAll(sectionWidgets[config.section]!);
+      }
+    }
+    return result;
   }
 
   String _greeting() {
@@ -525,7 +558,8 @@ class _StatusCard extends ConsumerWidget {
       bool hasTargets = false;
       for (final a in allocations) {
         final target = a.data.allocation.targetAmount;
-        if (target != null && target > 0) {
+        final targetCcy = a.data.allocation.targetCurrency ?? baseCurrency;
+        if (target != null && target > 0 && targetCcy == baseCurrency) {
           totalTarget += target;
           hasTargets = true;
         }
@@ -596,7 +630,8 @@ class _StatusCard extends ConsumerWidget {
         double totalBudget = 0;
         for (final a in allocations) {
           final t = a.data.allocation.targetAmount;
-          if (t != null && t > 0) totalBudget += t;
+          final ccy = a.data.allocation.targetCurrency ?? baseCurrency;
+          if (t != null && t > 0 && ccy == baseCurrency) totalBudget += t;
         }
 
         if (totalBudget <= 0) {
@@ -1031,7 +1066,6 @@ class _QuickAction extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-
   const _QuickAction(
       {required this.icon,
       required this.label,

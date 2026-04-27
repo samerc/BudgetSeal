@@ -201,16 +201,16 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             children: [
-              _SpendingGauge(
-                spent: totalExpense,
-                typical: typical,
-                currency: baseCurrency,
-              ),
-              const SizedBox(height: 20),
-              _CashflowSummary(
+              _MonthlySummaryCard(
                 income: totalIncome,
                 expense: totalExpense,
                 net: net,
+                lastMonthExpense: () {
+                  final lastMonth = DateTime(now.year, now.month - 1, 1);
+                  return stats?.monthly[lastMonth]?.expense ?? 0.0;
+                }(),
+                dailyRate: now.day > 0 ? totalExpense / now.day : 0,
+                daysLeft: DateUtils.getDaysInMonth(now.year, now.month) - now.day,
                 currency: baseCurrency,
               ),
               const SizedBox(height: 16),
@@ -501,276 +501,181 @@ class _HeatmapSection extends ConsumerWidget {
 
 // ── Spending Gauge (like the TD screenshot) ─────────────────────────────────
 
-class _SpendingGauge extends StatelessWidget {
-  final double spent;
-  final double typical;
+class _MonthlySummaryCard extends StatelessWidget {
+  final double income, expense, net;
+  final double lastMonthExpense;
+  final double dailyRate;
+  final int daysLeft;
   final String currency;
 
-  const _SpendingGauge({
-    required this.spent,
-    required this.typical,
+  const _MonthlySummaryCard({
+    required this.income,
+    required this.expense,
+    required this.net,
+    required this.lastMonthExpense,
+    required this.dailyRate,
+    required this.daysLeft,
     required this.currency,
   });
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final dayOfMonth = now.day;
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final fractionOfMonth = dayOfMonth / daysInMonth;
+    final projected = dailyRate * DateUtils.getDaysInMonth(now.year, now.month);
 
-    // Expected spend so far (proportion of typical for this point in month)
-    final expectedSoFar = typical * fractionOfMonth;
-
-    // Gauge progress: spent vs expected-so-far (not vs full typical)
-    // This makes the gauge meaningful: green = under pace, red = over pace
-    final gaugeBase = typical > 0 ? expectedSoFar : spent;
-    final gaugeProgress = gaugeBase > 0
-        ? (spent / gaugeBase).clamp(0.0, 1.5)
-        : (spent > 0 ? 1.0 : 0.0);
-
-    // Color based on pace: are you spending faster or slower than typical?
-    Color gaugeColor;
-    if (typical == 0) {
-      // No historical data — neutral
-      gaugeColor = AppColors.accent;
-    } else if (spent <= expectedSoFar * 0.8) {
-      gaugeColor = AppColors.healthy; // Well under pace
-    } else if (spent <= expectedSoFar * 1.1) {
-      gaugeColor = AppColors.caution; // Close to pace
-    } else {
-      gaugeColor = AppColors.overspent; // Over pace
+    // Comparison with last month
+    String? comparison;
+    Color? comparisonColor;
+    if (lastMonthExpense > 0) {
+      final diff = ((expense - lastMonthExpense) / lastMonthExpense * 100).abs();
+      if (expense < lastMonthExpense) {
+        comparison = '${diff.round()}% less than last month';
+        comparisonColor = AppColors.healthy;
+      } else if (expense > lastMonthExpense) {
+        comparison = '${diff.round()}% more than last month';
+        comparisonColor = AppColors.overspent;
+      } else {
+        comparison = 'Same as last month';
+        comparisonColor = AppColors.ts(context);
+      }
     }
 
-    final difference = typical > 0 ? (typical - spent).abs() : 0.0;
-    final isOver = spent > typical;
-
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
         children: [
-          Text('Monthly Spending',
+          // Header
+          Text(DateFormat('MMMM yyyy').format(now),
               style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          Text('as of ${DateFormat('MMMM d, yyyy').format(now)}',
-              style: TextStyle(
-                  fontSize: 12, color: AppColors.ts(context))),
-          const SizedBox(height: 24),
-          // Gauge
-          SizedBox(
-            width: 200,
-            height: 120,
-            child: CustomPaint(
-              painter: _GaugePainter(
-                progress: gaugeProgress,
-                color: gaugeColor,
-                bgColor: AppColors.bd(context),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.ts(context))),
+          const SizedBox(height: 16),
+          // Main stats row
+          Row(
+            children: [
+              Expanded(
+                child: _statColumn(
+                  context,
+                  label: 'Income',
+                  amount: income,
+                  color: AppColors.healthy,
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: 130,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        formatAmount(spent, currency: currency),
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Text('SPENT SO FAR',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          color: AppColors.ts(context))),
-                  const SizedBox(height: 8),
-                ],
+              Container(
+                  width: 1, height: 40, color: AppColors.bd(context)),
+              Expanded(
+                child: _statColumn(
+                  context,
+                  label: 'Expenses',
+                  amount: expense,
+                  color: AppColors.overspent,
+                ),
               ),
-            ),
+              Container(
+                  width: 1, height: 40, color: AppColors.bd(context)),
+              Expanded(
+                child: _statColumn(
+                  context,
+                  label: 'Net',
+                  amount: net,
+                  color: net >= 0 ? AppColors.healthy : AppColors.overspent,
+                  prefix: net >= 0 ? '+' : '',
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          // Below/Over typical + Typical spend
-          if (typical > 0) ...[
+          const SizedBox(height: 16),
+          Divider(color: AppColors.bd(context), height: 1),
+          const SizedBox(height: 12),
+          // Pace + projection
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Daily pace',
+                  style: TextStyle(
+                      fontSize: 12, color: AppColors.ts(context))),
+              Text(
+                '${formatAmount(dailyRate, currency: currency)}/day',
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Projected total',
+                  style: TextStyle(
+                      fontSize: 12, color: AppColors.ts(context))),
+              Text(
+                '~${formatAmount(projected, currency: currency)}',
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context)),
+              ),
+            ],
+          ),
+          // Comparison with last month
+          if (comparison != null) ...[
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(children: [
-                  Text(formatAmount(difference, currency: currency),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: isOver
-                              ? AppColors.overspent
-                              : AppColors.healthy)),
-                  Text(isOver ? 'OVER TYPICAL' : 'BELOW TYPICAL',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.ts(context))),
-                ]),
-                const SizedBox(width: 32),
-                Column(children: [
-                  Text(formatAmount(typical, currency: currency),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('TYPICAL SPEND',
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.ts(context))),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () => _showTypicalInfo(context),
-                        child: Icon(Icons.help_outline_rounded,
-                            size: 14, color: AppColors.th(context)),
-                      ),
-                    ],
-                  ),
-                ]),
+                Icon(
+                  expense <= lastMonthExpense
+                      ? Icons.trending_down_rounded
+                      : Icons.trending_up_rounded,
+                  size: 16,
+                  color: comparisonColor,
+                ),
+                const SizedBox(width: 6),
+                Text(comparison,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: comparisonColor)),
               ],
             ),
-          ] else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.info_outline_rounded,
-                      size: 14, color: AppColors.th(context)),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text('Add a few months of data to see typical spending',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.ts(context))),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _showTypicalInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.info_outline_rounded,
-                size: 20, color: AppColors.accent),
-            const SizedBox(width: 8),
-            const Text('Typical Spending'),
           ],
-        ),
-        content: Text(
-          '"Typical Spend" is the average of your total expenses '
-          'over the previous 6 months. It gives you a benchmark to '
-          'compare this month\'s spending against.\n\n'
-          '"Below/Over Typical" shows the difference between what '
-          'you\'ve spent this month and your typical full-month total.\n\n'
-          'The gauge color reflects your spending pace:\n'
-          '• Green — spending slower than usual\n'
-          '• Yellow — on track with typical pace\n'
-          '• Red — spending faster than usual',
-          style: TextStyle(
-              fontSize: 13,
-              color: AppColors.ts(context),
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Got it'),
-          ),
         ],
       ),
     );
   }
-}
 
-class _GaugePainter extends CustomPainter {
-  final double progress; // 0.0 to 1.5
-  final Color color;
-  final Color bgColor;
-
-  _GaugePainter({
-    required this.progress,
-    required this.color,
-    required this.bgColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height);
-    final radius = size.width / 2 - 12;
-    const startAngle = math.pi;
-    const sweepAngle = math.pi;
-
-    // Background arc
-    final bgPaint = Paint()
-      ..color = bgColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      bgPaint,
+  Widget _statColumn(BuildContext context,
+      {required String label,
+      required double amount,
+      required Color color,
+      String prefix = ''}) {
+    return Column(
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 11, color: AppColors.ts(context))),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '$prefix${formatAmount(amount, currency: currency)}',
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: color),
+          ),
+        ),
+      ],
     );
-
-    // Progress arc
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
-
-    final clampedProgress = progress.clamp(0.0, 1.0);
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle * clampedProgress,
-      false,
-      progressPaint,
-    );
-
-    // Typical marker (at the end of the arc)
-    if (progress > 0) {
-      final markerAngle = startAngle + sweepAngle * 1.0;
-      final markerPaint = Paint()
-        ..color = bgColor
-        ..style = PaintingStyle.fill;
-      final mx = center.dx + radius * math.cos(markerAngle);
-      final my = center.dy + radius * math.sin(markerAngle);
-      canvas.drawCircle(Offset(mx, my), 4, markerPaint);
-    }
   }
-
-  @override
-  bool shouldRepaint(covariant _GaugePainter old) =>
-      old.progress != progress || old.color != color;
 }
 
 // ── Cashflow Summary ────────────────────────────────────────────────────────
@@ -1033,10 +938,13 @@ class _NetWorthChart extends ConsumerWidget {
       data: (accountsWithBalance) {
         if (accountsWithBalance.isEmpty) return const SizedBox.shrink();
 
-        // Current net worth (sum of all account balances converted to base)
+        // Current net worth — only sum base-currency accounts
+        // (foreign currency accounts can't be meaningfully summed without FX rates)
         double currentNetWorth = 0;
         for (final awb in accountsWithBalance) {
-          currentNetWorth += awb.balance;
+          if (awb.account.currency == baseCurrency) {
+            currentNetWorth += awb.balance;
+          }
         }
 
         // Reconstruct historical net worth by working backwards from current
@@ -3049,6 +2957,84 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     _compareDate = DateTime(now.year, now.month, 0); // last day of prev month
   }
 
+  String _compareLabel = 'End of Last Month';
+
+  void _showComparePicker(BuildContext context) {
+    final now = DateTime.now();
+    final options = <(String, DateTime)>[
+      ('End of Last Week',
+          now.subtract(Duration(days: now.weekday)).subtract(const Duration(days: 0))),
+      ('End of Last Month', DateTime(now.year, now.month, 0)),
+      ('Same Time Last Month', DateTime(now.year, now.month - 1, now.day)),
+      ('End of Last Quarter', () {
+        final qMonth = ((now.month - 1) ~/ 3) * 3;
+        return qMonth > 0 ? DateTime(now.year, qMonth + 1, 0) : DateTime(now.year - 1, 12, 31);
+      }()),
+      ('End of Last Year', DateTime(now.year - 1, 12, 31)),
+      ('Same Time Last Year', DateTime(now.year - 1, now.month, now.day)),
+      ('Custom...', now),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: Text('Compare balances to:',
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(ctx))),
+              ),
+              Divider(height: 1, color: AppColors.bd(ctx)),
+              ...options.map((opt) => ListTile(
+                    title: Text(opt.$1,
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: _compareLabel == opt.$1
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: AppColors.tp(ctx))),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      if (opt.$1 == 'Custom...') {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _compareDate,
+                          firstDate: now.subtract(const Duration(days: 730)),
+                          lastDate: now,
+                        );
+                        if (picked != null && mounted) {
+                          setState(() {
+                            _compareDate = picked;
+                            _compareLabel = DateFormat('MMM d, yyyy').format(picked);
+                          });
+                        }
+                      } else {
+                        setState(() {
+                          _compareDate = opt.$2;
+                          _compareLabel = opt.$1;
+                        });
+                      }
+                    },
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
@@ -3100,65 +3086,58 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
               children: [
-                // Date selector
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: _compareDate,
-                          firstDate:
-                              DateTime.now().subtract(const Duration(days: 730)),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          setState(() => _compareDate = picked);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.bd(context)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.calendar_today_rounded,
-                                size: 14, color: AppColors.ts(context)),
-                            const SizedBox(width: 8),
-                            Text(
-                              DateFormat('MMM d, yyyy').format(_compareDate),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.tp(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                // Compare period selector
+                GestureDetector(
+                  onTap: () => _showComparePicker(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.bd(context)),
                     ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        DateFormat('MMM d, yyyy').format(today),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.accent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.calendar_today_rounded,
+                            size: 14, color: AppColors.ts(context)),
+                        const SizedBox(width: 8),
+                        Text(
+                          _compareLabel,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.expand_more_rounded,
+                            size: 18, color: AppColors.ts(context)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Date range display
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DateFormat('MMM d, yyyy').format(_compareDate),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ts(context)),
+                    ),
+                    Icon(Icons.arrow_forward_rounded,
+                        size: 14, color: AppColors.th(context)),
+                    Text(
+                      DateFormat('MMM d, yyyy').format(today),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent),
                     ),
                   ],
                 ),

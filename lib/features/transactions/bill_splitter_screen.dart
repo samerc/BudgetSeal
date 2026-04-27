@@ -36,6 +36,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   OcrResult? _ocrResult;
   final _selectedLineIndices = <int, String>{}; // lineIndex → personName
   String? _activePersonForSelection; // pre-selected person for tap assignment
+  bool _showAllLines = true; // show detected lines by default
 
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
@@ -80,9 +81,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
     final image = await picker.pickImage(
       source: source,
-      maxWidth: 1600,
-      maxHeight: 1600,
-      imageQuality: 85,
+      maxWidth: 2400,
+      maxHeight: 2400,
+      imageQuality: 95,
     );
     if (image == null) return;
 
@@ -124,6 +125,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       return;
     }
 
+    // If line has no parsed price, ask for amount first
+    if (!line.hasPrice) {
+      _promptAmountForLine(lineIndex, line);
+      return;
+    }
+
     // If a person is pre-selected, assign directly
     if (_activePersonForSelection != null) {
       _assignLineToPersons(lineIndex, line, _activePersonForSelection!);
@@ -134,12 +141,147 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     _showPersonPickerForLine(lineIndex, line);
   }
 
-  void _assignLineToPersons(int lineIndex, OcrLine line, String person) {
+  void _promptAmountForLine(int lineIndex, OcrLine line) {
+    final amountCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Enter amount'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('OCR text: "${line.text}"',
+                style: TextStyle(
+                    fontSize: 12, color: AppColors.ts(context),
+                    fontStyle: FontStyle.italic)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: amountCtrl,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: '0.00',
+                labelText: 'Amount',
+                filled: true,
+                fillColor: AppColors.sfv(context),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onSubmitted: (_) {
+                final amount = double.tryParse(
+                    amountCtrl.text.replaceAll(',', '.'));
+                if (amount != null && amount > 0) {
+                  Navigator.pop(ctx);
+                  // Create a modified line with the manual amount
+                  final fixedLine = OcrLine(
+                    text: line.text,
+                    boundingBox: line.boundingBox,
+                    parsedAmount: amount,
+                    parsedName: line.parsedName ?? line.text.trim(),
+                  );
+                  _ocrResult!.lines[lineIndex] = fixedLine;
+                  if (_activePersonForSelection != null) {
+                    _assignLineToPersons(
+                        lineIndex, fixedLine, _activePersonForSelection!);
+                  } else {
+                    _showPersonPickerForLine(lineIndex, fixedLine);
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final amount = double.tryParse(
+                  amountCtrl.text.replaceAll(',', '.'));
+              if (amount != null && amount > 0) {
+                Navigator.pop(ctx);
+                final fixedLine = OcrLine(
+                  text: line.text,
+                  boundingBox: line.boundingBox,
+                  parsedAmount: amount,
+                  parsedName: line.parsedName ?? line.text.trim(),
+                );
+                _ocrResult!.lines[lineIndex] = fixedLine;
+                if (_activePersonForSelection != null) {
+                  _assignLineToPersons(
+                      lineIndex, fixedLine, _activePersonForSelection!);
+                } else {
+                  _showPersonPickerForLine(lineIndex, fixedLine);
+                }
+              }
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _assignLineToPersons(int lineIndex, OcrLine line, String person) async {
+    final qty = line.parsedQuantity;
+    final amount = line.parsedAmount ?? 0;
+    final name = line.parsedName ?? line.text;
+
+    // If quantity > 1, ask if user wants to split into individual items
+    if (qty > 1 && _people.length > 1) {
+      final split = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('$qty × $name'),
+          content: Text(
+            'This line has $qty items totalling '
+            '${formatAmount(amount, currency: _billCurrency)}.\n\n'
+            'Split into $qty separate items '
+            '(${formatAmount(amount / qty, currency: _billCurrency)} each) '
+            'so you can assign them to different people?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Keep as one'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Split'),
+            ),
+          ],
+        ),
+      );
+
+      if (split == true && mounted) {
+        final unitPrice = amount / qty;
+        setState(() {
+          _selectedLineIndices[lineIndex] = person;
+          for (var i = 0; i < qty; i++) {
+            _items.add(_BillItem(
+              name: '$name (${i + 1}/$qty)',
+              amount: unitPrice,
+              assignedTo: {person},
+              ocrLineIndex: i == 0 ? lineIndex : null,
+            ));
+          }
+        });
+        return;
+      }
+      if (!mounted) return;
+    }
+
     setState(() {
       _selectedLineIndices[lineIndex] = person;
       _items.add(_BillItem(
-        name: line.parsedName ?? line.text,
-        amount: line.parsedAmount ?? 0,
+        name: qty > 1 ? '$name ×$qty' : name,
+        amount: amount,
         assignedTo: {person},
         ocrLineIndex: lineIndex,
       ));
@@ -335,6 +477,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 // ── Receipt Image with OCR overlay ──
                 if (_receiptPath != null && _ocrResult != null)
                   _buildReceiptOverlay(),
+                if (_receiptPath != null && _ocrResult != null) ...[
+                  const SizedBox(height: 8),
+                  _buildDetectedLinesList(),
+                ],
                 if (_receiptPath != null) const SizedBox(height: 16),
 
                 // ── People ──
@@ -665,7 +811,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               Icon(Icons.document_scanner_rounded,
                   size: 16, color: AppColors.ts(context)),
               const SizedBox(width: 8),
-              Text('Tap items to assign them',
+              Text('Tap lines to select items',
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -774,12 +920,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             color: isSelected
                 ? color.withValues(alpha: 0.3)
                 : Colors.transparent,
-            border: isSelected
-                ? Border.all(color: color, width: 2)
-                : line.hasPrice
-                    ? Border.all(
-                        color: Colors.white.withValues(alpha: 0.4), width: 1)
-                    : null,
+            border: Border.all(
+              color: isSelected
+                  ? color
+                  : Colors.white.withValues(alpha: 0.4),
+              width: isSelected ? 2 : 1,
+            ),
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -788,6 +934,105 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   }
 
   // ─── Item Card ─────────────────────────────────────────────────────────────
+
+  Widget _buildDetectedLinesList() {
+    final result = _ocrResult!;
+    final detected = result.lines.length;
+    final withPrice = result.lines.where((l) => l.hasPrice).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _showAllLines = !_showAllLines),
+          child: Row(
+            children: [
+              Icon(
+                _showAllLines
+                    ? Icons.expand_less_rounded
+                    : Icons.expand_more_rounded,
+                size: 18,
+                color: AppColors.ts(context),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$detected lines detected ($withPrice with prices)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.ts(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_showAllLines) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.sf(context),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.bd(context)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < result.lines.length; i++)
+                  GestureDetector(
+                    onTap: () => _onLineTapped(i),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 6, horizontal: 8),
+                      margin: const EdgeInsets.only(bottom: 2),
+                      decoration: BoxDecoration(
+                        color: _selectedLineIndices.containsKey(i)
+                            ? _personColor(
+                                    _selectedLineIndices[i]!)
+                                .withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          if (_selectedLineIndices.containsKey(i))
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Icon(Icons.check_circle_rounded,
+                                  size: 14,
+                                  color: _personColor(
+                                      _selectedLineIndices[i]!)),
+                            ),
+                          Expanded(
+                            child: Text(
+                              result.lines[i].text,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.tp(context),
+                              ),
+                            ),
+                          ),
+                          if (result.lines[i].hasPrice)
+                            Text(
+                              result.lines[i].parsedAmount!
+                                  .toStringAsFixed(2),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.accent,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 
   Widget _buildItemCard(BuildContext context, int index) {
     final item = _items[index];

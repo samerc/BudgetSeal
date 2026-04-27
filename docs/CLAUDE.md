@@ -163,6 +163,10 @@ Single-file sync approach (`PocketPlan_Sync.json`):
 - Supports Google Drive (OAuth) and system file picker (Dropbox/OneDrive/local)
 - Auto-syncs on app resume and pause via `WidgetsBindingObserver`
 - Restore from sync file during onboarding
+- Optional AES-256-CBC encryption with PBKDF2 key derivation (user-set password)
+
+### Sync Encryption
+`lib/core/sync/sync_encryption.dart` — optional end-to-end encryption for the sync file on Google Drive. User sets a sync password in Cloud Sync settings. The password is stored in Flutter Secure Storage (Android Keystore / iOS Keychain). PBKDF2 derives a 256-bit key (100,000 iterations, SHA-256). Encrypted format: `ENC:1:<salt>:<IV>:<ciphertext>`. Backward compatible — unencrypted files are auto-detected and read normally. Both devices in a shared household must use the same password.
 
 ## Key Patterns
 
@@ -241,6 +245,9 @@ analyzer conflict — waiting on upstream releases).
 | google_fonts | ^8.0.0 | Custom fonts |
 | confetti | ^0.8.0 | Celebration effects (goal completion) |
 | google_mlkit_text_recognition | ^0.15.1 | Offline receipt OCR (bill splitter) |
+| encrypt | ^5.0.3 | AES-256 encryption for sync files |
+| flutter_secure_storage | ^10.0.0 | Secure credential storage (Keystore/Keychain) |
+| pointycastle | ^3.9.1 | PBKDF2 key derivation |
 
 ## Testing
 
@@ -270,13 +277,16 @@ Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `
 All Drive API queries use `_escGdql()` to escape single quotes in parameters, preventing GDQL injection. Always use this helper when interpolating values into Drive query strings.
 
 ### Biometric Lock
-`local_auth` handles authentication. If the device has no biometrics/PIN, the lock screen still calls `authenticate()` (which prompts the user to set up credentials) rather than bypassing.
+`local_auth` handles authentication. If the device has no biometrics/PIN, the lock screen still calls `authenticate()` (which prompts the user to set up credentials) rather than bypassing. App re-locks on pause (when biometric is enabled) so switching away and back requires re-authentication.
 
 ### Temp File Cleanup
 Backup `.db` and export `.csv` files are written to the system temp directory for sharing, then deleted in a `finally` block. Never leave financial data in temp.
 
-### Sync File
-The sync file (`PocketPlan_Sync.json`) is plaintext JSON on Google Drive. Not yet encrypted — future improvement.
+### Sync File Encryption
+The sync file is optionally encrypted with AES-256-CBC. User sets a password in Cloud Sync settings → PBKDF2 derives the key → file is encrypted before upload. Unencrypted files are auto-detected for backward compatibility.
+
+### Backup Restore Validation
+Backup restore validates: SQLite magic bytes (`SQLite format 3`), file size < 100MB, auto-backup of current DB before overwriting.
 
 ## Error Handling
 
@@ -298,6 +308,8 @@ For user-initiated actions (save, delete, toggle), show a SnackBar on both succe
 
 ### Multi-Currency Amount Safety
 When computing base-currency totals (summaries, reports, dashboard), always use `isRealRate()` from `format_number.dart` to skip lines where the currency differs from base but `exchangeRateToBase` is 1.0 (rate not set). Without this check, foreign-currency amounts inflate totals (e.g., LBP 1,200,000 counted as $1,200,000).
+
+**Critical rule:** Never sum `targetAmount` across envelopes without checking `targetCurrency`. Never sum account balances across currencies. Always filter to `baseCurrency` or group by currency before aggregation. Dashboard budget status, velocity, envelope health, and reports net worth all enforce this.
 
 ### Running Balances for Transfers
 In `_applyTxToRunning()` (transactions_provider.dart), transfer destinations must use `tx.amount * tx.exchangeRateToBase` to convert to the destination currency. Using raw `tx.amount` adds the source currency amount to the destination account's running balance.

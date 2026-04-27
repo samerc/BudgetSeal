@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import 'sync_encryption.dart';
 
 /// Exports all data from the local database as a JSON map.
 /// Imports remote data and merges by lastModified (newer wins).
+/// When a sync password is set, the sync file is encrypted with AES-256.
 class SyncEngine {
   final AppDatabase _db;
 
@@ -46,14 +48,18 @@ class SyncEngine {
       'fxRates': fxRates.map(_fxRateToMap).toList(),
     };
 
-    return jsonEncode(data);
+    final json = jsonEncode(data);
+    // Encrypt if a sync password is set
+    return SyncEncryption.encrypt(json);
   }
 
   // ── Import (full restore) ─────────────────────────────────────
 
   /// Replace all local data with the contents of a sync file.
   /// Used for restore-from-backup scenarios.
-  Future<void> restoreFromJson(String jsonStr) async {
+  /// Automatically decrypts if the file is encrypted.
+  Future<void> restoreFromJson(String rawContent) async {
+    final jsonStr = await SyncEncryption.decrypt(rawContent);
     final data = jsonDecode(jsonStr) as Map<String, dynamic>;
 
     await _db.transaction(() async {
@@ -126,7 +132,8 @@ class SyncEngine {
   /// For each row: if remote lastModified > local lastModified, update local.
   /// If row doesn't exist locally, insert it.
   /// Returns the number of rows updated/inserted.
-  Future<int> mergeFromJson(String jsonStr) async {
+  Future<int> mergeFromJson(String rawContent) async {
+    final jsonStr = await SyncEncryption.decrypt(rawContent);
     final data = jsonDecode(jsonStr) as Map<String, dynamic>;
     int changed = 0;
 

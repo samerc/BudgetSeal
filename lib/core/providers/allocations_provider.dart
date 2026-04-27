@@ -19,7 +19,8 @@ class AllocationWithBalance {
   });
 
   double get totalInBase {
-    // Simplified: sum amounts (proper FX conversion done in UI layer)
+    // Only meaningful if single currency — returns sum of all balances.
+    // For multi-currency envelopes, use balanceByCurrency[currency] directly.
     return balanceByCurrency.values.fold(0.0, (a, b) => a + b);
   }
 }

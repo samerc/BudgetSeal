@@ -475,6 +475,7 @@ class _DetailBody extends ConsumerWidget {
       return <String, dynamic>{
         'amount': l.amount,
         'currency': l.currency,
+        'exchangeRateToBase': l.exchangeRateToBase,
         'accountId': l.accountId ?? tx.accountId,
         'categoryId': l.categoryId,
         'categoryName': cat?.name,
@@ -487,6 +488,7 @@ class _DetailBody extends ConsumerWidget {
       editLines.add({
         'amount': tx.amount,
         'currency': tx.currency,
+        'exchangeRateToBase': tx.exchangeRateToBase,
         'accountId': tx.accountId,
         'categoryId': tx.categoryId,
         'categoryName': cat?.name,

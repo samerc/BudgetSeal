@@ -8,6 +8,7 @@ import 'core/services/auto_backup_service.dart';
 import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
+import 'core/providers/biometric_provider.dart';
 import 'core/providers/font_provider.dart';
 import 'core/providers/household_provider.dart';
 import 'core/providers/theme_provider.dart';
@@ -284,6 +285,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     } else if (state == AppLifecycleState.paused) {
       // Sync on app pause (upload local changes)
       _autoSync();
+      // Re-lock if biometric is enabled
+      final biometricEnabled = ref.read(biometricLockProvider);
+      if (biometricEnabled) {
+        setState(() => _showLock = true);
+      }
     }
   }
 
