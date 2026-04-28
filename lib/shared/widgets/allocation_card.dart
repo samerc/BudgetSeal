@@ -110,13 +110,15 @@ class AllocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveTargetCurrency = targetCurrency ?? baseCurrency;
-    final mainBalance = balanceByCurrency[effectiveTargetCurrency] ?? 0.0;
-    final otherBalances = Map.of(balanceByCurrency)
-      ..remove(effectiveTargetCurrency);
+    // Use base currency balance for display on the card
+    final baseBalance = balanceByCurrency[baseCurrency] ?? 0.0;
+    // Use target currency balance for progress calculation
+    final targetCcyBalance = balanceByCurrency[effectiveTargetCurrency] ?? 0.0;
     final hasTarget = targetAmount != null && targetAmount! > 0;
     final progress =
-        hasTarget ? (mainBalance / targetAmount!).clamp(0.0, 1.0) : null;
-    final isOverspent = mainBalance < 0;
+        hasTarget ? (targetCcyBalance / targetAmount!).clamp(0.0, 1.0) : null;
+    // Overspent if any currency balance is negative
+    final isOverspent = balanceByCurrency.values.any((v) => v < -0.01);
 
     final bool hasCategoryIcon = categoryName != null;
     final Color iconColor = categoryColorHex != null
@@ -127,11 +129,11 @@ class AllocationCard extends StatelessWidget {
     final Color borderColor;
     if (isOverspent) {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
-    } else if (_isSavingWithGoal && mainBalance >= targetAmount!) {
+    } else if (_isSavingWithGoal && targetCcyBalance >= targetAmount!) {
       borderColor = AppColors.healthy.withValues(alpha: 0.35);
-    } else if (hasTarget && mainBalance > 0 && mainBalance < targetAmount! * 0.1) {
+    } else if (hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
       borderColor = AppColors.caution.withValues(alpha: 0.45);
-    } else if (hasTarget && mainBalance >= targetAmount!) {
+    } else if (hasTarget && targetCcyBalance >= targetAmount!) {
       borderColor = AppColors.healthy.withValues(alpha: 0.35);
     } else {
       borderColor = AppColors.bd(context);
@@ -207,7 +209,7 @@ class AllocationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Balance
+              // Balance — show in base currency only
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -230,7 +232,7 @@ class AllocationCard extends StatelessWidget {
                           ),
                         ),
                       Text(
-                        formatAmount(mainBalance, currency: effectiveTargetCurrency),
+                        formatAmount(baseBalance, currency: baseCurrency),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -239,20 +241,6 @@ class AllocationCard extends StatelessWidget {
                               : AppColors.tp(context),
                         ),
                       ),
-                      // Show other currency balances with context
-                      for (final entry in otherBalances.entries)
-                        if (entry.value.abs() > 0.001)
-                          Text(
-                            entry.value > 0
-                                ? ' + ${formatAmount(entry.value, currency: entry.key)}'
-                                : ' · ${formatAmount(entry.value.abs(), currency: entry.key)} spent',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: entry.value > 0
-                                  ? AppColors.ts(context)
-                                  : AppColors.overspent,
-                            ),
-                          ),
                     ],
                   ),
                   if (_isSavingWithGoal) ...[

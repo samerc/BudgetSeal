@@ -1143,12 +1143,10 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        maxChildSize: 0.85,
-        minChildSize: 0.4,
-        builder: (_, scrollCtrl) => Padding(
+      builder: (ctx) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.65,
+          child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
           child: Column(
             children: [
@@ -1229,7 +1227,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
               ),
               Expanded(
                 child: ListView(
-                  controller: scrollCtrl,
                   children: _emojiGroups.entries.map((group) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1285,7 +1282,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ],
           ),
         ),
-      ),
+        );
+      },
     );
     if (result != null && mounted) {
       setState(() => _emoji = result);

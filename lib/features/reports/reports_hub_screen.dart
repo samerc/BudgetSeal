@@ -3067,21 +3067,34 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 .where((a) => liabilityTypes.contains(a.account.type))
                 .toList();
 
-            // Totals
+            // Totals — only sum base-currency accounts
             double totalAssetsNow = 0, totalAssetsCompare = 0;
             double totalLiabilitiesNow = 0, totalLiabilitiesCompare = 0;
             for (final a in assets) {
-              totalAssetsNow += a.balance;
-              totalAssetsCompare += historicalBalances[a.account.id] ?? a.balance;
+              if (a.account.currency == baseCurrency) {
+                totalAssetsNow += a.balance;
+                totalAssetsCompare += historicalBalances[a.account.id] ?? a.balance;
+              }
             }
             for (final a in liabilities) {
-              totalLiabilitiesNow += a.balance;
-              totalLiabilitiesCompare +=
-                  historicalBalances[a.account.id] ?? a.balance;
+              if (a.account.currency == baseCurrency) {
+                totalLiabilitiesNow += a.balance;
+                totalLiabilitiesCompare +=
+                    historicalBalances[a.account.id] ?? a.balance;
+              }
             }
             final netWorthNow = totalAssetsNow - totalLiabilitiesNow.abs();
             final netWorthCompare =
                 totalAssetsCompare - totalLiabilitiesCompare.abs();
+
+            // Per-currency totals for foreign accounts
+            final foreignTotals = <String, double>{};
+            for (final a in accounts) {
+              if (a.account.currency != baseCurrency) {
+                foreignTotals[a.account.currency] =
+                    (foreignTotals[a.account.currency] ?? 0) + a.balance;
+              }
+            }
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
@@ -3224,6 +3237,27 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                       ),
                       const SizedBox(height: 8),
                       _bsChangeChip(netWorthCompare, netWorthNow),
+                      // Foreign currency totals
+                      if (foreignTotals.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Divider(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            height: 1),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 4,
+                          alignment: WrapAlignment.center,
+                          children: foreignTotals.entries.map((e) => Text(
+                                formatAmount(e.value, currency: e.key),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                ),
+                              )).toList(),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -3254,26 +3288,37 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
   Widget _bsSectionHeader(BuildContext context, String label,
       double compareTotal, double nowTotal, String currency) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
       child: Row(
         children: [
-          Text(label,
+          Expanded(
+            flex: 3,
+            child: Text(label,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
                 color: label == 'ASSETS' ? AppColors.healthy : AppColors.overspent,
               )),
-          const Spacer(),
-          Text(formatAmount(compareTotal, currency: currency),
-              style: TextStyle(
-                  fontSize: 11, color: AppColors.ts(context))),
-          const SizedBox(width: 16),
-          Text(formatAmount(nowTotal, currency: currency),
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(formatAmount(compareTotal, currency: currency),
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                    fontSize: 11, color: AppColors.ts(context))),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: Text(formatAmount(nowTotal, currency: currency),
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tp(context))),
+          ),
+          const SizedBox(width: 22), // space for change indicator column
         ],
       ),
     );
@@ -3287,9 +3332,15 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     String baseCurrency,
     double sectionTotal,
   ) {
-    // Group total
+    // Split into base-currency and foreign accounts
+    final baseAccounts =
+        accounts.where((a) => a.account.currency == baseCurrency).toList();
+    final foreignAccounts =
+        accounts.where((a) => a.account.currency != baseCurrency).toList();
+
+    // Group total from base-currency accounts only
     double groupNow = 0, groupCompare = 0;
-    for (final a in accounts) {
+    for (final a in baseAccounts) {
       groupNow += a.balance;
       groupCompare += historicalBalances[a.account.id] ?? a.balance;
     }
@@ -3311,111 +3362,106 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
             child: Row(
               children: [
-                Icon(
-                  _typeIcon(typeName),
-                  size: 16,
-                  color: AppColors.accent,
-                ),
+                Icon(_typeIcon(typeName), size: 16, color: AppColors.accent),
                 const SizedBox(width: 8),
                 Text(typeName,
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: AppColors.tp(context))),
-                const SizedBox(width: 6),
-                Text('$pct%',
-                    style: TextStyle(
-                        fontSize: 11, color: AppColors.ts(context))),
+                if (baseAccounts.isNotEmpty) ...[
+                  const SizedBox(width: 6),
+                  Text('$pct%',
+                      style: TextStyle(
+                          fontSize: 11, color: AppColors.ts(context))),
+                ],
                 const Spacer(),
-                Text(formatAmount(groupCompare, currency: baseCurrency),
-                    style: TextStyle(
-                        fontSize: 11, color: AppColors.ts(context))),
-                const SizedBox(width: 12),
-                Text(formatAmount(groupNow, currency: baseCurrency),
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context))),
+                if (baseAccounts.isNotEmpty) ...[
+                  Text(formatAmount(groupCompare, currency: baseCurrency),
+                      style: TextStyle(
+                          fontSize: 11, color: AppColors.ts(context))),
+                  const SizedBox(width: 12),
+                  Text(formatAmount(groupNow, currency: baseCurrency),
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context))),
+                ],
               ],
             ),
           ),
           Divider(height: 1, color: AppColors.bd(context)),
-          // Account rows
-          ...accounts.map((a) {
+          // Base-currency account rows (with percentages)
+          ...baseAccounts.map((a) {
             final now = a.balance;
             final compare = historicalBalances[a.account.id] ?? now;
             final acctPct = sectionTotal != 0
                 ? ((now / sectionTotal) * 100).round()
                 : 0;
-            final isNonBase = a.account.currency != baseCurrency;
-
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(a.account.name,
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.tp(context)),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                            ),
-                            const SizedBox(width: 6),
-                            Text('$acctPct%',
-                                style: TextStyle(
-                                    fontSize: 10,
-                                    color: AppColors.ts(context))),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Compare date balance
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        formatAmount(compare, currency: a.account.currency),
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.ts(context)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  // Current balance + base equivalent
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        formatAmount(now, currency: a.account.currency),
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context)),
-                      ),
-                      if (isNonBase && now != 0)
-                        Text(
-                          formatAmount(now * a.account.initialBalance,
-                              currency: baseCurrency),
-                          style: TextStyle(
-                              fontSize: 9, color: AppColors.th(context)),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(width: 6),
-                  _bsChangeIndicator(compare, now),
-                ],
-              ),
-            );
+            return _bsAccountRow(
+                context, a, compare, now, baseCurrency, '$acctPct%');
           }),
+          // Foreign-currency account rows (no percentage, own currency)
+          ...foreignAccounts.map((a) {
+            final now = a.balance;
+            final compare = historicalBalances[a.account.id] ?? now;
+            return _bsAccountRow(
+                context, a, compare, now, baseCurrency, a.account.currency);
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _bsAccountRow(BuildContext context, AccountWithBalance a,
+      double compare, double now, String baseCurrency, String badge) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: Row(
+        children: [
+          // Name + badge
+          Expanded(
+            flex: 3,
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(a.account.name,
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.tp(context)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ),
+                const SizedBox(width: 6),
+                Text(badge,
+                    style: TextStyle(
+                        fontSize: 10, color: AppColors.ts(context))),
+              ],
+            ),
+          ),
+          // Compare balance
+          Expanded(
+            flex: 2,
+            child: Text(
+              formatAmount(compare, currency: a.account.currency),
+              textAlign: TextAlign.end,
+              style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Current balance
+          Expanded(
+            flex: 2,
+            child: Text(
+              formatAmount(now, currency: a.account.currency),
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.tp(context)),
+            ),
+          ),
+          const SizedBox(width: 4),
+          _bsChangeIndicator(compare, now),
         ],
       ),
     );

@@ -11,6 +11,8 @@ import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/autofill_provider.dart';
+import '../../core/services/autofill_service.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -207,6 +209,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _lines[lineIndex].rateCtrl.text = '';
       });
     }
+
+    // Auto-fill category from last transaction with this account
+    final afSettings = ref.read(autofillProvider);
+    if (afSettings.category && _lines[lineIndex].categoryId == null) {
+      final entries = ref.read(transactionEntriesProvider).value ?? [];
+      for (final e in entries) {
+        if (e.tx.type == 'transfer') continue;
+        final matchesAccount = e.tx.accountId == accountId ||
+            e.lines.any((l) => l.accountId == accountId);
+        if (matchesAccount && e.tx.categoryId != null) {
+          final categories = ref.read(categoriesProvider).value ?? [];
+          final cat = categories.where((c) => c.id == e.tx.categoryId).firstOrNull;
+          if (cat != null && mounted) {
+            setState(() {
+              _lines[lineIndex].categoryId = cat.id;
+              _lines[lineIndex].categoryName = cat.name;
+            });
+          }
+          break;
+        }
+      }
+    }
   }
 
   Future<void> _fetchRate(int lineIndex, String lineCurrency) async {
@@ -342,13 +366,41 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           });
           Navigator.of(ctx).pop();
-          // Auto-fill account from category's default if line has no account.
-          if (_lines[lineIndex].accountId == null && categories.isNotEmpty) {
-            final cat = categories
-                .where((c) => c.id == id)
-                .firstOrNull;
-            if (cat?.defaultAccountId != null) {
-              _onLineAccountChanged(lineIndex, cat!.defaultAccountId);
+
+          // Auto-fill from last transaction with this category
+          final afSettings = ref.read(autofillProvider);
+          final entries = ref.read(transactionEntriesProvider).value ?? [];
+          final fill = lookupAutofill(
+            categoryId: id,
+            entries: entries,
+            settings: afSettings,
+          );
+          if (fill.hasData) {
+            setState(() {
+              final line = _lines[lineIndex];
+              final canOverride = afSettings.overrideExisting;
+              if (fill.accountId != null &&
+                  (line.accountId == null || canOverride)) {
+                _onLineAccountChanged(lineIndex, fill.accountId!);
+              }
+              if (fill.title != null &&
+                  (_titleCtrl.text.isEmpty || canOverride)) {
+                _titleCtrl.text = fill.title!;
+              }
+              if (fill.amount != null && fill.amount! > 0 &&
+                  (line.amount <= 0 || canOverride)) {
+                line.amountCtrl.text = fill.amount!.toString();
+              }
+            });
+          } else {
+            // Fallback: auto-fill account from category's default
+            if (_lines[lineIndex].accountId == null && categories.isNotEmpty) {
+              final cat = categories
+                  .where((c) => c.id == id)
+                  .firstOrNull;
+              if (cat?.defaultAccountId != null) {
+                _onLineAccountChanged(lineIndex, cat!.defaultAccountId);
+              }
             }
           }
         },
@@ -376,7 +428,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => CurrencySheet(current: _lines[lineIndex].currency),
+      builder: (_) {
+        final accts = ref.read(accountsProvider).value ?? [];
+        return CurrencySheet(
+          current: _lines[lineIndex].currency,
+          accountCurrencies: accts.map((a) => a.currency).toSet().toList(),
+        );
+      },
     );
     if (result != null && mounted) {
       setState(() => _lines[lineIndex].currency = result);

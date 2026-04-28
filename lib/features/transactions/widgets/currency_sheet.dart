@@ -90,22 +90,54 @@ class CurrencySheet extends StatefulWidget {
   /// Optional list of currency codes to show in a "Recently Used" section.
   final List<String> recentCurrencies;
 
+  /// Currency codes from user's accounts — pinned at the top.
+  final List<String> accountCurrencies;
+
   const CurrencySheet({
     super.key,
     required this.current,
     this.recentCurrencies = const [],
+    this.accountCurrencies = const [],
   });
 
   @override
   State<CurrencySheet> createState() => _CurrencySheetState();
 }
 
-class _CurrencySheetState extends State<CurrencySheet> {
+class _CurrencySheetState extends State<CurrencySheet>
+    with WidgetsBindingObserver {
   final _searchCtrl = TextEditingController();
+  final _sheetCtrl = DraggableScrollableController();
   String _query = '';
+  bool _keyboardVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    final bottomInset =
+        WidgetsBinding.instance.platformDispatcher.views.first.viewInsets.bottom;
+    final nowVisible = bottomInset > 100;
+    if (nowVisible && !_keyboardVisible) {
+      _keyboardVisible = true;
+      if (_sheetCtrl.isAttached) {
+        _sheetCtrl.animateTo(0.92,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut);
+      }
+    } else if (!nowVisible && _keyboardVisible) {
+      _keyboardVisible = false;
+    }
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _sheetCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -132,10 +164,13 @@ class _CurrencySheetState extends State<CurrencySheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: DraggableScrollableSheet(
+        controller: _sheetCtrl,
         initialChildSize: 0.6,
         minChildSize: 0.4,
-        maxChildSize: 0.85,
+        maxChildSize: 0.92,
         expand: false,
+        snap: true,
+        snapSizes: const [0.6, 0.92],
         builder: (_, scrollCtrl) => Column(
           children: [
             const SizedBox(height: 12),
@@ -189,6 +224,36 @@ class _CurrencySheetState extends State<CurrencySheet> {
                 controller: scrollCtrl,
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
+                  // Account currencies (pinned at top)
+                  if (_query.isEmpty && widget.accountCurrencies.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                      child: Text(
+                        'YOUR ACCOUNTS',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                          color: AppColors.ts(context),
+                        ),
+                      ),
+                    ),
+                    for (final code in widget.accountCurrencies)
+                      _buildCurrencyTile(
+                        code,
+                        kCurrencies
+                            .firstWhere((c) => c.$1 == code,
+                                orElse: () => (code, code))
+                            .$2,
+                      ),
+                    Divider(
+                      height: 1,
+                      indent: 20,
+                      endIndent: 20,
+                      color: AppColors.bd(context),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   // Recently used section
                   if (recentCodes.isNotEmpty) ...[
                     Padding(

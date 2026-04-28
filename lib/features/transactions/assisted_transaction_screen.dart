@@ -8,6 +8,8 @@ import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/autofill_provider.dart';
+import '../../core/services/autofill_service.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -536,9 +538,7 @@ class _AssistedTransactionScreenState
                               _activeLine.category = parent;
                               _activeLine.type = localType;
                               _type = localType;
-                              if (parent.defaultAccountId != null) {
-                                _accountId = parent.defaultAccountId;
-                              }
+                              _applyAutofill(parent.id);
                               Navigator.pop(ctx);
                               _showAmountScreen();
                             },
@@ -620,11 +620,7 @@ class _AssistedTransactionScreenState
                                               _activeLine.category = sub;
                                               _activeLine.type = localType;
                                               _type = localType;
-                                              if (sub.defaultAccountId !=
-                                                  null) {
-                                                _accountId =
-                                                    sub.defaultAccountId;
-                                              }
+                                              _applyAutofill(sub.id);
                                               Navigator.pop(ctx);
                                               _showAmountScreen();
                                             },
@@ -902,6 +898,32 @@ class _AssistedTransactionScreenState
         ),
       ),
     );
+  }
+
+  void _applyAutofill(String categoryId) {
+    final settings = ref.read(autofillProvider);
+    final entries = ref.read(transactionEntriesProvider).value ?? [];
+    final fill = lookupAutofill(
+      categoryId: categoryId,
+      entries: entries,
+      settings: settings,
+    );
+    if (!fill.hasData) {
+      // Fallback to category's default account
+      final categories = ref.read(categoriesProvider).value ?? [];
+      final cat = categories.where((c) => c.id == categoryId).firstOrNull;
+      if (cat?.defaultAccountId != null && _accountId == null) {
+        _accountId = cat!.defaultAccountId;
+      }
+      return;
+    }
+    final canOverride = settings.overrideExisting;
+    if (fill.accountId != null && (_accountId == null || canOverride)) {
+      _accountId = fill.accountId;
+    }
+    if (fill.title != null && (_title.isEmpty || canOverride)) {
+      _title = fill.title!;
+    }
   }
 
   void _showAmountScreen() {

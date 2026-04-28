@@ -592,8 +592,8 @@ class _StatusCard extends ConsumerWidget {
             ? Icons.check_circle_outline_rounded
             : Icons.warning_amber_rounded;
         budgetLine = isUnder
-            ? '${formatAmount(diff, currency: baseCurrency)} left to spend this month'
-            : '${formatAmount(diff.abs(), currency: baseCurrency)} over budget this month';
+            ? '${formatAmount(diff, currency: baseCurrency)} left of ${formatAmount(totalTarget, currency: baseCurrency)} budget'
+            : '${formatAmount(diff.abs(), currency: baseCurrency)} over ${formatAmount(totalTarget, currency: baseCurrency)} budget';
       }
     }
 
@@ -708,6 +708,40 @@ class _StatusCard extends ConsumerWidget {
                         ? AppColors.caution
                         : AppColors.overspent,
                 text: ageLine,
+                onInfoTap: () => showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Row(
+                      children: [
+                        Icon(Icons.schedule_rounded, size: 20),
+                        SizedBox(width: 8),
+                        Text('Age of Money'),
+                      ],
+                    ),
+                    content: const Text(
+                      'This shows how long money sits in your accounts '
+                      'before you spend it.\n\n'
+                      'Think of it as a buffer:\n\n'
+                      '\u2022 Under 14 days \u2014 you\'re spending money '
+                      'almost as fast as it comes in\n'
+                      '\u2022 14\u201330 days \u2014 you have a small cushion, '
+                      'getting ahead\n'
+                      '\u2022 30\u201360 days \u2014 you\'re spending last '
+                      'month\'s income. Great!\n'
+                      '\u2022 60+ days \u2014 strong financial health, '
+                      'big safety net\n\n'
+                      'The goal is to increase this number over time. '
+                      'The higher it is, the more financially secure you are.',
+                      style: TextStyle(fontSize: 13, height: 1.5),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Got it'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ],
@@ -721,11 +755,13 @@ class _StatusLine extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String text;
+  final VoidCallback? onInfoTap;
 
   const _StatusLine({
     required this.icon,
     required this.color,
     required this.text,
+    this.onInfoTap,
   });
 
   @override
@@ -744,6 +780,15 @@ class _StatusLine extends StatelessWidget {
             ),
           ),
         ),
+        if (onInfoTap != null)
+          GestureDetector(
+            onTap: onInfoTap,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Icon(Icons.help_outline_rounded,
+                  size: 15, color: color.withValues(alpha: 0.6)),
+            ),
+          ),
       ],
     );
   }

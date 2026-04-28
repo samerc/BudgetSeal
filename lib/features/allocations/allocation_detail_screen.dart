@@ -665,7 +665,6 @@ class _AllocationDetailScreenState
 
   Future<void> _showIconPicker() async {
     final customCtrl = TextEditingController();
-    // Use empty string to signal "remove icon"
     final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.sf(context),
@@ -673,166 +672,136 @@ class _AllocationDetailScreenState
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        maxChildSize: 0.85,
-        minChildSize: 0.4,
-        builder: (_, scrollCtrl) => Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.th(context),
-                    borderRadius: BorderRadius.circular(2),
+      builder: (ctx) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.65,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.th(ctx),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Text('Choose Icon',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
-              const SizedBox(height: 12),
-              // Custom emoji input
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: customCtrl,
-                      style: const TextStyle(fontSize: 24),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: 'Type or paste emoji',
-                        hintStyle: TextStyle(
-                            fontSize: 14, color: AppColors.th(context)),
-                        filled: true,
-                        fillColor: AppColors.sfv(context),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+                const SizedBox(height: 12),
+                Text('Choose Icon',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(ctx))),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: customCtrl,
+                        style: const TextStyle(fontSize: 24),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: 'Type or paste emoji',
+                          hintStyle: TextStyle(
+                              fontSize: 14, color: AppColors.th(ctx)),
+                          filled: true,
+                          fillColor: AppColors.sfv(ctx),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          isDense: true,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        isDense: true,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () {
-                      final text = customCtrl.text.trim();
-                      if (text.isNotEmpty) {
-                        Navigator.pop(ctx, text.characters.first);
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () {
+                        final text = customCtrl.text.trim();
+                        if (text.isNotEmpty) {
+                          Navigator.pop(ctx, text.characters.first);
+                        }
+                      },
+                      child: const Text('Use'),
                     ),
-                    child: const Text('Use'),
+                  ],
+                ),
+                if (_icon != null) ...[
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx, ''),
+                      child: const Text('Remove icon',
+                          style: TextStyle(fontSize: 12)),
+                    ),
                   ),
                 ],
-              ),
-              if (_icon != null) ...[
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(ctx, ''),
-                    child: const Text('Remove icon',
-                        style: TextStyle(fontSize: 12)),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView(
+                    children: _emojiGroups.entries.map((group) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 12, bottom: 8),
+                            child: Text(group.key,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.ts(ctx),
+                                  letterSpacing: 0.5,
+                                )),
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: group.value.map((e) {
+                              final isSelected = e == _icon;
+                              return GestureDetector(
+                                onTap: () => Navigator.pop(ctx, e),
+                                child: Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.accent
+                                            .withValues(alpha: 0.15)
+                                        : AppColors.sfv(ctx),
+                                    borderRadius:
+                                        BorderRadius.circular(12),
+                                    border: isSelected
+                                        ? Border.all(
+                                            color: AppColors.accent,
+                                            width: 2)
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(e,
+                                        style: const TextStyle(
+                                            fontSize: 20)),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }).toList(),
                   ),
                 ),
               ],
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Divider(color: AppColors.bd(context))),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('or pick below',
-                          style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.th(context))),
-                    ),
-                    Expanded(
-                        child: Divider(color: AppColors.bd(context))),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: scrollCtrl,
-                  children: _emojiGroups.entries.map((group) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(top: 12, bottom: 8),
-                          child: Text(group.key,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.ts(context),
-                                letterSpacing: 0.5,
-                              )),
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: group.value.map((e) {
-                            final isSelected = e == _icon;
-                            return GestureDetector(
-                              onTap: () => Navigator.pop(ctx, e),
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.accent
-                                          .withValues(alpha: 0.15)
-                                      : AppColors.sfv(context),
-                                  borderRadius:
-                                      BorderRadius.circular(12),
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: AppColors.accent,
-                                          width: 2)
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text(e,
-                                      style: const TextStyle(
-                                          fontSize: 20)),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
-    // Dismiss keyboard focus after sheet closes
     if (mounted) FocusScope.of(context).unfocus();
     if (result != null && mounted) {
       setState(() => _icon = result.isEmpty ? null : result);
@@ -1104,8 +1073,8 @@ class _AllocationDetailScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: CalculatorAmountField(
-                        value: 0,
-                        onChanged: (v) => amount = v,
+                        value: amount,
+                        onChanged: (v) => setSheetState(() => amount = v),
                         hintText: 'Amount',
                         fontSize: 16,
                         style: TextStyle(
@@ -1145,6 +1114,36 @@ class _AllocationDetailScreenState
     final fundAmount = (result['amount'] as double?) ?? 0;
     final fundCurrency = result['currency'] as String? ?? defaultCurrency;
     if (fundAmount <= 0) return;
+
+    // Check if funding exceeds unallocated balance
+    final unallocBal = ref.read(unallocatedProvider).value ?? {};
+    final available = unallocBal[fundCurrency] ?? 0.0;
+    if (fundAmount > available + 0.01 && mounted) {
+      final deficit = fundAmount - available;
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Over-funding'),
+          content: Text(
+            'You\'re assigning ${formatAmount(deficit, currency: fundCurrency)} '
+            'more than your available ${formatAmount(available, currency: fundCurrency)} '
+            'unallocated balance.\n\n'
+            'Your unallocated balance will go negative. Continue anyway?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Fund Anyway'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !mounted) return;
+    }
 
     try {
       final engine = ref.read(allocationEngineProvider);

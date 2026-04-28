@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/providers/accounts_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../theme/app_colors.dart';
 
 /// A read-only field that opens the currency picker sheet when tapped.
-class CurrencyPickerField extends StatelessWidget {
+class CurrencyPickerField extends ConsumerWidget {
   final String label;
   final String value;
   final ValueChanged<String> onChanged;
@@ -23,7 +25,10 @@ class CurrencyPickerField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get unique currencies from user's accounts
+    final accounts = ref.watch(accountsProvider).value ?? [];
+    final acctCurrencies = accounts.map((a) => a.currency).toSet().toList();
     final flag = kCurrencyFlags[value];
     final symbol = kCurrencySymbols[value];
 
@@ -36,6 +41,7 @@ class CurrencyPickerField extends StatelessWidget {
           builder: (_) => CurrencySheet(
             current: value,
             recentCurrencies: recentCurrencies,
+            accountCurrencies: acctCurrencies,
           ),
         );
         if (result != null) onChanged(result);

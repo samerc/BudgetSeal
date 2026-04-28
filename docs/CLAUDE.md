@@ -496,6 +496,22 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 4-page flow: Welcome → How it works (4 steps) → Good to know (tips about bill splitter, dashboard customization, bulk actions, health check) → Setup (name, currency, period start day).
 
+## Auto-fill
+
+`lib/core/providers/autofill_provider.dart` + `lib/core/services/autofill_service.dart`. When a category is selected, auto-fills fields from the last transaction with that category. Configurable in Settings > Appearance > Auto-fill: Account (default on), Title (default on), Amount (default off), Category per account (default off), Override existing values (default off). Works in both AF and classic form.
+
+## Over-funding Warning
+
+Both the funding screen (bulk) and envelope detail screen (single fund) check if the funding amount exceeds unallocated balance. Shows a warning dialog: "Your unallocated balance will go negative. Continue anyway?" with Cancel/Fund Anyway options.
+
+## Bottom Sheet Icon Pickers
+
+Envelope and category icon pickers use `SizedBox(height: 65% of screen)` inside `showModalBottomSheet(isScrollControlled: true)`. Do NOT use `DraggableScrollableSheet` — it causes dark overlay / zero-height rendering issues. Use the parent State's `context` for `MediaQuery`, not the builder's `ctx`.
+
+## Future Months
+
+Transaction list caps month tabs to current month. No future months shown. Right arrow hidden at current month. Swipe-forward blocked. Year picker only shows up to current year.
+
 ## Navigation Bar (5 tabs)
 Home | Activity | Budget | Reports | More
 

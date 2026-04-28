@@ -9,6 +9,7 @@ import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
+import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import 'dart:ui' as ui;
 
 import '../../shared/widgets/currency_picker_field.dart';
@@ -25,11 +26,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   final _personCtrl = TextEditingController();
   final _items = <_BillItem>[];
   double _tipPercent = 0;
+  double _tipAmount = 0;
+  bool _tipIsAmount = false; // false = percentage, true = fixed amount
   bool _scanning = false;
 
   // Bill currency (may differ from base)
   late String _billCurrency;
   double _exchangeRate = 1.0; // billCurrency → baseCurrency
+  bool _rateInverted = false;
+  final _rateCtrl = TextEditingController();
 
   // OCR state
   String? _receiptPath;
@@ -50,6 +55,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   @override
   void dispose() {
     _personCtrl.dispose();
+    _rateCtrl.dispose();
     super.dispose();
   }
 
@@ -388,7 +394,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       }
     }
 
-    if (_tipPercent > 0) {
+    if (_tipIsAmount && _tipAmount > 0) {
+      // Fixed tip split evenly across all people
+      final tipPerPerson = _tipAmount / _people.length;
+      for (final key in splits.keys) {
+        splits[key] = splits[key]! + tipPerPerson;
+      }
+    } else if (!_tipIsAmount && _tipPercent > 0) {
       final tipMultiplier = 1 + _tipPercent / 100;
       for (final key in splits.keys) {
         splits[key] = splits[key]! * tipMultiplier;
@@ -419,7 +431,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
     context.push('/add-transaction', extra: {
       'editType': 'expense',
-      'editNote': note,
+      // "Bill Split — details" → title gets "Bill Split", note gets the details
+      'editNote': 'Bill Split — $note',
       'editLines': [
         {
           'amount': myShare,
@@ -612,17 +625,16 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            Text('1 $_billCurrency = ',
+                            Text(
+                                '1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
                                 style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.ts(context))),
                             Expanded(
-                              child: TextFormField(
-                                initialValue: _exchangeRate != 1.0
-                                    ? _exchangeRate.toString()
-                                    : '',
+                              child: TextField(
+                                controller: _rateCtrl,
                                 decoration: InputDecoration(
-                                  hintText: 'Rate to $_baseCurrency',
+                                  hintText: 'Rate',
                                   isDense: true,
                                   filled: true,
                                   fillColor: AppColors.sfv(context),
@@ -634,14 +646,44 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                                 keyboardType: const TextInputType
                                     .numberWithOptions(decimal: true),
                                 onChanged: (v) {
-                                  _exchangeRate = double.tryParse(v) ?? 1.0;
+                                  final r = double.tryParse(v) ?? 0;
+                                  if (r > 0) {
+                                    _exchangeRate = _rateInverted ? 1.0 / r : r;
+                                  }
+                                  setState(() {});
                                 },
                               ),
                             ),
-                            Text(' $_baseCurrency',
+                            Text(
+                                ' ${_rateInverted ? _billCurrency : _baseCurrency}',
                                 style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.ts(context))),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _rateInverted = !_rateInverted;
+                                  // Update display
+                                  if (_exchangeRate > 0 && _exchangeRate != 1.0) {
+                                    final display = _rateInverted
+                                        ? 1.0 / _exchangeRate
+                                        : _exchangeRate;
+                                    _rateCtrl.text = display.toStringAsFixed(
+                                        display >= 1 ? 2 : 6);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Icon(Icons.swap_vert_rounded,
+                                    size: 16, color: AppColors.accent),
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -667,26 +709,119 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 const SizedBox(height: 8),
                 _card(
                   context,
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Slider(
-                          value: _tipPercent,
-                          min: 0,
-                          max: 30,
-                          divisions: 6,
-                          label: '${_tipPercent.round()}%',
-                          onChanged: (v) => setState(() => _tipPercent = v),
+                      // Toggle: percentage vs amount
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _tipIsAmount = false),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: !_tipIsAmount
+                                      ? AppColors.accent.withValues(alpha: 0.12)
+                                      : AppColors.sfv(context),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: !_tipIsAmount
+                                      ? Border.all(
+                                          color: AppColors.accent
+                                              .withValues(alpha: 0.4))
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text('Percentage',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: !_tipIsAmount
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                          color: !_tipIsAmount
+                                              ? AppColors.accent
+                                              : AppColors.ts(context))),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _tipIsAmount = true),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: _tipIsAmount
+                                      ? AppColors.accent.withValues(alpha: 0.12)
+                                      : AppColors.sfv(context),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: _tipIsAmount
+                                      ? Border.all(
+                                          color: AppColors.accent
+                                              .withValues(alpha: 0.4))
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text('Fixed Amount',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: _tipIsAmount
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                          color: _tipIsAmount
+                                              ? AppColors.accent
+                                              : AppColors.ts(context))),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (!_tipIsAmount)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Slider(
+                                value: _tipPercent,
+                                min: 0,
+                                max: 30,
+                                divisions: 6,
+                                label: '${_tipPercent.round()}%',
+                                onChanged: (v) =>
+                                    setState(() => _tipPercent = v),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 50,
+                              child: Text('${_tipPercent.round()}%',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.tp(context))),
+                            ),
+                          ],
+                        )
+                      else
+                        TextField(
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration: InputDecoration(
+                            hintText: '0.00',
+                            labelText: 'Tip amount',
+                            prefixText:
+                                '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
+                            isDense: true,
+                            filled: true,
+                            fillColor: AppColors.sfv(context),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onChanged: (v) => setState(() =>
+                              _tipAmount = double.tryParse(v) ?? 0),
                         ),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        child: Text('${_tipPercent.round()}%',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.tp(context))),
-                      ),
                     ],
                   ),
                 ),
@@ -1014,8 +1149,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                           ),
                           if (result.lines[i].hasPrice)
                             Text(
-                              result.lines[i].parsedAmount!
-                                  .toStringAsFixed(2),
+                              formatAmount(result.lines[i].parsedAmount!,
+                                  currency: _billCurrency),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -1094,7 +1229,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 : IntrinsicWidth(
                     child: TextFormField(
                     initialValue:
-                        item.amount > 0 ? item.amount.toStringAsFixed(2) : '',
+                        item.amount > 0
+                            ? (item.amount % 1 == 0
+                                ? item.amount.toInt().toString()
+                                : item.amount.toStringAsFixed(2))
+                            : '',
                     decoration: const InputDecoration(
                       hintText: '0.00',
                       isDense: true,

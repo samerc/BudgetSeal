@@ -59,6 +59,47 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     List<AllocationWithBalance> allocations,
     String baseCurrency,
   ) async {
+    // Check if funding exceeds unallocated — warn but allow
+    final unallocated = ref.read(unallocatedProvider).value ?? {};
+    final distributed = _totalDistributedByCurrency(allocations, baseCurrency);
+    bool willExceed = false;
+    String? exceedDetails;
+    for (final entry in distributed.entries) {
+      final available = unallocated[entry.key] ?? 0.0;
+      if (entry.value > available + 0.01) {
+        willExceed = true;
+        final deficit = entry.value - available;
+        exceedDetails = '${formatAmount(deficit, currency: entry.key)} '
+            'more than available in ${entry.key}';
+        break;
+      }
+    }
+
+    if (willExceed && mounted) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Over-funding'),
+          content: Text(
+            'You\'re assigning $exceedDetails. '
+            'Your unallocated balance will go negative.\n\n'
+            'Continue anyway?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Fund Anyway'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !mounted) return;
+    }
+
     final engine = ref.read(allocationEngineProvider);
     setState(() => _isFunding = true);
 
@@ -906,7 +947,7 @@ class _BottomFundBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canFund = hasAnyAmount && !exceeds && !isFunding;
+    final canFund = hasAnyAmount && !isFunding;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),

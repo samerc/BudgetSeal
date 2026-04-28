@@ -17,6 +17,7 @@ import '../../core/providers/currency_symbol_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/number_format_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/font_provider.dart';
@@ -194,6 +195,13 @@ class SettingsScreen extends ConsumerWidget {
                   iconColor: const Color(0xFF42A5F5),
                   onTap: () => _showEntryModePicker(context, ref));
             }),
+            _SettingsTile(
+              icon: Icons.auto_fix_high_rounded,
+              title: 'Auto-fill',
+              subtitle: 'Pre-fill fields from last transaction',
+              iconColor: const Color(0xFF26A69A),
+              onTap: () => _showAutofillSettings(context, ref),
+            ),
             Builder(builder: (context) {
               final homeTab = ref.watch(homeTabProvider);
               return _SettingsTile(icon: Icons.home_outlined, title: 'Start Screen',
@@ -409,6 +417,106 @@ class SettingsScreen extends ConsumerWidget {
       builder: (_) => _ShareHouseholdSettingsSheet(
         googleDrive: notifier.googleDrive,
       ),
+    );
+  }
+
+  void _showAutofillSettings(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            final settings = ref.watch(autofillProvider);
+            final notifier = ref.read(autofillProvider.notifier);
+
+            void toggle(AutofillSettings Function(AutofillSettings) update) {
+              notifier.update(update(settings));
+              setSheetState(() {}); // force sheet rebuild
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36, height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.th(ctx),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Auto-fill Settings',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(ctx))),
+                  const SizedBox(height: 4),
+                  Text(
+                    'When you pick a category, these fields are '
+                    'pre-filled from your last transaction with that category.',
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.ts(ctx)),
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Account', style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Use the same account as last time',
+                        style: TextStyle(fontSize: 11)),
+                    value: settings.account,
+                    onChanged: (v) => toggle((s) => s.copyWith(account: v)),
+                  ),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Title', style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Copy the title from last time',
+                        style: TextStyle(fontSize: 11)),
+                    value: settings.title,
+                    onChanged: (v) => toggle((s) => s.copyWith(title: v)),
+                  ),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Amount', style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Copy the amount from last time',
+                        style: TextStyle(fontSize: 11)),
+                    value: settings.amount,
+                    onChanged: (v) => toggle((s) => s.copyWith(amount: v)),
+                  ),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Category', style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Remember last used category per account',
+                        style: TextStyle(fontSize: 11)),
+                    value: settings.category,
+                    onChanged: (v) => toggle((s) => s.copyWith(category: v)),
+                  ),
+                  const Divider(),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Override existing values',
+                        style: TextStyle(fontSize: 14)),
+                    subtitle: const Text(
+                        'Replace fields even if you already filled them',
+                        style: TextStyle(fontSize: 11)),
+                    value: settings.overrideExisting,
+                    onChanged: (v) =>
+                        toggle((s) => s.copyWith(overrideExisting: v)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
