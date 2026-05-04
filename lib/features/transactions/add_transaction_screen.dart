@@ -155,6 +155,46 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     super.dispose();
   }
 
+  void _autofillFromTitle(String title) {
+    final afSettings = ref.read(autofillProvider);
+    final entries = ref.read(transactionEntriesProvider).value ?? [];
+    final fill = lookupAutofillByTitle(
+      title: title,
+      entries: entries,
+      settings: afSettings,
+    );
+    if (!fill.hasData) {
+      setState(() {});
+      return;
+    }
+    setState(() {
+      final line = _lines.isNotEmpty ? _lines[0] : null;
+      if (line == null) return;
+      final canOverride = afSettings.overrideExisting;
+      if (fill.accountId != null &&
+          (line.accountId == null || canOverride)) {
+        _onLineAccountChanged(0, fill.accountId!);
+      }
+      if (fill.categoryId != null &&
+          (line.categoryId == null || canOverride)) {
+        line.categoryId = fill.categoryId;
+        // Also set transaction type from category
+        final categories = ref.read(categoriesProvider).value ?? [];
+        final cat = categories.where((c) => c.id == fill.categoryId).firstOrNull;
+        if (cat != null) {
+          final txType = cat.transactionType == 'income'
+              ? _TxType.income
+              : _TxType.expense;
+          if (_type != txType) _type = txType;
+        }
+      }
+      if (fill.amount != null && fill.amount! > 0 &&
+          (line.amount <= 0 || canOverride)) {
+        line.amountCtrl.text = fill.amount!.toString();
+      }
+    });
+  }
+
   Color _typeColor(BuildContext context) {
     final txColors = ref.watch(txColorsProvider);
     return switch (_type) {
@@ -1339,7 +1379,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     _titleCtrl.text = s;
                     _titleCtrl.selection = TextSelection.fromPosition(
                         TextPosition(offset: s.length));
-                    setState(() {});
+                    FocusScope.of(context).unfocus();
+                    // Auto-fill from last transaction with this title
+                    _autofillFromTitle(s);
                   },
                   child: ConstrainedBox(
                     constraints: BoxConstraints(

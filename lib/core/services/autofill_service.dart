@@ -100,3 +100,60 @@ AutofillData lookupAutofill({
     categoryName: null,
   );
 }
+
+/// Look up auto-fill data from the last transaction that has the same title.
+AutofillData lookupAutofillByTitle({
+  required String title,
+  required List<TransactionEntry> entries,
+  required AutofillSettings settings,
+}) {
+  TransactionEntry? match;
+  for (final e in entries) {
+    if (e.tx.type == 'transfer') continue;
+    final note = e.tx.note;
+    final txTitle = note.contains(' — ') ? note.split(' — ').first : note;
+    if (txTitle.toLowerCase() == title.toLowerCase() && txTitle.isNotEmpty) {
+      match = e;
+      break;
+    }
+  }
+
+  if (match == null) return const AutofillData();
+
+  String? accountId;
+  String? accountName;
+  if (settings.account) {
+    if (match.lines.isNotEmpty && match.lines.first.accountId != null) {
+      accountId = match.lines.first.accountId;
+      accountName = match.lineAccountNames[accountId];
+    }
+    accountId ??= match.tx.accountId;
+    accountName ??= match.accountName;
+  }
+
+  String? categoryId;
+  String? categoryName;
+  if (settings.category) {
+    if (match.lines.isNotEmpty && match.lines.first.categoryId != null) {
+      categoryId = match.lines.first.categoryId;
+    }
+    categoryId ??= match.tx.categoryId;
+  }
+
+  double? amount;
+  if (settings.amount) {
+    if (match.lines.isNotEmpty) {
+      amount = match.lines.first.amount;
+    }
+    amount ??= match.tx.amount;
+  }
+
+  return AutofillData(
+    accountId: accountId,
+    accountName: accountName,
+    title: null, // title is already set by the caller
+    amount: amount,
+    categoryId: categoryId,
+    categoryName: categoryName,
+  );
+}
