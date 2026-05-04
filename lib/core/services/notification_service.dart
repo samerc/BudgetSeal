@@ -17,7 +17,7 @@ class NotificationService {
   static const _billNotifId = 1002;
 
   static const _cooldownKey = 'notif_last_check';
-  static const _cooldownHours = 6;
+  static const _cooldownHours = 24;
 
   static Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -56,8 +56,9 @@ class NotificationService {
     for (final awc in allocations) {
       final balances =
           await ledgerDao.getBalanceByCurrency(awc.allocation.id);
-      final total = balances.values.fold(0.0, (a, b) => a + b);
-      if (total < 0) {
+      // Check each currency independently — don't sum across currencies
+      final hasNegative = balances.values.any((v) => v < -0.01);
+      if (hasNegative) {
         overspent.add(awc.allocation.name);
       }
     }

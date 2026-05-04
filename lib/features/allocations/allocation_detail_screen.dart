@@ -41,6 +41,7 @@ class _AllocationDetailScreenState
   String _type = 'spending';
   String _periodicity = 'periodic';
   bool _rollover = false;
+  bool _autoReset = true;
   String? _icon; // emoji icon for this envelope
   bool _loading = false;
   bool _showSettings = false;
@@ -72,6 +73,7 @@ class _AllocationDetailScreenState
         _type = alloc.type;
         _periodicity = alloc.periodicity;
         _rollover = alloc.rollover;
+        _autoReset = alloc.autoReset;
         _icon = alloc.icon;
         if (alloc.targetAmount != null) {
           _targetAmount = alloc.targetAmount!;
@@ -476,6 +478,35 @@ class _AllocationDetailScreenState
                       ),
                     ]),
                   ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(children: [
+                      Icon(Icons.auto_mode_rounded,
+                          size: 20, color: AppColors.textSecondary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Auto-reset',
+                                  style: TextStyle(
+                                      color: AppColors.tp(context),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                              Text('Reset automatically at period start',
+                                  style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12)),
+                            ]),
+                      ),
+                      Switch.adaptive(
+                        value: _autoReset,
+                        onChanged: (v) => setState(() => _autoReset = v),
+                        activeTrackColor: AppColors.accent,
+                      ),
+                    ]),
+                  ),
                 ],
               ]),
               const SizedBox(height: 16),
@@ -665,18 +696,18 @@ class _AllocationDetailScreenState
 
   Future<void> _showIconPicker() async {
     final customCtrl = TextEditingController();
-    final result = await showModalBottomSheet<String>(
+    try {
+    final result = await showDialog<String>(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.65,
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: AppColors.sf(ctx),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             child: Column(
               children: [
                 Center(
@@ -805,6 +836,9 @@ class _AllocationDetailScreenState
     if (mounted) FocusScope.of(context).unfocus();
     if (result != null && mounted) {
       setState(() => _icon = result.isEmpty ? null : result);
+    }
+    } finally {
+      customCtrl.dispose();
     }
   }
 
@@ -1179,316 +1213,6 @@ class _AllocationDetailScreenState
   }
 
   // ---------------------------------------------------------------------------
-  // Progress ring (kept for potential future use)
-  // ---------------------------------------------------------------------------
-
-  Widget _buildProgressRing() {
-    if (_targetAmount <= 0) return const SizedBox.shrink();
-    final target = _targetAmount;
-
-    final entriesAsync = ref.watch(transactionEntriesProvider);
-    final linkedCatIds = _linkedCategories.map((c) => c.id).toSet();
-
-    return entriesAsync.when(
-      data: (entries) {
-        final targetCurrency = _targetCurrencyController.text;
-        double spent = 0;
-        for (final e in entries) {
-          if (e.tx.type != 'expense') continue;
-          // Check category match at header or line level
-          if (e.lines.isNotEmpty) {
-            for (final l in e.lines) {
-              if (linkedCatIds.contains(l.categoryId) &&
-                  l.currency == targetCurrency) {
-                spent += l.amount;
-              }
-            }
-          } else if (linkedCatIds.contains(e.tx.categoryId)) {
-            // Header-level: use tx.amount if currency matches
-            if (e.tx.currency == targetCurrency) {
-              spent += e.tx.amount;
-            }
-          }
-        }
-
-        final progress = (spent / target).clamp(0.0, 1.5);
-        final pct = (progress * 100).round();
-        final color = progress > 1.0
-            ? AppColors.overspent
-            : progress > 0.8
-                ? AppColors.caution
-                : AppColors.healthy;
-
-        return _sectionContainer(children: [
-          _sectionHeader('BUDGET PROGRESS', icon: Icons.donut_large_rounded),
-          const SizedBox(height: 4),
-          Center(
-            child: SizedBox(
-              width: 140,
-              height: 140,
-              child: CustomPaint(
-                painter: _ProgressRingPainter(
-                  progress: progress.clamp(0.0, 1.0),
-                  color: color,
-                  bgColor: AppColors.bd(context),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$pct%',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: color,
-                        ),
-                      ),
-                      Text(
-                        'of ${formatAmount(target, currency: _targetCurrencyController.text)}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _miniStat('Spent', formatAmount(spent, currency: targetCurrency), color),
-              _miniStat('Remaining', formatAmount((target - spent).clamp(0, double.infinity), currency: targetCurrency), AppColors.healthy),
-            ],
-          ),
-          // Show other currency balances held in this envelope
-          Builder(builder: (_) {
-            final allocAsync = ref.watch(allocationsProvider);
-            final alloc = allocAsync.value
-                ?.where((a) => a.data.allocation.id == widget.allocationId)
-                .firstOrNull;
-            if (alloc == null) return const SizedBox.shrink();
-            final otherBalances = Map.of(alloc.balanceByCurrency)
-              ..remove(targetCurrency);
-            final nonZero = otherBalances.entries
-                .where((e) => e.value.abs() > 0.001)
-                .toList();
-            if (nonZero.isEmpty) return const SizedBox.shrink();
-            return Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                'Also holding: ${nonZero.map((e) => formatAmount(e.value, currency: e.key)).join(', ')}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.ts(context),
-                ),
-              ),
-            );
-          }),
-        ]);
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _miniStat(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 11, color: AppColors.textSecondary)),
-        const SizedBox(height: 2),
-        Text(value,
-            style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w700, color: color)),
-      ],
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Goal Timeline: for savings envelopes with a target
-  // ---------------------------------------------------------------------------
-
-  Widget _buildGoalTimeline() {
-    if (_targetAmount <= 0) return const SizedBox.shrink();
-    final target = _targetAmount;
-    final currency = _targetCurrencyController.text;
-
-    final db = ref.read(databaseProvider);
-    final ledgerDao = LedgerDao(db);
-
-    return FutureBuilder<Map<String, double>>(
-      future: ledgerDao.getBalanceByCurrency(widget.allocationId),
-      builder: (context, balanceSnap) {
-        if (!balanceSnap.hasData) return const SizedBox.shrink();
-        final balances = balanceSnap.data!;
-        final balance = balances[currency] ?? 0.0;
-
-        if (balance >= target) {
-          return _sectionContainer(children: [
-            _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.healthy.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: AppColors.healthy.withValues(alpha: 0.3)),
-              ),
-              child: Row(children: [
-                const Icon(Icons.celebration_rounded,
-                    size: 20, color: AppColors.healthy),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Goal reached! You\'ve saved ${formatAmount(balance, currency: currency)} of your ${formatAmount(target, currency: currency)} target.',
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.healthy),
-                  ),
-                ),
-              ]),
-            ),
-          ]);
-        }
-
-        return FutureBuilder<List<AllocationLedgerData>>(
-          future: (db.select(db.allocationLedger)
-                ..where(
-                    (t) => t.allocationId.equals(widget.allocationId))
-                ..where((t) => t.entryType.equals('funding')))
-              .get(),
-          builder: (context, ledgerSnap) {
-            if (!ledgerSnap.hasData) return const SizedBox.shrink();
-            final fundingEntries = ledgerSnap.data!;
-
-            if (fundingEntries.isEmpty) {
-              return _sectionContainer(children: [
-                _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(children: [
-                    Icon(Icons.info_outline_rounded,
-                        size: 16, color: AppColors.ts(context)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'No funding yet. Start funding this envelope to see a goal timeline.',
-                        style: TextStyle(
-                            fontSize: 13, color: AppColors.ts(context)),
-                      ),
-                    ),
-                  ]),
-                ),
-              ]);
-            }
-
-            // Calculate average monthly funding
-            final now = DateTime.now();
-            // Find earliest funding entry
-            DateTime earliest = now;
-            double totalFunded = 0;
-            for (final entry in fundingEntries) {
-              if (entry.currency == currency) {
-                totalFunded += entry.amount;
-                if (entry.createdAt.isBefore(earliest)) {
-                  earliest = entry.createdAt;
-                }
-              }
-            }
-
-            if (totalFunded <= 0) {
-              return const SizedBox.shrink();
-            }
-
-            // Months since first funding (at least 1)
-            final monthsSinceCreation = ((now.year - earliest.year) * 12 +
-                    (now.month - earliest.month))
-                .clamp(1, 999);
-            final avgMonthlyFunding = totalFunded / monthsSinceCreation;
-
-            final remaining = target - balance;
-            final monthsToGoal = avgMonthlyFunding > 0
-                ? (remaining / avgMonthlyFunding).ceil()
-                : -1;
-
-            final targetDate = monthsToGoal > 0
-                ? DateTime(now.year, now.month + monthsToGoal, 1)
-                : null;
-
-            return _sectionContainer(children: [
-              _sectionHeader('GOAL TIMELINE', icon: Icons.flag_rounded),
-              // Progress summary
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _miniStat(
-                      'Saved',
-                      formatAmount(balance, currency: currency),
-                      AppColors.healthy),
-                  _miniStat(
-                      'Remaining',
-                      formatAmount(remaining, currency: currency),
-                      AppColors.ts(context)),
-                  _miniStat(
-                      'Avg/month',
-                      formatAmount(avgMonthlyFunding, currency: currency),
-                      AppColors.accent),
-                ],
-              ),
-              const SizedBox(height: 14),
-              // Timeline estimate
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: AppColors.accent.withValues(alpha: 0.2)),
-                ),
-                child: Row(children: [
-                  const Icon(Icons.timeline_rounded,
-                      size: 20, color: AppColors.accent),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: monthsToGoal > 0
-                        ? Text(
-                            'At your current pace, you\'ll reach your goal in '
-                            '$monthsToGoal month${monthsToGoal == 1 ? '' : 's'}'
-                            '${targetDate != null ? ' (${DateFormat('MMMM yyyy').format(targetDate)})' : ''}',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.tp(context)),
-                          )
-                        : Text(
-                            'Unable to estimate timeline',
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.ts(context)),
-                          ),
-                  ),
-                ]),
-              ),
-            ]);
-          },
-        );
-      },
-    );
-  }
-
-  // ---------------------------------------------------------------------------
   // Recent transactions (last 5)
   // ---------------------------------------------------------------------------
 
@@ -1704,83 +1428,6 @@ class _AllocationDetailScreenState
         ]);
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildEnvelopeTransactions() {
-    final entriesAsync = ref.watch(transactionEntriesProvider);
-    final linkedCatIds = _linkedCategories.map((c) => c.id).toSet();
-
-    return entriesAsync.when(
-      data: (entries) {
-        // Filter: transactions whose category is linked to this envelope.
-        final filtered = entries.where((e) {
-          if (linkedCatIds.contains(e.tx.categoryId)) return true;
-          for (final l in e.lines) {
-            if (linkedCatIds.contains(l.categoryId)) return true;
-          }
-          return false;
-        }).take(20).toList();
-
-        if (filtered.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Text('No transactions in this envelope yet',
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.textHint)),
-            ),
-          );
-        }
-
-        return Column(
-          children: filtered.map((e) {
-            final tx = e.tx;
-            final color = tx.type == 'income'
-                ? AppColors.healthy
-                : AppColors.overspent;
-            final label = tx.note.isNotEmpty ? tx.note : tx.type;
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(label,
-                            style: const TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w500),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                        Text(
-                          DateFormat('MMM d').format(
-                              tx.createdAt.toLocal()),
-                          style: const TextStyle(
-                              fontSize: 10, color: AppColors.textHint),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: color),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        );
-      },
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: Center(child: CircularProgressIndicator()),
-      ),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
@@ -2481,6 +2128,7 @@ class _AllocationDetailScreenState
         type: Value(_type),
         periodicity: Value(effectivePeriodicity),
         rollover: Value(_rollover),
+        autoReset: Value(_autoReset),
         icon: Value(_icon),
         targetAmount: Value(targetAmount),
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
@@ -2549,60 +2197,6 @@ class _SegmentChip extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ProgressRingPainter extends CustomPainter {
-  final double progress; // 0.0 to 1.0
-  final Color color;
-  final Color bgColor;
-
-  _ProgressRingPainter({
-    required this.progress,
-    required this.color,
-    required this.bgColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (math.min(size.width, size.height) / 2) - 10;
-    const startAngle = -math.pi / 2;
-    const fullSweep = 2 * math.pi;
-
-    // Background ring
-    final bgPaint = Paint()
-      ..color = bgColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      fullSweep,
-      false,
-      bgPaint,
-    );
-
-    // Progress arc
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      fullSweep * progress.clamp(0.0, 1.0),
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ProgressRingPainter old) =>
-      old.progress != progress || old.color != color;
 }
 
 // =============================================================================

@@ -20,6 +20,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
+import '../../core/providers/period_reset_provider.dart';
 import '../../shared/widgets/animated_amount.dart';
 import '../../shared/widgets/breathing_widget.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -60,6 +61,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final household = ref.watch(householdProvider).value;
+    // Trigger period auto-reset check on each build (FutureProvider caches)
+    ref.watch(periodResetCheckProvider);
     final layout = ref.watch(dashboardLayoutProvider);
     bool sectionVisible(DashboardSection s) =>
         layout.firstWhere((c) => c.section == s,

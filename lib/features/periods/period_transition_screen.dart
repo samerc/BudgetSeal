@@ -8,6 +8,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/error_retry.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
 class _AllocationResolution {
@@ -96,7 +97,8 @@ class _PeriodTransitionScreenState
       ref.invalidate(unallocatedProvider);
 
       if (mounted) {
-        context.go('/funding');
+        context.pop(); // close period transition
+        context.push('/funding'); // open funding as a new route
       }
     } catch (e) {
       if (mounted) {
@@ -126,7 +128,11 @@ class _PeriodTransitionScreenState
       ),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorRetry(
+          message: "Couldn't load envelopes",
+          details: '$e',
+          onRetry: () => ref.invalidate(allocationsProvider),
+        ),
         data: (_) => Column(
           children: [
             // Header banner

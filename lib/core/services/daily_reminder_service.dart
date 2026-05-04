@@ -37,6 +37,17 @@ class DailyReminderService {
   ];
 
   static final _plugin = FlutterLocalNotificationsPlugin();
+  static bool _initialized = false;
+
+  static Future<void> _ensureInitialized() async {
+    if (_initialized) return;
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const ios = DarwinInitializationSettings();
+    await _plugin.initialize(
+      settings: const InitializationSettings(android: android, iOS: ios),
+    );
+    _initialized = true;
+  }
 
   // ── Settings ────────────────────────────────────────────────────
 
@@ -101,6 +112,7 @@ class DailyReminderService {
   // ── Core ────────────────────────────────────────────────────────
 
   static Future<void> _schedule() async {
+    await _ensureInitialized();
     _ensureTz();
 
     // Request notification permission on Android 13+
@@ -139,6 +151,7 @@ class DailyReminderService {
   }
 
   static Future<void> _cancel() async {
+    await _ensureInitialized();
     await _plugin.cancel(id: _notificationId);
   }
 

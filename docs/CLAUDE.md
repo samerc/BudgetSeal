@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v12)
+│   │   ├── app_database.dart   # Drift database definition (schema v13)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (11 tables)
@@ -88,7 +88,9 @@ lib/
 │   └── services/
 │       ├── notification_service.dart
 │       ├── auto_backup_service.dart  # Scheduled local DB backups
-│       └── daily_reminder_service.dart # Daily transaction logging reminder
+│       ├── daily_reminder_service.dart # Daily transaction logging reminder
+│       ├── period_reset_service.dart   # Auto/manual envelope period resets
+│       └── autofill_service.dart       # Last-transaction lookup for auto-fill
 ├── features/                   # Screen-level code, one folder per feature
 │   ├── dashboard/
 │   ├── main/                   # Main screen with bottom nav bar
@@ -201,12 +203,13 @@ All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages
 
 ## Database
 
-### Schema Version: 12
+### Schema Version: 13
 11 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
 v11→v12 added `deleted` (BOOLEAN, default false) to `transactions` for soft-delete support.
+v12→v13 added `autoReset` (BOOLEAN, default true) to `allocations` for period reset behavior.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -330,7 +333,7 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 `withdrawFromAllocation()` checks sufficient balance before debiting. Throws `StateError` if the allocation doesn't have enough in the requested currency. Callers must catch and show an error.
 
 ### Notification Grouping
-`NotificationService` groups multiple low-envelope alerts into one notification and multiple upcoming-bill alerts into one. Uses fixed notification IDs (1001, 1002) so each check replaces the previous. 6-hour cooldown between checks via SharedPreferences.
+`NotificationService` groups multiple low-envelope alerts into one notification and multiple upcoming-bill alerts into one. Uses fixed notification IDs (1001, 1002) so each check replaces the previous. 24-hour cooldown between checks via SharedPreferences. Overspent detection checks each currency independently (never sums across currencies).
 
 ### Envelope Currency Handling
 - `tx.amount` and `tx.currency` are always in the household's **base currency** — never use them directly for display in envelope contexts.
@@ -374,7 +377,7 @@ Mixed-type items from the assisted flow (e.g., expense + income in one session) 
 
 ## Daily Reminder
 
-`DailyReminderService` schedules a daily local notification via `flutter_local_notifications`. Users configure in Settings: toggle on/off, pick time (default 7 PM), optional custom message. If no custom message, rotates between 5 default prompts. Initialized in `main()` via `DailyReminderService.init()` which re-schedules if enabled. Uses `timezone` package for `zonedSchedule` with `matchDateTimeComponents.time`.
+`DailyReminderService` schedules a daily local notification via `flutter_local_notifications`. Users configure in Settings: toggle on/off, pick time (default 7 PM), optional custom message. If no custom message, rotates between 5 default prompts. Initialized in `main()` via `DailyReminderService.init()` which re-schedules if enabled. Uses `timezone` package for `zonedSchedule` with `matchDateTimeComponents.time`. Important: the service has its own `FlutterLocalNotificationsPlugin` instance that must be initialized via `_ensureInitialized()` before any scheduling call.
 
 ### Category Icons
 Users can pick from 120+ curated emojis organized by group, OR type/paste any emoji from the system keyboard via the text field at the top of the picker. The `CategoryIcon` widget resolves display priority: PNG asset by name match → emoji → first-letter fallback.
@@ -438,9 +441,11 @@ Two modes:
 - **Manual**: Enter total + number of people, even or custom split
 - **Scan Receipt**: Camera/gallery → offline OCR via `google_mlkit_text_recognition` → extracted line items with amounts → assign each item to people → per-person totals
 
-OCR service at `lib/shared/utils/ocr_service.dart` — regex parsing of receipt text to extract `(name, amount)` pairs. Filters out non-item lines (totals, tax, headers). Fully offline, no internet needed.
+OCR service at `lib/shared/utils/ocr_service.dart` — regex parsing of receipt text to extract `(name, amount, quantity)` tuples. Line merging by Y-position (handles ML Kit splitting items across blocks). Handles both US (1,234.56) and European (1.234,56 or 4,50) number formats. Quantity detection from leading "2x" or trailing numbers. Filters out non-item lines (totals, tax, headers). Fully offline, no internet needed.
 
-Tip slider (0-30%), per-person summary, "Create Transaction" button pre-fills an expense transaction with split details in the note.
+Interactive receipt overlay shows tappable bounding boxes on the receipt image. Tap a person chip, then tap items to assign. Lines without detected prices prompt for manual amount entry. Quantity > 1 items offer "split into individual items" for multi-person assignment.
+
+Tip: percentage slider (0-30%) or fixed amount toggle. Cross-currency support with exchange rate input + swap button. "Create Transaction" button disabled if user's share is $0. Warning dialog if cross-currency rate not set.
 
 ## Customizable Dashboard
 
@@ -504,9 +509,18 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 Both the funding screen (bulk) and envelope detail screen (single fund) check if the funding amount exceeds unallocated balance. Shows a warning dialog: "Your unallocated balance will go negative. Continue anyway?" with Cancel/Fund Anyway options.
 
-## Bottom Sheet Icon Pickers
+## Icon Pickers
 
-Envelope and category icon pickers use `SizedBox(height: 65% of screen)` inside `showModalBottomSheet(isScrollControlled: true)`. Do NOT use `DraggableScrollableSheet` — it causes dark overlay / zero-height rendering issues. Use the parent State's `context` for `MediaQuery`, not the builder's `ctx`.
+Envelope and category icon pickers use `showDialog` with a `Dialog` widget (NOT `showModalBottomSheet`). `DraggableScrollableSheet` causes dark overlay / zero-height rendering issues. The dialog returns the selected emoji via `Navigator.pop(ctx, emoji)`. A `TextEditingController` is created locally and disposed in a `finally` block after the dialog closes.
+
+## Period Reset
+
+`lib/core/services/period_reset_service.dart` + `lib/core/providers/period_reset_provider.dart`. At app launch, `periodResetCheckProvider` checks all periodic envelopes whose period has elapsed.
+
+- Envelopes with `autoReset = true` (default): automatically zeroed out via ledger entry on period start
+- Envelopes with `autoReset = false`: flagged as "pending manual reset" — shown with amber glow on the Budget tab and a banner prompting the user to review
+- Toggle per-envelope in the envelope detail screen settings (3-dot menu)
+- `PeriodResetService.checkAndAutoReset()` runs once per app launch, tracked via SharedPreferences timestamp
 
 ## Future Months
 

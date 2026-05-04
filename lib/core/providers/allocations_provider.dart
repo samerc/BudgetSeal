@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../database/app_database.dart';
@@ -69,12 +70,14 @@ final allocationsProvider =
   // Watch allocations table — re-compute when allocations change
   final allocSub = dao.watchAll(householdId).listen((list) {
     cachedList = list;
-    recompute();
+    recompute().catchError(
+        (e) => debugPrint('[allocationsProvider] recompute error: $e'));
   });
 
   // Watch ledger table — re-compute when balances change
   final ledgerSub = db.select(db.allocationLedger).watch().listen((_) {
-    recompute();
+    recompute().catchError(
+        (e) => debugPrint('[allocationsProvider] recompute error: $e'));
   });
 
   ref.onDispose(() {

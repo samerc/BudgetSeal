@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/period_reset_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
@@ -158,7 +159,61 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               ),
             ),
 
-          // ── Budget Summary ──
+          // ── Period Reset Banner ──
+          if (_searchQuery.isEmpty)
+          SliverToBoxAdapter(
+            child: ref.watch(pendingResetProvider).when(
+              data: (pendingIds) {
+                if (pendingIds.isEmpty) return const SizedBox.shrink();
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.caution.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.caution.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.update_rounded,
+                          size: 20, color: AppColors.caution),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('New period started',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.tp(context))),
+                            Text(
+                              '${pendingIds.length} envelope(s) need review',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.ts(context)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            context.push('/period-transition'),
+                        child: const Text('Review'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ),
+
+          // ── Budget Summary (hidden during search) ──
+          if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: allocationsAsync.when(
               data: (allocations) {
@@ -226,7 +281,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // ── Unallocated Banner ──
+          // ── Unallocated Banner (hidden during search) ──
+          if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: unallocatedAsync.when(
               data: (unallocated) => _UnallocatedBanner(
@@ -394,10 +450,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         ),
       );
 
+      final pendingIds = ref.watch(pendingResetProvider).value ?? [];
       for (final a in items) {
         final cat = a.data.category;
         widgets.add(
           AllocationCard(
+            needsReview: pendingIds.contains(a.data.allocation.id),
             name: a.data.allocation.name,
             type: a.data.allocation.type,
             periodicity: a.data.allocation.periodicity,

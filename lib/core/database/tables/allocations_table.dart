@@ -21,6 +21,9 @@ class Allocations extends Table {
   TextColumn get targetCurrency => text().nullable()();
   /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
   TextColumn get icon => text().nullable()();
+  /// Whether this periodic envelope resets automatically at period start.
+  /// If false, user must manually handle it in Period Transition.
+  BoolColumn get autoReset => boolean().withDefault(const Constant(true))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

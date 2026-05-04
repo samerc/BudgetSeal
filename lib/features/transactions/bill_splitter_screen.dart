@@ -96,6 +96,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     setState(() {
       _scanning = true;
       _receiptPath = image.path;
+      _imageSizeCache = null; // Reset so new image dimensions are computed
     });
 
     final result = await OcrService.scanReceipt(image.path);
@@ -274,7 +275,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               name: '$name (${i + 1}/$qty)',
               amount: unitPrice,
               assignedTo: {person},
-              ocrLineIndex: i == 0 ? lineIndex : null,
+              ocrLineIndex: lineIndex, // All sub-items track back to the OCR line
             ));
           }
         });
@@ -355,9 +356,21 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       if (_activePersonForSelection == removed) {
         _activePersonForSelection = null;
       }
-      // Remove items assigned to this person
+      // Remove person from shared items; delete items only assigned to them
       _selectedLineIndices.removeWhere((_, p) => p == removed);
-      _items.removeWhere((item) => item.assignedTo.contains(removed));
+      final toRemove = <int>[];
+      for (var i = 0; i < _items.length; i++) {
+        _items[i].assignedTo.remove(removed);
+        if (_items[i].assignedTo.isEmpty) {
+          if (_items[i].ocrLineIndex != null) {
+            _selectedLineIndices.remove(_items[i].ocrLineIndex);
+          }
+          toRemove.add(i);
+        }
+      }
+      for (var i = toRemove.length - 1; i >= 0; i--) {
+        _items.removeAt(toRemove[i]);
+      }
     });
   }
 
@@ -371,10 +384,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   void _removeItem(int index) {
     final item = _items[index];
     setState(() {
-      if (item.ocrLineIndex != null) {
-        _selectedLineIndices.remove(item.ocrLineIndex);
-      }
       _items.removeAt(index);
+      // Only clear OCR highlight if no other items reference the same line
+      if (item.ocrLineIndex != null) {
+        final stillReferenced =
+            _items.any((i) => i.ocrLineIndex == item.ocrLineIndex);
+        if (!stillReferenced) {
+          _selectedLineIndices.remove(item.ocrLineIndex);
+        }
+      }
     });
   }
 
@@ -418,7 +436,35 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   // ─── Create Transaction ────────────────────────────────────────────────────
 
-  void _createTransaction() {
+  void _createTransaction() async {
+    final isCross = _billCurrency != _baseCurrency;
+    final rateNotSet = isCross && (_exchangeRate - 1.0).abs() < 0.001;
+
+    if (rateNotSet) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Exchange rate not set'),
+          content: Text(
+            'The bill currency ($_billCurrency) differs from your base currency '
+            '($_baseCurrency) but no exchange rate was entered.\n\n'
+            'The transaction will be saved without conversion.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Go back'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Continue anyway'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !mounted) return;
+    }
+
     final splits = _calculateSplits();
     final myName = _people.first;
     final myShare = splits[myName] ?? 0;
@@ -429,9 +475,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         : 'Split with ${otherPeople.join(", ")} — '
             'Total: ${formatAmount(total, currency: _billCurrency)}';
 
+    if (!mounted) return;
     context.push('/add-transaction', extra: {
       'editType': 'expense',
-      // "Bill Split — details" → title gets "Bill Split", note gets the details
       'editNote': 'Bill Split — $note',
       'editLines': [
         {
@@ -918,7 +964,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 const SizedBox(height: 24),
 
                 FilledButton.icon(
-                  onPressed: grandTotal > 0 ? _createTransaction : null,
+                  onPressed: grandTotal > 0 && (splits[_people.first] ?? 0) > 0
+                      ? _createTransaction
+                      : null,
                   icon: const Icon(Icons.receipt_long_rounded),
                   label: Text(
                       'Create Transaction (${formatAmount(splits[_people.first] ?? 0, currency: _billCurrency)})'),

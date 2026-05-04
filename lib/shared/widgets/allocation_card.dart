@@ -21,6 +21,9 @@ class AllocationCard extends StatelessWidget {
   final String? categoryIcon;
   final String? categoryColorHex;
 
+  /// Whether this envelope needs manual period review (amber glow).
+  final bool needsReview;
+
   const AllocationCard({
     super.key,
     required this.name,
@@ -33,6 +36,7 @@ class AllocationCard extends StatelessWidget {
     this.envelopeIcon,
     this.onTap,
     this.onSpend,
+    this.needsReview = false,
     this.categoryName,
     this.categoryIcon,
     this.categoryColorHex,
@@ -47,7 +51,7 @@ class AllocationCard extends StatelessWidget {
   bool get _isSaving => type == 'saving';
   bool get _isSavingWithGoal => _isSaving && targetAmount != null && targetAmount! > 0;
 
-  Widget _buildIcon(BuildContext context, bool hasTarget, double? progress,
+  Widget _buildIcon(BuildContext context, bool hasTarget, double? rawProgress,
       bool isOverspent, bool hasCategoryIcon, Color iconColor, IconData savingsIcon) {
     // Determine the inner content — always render something
     Widget inner;
@@ -72,16 +76,16 @@ class AllocationCard extends StatelessWidget {
     }
 
     // Wrap in circular progress ring when there's a target
-    if (hasTarget && progress != null) {
+    if (hasTarget && rawProgress != null) {
       final ringColor = isOverspent
           ? AppColors.overspent
-          : progress >= 1.0
+          : rawProgress >= 1.0
               ? AppColors.healthy
               : _typeColor;
       return Padding(
         padding: const EdgeInsets.only(right: 10),
         child: AnimatedCircularProgress(
-          progress: progress,
+          progress: rawProgress,
           color: ringColor,
           overspendColor: AppColors.overspent,
           trackColor: AppColors.bd(context),
@@ -110,24 +114,36 @@ class AllocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveTargetCurrency = targetCurrency ?? baseCurrency;
-    // Use base currency balance for display on the card
-    final baseBalance = balanceByCurrency[baseCurrency] ?? 0.0;
-    // Use target currency balance for progress calculation
+    // Use target currency balance for display when envelope has a specific target currency
     final targetCcyBalance = balanceByCurrency[effectiveTargetCurrency] ?? 0.0;
+    // Display currency: show in target currency if set, otherwise base
+    final displayCurrency = effectiveTargetCurrency;
+    final displayBalance = targetCcyBalance;
     final hasTarget = targetAmount != null && targetAmount! > 0;
-    final progress =
-        hasTarget ? (targetCcyBalance / targetAmount!).clamp(0.0, 1.0) : null;
+    // Unclamped progress for the circular ring (allows overspend arc > 1.0)
+    final rawProgress = hasTarget ? (targetCcyBalance / targetAmount!) : null;
+    // Clamped progress for LinearProgressIndicator (must be 0.0–1.0)
+    final progress = rawProgress?.clamp(0.0, 1.0);
     // Overspent if any currency balance is negative
     final isOverspent = balanceByCurrency.values.any((v) => v < -0.01);
 
     final bool hasCategoryIcon = categoryName != null;
-    final Color iconColor = categoryColorHex != null
-        ? Color(int.parse('FF${categoryColorHex!.replaceAll('#', '')}', radix: 16))
-        : _typeColor;
+    Color parsedColor = _typeColor;
+    if (categoryColorHex != null) {
+      try {
+        parsedColor = Color(
+            int.parse('FF${categoryColorHex!.replaceAll('#', '')}', radix: 16));
+      } catch (_) {
+        // Invalid hex string — keep fallback color
+      }
+    }
+    final Color iconColor = parsedColor;
 
     // Determine urgency border color
     final Color borderColor;
-    if (isOverspent) {
+    if (needsReview) {
+      borderColor = AppColors.caution.withValues(alpha: 0.6);
+    } else if (isOverspent) {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
     } else if (_isSavingWithGoal && targetCcyBalance >= targetAmount!) {
       borderColor = AppColors.healthy.withValues(alpha: 0.35);
@@ -159,7 +175,7 @@ class AllocationCard extends StatelessWidget {
           child: Row(
             children: [
               // Icon: with circular progress ring when target exists
-              _buildIcon(context, hasTarget, progress, isOverspent,
+              _buildIcon(context, hasTarget, rawProgress, isOverspent,
                   hasCategoryIcon, iconColor, savingsIcon),
               // Name + progress
               Expanded(
@@ -232,7 +248,7 @@ class AllocationCard extends StatelessWidget {
                           ),
                         ),
                       Text(
-                        formatAmount(baseBalance, currency: baseCurrency),
+                        formatAmount(displayBalance, currency: displayCurrency),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,

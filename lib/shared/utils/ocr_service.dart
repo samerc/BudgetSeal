@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -59,13 +60,17 @@ class OcrService {
       final inputImage = InputImage.fromFilePath(imagePath);
       final recognized = await textRecognizer.processImage(inputImage);
 
-      // Get image dimensions from metadata
-      final inputImg = InputImage.fromFilePath(imagePath);
-      final imageData = inputImg.metadata;
+      // Get actual image dimensions by decoding the file
       int imgW = 1000, imgH = 1400; // fallback
-      if (imageData?.size != null) {
-        imgW = imageData!.size.width.toInt();
-        imgH = imageData.size.height.toInt();
+      try {
+        final bytes = await File(imagePath).readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        imgW = frame.image.width;
+        imgH = frame.image.height;
+        frame.image.dispose();
+      } catch (_) {
+        // Keep fallback dimensions
       }
 
       // Collect all raw lines from all blocks
@@ -200,11 +205,31 @@ class OcrService {
   static ExtractedItem? _buildItem(String rawName, String rawPrice) {
     // Clean price: remove spaces, normalize separators
     var priceStr = rawPrice.replaceAll(' ', '');
-    // Handle "1,234.56" or "1.234,56" or "1 234.56"
-    if (priceStr.contains(',') && priceStr.indexOf(',') > priceStr.lastIndexOf('.')) {
-      priceStr = priceStr.replaceAll('.', '').replaceAll(',', '.');
-    } else {
-      priceStr = priceStr.replaceAll(',', '');
+    // Handle various number formats:
+    // "1,234.56" (US thousands) → 1234.56
+    // "1.234,56" (EU thousands) → 1234.56
+    // "4,50" (EU decimal, no thousands) → 4.50
+    // "1,500" (US thousands, no decimal) → 1500
+    if (priceStr.contains(',') && priceStr.contains('.')) {
+      // Both separators present — last one is the decimal
+      if (priceStr.lastIndexOf(',') > priceStr.lastIndexOf('.')) {
+        // EU: "1.234,56" → dots are thousands, comma is decimal
+        priceStr = priceStr.replaceAll('.', '').replaceAll(',', '.');
+      } else {
+        // US: "1,234.56" → commas are thousands, dot is decimal
+        priceStr = priceStr.replaceAll(',', '');
+      }
+    } else if (priceStr.contains(',')) {
+      // Only comma — check if it's a decimal separator
+      final commaPos = priceStr.indexOf(',');
+      final afterComma = priceStr.substring(commaPos + 1);
+      if (afterComma.length <= 2 && !afterComma.contains(',')) {
+        // "4,50" or "4,5" → EU decimal
+        priceStr = priceStr.replaceAll(',', '.');
+      } else {
+        // "1,500" → US thousands
+        priceStr = priceStr.replaceAll(',', '');
+      }
     }
     final amount = double.tryParse(priceStr);
     if (amount == null || amount <= 0) return null;
@@ -229,11 +254,12 @@ class OcrService {
     name = name.replaceAll(
         RegExp(r'^[A-Z]?[\dA-Z]{3,10}\s+', caseSensitive: false), '');
 
-    // Extract trailing quantity: "AVOCADO EXTRA  2" or "Mango  1"
-    final trailingQty = RegExp(r'^(.+?)\s+(\d{1,2})$').firstMatch(name);
+    // Extract trailing quantity: "AVOCADO EXTRA  2" or "Mango  3"
+    // Only treat as quantity if value is 2-20 (1 is noise, >20 is likely a code)
+    final trailingQty = RegExp(r'^(.+?)\s{2,}(\d{1,2})$').firstMatch(name);
     if (trailingQty != null && quantity == 1) {
       final q = int.tryParse(trailingQty.group(2)!);
-      if (q != null && q >= 1 && q <= 99) {
+      if (q != null && q >= 2 && q <= 20) {
         quantity = q;
         name = trailingQty.group(1)!;
       }

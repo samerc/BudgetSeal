@@ -9,6 +9,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_display.dart';
+import '../../shared/widgets/error_retry.dart';
 
 class FundingScreen extends ConsumerStatefulWidget {
   const FundingScreen({super.key});
@@ -157,7 +158,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       ),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorRetry(
+          message: "Couldn't load envelopes",
+          details: '$e',
+          onRetry: () => ref.invalidate(allocationsProvider),
+        ),
         data: (allocations) {
           final distributedByCurrency =
               _totalDistributedByCurrency(allocations, baseCurrency);

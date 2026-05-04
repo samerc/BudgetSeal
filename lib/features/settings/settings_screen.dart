@@ -1849,6 +1849,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
   bool _enabled = false;
   TimeOfDay _time = const TimeOfDay(hour: 19, minute: 0);
   String _message = '';
+  final _messageCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -1865,8 +1866,15 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
         _enabled = enabled;
         _time = time;
         _message = message;
+        _messageCtrl.text = message;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _messageCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -1941,7 +1949,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: TextField(
-                controller: TextEditingController(text: _message),
+                controller: _messageCtrl,
                 style: TextStyle(
                     fontSize: 13, color: AppColors.tp(context)),
                 textInputAction: TextInputAction.done,
@@ -1964,6 +1972,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
                               size: 16, color: AppColors.th(context)),
                           onPressed: () async {
                             await DailyReminderService.setMessage('');
+                            _messageCtrl.clear();
                             setState(() => _message = '');
                           },
                         )

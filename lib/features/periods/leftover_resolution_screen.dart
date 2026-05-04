@@ -6,6 +6,7 @@ import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/error_retry.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
 class LeftoverResolutionArgs {
@@ -111,7 +112,11 @@ class _LeftoverResolutionScreenState
       appBar: AppBar(title: const Text('Resolve Leftovers')),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorRetry(
+          message: "Couldn't load data",
+          details: '$e',
+          onRetry: () => ref.invalidate(allocationsProvider),
+        ),
         data: (allocations) {
           final allocation = _findAllocation(allocations);
           if (allocation == null) {

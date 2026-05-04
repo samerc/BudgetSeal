@@ -1136,18 +1136,18 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
 
   Future<void> _showEmojiPicker() async {
     final customCtrl = TextEditingController();
-    final result = await showModalBottomSheet<String>(
+    try {
+    final result = await showDialog<String>(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.65,
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: AppColors.sf(ctx),
           child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: Column(
             children: [
               Center(
@@ -1283,10 +1283,12 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           ),
         ),
         );
-      },
-    );
+      });
     if (result != null && mounted) {
       setState(() => _emoji = result);
+    }
+    } finally {
+      customCtrl.dispose();
     }
   }
 
