@@ -258,10 +258,15 @@ class _AssistedTransactionScreenState
                           _title = s;
                           movedForward = true;
                           Navigator.pop(ctx);
+                          // Try autofill from title — may pre-fill category & account
+                          _applyAutofillFromTitle(s);
                           if (localType == 'transfer') {
                             _showAmountScreen();
-                          } else {
+                          } else if (_activeLine.category == null) {
                             _showCategoryPopup();
+                          } else {
+                            // Category was filled by title autofill — skip to amount
+                            _showAmountScreen();
                           }
                         },
                         child: ConstrainedBox(
@@ -923,6 +928,31 @@ class _AssistedTransactionScreenState
     }
     if (fill.title != null && (_title.isEmpty || canOverride)) {
       _title = fill.title!;
+    }
+  }
+
+  void _applyAutofillFromTitle(String title) {
+    final settings = ref.read(autofillProvider);
+    final entries = ref.read(transactionEntriesProvider).value ?? [];
+    final fill = lookupAutofillByTitle(
+      title: title,
+      entries: entries,
+      settings: settings,
+    );
+    if (!fill.hasData) return;
+    final canOverride = settings.overrideExisting;
+    if (fill.accountId != null && (_accountId == null || canOverride)) {
+      _accountId = fill.accountId;
+    }
+    if (fill.categoryId != null &&
+        (_activeLine.category == null || canOverride)) {
+      final categories = ref.read(categoriesProvider).value ?? [];
+      final cat =
+          categories.where((c) => c.id == fill.categoryId).firstOrNull;
+      if (cat != null) {
+        _activeLine.category = cat;
+        _type = cat.transactionType;
+      }
     }
   }
 
