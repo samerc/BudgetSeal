@@ -61,6 +61,7 @@ dependencies:
   encrypt: ^5.0.3
   flutter_secure_storage: ^10.0.0
   pointycastle: ^3.9.1
+  flutter_timezone: ^5.0.2
 
 dev_dependencies:
   flutter_test:

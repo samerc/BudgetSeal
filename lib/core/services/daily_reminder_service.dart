@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
@@ -113,7 +114,7 @@ class DailyReminderService {
 
   static Future<void> _schedule() async {
     await _ensureInitialized();
-    _ensureTz();
+    await _ensureTz();
 
     // Request notification permission on Android 13+
     await _plugin
@@ -155,18 +156,23 @@ class DailyReminderService {
     await _plugin.cancel(id: _notificationId);
   }
 
-  /// Ensure timezone data is loaded.
+  /// Ensure timezone data is loaded and local timezone is set.
   static bool _tzInitialized = false;
-  static void _ensureTz() {
+  static Future<void> _ensureTz() async {
     if (!_tzInitialized) {
       tz_data.initializeTimeZones();
+      try {
+        final tzInfo = await FlutterTimezone.getLocalTimezone();
+        tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
+      } catch (_) {
+        // Fallback: tz.local stays UTC — better than crashing
+      }
       _tzInitialized = true;
     }
   }
 
   /// Compute the next occurrence of the given time today or tomorrow.
   static tz.TZDateTime _nextInstanceOfTime(TimeOfDay time) {
-    _ensureTz();
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(
       tz.local,
