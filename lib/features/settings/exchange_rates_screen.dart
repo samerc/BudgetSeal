@@ -83,10 +83,8 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
 
     return Scaffold(
-      
       appBar: AppBar(
         title: const Text('Exchange Rates'),
-        
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -99,29 +97,40 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
       ),
       body: _loading && _rates.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : _error != null && _rates.isEmpty
+          : !_loading && _rates.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.cloud_off_rounded,
-                          size: 48, color: AppColors.textHint),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Could not fetch rates',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 15),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: _fetchRates,
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: const Text('Retry'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.accent,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.cloud_off_rounded,
+                            size: 48, color: AppColors.ts(context)),
+                        const SizedBox(height: 12),
+                        Text(
+                          _error != null
+                              ? 'Could not fetch rates'
+                              : 'No rates available',
+                          style: TextStyle(
+                              color: AppColors.tp(context),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Text(
+                          'Check your internet connection and try again.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: AppColors.ts(context), fontSize: 13),
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          onPressed: _fetchRates,
+                          icon: const Icon(Icons.refresh_rounded, size: 16),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : ListView(
