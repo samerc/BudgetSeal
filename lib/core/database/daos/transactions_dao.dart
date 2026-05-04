@@ -17,8 +17,9 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
             ..limit(limit))
           .watch();
 
-  Future<Transaction?> getById(String id) =>
-      (select(transactions)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<Transaction?> getById(String id) => (select(transactions)
+        ..where((t) => t.id.equals(id) & t.deleted.equals(false)))
+      .getSingleOrNull();
 
   Future<String> insert(TransactionsCompanion entry) async {
     await into(transactions).insert(entry);

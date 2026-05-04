@@ -256,8 +256,11 @@ class OcrService {
           priceStr = priceStr.replaceAll('.', '');
         }
         // Single dot + 3 digits: ambiguous, but for large numbers treat as thousands
-        else if (double.tryParse(priceStr.replaceAll('.', ''))! > 999) {
-          priceStr = priceStr.replaceAll('.', '');
+        else {
+          final asWhole = double.tryParse(priceStr.replaceAll('.', ''));
+          if (asWhole != null && asWhole > 999) {
+            priceStr = priceStr.replaceAll('.', '');
+          }
         }
       }
       // Otherwise it's a normal decimal: "12.50" → keep as-is
