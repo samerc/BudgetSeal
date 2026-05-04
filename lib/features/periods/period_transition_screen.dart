@@ -136,82 +136,58 @@ class _PeriodTransitionScreenState
         data: (_) => Column(
           children: [
             // Header banner
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, Color(0xFF2A3F6A)],
+            Builder(builder: (_) {
+              final household = householdAsync.value;
+              final startDay = household?.periodStartDay ?? 1;
+              final periodStart = now.day >= startDay
+                  ? DateTime(now.year, now.month, startDay)
+                  : DateTime(now.year, now.month - 1, startDay);
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppColors.sf(context),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.bd(context)),
                 ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.calendar_today_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'New period starting',
+                      child: Icon(Icons.calendar_today_rounded,
+                          color: AppColors.accent, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('New Period',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.tp(context),
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                              ),
+                              )),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${DateFormat.yMMMd().format(periodStart)} — ${_ordinal(startDay)} of each month',
+                            style: TextStyle(
+                              color: AppColors.ts(context),
+                              fontSize: 13,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              DateFormat.yMMMd().format(now),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    householdAsync.whenOrNull(
-                          data: (h) => h != null
-                              ? 'Period start day: ${_ordinal(h.periodStartDay)} of each month'
-                              : '',
-                        ) ??
-                        '',
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 12,
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
 
             // Subheading
             Padding(
