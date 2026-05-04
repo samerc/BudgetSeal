@@ -163,14 +163,26 @@ class OcrService {
     final lower = trimmed.toLowerCase();
     if (_isNonItemLine(lower)) return null;
 
-    // Find ALL price-like numbers in the line
+    // Find ALL price-like numbers in the line.
+    // Match both decimal prices (12.50, 4,50) and thousands-separated (317,100, 1.234.567).
     final priceMatches = RegExp(
-      r'[\$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*[.,]\d{1,2})',
+      r'[\$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?)',
     ).allMatches(trimmed).toList();
 
-    if (priceMatches.isNotEmpty) {
+    // Filter: reject partial matches where a digit follows (e.g., "317,10" from "317,100")
+    final validMatches = priceMatches.where((m) {
+      final end = m.end;
+      if (end < trimmed.length && RegExp(r'\d').hasMatch(trimmed[end])) {
+        return false; // partial match — digit continues after
+      }
+      // Must contain at least one separator or be 4+ digits to look like a price
+      final text = m.group(1)!;
+      return text.contains(RegExp(r'[.,]')) || text.length >= 4;
+    }).toList();
+
+    if (validMatches.isNotEmpty) {
       // Use the LAST price in the line (rightmost = most likely the item price)
-      final lastMatch = priceMatches.last;
+      final lastMatch = validMatches.last;
       final priceStr = lastMatch.group(1)!;
       final namepart = trimmed.substring(0, lastMatch.start).trim();
       final item = _buildItem(namepart, priceStr);
@@ -220,16 +232,35 @@ class OcrService {
         priceStr = priceStr.replaceAll(',', '');
       }
     } else if (priceStr.contains(',')) {
-      // Only comma — check if it's a decimal separator
+      // Only comma — check if it's a decimal or thousands separator
       final commaPos = priceStr.indexOf(',');
       final afterComma = priceStr.substring(commaPos + 1);
-      if (afterComma.length <= 2 && !afterComma.contains(',')) {
+      if (afterComma.length == 3 && RegExp(r'^\d{3}$').hasMatch(afterComma)) {
+        // "317,100" or "1,500" → exactly 3 digits = thousands separator
+        priceStr = priceStr.replaceAll(',', '');
+      } else if (afterComma.length <= 2 && !afterComma.contains(',')) {
         // "4,50" or "4,5" → EU decimal
         priceStr = priceStr.replaceAll(',', '.');
       } else {
-        // "1,500" → US thousands
+        // Multiple commas or other patterns → treat as thousands
         priceStr = priceStr.replaceAll(',', '');
       }
+    } else if (priceStr.contains('.')) {
+      // Only dot — "145.000" with exactly 3 trailing digits = thousands, not decimal
+      final dotPos = priceStr.lastIndexOf('.');
+      final afterDot = priceStr.substring(dotPos + 1);
+      if (afterDot.length == 3 && RegExp(r'^\d{3}$').hasMatch(afterDot)) {
+        // Could be thousands (145.000 = 145000) or decimal (145.000 = 145.0)
+        // If multiple dots, definitely thousands: "1.234.567"
+        if (priceStr.indexOf('.') != priceStr.lastIndexOf('.')) {
+          priceStr = priceStr.replaceAll('.', '');
+        }
+        // Single dot + 3 digits: ambiguous, but for large numbers treat as thousands
+        else if (double.tryParse(priceStr.replaceAll('.', ''))! > 999) {
+          priceStr = priceStr.replaceAll('.', '');
+        }
+      }
+      // Otherwise it's a normal decimal: "12.50" → keep as-is
     }
     final amount = double.tryParse(priceStr);
     if (amount == null || amount <= 0) return null;

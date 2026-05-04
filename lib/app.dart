@@ -19,7 +19,6 @@ import 'features/allocations/allocation_detail_screen.dart';
 import 'features/allocations/funding_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/main/main_screen.dart';
-import 'features/onboarding/guided_setup_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/periods/leftover_resolution_screen.dart';
 import 'features/recurring/bill_calendar_screen.dart';
@@ -77,11 +76,6 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/onboarding',
           pageBuilder: (_, state) =>
               fadePage(child: const OnboardingScreen(), state: state),
-        ),
-        GoRoute(
-          path: '/guided-setup',
-          pageBuilder: (_, state) =>
-              fadePage(child: const GuidedSetupScreen(), state: state),
         ),
         GoRoute(
           path: '/',

@@ -1155,7 +1155,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.th(context),
+                    color: AppColors.th(ctx),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1165,7 +1165,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
+                      color: AppColors.tp(ctx))),
               const SizedBox(height: 12),
               // Custom emoji input — opens system emoji keyboard
               Row(
@@ -1178,9 +1178,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       decoration: InputDecoration(
                         hintText: 'Type or paste any emoji',
                         hintStyle: TextStyle(
-                            fontSize: 14, color: AppColors.th(context)),
+                            fontSize: 14, color: AppColors.th(ctx)),
                         filled: true,
-                        fillColor: AppColors.sfv(context),
+                        fillColor: AppColors.sfv(ctx),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -1214,14 +1214,14 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 padding: const EdgeInsets.only(top: 12, bottom: 4),
                 child: Row(
                   children: [
-                    Expanded(child: Divider(color: AppColors.bd(context))),
+                    Expanded(child: Divider(color: AppColors.bd(ctx))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text('or pick below',
                           style: TextStyle(
-                              fontSize: 11, color: AppColors.th(context))),
+                              fontSize: 11, color: AppColors.th(ctx))),
                     ),
-                    Expanded(child: Divider(color: AppColors.bd(context))),
+                    Expanded(child: Divider(color: AppColors.bd(ctx))),
                   ],
                 ),
               ),
@@ -1238,7 +1238,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ts(context),
+                              color: AppColors.ts(ctx),
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -1259,7 +1259,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                                   color: isSelected
                                       ? AppColors.accent
                                           .withValues(alpha: 0.15)
-                                      : AppColors.sfv(context),
+                                      : AppColors.sfv(ctx),
                                   borderRadius: BorderRadius.circular(12),
                                   border: isSelected
                                       ? Border.all(

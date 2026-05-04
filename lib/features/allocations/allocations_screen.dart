@@ -58,6 +58,64 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   @override
   bool get wantKeepAlive => true;
 
+  void _showEnvelopeHelp(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('How Envelopes Work'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _helpRow('1', 'Create envelopes for each spending category'),
+            const SizedBox(height: 10),
+            _helpRow('2', 'Set a monthly budget target for each'),
+            const SizedBox(height: 10),
+            _helpRow('3', 'Fund envelopes when you get paid'),
+            const SizedBox(height: 10),
+            _helpRow('4', 'Spend from envelopes — track what\'s left'),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _helpRow(String num, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: AppColors.accent.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Center(
+            child: Text(num,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.accent)),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(text, style: const TextStyle(fontSize: 13, height: 1.3)),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -110,6 +168,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                           }
                         });
                       },
+                    ),
+                    IconButton(
+                      tooltip: 'How envelopes work',
+                      icon: Icon(Icons.help_outline_rounded,
+                          color: AppColors.ts(context)),
+                      onPressed: () => _showEnvelopeHelp(context),
                     ),
                   ],
                 ),
@@ -659,176 +723,61 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hero section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, Color(0xFF2A3F6A)],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              borderRadius: BorderRadius.circular(14),
+              child: Icon(Icons.mail_rounded,
+                  size: 36, color: AppColors.accent),
             ),
-            child: Column(
-              children: [
-                const Icon(Icons.account_balance_wallet_rounded,
-                    size: 48, color: Colors.white),
-                const SizedBox(height: 16),
-                const Text(
-                  'Envelope Budgeting',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+            const SizedBox(height: 20),
+            Text(
+              'No envelopes yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Create an envelope to start budgeting.\nTap ? for help.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.ts(context),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push('/allocations/new'),
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: const Text(
+                  'Create Envelope',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                ),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Give every dollar a job. Assign your money to envelopes and spend only what you\'ve set aside.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Steps
-          _StepCard(
-            number: '1',
-            title: 'Create envelopes',
-            description:
-                'Make an envelope for each spending category: Groceries, Rent, Entertainment, etc.',
-            icon: Icons.add_circle_outline_rounded,
-          ),
-          const SizedBox(height: 10),
-          _StepCard(
-            number: '2',
-            title: 'Set a monthly budget',
-            description:
-                'Decide how much you want to spend in each envelope per month. This is your target.',
-            icon: Icons.track_changes_rounded,
-          ),
-          const SizedBox(height: 10),
-          _StepCard(
-            number: '3',
-            title: 'Fund your envelopes',
-            description:
-                'When you get paid, distribute money into your envelopes. Use "Fund Envelopes" to fill them up.',
-            icon: Icons.savings_rounded,
-          ),
-          const SizedBox(height: 10),
-          _StepCard(
-            number: '4',
-            title: 'Spend with confidence',
-            description:
-                'When you record a transaction, it draws from the envelope. You always know what\'s left.',
-            icon: Icons.check_circle_outline_rounded,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => context.push('/allocations/new'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              icon: const Icon(Icons.add_rounded, size: 20),
-              label: const Text(
-                'Create your first envelope',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
-}
-
-class _StepCard extends StatelessWidget {
-  final String number;
-  final String title;
-  final String description;
-  final IconData icon;
-
-  const _StepCard({
-    required this.number,
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.bd(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
