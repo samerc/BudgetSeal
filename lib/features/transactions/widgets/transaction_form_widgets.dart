@@ -14,13 +14,11 @@ class TxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.3)),
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
       ),
       child: child,
     );
@@ -110,10 +108,10 @@ class CurrencyBadge extends StatelessWidget {
       ),
       child: Text(
         currency,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
-          color: AppColors.textSecondary,
+          color: AppColors.ts(context),
           letterSpacing: 0.5,
         ),
       ),
@@ -298,15 +296,15 @@ class LineCard extends StatelessWidget {
                     hint: Row(
                       children: [
                         Icon(Icons.account_balance_rounded,
-                            size: 16, color: AppColors.textHint),
+                            size: 16, color: AppColors.th(context)),
                         const SizedBox(width: 8),
                         Text('Select account',
                             style: TextStyle(
-                                color: AppColors.textHint, fontSize: 13)),
+                                color: AppColors.th(context), fontSize: 13)),
                       ],
                     ),
-                    icon: const Icon(Icons.expand_more_rounded,
-                        size: 16, color: AppColors.textHint),
+                    icon: Icon(Icons.expand_more_rounded,
+                        size: 16, color: AppColors.th(context)),
                     items: accounts
                         .map((a) => DropdownMenuItem(
                               value: a.id,
@@ -314,7 +312,7 @@ class LineCard extends StatelessWidget {
                                 children: [
                                   Icon(_accountIcon(a.type),
                                       size: 16,
-                                      color: AppColors.textSecondary),
+                                      color: AppColors.ts(context)),
                                   const SizedBox(width: 8),
                                   Flexible(
                                     child: Text(a.name,
@@ -325,9 +323,9 @@ class LineCard extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(a.currency,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontSize: 11,
-                                          color: AppColors.textHint,
+                                          color: AppColors.th(context),
                                           fontWeight: FontWeight.w600)),
                                 ],
                               ),
@@ -347,8 +345,8 @@ class LineCard extends StatelessWidget {
                       color: AppColors.bd(context),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(Icons.close_rounded,
-                        size: 16, color: AppColors.textSecondary),
+                    child: Icon(Icons.close_rounded,
+                        size: 16, color: AppColors.ts(context)),
                   ),
                 ),
               ],
@@ -399,9 +397,9 @@ class LineCard extends StatelessWidget {
                     line.rateInverted
                         ? '1 ${line.currency} ='
                         : '1 $baseCurrency =',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: AppColors.ts(context),
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -417,10 +415,10 @@ class LineCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: AppColors.accent,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '0.00',
                         hintStyle:
-                            TextStyle(fontSize: 13, color: AppColors.textHint),
+                            TextStyle(fontSize: 13, color: AppColors.th(context)),
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
@@ -443,10 +441,10 @@ class LineCard extends StatelessWidget {
                   ),
                   Text(
                     line.rateInverted ? baseCurrency : line.currency,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
+                      color: AppColors.ts(context),
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -511,21 +509,20 @@ class LineCard extends StatelessWidget {
           TextField(
             controller: line.noteCtrl,
             textCapitalization: TextCapitalization.sentences,
-            style:
-                const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            decoration: const InputDecoration(
+            style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+            decoration: InputDecoration(
               hintText: 'Item note…',
-              hintStyle: TextStyle(fontSize: 13, color: AppColors.textHint),
+              hintStyle: TextStyle(fontSize: 13, color: AppColors.th(context)),
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
               prefixIcon: Padding(
-                padding: EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.only(right: 8),
                 child: Icon(Icons.notes_rounded,
-                    size: 14, color: AppColors.textHint),
+                    size: 14, color: AppColors.th(context)),
               ),
               prefixIconConstraints:
-                  BoxConstraints(minWidth: 0, minHeight: 0),
+                  const BoxConstraints(minWidth: 0, minHeight: 0),
             ),
           ),
         ],
