@@ -473,20 +473,14 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             )
           : Column(
               children: [
-                // ── Step indicator ──
                 _buildStepIndicator(),
-                // ── Body ──
                 Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: switch (_step) {
-                      0 => _buildItemsStep(),
-                      1 => _buildSplitStep(),
-                      _ => _buildReviewStep(splits, grandTotal),
-                    },
-                  ),
+                  child: _step == 0
+                      ? _buildItemsStep()
+                      : _step == 1
+                          ? _buildSplitStep()
+                          : _buildReviewStep(splits, grandTotal),
                 ),
-                // ── Bottom bar ──
                 _buildBottomBar(grandTotal, myShare),
               ],
             ),
