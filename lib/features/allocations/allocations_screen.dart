@@ -639,14 +639,11 @@ class _UnallocatedBanner extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF2A3F6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -657,17 +654,18 @@ class _UnallocatedBanner extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Unallocated',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                    style: TextStyle(
+                        color: AppColors.ts(context), fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   CurrencyDisplay(
                     amount: baseAmount,
                     currency: baseCurrency,
-                    amountStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
+                    amountStyle: TextStyle(
+                      color: AppColors.tp(context),
+                      fontSize: 24,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -680,8 +678,8 @@ class _UnallocatedBanner extends StatelessWidget {
                       .where((e) => e.key != baseCurrency)
                       .map((e) => Text(
                             formatAmount(e.value, currency: e.key),
-                            style: const TextStyle(
-                                color: Colors.white70,
+                            style: TextStyle(
+                                color: AppColors.ts(context),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600),
                           ))
@@ -689,14 +687,12 @@ class _UnallocatedBanner extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: hasAllocations ? () => context.push('/funding') : null,
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.18),
-                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
