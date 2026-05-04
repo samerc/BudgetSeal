@@ -471,18 +471,21 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ],
               ),
             )
-          : Column(
-              children: [
-                _buildStepIndicator(),
-                Expanded(
-                  child: _step == 0
-                      ? _buildItemsStep()
-                      : _step == 1
-                          ? _buildSplitStep()
-                          : _buildReviewStep(splits, grandTotal),
-                ),
-                _buildBottomBar(grandTotal, myShare),
-              ],
+          : SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  _buildStepIndicator(),
+                  Expanded(
+                    child: _step == 0
+                        ? _buildItemsStep()
+                        : _step == 1
+                            ? _buildSplitStep()
+                            : _buildReviewStep(splits, grandTotal),
+                  ),
+                  _buildBottomBar(grandTotal, myShare),
+                ],
+              ),
             ),
     );
   }
@@ -580,8 +583,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     if (_items.isEmpty && _ocrResult == null) {
       // Empty state — show entry points
       return Center(
-        key: const ValueKey('items-empty'),
-        child: Padding(
+          child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -634,7 +636,6 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
     // Has items or OCR result
     return ListView(
-      key: const ValueKey('items-list'),
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       children: [
         // OCR detected lines
@@ -760,7 +761,6 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   Widget _buildSplitStep() {
     return ListView(
-      key: const ValueKey('split'),
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       children: [
         // People management
@@ -977,7 +977,6 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final isCross = _billCurrency != _baseCurrency;
 
     return ListView(
-      key: const ValueKey('review'),
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       children: [
         // Per-person summary
