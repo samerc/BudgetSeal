@@ -807,33 +807,59 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Quick templates button
-            if (widget.editTransactionId == null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: OutlinedButton.icon(
-                  onPressed: () => context.push('/templates'),
-                  icon: const Icon(Icons.bolt_rounded, size: 16),
-                  label: const Text('Use Template'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                        color: AppColors.accent.withValues(alpha: 0.3)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+            // Type selector + template
+            Row(
+              children: [
+                Expanded(child: _buildTypeSelector()),
+                if (widget.editTransactionId == null) ...[
+                  const SizedBox(width: 10),
+                  IconButton(
+                    tooltip: 'Use Template',
+                    onPressed: () => context.push('/templates'),
+                    icon: Icon(Icons.bolt_rounded,
+                        color: AppColors.accent, size: 22),
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          AppColors.accent.withValues(alpha: 0.1),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                ),
-              ),
-            _buildTypeSelector(),
-            const SizedBox(height: 12),
-            // Title field with autocomplete
-            TxCard(
-              child: _buildTitleField(),
+                ],
+              ],
             ),
             const SizedBox(height: 12),
-            _buildDateRow(),
+
+            // Title + Date + Note — grouped in one card
+            TxCard(
+              child: Column(
+                children: [
+                  _buildTitleField(),
+                  Divider(height: 1, indent: 16, endIndent: 16,
+                      color: AppColors.bd(context)),
+                  _buildDateRowInline(),
+                  Divider(height: 1, indent: 16, endIndent: 16,
+                      color: AppColors.bd(context)),
+                  TextField(
+                    controller: _noteCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: 'Add a note…',
+                      hintStyle: TextStyle(color: AppColors.th(context)),
+                      prefixIcon: Icon(Icons.notes_rounded,
+                          size: 18, color: AppColors.ts(context)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                    ),
+                    maxLines: 3,
+                    minLines: 1,
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
+
             // Validation error
             if (_validationError != null)
               Container(
@@ -864,6 +890,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ],
                 ),
               ),
+
+            // Lines or transfer
             if (_type == _TxType.transfer) ...[
               _buildTransferSection(accounts),
               const SizedBox(height: 12),
@@ -872,9 +900,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               _buildLinesSection(accounts),
               const SizedBox(height: 12),
             ],
-            _buildNoteField(),
-            const SizedBox(height: 12),
-            // Receipt photo
+
+            // Receipt
             _buildReceiptButton(),
             const SizedBox(height: 40),
           ],
@@ -926,60 +953,57 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  Widget _buildDateRow() {
-    return TxCard(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          children: [
-            // Date
-            Expanded(
-              child: InkWell(
-                onTap: _pickDate,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today_rounded,
-                          size: 16, color: AppColors.textSecondary),
-                      const SizedBox(width: 8),
-                      Text(_dateLabel,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
+  Widget _buildDateRowInline() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today_rounded,
+                        size: 16, color: AppColors.ts(context)),
+                    const SizedBox(width: 8),
+                    Text(_dateLabel,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.tp(context))),
+                  ],
                 ),
               ),
             ),
-            Container(
-              width: 1,
-              height: 24,
-              color: AppColors.textHint.withValues(alpha: 0.3),
-            ),
-            // Time
-            Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: InkWell(
-                onTap: _pickTime,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.access_time_rounded,
-                          size: 16, color: AppColors.textSecondary),
-                      const SizedBox(width: 8),
-                      Text(_timeLabel,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
+          ),
+          Container(
+              width: 1, height: 24, color: AppColors.bd(context)),
+          Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: InkWell(
+              onTap: _pickTime,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.access_time_rounded,
+                        size: 16, color: AppColors.ts(context)),
+                    const SizedBox(width: 8),
+                    Text(_timeLabel,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.tp(context))),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1277,16 +1301,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
           );
         }),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.add_rounded, size: 16),
-          label: const Text('Add item'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: _typeColor(context),
-            side: BorderSide(color: _typeColor(context).withValues(alpha: 0.4)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
+        TextButton.icon(
+          icon: Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
+          label: Text('Add item',
+              style: TextStyle(color: AppColors.accent)),
           onPressed: _addLine,
         ),
         if (_hasMultipleLines || _hasMultiCurrency) ...[
@@ -1411,25 +1429,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  Widget _buildNoteField() {
-    return TxCard(
-      child: TextField(
-        controller: _noteCtrl,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(
-          hintText: 'Add a note…',
-          hintStyle: TextStyle(color: AppColors.textHint),
-          prefixIcon: Icon(Icons.notes_rounded,
-              size: 18, color: AppColors.textSecondary),
-          border: InputBorder.none,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-        maxLines: 3,
-        minLines: 1,
-      ),
-    );
-  }
 
   Future<void> _resolveReceiptPaths() async {
     final paths = await resolveReceiptPaths(_receiptFilenames);
@@ -1495,7 +1494,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
 
-    return OutlinedButton.icon(
+    return TextButton.icon(
       onPressed: () async {
         final filenames = await pickAndSaveReceipts(context);
         if (filenames.isNotEmpty && mounted) {
@@ -1503,14 +1502,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _resolveReceiptPaths();
         }
       },
-      icon: const Icon(Icons.receipt_long_rounded, size: 16),
-      label: const Text('Attach Receipt'),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
-        side: BorderSide(color: AppColors.bd(context)),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+      icon: Icon(Icons.receipt_long_rounded,
+          size: 16, color: AppColors.ts(context)),
+      label: Text('Attach Receipt',
+          style: TextStyle(color: AppColors.ts(context))),
     );
   }
 
