@@ -1139,6 +1139,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
     try {
     final result = await showDialog<String>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) {
         return Dialog(
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
