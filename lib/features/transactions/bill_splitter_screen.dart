@@ -460,6 +460,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ),
         ],
       ),
+      bottomNavigationBar: _scanning ? null : _buildBottomBar(grandTotal, myShare),
       body: _scanning
           ? const Center(
               child: Column(
@@ -471,21 +472,17 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ],
               ),
             )
-          : SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                  _buildStepIndicator(),
-                  Expanded(
-                    child: _step == 0
-                        ? _buildItemsStep()
-                        : _step == 1
-                            ? _buildSplitStep()
-                            : _buildReviewStep(splits, grandTotal),
-                  ),
-                  _buildBottomBar(grandTotal, myShare),
-                ],
-              ),
+          : Column(
+              children: [
+                _buildStepIndicator(),
+                Expanded(
+                  child: _step == 0
+                      ? _buildItemsStep()
+                      : _step == 1
+                          ? _buildSplitStep()
+                          : _buildReviewStep(splits, grandTotal),
+                ),
+              ],
             ),
     );
   }
@@ -493,86 +490,70 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   // ─── Step Indicator ───────────────────────────────────────────────────────
 
   Widget _buildStepIndicator() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 8, 32, 12),
       child: Row(
-        children: List.generate(3, (i) {
-          final isActive = i == _step;
-          final isDone = i < _step;
-          return Expanded(
-            child: GestureDetector(
+        children: [
+          for (var i = 0; i < 3; i++) ...[
+            if (i > 0)
+              Expanded(
+                child: Container(
+                  height: 2,
+                  color: i <= _step ? AppColors.accent : AppColors.bd(context),
+                ),
+              ),
+            GestureDetector(
               onTap: () {
-                if (i < _step) _goToStep(i); // can go back
+                if (i < _step) _goToStep(i);
                 if (i == 1 && _canProceedFromItems) _goToStep(1);
                 if (i == 2 && _canProceedFromSplit) _goToStep(2);
               },
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      if (i > 0)
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: isDone || isActive
-                                ? AppColors.accent
-                                : AppColors.bd(context),
-                          ),
-                        ),
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: isDone
-                              ? AppColors.accent
-                              : isActive
-                                  ? AppColors.accent.withValues(alpha: 0.15)
-                                  : AppColors.sfv(context),
-                          shape: BoxShape.circle,
-                          border: isActive
-                              ? Border.all(color: AppColors.accent, width: 2)
-                              : null,
-                        ),
-                        child: Center(
-                          child: isDone
-                              ? const Icon(Icons.check_rounded,
-                                  size: 16, color: Colors.white)
-                              : Text('${i + 1}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isActive
-                                        ? AppColors.accent
-                                        : AppColors.ts(context),
-                                  )),
-                        ),
-                      ),
-                      if (i < 2)
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: isDone
-                                ? AppColors.accent
-                                : AppColors.bd(context),
-                          ),
-                        ),
-                    ],
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: i < _step
+                          ? AppColors.accent
+                          : i == _step
+                              ? AppColors.accent.withValues(alpha: 0.15)
+                              : AppColors.sfv(context),
+                      shape: BoxShape.circle,
+                      border: i == _step
+                          ? Border.all(color: AppColors.accent, width: 2)
+                          : null,
+                    ),
+                    child: Center(
+                      child: i < _step
+                          ? const Icon(Icons.check_rounded,
+                              size: 14, color: Colors.white)
+                          : Text('${i + 1}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: i == _step
+                                    ? AppColors.accent
+                                    : AppColors.ts(context),
+                              )),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(_stepLabels[i],
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight:
-                            isActive ? FontWeight.w700 : FontWeight.w500,
-                        color: isActive
+                            i == _step ? FontWeight.w700 : FontWeight.w500,
+                        color: i == _step
                             ? AppColors.accent
                             : AppColors.ts(context),
                       )),
                 ],
               ),
             ),
-          );
-        }),
+          ],
+        ],
       ),
     );
   }
