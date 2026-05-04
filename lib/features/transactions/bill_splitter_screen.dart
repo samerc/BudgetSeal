@@ -27,7 +27,6 @@ class BillSplitterScreen extends ConsumerStatefulWidget {
 
 class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   int _step = 0; // 0=items, 1=split, 2=review
-  static const _stepLabels = ['Items', 'Split', 'Review'];
 
   // ── People ──
   final _people = <String>['Me'];
@@ -439,11 +438,27 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // BUILD
+  // BUILD — single ListView, no Column/Expanded
   // ═══════════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
+    if (_scanning) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Bill Splitter')),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Scanning receipt...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     final splits = _calculateSplits();
     final grandTotal = splits.values.fold(0.0, (s, v) => s + v);
     final myShare = splits[_people.first] ?? 0;
@@ -460,101 +475,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: _scanning ? null : _buildBottomBar(grandTotal, myShare),
-      body: _scanning
-          ? const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Scanning receipt...'),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                _buildStepIndicator(),
-                Expanded(
-                  child: _step == 0
-                      ? _buildItemsStep()
-                      : _step == 1
-                          ? _buildSplitStep()
-                          : _buildReviewStep(splits, grandTotal),
-                ),
-              ],
-            ),
-    );
-  }
-
-  // ─── Step Indicator ───────────────────────────────────────────────────────
-
-  Widget _buildStepIndicator() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 8, 32, 12),
-      child: Row(
-        children: [
-          for (var i = 0; i < 3; i++) ...[
-            if (i > 0)
-              Expanded(
-                child: Container(
-                  height: 2,
-                  color: i <= _step ? AppColors.accent : AppColors.bd(context),
-                ),
-              ),
-            GestureDetector(
-              onTap: () {
-                if (i < _step) _goToStep(i);
-                if (i == 1 && _canProceedFromItems) _goToStep(1);
-                if (i == 2 && _canProceedFromSplit) _goToStep(2);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: i < _step
-                          ? AppColors.accent
-                          : i == _step
-                              ? AppColors.accent.withValues(alpha: 0.15)
-                              : AppColors.sfv(context),
-                      shape: BoxShape.circle,
-                      border: i == _step
-                          ? Border.all(color: AppColors.accent, width: 2)
-                          : null,
-                    ),
-                    child: Center(
-                      child: i < _step
-                          ? const Icon(Icons.check_rounded,
-                              size: 14, color: Colors.white)
-                          : Text('${i + 1}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: i == _step
-                                    ? AppColors.accent
-                                    : AppColors.ts(context),
-                              )),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(_stepLabels[i],
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight:
-                            i == _step ? FontWeight.w700 : FontWeight.w500,
-                        color: i == _step
-                            ? AppColors.accent
-                            : AppColors.ts(context),
-                      )),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
+      body: _step == 0
+          ? _buildItemsStep()
+          : _step == 1
+              ? _buildSplitStep()
+              : _buildReviewStep(splits, grandTotal),
+      bottomNavigationBar: _buildBottomBar(grandTotal, myShare),
     );
   }
 
