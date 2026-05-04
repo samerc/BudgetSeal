@@ -103,10 +103,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _greeting(),
+                              'Household',
                               style: TextStyle(
                                 color: AppColors.ts(context),
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -516,14 +516,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     return result;
   }
 
-  String _greeting() {
-    final now = DateTime.now();
-    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final day = days[now.weekday - 1];
-    if (now.hour < 12) return 'Good morning, $day';
-    if (now.hour < 17) return 'Good afternoon, $day';
-    return 'Good evening, $day';
-  }
 
   void _showGlobalSearch(BuildContext context, WidgetRef ref) {
     showSearch(context: context, delegate: _GlobalSearchDelegate(ref));
@@ -1762,10 +1754,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
-          color: AppColors.th(context),
+          letterSpacing: 0.8,
+          color: AppColors.tp(context),
         ),
       ),
     );
