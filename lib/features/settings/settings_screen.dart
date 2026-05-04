@@ -1,11 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -558,30 +553,30 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      // Delete the database file
       final db = ref.read(databaseProvider);
-      await db.close();
 
-      final dir = await getApplicationDocumentsDirectory();
-      final dbFile = File(p.join(dir.path, 'pocketplan.db'));
-      if (dbFile.existsSync()) dbFile.deleteSync();
+      // Delete all rows from all tables (keeps DB connection alive for providers)
+      await db.batch((batch) {
+        batch.deleteAll(db.allocationLedger);
+        batch.deleteAll(db.transactionLines);
+        batch.deleteAll(db.transactions);
+        batch.deleteAll(db.allocations);
+        batch.deleteAll(db.categories);
+        batch.deleteAll(db.accounts);
+        batch.deleteAll(db.recurringTransactions);
+        batch.deleteAll(db.transactionTemplates);
+        batch.deleteAll(db.fxRates);
+        batch.deleteAll(db.users);
+        batch.deleteAll(db.households);
+      });
 
       // Clear preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
 
-      // Force restart the app — navigating to onboarding after db.close()
-      // leaves stale provider references to the closed database.
+      // Navigate to onboarding — DB stays open so providers won't crash
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All data erased. Restarting...'),
-            behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        await Future.delayed(const Duration(seconds: 2));
-        SystemNavigator.pop();
+        context.go('/onboarding');
       }
     }
   }
