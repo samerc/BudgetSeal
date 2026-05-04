@@ -475,12 +475,109 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ),
         ],
       ),
-      body: _step == 0
-          ? _buildItemsStep()
-          : _step == 1
-              ? _buildSplitStep()
-              : _buildReviewStep(splits, grandTotal),
-      bottomNavigationBar: _buildBottomBar(grandTotal, myShare),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (_step == 0) ...[
+            if (_items.isEmpty && _ocrResult == null) ...[
+              const SizedBox(height: 40),
+              Center(child: Icon(Icons.receipt_long_rounded,
+                  size: 48, color: AppColors.ts(context))),
+              const SizedBox(height: 12),
+              Center(child: Text('Add items to split',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context)))),
+              const SizedBox(height: 6),
+              Center(child: Text('Scan a receipt or add items manually',
+                  style: TextStyle(fontSize: 13, color: AppColors.ts(context)))),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _scanReceipt,
+                icon: const Icon(Icons.camera_alt_rounded, size: 20),
+                label: const Text('Scan Receipt'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _addManualItem,
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: const Text('Add Manually'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ] else ...[
+              if (_ocrResult != null) ...[
+                _buildDetectedLinesList(),
+                const SizedBox(height: 12),
+              ],
+              for (var i = 0; i < _items.length; i++) _buildItemTile(i),
+              TextButton.icon(
+                onPressed: _addManualItem,
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('Add item'),
+              ),
+            ],
+          ],
+          if (_step == 1) ...[
+            _buildPeopleSection(),
+            const SizedBox(height: 12),
+            _buildSplitEvenlyToggle(),
+            const SizedBox(height: 12),
+            if (!_splitEvenly && _people.length > 1) ...[
+              Text('ASSIGN ITEMS', style: TextStyle(fontSize: 11,
+                  fontWeight: FontWeight.w700, letterSpacing: 0.8,
+                  color: AppColors.ts(context))),
+              const SizedBox(height: 8),
+              for (var i = 0; i < _items.length; i++) _buildAssignableItem(i),
+            ],
+          ],
+          if (_step == 2) ...[
+            _buildSummaryCard(splits, grandTotal),
+            const SizedBox(height: 10),
+            _buildTipSection(),
+            const SizedBox(height: 8),
+            _buildCurrencySection(),
+          ],
+          // Nav buttons at bottom
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              if (_step > 0) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _goToStep(_step - 1),
+                    child: const Text('Back'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: _step == 2
+                    ? FilledButton.icon(
+                        onPressed: grandTotal > 0 && myShare > 0
+                            ? _createTransaction : null,
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: const Text('Save'),
+                      )
+                    : FilledButton(
+                        onPressed: _step == 0
+                            ? (_canProceedFromItems ? () => _goToStep(1) : null)
+                            : (_canProceedFromSplit ? () => _goToStep(2) : null),
+                        child: const Text('Next'),
+                      ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
     );
   }
 
@@ -664,7 +761,190 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     );
   }
 
-  // ─── Step 1: Split ────────────────────────────────────────────────────────
+  // ─── Split helpers (used inline in ListView) ──────────────────────────────
+
+  Widget _buildPeopleSection() {
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('WHO\'S SPLITTING?', style: TextStyle(fontSize: 11,
+              fontWeight: FontWeight.w700, letterSpacing: 0.8,
+              color: AppColors.ts(context))),
+          const SizedBox(height: 10),
+          Wrap(spacing: 8, runSpacing: 6, children: [
+            for (final p in _people) _personChip(p),
+          ]),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(child: TextField(
+              controller: _personCtrl,
+              decoration: InputDecoration(hintText: 'Add person', isDense: true,
+                filled: true, fillColor: AppColors.sfv(context),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none)),
+              textCapitalization: TextCapitalization.words,
+              onSubmitted: (_) => _addPerson(),
+            )),
+            const SizedBox(width: 8),
+            IconButton.filled(onPressed: _addPerson,
+              icon: const Icon(Icons.add, size: 18),
+              style: IconButton.styleFrom(backgroundColor: AppColors.accent)),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSplitEvenlyToggle() {
+    return _card(
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Split evenly',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        subtitle: Text(
+          'Each person pays ${formatAmount(_items.fold(0.0, (s, i) => s + i.amount) / (_people.isNotEmpty ? _people.length : 1), currency: _billCurrency)}',
+          style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+        value: _splitEvenly,
+        onChanged: (v) => setState(() => _splitEvenly = v),
+      ),
+    );
+  }
+
+  // ─── Review helpers ───────────────────────────────────────────────────────
+
+  Widget _buildSummaryCard(Map<String, double> splits, double grandTotal) {
+    final isCross = _billCurrency != _baseCurrency;
+    return _card(
+      child: Column(children: [
+        for (final entry in splits.entries)
+          Padding(padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              Container(width: 10, height: 10,
+                decoration: BoxDecoration(color: _personColor(entry.key),
+                    shape: BoxShape.circle)),
+              const SizedBox(width: 10),
+              Expanded(child: Text(entry.key, style: TextStyle(fontSize: 14,
+                  fontWeight: entry.key == _people.first
+                      ? FontWeight.w700 : FontWeight.w500,
+                  color: AppColors.tp(context)))),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(formatAmount(entry.value, currency: _billCurrency),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+                if (isCross && (_exchangeRate - 1.0).abs() >= 0.001)
+                  Text('≈ ${formatAmount(_toBase(entry.value), currency: _baseCurrency)}',
+                      style: TextStyle(fontSize: 11, color: AppColors.ts(context))),
+              ]),
+            ])),
+        Divider(color: AppColors.bd(context)),
+        Row(children: [
+          Expanded(child: Text('Total', style: TextStyle(fontSize: 15,
+              fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+          Text(formatAmount(grandTotal, currency: _billCurrency),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                  color: AppColors.tp(context))),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _buildTipSection() {
+    return _collapsibleCard(
+      title: 'Tip',
+      trailing: _tipPercent > 0 || _tipAmount > 0
+          ? _tipIsAmount
+              ? formatAmount(_tipAmount, currency: _billCurrency)
+              : '${_tipPercent.round()}%'
+          : 'None',
+      expanded: _tipExpanded,
+      onTap: () => setState(() => _tipExpanded = !_tipExpanded),
+      child: Column(children: [
+        Row(children: [
+          _segmentButton('Percentage', !_tipIsAmount,
+              () => setState(() => _tipIsAmount = false)),
+          const SizedBox(width: 8),
+          _segmentButton('Amount', _tipIsAmount,
+              () => setState(() => _tipIsAmount = true)),
+        ]),
+        const SizedBox(height: 12),
+        if (!_tipIsAmount)
+          Row(children: [
+            Expanded(child: Slider(value: _tipPercent, min: 0, max: 30,
+                divisions: 6, label: '${_tipPercent.round()}%',
+                onChanged: (v) => setState(() => _tipPercent = v))),
+            SizedBox(width: 50, child: Text('${_tipPercent.round()}%',
+                textAlign: TextAlign.center, style: TextStyle(
+                    fontWeight: FontWeight.w600, color: AppColors.tp(context)))),
+          ])
+        else
+          TextField(
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(hintText: '0.00', labelText: 'Tip amount',
+              prefixText: '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
+              isDense: true, filled: true, fillColor: AppColors.sfv(context),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none)),
+            onChanged: (v) => setState(() => _tipAmount = double.tryParse(v) ?? 0),
+          ),
+      ]),
+    );
+  }
+
+  Widget _buildCurrencySection() {
+    final isCross = _billCurrency != _baseCurrency;
+    return _collapsibleCard(
+      title: 'Currency',
+      trailing: _billCurrency,
+      expanded: _currencyExpanded,
+      onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
+      child: Column(children: [
+        CurrencyPickerField(value: _billCurrency, label: 'Bill currency',
+          onChanged: (c) => setState(() {
+            _billCurrency = c;
+            if (c == _baseCurrency) _exchangeRate = 1.0;
+          })),
+        if (isCross) ...[
+          const SizedBox(height: 12),
+          Row(children: [
+            Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+            Expanded(child: TextField(controller: _rateCtrl,
+              decoration: InputDecoration(hintText: 'Rate', isDense: true,
+                filled: true, fillColor: AppColors.sfv(context),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none)),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (v) {
+                final r = double.tryParse(v) ?? 0;
+                if (r > 0) _exchangeRate = _rateInverted ? 1.0 / r : r;
+                setState(() {});
+              })),
+            Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => setState(() {
+                _rateInverted = !_rateInverted;
+                if (_exchangeRate > 0 && _exchangeRate != 1.0) {
+                  final d = _rateInverted ? 1.0 / _exchangeRate : _exchangeRate;
+                  _rateCtrl.text = d.toStringAsFixed(d >= 1 ? 2 : 6);
+                }
+              }),
+              child: Container(padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6)),
+                child: Icon(Icons.swap_vert_rounded, size: 16,
+                    color: AppColors.accent)),
+            ),
+          ]),
+        ],
+      ]),
+    );
+  }
+
+  // ─── Step 1: Split (kept for reference, now unused) ───────────────────────
 
   Widget _buildSplitStep() {
     return ListView(
