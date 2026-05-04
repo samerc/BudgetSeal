@@ -10,7 +10,6 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
-import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
@@ -104,37 +103,23 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          _SummaryChip(
-                            icon: Icons.label_rounded,
-                            label: '${categories.length}',
-                            subtitle: 'Total',
-                            color: AppColors.accent,
-                          ),
-                          const SizedBox(width: 20),
-                          _SummaryChip(
-                            icon: Icons.arrow_upward_rounded,
-                            label: '$expenseCount',
-                            subtitle: 'Expense',
-                            color: AppColors.overspent,
-                          ),
-                          const SizedBox(width: 20),
-                          _SummaryChip(
-                            icon: Icons.arrow_downward_rounded,
-                            label: '$incomeCount',
-                            subtitle: 'Income',
-                            color: AppColors.healthy,
-                          ),
-                        ],
-                      ),
+                    child: Row(
+                      children: [
+                        _SummaryPill(
+                          label: '${categories.length} total',
+                          color: AppColors.accent,
+                        ),
+                        const SizedBox(width: 8),
+                        _SummaryPill(
+                          label: '$expenseCount expense',
+                          color: AppColors.overspent,
+                        ),
+                        const SizedBox(width: 8),
+                        _SummaryPill(
+                          label: '$incomeCount income',
+                          color: AppColors.healthy,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -420,41 +405,25 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// Summary chip
+// Summary pill
 // ---------------------------------------------------------------------------
 
-class _SummaryChip extends StatelessWidget {
-  final IconData icon;
+class _SummaryPill extends StatelessWidget {
   final String label;
-  final String subtitle;
   final Color color;
-  const _SummaryChip({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-  });
+  const _SummaryPill({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-            Text(subtitle,
-                style:
-                    TextStyle(fontSize: 11, color: AppColors.ts(context))),
-          ],
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 12, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
@@ -608,153 +577,139 @@ class _CategoriesSliver extends ConsumerWidget {
   ) {
     final color = AppColors.fromHex(group.colorHex);
     final hasEmoji = group.icon.length <= 4 && group.icon != 'category';
-    final defaultAcct = group.defaultAccountId != null
-        ? accountMap[group.defaultAccountId]
-        : null;
-    final envelopeName = group.allocationId != null
-        ? allocMap[group.allocationId]
-        : null;
-
-    // Build info chips
-    final chips = <Widget>[];
-    if (envelopeName != null) {
-      chips.add(_infoBadge(
-          context, Icons.account_balance_wallet_outlined, envelopeName));
-    }
-    if (defaultAcct != null) {
-      chips.add(_infoBadge(context, Icons.credit_card_rounded,
-          '${defaultAcct.name} (${defaultAcct.currency})'));
-    }
-    if (subs.isNotEmpty) {
-      chips.add(_infoBadge(context, Icons.subdirectory_arrow_right_rounded,
-          '${subs.length} sub'));
-    }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 6),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.bd(context)),
       ),
-      child: Column(
-        children: [
-          // Main category tile — tap to edit
-          InkWell(
-            onTap: () => onEdit(group),
-            onLongPress: () => _showActions(context, group),
-            borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(14), bottom: Radius.circular(14)),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-              child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Colored left accent bar
+            Container(width: 4, color: color),
+            Expanded(
+              child: Column(
                 children: [
-                  CategoryIcon(
-                    categoryName: group.name,
-                    emoji: hasEmoji ? group.icon : null,
-                    color: color,
-                    size: 40,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          group.name,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: group.archived
-                                ? AppColors.th(context)
-                                : AppColors.tp(context),
-                            decoration: group.archived
-                                ? TextDecoration.lineThrough
-                                : null,
+                  // Main category tile
+                  InkWell(
+                    onTap: () => onEdit(group),
+                    onLongPress: () => _showActions(context, group),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 14, 10),
+                      child: Row(
+                        children: [
+                          // Emoji icon in colored circle
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                hasEmoji ? group.icon : group.name[0],
+                                style: TextStyle(
+                                  fontSize: hasEmoji ? 18 : 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: hasEmoji ? null : color,
+                                ),
+                              ),
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (chips.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Wrap(spacing: 6, runSpacing: 4, children: chips),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  group.name,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: group.archived
+                                        ? AppColors.th(context)
+                                        : AppColors.tp(context),
+                                    decoration: group.archived
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (subs.isNotEmpty)
+                                  Text(
+                                    '${subs.length} subcategor${subs.length == 1 ? 'y' : 'ies'}',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.ts(context)),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded,
+                              size: 18, color: AppColors.th(context)),
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded,
-                      size: 20, color: AppColors.th(context)),
+                  // Subcategories
+                  if (subs.isNotEmpty) ...[
+                    Divider(
+                        height: 1,
+                        indent: 12,
+                        endIndent: 12,
+                        color: AppColors.bd(context)),
+                    ...subs.map((sub) {
+                      final subEmoji =
+                          sub.icon.length <= 4 && sub.icon != 'category';
+                      return InkWell(
+                        onTap: () => onEdit(sub),
+                        onLongPress: () => _showActions(context, sub),
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(16, 8, 14, 8),
+                          child: Row(
+                            children: [
+                              Text(
+                                subEmoji ? sub.icon : '·',
+                                style: TextStyle(
+                                  fontSize: subEmoji ? 16 : 20,
+                                  color: color,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  sub.name,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: sub.archived
+                                        ? AppColors.th(context)
+                                        : AppColors.tp(context),
+                                    decoration: sub.archived
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
                 ],
               ),
             ),
-          ),
-          // Subcategories (inline, no expansion needed)
-          if (subs.isNotEmpty) ...[
-            Divider(height: 1, color: AppColors.bd(context)),
-            ...subs.map((sub) {
-              final subColor = AppColors.fromHex(sub.colorHex);
-              final subEmoji =
-                  sub.icon.length <= 4 && sub.icon != 'category';
-              return InkWell(
-                onTap: () => onEdit(sub),
-                onLongPress: () => _showActions(context, sub),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(52, 8, 12, 8),
-                  child: Row(
-                    children: [
-                      CategoryIcon(
-                        categoryName: sub.name,
-                        emoji: subEmoji ? sub.icon : null,
-                        color: subColor,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          sub.name,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: sub.archived
-                                ? AppColors.th(context)
-                                : AppColors.tp(context),
-                            decoration: sub.archived
-                                ? TextDecoration.lineThrough
-                                : null,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Icon(Icons.chevron_right_rounded,
-                          size: 16, color: AppColors.th(context)),
-                    ],
-                  ),
-                ),
-              );
-            }),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _infoBadge(BuildContext context, IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 10, color: AppColors.ts(context)),
-          const SizedBox(width: 3),
-          Text(label,
-              style:
-                  TextStyle(fontSize: 10, color: AppColors.ts(context))),
-        ],
+        ),
       ),
     );
   }
