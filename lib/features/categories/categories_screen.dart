@@ -800,6 +800,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   String _emoji = '📦';
   Color _color = _categoryColors[0];
   bool _loading = false;
+  bool _showEmojiGrid = false;
 
   static const _emojiGroups = <String, List<String>>{
     'Food & Drink': [
@@ -901,12 +902,16 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ),
             const SizedBox(height: 20),
 
-            // Icon + Name on the same row for compact feel
+            // Icon + Name on the same row
             Row(
               children: [
-                // Current emoji preview (tap to expand picker)
+                // Current emoji preview (tap to expand/collapse inline picker)
                 GestureDetector(
-                  onTap: () => _showEmojiPicker(),
+                  onTap: () => setState(() {
+                    _showEmojiGrid = !_showEmojiGrid;
+                    // Dismiss keyboard when opening picker
+                    if (_showEmojiGrid) FocusScope.of(context).unfocus();
+                  }),
                   child: Container(
                     width: 52,
                     height: 52,
@@ -914,7 +919,11 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       color: _color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                          color: _color.withValues(alpha: 0.3)),
+                        color: _showEmojiGrid
+                            ? AppColors.accent
+                            : _color.withValues(alpha: 0.3),
+                        width: _showEmojiGrid ? 2 : 1,
+                      ),
                     ),
                     child: Center(
                       child: Text(_emoji,
@@ -926,7 +935,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 Expanded(
                   child: TextField(
                     controller: _nameCtrl,
-                    autofocus: _isNew,
+                    autofocus: _isNew && !_showEmojiGrid,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: 'Name',
@@ -943,10 +952,75 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       ),
                     ),
                     textCapitalization: TextCapitalization.words,
+                    onTap: () {
+                      if (_showEmojiGrid) setState(() => _showEmojiGrid = false);
+                    },
                   ),
                 ),
               ],
             ),
+
+            // ── Inline emoji picker (expands below icon+name row) ──
+            if (_showEmojiGrid) ...[
+              const SizedBox(height: 12),
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.bd(context)),
+                ),
+                child: ListView(
+                  padding: const EdgeInsets.all(10),
+                  children: _emojiGroups.entries.map((group) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 6),
+                          child: Text(group.key,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.ts(context),
+                                letterSpacing: 0.5,
+                              )),
+                        ),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: group.value.map((e) {
+                            final isSelected = e == _emoji;
+                            return GestureDetector(
+                              onTap: () => setState(() {
+                                _emoji = e;
+                                _showEmojiGrid = false;
+                              }),
+                              child: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.accent.withValues(alpha: 0.15)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: isSelected
+                                      ? Border.all(color: AppColors.accent, width: 2)
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text(e, style: const TextStyle(fontSize: 20)),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Type toggle
@@ -1089,164 +1163,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
     );
   }
 
-  Future<void> _showEmojiPicker() async {
-    final customCtrl = TextEditingController();
-    try {
-    final result = await showDialog<String>(
-      context: context,
-      useRootNavigator: true,
-      builder: (ctx) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: AppColors.sf(ctx),
-          child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: Column(
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.th(ctx),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text('Choose Icon',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(ctx))),
-              const SizedBox(height: 12),
-              // Custom emoji input — opens system emoji keyboard
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: customCtrl,
-                      style: const TextStyle(fontSize: 24),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: 'Type or paste any emoji',
-                        hintStyle: TextStyle(
-                            fontSize: 14, color: AppColors.th(ctx)),
-                        filled: true,
-                        fillColor: AppColors.sfv(ctx),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () {
-                      final text = customCtrl.text.trim();
-                      if (text.isNotEmpty) {
-                        Navigator.pop(ctx, text.characters.first);
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Use'),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 4),
-                child: Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.bd(ctx))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('or pick below',
-                          style: TextStyle(
-                              fontSize: 11, color: AppColors.th(ctx))),
-                    ),
-                    Expanded(child: Divider(color: AppColors.bd(ctx))),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: _emojiGroups.entries.map((group) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12, bottom: 8),
-                          child: Text(
-                            group.key,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.ts(ctx),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: group.value.map((e) {
-                            final isSelected = e == _emoji;
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.pop(ctx, e);
-                              },
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.accent
-                                          .withValues(alpha: 0.15)
-                                      : AppColors.sfv(ctx),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: AppColors.accent, width: 2)
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text(e,
-                                      style: const TextStyle(fontSize: 20)),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        );
-      });
-    if (result != null && mounted) {
-      setState(() => _emoji = result);
-    }
-    } finally {
-      customCtrl.dispose();
-    }
-  }
 
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();

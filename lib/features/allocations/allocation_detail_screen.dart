@@ -45,6 +45,7 @@ class _AllocationDetailScreenState
   String? _icon; // emoji icon for this envelope
   bool _loading = false;
   bool _showSettings = false;
+  bool _showEmojiGrid = false;
   final _confettiCtrl = ConfettiController(duration: const Duration(seconds: 2));
   bool _confettiPlayed = false;
   List<Category> _linkedCategories = [];
@@ -299,9 +300,11 @@ class _AllocationDetailScreenState
               _sectionHeader('NAME & ICON', icon: Icons.label_outline_rounded),
               Row(
                 children: [
-                  // Icon picker
                   GestureDetector(
-                    onTap: _showIconPicker,
+                    onTap: () => setState(() {
+                      _showEmojiGrid = !_showEmojiGrid;
+                      if (_showEmojiGrid) FocusScope.of(context).unfocus();
+                    }),
                     child: Container(
                       width: 48,
                       height: 48,
@@ -309,7 +312,11 @@ class _AllocationDetailScreenState
                         color: AppColors.accent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color: AppColors.accent.withValues(alpha: 0.3)),
+                          color: _showEmojiGrid
+                              ? AppColors.accent
+                              : AppColors.accent.withValues(alpha: 0.3),
+                          width: _showEmojiGrid ? 2 : 1,
+                        ),
                       ),
                       child: Center(
                         child: _icon != null
@@ -327,13 +334,91 @@ class _AllocationDetailScreenState
                           _inputDecoration('Envelope name (e.g. Groceries)'),
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.done,
-                      autofocus: _isNew,
+                      autofocus: _isNew && !_showEmojiGrid,
                       style: TextStyle(
                           color: AppColors.tp(context), fontSize: 15),
+                      onTap: () {
+                        if (_showEmojiGrid) setState(() => _showEmojiGrid = false);
+                      },
                     ),
                   ),
                 ],
               ),
+              // Inline emoji grid
+              if (_showEmojiGrid) ...[
+                const SizedBox(height: 12),
+                if (_icon != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => setState(() {
+                        _icon = null;
+                        _showEmojiGrid = false;
+                      }),
+                      child: const Text('Remove icon',
+                          style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: AppColors.sfv(context),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.bd(context)),
+                  ),
+                  child: ListView(
+                    padding: const EdgeInsets.all(10),
+                    children: _emojiGroups.entries.map((group) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 6),
+                            child: Text(group.key,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.ts(context),
+                                  letterSpacing: 0.5,
+                                )),
+                          ),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: group.value.map((e) {
+                              final isSelected = e == _icon;
+                              return GestureDetector(
+                                onTap: () => setState(() {
+                                  _icon = e;
+                                  _showEmojiGrid = false;
+                                }),
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.accent.withValues(alpha: 0.15)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: isSelected
+                                        ? Border.all(
+                                            color: AppColors.accent, width: 2)
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(e,
+                                        style: const TextStyle(fontSize: 20)),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             ]),
             const SizedBox(height: 16),
 
@@ -694,154 +779,6 @@ class _AllocationDetailScreenState
     ],
   };
 
-  Future<void> _showIconPicker() async {
-    final customCtrl = TextEditingController();
-    try {
-    final result = await showDialog<String>(
-      context: context,
-      useRootNavigator: true,
-      builder: (ctx) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: AppColors.sf(ctx),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    width: 36, height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.th(ctx),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text('Choose Icon',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(ctx))),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: customCtrl,
-                        style: const TextStyle(fontSize: 24),
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          hintText: 'Type or paste emoji',
-                          hintStyle: TextStyle(
-                              fontSize: 14, color: AppColors.th(ctx)),
-                          filled: true,
-                          fillColor: AppColors.sfv(ctx),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton(
-                      onPressed: () {
-                        final text = customCtrl.text.trim();
-                        if (text.isNotEmpty) {
-                          Navigator.pop(ctx, text.characters.first);
-                        }
-                      },
-                      child: const Text('Use'),
-                    ),
-                  ],
-                ),
-                if (_icon != null) ...[
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(ctx, ''),
-                      child: const Text('Remove icon',
-                          style: TextStyle(fontSize: 12)),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView(
-                    children: _emojiGroups.entries.map((group) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 12, bottom: 8),
-                            child: Text(group.key,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.ts(ctx),
-                                  letterSpacing: 0.5,
-                                )),
-                          ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: group.value.map((e) {
-                              final isSelected = e == _icon;
-                              return GestureDetector(
-                                onTap: () => Navigator.pop(ctx, e),
-                                child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? AppColors.accent
-                                            .withValues(alpha: 0.15)
-                                        : AppColors.sfv(ctx),
-                                    borderRadius:
-                                        BorderRadius.circular(12),
-                                    border: isSelected
-                                        ? Border.all(
-                                            color: AppColors.accent,
-                                            width: 2)
-                                        : null,
-                                  ),
-                                  child: Center(
-                                    child: Text(e,
-                                        style: const TextStyle(
-                                            fontSize: 20)),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (mounted) FocusScope.of(context).unfocus();
-    if (result != null && mounted) {
-      setState(() => _icon = result.isEmpty ? null : result);
-    }
-    } finally {
-      customCtrl.dispose();
-    }
-  }
 
   // ---------------------------------------------------------------------------
   // Balance hero card
