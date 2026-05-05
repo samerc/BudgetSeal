@@ -11,6 +11,7 @@ import 'shared/utils/format_number.dart';
 import 'core/providers/biometric_provider.dart';
 import 'core/providers/font_provider.dart';
 import 'core/providers/household_provider.dart';
+import 'core/providers/text_scale_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'features/lock/lock_screen.dart';
 import 'features/accounts/account_detail_screen.dart';
@@ -346,6 +347,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
       );
     }
 
+    final textScale = ref.watch(textScaleProvider);
+
     return MaterialApp.router(
       title: 'Pocket Plan',
       theme: lightTheme,
@@ -354,10 +357,20 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
       // Dismiss keyboard when tapping outside any text field (globally).
-      builder: (context, child) => GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: child,
-      ),
+      // Apply user's text scale preference.
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        final baseScale = mediaQuery.textScaler.scale(1.0);
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(baseScale * textScale),
+          ),
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

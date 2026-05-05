@@ -444,7 +444,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           }
         },
-        onCreated: (cat) async {
+        onCreated: (name) async {
           if (householdId == null) return;
           final db = ref.read(databaseProvider);
           final cats = ref.read(categoriesProvider).value ?? [];
@@ -452,12 +452,27 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               categoryPresetColors[cats.length % categoryPresetColors.length];
           final colorHex =
               '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+          final newId = const Uuid().v4();
+          final txType = _type == _TxType.income ? 'income' : 'expense';
           await db.into(db.categories).insert(CategoriesCompanion.insert(
-                id: const Uuid().v4(),
+                id: newId,
                 householdId: householdId,
-                name: cat,
+                name: name,
                 colorHex: Value(colorHex),
+                transactionType: Value(txType),
               ));
+          ref.invalidate(categoriesProvider);
+          if (mounted) {
+            // Auto-select the newly created category
+            setState(() {
+              _lines[lineIndex].categoryId = newId;
+              _lines[lineIndex].categoryName = name;
+              _lines[lineIndex].categoryColor = color;
+            });
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          }
         },
       ),
     );

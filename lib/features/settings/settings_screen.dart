@@ -16,6 +16,7 @@ import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/font_provider.dart';
+import '../../core/providers/text_scale_provider.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/providers/receipt_sync_provider.dart';
 import '../../core/providers/sync_provider.dart';
@@ -210,6 +211,13 @@ class SettingsScreen extends ConsumerWidget {
               return _SettingsTile(icon: Icons.text_fields_rounded, title: 'Font',
                   subtitle: font, iconColor: const Color(0xFF7E57C2),
                   onTap: () => _showFontPicker(context, ref));
+            }),
+            Builder(builder: (context) {
+              final scale = ref.watch(textScaleProvider);
+              final label = textScaleOptions[scale] ?? '${(scale * 100).round()}%';
+              return _SettingsTile(icon: Icons.format_size_rounded, title: 'Text Size',
+                  subtitle: label, iconColor: const Color(0xFF5C6BC0),
+                  onTap: () => _showTextSizePicker(context, ref));
             }),
             const SizedBox(height: 20),
 
@@ -1078,6 +1086,34 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (picked != null) ref.read(fontProvider.notifier).setFont(picked);
+  }
+
+  void _showTextSizePicker(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(textScaleProvider);
+    final picked = await showModalBottomSheet<double>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(padding: const EdgeInsets.all(16),
+              child: Text('Text Size', style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+          ...textScaleOptions.entries.map((e) => ListTile(
+                leading: Icon(
+                    (e.key - current).abs() < 0.01
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: AppColors.accent),
+                title: Text(e.value),
+                subtitle: Text('Preview text at this size',
+                    style: TextStyle(fontSize: 14 * e.key,
+                        color: AppColors.ts(context))),
+                onTap: () => Navigator.pop(ctx, e.key),
+              )),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (picked != null) ref.read(textScaleProvider.notifier).setScale(picked);
   }
 }
 
