@@ -174,7 +174,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                       'Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: AppColors.ts(context),
                       ),
                     ),
                     const SizedBox(height: 16),

@@ -6,6 +6,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
@@ -146,8 +147,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                         'Budget',
                         style: TextStyle(
                           color: AppColors.tp(context),
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
+                          fontSize: TypographyTokens.screenTitleSize,
+                          fontWeight: TypographyTokens.screenTitleWeight,
                         ),
                       ),
                     ),
@@ -193,7 +194,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
                     hintText: 'Search envelopes...',
-                    hintStyle: const TextStyle(color: AppColors.textHint),
+                    hintStyle: TextStyle(color: AppColors.th(context)),
                     prefixIcon:
                         Icon(Icons.search_rounded, color: AppColors.ts(context)),
                     suffixIcon: _searchQuery.isNotEmpty
@@ -483,10 +484,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               Text(
                 _sectionTitle(type),
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                  fontSize: TypographyTokens.sectionHeaderSize,
+                  fontWeight: TypographyTokens.sectionHeaderWeight,
                   color: _sectionColor(type, context),
-                  letterSpacing: 0.6,
+                  letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
                 ),
               ),
               const SizedBox(width: 8),
@@ -495,7 +496,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textHint,
+                  color: AppColors.th(context),
                 ),
               ),
               const Spacer(),

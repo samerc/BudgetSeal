@@ -110,7 +110,8 @@ lib/
 └── shared/
     ├── theme/
     │   ├── app_colors.dart     # Theme-aware color system (light + dark)
-    │   └── app_theme.dart      # Material theme definitions
+    │   ├── app_theme.dart      # Material theme definitions
+    │   └── design_tokens.dart  # Spacing, card, and typography constants
     ├── utils/
     │   ├── format_number.dart  # Amount formatting with currency symbols
     │   ├── haptics.dart
@@ -119,7 +120,8 @@ lib/
     │   ├── app_info.dart
     │   └── responsive.dart
     └── widgets/                # Reusable widgets
-        ├── allocation_card.dart         # Envelope card with circular progress
+        ├── app_card.dart             # Standard card container (radius 14, theme-aware)
+        ├── allocation_card.dart      # Envelope card with circular progress
         ├── amount_field.dart         # Opens calculator sheet (not keyboard)
         ├── animated_amount.dart      # Count-up/down currency animation
         ├── animated_circular_progress.dart # Custom-painted progress ring
@@ -131,6 +133,7 @@ lib/
         ├── empty_state.dart
         ├── error_retry.dart
         ├── hint_banner.dart
+        ├── section_header.dart       # Standard section header (13px, w700, ls 0.8)
         ├── skeleton_loader.dart
         └── spending_heatmap.dart     # GitHub-style daily spending grid
 ```
@@ -393,7 +396,9 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 - Loading: `SkeletonList` for lists, `CircularProgressIndicator` for detail screens
 - Empty: `EmptyState` widget everywhere
 - Error: `ErrorRetry` widget everywhere
-- Cards: `BorderRadius.circular(14)`, `AppColors.sf(context)` background
+- Cards: Use `AppCard` widget or `CardTokens.radius` (14) + `CardTokens.padding` (16h, 14v) + `AppColors.sf(context)` bg + `AppColors.bd(context)` border
+- Section headers: Use `SectionHeader` widget or `TypographyTokens.sectionHeaderSize/Weight/LetterSpacing`
+- Screen titles: `TypographyTokens.screenTitleSize` (24) + `TypographyTokens.screenTitleWeight` (w800)
 - Chips: Pill-shaped (20px radius), colored border+bg when selected
 - SnackBars: Always `behavior: SnackBarBehavior.floating`
 - All list screens have `RefreshIndicator`
@@ -483,7 +488,23 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 ## Theme System
 
-`buildLightTheme(fontName)` and `buildDarkTheme(fontName)` in `app_theme.dart` generate full ThemeData with the selected font applied everywhere (AppBar, buttons, inputs, nav bar, text theme). Font selection is dynamic via `fontProvider`. Default font: Inter. Available: DM Sans, Poppins, Nunito, Rubik, Space Grotesk.
+`buildLightTheme(fontName)` and `buildDarkTheme(fontName)` in `app_theme.dart` generate full ThemeData with the selected font applied everywhere (AppBar, buttons, inputs, nav bar, text theme). Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+
+### Design Tokens
+`lib/shared/theme/design_tokens.dart` defines the single source of truth:
+- **Spacing**: xs(4), sm(8), md(12), lg(16), xl(24), sectionGap(16), headerToCard(8)
+- **CardTokens**: radius(14), paddingH(16), paddingV(14), borderRadius, padding
+- **TypographyTokens**: screenTitle(24/w800), sectionHeader(13/w700/ls0.8), cardTitle(15/w600), amountLarge(22/w700), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600)
+
+### Color Palette
+- Accent: `#2563EB` (Royal Blue)
+- Expense/Overspent: `#DC2626` (Deep Red)
+- Income/Healthy: `#059669` (Deep Emerald)
+- Caution: `#D97706` (Deep Amber)
+
+### Shared Layout Widgets
+- `SectionHeader` (`lib/shared/widgets/section_header.dart`): uppercase, 13px w700, letter-spacing 0.8, optional trailing action
+- `AppCard` (`lib/shared/widgets/app_card.dart`): theme-aware bg/border, radius 14, standard padding, optional onTap
 
 ## More Tab Structure
 
@@ -499,7 +520,7 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 ## Onboarding
 
-4-page flow: Welcome → How it works (4 steps) → Good to know (tips about bill splitter, dashboard customization, bulk actions, health check) → Setup (name, currency, period start day).
+3-page flow: Welcome (how-it-works + Restore/Join buttons) → Setup (household name, currency, period day, account, categories toggle, entry mode) → Done.
 
 ## Auto-fill
 
@@ -511,7 +532,7 @@ Both the funding screen (bulk) and envelope detail screen (single fund) check if
 
 ## Icon Pickers
 
-Envelope and category icon pickers use `showDialog` with a `Dialog` widget (NOT `showModalBottomSheet`). `DraggableScrollableSheet` causes dark overlay / zero-height rendering issues. The dialog returns the selected emoji via `Navigator.pop(ctx, emoji)`. A `TextEditingController` is created locally and disposed in a `finally` block after the dialog closes.
+Envelope and category icon pickers use an **inline expandable emoji grid** within the form itself (setState toggle, no overlays). Never use `showDialog` or `showModalBottomSheet` for icon pickers — they cause `_dependents.isEmpty` crashes when launched from bottom sheets or nested navigators. The grid shows 120+ curated emojis organized by group with a text field for custom emoji input.
 
 ## Period Reset
 

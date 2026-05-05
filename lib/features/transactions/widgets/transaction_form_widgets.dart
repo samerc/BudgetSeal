@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/widgets/amount_field.dart';
 
 // ---------------------------------------------------------------------------
@@ -277,10 +278,10 @@ class LineCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      padding: CardTokens.padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

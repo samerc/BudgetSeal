@@ -16,6 +16,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
@@ -207,8 +208,8 @@ class _DetailBody extends ConsumerWidget {
                     child: Text(
                       amountText,
                       style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TypographyTokens.screenTitleSize,
+                        fontWeight: TypographyTokens.screenTitleWeight,
                         color: typeColor,
                       ),
                     ),

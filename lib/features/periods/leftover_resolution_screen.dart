@@ -212,7 +212,7 @@ class _LeftoverResolutionScreenState
                               Text(
                                 'No balance',
                                 style: textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textHint,
+                                  color: AppColors.th(context),
                                 ),
                               )
                             else
@@ -234,13 +234,13 @@ class _LeftoverResolutionScreenState
                                 Icons.info_outline_rounded,
                                 size: 40,
                                 color:
-                                    AppColors.textHint.withValues(alpha: 0.6),
+                                    AppColors.th(context).withValues(alpha: 0.6),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'No positive balance to resolve.',
                                 style: textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.ts(context),
                                 ),
                               ),
                             ],
@@ -448,7 +448,7 @@ class _BalanceRow extends StatelessWidget {
         ? AppColors.overspent
         : isPositive
             ? AppColors.healthy
-            : AppColors.textSecondary;
+            : AppColors.ts(context);
     final bgColor = amount < 0
         ? AppColors.overspentLight
         : isPositive
@@ -536,7 +536,7 @@ class _ResolutionOption extends StatelessWidget {
               Icon(
                 icon,
                 size: 22,
-                color: selected ? AppColors.accent : AppColors.textHint,
+                color: selected ? AppColors.accent : AppColors.th(context),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -550,15 +550,15 @@ class _ResolutionOption extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: selected
                             ? AppColors.textPrimary
-                            : AppColors.textSecondary,
+                            : AppColors.ts(context),
                       ),
                     ),
                     const SizedBox(height: 1),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textHint,
+                        color: AppColors.th(context),
                       ),
                     ),
                   ],
@@ -567,7 +567,7 @@ class _ResolutionOption extends StatelessWidget {
               Icon(
                 selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 size: 20,
-                color: selected ? AppColors.accent : AppColors.textHint,
+                color: selected ? AppColors.accent : AppColors.th(context),
               ),
             ],
           ),

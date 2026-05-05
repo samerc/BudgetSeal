@@ -137,11 +137,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Export all your transactions as a CSV file. '
                     'You can open it in Excel, Google Sheets, or any spreadsheet app.',
                     style: TextStyle(
-                        fontSize: 13, color: AppColors.textSecondary),
+                        fontSize: 13, color: AppColors.ts(context)),
                   ),
                   const SizedBox(height: 20),
                   FilledButton.icon(

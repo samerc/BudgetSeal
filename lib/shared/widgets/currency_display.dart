@@ -37,8 +37,8 @@ class CurrencyDisplay extends StatelessWidget {
         if (baseAmount != null && baseCurrency != null && baseCurrency != currency)
           Text(
             '≈ ${formatAmount(baseAmount!, currency: baseCurrency)}',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.ts(context),
               fontSize: 11,
             ),
           ),

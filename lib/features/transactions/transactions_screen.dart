@@ -16,6 +16,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/utils/receipt_helper.dart';
@@ -352,9 +353,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 controller: _searchCtrl,
                 autofocus: false,
                 style: const TextStyle(fontSize: 16),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search transactions...',
-                  hintStyle: TextStyle(color: AppColors.textHint),
+                  hintStyle: TextStyle(color: AppColors.th(context)),
                   border: InputBorder.none,
                   isDense: true,
                 ),
@@ -390,8 +391,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           Text(
             'Transactions',
             style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
+              fontSize: TypographyTokens.screenTitleSize,
+              fontWeight: TypographyTokens.screenTitleWeight,
               color: AppColors.tp(context),
             ),
           ),

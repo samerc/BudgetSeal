@@ -4,15 +4,15 @@ abstract final class AppColors {
   // ── Brand (same in both themes) ────────────────────────────
   static const primary = Color(0xFF1A2B4A);
   static const primaryLight = Color(0xFF2A3F6A);
-  static const accent = Color(0xFF6366F1);
-  static const accentLight = Color(0xFFE0E7FF);
+  static const accent = Color(0xFF2563EB);
+  static const accentLight = Color(0xFFDBEAFE);
 
   // ── Semantic (same in both themes) ─────────────────────────
-  static const healthy = Color(0xFF10B981);
+  static const healthy = Color(0xFF059669);
   static const healthyLight = Color(0xFFD1FAE5);
-  static const caution = Color(0xFFF59E0B);
+  static const caution = Color(0xFFD97706);
   static const cautionLight = Color(0xFFFEF3C7);
-  static const overspent = Color(0xFFEF4444);
+  static const overspent = Color(0xFFDC2626);
   static const overspentLight = Color(0xFFFEE2E2);
 
   // ── Theme-aware surface/text colors ────────────────────────

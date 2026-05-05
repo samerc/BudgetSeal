@@ -19,6 +19,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -96,13 +97,13 @@ class _AllocationDetailScreenState
     super.dispose();
   }
 
-  static const _sectionRadius = BorderRadius.all(Radius.circular(16));
+  static final _sectionRadius = BorderRadius.circular(CardTokens.radius);
   static const _inputRadius = BorderRadius.all(Radius.circular(12));
 
   InputDecoration _inputDecoration(String label, {Widget? prefixIcon}) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+      labelStyle: TextStyle(color: AppColors.ts(context), fontSize: 14),
       floatingLabelStyle: const TextStyle(
           color: AppColors.accent, fontWeight: FontWeight.w600),
       filled: true,
@@ -146,11 +147,11 @@ class _AllocationDetailScreenState
           const SizedBox(width: 8),
         ],
         Text(label,
-            style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.6)),
+            style: TextStyle(
+                fontSize: TypographyTokens.sectionHeaderSize,
+                fontWeight: TypographyTokens.sectionHeaderWeight,
+                color: AppColors.ts(context),
+                letterSpacing: TypographyTokens.sectionHeaderLetterSpacing)),
       ]),
     );
   }
@@ -538,8 +539,8 @@ class _AllocationDetailScreenState
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                     child: Row(children: [
-                      const Icon(Icons.replay_rounded,
-                          size: 20, color: AppColors.textSecondary),
+                      Icon(Icons.replay_rounded,
+                          size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -552,7 +553,7 @@ class _AllocationDetailScreenState
                                       fontWeight: FontWeight.w500)),
                               Text('Carry remaining funds to the next period',
                                   style: TextStyle(
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.ts(context),
                                       fontSize: 12)),
                             ]),
                       ),
@@ -568,7 +569,7 @@ class _AllocationDetailScreenState
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Row(children: [
                       Icon(Icons.auto_mode_rounded,
-                          size: 20, color: AppColors.textSecondary),
+                          size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -581,7 +582,7 @@ class _AllocationDetailScreenState
                                       fontWeight: FontWeight.w500)),
                               Text('Reset automatically at period start',
                                   style: TextStyle(
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.ts(context),
                                       fontSize: 12)),
                             ]),
                       ),
@@ -609,8 +610,8 @@ class _AllocationDetailScreenState
                   _type == 'saving'
                       ? 'How much do you want to save in this envelope?'
                       : 'How much do you want to spend in this envelope each month?',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(
+                      fontSize: 12, color: AppColors.ts(context)),
                 ),
                 const SizedBox(height: 12),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -644,10 +645,10 @@ class _AllocationDetailScreenState
               _sectionContainer(children: [
                 _sectionHeader('LINKED CATEGORIES',
                     icon: Icons.label_outline_rounded),
-                const Text(
+                Text(
                   'Expenses with these categories will debit this envelope.',
                   style: TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary),
+                      fontSize: 12, color: AppColors.ts(context)),
                 ),
                 const SizedBox(height: 12),
                 if (_linkedCategories.isEmpty && !_isNew)
@@ -693,8 +694,8 @@ class _AllocationDetailScreenState
                         ),
                         GestureDetector(
                           onTap: () => _unlinkCategory(cat.id),
-                          child: const Icon(Icons.close_rounded,
-                              size: 16, color: AppColors.textHint),
+                          child: Icon(Icons.close_rounded,
+                              size: 16, color: AppColors.th(context)),
                         ),
                       ]),
                     )),
@@ -824,7 +825,7 @@ class _AllocationDetailScreenState
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
       child: Column(
         children: [
@@ -833,8 +834,8 @@ class _AllocationDetailScreenState
             formatAmount(mainBalance, currency: targetCurrency),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
+              fontSize: TypographyTokens.screenTitleSize,
+              fontWeight: TypographyTokens.screenTitleWeight,
             ),
           ),
           // Other currency balances
@@ -1171,12 +1172,12 @@ class _AllocationDetailScreenState
           final recent = ledgerEntries.take(8).toList();
 
           if (recent.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text('No activity yet',
                     style:
-                        TextStyle(fontSize: 13, color: AppColors.textHint)),
+                        TextStyle(fontSize: 13, color: AppColors.th(context))),
               ),
             );
           }
@@ -1233,9 +1234,9 @@ class _AllocationDetailScreenState
                           ),
                           Text(
                             '${DateFormat('MMM d').format(entry.createdAt.toLocal())} · $label',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.textHint),
+                                color: AppColors.th(context)),
                           ),
                         ],
                       ),
@@ -1350,10 +1351,10 @@ class _AllocationDetailScreenState
                         const SizedBox(height: 6),
                         Text(
                           DateFormat('MMM').format(m),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: AppColors.ts(context),
                           ),
                         ),
                       ],
@@ -1410,7 +1411,7 @@ class _AllocationDetailScreenState
               ),
               child: Icon(icon,
                   size: 22,
-                  color: isSelected ? AppColors.accent : AppColors.textSecondary),
+                  color: isSelected ? AppColors.accent : AppColors.ts(context)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -2129,7 +2130,7 @@ class _SegmentChip extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color:
-                    isSelected ? AppColors.accent : AppColors.textSecondary,
+                    isSelected ? AppColors.accent : AppColors.ts(context),
               )),
         ]),
       ),

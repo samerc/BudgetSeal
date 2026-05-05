@@ -16,9 +16,11 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../shared/widgets/animated_amount.dart';
@@ -304,7 +306,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.money] = [
-                  _SectionHeader(label: 'YOUR MONEY'),
+                  const SectionHeader('Your Money'),
                   const SizedBox(height: 8),
                   // Net Worth Card
                   accountsAsync.when(
@@ -414,7 +416,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.activity] = [
-                  _SectionHeader(label: 'ACTIVITY'),
+                  const SectionHeader('Activity'),
                   const SizedBox(height: 8),
                   // Quick Templates (above recent transactions)
                   _QuickTemplatesSection(),
@@ -423,8 +425,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   Text(
                     'Recent',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontSize: TypographyTokens.cardTitleSize,
+                      fontWeight: TypographyTokens.cardTitleWeight,
                       color: AppColors.tp(context),
                     ),
                   ),
@@ -1523,7 +1525,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
 
     return ListView(padding: const EdgeInsets.all(16), children: [
       if (matchAcct.isNotEmpty) ...[
-        _sectionHead('Accounts'),
+        _sectionHead(context, 'Accounts'),
         ...matchAcct.map((a) => ListTile(
               leading:
                   Icon(Icons.credit_card_rounded, color: AppColors.accent),
@@ -1538,7 +1540,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         const SizedBox(height: 8),
       ],
       if (matchCat.isNotEmpty) ...[
-        _sectionHead('Categories'),
+        _sectionHead(context, 'Categories'),
         ...matchCat.map((c) {
           final color = _hex(c.colorHex);
           return ListTile(
@@ -1556,7 +1558,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         const SizedBox(height: 8),
       ],
       if (matchTx.isNotEmpty) ...[
-        _sectionHead('Transactions'),
+        _sectionHead(context, 'Transactions'),
         ...matchTx.map((e) {
           final cat = e.tx.categoryId != null
               ? catMap[e.tx.categoryId]
@@ -1588,13 +1590,13 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
     ]);
   }
 
-  Widget _sectionHead(String t) => Padding(
+  Widget _sectionHead(BuildContext context, String t) => Padding(
       padding: const EdgeInsets.only(bottom: 4, top: 4),
       child: Text(t,
           style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: AppColors.ts(context),
               letterSpacing: 0.5)));
 
   Color _hex(String hex) {
@@ -1638,8 +1640,8 @@ class _QuickTemplatesSection extends ConsumerWidget {
                   Text(
                     'Quick Templates',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontSize: TypographyTokens.cardTitleSize,
+                      fontWeight: TypographyTokens.cardTitleWeight,
                       color: AppColors.tp(context),
                     ),
                   ),
@@ -1741,28 +1743,6 @@ class _QuickTemplatesSection extends ConsumerWidget {
   }
 }
 
-// ─── Section Header ────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-          color: AppColors.tp(context),
-        ),
-      ),
-    );
-  }
-}
 
 // ─── Shimmer placeholder ────────────────────────────────────────────────────
 

@@ -7,6 +7,7 @@ const _key = 'app_font';
 
 /// Available font families.
 const appFonts = <String, String>{
+  'Plus Jakarta Sans': 'Plus Jakarta Sans',
   'DM Sans': 'DM Sans',
   'Inter': 'Inter',
   'Poppins': 'Poppins',
@@ -22,7 +23,7 @@ class FontNotifier extends Notifier<String> {
   @override
   String build() {
     _load();
-    return 'Inter';
+    return 'Plus Jakarta Sans';
   }
 
   Future<void> _load() async {
@@ -47,12 +48,13 @@ TextTheme buildTextTheme(String fontName, [Brightness brightness = Brightness.li
       : ThemeData.light().textTheme;
 
   return switch (fontName) {
+    'Plus Jakarta Sans' => GoogleFonts.plusJakartaSansTextTheme(base),
     'Poppins' => GoogleFonts.poppinsTextTheme(base),
     'Nunito' => GoogleFonts.nunitoTextTheme(base),
     'Rubik' => GoogleFonts.rubikTextTheme(base),
     'DM Sans' => GoogleFonts.dmSansTextTheme(base),
     'Space Grotesk' => GoogleFonts.spaceGroteskTextTheme(base),
-    _ => GoogleFonts.interTextTheme(base),
+    _ => GoogleFonts.plusJakartaSansTextTheme(base),
   };
 }
 
@@ -63,11 +65,12 @@ TextStyle fontStyle(String fontName, {
   Color? color,
 }) {
   return switch (fontName) {
+    'Plus Jakarta Sans' => GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Poppins' => GoogleFonts.poppins(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Nunito' => GoogleFonts.nunito(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Rubik' => GoogleFonts.rubik(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'DM Sans' => GoogleFonts.dmSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Space Grotesk' => GoogleFonts.spaceGrotesk(fontSize: fontSize, fontWeight: fontWeight, color: color),
-    _ => GoogleFonts.inter(fontSize: fontSize, fontWeight: fontWeight, color: color),
+    _ => GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
   };
 }

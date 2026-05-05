@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/providers/font_provider.dart';
 import 'app_colors.dart';
+import 'design_tokens.dart';
 
 /// Build the light theme with the given font name.
 ThemeData buildLightTheme(String fontName) {
@@ -33,7 +34,7 @@ ThemeData buildLightTheme(String fontName) {
       color: AppColors.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         side: BorderSide(color: Colors.grey.shade200),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -76,12 +77,13 @@ ThemeData buildLightTheme(String fontName) {
       space: 1,
     ),
     textTheme: textTheme.copyWith(
-      displaySmall: fs(28, FontWeight.w700, AppColors.textPrimary),
+      displaySmall: fs(TypographyTokens.screenTitleSize, TypographyTokens.screenTitleWeight, AppColors.textPrimary),
       titleLarge: fs(20, FontWeight.w700, AppColors.textPrimary),
-      titleMedium: fs(16, FontWeight.w600, AppColors.textPrimary),
-      bodyMedium: fs(14, null, AppColors.textPrimary),
-      bodySmall: fs(12, null, AppColors.textSecondary),
-      labelSmall: fs(11, null, AppColors.textHint),
+      titleMedium: fs(TypographyTokens.cardTitleSize, TypographyTokens.cardTitleWeight, AppColors.textPrimary),
+      bodyLarge: fs(TypographyTokens.bodySize, TypographyTokens.bodyWeight, AppColors.textPrimary),
+      bodyMedium: fs(TypographyTokens.bodySize, TypographyTokens.bodyWeight, AppColors.textPrimary),
+      bodySmall: fs(TypographyTokens.captionSize, TypographyTokens.captionWeight, AppColors.textSecondary),
+      labelSmall: fs(TypographyTokens.overlineSize, TypographyTokens.overlineWeight, AppColors.textHint),
     ),
   );
 }
@@ -116,7 +118,7 @@ ThemeData buildDarkTheme(String fontName) {
       color: AppColors.darkSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         side: const BorderSide(color: AppColors.darkSurfaceVariant),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -159,16 +161,17 @@ ThemeData buildDarkTheme(String fontName) {
       space: 1,
     ),
     textTheme: textTheme.copyWith(
-      displaySmall: fs(28, FontWeight.w700, AppColors.darkTextPrimary),
+      displaySmall: fs(TypographyTokens.screenTitleSize, TypographyTokens.screenTitleWeight, AppColors.darkTextPrimary),
       titleLarge: fs(20, FontWeight.w700, AppColors.darkTextPrimary),
-      titleMedium: fs(16, FontWeight.w600, AppColors.darkTextPrimary),
-      bodyMedium: fs(14, null, AppColors.darkTextPrimary),
-      bodySmall: fs(12, null, AppColors.darkTextSecondary),
-      labelSmall: fs(11, null, AppColors.darkTextHint),
+      titleMedium: fs(TypographyTokens.cardTitleSize, TypographyTokens.cardTitleWeight, AppColors.darkTextPrimary),
+      bodyLarge: fs(TypographyTokens.bodySize, TypographyTokens.bodyWeight, AppColors.darkTextPrimary),
+      bodyMedium: fs(TypographyTokens.bodySize, TypographyTokens.bodyWeight, AppColors.darkTextPrimary),
+      bodySmall: fs(TypographyTokens.captionSize, TypographyTokens.captionWeight, AppColors.darkTextSecondary),
+      labelSmall: fs(TypographyTokens.overlineSize, TypographyTokens.overlineWeight, AppColors.darkTextHint),
     ),
   );
 }
 
 // ── Keep old names as aliases for backward compatibility ─────────────────────
-final appTheme = buildLightTheme('Inter');
-final appDarkTheme = buildDarkTheme('Inter');
+final appTheme = buildLightTheme('Plus Jakarta Sans');
+final appDarkTheme = buildDarkTheme('Plus Jakarta Sans');

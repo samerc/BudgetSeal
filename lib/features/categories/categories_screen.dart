@@ -10,6 +10,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
@@ -87,8 +88,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         child: Text(
                           'Categories',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                            fontSize: TypographyTokens.screenTitleSize,
+                            fontWeight: TypographyTokens.screenTitleWeight,
                             color: AppColors.tp(context),
                           ),
                         ),

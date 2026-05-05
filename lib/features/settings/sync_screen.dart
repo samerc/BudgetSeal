@@ -37,7 +37,7 @@ class SyncScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    _statusIcon(syncState.status, isConnected),
+                    _statusIcon(context, syncState.status, isConnected),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -196,7 +196,7 @@ class SyncScreen extends ConsumerWidget {
     );
   }
 
-  Widget _statusIcon(SyncStatus status, bool connected) {
+  Widget _statusIcon(BuildContext context, SyncStatus status, bool connected) {
     if (status == SyncStatus.syncing) {
       return const SizedBox(
         width: 40,
@@ -216,7 +216,7 @@ class SyncScreen extends ConsumerWidget {
       SyncStatus.error => (Icons.error_rounded, AppColors.overspent),
       _ => connected
           ? (Icons.cloud_done_rounded, AppColors.accent)
-          : (Icons.cloud_off_rounded, AppColors.textSecondary),
+          : (Icons.cloud_off_rounded, AppColors.ts(context)),
     };
 
     return Container(

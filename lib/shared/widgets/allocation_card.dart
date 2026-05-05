@@ -271,14 +271,14 @@ class AllocationCard extends StatelessWidget {
                     ),
                     Text(
                       '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
-                      style: const TextStyle(
-                          fontSize: 10, color: AppColors.textHint),
+                      style: TextStyle(
+                          fontSize: 10, color: AppColors.th(context)),
                     ),
                   ] else if (hasTarget && !_isSaving)
                     Text(
                       '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
-                      style: const TextStyle(
-                          fontSize: 10, color: AppColors.textHint),
+                      style: TextStyle(
+                          fontSize: 10, color: AppColors.th(context)),
                     ),
                 ],
               ),

@@ -19,6 +19,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
@@ -105,8 +106,8 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
               child: Text(
                 'Reports',
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
+                  fontSize: TypographyTokens.screenTitleSize,
+                  fontWeight: TypographyTokens.screenTitleWeight,
                   color: AppColors.tp(context),
                 ),
               ),
@@ -461,11 +462,11 @@ class _HeatmapSection extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _legendDot(AppColors.sfv(context), 'None'),
+              _legendDot(context, AppColors.sfv(context), 'None'),
               const SizedBox(width: 12),
-              _legendDot(AppColors.overspent.withValues(alpha: 0.4), 'Expense'),
+              _legendDot(context, AppColors.overspent.withValues(alpha: 0.4), 'Expense'),
               const SizedBox(width: 12),
-              _legendDot(AppColors.healthy.withValues(alpha: 0.4), 'Income'),
+              _legendDot(context, AppColors.healthy.withValues(alpha: 0.4), 'Income'),
             ],
           ),
           const SizedBox(height: 6),
@@ -480,7 +481,7 @@ class _HeatmapSection extends ConsumerWidget {
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(BuildContext context, Color color, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -493,7 +494,7 @@ class _HeatmapSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(label, style: TextStyle(fontSize: 10, color: AppColors.th(context))),
       ],
     );
   }
@@ -544,7 +545,7 @@ class _MonthlySummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -699,7 +700,7 @@ class _CashflowSummary extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -820,7 +821,7 @@ class _TrendChart extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -987,7 +988,7 @@ class _NetWorthChart extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
             border: Border.all(color: AppColors.bd(context)),
           ),
           child: Column(
@@ -2380,7 +2381,7 @@ class _HealthScoreCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -2470,7 +2471,7 @@ class _VelocityCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -2600,7 +2601,7 @@ class _BiggestExpenseCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
           border: Border.all(color: AppColors.bd(context)),
         ),
         child: Row(
@@ -2700,7 +2701,7 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
                 border: Border.all(color: AppColors.bd(context)),
               ),
               child: Row(
@@ -2780,7 +2781,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

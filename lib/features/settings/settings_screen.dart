@@ -26,6 +26,7 @@ import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 import '../../shared/utils/format_number.dart';
 
@@ -54,8 +55,8 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text('More',
                       style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
+                          fontSize: TypographyTokens.screenTitleSize,
+                          fontWeight: TypographyTokens.screenTitleWeight,
                           color: AppColors.tp(context))),
                   const Spacer(),
                   GestureDetector(
@@ -78,7 +79,7 @@ class SettingsScreen extends ConsumerWidget {
                 gradient: LinearGradient(
                   colors: [AppColors.accent, AppColors.accent.withValues(alpha: 0.8)],
                 ),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
               child: Row(
                 children: [
@@ -613,8 +614,8 @@ class SettingsScreen extends ConsumerWidget {
             if (description != null) ...[
               const SizedBox(height: 8),
               Text(description,
-                  style: const TextStyle(
-                      fontSize: 13, color: AppColors.textSecondary)),
+                  style: TextStyle(
+                      fontSize: 13, color: AppColors.ts(context))),
             ],
             const SizedBox(height: 16),
             TextField(
@@ -928,8 +929,8 @@ class SettingsScreen extends ConsumerWidget {
             if (description != null) ...[
               const SizedBox(height: 8),
               Text(description,
-                  style: const TextStyle(
-                      fontSize: 13, color: AppColors.textSecondary)),
+                  style: TextStyle(
+                      fontSize: 13, color: AppColors.ts(context))),
             ],
             const SizedBox(height: 16),
             TextField(
@@ -1069,7 +1070,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: Text(font, style: fontStyle(font, fontSize: 16)),
                 subtitle: Text('The quick brown fox jumps over the lazy dog',
                     style: fontStyle(font, fontSize: 12,
-                        color: AppColors.textSecondary)),
+                        color: AppColors.ts(context))),
                 onTap: () => Navigator.pop(ctx, font),
               )),
           const SizedBox(height: 8),
@@ -1248,11 +1249,11 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.1,
-          color: AppColors.textSecondary,
+        style: TextStyle(
+          fontSize: TypographyTokens.sectionHeaderSize,
+          fontWeight: TypographyTokens.sectionHeaderWeight,
+          letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+          color: AppColors.ts(context),
         ),
       ),
     );
@@ -1280,7 +1281,7 @@ class _SettingsTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
       child: ListTile(
         leading: Container(
@@ -1293,14 +1294,15 @@ class _SettingsTile extends StatelessWidget {
           child: Icon(icon, color: iconColor, size: 18),
         ),
         title: Text(title,
-            style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w500,
+                color: AppColors.tp(context))),
         subtitle: Text(subtitle,
-            style: const TextStyle(
-                fontSize: 12, color: AppColors.textSecondary)),
+            style: TextStyle(
+                fontSize: 12, color: AppColors.ts(context))),
         trailing: onTap != null
-            ? const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.textHint)
+            ? Icon(Icons.chevron_right_rounded,
+                size: 18, color: AppColors.th(context))
             : null,
         onTap: onTap,
       ),
@@ -1317,7 +1319,7 @@ class _BiometricTile extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
       child: ListTile(
         leading: Container(
@@ -1332,8 +1334,8 @@ class _BiometricTile extends ConsumerWidget {
         ),
         title: const Text('Biometric Lock',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-        subtitle: const Text('Require fingerprint or face to open',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        subtitle: Text('Require fingerprint or face to open',
+            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
         trailing: Switch.adaptive(
           value: enabled,
           activeTrackColor: AppColors.accent,

@@ -83,7 +83,7 @@ class CalculatorAmountField extends StatelessWidget {
                   style: displayText.isEmpty
                       ? effectiveStyle.copyWith(
                           fontWeight: FontWeight.w300,
-                          color: AppColors.textHint,
+                          color: AppColors.th(context),
                         )
                       : effectiveStyle,
                 ),

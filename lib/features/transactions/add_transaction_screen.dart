@@ -1098,9 +1098,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         const SizedBox(width: 8),
                         Text(
                             '1 ${_rateInverted ? toAcc.currency : fromAcc.currency} =',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary)),
+                                color: AppColors.ts(context))),
                         const SizedBox(width: 6),
                         SizedBox(
                           width: 90,
@@ -1113,10 +1113,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.accent),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: '0.00',
                               hintStyle: TextStyle(
-                                  fontSize: 13, color: AppColors.textHint),
+                                  fontSize: 13, color: AppColors.th(context)),
                               border: InputBorder.none,
                               isDense: true,
                               contentPadding: EdgeInsets.zero,
@@ -1138,10 +1138,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ),
                         Text(
                             _rateInverted ? fromAcc.currency : toAcc.currency,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary)),
+                                color: AppColors.ts(context))),
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () {
@@ -1185,7 +1185,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             'Destination receives:',
                             style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary),
+                                color: AppColors.ts(context)),
                           ),
                           Text(
                             formatAmount(destAmount,
@@ -1224,15 +1224,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           isExpanded: true,
           hint: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.textSecondary),
+              Icon(icon, size: 18, color: AppColors.ts(context)),
               const SizedBox(width: 12),
               Text(hint,
-                  style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 15)),
+                  style: TextStyle(
+                      color: AppColors.ts(context), fontSize: 15)),
             ],
           ),
-          icon: const Icon(Icons.chevron_right_rounded,
-              size: 18, color: AppColors.textHint),
+          icon: Icon(Icons.chevron_right_rounded,
+              size: 18, color: AppColors.th(context)),
           items: () {
               final balances = ref.watch(accountsWithBalanceProvider).value ?? [];
               final balanceMap = {for (final ab in balances) ab.account.id: ab.balance};
@@ -1243,7 +1243,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         value: a.id,
                         child: Row(children: [
                           Icon(_accountIcon(a.type),
-                              size: 18, color: AppColors.textSecondary),
+                              size: 18, color: AppColors.ts(context)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(a.name,
@@ -1261,7 +1261,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 fontSize: 12,
                                 color: balance != null && balance < 0
                                     ? AppColors.overspent
-                                    : AppColors.textSecondary),
+                                    : AppColors.ts(context)),
                           ),
                         ]),
                       );
@@ -1375,14 +1375,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           controller: _titleCtrl,
           textCapitalization: TextCapitalization.sentences,
           onChanged: (_) => setState(() {}), // rebuild pills
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Title (e.g. Coffee, Groceries)',
-            hintStyle: TextStyle(color: AppColors.textHint),
+            hintStyle: TextStyle(color: AppColors.th(context)),
             prefixIcon: Icon(Icons.edit_rounded,
-                size: 18, color: AppColors.textSecondary),
+                size: 18, color: AppColors.ts(context)),
             border: InputBorder.none,
             contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
         if (filtered.isNotEmpty)
@@ -1469,8 +1469,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.add_rounded,
-                    size: 18, color: AppColors.textHint),
+                icon: Icon(Icons.add_rounded,
+                    size: 18, color: AppColors.th(context)),
                 tooltip: 'Add more',
                 onPressed: () async {
                   final newFilenames = await pickAndSaveReceipts(context);
@@ -1481,8 +1481,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded,
-                    size: 18, color: AppColors.textHint),
+                icon: Icon(Icons.close_rounded,
+                    size: 18, color: AppColors.th(context)),
                 onPressed: () => setState(() {
                   _receiptFilenames = [];
                   _resolvedReceiptPaths = [];

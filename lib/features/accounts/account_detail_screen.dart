@@ -14,6 +14,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
@@ -107,9 +108,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(width: 6),
               Text(title,
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
+                    fontSize: TypographyTokens.sectionHeaderSize,
+                    fontWeight: TypographyTokens.sectionHeaderWeight,
+                    letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
                     color: AppColors.ts(context),
                   )),
             ],
@@ -127,8 +128,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       hintText: hint,
       filled: true,
       fillColor: AppColors.sfv(context),
-      labelStyle: const TextStyle(color: AppColors.textSecondary),
-      hintStyle: const TextStyle(color: AppColors.textHint),
+      labelStyle: TextStyle(color: AppColors.ts(context)),
+      hintStyle: TextStyle(color: AppColors.th(context)),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
@@ -309,8 +310,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.settings_outlined,
-                          size: 18, color: AppColors.textSecondary),
+                      Icon(Icons.settings_outlined,
+                          size: 18, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       const Expanded(
                         child: Text('Account Settings',
@@ -322,7 +323,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         _showSettings
                             ? Icons.expand_less_rounded
                             : Icons.expand_more_rounded,
-                        color: AppColors.textHint,
+                        color: AppColors.th(context),
                       ),
                     ],
                   ),
@@ -477,13 +478,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   const Icon(Icons.receipt_long_rounded,
                       size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'RECENT TRANSACTIONS',
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.textSecondary,
+                      fontSize: TypographyTokens.sectionHeaderSize,
+                      fontWeight: TypographyTokens.sectionHeaderWeight,
+                      letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+                      color: AppColors.ts(context),
                     ),
                   ),
                 ],
@@ -522,9 +523,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Center(
+            child: Center(
               child: Text('No transactions yet',
-                  style: TextStyle(color: AppColors.textHint)),
+                  style: TextStyle(color: AppColors.th(context))),
             ),
           );
         }
@@ -547,7 +548,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     : tx.type;
             final catColor = cat != null
                 ? AppColors.fromHex(cat.colorHex)
-                : AppColors.textSecondary;
+                : AppColors.ts(context);
 
             // Determine display amount from lines
             final lines = e.lines;
@@ -591,9 +592,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                             Text(
                               DateFormat('MMM d, yyyy')
                                   .format(tx.createdAt.toLocal()),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.textHint),
+                                  color: AppColors.th(context)),
                             ),
                           ],
                         ),
@@ -611,9 +612,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                           if (showBase)
                             Text(
                               '\u2248 ${formatAmount(tx.amount, currency: tx.currency)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 9,
-                                  color: AppColors.textHint),
+                                  color: AppColors.th(context)),
                             ),
                         ],
                       ),
@@ -667,7 +668,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 'Enter the actual balance of this account. An adjustment transaction will be created for the difference.',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: AppColors.ts(context),
                 ),
               ),
               if (_currentBalance != null) ...[

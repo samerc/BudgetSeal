@@ -323,7 +323,7 @@ class _SubscriptionDetailScreenState
                 const Text('Could not load subscription'),
                 const SizedBox(height: 8),
                 Text(_error!,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+                    style: TextStyle(fontSize: 12, color: AppColors.th(context)),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton.tonal(
