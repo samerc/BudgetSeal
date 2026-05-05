@@ -35,6 +35,7 @@ import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/health_check_screen.dart';
 import 'features/transactions/bill_splitter_screen.dart';
+import 'features/web_companion/web_companion_screen.dart';
 import 'features/settings/notifications_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
@@ -258,6 +259,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/about',
           pageBuilder: (_, state) => slideUpPage(
               child: const AboutScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/web-companion',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const WebCompanionScreen(), state: state),
         ),
       ],
     );

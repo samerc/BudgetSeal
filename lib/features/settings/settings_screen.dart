@@ -153,6 +153,10 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'View and refresh currency rates',
                 iconColor: const Color(0xFF4DB6AC),
                 onTap: () => context.push('/exchange-rates')),
+            _SettingsTile(icon: Icons.computer_rounded, title: 'Web Companion',
+                subtitle: 'Manage your budget from a browser',
+                iconColor: const Color(0xFF0EA5E9),
+                onTap: () => context.push('/web-companion')),
             const SizedBox(height: 20),
 
             // ── Automation ──
