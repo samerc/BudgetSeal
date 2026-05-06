@@ -1075,17 +1075,26 @@ class SettingsScreen extends ConsumerWidget {
           Padding(padding: const EdgeInsets.all(16),
               child: Text('Choose Font', style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
-          ...appFonts.keys.map((font) => ListTile(
-                leading: Icon(font == currentFont
-                    ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                    color: AppColors.accent),
-                title: Text(font, style: fontStyle(font, fontSize: 16)),
-                subtitle: Text('The quick brown fox jumps over the lazy dog',
-                    style: fontStyle(font, fontSize: 12,
-                        color: AppColors.ts(context))),
-                onTap: () => Navigator.pop(ctx, font),
-              )),
-          const SizedBox(height: 8),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...appFonts.keys.map((font) => ListTile(
+                        leading: Icon(font == currentFont
+                            ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                            color: AppColors.accent),
+                        title: Text(font, style: fontStyle(font, fontSize: 16)),
+                        subtitle: Text('The quick brown fox jumps over the lazy dog',
+                            style: fontStyle(font, fontSize: 12,
+                                color: AppColors.ts(context))),
+                        onTap: () => Navigator.pop(ctx, font),
+                      )),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
         ]),
       ),
     );

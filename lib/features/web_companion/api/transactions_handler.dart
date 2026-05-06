@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
+import '../../../core/database/app_database.dart';
 import '../../../core/engine/allocation_engine.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
@@ -25,18 +26,47 @@ Handler listTransactionsHandler(Ref ref) {
           (int.tryParse(params['limit'] ?? '50') ?? 50).clamp(1, 200);
       final offset = (page - 1) * limit;
       final typeFilter = params['type'];
+      final accountFilter = params['accountId'];
 
       if (typeFilter != null &&
           !['income', 'expense', 'transfer'].contains(typeFilter)) {
         return badRequest('type must be income, expense, or transfer');
       }
 
+      // Optional date range filter
+      final fromDate = params['from'] != null
+          ? DateTime.tryParse(params['from']!)
+          : null;
+      final toDate = params['to'] != null
+          ? DateTime.tryParse(params['to']!)
+          : null;
+      final search = params['search']?.trim();
+
       final query = db.select(db.transactions)
         ..where((t) {
-          final base =
+          var expr =
               t.householdId.equals(householdId) & t.deleted.equals(false);
-          if (typeFilter != null) return base & t.type.equals(typeFilter);
-          return base;
+          if (typeFilter != null) expr = expr & t.type.equals(typeFilter);
+          if (accountFilter != null) {
+            expr = expr &
+                (t.accountId.equals(accountFilter) |
+                    t.destinationAccountId.equals(accountFilter));
+          }
+          if (fromDate != null) {
+            expr = expr & t.createdAt.isBiggerOrEqualValue(fromDate);
+          }
+          if (toDate != null) {
+            expr = expr & t.createdAt.isSmallerThanValue(toDate);
+          }
+          if (search != null && search.isNotEmpty) {
+            // Escape SQL LIKE wildcards in user input
+            final escaped = search
+                .replaceAll('\\', '\\\\')
+                .replaceAll('%', '\\%')
+                .replaceAll('_', '\\_');
+            expr = expr & t.note.like('%$escaped%');
+          }
+          return expr;
         })
         ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
         ..limit(limit, offset: offset);
@@ -52,10 +82,38 @@ Handler listTransactionsHandler(Ref ref) {
       final catMap = {for (final c in categories) c.id: c};
       final acctMap = {for (final a in accounts) a.id: a};
 
+      // Batch-fetch first line per transaction so the frontend can display
+      // the native currency/amount (tx.amount/currency is always base).
+      final txIds = txs.map((t) => t.id).toList();
+      final allLines = txIds.isNotEmpty
+          ? await (db.select(db.transactionLines)
+                ..where((l) => l.transactionId.isIn(txIds)))
+              .get()
+          : <TransactionLine>[];
+      final firstLineMap = <String, TransactionLine>{};
+      for (final l in allLines) {
+        firstLineMap.putIfAbsent(l.transactionId, () => l);
+      }
+
+      final household = await (db.select(db.households)
+            ..where((h) => h.id.equals(householdId)))
+          .getSingleOrNull();
+      final baseCurrency = household?.baseCurrency ?? 'USD';
+
       return ok({
         'page': page,
         'limit': limit,
-        'items': txs.map((t) => txToJson(t, catMap, acctMap)).toList(),
+        'baseCurrency': baseCurrency,
+        'items': txs.map((t) {
+          final json = txToJson(t, catMap, acctMap);
+          final line = firstLineMap[t.id];
+          if (line != null) {
+            json['lineCurrency'] = line.currency;
+            json['lineAmount'] = line.amount;
+            json['lineExchangeRate'] = line.exchangeRateToBase;
+          }
+          return json;
+        }).toList(),
       });
     } catch (e) {
       return serverError(e);

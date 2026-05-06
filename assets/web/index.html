@@ -89,6 +89,16 @@
             <span class="nav-text">Reports</span>
           </a></li>
         </ul>
+        <div style="padding:8px 10px;margin-top:auto">
+          <button class="theme-toggle" onclick="cycleTheme()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <span class="nav-text" id="theme-label">Auto</span>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 12px">
+          <div id="conn-dot" class="conn-dot"></div>
+          <span class="nav-text text-secondary" style="font-size:11px">Server</span>
+        </div>
         <button id="sign-out-btn" class="sign-out-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
           <span class="nav-text">Sign out</span>

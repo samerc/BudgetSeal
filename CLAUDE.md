@@ -453,22 +453,54 @@ All 4 main tabs (Dashboard, Transactions, Allocations, Reports) use `AutomaticKe
 
 ## Web Companion
 
-Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; a laptop browser connects over the same WiFi network and gets a full budget management SPA. All 4 phases complete.
+Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; a laptop browser connects over the same WiFi network and gets a full budget management SPA. HTTP only (HTTPS not viable for private IPs — CAs won't issue certs). All 4 phases complete.
 
 ### Architecture Decisions
-- Server runs in the **main Dart isolate** — same as Flutter UI, so handlers call Riverpod providers directly. `flutter_foreground_task` on Android is purely a process keep-alive; its `TaskHandler` is a no-op.
-- `_NoOpTaskHandler.onDestroy` signature: `Future<void> onDestroy(DateTime timestamp, bool isTimeout)` — the `isTimeout` param is required in v9.
+- Server runs in the **main Dart isolate** — same as Flutter UI, so handlers call Riverpod providers directly.
+- `flutter_foreground_task` on Android keeps the process alive. **Must call `FlutterForegroundTask.init()`** before `startService()` — without it, the foreground service never starts and Android kills the process when the screen turns off.
+- `_NoOpTaskHandler.onRepeatEvent` refreshes the notification every 5 seconds via `FlutterForegroundTask.updateService()` to keep the service active. `onDestroy` signature: `Future<void> onDestroy(DateTime timestamp, bool isTimeout)` — the `isTimeout` param is required in v9.
+- `ForegroundTaskOptions`: `allowWakeLock: true`, `allowWifiLock: true` (critical for HTTP server).
 - Auto-stop after **6 hours** (Android 15+ caps dataSync foreground services at 6h; we match this on all platforms).
 - PIN stored as SHA-256 hash in FlutterSecureStorage.
 - Session tokens: UUID4, 4-hour inactivity expiry, server-side in-memory map, max 10 sessions (oldest evicted).
-- Security middleware pipeline order: `privateIp → bodySize (512 KB) → rateLimit (120 req/min) → cors → router`.
+- Security middleware pipeline order: `privateIp → bodySize (512 KB) → rateLimit (120 req/min) → security headers → router`.
 - Handlers use `ref.read(databaseProvider)` and `.get()` (one-shot Future), not `.watch()` (streams). Web client polls on demand.
+
+### Security
+- **CORS**: Same-origin only (echoes request `Origin` header). Never use `Access-Control-Allow-Origin: *` — it allows any malicious website to exfiltrate budget data via CSRF.
+- **Security headers** on all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
+- **`serverError()`** logs exception details locally via `debugPrint` but returns generic "Internal server error" to the client. Never leak stack traces, DB schema, or internal types.
+- **`/auth/status`** does not expose `activeSessions` count — prevents session enumeration.
+- **Private IP check** validates IPv4 (127.x, 10.x, 192.168.x, 172.16-31.x) and IPv6 (::1, fe80: link-local, fc/fd ULA).
+- **Rate limiter** evicts stale IP entries every 5 minutes to prevent memory growth.
+- **WiFi security warning**: Phone screen shows a network security notice before the Start button. Detects public networks by WiFi name keywords (guest, public, airport, hotel, cafe, etc.) and shows an elevated amber warning.
+- **`esc()` in app.js** escapes `'` (single quotes) as `&#39;` — prevents XSS in onclick attributes when account/category names contain quotes.
+- **Search input** escapes SQL LIKE wildcards (`%`, `_`, `\`) in the backend before passing to Drift's `.like()`.
+
+### Multi-Currency in Web Companion
+- Transaction list handler returns `lineCurrency`, `lineAmount`, `lineExchangeRate` from the first transaction line alongside the header data. The frontend displays the native currency amount, not the base currency header amount.
+- `isRealRate` check: both `cashflowReportHandler` and `byCategoryReportHandler` skip lines where currency differs from base but `exchangeRateToBase` is ~1.0 (rate not set). Same logic as `isRealRate()` in `format_number.dart`.
+- Transactions with missing exchange rates show an amber "No rate" warning in the list.
 
 ### Web SPA Notes
 - Token stored in `sessionStorage` (clears on browser close), sent as `Authorization: Bearer <token>`.
 - `api()` function in `app.js` separates fetch failures from JSON parse failures — each logs to `console.error` with the path.
 - `getAccounts()` / `getCategories()` use `if (!('accounts' in cache))` — only populate cache on success (`if (d) cache.accounts = ...`). Failed loads leave the key absent so the next call retries. Do NOT use `if (!cache.accounts)` — an empty array `[]` is truthy, permanently poisoning the cache after a failed load.
 - `Content-Type: application/json` is only sent on requests that have a body (POST/PUT), not on GETs.
+- Categories and accounts are prefetched in the background after auth success.
+- `invalidateAll()` clears all cached data after any mutation (add/edit/delete).
+
+### SPA Features
+- **Skeleton loaders** on all pages instead of spinner.
+- **Keyboard shortcuts**: `N` = new transaction, `/` = search, `Esc` = close modal, `?` = help. Disabled during input focus and when modal is open.
+- **Transaction search**: server-side LIKE query on `note` field with SQL wildcard escaping.
+- **Month navigation**: year arrows + month tabs (Jan–Dec + All). Backend supports `from`/`to` date params.
+- **Account filtering**: transactions list supports `accountId` param (matches both source and destination for transfers).
+- **Dark mode toggle**: cycles System → Light → Dark, persisted in `localStorage`, applied via `html[data-theme]` attribute.
+- **Connection status**: green/red dot in sidebar, pings `/auth/status` every 15 seconds.
+- **CSV export**: downloads current table as `.csv` file.
+- **Styled confirm dialogs**: `confirmDialog()` returns Promise, used for delete recurring/subscriptions. Transaction delete is immediate (soft-delete, recoverable via Health Check).
+- **Exchange rate field**: auto-shown in transaction form when currency differs from base, with conversion hint.
 
 ### REST API Endpoints
 ```
@@ -476,14 +508,14 @@ POST /auth/pin                         → { token, expiresAt }
 GET  /auth/status                      → { authenticated: bool }
 
 GET  /api/dashboard                    → period info, envelopes, recent 10 transactions
-GET  /api/transactions?page=&filter=   → paginated list
+GET  /api/transactions?page=&limit=    → paginated list (supports type, accountId, from, to, search)
 POST /api/transactions                 → create
 GET  /api/transactions/:id             → single + lines
 PUT  /api/transactions/:id             → update
 DELETE /api/transactions/:id           → soft delete
 
 GET  /api/categories                   → all non-archived
-POST /api/categories                   → create
+POST /api/categories                   → create (supports parentId)
 PUT  /api/categories/:id               → update
 
 GET  /api/accounts                     → with balances
@@ -501,20 +533,20 @@ GET  /api/subscriptions                → recurring where isSubscription=true
 POST /api/subscriptions                → create
 PUT  /api/subscriptions/:id            → update
 
-GET  /api/reports/cashflow?year&month  → monthly totals
-GET  /api/reports/by-category?period   → spending per category
+GET  /api/reports/cashflow?year&month  → monthly totals, topExpenses, transactionCount
+GET  /api/reports/by-category?year&month&type → spending/income per category (type=expense|income)
 ```
 
 ### SPA Hash Routes
 ```
 #/              Dashboard (envelopes, period summary, recent transactions)
-#/transactions  List + full add/edit form
-#/categories    Manage categories
-#/accounts      Accounts + balances
+#/transactions  List with search, month tabs, type filters, CSV export
+#/categories    Manage categories (hierarchy with parent/sub)
+#/accounts      Accounts grouped by type + net worth + per-account transactions
 #/envelopes     Envelope balances + fund
 #/recurring     Recurring transactions
 #/subscriptions Subscriptions
-#/reports       Cashflow chart + category breakdown (Chart.js CDN)
+#/reports       Summary stats, daily chart, doughnut, category breakdown, top expenses
 ```
 
 ## Auto Backup

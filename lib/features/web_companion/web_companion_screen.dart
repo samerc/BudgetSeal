@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/providers/web_companion_provider.dart';
@@ -22,11 +23,38 @@ class WebCompanionScreen extends ConsumerStatefulWidget {
 class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   bool _showQr = false;
   bool _hasPinSet = false;
+  bool _wifiWarning = false;
+  String? _wifiName;
 
   @override
   void initState() {
     super.initState();
     _checkPin();
+    _checkWifiSecurity();
+  }
+
+  Future<void> _checkWifiSecurity() async {
+    try {
+      final info = NetworkInfo();
+      final name = await info.getWifiName(); // e.g. "MyHomeWiFi"
+      if (!mounted) return;
+      // If we can't get the name, or the name suggests a public network, warn
+      final lower = (name ?? '').replaceAll('"', '').toLowerCase();
+      final publicKeywords = [
+        'guest', 'public', 'free', 'open', 'airport', 'hotel',
+        'cafe', 'coffee', 'starbucks', 'mcdonalds', 'restaurant',
+        'library', 'hospital', 'mall', 'shop', 'store',
+      ];
+      final isPublic = name == null ||
+          name.isEmpty ||
+          publicKeywords.any((k) => lower.contains(k));
+      setState(() {
+        _wifiWarning = isPublic;
+        _wifiName = name?.replaceAll('"', '');
+      });
+    } catch (_) {
+      // Can't detect — don't show warning
+    }
   }
 
   Future<void> _checkPin() async {
@@ -199,6 +227,18 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           // iOS warning banner
           if (Platform.isIOS) ...[
             _buildIosWarning(),
+            const SizedBox(height: 16),
+          ],
+
+          // Network security notice — always visible before starting
+          if (!state.isRunning) ...[
+            _buildNetworkNotice(),
+            const SizedBox(height: 16),
+          ],
+
+          // Public WiFi warning — elevated alert when network looks public
+          if (_wifiWarning && state.isRunning) ...[
+            _buildWifiWarning(),
             const SizedBox(height: 16),
           ],
 
@@ -496,6 +536,117 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     );
   }
 
+  Widget _buildNetworkNotice() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPublic = _wifiWarning;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isPublic
+            ? const Color(0xFFFEF3C7)
+            : isDark
+                ? const Color(0xFF172554)
+                : const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        border: Border.all(
+          color: isPublic
+              ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
+              : isDark
+                  ? const Color(0xFF1E40AF).withValues(alpha: 0.4)
+                  : const Color(0xFF93C5FD).withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isPublic ? Icons.warning_amber_rounded : Icons.shield_outlined,
+                color: isPublic ? const Color(0xFF92400E) : const Color(0xFF2563EB),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isPublic ? 'Public Network Detected' : 'Network Security',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isPublic
+                      ? const Color(0xFF92400E)
+                      : isDark
+                          ? const Color(0xFF93C5FD)
+                          : const Color(0xFF1E40AF),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isPublic
+                ? 'You appear to be on a public network${_wifiName != null && _wifiName!.isNotEmpty ? ' ("$_wifiName")' : ''}. '
+                  'Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.'
+                : 'Web Companion uses HTTP (unencrypted). Only use it on your private home or office WiFi. '
+                  'Never start the server on public networks (hotels, airports, cafes) — anyone on the same network could see your data.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: isPublic
+                  ? const Color(0xFF92400E)
+                  : isDark
+                      ? const Color(0xFF93C5FD).withValues(alpha: 0.8)
+                      : const Color(0xFF1E40AF).withValues(alpha: 0.75),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWifiWarning() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.shield_outlined,
+              color: Color(0xFF92400E), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Security Warning',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF92400E)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _wifiName != null && _wifiName!.isNotEmpty
+                      ? 'Network "$_wifiName" may be public. Traffic is unencrypted — avoid using Web Companion on public WiFi, as others on the same network could intercept your data.'
+                      : 'Could not detect your WiFi network name. If you\'re on a public network, avoid using Web Companion — traffic is unencrypted and could be intercepted.',
+                  style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF92400E),
+                      height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInfoCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -515,6 +666,9 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           const SizedBox(height: 10),
           _infoRow(Icons.security_rounded,
               '5 failed PIN attempts locks the interface for 30 minutes'),
+          const SizedBox(height: 10),
+          _infoRow(Icons.lock_outline_rounded,
+              'Use only on trusted private networks — traffic is not encrypted'),
         ],
       ),
     );

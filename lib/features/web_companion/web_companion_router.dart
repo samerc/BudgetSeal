@@ -116,10 +116,7 @@ Handler _authStatusHandler(WebCompanionAuth auth) {
     final token = _extractToken(request);
     final authenticated = auth.validateToken(token);
     return Response.ok(
-      jsonEncode({
-        'authenticated': authenticated,
-        'activeSessions': auth.activeSessionCount,
-      }),
+      jsonEncode({'authenticated': authenticated}),
       headers: _jsonHeaders,
     );
   };

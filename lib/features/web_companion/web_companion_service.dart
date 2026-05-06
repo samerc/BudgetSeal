@@ -48,7 +48,7 @@ class WebCompanionService {
           .addMiddleware(_privateIpMiddleware())
           .addMiddleware(_bodySizeLimitMiddleware())
           .addMiddleware(_rateLimitMiddleware())
-          .addMiddleware(_corsMiddleware())
+          .addMiddleware(_securityMiddleware())
           .addHandler(handler);
 
       // Bind shelf server to the WiFi IP only (not 0.0.0.0)
@@ -112,8 +112,27 @@ class WebCompanionService {
   }
 
   static Future<void> _startForegroundService(String ip) async {
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'web_companion',
+        channelName: 'Web Companion',
+        channelDescription: 'Keeps the local budget server running',
+        channelImportance: NotificationChannelImportance.LOW,
+        priority: NotificationPriority.LOW,
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(),
+      foregroundTaskOptions: ForegroundTaskOptions(
+        eventAction: ForegroundTaskEventAction.repeat(5000),
+        autoRunOnBoot: false,
+        autoRunOnMyPackageReplaced: false,
+        allowWakeLock: true,
+        allowWifiLock: true,
+      ),
+    );
+
     await FlutterForegroundTask.startService(
       serviceId: 7432,
+      serviceTypes: [ForegroundServiceTypes.dataSync],
       notificationTitle: 'PocketPlan Web Companion',
       notificationText: 'Running at http://$ip:7432',
       callback: startCallback,
@@ -139,13 +158,19 @@ class WebCompanionService {
   }
 
   static bool _isPrivateIp(String ip) {
-    if (ip == '::1' || ip.startsWith('127.')) return true;
+    // IPv4 private ranges
+    if (ip.startsWith('127.')) return true;
     if (ip.startsWith('192.168.') || ip.startsWith('10.')) return true;
     final parts = ip.split('.');
     if (parts.length == 4 && parts[0] == '172') {
       final second = int.tryParse(parts[1]);
       if (second != null && second >= 16 && second <= 31) return true;
     }
+    // IPv6 loopback and private ranges
+    if (ip == '::1') return true;
+    final lower = ip.toLowerCase();
+    if (lower.startsWith('fe80:')) return true; // link-local
+    if (lower.startsWith('fc') || lower.startsWith('fd')) return true; // ULA
     return false;
   }
 
@@ -168,8 +193,10 @@ class WebCompanionService {
   }
 
   /// Simple per-IP rate limiter: max 120 requests per minute.
+  /// Evicts stale IPs to prevent memory growth.
   static Middleware _rateLimitMiddleware({int maxPerMinute = 120}) {
     final tracker = <String, List<DateTime>>{};
+    var lastPrune = DateTime.now();
     return (Handler inner) {
       return (Request request) async {
         final connInfo =
@@ -177,6 +204,13 @@ class WebCompanionService {
         final ip = connInfo?.remoteAddress.address ?? 'unknown';
         final now = DateTime.now();
         final windowStart = now.subtract(const Duration(minutes: 1));
+
+        // Evict stale IPs every 5 minutes to prevent memory leak
+        if (now.difference(lastPrune).inMinutes >= 5) {
+          tracker.removeWhere((_, hits) =>
+              hits.isEmpty || hits.last.isBefore(windowStart));
+          lastPrune = now;
+        }
 
         final hits = tracker[ip] ?? [];
         hits.removeWhere((t) => t.isBefore(windowStart));
@@ -194,31 +228,45 @@ class WebCompanionService {
     };
   }
 
-  /// CORS headers for browser preflight requests.
-  static Middleware _corsMiddleware() {
+  /// Security and CORS middleware.
+  /// SPA is served from the same origin so CORS is same-origin only.
+  /// Adds security headers to all responses.
+  static Middleware _securityMiddleware() {
     return createMiddleware(
       requestHandler: (Request request) {
         if (request.method == 'OPTIONS') {
-          return Response.ok(
-            '',
-            headers: _corsHeaders,
-          );
+          final origin = request.headers['origin'] ?? '';
+          return Response.ok('', headers: _buildCorsHeaders(origin));
         }
         return null;
       },
       responseHandler: (Response response) {
         return response.change(headers: {
           ...response.headers,
-          ..._corsHeaders,
+          ..._securityHeaders,
         });
       },
     );
   }
 
-  static const _corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  static Map<String, String> _buildCorsHeaders(String origin) {
+    // Only allow same-origin requests (the phone's own IP)
+    // origin will be like "http://192.168.1.x:7432"
+    return {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '3600',
+      'Vary': 'Origin',
+      ..._securityHeaders,
+    };
+  }
+
+  static const _securityHeaders = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+    'Cache-Control': 'no-store',
   };
 }
 
@@ -236,7 +284,14 @@ class _NoOpTaskHandler extends TaskHandler {
   }
 
   @override
-  void onRepeatEvent(DateTime timestamp) {}
+  void onRepeatEvent(DateTime timestamp) {
+    // Refresh the notification periodically so Android knows the service
+    // is still active and doesn't kill it when the screen is off.
+    FlutterForegroundTask.updateService(
+      notificationTitle: 'PocketPlan Web Companion',
+      notificationText: 'Running · ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
+    );
+  }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {

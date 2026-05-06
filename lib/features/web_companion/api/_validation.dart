@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shelf/shelf.dart';
 
 const _jsonHeaders = {'content-type': 'application/json; charset=utf-8'};
@@ -32,11 +33,14 @@ Response notFound([String message = 'Not found']) =>
 Response forbidden([String message = 'No active household']) =>
     Response(403, body: jsonEncode({'error': message}), headers: _jsonHeaders);
 
-Response serverError(Object e) => Response(
-      500,
-      body: jsonEncode({'error': 'Internal error: $e'}),
-      headers: _jsonHeaders,
-    );
+Response serverError(Object e) {
+  debugPrint('[WebCompanion] Server error: $e');
+  return Response(
+    500,
+    body: jsonEncode({'error': 'Internal server error'}),
+    headers: _jsonHeaders,
+  );
+}
 
 /// Extract a required non-empty String field from a JSON body.
 String? requireString(Map<String, dynamic> body, String key) {
