@@ -2886,58 +2886,90 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
   }
 
   /// Compute what each account's balance was at a historical date.
-  /// Takes current balance and subtracts all transactions after that date.
+  /// Takes current balance and reverses all transactions after that date.
+  /// Uses batched queries instead of N+1 per-account loops.
   Future<Map<String, double>> _computeHistoricalBalances(
       List<AccountWithBalance> accounts, DateTime asOfDate) async {
     final db = ref.read(databaseProvider);
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return {};
+
     final result = <String, double>{};
+    final acctIds = accounts.map((a) => a.account.id).toSet();
 
+    // Batch 1: all non-deleted transactions after the date for this household
+    final txsAfter = await (db.select(db.transactions)
+          ..where((t) =>
+              t.householdId.equals(householdId) &
+              t.deleted.equals(false) &
+              t.createdAt.isBiggerThanValue(asOfDate)))
+        .get();
+
+    if (txsAfter.isEmpty) {
+      for (final ab in accounts) {
+        result[ab.account.id] = ab.balance;
+      }
+      return result;
+    }
+
+    // Batch 2: all lines for those transactions in one query
+    final txIds = txsAfter.map((t) => t.id).toList();
+    final allLines = await (db.select(db.transactionLines)
+          ..where((l) => l.transactionId.isIn(txIds)))
+        .get();
+
+    // Index lines by txId and track which txs have per-line accounts
+    final linesByTx = <String, List<TransactionLine>>{};
+    final txsWithPerLineAcct = <String>{};
+    for (final l in allLines) {
+      linesByTx.putIfAbsent(l.transactionId, () => []).add(l);
+      if (l.accountId != null) txsWithPerLineAcct.add(l.transactionId);
+    }
+
+    // Initialize balances from current
     for (final ab in accounts) {
-      double balance = ab.balance;
-      final acctId = ab.account.id;
+      result[ab.account.id] = ab.balance;
+    }
 
-      // Get all transactions after the comparison date
-      final txsAfter = await (db.select(db.transactions)
-            ..where((t) => t.deleted.equals(false))
-            ..where((t) => t.createdAt.isBiggerThanValue(asOfDate)))
-          .get();
-
-      for (final tx in txsAfter) {
-        // Lines referencing this account
-        final lines = await (db.select(db.transactionLines)
-              ..where((l) => l.transactionId.equals(tx.id))
-              ..where((l) => l.accountId.equals(acctId)))
-            .get();
-
-        if (lines.isNotEmpty) {
-          for (final l in lines) {
-            if (tx.type == 'income') balance -= l.amount;
-            if (tx.type == 'expense') balance += l.amount;
-          }
-        } else if (tx.accountId == acctId) {
-          // Header-level (no per-line account)
-          // Check if ANY lines have accountId set
-          final allLines = await (db.select(db.transactionLines)
-                ..where((l) => l.transactionId.equals(tx.id)))
-              .get();
-          final hasPerLine = allLines.any((l) => l.accountId != null);
-          if (!hasPerLine) {
-            if (tx.type == 'income') balance -= tx.amount;
-            if (tx.type == 'expense') balance += tx.amount;
-          }
+    // Reverse each transaction's effect on affected accounts
+    for (final tx in txsAfter) {
+      if (tx.type == 'transfer') {
+        // Source: was debited tx.amount, so add it back
+        if (acctIds.contains(tx.accountId)) {
+          result[tx.accountId] = (result[tx.accountId] ?? 0) + tx.amount;
         }
-
-        // Transfers
-        if (tx.type == 'transfer') {
-          if (tx.accountId == acctId) balance += tx.amount;
-          if (tx.destinationAccountId == acctId) {
-            balance -= tx.amount * tx.exchangeRateToBase;
-          }
+        // Destination: was credited tx.amount * rate, so subtract it back
+        if (tx.destinationAccountId != null &&
+            acctIds.contains(tx.destinationAccountId)) {
+          result[tx.destinationAccountId!] =
+              (result[tx.destinationAccountId!] ?? 0) -
+                  tx.amount * tx.exchangeRateToBase;
         }
+        continue;
       }
 
-      result[acctId] = balance;
+      // Income/expense: check per-line accounts first
+      final lines = linesByTx[tx.id] ?? [];
+      if (txsWithPerLineAcct.contains(tx.id)) {
+        // Per-line: each line's amount is in that line-account's currency
+        for (final l in lines) {
+          if (l.accountId == null || !acctIds.contains(l.accountId)) continue;
+          if (tx.type == 'income') {
+            result[l.accountId!] = (result[l.accountId!] ?? 0) - l.amount;
+          } else if (tx.type == 'expense') {
+            result[l.accountId!] = (result[l.accountId!] ?? 0) + l.amount;
+          }
+        }
+      } else if (acctIds.contains(tx.accountId)) {
+        // Header-level: tx.amount is in the account's currency
+        if (tx.type == 'income') {
+          result[tx.accountId] = (result[tx.accountId] ?? 0) - tx.amount;
+        } else if (tx.type == 'expense') {
+          result[tx.accountId] = (result[tx.accountId] ?? 0) + tx.amount;
+        }
+      }
     }
+
     return result;
   }
 }
