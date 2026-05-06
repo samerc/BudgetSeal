@@ -112,6 +112,15 @@ class WebCompanionService {
   }
 
   static Future<void> _startForegroundService(String ip) async {
+    // Request battery optimization exemption — critical on Samsung, Xiaomi,
+    // OnePlus, etc. Without this, Android kills the process when screen is off
+    // even with an active foreground service.
+    final batteryOk =
+        await FlutterForegroundTask.isIgnoringBatteryOptimizations;
+    if (!batteryOk) {
+      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    }
+
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'web_companion',
@@ -130,13 +139,15 @@ class WebCompanionService {
       ),
     );
 
-    await FlutterForegroundTask.startService(
+    final result = await FlutterForegroundTask.startService(
       serviceId: 7432,
       serviceTypes: [ForegroundServiceTypes.dataSync],
       notificationTitle: 'PocketPlan Web Companion',
       notificationText: 'Running at http://$ip:7432',
       callback: startCallback,
     );
+
+    debugPrint('[WebCompanion] Foreground service start result: $result');
   }
 
   /// Rejects requests from non-private IP ranges.
