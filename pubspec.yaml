@@ -4,13 +4,16 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
   # Database — Drift (type-safe SQLite ORM)
+  # NOTE: drift/drift_dev stuck at 2.31.x — drift_dev 2.32+ needs analyzer 10+
+  # which conflicts with riverpod_generator (needs analyzer <10). Waiting for
+  # riverpod_generator to support analyzer 10+.
   drift: ^2.22.0
   drift_flutter: ^0.2.0
   sqlite3_flutter_libs: ^0.5.0
@@ -66,10 +69,10 @@ dependencies:
   # Web Companion (local HTTP server)
   shelf: ^1.4.2
   shelf_router: ^1.1.4
-  network_info_plus: ^6.0.1
+  network_info_plus: ^7.0.0
   qr_flutter: ^4.1.0
   flutter_foreground_task: ^9.0.0
-  wakelock_plus: ^1.2.10
+  wakelock_plus: ^1.5.0
   crypto: ^3.0.0
 
 dev_dependencies:

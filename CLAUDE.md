@@ -277,6 +277,8 @@ Every table has `id` (UUID text primary key). Most have `createdAt`, `lastModifi
 
 ## Dependencies (key ones)
 
+**Version pinning conflict:** drift/drift_dev 2.32+ requires analyzer 10+, but riverpod_generator requires analyzer <10. Both are pinned at 2.31.x until riverpod_generator supports analyzer 10+. This also blocks sqlite3 3.x, drift_flutter 0.3.x, and sqlite3_flutter_libs 0.6.x. The `win32` 5.x vs 6.x split similarly blocks share_plus 13.x and network_info_plus 8.x (flutter_secure_storage pins win32 ^5.x).
+
 | Package | Constraint | Purpose |
 |---------|------------|---------|
 | drift | ^2.22.0 | SQLite ORM |
@@ -304,7 +306,7 @@ Every table has `id` (UUID text primary key). Most have `createdAt`, `lastModifi
 | pointycastle | ^3.9.1 | PBKDF2 key derivation |
 | shelf | ^1.4.2 | HTTP server (Web Companion) |
 | shelf_router | ^1.1.4 | Route matching (Web Companion) |
-| network_info_plus | ^6.0.1 | WiFi IP detection (Web Companion) |
+| network_info_plus | ^7.0.0 | WiFi IP detection (Web Companion) |
 | qr_flutter | ^4.1.0 | QR code display (Web Companion) |
 | flutter_foreground_task | ^9.0.0 | Android foreground service (Web Companion) |
 | wakelock_plus | ^1.2.10 | iOS screen-on (Web Companion) |
