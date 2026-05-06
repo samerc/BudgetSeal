@@ -1213,8 +1213,16 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           child: CustomScrollView(
             controller: _listScrollCtrl,
             slivers: [
-              // Top padding
-              const SliverPadding(padding: EdgeInsets.only(top: 4)),
+              // Monthly expense/income/net summary
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                  child: _MonthlySummaryBar(
+                    entries: filtered,
+                    baseCurrency: baseCurrency,
+                  ),
+                ),
+              ),
               // Date-grouped slivers with sticky headers
               for (final group in groups)
                 MultiSliver(
@@ -1523,54 +1531,27 @@ class _DateHeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isToday = _isToday(date);
-    // Solid background so it visually separates when scrolling (#1)
+    // Clean Cashew-style date header: text-only row, no card wrapper
     return Container(
       color: AppColors.bg(context),
-      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Today indicator (#4)
-              if (isToday) ...[
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'TODAY',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                _label(date),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context),
-                ),
-              ),
-            ],
+          Text(
+            _label(date),
+            style: TextStyle(
+              fontSize: TypographyTokens.dateHeaderSize,
+              fontWeight: TypographyTokens.dateHeaderWeight,
+              color: AppColors.ts(context),
+            ),
           ),
           if (dayTotal != 0)
             Text(
-              formatSignedAmount(dayTotal, currency: baseCurrency, type: dayTotal < 0 ? 'expense' : 'income'),
+              formatSignedAmount(dayTotal.abs(), currency: baseCurrency, type: dayTotal < 0 ? 'expense' : 'income'),
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: TypographyTokens.dateHeaderSize,
+                fontWeight: FontWeight.w500,
                 color: dayTotal < 0 ? AppColors.overspent : AppColors.healthy,
               ),
             ),
@@ -1579,20 +1560,16 @@ class _DateHeaderTile extends StatelessWidget {
     );
   }
 
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
-  }
-
   String _label(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return DateFormat('MMMM d').format(date);
+    if (diff == 0) return 'Today, ${DateFormat('MMMM d').format(date)}';
     if (diff == 1) return 'Yesterday, ${DateFormat('MMMM d').format(date)}';
-    if (diff < 7) return '${DateFormat('EEEE').format(date)}, ${DateFormat('MMMM d').format(date)}';
-    return DateFormat('MMMM d').format(date);
+    if (diff < 7) return '${DateFormat('EEEE, MMMM d').format(date)}';
+    if (date.year == now.year) return DateFormat('EEEE, MMMM d').format(date);
+    return DateFormat('MMMM d, y').format(date);
   }
 }
 
@@ -1667,8 +1644,8 @@ class _TxTile extends ConsumerWidget {
               // ── Circular category icon (tap to filter #5) ─────
             if (isTransfer)
               Container(
-                width: 46,
-                height: 46,
+                width: CategoryIconTokens.listSize,
+                height: CategoryIconTokens.listSize,
                 decoration: BoxDecoration(
                   color: typeColor.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
@@ -1693,7 +1670,7 @@ class _TxTile extends ConsumerWidget {
                     categoryName: catName ?? '',
                     emoji: cat?.icon,
                     color: catColor,
-                    size: 46,
+                    size: CategoryIconTokens.listSize,
                     circular: true,
                   ),
                 ),
@@ -2217,6 +2194,99 @@ class _SummaryDot extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Cash flow footer
 // ---------------------------------------------------------------------------
+
+class _MonthlySummaryBar extends StatelessWidget {
+  final List<TransactionEntry> entries;
+  final String baseCurrency;
+
+  const _MonthlySummaryBar({required this.entries, required this.baseCurrency});
+
+  @override
+  Widget build(BuildContext context) {
+    double income = 0, expense = 0;
+    for (final e in entries) {
+      double baseAmt = 0;
+      if (e.lines.isNotEmpty) {
+        for (final l in e.lines) {
+          if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
+          baseAmt += l.amount * l.exchangeRateToBase;
+        }
+      } else {
+        if (isRealRate(e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
+          baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
+        }
+      }
+      if (e.tx.type == 'income') income += baseAmt;
+      if (e.tx.type == 'expense') expense += baseAmt;
+    }
+    final net = income - expense;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text.rich(TextSpan(children: [
+              TextSpan(
+                text: '▼ ',
+                style: TextStyle(fontSize: 10, color: AppColors.overspent),
+              ),
+              TextSpan(
+                text: formatAmount(expense, currency: baseCurrency),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.overspent,
+                ),
+              ),
+            ])),
+          ),
+          Expanded(
+            child: Center(
+              child: Text.rich(TextSpan(children: [
+                TextSpan(
+                  text: '▲ ',
+                  style: TextStyle(fontSize: 10, color: AppColors.healthy),
+                ),
+                TextSpan(
+                  text: formatAmount(income, currency: baseCurrency),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.healthy,
+                  ),
+                ),
+              ])),
+            ),
+          ),
+          Expanded(
+            child: Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: '= ',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.tp(context)),
+                ),
+                TextSpan(
+                  text: formatAmount(net, currency: baseCurrency),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: net >= 0 ? AppColors.healthy : AppColors.overspent,
+                  ),
+                ),
+              ]),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _CashFlowFooter extends StatelessWidget {
   final double total;
