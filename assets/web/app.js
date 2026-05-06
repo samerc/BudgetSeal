@@ -272,7 +272,7 @@ const routes = {
 function navigate(hash) {
   const route = hash || '#/';
   state.currentRoute = route;
-  if (route !== '#/transactions') { _txPage = 1; _txFilter = ''; _txSearch = ''; }
+  if (route !== '#/transactions') { _txPage = 1; _txFilter = ''; _txSearch = ''; _txMonth = new Date().getMonth(); _txYear = new Date().getFullYear(); }
   document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === route));
   (routes[route] || renderDashboard)();
 }
@@ -504,9 +504,10 @@ async function renderTransactions(page, typeFilter, search) {
 function exportCSV() {
   const table = document.querySelector('.data-table');
   if (!table) return;
-  const rows = [...table.querySelectorAll('tr')];
+  // Skip expanded detail rows (tx-lines-*) which have different column structure
+  const rows = [...table.querySelectorAll('tr')].filter(r => !r.id?.startsWith('tx-lines-'));
   const csv = rows.map(r => {
-    const cells = [...r.querySelectorAll('th, td')];
+    const cells = [...r.querySelectorAll(':scope > th, :scope > td')];
     return cells.slice(0, -1).map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`).join(',');
   }).join('\n');
 

@@ -279,7 +279,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         builder: (ctx) => AlertDialog(
           title: Text('$qty × $name'),
           content: Text(
-              'Split into $qty items (${formatAmount(amount / qty, currency: _billCurrency)} each)?'),
+              'Split into $qty items (${formatAmount(qty > 0 ? amount / qty : 0, currency: _billCurrency)} each)?'),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -290,7 +290,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           ],
         ),
       );
-      if (split == true && mounted) {
+      if (split == true && mounted && qty > 0) {
         final unitPrice = amount / qty;
         setState(() {
           _selectedLineIndices[lineIndex] = person;
@@ -325,7 +325,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final splits = <String, double>{for (final p in _people) p: 0};
     final subtotal = _items.fold(0.0, (s, i) => s + i.amount);
 
-    if (_splitEvenly && subtotal > 0) {
+    if (_splitEvenly && subtotal > 0 && _people.isNotEmpty) {
       final perPerson = subtotal / _people.length;
       for (final p in _people) {
         splits[p] = perPerson;
@@ -341,7 +341,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     }
 
     // Apply tip
-    if (_tipIsAmount && _tipAmount > 0) {
+    if (_tipIsAmount && _tipAmount > 0 && _people.isNotEmpty) {
       final tipPerPerson = _tipAmount / _people.length;
       for (final key in splits.keys) {
         splits[key] = splits[key]! + tipPerPerson;

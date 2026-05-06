@@ -131,7 +131,10 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         final existingTxs = await (db.select(db.transactions)
               ..where((t) => t.id.isIn(txIdsInLedger.toList())))
             .get();
-        final existingIds = existingTxs.map((t) => t.id).toSet();
+        final existingIds = existingTxs
+            .where((t) => !t.deleted)
+            .map((t) => t.id)
+            .toSet();
         orphanCount = txIdsInLedger.difference(existingIds).length;
       }
     }

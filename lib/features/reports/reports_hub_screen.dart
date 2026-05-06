@@ -2035,16 +2035,17 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
 
         double total = 0;
         for (final r in recs) {
+          final interval = r.interval > 0 ? r.interval : 1;
           double monthly = r.amount;
           switch (r.frequency) {
             case 'daily':
-              monthly = r.amount * 30 / r.interval;
+              monthly = r.amount * 30 / interval;
             case 'weekly':
-              monthly = r.amount * 4.33 / r.interval;
+              monthly = r.amount * 4.33 / interval;
             case 'monthly':
-              monthly = r.amount / r.interval;
+              monthly = r.amount / interval;
             case 'yearly':
-              monthly = r.amount / (12 * r.interval);
+              monthly = r.amount / (12 * interval);
           }
           total += monthly;
         }

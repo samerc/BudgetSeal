@@ -15,8 +15,10 @@ class EntryModeNotifier extends Notifier<String> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getString(_key) ?? 'assisted';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getString(_key) ?? 'assisted';
+    } catch (_) {}
   }
 
   Future<void> setMode(String mode) async {

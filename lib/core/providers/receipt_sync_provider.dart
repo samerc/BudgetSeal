@@ -11,9 +11,11 @@ class ReceiptSyncNotifier extends Notifier<bool> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final value = prefs.getBool(_prefKey) ?? true;
-    state = value;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final value = prefs.getBool(_prefKey) ?? true;
+      state = value;
+    } catch (_) {}
   }
 
   Future<void> enable() async {
