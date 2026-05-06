@@ -114,7 +114,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabTapped,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          indicatorColor: AppColors.accent.withValues(alpha: 0.12),
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),

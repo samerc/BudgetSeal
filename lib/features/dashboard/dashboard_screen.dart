@@ -116,8 +116,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                               household?.name ?? 'PocketPlan',
                               style: TextStyle(
                                 color: AppColors.tp(context),
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
+                                fontSize: TypographyTokens.screenTitleSize,
+                                fontWeight: TypographyTokens.screenTitleWeight,
                               ),
                             ),
                           ],
