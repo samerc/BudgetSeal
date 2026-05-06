@@ -39,9 +39,10 @@ class SettingsScreen extends ConsumerWidget {
     final household = ref.watch(householdProvider).value;
 
     final themeLabel = switch (ref.watch(themeModeProvider)) {
-      ThemeMode.light => 'Light',
-      ThemeMode.dark => 'Dark',
-      ThemeMode.system => 'System',
+      'light' => 'Light',
+      'dark' => 'Dark',
+      'black' => 'Black',
+      _ => 'System',
     };
 
     return Scaffold(
@@ -988,7 +989,7 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showThemePicker(BuildContext context, WidgetRef ref) async {
     final mode = ref.read(themeModeProvider);
-    final picked = await showModalBottomSheet<ThemeMode>(
+    final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -996,9 +997,10 @@ class SettingsScreen extends ConsumerWidget {
               child: Text('Theme', style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           for (final entry in [
-            (ThemeMode.system, 'System', 'Follow device settings'),
-            (ThemeMode.light, 'Light', null),
-            (ThemeMode.dark, 'Dark', null),
+            ('system', 'System', 'Follow device settings'),
+            ('light', 'Light', null),
+            ('dark', 'Dark', null),
+            ('black', 'Black', 'AMOLED pure black'),
           ])
             ListTile(
               leading: Icon(mode == entry.$1

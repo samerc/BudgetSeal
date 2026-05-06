@@ -4,31 +4,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _key = 'theme_mode';
 
+/// Supported theme modes: system, light, dark, black (AMOLED).
+/// 'black' uses Flutter's dark Brightness but with pure black scaffolding.
 final themeModeProvider =
-    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+    NotifierProvider<ThemeModeNotifier, String>(ThemeModeNotifier.new);
 
-class ThemeModeNotifier extends Notifier<ThemeMode> {
+class ThemeModeNotifier extends Notifier<String> {
   @override
-  ThemeMode build() {
+  String build() {
     _load();
-    return ThemeMode.light;
+    return 'light';
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final val = prefs.getString(_key);
-    if (val == 'light') {
-      state = ThemeMode.light;
-    } else if (val == 'dark') {
-      state = ThemeMode.dark;
-    } else {
-      state = ThemeMode.system;
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final val = prefs.getString(_key);
+      if (val == 'light' || val == 'dark' || val == 'black' || val == 'system') {
+        state = val!;
+      } else {
+        state = 'system';
+      }
+    } catch (_) {}
   }
 
-  Future<void> setMode(ThemeMode mode) async {
+  Future<void> setMode(String mode) async {
     state = mode;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, mode.name);
+    await prefs.setString(_key, mode);
   }
+
+  /// Convert to Flutter's ThemeMode (black maps to dark).
+  ThemeMode get flutterThemeMode => switch (state) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        'black' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+  /// Whether the current mode is the AMOLED black variant.
+  bool get isBlackMode => state == 'black';
 }

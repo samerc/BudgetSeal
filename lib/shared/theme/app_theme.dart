@@ -35,7 +35,7 @@ ThemeData buildLightTheme(String fontName) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Colors.grey.shade200.withValues(alpha: 0.7)),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     ),
@@ -67,8 +67,11 @@ ThemeData buildLightTheme(String fontName) {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
       indicatorColor: AppColors.accent.withValues(alpha: 0.12),
+      indicatorShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       labelTextStyle: WidgetStatePropertyAll(
-        fs(11, FontWeight.w500, null),
+        fs(11, FontWeight.w600, null),
       ),
     ),
     dividerTheme: DividerThemeData(
@@ -119,7 +122,8 @@ ThemeData buildDarkTheme(String fontName) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        side: const BorderSide(color: AppColors.darkSurfaceVariant),
+        // No border in dark mode — uses surface elevation only
+        side: BorderSide.none,
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     ),
@@ -151,8 +155,11 @@ ThemeData buildDarkTheme(String fontName) {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
       indicatorColor: AppColors.accent.withValues(alpha: 0.2),
+      indicatorShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       labelTextStyle: WidgetStatePropertyAll(
-        fs(11, FontWeight.w500, null),
+        fs(11, FontWeight.w600, null),
       ),
     ),
     dividerTheme: const DividerThemeData(
@@ -168,6 +175,34 @@ ThemeData buildDarkTheme(String fontName) {
       bodyMedium: fs(TypographyTokens.bodySize, TypographyTokens.bodyWeight, AppColors.darkTextPrimary),
       bodySmall: fs(TypographyTokens.captionSize, TypographyTokens.captionWeight, AppColors.darkTextSecondary),
       labelSmall: fs(TypographyTokens.overlineSize, TypographyTokens.overlineWeight, AppColors.darkTextHint),
+    ),
+  );
+}
+
+/// Build the black (AMOLED) theme — same as dark but with pure black surfaces.
+ThemeData buildBlackTheme(String fontName) {
+  final dark = buildDarkTheme(fontName);
+  return dark.copyWith(
+    scaffoldBackgroundColor: AppColors.blackBackground,
+    colorScheme: dark.colorScheme.copyWith(
+      surface: AppColors.blackSurface,
+    ),
+    appBarTheme: dark.appBarTheme.copyWith(
+      backgroundColor: AppColors.blackBackground,
+    ),
+    cardTheme: dark.cardTheme.copyWith(
+      color: AppColors.blackSurface,
+    ),
+    inputDecorationTheme: dark.inputDecorationTheme.copyWith(
+      fillColor: AppColors.blackSurfaceVariant,
+    ),
+    navigationBarTheme: dark.navigationBarTheme.copyWith(
+      backgroundColor: AppColors.blackSurface,
+    ),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.blackSurfaceVariant,
+      thickness: 1,
+      space: 1,
     ),
   );
 }

@@ -304,7 +304,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeModeProvider);
+    final themeNotifier = ref.watch(themeModeProvider.notifier);
+    final themeMode = themeNotifier.flutterThemeMode;
     final selectedFont = ref.watch(fontProvider);
 
     // Apply currency symbol overrides and number format whenever they change.
@@ -315,7 +316,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
 
     // Rebuild themes with the selected font (applies to all text styles).
     final lightTheme = buildLightTheme(selectedFont);
-    final darkTheme = buildDarkTheme(selectedFont);
+    final darkTheme = themeNotifier.isBlackMode
+        ? buildBlackTheme(selectedFont)
+        : buildDarkTheme(selectedFont);
 
     if (_showSplash) {
       return MaterialApp(
