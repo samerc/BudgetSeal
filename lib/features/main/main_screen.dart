@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
-import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/haptics.dart';
 import '../allocations/allocations_screen.dart';
 import '../dashboard/dashboard_screen.dart';

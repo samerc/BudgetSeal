@@ -1577,7 +1577,7 @@ class _DateHeaderTile extends StatelessWidget {
     final diff = today.difference(d).inDays;
     if (diff == 0) return 'Today, ${DateFormat('MMMM d').format(date)}';
     if (diff == 1) return 'Yesterday, ${DateFormat('MMMM d').format(date)}';
-    if (diff < 7) return '${DateFormat('EEEE, MMMM d').format(date)}';
+    if (diff < 7) return DateFormat('EEEE, MMMM d').format(date);
     if (date.year == now.year) return DateFormat('EEEE, MMMM d').format(date);
     return DateFormat('MMMM d, y').format(date);
   }
