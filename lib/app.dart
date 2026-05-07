@@ -310,7 +310,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
 
   @override
   Widget build(BuildContext context) {
-    final themeNotifier = ref.watch(themeModeProvider.notifier);
+    // Watch the state (String) to rebuild on changes, read notifier for helpers
+    ref.watch(themeModeProvider);
+    final themeNotifier = ref.read(themeModeProvider.notifier);
     final themeMode = themeNotifier.flutterThemeMode;
     final selectedFont = ref.watch(fontProvider);
 
