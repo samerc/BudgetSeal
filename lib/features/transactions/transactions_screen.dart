@@ -16,6 +16,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../core/providers/tx_list_settings_provider.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
@@ -413,6 +414,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             icon: Icon(Icons.search_rounded,
                 size: 22, color: AppColors.ts(context)),
             onPressed: () => setState(() => _showSearch = true),
+          ),
+          IconButton(
+            tooltip: 'List settings',
+            icon: Icon(Icons.tune_rounded,
+                size: 21, color: AppColors.ts(context)),
+            onPressed: () => context.push('/tx-list-settings'),
           ),
         ],
       ),
@@ -1235,6 +1242,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                           date: group.date,
                           dayTotal: group.dayTotal,
                           baseCurrency: group.baseCurrency,
+                          showTotal: ref.watch(txListSettingsProvider).dateBannerTotal == 'dayTotal',
                         ),
                       ),
                     ),
@@ -1523,10 +1531,12 @@ class _DateHeaderTile extends StatelessWidget {
   final DateTime date;
   final double dayTotal;
   final String baseCurrency;
+  final bool showTotal;
   const _DateHeaderTile({
     required this.date,
     this.dayTotal = 0,
     this.baseCurrency = 'USD',
+    this.showTotal = true,
   });
 
   @override
@@ -1546,7 +1556,7 @@ class _DateHeaderTile extends StatelessWidget {
               color: AppColors.ts(context),
             ),
           ),
-          if (dayTotal != 0)
+          if (showTotal && dayTotal != 0)
             Text(
               formatSignedAmount(dayTotal.abs(), currency: baseCurrency, type: dayTotal < 0 ? 'expense' : 'income'),
               style: TextStyle(
