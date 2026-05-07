@@ -24,6 +24,10 @@ class AllocationCard extends StatelessWidget {
   /// Whether this envelope needs manual period review (amber glow).
   final bool needsReview;
 
+  /// Optional period boundaries for daily allowance calculation.
+  final DateTime? periodStart;
+  final DateTime? periodEnd;
+
   const AllocationCard({
     super.key,
     required this.name,
@@ -40,6 +44,8 @@ class AllocationCard extends StatelessWidget {
     this.categoryName,
     this.categoryIcon,
     this.categoryColorHex,
+    this.periodStart,
+    this.periodEnd,
   });
 
   Color get _typeColor => switch (type) {
@@ -219,6 +225,28 @@ class AllocationCard extends StatelessWidget {
                                   : _typeColor,
                         ),
                       ),
+                    ],
+                    // Daily allowance (Cashew-style) for spending envelopes
+                    if (!_isSaving && hasTarget && displayBalance > 0 &&
+                        periodStart != null && periodEnd != null) ...[
+                      () {
+                        final now = DateTime.now();
+                        final daysLeft = periodEnd!.difference(now).inDays;
+                        if (daysLeft > 0) {
+                          final daily = displayBalance / daysLeft;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '${formatAmount(daily, currency: displayCurrency)}/day for $daysLeft days',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.ts(context),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }(),
                     ],
                     // For savings-open: no progress bar at all
                   ],

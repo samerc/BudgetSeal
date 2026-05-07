@@ -20,6 +20,7 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/utils/receipt_helper.dart';
@@ -27,6 +28,8 @@ import '../../shared/widgets/amount_field.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
 import 'widgets/transaction_form_widgets.dart';
+
+bool _isEmoji(String s) => s.isNotEmpty && s.runes.first > 255;
 
 enum _TxType { income, expense, transfer }
 
@@ -845,6 +848,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
             const SizedBox(height: 12),
 
+            // Category hero banner (Cashew-style)
+            if (_type != _TxType.transfer && _lines.isNotEmpty) ...[
+              _buildCategoryHero(context),
+              const SizedBox(height: 12),
+            ],
+
             // Title + Date + Note — grouped in one card
             TxCard(
               child: Column(
@@ -928,6 +937,86 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   // ---------------------------------------------------------------------------
   // Type selector
   // ---------------------------------------------------------------------------
+
+  Widget _buildCategoryHero(BuildContext context) {
+    final line = _lines.first;
+    final cat = line.categoryId != null
+        ? (ref.read(categoriesProvider).value ?? [])
+            .where((c) => c.id == line.categoryId)
+            .firstOrNull
+        : null;
+
+    final typeColor = _typeColor(context);
+    final catColor = cat?.colorHex != null
+        ? AppColors.fromHex(cat!.colorHex)
+        : typeColor;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: catColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        border: Border.all(color: catColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          // Category icon
+          Container(
+            width: CategoryIconTokens.listSize,
+            height: CategoryIconTokens.listSize,
+            decoration: BoxDecoration(
+              color: catColor.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: cat != null && cat.icon.isNotEmpty && _isEmoji(cat.icon)
+                  ? Text(cat.icon, style: const TextStyle(fontSize: 22))
+                  : Icon(
+                      _type == _TxType.income
+                          ? Icons.arrow_downward_rounded
+                          : Icons.arrow_upward_rounded,
+                      size: 22,
+                      color: catColor,
+                    ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          // Category name + amount
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatAmount(_totalBaseAmount, currency: _baseCurrency),
+                  style: TextStyle(
+                    fontSize: TypographyTokens.amountLargeSize,
+                    fontWeight: TypographyTokens.amountLargeWeight,
+                    color: AppColors.tp(context),
+                  ),
+                ),
+                if (cat != null)
+                  Text(
+                    cat.name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.ts(context),
+                    ),
+                  )
+                else
+                  Text(
+                    'No category',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.th(context),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTypeSelector() {
     return Row(
