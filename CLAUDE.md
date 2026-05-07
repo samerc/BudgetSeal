@@ -249,8 +249,11 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Design Conventions
 
-- **Card radius:** 14, **padding:** 16h / 14v — consistent everywhere
-- **Section headers:** visible, black/primary text, bigger weight — not dimmed
+- **Card radius:** 16 (`CardTokens.radius`), **padding:** 16h / 14v — consistent everywhere. All `BorderRadius.circular()` calls use the token, never hardcoded.
+- **Category icons:** 48px circles in lists (`CategoryIconTokens.listSize`), 36px compact, 64px hero.
+- **Screen titles:** 28px w800 (`TypographyTokens.screenTitleSize`) — Cashew-inspired large bold.
+- **Section headers:** visible, secondary text color, bigger weight — not dimmed.
+- **Cards in dark/black mode:** faint white border (5-7% opacity) for edge definition. No visible outlines. Light mode uses subtle `#E8EBF0` border.
 - No glassmorphism. No left-border accent bars on cards (looks like a prototype).
 - Design inspiration: Cashew app (cohesion and feel, not direct copying)
 - "Good morning" greeting removed — user disliked it
@@ -427,11 +430,13 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 `NotificationService` groups multiple low-envelope alerts into one notification and multiple upcoming-bill alerts into one. Uses fixed notification IDs (1001, 1002) so each check replaces the previous. 24-hour cooldown between checks via SharedPreferences. Overspent detection checks each currency independently (never sums across currencies).
 
 ### Envelope Currency Handling
+- **Cross-currency debit conversion**: When an expense line is in a foreign currency (e.g., LBP) but the linked envelope targets a different currency (e.g., USD), `AllocationEngine.recordTransaction()` converts the amount to base currency via `exchangeRateToBase` before recording the ledger entry. The envelope stays single-currency. Lines with no real exchange rate (`isRealRate` returns false) are skipped to avoid inflating the envelope.
 - `tx.amount` and `tx.currency` are always in the household's **base currency** — never use them directly for display in envelope contexts.
 - For envelope progress/spent calculations, sum **line amounts** that match the envelope's `targetCurrency`, not `tx.amount`.
 - Budget summary on the allocations screen only sums base-currency envelopes to avoid mixing currencies.
 - The spend button pre-fills the envelope's `targetCurrency`, not `baseCurrency`.
 - `AllocationWithBalance.totalInBase` sums raw balances across currencies without conversion — use `balanceByCurrency[currency]` for accurate per-currency display.
+- **Allocation card multi-currency display**: `isTargetOverspent` (target currency negative) shows red border/amount. `hasCrossDebt` (other currency negative) shows amber border + debt amount in amber text. Progress bar stays green when target is met even with cross-currency debt.
 
 ## Performance
 
@@ -675,32 +680,42 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 ## Theme System
 
-`buildLightTheme(fontName)` and `buildDarkTheme(fontName)` in `app_theme.dart` generate full ThemeData with the selected font applied everywhere (AppBar, buttons, inputs, nav bar, text theme). Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+`buildLightTheme(fontName)`, `buildDarkTheme(fontName)`, and `buildBlackTheme(fontName)` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+
+**Theme modes:** `themeModeProvider` stores a String (`'system'`/`'light'`/`'dark'`/`'black'`). `flutterThemeMode` getter maps black → dark for Flutter's ThemeMode. `isBlackMode` getter for AMOLED-specific logic. `app.dart` must `ref.watch(themeModeProvider)` for the state (not `.notifier`) to rebuild on theme change.
 
 ### Design Tokens
 `lib/shared/theme/design_tokens.dart` defines the single source of truth:
-- **Spacing**: xs(4), sm(8), md(12), lg(16), xl(24), sectionGap(16), headerToCard(8)
-- **CardTokens**: radius(14), paddingH(16), paddingV(14), borderRadius, padding
-- **TypographyTokens**: screenTitle(24/w800), sectionHeader(13/w700/ls0.8), cardTitle(15/w600), amountLarge(22/w700), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600)
+- **Spacing**: xs(4), sm(8), md(12), lg(16), xl(24), xxl(32), sectionGap(16), headerToCard(8)
+- **CardTokens**: radius(16), paddingH(16), paddingV(14), borderRadius, padding
+- **CategoryIconTokens**: listSize(48), compactSize(36), heroSize(64)
+- **TypographyTokens**: screenTitle(28/w800), sectionHeader(13/w700/ls0.8), cardTitle(15/w600), amountLarge(24/w700), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600), txTitle(15/w600), txSubtitle(12/w400), dateHeader(14/w600)
 
 ### Color Palette
 - Accent: `#2563EB` (Royal Blue)
 - Expense/Overspent: `#DC2626` (Deep Red)
 - Income/Healthy: `#059669` (Deep Emerald)
 - Caution: `#D97706` (Deep Amber)
+- Light bg: `#F5F6FA`, Dark bg: `#0F1219`, Black bg: `#000000`
 
 ### Shared Layout Widgets
 - `SectionHeader` (`lib/shared/widgets/section_header.dart`): uppercase, 13px w700, letter-spacing 0.8, optional trailing action
-- `AppCard` (`lib/shared/widgets/app_card.dart`): theme-aware bg/border, radius 14, standard padding, optional onTap
+- `AppCard` (`lib/shared/widgets/app_card.dart`): theme-aware bg/border, radius 16, standard padding, optional onTap
 
 ## More Tab Structure
 
-Settings screen organized into sections:
+The More tab is split into two screens:
+
+**More page** (tab) — feature hub:
 - **TOOLS**: Accounts, Categories, Bill Splitter, Bill Calendar, Exchange Rates, Web Companion
 - **AUTOMATION**: Recurring, Templates, Subscriptions, Period Transition
-- **APPEARANCE**: Theme, Colors, Entry Mode, Start Screen, Font
+- Settings & Customization → navigates to `/settings`
+- About PocketPlan
+
+**Settings screen** (`/settings`) — all configuration:
+- **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
-- **PREFERENCES**: Base Currency, Period Start Day, Currency Symbols, Number Format
+- **PREFERENCES**: Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
 - **SECURITY**: Biometric Lock
 
 Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
