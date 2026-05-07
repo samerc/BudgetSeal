@@ -122,8 +122,7 @@ ThemeData buildDarkTheme(String fontName) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        // No border in dark mode — uses surface elevation only
-        side: BorderSide.none,
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     ),

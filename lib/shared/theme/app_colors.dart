@@ -48,15 +48,15 @@ abstract final class AppColors {
         _ThemeMode.light => const Color(0xFF94A3B8),
       };
   static Color bd(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF1A1A1A),
+        _ThemeMode.black => const Color(0xFF222222),
         _ThemeMode.dark  => const Color(0xFF2A3348),
         _ThemeMode.light => const Color(0xFFE2E8F0),
       };
 
-  /// Card border: invisible in dark/black modes, subtle in light.
+  /// Card border: faint edge in dark/black modes, subtle in light.
   static Color cardBorder(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => Colors.transparent,
-        _ThemeMode.dark  => Colors.transparent,
+        _ThemeMode.black => Colors.white.withValues(alpha: 0.07),
+        _ThemeMode.dark  => Colors.white.withValues(alpha: 0.05),
         _ThemeMode.light => const Color(0xFFE8EBF0),
       };
 
