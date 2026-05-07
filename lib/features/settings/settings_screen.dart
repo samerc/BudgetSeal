@@ -10,6 +10,9 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/biometric_provider.dart';
 import '../../core/providers/currency_symbol_provider.dart';
 import '../../core/providers/database_provider.dart';
+import 'package:intl/intl.dart';
+
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/number_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/autofill_provider.dart';
@@ -131,54 +134,55 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // ── Tools ──
+            // ── Tools & Automation (2-column grid, Cashew-style) ──
             _SectionHeader(title: 'TOOLS'),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.credit_card_rounded, title: 'Accounts',
-                subtitle: 'Manage your accounts and balances',
-                iconColor: const Color(0xFF1565C0),
-                onTap: () => context.push('/accounts')),
-            _SettingsTile(icon: Icons.label_rounded, title: 'Categories',
-                subtitle: 'Manage groups and categories',
-                iconColor: const Color(0xFFBA68C8),
-                onTap: () => context.push('/categories')),
-            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
-                subtitle: 'Split bills & scan receipts',
-                iconColor: const Color(0xFF26A69A),
-                onTap: () => context.push('/bill-splitter')),
-            _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
-                subtitle: 'View upcoming recurring bills',
-                iconColor: const Color(0xFF66BB6A),
-                onTap: () => context.push('/bill-calendar')),
-            _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
-                subtitle: 'View and refresh currency rates',
-                iconColor: const Color(0xFF4DB6AC),
-                onTap: () => context.push('/exchange-rates')),
-            _SettingsTile(icon: Icons.computer_rounded, title: 'Web Companion',
-                subtitle: 'Manage your budget from a browser',
-                iconColor: const Color(0xFF0EA5E9),
-                onTap: () => context.push('/web-companion')),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _GridTile(icon: Icons.credit_card_rounded, title: 'Accounts',
+                    iconColor: const Color(0xFF1565C0),
+                    onTap: () => context.push('/accounts')),
+                _GridTile(icon: Icons.label_rounded, title: 'Categories',
+                    iconColor: const Color(0xFFBA68C8),
+                    onTap: () => context.push('/categories')),
+                _GridTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
+                    iconColor: const Color(0xFF26A69A),
+                    onTap: () => context.push('/bill-splitter')),
+                _GridTile(icon: Icons.calendar_month_rounded, title: 'Calendar',
+                    iconColor: const Color(0xFF66BB6A),
+                    onTap: () => context.push('/bill-calendar')),
+                _GridTile(icon: Icons.currency_exchange_rounded, title: 'Rates',
+                    iconColor: const Color(0xFF4DB6AC),
+                    onTap: () => context.push('/exchange-rates')),
+                _GridTile(icon: Icons.computer_rounded, title: 'Web Companion',
+                    iconColor: const Color(0xFF0EA5E9),
+                    onTap: () => context.push('/web-companion')),
+              ],
+            ),
             const SizedBox(height: 20),
 
-            // ── Automation ──
             _SectionHeader(title: 'AUTOMATION'),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.repeat_rounded, title: 'Recurring',
-                subtitle: 'Manage recurring transactions',
-                iconColor: const Color(0xFFFF7043),
-                onTap: () => context.push('/recurring')),
-            _SettingsTile(icon: Icons.bolt_rounded, title: 'Templates',
-                subtitle: 'Save frequent transactions',
-                iconColor: const Color(0xFFFFB74D),
-                onTap: () => context.push('/templates')),
-            _SettingsTile(icon: Icons.subscriptions_rounded, title: 'Subscriptions',
-                subtitle: 'Track recurring subscriptions',
-                iconColor: AppColors.accent,
-                onTap: () => context.push('/subscriptions')),
-            _SettingsTile(icon: Icons.refresh_rounded, title: 'Period Transition',
-                subtitle: 'End period and resolve leftovers',
-                iconColor: AppColors.accent,
-                onTap: () => context.push('/period-transition')),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _GridTile(icon: Icons.repeat_rounded, title: 'Recurring',
+                    iconColor: const Color(0xFFFF7043),
+                    onTap: () => context.push('/recurring')),
+                _GridTile(icon: Icons.bolt_rounded, title: 'Templates',
+                    iconColor: const Color(0xFFFFB74D),
+                    onTap: () => context.push('/templates')),
+                _GridTile(icon: Icons.subscriptions_rounded, title: 'Subscriptions',
+                    iconColor: AppColors.accent,
+                    onTap: () => context.push('/subscriptions')),
+                _GridTile(icon: Icons.refresh_rounded, title: 'Period',
+                    iconColor: AppColors.accent,
+                    onTap: () => context.push('/period-transition')),
+              ],
+            ),
             const SizedBox(height: 20),
 
             // ── Appearance ──
@@ -393,6 +397,17 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Preview: $preview',
                 iconColor: const Color(0xFF5C6BC0),
                 onTap: () => _showNumberFormatEditor(context, ref),
+              );
+            }),
+            Builder(builder: (context) {
+              final dateFmt = ref.watch(dateFormatProvider);
+              final preview = DateFormat(dateFmt).format(DateTime.now());
+              return _SettingsTile(
+                icon: Icons.date_range_rounded,
+                title: 'Date Format',
+                subtitle: preview,
+                iconColor: const Color(0xFF7E57C2),
+                onTap: () => _showDateFormatPicker(context, ref),
               );
             }),
             const SizedBox(height: 20),
@@ -1017,6 +1032,32 @@ class SettingsScreen extends ConsumerWidget {
     if (picked != null) ref.read(themeModeProvider.notifier).setMode(picked);
   }
 
+  void _showDateFormatPicker(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(dateFormatProvider);
+    final now = DateTime.now();
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(padding: const EdgeInsets.all(16),
+              child: Text('Date Format', style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+          for (final entry in dateFormatOptions.entries)
+            ListTile(
+              leading: Icon(current == entry.key
+                  ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: AppColors.accent),
+              title: Text(DateFormat(entry.key).format(now)),
+              subtitle: Text(entry.key, style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+              onTap: () => Navigator.pop(ctx, entry.key),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (picked != null) ref.read(dateFormatProvider.notifier).setFormat(picked);
+  }
+
   void _showHomeTabPicker(BuildContext context, WidgetRef ref) async {
     final homeTab = ref.read(homeTabProvider);
     final icons = [Icons.dashboard_rounded, Icons.receipt_long_rounded,
@@ -1305,6 +1346,52 @@ class _SectionHeader extends StatelessWidget {
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
           color: AppColors.ts(context),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  const _GridTile({
+    required this.icon,
+    required this.title,
+    required this.iconColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final width = (MediaQuery.of(context).size.width - 16 * 2 - 10) / 2;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          border: Border.all(color: AppColors.cardBorder(context)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context),
+                  ),
+                  overflow: TextOverflow.ellipsis),
+            ),
+          ],
         ),
       ),
     );
