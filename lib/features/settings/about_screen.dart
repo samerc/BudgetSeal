@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -170,7 +171,7 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
           border: Border.all(color: AppColors.bd(context)),
         ),
         child: Column(

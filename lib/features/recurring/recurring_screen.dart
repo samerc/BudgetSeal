@@ -11,6 +11,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -103,7 +104,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                         child: Text(
                           'Recurring',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           ),
@@ -131,7 +132,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                       child: Row(
                         children: [
@@ -404,7 +405,7 @@ class _RecurringTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: ListTile(
@@ -679,7 +680,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
                 backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
               child: _saving
                   ? const SizedBox(
@@ -919,7 +920,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                     child: const Text('Cancel',
                         style: TextStyle(
@@ -934,7 +935,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                       backgroundColor: AppColors.accent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                     child: _saving
                         ? const SizedBox(

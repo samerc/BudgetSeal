@@ -18,7 +18,7 @@ class TxCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: child,

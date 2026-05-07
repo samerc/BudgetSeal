@@ -96,7 +96,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -450,7 +450,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   disabledBackgroundColor:
                       AppColors.accent.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                 ),
                 child: _loading
@@ -707,7 +707,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   backgroundColor: AppColors.accent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(CardTokens.radius)),
                 ),
                 child: const Text('Apply Adjustment',
                     style:

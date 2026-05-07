@@ -438,7 +438,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: AppColors.sf(context),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(CardTokens.radius),
                           ),
                           child: Center(
                             child: Column(
@@ -833,7 +833,7 @@ class _SpendingOverviewCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -1058,7 +1058,7 @@ class _NetWorthCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1131,7 +1131,7 @@ class _QuickAction extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
               child: Column(children: [
                 Container(
@@ -1185,7 +1185,7 @@ class _SummaryRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
           border: Border.all(color: AppColors.bd(context)),
         ),
         child: Row(children: [
@@ -1250,7 +1250,7 @@ class _EnvelopeHealthCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1389,7 +1389,7 @@ class _RecentTxTile extends ConsumerWidget {
               const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
           child: Row(children: [
             CategoryIcon(
@@ -1756,7 +1756,7 @@ class _ShimmerCard extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
     );
   }

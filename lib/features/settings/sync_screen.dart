@@ -9,6 +9,7 @@ import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../core/sync/sync_encryption.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class SyncScreen extends ConsumerWidget {
   const SyncScreen({super.key});
@@ -415,7 +416,7 @@ class _ActionButton extends StatelessWidget {
           backgroundColor: color,
           disabledBackgroundColor: color.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
         ),
       ),
@@ -533,7 +534,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                   labelText: 'Their email address',
                   hintText: 'partner@gmail.com',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                   prefixIcon: const Icon(Icons.email_outlined),
                 ),
@@ -559,7 +560,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF7E57C2),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                 ),
@@ -569,7 +570,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(
                       color: AppColors.accent.withValues(alpha: 0.2)),
                 ),
@@ -611,7 +612,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                 ),
@@ -783,7 +784,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

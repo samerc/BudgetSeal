@@ -360,7 +360,7 @@ class _DetailBody extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Padding(
@@ -643,7 +643,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(color: AppColors.bd(context)),
                   ),
                   child: Row(
@@ -808,7 +808,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

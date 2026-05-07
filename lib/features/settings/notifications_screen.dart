@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/daily_reminder_service.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -186,7 +187,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

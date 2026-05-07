@@ -6,6 +6,7 @@ import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/error_retry.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
@@ -401,7 +402,7 @@ class _LeftoverResolutionScreenState
                         backgroundColor: AppColors.accent,
                         minimumSize: const Size.fromHeight(52),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(CardTokens.radius),
                         ),
                       ),
                       child: _saving
@@ -516,10 +517,10 @@ class _ResolutionOption extends StatelessWidget {
       color: selected
           ? AppColors.accentLight.withValues(alpha: 0.3)
           : AppColors.sf(context),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(CardTokens.radius),
       child: InkWell(
         onTap: () => onChanged(value),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
@@ -529,7 +530,7 @@ class _ResolutionOption extends StatelessWidget {
                   : AppColors.surfaceVariant,
               width: selected ? 1.5 : 1,
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
           child: Row(
             children: [

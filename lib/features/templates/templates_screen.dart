@@ -11,6 +11,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -206,7 +207,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   Expanded(
                     child: Text('Templates',
                         style: TextStyle(
-                            fontSize: 24,
+                            fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context))),
                   ),
@@ -397,7 +398,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
             border: Border.all(color: AppColors.bd(context)),
           ),
           child: Row(

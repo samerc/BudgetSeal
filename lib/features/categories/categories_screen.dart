@@ -583,7 +583,7 @@ class _CategoriesSliver extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       clipBehavior: Clip.antiAlias,
@@ -918,7 +918,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     height: 52,
                     decoration: BoxDecoration(
                       color: _color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                       border: Border.all(
                         color: _showEmojiGrid
                             ? AppColors.accent
@@ -1142,7 +1142,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                 ),
               ),
               child: _loading

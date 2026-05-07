@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class ImportExportScreen extends StatelessWidget {
   const ImportExportScreen({super.key});
@@ -68,7 +69,7 @@ class _HubTile extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
           border: Border.all(color: AppColors.bd(context)),
         ),
         child: Row(

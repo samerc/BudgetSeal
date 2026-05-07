@@ -419,7 +419,7 @@ class _HeatmapSection extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -1677,7 +1677,7 @@ class _InsightsTab extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(color: AppColors.bd(context)),
                   ),
                   child: Row(
@@ -2543,7 +2543,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     gradient: LinearGradient(
                       colors: [AppColors.primary, const Color(0xFF2A3F6A)],
                     ),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                   child: Column(
                     children: [
@@ -2710,7 +2710,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

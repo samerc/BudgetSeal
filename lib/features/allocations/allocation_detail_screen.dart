@@ -267,7 +267,7 @@ class _AllocationDetailScreenState
                     backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(CardTokens.radius)),
                   ),
                   child: _loading
                       ? const SizedBox(
@@ -2384,7 +2384,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                     backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(CardTokens.radius)),
                   ),
                   child: _applying
                       ? const SizedBox(
@@ -2413,7 +2413,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

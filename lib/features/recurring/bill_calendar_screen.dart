@@ -6,6 +6,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 
 class BillCalendarScreen extends ConsumerStatefulWidget {
@@ -142,7 +143,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                 ),
                 child: Row(
                   children: [

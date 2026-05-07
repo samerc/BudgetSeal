@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/services/auto_backup_service.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -438,7 +439,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   margin: const EdgeInsets.only(bottom: 6),
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(color: AppColors.bd(context)),
                   ),
                   child: ListTile(
@@ -504,7 +505,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

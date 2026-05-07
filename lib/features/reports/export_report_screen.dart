@@ -11,6 +11,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 
 /// Generates and shares an HTML monthly report that can be printed as PDF.
@@ -116,7 +117,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                       backgroundColor: AppColors.accent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                   ),
                 ],

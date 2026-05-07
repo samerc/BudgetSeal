@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
   const ExportScreen({super.key});
@@ -159,7 +160,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                       backgroundColor: AppColors.accent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                   ),
                 ],

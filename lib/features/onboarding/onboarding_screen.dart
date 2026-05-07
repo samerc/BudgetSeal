@@ -15,6 +15,7 @@ import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 
@@ -867,7 +868,7 @@ class _OnboardingButton extends StatelessWidget {
           foregroundColor: AppColors.accent,
           disabledBackgroundColor: Colors.white.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
         ),
         child: loading
@@ -912,7 +913,7 @@ class _RestoreFromCloudButton extends ConsumerWidget {
           foregroundColor: Colors.white,
           side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
         ),
       ),
@@ -1048,7 +1049,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
                       foregroundColor: AppColors.tp(context),
                       side: BorderSide(color: AppColors.bd(context)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                     ),
                   ),
@@ -1105,7 +1106,7 @@ class _JoinHouseholdButton extends ConsumerWidget {
           foregroundColor: Colors.white,
           side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
         ),
       ),
@@ -1252,7 +1253,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
                   labelText: 'Invite code',
                   hintText: 'PP-...',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                   prefixIcon: const Icon(Icons.vpn_key_outlined),
                 ),
@@ -1270,7 +1271,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                 ),

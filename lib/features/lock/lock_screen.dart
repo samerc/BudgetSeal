@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 class LockScreen extends StatefulWidget {
   final VoidCallback onUnlocked;
@@ -112,7 +113,7 @@ class _LockScreenState extends State<LockScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
             ),
           ],

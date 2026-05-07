@@ -8,6 +8,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/error_retry.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
@@ -148,7 +149,7 @@ class _PeriodTransitionScreenState
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: AppColors.sf(context),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(color: AppColors.bd(context)),
                 ),
                 child: Row(
@@ -277,7 +278,7 @@ class _PeriodTransitionScreenState
                     backgroundColor: AppColors.accent,
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                   child: _completing

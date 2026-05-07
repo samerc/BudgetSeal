@@ -312,7 +312,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                     child: Row(
                       children: [
@@ -643,7 +643,7 @@ class _UnallocatedBanner extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(

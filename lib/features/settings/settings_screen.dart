@@ -290,7 +290,7 @@ class SettingsScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.sf(context),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                       border: Border.all(color: AppColors.bd(context)),
                     ),
                     child: SwitchListTile(
@@ -669,7 +669,7 @@ class SettingsScreen extends ConsumerWidget {
                 backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
               child: const Text('Save',
                   style:
@@ -759,7 +759,7 @@ class SettingsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -987,7 +987,7 @@ class SettingsScreen extends ConsumerWidget {
                 backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
               child: const Text('Save',
                   style:
@@ -1785,7 +1785,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.sfv(context),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
               child: Column(
                 children: [
@@ -2148,7 +2148,7 @@ class _SettingsBackupBanner extends ConsumerWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: AppColors.caution.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(CardTokens.radius),
               border: Border.all(
                   color: AppColors.caution.withValues(alpha: 0.25)),
             ),
@@ -2319,7 +2319,7 @@ class _ShareHouseholdSettingsSheetState
                   labelText: 'Their email address',
                   hintText: 'partner@gmail.com',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                   prefixIcon: const Icon(Icons.email_outlined),
                 ),
@@ -2345,7 +2345,7 @@ class _ShareHouseholdSettingsSheetState
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF7E57C2),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                 ),
@@ -2355,7 +2355,7 @@ class _ShareHouseholdSettingsSheetState
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(
                       color: AppColors.accent.withValues(alpha: 0.2)),
                 ),
@@ -2397,7 +2397,7 @@ class _ShareHouseholdSettingsSheetState
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                   ),
                 ),

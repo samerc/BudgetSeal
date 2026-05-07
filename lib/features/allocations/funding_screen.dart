@@ -6,6 +6,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_display.dart';
@@ -308,7 +309,7 @@ class _InstructionsPanel extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
@@ -317,7 +318,7 @@ class _InstructionsPanel extends StatelessWidget {
             onTap: onToggle,
             borderRadius: expanded
                 ? const BorderRadius.vertical(top: Radius.circular(14))
-                : BorderRadius.circular(14),
+                : BorderRadius.circular(CardTokens.radius),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
@@ -629,17 +630,17 @@ class _QuickFillTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(
           color: AppColors.accent.withValues(alpha: 0.2),
         ),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         child: InkWell(
           onTap: hasEnvelopes ? onQuickFill : null,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
           child: Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -979,7 +980,7 @@ class _BottomFundBar extends StatelessWidget {
               disabledBackgroundColor: AppColors.sfv(context),
               disabledForegroundColor: AppColors.th(context),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
               elevation: canFund ? 2 : 0,
               shadowColor: AppColors.accent.withValues(alpha: 0.4),

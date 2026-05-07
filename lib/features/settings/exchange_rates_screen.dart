@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 /// Displays cached exchange rates and allows manual refresh.
 class ExchangeRatesScreen extends ConsumerStatefulWidget {
@@ -141,7 +142,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.accent.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                         border: Border.all(
                             color: AppColors.accent.withValues(alpha: 0.2)),
                       ),

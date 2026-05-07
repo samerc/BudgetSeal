@@ -1276,7 +1276,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                     color: isSelected
                                         ? AppColors.accent.withValues(alpha: 0.1)
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(14),
+                                    borderRadius: BorderRadius.circular(CardTokens.radius),
                                   ),
                                   child: Row(
                                     children: [
@@ -1323,7 +1323,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                 margin: const EdgeInsets.only(bottom: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.accent,
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(CardTokens.radius),
                                 ),
                                 child: const Icon(Icons.edit_rounded,
                                     color: Colors.white),
@@ -1335,7 +1335,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                 margin: const EdgeInsets.only(bottom: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.overspent,
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(CardTokens.radius),
                                 ),
                                 child: const Icon(Icons.delete_rounded,
                                     color: Colors.white),
@@ -1387,7 +1387,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                   color: _highlightedTxId == e.tx.id
                                       ? AppColors.accent.withValues(alpha: 0.12)
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(CardTokens.radius),
                                 ),
                                 child: _TxTile(
                                   entry: e,

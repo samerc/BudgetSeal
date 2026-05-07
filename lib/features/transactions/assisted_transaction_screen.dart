@@ -16,6 +16,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -836,7 +837,7 @@ class _AssistedTransactionScreenState
                     color: isSelected
                         ? color.withValues(alpha: 0.1)
                         : AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: isSelected
                         ? Border.all(color: color.withValues(alpha: 0.4))
                         : null,
@@ -1562,7 +1563,7 @@ class _AssistedTransactionScreenState
                     color: _transferExchangeRate <= 1.0
                         ? AppColors.overspent.withValues(alpha: 0.08)
                         : AppColors.healthy.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(
                         color: _transferExchangeRate <= 1.0
                             ? AppColors.overspent.withValues(alpha: 0.4)

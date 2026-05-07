@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
 import '../../shared/widgets/currency_picker_field.dart';
@@ -935,7 +936,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     color: assigned
                         ? color.withValues(alpha: 0.15)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(
                       color: assigned
                           ? color

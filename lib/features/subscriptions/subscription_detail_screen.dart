@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/database_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../recurring/recurring_screen.dart' show EditRecurringSheet;
@@ -417,7 +418,7 @@ class _SubscriptionDetailScreenState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(CardTokens.radius),
               border: Border.all(color: AppColors.bd(context)),
             ),
             child: Column(
@@ -457,7 +458,7 @@ class _SubscriptionDetailScreenState
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(CardTokens.radius),
               border: Border.all(color: AppColors.bd(context)),
             ),
             child: Column(
@@ -525,7 +526,7 @@ class _SubscriptionDetailScreenState
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
                 border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(
@@ -632,7 +633,7 @@ class _SubscriptionDetailScreenState
             Container(
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
                 border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(
@@ -662,7 +663,7 @@ class _SubscriptionDetailScreenState
             Container(
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
                 border: Border.all(color: AppColors.bd(context)),
               ),
               child: Column(

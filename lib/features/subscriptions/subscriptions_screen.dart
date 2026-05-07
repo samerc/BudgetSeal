@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -205,7 +206,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                         child: Text(
                           'Subscriptions',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           ),
@@ -229,7 +230,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                       child: Row(
                         children: [
@@ -241,7 +242,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                   '${formatAmount(monthlyTotal)}/month',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 24,
+                                    fontSize: TypographyTokens.screenTitleSize,
                                     fontWeight: FontWeight.w800,
                                   ),
                                   maxLines: 1,
@@ -290,7 +291,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                       child: Row(
                         children: [
@@ -537,7 +538,7 @@ class _SubscriptionTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(color: AppColors.bd(context)),
       ),
       child: ListTile(
