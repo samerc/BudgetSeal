@@ -134,305 +134,77 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // ── Tools & Automation (2-column grid, Cashew-style) ──
+            // ── Tools ──
             _SectionHeader(title: 'TOOLS'),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _GridTile(icon: Icons.credit_card_rounded, title: 'Accounts',
-                    iconColor: const Color(0xFF1565C0),
-                    onTap: () => context.push('/accounts')),
-                _GridTile(icon: Icons.label_rounded, title: 'Categories',
-                    iconColor: const Color(0xFFBA68C8),
-                    onTap: () => context.push('/categories')),
-                _GridTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
-                    iconColor: const Color(0xFF26A69A),
-                    onTap: () => context.push('/bill-splitter')),
-                _GridTile(icon: Icons.calendar_month_rounded, title: 'Calendar',
-                    iconColor: const Color(0xFF66BB6A),
-                    onTap: () => context.push('/bill-calendar')),
-                _GridTile(icon: Icons.currency_exchange_rounded, title: 'Rates',
-                    iconColor: const Color(0xFF4DB6AC),
-                    onTap: () => context.push('/exchange-rates')),
-                _GridTile(icon: Icons.computer_rounded, title: 'Web Companion',
-                    iconColor: const Color(0xFF0EA5E9),
-                    onTap: () => context.push('/web-companion')),
-              ],
-            ),
+            _SettingsTile(icon: Icons.credit_card_rounded, title: 'Accounts',
+                subtitle: 'Manage your accounts and balances',
+                iconColor: const Color(0xFF1565C0),
+                onTap: () => context.push('/accounts')),
+            _SettingsTile(icon: Icons.label_rounded, title: 'Categories',
+                subtitle: 'Manage groups and categories',
+                iconColor: const Color(0xFFBA68C8),
+                onTap: () => context.push('/categories')),
+            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
+                subtitle: 'Split bills & scan receipts',
+                iconColor: const Color(0xFF26A69A),
+                onTap: () => context.push('/bill-splitter')),
+            _SettingsTile(icon: Icons.calendar_month_rounded, title: 'Bill Calendar',
+                subtitle: 'View upcoming recurring bills',
+                iconColor: const Color(0xFF66BB6A),
+                onTap: () => context.push('/bill-calendar')),
+            _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
+                subtitle: 'View and refresh currency rates',
+                iconColor: const Color(0xFF4DB6AC),
+                onTap: () => context.push('/exchange-rates')),
+            _SettingsTile(icon: Icons.computer_rounded, title: 'Web Companion',
+                subtitle: 'Manage your budget from a browser',
+                iconColor: const Color(0xFF0EA5E9),
+                onTap: () => context.push('/web-companion')),
             const SizedBox(height: 20),
 
+            // ── Automation ──
             _SectionHeader(title: 'AUTOMATION'),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _GridTile(icon: Icons.repeat_rounded, title: 'Recurring',
-                    iconColor: const Color(0xFFFF7043),
-                    onTap: () => context.push('/recurring')),
-                _GridTile(icon: Icons.bolt_rounded, title: 'Templates',
-                    iconColor: const Color(0xFFFFB74D),
-                    onTap: () => context.push('/templates')),
-                _GridTile(icon: Icons.subscriptions_rounded, title: 'Subscriptions',
-                    iconColor: AppColors.accent,
-                    onTap: () => context.push('/subscriptions')),
-                _GridTile(icon: Icons.refresh_rounded, title: 'Period',
-                    iconColor: AppColors.accent,
-                    onTap: () => context.push('/period-transition')),
-              ],
-            ),
+            _SettingsTile(icon: Icons.repeat_rounded, title: 'Recurring',
+                subtitle: 'Manage recurring transactions',
+                iconColor: const Color(0xFFFF7043),
+                onTap: () => context.push('/recurring')),
+            _SettingsTile(icon: Icons.bolt_rounded, title: 'Templates',
+                subtitle: 'Save frequent transactions',
+                iconColor: const Color(0xFFFFB74D),
+                onTap: () => context.push('/templates')),
+            _SettingsTile(icon: Icons.subscriptions_rounded, title: 'Subscriptions',
+                subtitle: 'Track recurring subscriptions',
+                iconColor: AppColors.accent,
+                onTap: () => context.push('/subscriptions')),
+            _SettingsTile(icon: Icons.refresh_rounded, title: 'Period Transition',
+                subtitle: 'End period and resolve leftovers',
+                iconColor: AppColors.accent,
+                onTap: () => context.push('/period-transition')),
             const SizedBox(height: 20),
 
-            // ── Appearance ──
-            _SectionHeader(title: 'APPEARANCE'),
+            // ── Settings (navigates to dedicated screen) ──
+            _SettingsTile(icon: Icons.settings_rounded, title: 'Settings & Customization',
+                subtitle: 'Theme, font, data, preferences',
+                iconColor: AppColors.ts(context),
+                onTap: () => context.push('/settings')),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.palette_outlined, title: 'Theme',
-                subtitle: themeLabel, iconColor: AppColors.accent,
-                onTap: () => _showThemePicker(context, ref)),
-            _SettingsTile(icon: Icons.color_lens_outlined, title: 'Colors',
-                subtitle: 'Income, expense & transfer', iconColor: const Color(0xFFEC407A),
-                onTap: () => _showColorConfig(context, ref)),
-            Builder(builder: (context) {
-              final mode = ref.watch(entryModeProvider);
-              return _SettingsTile(icon: Icons.touch_app_outlined, title: 'Entry Mode',
-                  subtitle: mode == 'assisted' ? 'Assisted (step-by-step)' : 'Classic (single form)',
-                  iconColor: const Color(0xFF42A5F5),
-                  onTap: () => _showEntryModePicker(context, ref));
-            }),
-            _SettingsTile(
-              icon: Icons.auto_fix_high_rounded,
-              title: 'Auto-fill',
-              subtitle: 'Pre-fill fields from last transaction',
-              iconColor: const Color(0xFF26A69A),
-              onTap: () => _showAutofillSettings(context, ref),
-            ),
-            Builder(builder: (context) {
-              final homeTab = ref.watch(homeTabProvider);
-              return _SettingsTile(icon: Icons.home_outlined, title: 'Start Screen',
-                  subtitle: homeTabLabels[homeTab],
-                  iconColor: const Color(0xFF26A69A),
-                  onTap: () => _showHomeTabPicker(context, ref));
-            }),
-            Builder(builder: (context) {
-              final font = ref.watch(fontProvider);
-              return _SettingsTile(icon: Icons.text_fields_rounded, title: 'Font',
-                  subtitle: font, iconColor: const Color(0xFF7E57C2),
-                  onTap: () => _showFontPicker(context, ref));
-            }),
-            Builder(builder: (context) {
-              final scale = ref.watch(textScaleProvider);
-              final label = textScaleOptions[scale] ?? '${(scale * 100).round()}%';
-              return _SettingsTile(icon: Icons.format_size_rounded, title: 'Text Size',
-                  subtitle: label, iconColor: const Color(0xFF5C6BC0),
-                  onTap: () => _showTextSizePicker(context, ref));
-            }),
-            const SizedBox(height: 20),
-
-            // ── Data & Sync ──
-            _SectionHeader(title: 'DATA'),
-            const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.cloud_sync_rounded, title: 'Cloud Sync',
-                subtitle: 'Sync across devices', iconColor: AppColors.accent,
-                onTap: () => context.push('/sync')),
-            Builder(builder: (context) {
-              final syncState = ref.watch(syncProvider);
-              final isConnected = syncState.activeProvider is GoogleDriveProvider;
-              return _SettingsTile(
-                icon: Icons.people_outline_rounded,
-                title: 'Share Household',
-                subtitle: isConnected
-                    ? 'Invite someone to share your data'
-                    : 'Connect Cloud Sync first to share',
-                iconColor: const Color(0xFF7E57C2),
-                onTap: () {
-                  if (isConnected) {
-                    _showShareHousehold(context, ref);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Set up Cloud Sync with Google Drive first to share your household.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-              );
-            }),
-            _SettingsTile(icon: Icons.backup_rounded, title: 'Backup & Restore',
-                subtitle: 'Export or restore database', iconColor: const Color(0xFF42A5F5),
-                onTap: () => context.push('/backup')),
-            _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
-                subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
-                onTap: () => context.push('/import-export')),
-            _SettingsTile(
-                icon: Icons.notifications_active_rounded,
-                title: 'Notifications',
-                subtitle: 'Daily reminder, envelope & bill alerts',
-                iconColor: const Color(0xFFFF9800),
-                onTap: () => context.push('/notifications')),
-            _SettingsTile(
-                icon: Icons.monitor_heart_rounded,
-                title: 'Health Check',
-                subtitle: 'Verify data integrity & repair',
-                iconColor: const Color(0xFF4DB6AC),
-                onTap: () => context.push('/health-check')),
-            // ── Receipt Sync toggle ──
-            Builder(builder: (context) {
-              final syncState = ref.watch(syncProvider);
-              final isCloudConnected = syncState.activeProvider != null;
-              if (!isCloudConnected) return const SizedBox.shrink();
-              final receiptSyncEnabled = ref.watch(receiptSyncProvider);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.sf(context),
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                      border: Border.all(color: AppColors.bd(context)),
-                    ),
-                    child: SwitchListTile(
-                      secondary: Container(
-                        width: 36, height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.photo_library_rounded,
-                            size: 18, color: Color(0xFF7E57C2)),
-                      ),
-                      title: Text('Sync Receipts',
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.tp(context))),
-                      subtitle: Text(
-                        receiptSyncEnabled
-                            ? 'Upload receipt photos to cloud storage'
-                            : 'Receipts are stored on this device only',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.ts(context)),
-                      ),
-                      value: receiptSyncEnabled,
-                      onChanged: (_) =>
-                          ref.read(receiptSyncProvider.notifier).toggle(),
-                      activeTrackColor: AppColors.accent,
-                    ),
-                  ),
-                  if (!receiptSyncEnabled)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.warning_amber_rounded,
-                              size: 14, color: AppColors.caution),
-                          const SizedBox(width: 6),
-                          Text('Receipts are stored on this device only',
-                              style: TextStyle(
-                                  fontSize: 11, color: AppColors.caution)),
-                        ],
-                      ),
-                    ),
-                ],
-              );
-            }),
-            const SizedBox(height: 20),
-
-            // ── Preferences ──
-            _SectionHeader(title: 'PREFERENCES'),
-            const SizedBox(height: 8),
-            _SettingsTile(
-              icon: Icons.monetization_on_rounded,
-              title: 'Base Currency',
-              subtitle: household?.baseCurrency ?? 'USD',
-              iconColor: AppColors.caution,
-              onTap: () async {
-                final result = await showModalBottomSheet<String>(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => CurrencySheet(
-                      current: household?.baseCurrency ?? 'USD'),
-                );
-                if (result != null && household != null) {
-                  final db = ref.read(databaseProvider);
-                  await (db.update(db.households)
-                        ..where((h) => h.id.equals(household.id)))
-                      .write(HouseholdsCompanion(baseCurrency: Value(result)));
-                }
-              },
-            ),
-            _SettingsTile(
-              icon: Icons.calendar_today_rounded,
-              title: 'Period Start Day',
-              subtitle: 'Day ${household?.periodStartDay ?? 1}',
-              iconColor: AppColors.caution,
-              onTap: () => _editNumber(context, ref,
-                  title: 'Period Start Day',
-                  currentValue: household?.periodStartDay ?? 1,
-                  min: 1, max: 28,
-                  description: 'The day of the month when a new budget period starts.',
-                  onSave: (val) async {
-                    final db = ref.read(databaseProvider);
-                    await (db.update(db.households)
-                          ..where((h) => h.id.equals(household!.id)))
-                        .write(HouseholdsCompanion(periodStartDay: Value(val)));
-                  }),
-            ),
-            _SettingsTile(
-              icon: Icons.attach_money_rounded,
-              title: 'Currency Symbols',
-              subtitle: 'Override how currencies are displayed',
-              iconColor: const Color(0xFF4DB6AC),
-              onTap: () => _showCurrencySymbolEditor(context, ref),
-            ),
-            Builder(builder: (context) {
-              ref.watch(numberFormatProvider); // rebuild on change
-              final preview = formatAmount(1234567.89);
-              return _SettingsTile(
-                icon: Icons.format_list_numbered_rounded,
-                title: 'Number Format',
-                subtitle: 'Preview: $preview',
-                iconColor: const Color(0xFF5C6BC0),
-                onTap: () => _showNumberFormatEditor(context, ref),
-              );
-            }),
-            Builder(builder: (context) {
-              final dateFmt = ref.watch(dateFormatProvider);
-              final preview = DateFormat(dateFmt).format(DateTime.now());
-              return _SettingsTile(
-                icon: Icons.date_range_rounded,
-                title: 'Date Format',
-                subtitle: preview,
-                iconColor: const Color(0xFF7E57C2),
-                onTap: () => _showDateFormatPicker(context, ref),
-              );
-            }),
-            const SizedBox(height: 20),
-
-            // ── Security ──
-            _SectionHeader(title: 'SECURITY'),
-            const SizedBox(height: 8),
-            _BiometricTile(),
-            const SizedBox(height: 20),
-
-            // ── About + Reset ──
             _SettingsTile(icon: Icons.info_outline_rounded, title: 'About PocketPlan',
-                subtitle: 'Version $appVersion', iconColor: AppColors.ts(context),
+                subtitle: 'Version $appVersion', iconColor: AppColors.th(context),
                 onTap: () => context.push('/about')),
-            const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.delete_forever_rounded, title: 'Reset Everything',
-                subtitle: 'Erase all data and start fresh', iconColor: AppColors.overspent,
-                onTap: () => _confirmReset(context, ref)),
           ],
         ),
       ),
     );
   }
+}
 
-  void _showShareHousehold(BuildContext context, WidgetRef ref) {
+// ═══════════════════════════════════════════════════════════════════════════
+// Shared helper functions (used by both SettingsScreen and SettingsDetailScreen)
+// ═══════════════════════════════════════════════════════════════════════════
+
+void _showShareHousehold(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(syncProvider.notifier);
     showModalBottomSheet(
       context: context,
@@ -1171,7 +943,6 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (picked != null) ref.read(textScaleProvider.notifier).setScale(picked);
   }
-}
 
 // ─── Entry Mode Selection Sheet ───────────────────────────────────────────
 
@@ -1331,6 +1102,276 @@ class _EntryModeCard extends StatelessWidget {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Settings Detail Screen — all configuration options
+// ═══════════════════════════════════════════════════════════════════════════
+
+class SettingsDetailScreen extends ConsumerWidget {
+  const SettingsDetailScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final household = ref.watch(householdProvider).value;
+
+    final themeLabel = switch (ref.watch(themeModeProvider)) {
+      'light' => 'Light',
+      'dark' => 'Dark',
+      'black' => 'Black',
+      _ => 'System',
+    };
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        children: [
+          // ── Appearance ──
+          _SectionHeader(title: 'APPEARANCE'),
+          const SizedBox(height: 8),
+          _SettingsTile(icon: Icons.palette_outlined, title: 'Theme',
+              subtitle: themeLabel, iconColor: AppColors.accent,
+              onTap: () => _showThemePicker(context, ref)),
+          _SettingsTile(icon: Icons.color_lens_outlined, title: 'Colors',
+              subtitle: 'Income, expense & transfer', iconColor: const Color(0xFFEC407A),
+              onTap: () => _showColorConfig(context, ref)),
+          Builder(builder: (context) {
+            final mode = ref.watch(entryModeProvider);
+            return _SettingsTile(icon: Icons.touch_app_outlined, title: 'Entry Mode',
+                subtitle: mode == 'assisted' ? 'Assisted (step-by-step)' : 'Classic (single form)',
+                iconColor: const Color(0xFF42A5F5),
+                onTap: () => _showEntryModePicker(context, ref));
+          }),
+          _SettingsTile(
+            icon: Icons.auto_fix_high_rounded,
+            title: 'Auto-fill',
+            subtitle: 'Pre-fill fields from last transaction',
+            iconColor: const Color(0xFF26A69A),
+            onTap: () => _showAutofillSettings(context, ref),
+          ),
+          Builder(builder: (context) {
+            final homeTab = ref.watch(homeTabProvider);
+            return _SettingsTile(icon: Icons.home_outlined, title: 'Start Screen',
+                subtitle: homeTabLabels[homeTab],
+                iconColor: const Color(0xFF26A69A),
+                onTap: () => _showHomeTabPicker(context, ref));
+          }),
+          Builder(builder: (context) {
+            final font = ref.watch(fontProvider);
+            return _SettingsTile(icon: Icons.text_fields_rounded, title: 'Font',
+                subtitle: font, iconColor: const Color(0xFF7E57C2),
+                onTap: () => _showFontPicker(context, ref));
+          }),
+          Builder(builder: (context) {
+            final scale = ref.watch(textScaleProvider);
+            final label = textScaleOptions[scale] ?? '${(scale * 100).round()}%';
+            return _SettingsTile(icon: Icons.format_size_rounded, title: 'Text Size',
+                subtitle: label, iconColor: const Color(0xFF5C6BC0),
+                onTap: () => _showTextSizePicker(context, ref));
+          }),
+          _SettingsTile(icon: Icons.view_list_rounded, title: 'Transaction List',
+              subtitle: 'Layout, icons, date banner',
+              iconColor: const Color(0xFF42A5F5),
+              onTap: () => context.push('/tx-list-settings')),
+          const SizedBox(height: 20),
+
+          // ── Data & Sync ──
+          _SectionHeader(title: 'DATA'),
+          const SizedBox(height: 8),
+          _SettingsTile(icon: Icons.cloud_sync_rounded, title: 'Cloud Sync',
+              subtitle: 'Sync across devices', iconColor: AppColors.accent,
+              onTap: () => context.push('/sync')),
+          Builder(builder: (context) {
+            final syncState = ref.watch(syncProvider);
+            final isConnected = syncState.activeProvider is GoogleDriveProvider;
+            return _SettingsTile(
+              icon: Icons.people_outline_rounded,
+              title: 'Share Household',
+              subtitle: isConnected
+                  ? 'Invite someone to share your data'
+                  : 'Connect Cloud Sync first to share',
+              iconColor: const Color(0xFF7E57C2),
+              onTap: () {
+                if (isConnected) {
+                  _showShareHousehold(context, ref);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Set up Cloud Sync with Google Drive first to share your household.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+            );
+          }),
+          _SettingsTile(icon: Icons.backup_rounded, title: 'Backup & Restore',
+              subtitle: 'Export or restore database', iconColor: const Color(0xFF42A5F5),
+              onTap: () => context.push('/backup')),
+          _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
+              subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
+              onTap: () => context.push('/import-export')),
+          _SettingsTile(
+              icon: Icons.notifications_active_rounded,
+              title: 'Notifications',
+              subtitle: 'Daily reminder, envelope & bill alerts',
+              iconColor: const Color(0xFFFF9800),
+              onTap: () => context.push('/notifications')),
+          _SettingsTile(
+              icon: Icons.monitor_heart_rounded,
+              title: 'Health Check',
+              subtitle: 'Verify data integrity & repair',
+              iconColor: const Color(0xFF4DB6AC),
+              onTap: () => context.push('/health-check')),
+          // ── Receipt Sync toggle ──
+          Builder(builder: (context) {
+            final syncState = ref.watch(syncProvider);
+            final isCloudConnected = syncState.activeProvider != null;
+            if (!isCloudConnected) return const SizedBox.shrink();
+            final receiptSyncEnabled = ref.watch(receiptSyncProvider);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.sf(context),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
+                    border: Border.all(color: AppColors.bd(context)),
+                  ),
+                  child: SwitchListTile(
+                    secondary: Container(
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.photo_library_rounded,
+                          size: 18, color: Color(0xFF7E57C2)),
+                    ),
+                    title: Text('Sync Receipts',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    subtitle: Text(
+                      receiptSyncEnabled
+                          ? 'Upload receipt photos to cloud storage'
+                          : 'Receipts are stored on this device only',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context)),
+                    ),
+                    value: receiptSyncEnabled,
+                    onChanged: (_) =>
+                        ref.read(receiptSyncProvider.notifier).toggle(),
+                    activeTrackColor: AppColors.accent,
+                  ),
+                ),
+                if (!receiptSyncEnabled)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded,
+                            size: 14, color: AppColors.caution),
+                        const SizedBox(width: 6),
+                        Text('Receipts are stored on this device only',
+                            style: TextStyle(
+                                fontSize: 11, color: AppColors.caution)),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }),
+          const SizedBox(height: 20),
+
+          // ── Preferences ──
+          _SectionHeader(title: 'PREFERENCES'),
+          const SizedBox(height: 8),
+          _SettingsTile(
+            icon: Icons.monetization_on_rounded,
+            title: 'Base Currency',
+            subtitle: household?.baseCurrency ?? 'USD',
+            iconColor: AppColors.caution,
+            onTap: () async {
+              final result = await showModalBottomSheet<String>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => CurrencySheet(
+                    current: household?.baseCurrency ?? 'USD'),
+              );
+              if (result != null && household != null) {
+                final db = ref.read(databaseProvider);
+                await (db.update(db.households)
+                      ..where((h) => h.id.equals(household.id)))
+                    .write(HouseholdsCompanion(baseCurrency: Value(result)));
+              }
+            },
+          ),
+          _SettingsTile(
+            icon: Icons.calendar_today_rounded,
+            title: 'Period Start Day',
+            subtitle: 'Day ${household?.periodStartDay ?? 1}',
+            iconColor: AppColors.caution,
+            onTap: () => _editNumber(context, ref,
+                title: 'Period Start Day',
+                currentValue: household?.periodStartDay ?? 1,
+                min: 1, max: 28,
+                description: 'The day of the month when a new budget period starts.',
+                onSave: (val) async {
+                  final db = ref.read(databaseProvider);
+                  await (db.update(db.households)
+                        ..where((h) => h.id.equals(household!.id)))
+                      .write(HouseholdsCompanion(periodStartDay: Value(val)));
+                }),
+          ),
+          _SettingsTile(
+            icon: Icons.attach_money_rounded,
+            title: 'Currency Symbols',
+            subtitle: 'Override how currencies are displayed',
+            iconColor: const Color(0xFF4DB6AC),
+            onTap: () => _showCurrencySymbolEditor(context, ref),
+          ),
+          Builder(builder: (context) {
+            ref.watch(numberFormatProvider);
+            final preview = formatAmount(1234567.89);
+            return _SettingsTile(
+              icon: Icons.format_list_numbered_rounded,
+              title: 'Number Format',
+              subtitle: 'Preview: $preview',
+              iconColor: const Color(0xFF5C6BC0),
+              onTap: () => _showNumberFormatEditor(context, ref),
+            );
+          }),
+          Builder(builder: (context) {
+            final dateFmt = ref.watch(dateFormatProvider);
+            final preview = DateFormat(dateFmt).format(DateTime.now());
+            return _SettingsTile(
+              icon: Icons.date_range_rounded,
+              title: 'Date Format',
+              subtitle: preview,
+              iconColor: const Color(0xFF7E57C2),
+              onTap: () => _showDateFormatPicker(context, ref),
+            );
+          }),
+          const SizedBox(height: 20),
+
+          // ── Security ──
+          _SectionHeader(title: 'SECURITY'),
+          const SizedBox(height: 8),
+          _BiometricTile(),
+          const SizedBox(height: 20),
+
+          // ── Danger zone ──
+          _SettingsTile(icon: Icons.delete_forever_rounded, title: 'Reset Everything',
+              subtitle: 'Erase all data and start fresh', iconColor: AppColors.overspent,
+              onTap: () => _confirmReset(context, ref)),
+        ],
+      ),
+    );
+  }
+}
+
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
@@ -1346,52 +1387,6 @@ class _SectionHeader extends StatelessWidget {
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
           color: AppColors.ts(context),
-        ),
-      ),
-    );
-  }
-}
-
-class _GridTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  const _GridTile({
-    required this.icon,
-    required this.title,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final width = (MediaQuery.of(context).size.width - 16 * 2 - 10) / 2;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          border: Border.all(color: AppColors.cardBorder(context)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: iconColor),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context),
-                  ),
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ],
         ),
       ),
     );

@@ -35,6 +35,7 @@ import 'features/settings/about_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/health_check_screen.dart';
 import 'features/transactions/bill_splitter_screen.dart';
+import 'features/settings/settings_screen.dart';
 import 'features/transactions/tx_list_settings_screen.dart';
 import 'features/web_companion/web_companion_screen.dart';
 import 'features/settings/notifications_screen.dart';
@@ -270,6 +271,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/tx-list-settings',
           pageBuilder: (_, state) => slideUpPage(
               child: const TxListSettingsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/settings',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const SettingsDetailScreen(), state: state),
         ),
       ],
     );
