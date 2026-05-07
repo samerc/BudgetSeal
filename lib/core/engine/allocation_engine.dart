@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
 import 'balance_calculator.dart';
@@ -372,11 +374,46 @@ class AllocationEngine {
     }
 
     // For expenses: create a ledger consumption entry per categorised line.
+    // Convert to the envelope's target currency (or base) so envelopes
+    // always track a single currency instead of accumulating foreign debt.
     if (type == 'expense') {
       for (final line in lines) {
         if (line.categoryId != null) {
           final allocationId = await _allocationIdForCategory(line.categoryId!);
           if (allocationId != null) {
+            // Look up the envelope's target currency
+            final alloc = await (_db.select(_db.allocations)
+                  ..where((a) => a.id.equals(allocationId))
+                  ..limit(1))
+                .getSingleOrNull();
+            final targetCurrency = alloc?.targetCurrency ?? baseCurrency;
+
+            double debitAmount;
+            String debitCurrency;
+            double debitRate;
+
+            if (line.currency == targetCurrency) {
+              // Same currency — no conversion needed
+              debitAmount = -line.amount;
+              debitCurrency = line.currency;
+              debitRate = line.exchangeRateToBase;
+            } else if (isRealRate(line.currency, baseCurrency, line.exchangeRateToBase)) {
+              // Foreign currency with a real rate — convert to base,
+              // then record in the envelope's target currency
+              final baseAmount = line.amount * line.exchangeRateToBase;
+              debitAmount = -baseAmount;
+              debitCurrency = baseCurrency;
+              debitRate = 1.0;
+              debugPrint('[AllocationEngine] Cross-currency debit: '
+                  '${line.amount} ${line.currency} → $baseAmount $baseCurrency');
+            } else {
+              // Foreign currency with no real rate — skip deduction
+              // to avoid inflating the envelope with unconverted amounts.
+              debugPrint('[AllocationEngine] Skipping ledger entry: '
+                  '${line.amount} ${line.currency} has no exchange rate');
+              continue;
+            }
+
             final lineAccountId = line.accountId ?? accountId;
             await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
               id: _uuid.v4(),
@@ -384,9 +421,9 @@ class AllocationEngine {
               sourceTransactionId: Value(txId),
               sourceAccountId: Value(lineAccountId),
               entryType: 'consumption',
-              amount: -line.amount, // debit in line's currency
-              currency: line.currency,
-              exchangeRateToBase: Value(line.exchangeRateToBase),
+              amount: debitAmount,
+              currency: debitCurrency,
+              exchangeRateToBase: Value(debitRate),
               note: Value(line.note.isNotEmpty ? line.note : note),
               deviceId: deviceId,
             ));
