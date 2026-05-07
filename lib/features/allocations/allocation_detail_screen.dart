@@ -842,9 +842,13 @@ class _AllocationDetailScreenState
           for (final entry in otherBalances.entries)
             if (entry.value.abs() > 0.001)
               Text(
-                '+ ${formatAmount(entry.value, currency: entry.key)}',
+                entry.value >= 0
+                    ? '+ ${formatAmount(entry.value, currency: entry.key)}'
+                    : formatAmount(entry.value, currency: entry.key),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: entry.value < 0
+                      ? const Color(0xFFFFB74D) // amber warning for debt
+                      : Colors.white.withValues(alpha: 0.7),
                   fontSize: 13,
                 ),
               ),

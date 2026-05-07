@@ -130,8 +130,18 @@ class AllocationCard extends StatelessWidget {
     final rawProgress = hasTarget ? (targetCcyBalance / targetAmount!) : null;
     // Clamped progress for LinearProgressIndicator (must be 0.0–1.0)
     final progress = rawProgress?.clamp(0.0, 1.0);
-    // Overspent if any currency balance is negative
-    final isOverspent = balanceByCurrency.values.any((v) => v < -0.01);
+    // Overspent: target currency balance is negative
+    final isTargetOverspent = targetCcyBalance < -0.01;
+    // Cross-currency debt: another currency has negative balance
+    final crossCurrencyDebt = <String, double>{};
+    for (final entry in balanceByCurrency.entries) {
+      if (entry.key != effectiveTargetCurrency && entry.value < -0.01) {
+        crossCurrencyDebt[entry.key] = entry.value;
+      }
+    }
+    final hasCrossDebt = crossCurrencyDebt.isNotEmpty;
+    // Legacy compatibility: either condition counts as "overspent" for border
+    final isOverspent = isTargetOverspent;
 
     final bool hasCategoryIcon = categoryName != null;
     Color parsedColor = _typeColor;
@@ -149,8 +159,10 @@ class AllocationCard extends StatelessWidget {
     final Color borderColor;
     if (needsReview) {
       borderColor = AppColors.caution.withValues(alpha: 0.6);
-    } else if (isOverspent) {
+    } else if (isTargetOverspent) {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
+    } else if (hasCrossDebt) {
+      borderColor = AppColors.caution.withValues(alpha: 0.5);
     } else if (_isSavingWithGoal && targetCcyBalance >= targetAmount!) {
       borderColor = AppColors.healthy.withValues(alpha: 0.35);
     } else if (hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
@@ -218,7 +230,7 @@ class AllocationCard extends StatelessWidget {
                           value: progress,
                           minHeight: 4,
                           backgroundColor: AppColors.bd(context),
-                          color: isOverspent
+                          color: isTargetOverspent
                               ? AppColors.overspent
                               : progress >= 1.0
                                   ? AppColors.healthy
@@ -253,20 +265,20 @@ class AllocationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Balance — show in base currency only
+              // Balance — target currency + cross-currency debt
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isOverspent)
+                      if (isTargetOverspent)
                         Padding(
                           padding: const EdgeInsets.only(right: 4),
                           child: Icon(Icons.warning_amber_rounded,
                               size: 14, color: AppColors.overspent),
                         ),
-                      if (_isSaving && !isOverspent)
+                      if (_isSaving && !isTargetOverspent)
                         Text(
                           'Saved: ',
                           style: TextStyle(
@@ -280,7 +292,7 @@ class AllocationCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: isOverspent
+                          color: isTargetOverspent
                               ? AppColors.overspent
                               : AppColors.tp(context),
                         ),
@@ -307,6 +319,16 @@ class AllocationCard extends StatelessWidget {
                       '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
                       style: TextStyle(
                           fontSize: 10, color: AppColors.th(context)),
+                    ),
+                  // Show cross-currency debt below the amount
+                  for (final debt in crossCurrencyDebt.entries)
+                    Text(
+                      formatAmount(debt.value, currency: debt.key),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.caution,
+                      ),
                     ),
                 ],
               ),
