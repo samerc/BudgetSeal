@@ -87,8 +87,13 @@ Future<String?> pickAndSaveReceipt(BuildContext context) async {
 
 /// Pick multiple receipt photos (multi-select from gallery, or one from camera).
 /// Returns a list of saved FILENAMES (not full paths). Empty if cancelled.
-Future<List<String>> pickAndSaveReceipts(BuildContext context) async {
-  final result = await _showPickerSheet(context);
+Future<List<String>> pickAndSaveReceipts(
+  BuildContext context, {
+  bool fromCamera = false,
+}) async {
+  final result = fromCamera
+      ? _PickerChoice.camera
+      : await _showPickerSheet(context);
   if (result == null) return [];
 
   if (result == _PickerChoice.camera) {

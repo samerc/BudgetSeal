@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/accent_color_provider.dart';
 import '../../core/providers/biometric_provider.dart';
 import '../../core/providers/currency_symbol_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -153,6 +154,14 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'View upcoming recurring bills',
                 iconColor: const Color(0xFF66BB6A),
                 onTap: () => context.push('/bill-calendar')),
+            _SettingsTile(icon: Icons.upcoming_rounded, title: 'Upcoming Bills',
+                subtitle: 'Bills due soon with urgency',
+                iconColor: const Color(0xFFEF6C00),
+                onTap: () => context.push('/upcoming-bills')),
+            _SettingsTile(icon: Icons.flight_takeoff_rounded, title: 'Travel Exchange',
+                subtitle: 'Exchange currency for a trip',
+                iconColor: const Color(0xFF42A5F5),
+                onTap: () => context.push('/travel-exchange')),
             _SettingsTile(icon: Icons.currency_exchange_rounded, title: 'Exchange Rates',
                 subtitle: 'View and refresh currency rates',
                 iconColor: const Color(0xFF4DB6AC),
@@ -178,6 +187,10 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Track recurring subscriptions',
                 iconColor: AppColors.accent,
                 onTap: () => context.push('/subscriptions')),
+            _SettingsTile(icon: Icons.flag_rounded, title: 'Goals & Loans',
+                subtitle: 'Savings goals and debt tracking',
+                iconColor: const Color(0xFF22C55E),
+                onTap: () => context.push('/objectives')),
             _SettingsTile(icon: Icons.refresh_rounded, title: 'Period Transition',
                 subtitle: 'End period and resolve leftovers',
                 iconColor: AppColors.accent,
@@ -366,6 +379,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         batch.deleteAll(db.accounts);
         batch.deleteAll(db.recurringTransactions);
         batch.deleteAll(db.transactionTemplates);
+        batch.deleteAll(db.objectives);
         batch.deleteAll(db.fxRates);
         batch.deleteAll(db.users);
         batch.deleteAll(db.households);
@@ -804,30 +818,72 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     if (picked != null) ref.read(themeModeProvider.notifier).setMode(picked);
   }
 
-  void _showDateFormatPicker(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(dateFormatProvider);
-    final now = DateTime.now();
+  void _showAccentColorPicker(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(accentColorProvider);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Date Format', style: TextStyle(fontSize: 18,
+              child: Text('Accent Color', style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
-          for (final entry in dateFormatOptions.entries)
-            ListTile(
-              leading: Icon(current == entry.key
-                  ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: AppColors.accent),
-              title: Text(DateFormat(entry.key).format(now)),
-              subtitle: Text(entry.key, style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-              onTap: () => Navigator.pop(ctx, entry.key),
+          // System option
+          ListTile(
+            leading: Icon(current == 'system'
+                ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                color: AppColors.accent),
+            title: const Text('System'),
+            subtitle: const Text('Material You (Android 12+)'),
+            onTap: () => Navigator.pop(ctx, 'system'),
+          ),
+          // Default
+          ListTile(
+            leading: Icon(current == 'default'
+                ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                color: const Color(0xFF2563EB)),
+            title: const Text('Royal Blue'),
+            subtitle: const Text('Default'),
+            trailing: Container(width: 24, height: 24,
+                decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle)),
+            onTap: () => Navigator.pop(ctx, 'default'),
+          ),
+          // Color grid
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Wrap(spacing: 12, runSpacing: 12,
+              children: accentColorOptions.entries
+                  .where((e) => e.key != 'default')
+                  .map((e) {
+                final color = AppColors.fromHex(e.value);
+                final isSelected = current == e.key;
+                return GestureDetector(
+                  onTap: () => Navigator.pop(ctx, e.key),
+                  child: Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: color, shape: BoxShape.circle,
+                      border: isSelected ? Border.all(color: AppColors.tp(context), width: 3) : null,
+                      boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)] : null,
+                    ),
+                    child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
+                  ),
+                );
+              }).toList(),
             ),
-          const SizedBox(height: 8),
+          ),
+          const SizedBox(height: 12),
         ]),
       ),
     );
-    if (picked != null) ref.read(dateFormatProvider.notifier).setFormat(picked);
+    if (picked != null) ref.read(accentColorProvider.notifier).setColor(picked);
+  }
+
+  void _showDateFormatPicker(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _DateFormatSheet(),
+    );
   }
 
   void _showHomeTabPicker(BuildContext context, WidgetRef ref) async {
@@ -1131,6 +1187,14 @@ class SettingsDetailScreen extends ConsumerWidget {
           _SettingsTile(icon: Icons.palette_outlined, title: 'Theme',
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
+          Builder(builder: (context) {
+            final accentVal = ref.watch(accentColorProvider);
+            final accentLabel = accentVal == 'system' ? 'System (Material You)'
+                : accentVal == 'default' ? 'Royal Blue' : accentVal;
+            return _SettingsTile(icon: Icons.colorize_rounded, title: 'Accent Color',
+                subtitle: accentLabel, iconColor: ref.read(accentColorProvider.notifier).resolve() ?? AppColors.accent,
+                onTap: () => _showAccentColorPicker(context, ref));
+          }),
           _SettingsTile(icon: Icons.color_lens_outlined, title: 'Colors',
               subtitle: 'Income, expense & transfer', iconColor: const Color(0xFFEC407A),
               onTap: () => _showColorConfig(context, ref)),
@@ -1563,7 +1627,15 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
   @override
   Widget build(BuildContext context) {
     final overrides = ref.watch(currencySymbolProvider);
-    final allCurrencies = defaultCurrencySymbols.keys.toList()..sort();
+    // Pin overridden currencies to the top, then alphabetical
+    final allCurrencies = defaultCurrencySymbols.keys.toList()
+      ..sort((a, b) {
+        final aOver = overrides.containsKey(a);
+        final bOver = overrides.containsKey(b);
+        if (aOver && !bOver) return -1;
+        if (!aOver && bOver) return 1;
+        return a.compareTo(b);
+      });
 
     return Container(
       constraints: BoxConstraints(
@@ -1612,9 +1684,29 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-              itemCount: allCurrencies.length,
+              itemCount: allCurrencies.length + (overrides.isNotEmpty ? 1 : 0),
               itemBuilder: (_, i) {
-                final code = allCurrencies[i];
+                // Insert a divider after the pinned overrides
+                if (overrides.isNotEmpty && i == overrides.length) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(children: [
+                      Expanded(child: Divider(color: AppColors.bd(context))),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text('ALL CURRENCIES',
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: AppColors.th(context))),
+                      ),
+                      Expanded(child: Divider(color: AppColors.bd(context))),
+                    ]),
+                  );
+                }
+                final idx = overrides.isNotEmpty && i > overrides.length ? i - 1 : i;
+                final code = allCurrencies[idx];
                 final defaultSymbol = defaultCurrencySymbols[code]!;
                 final currentSymbol = overrides[code] ?? defaultSymbol;
                 final isOverridden = overrides.containsKey(code);
@@ -1716,7 +1808,6 @@ class _NumberFormatSheet extends ConsumerStatefulWidget {
 class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
   late ThousandsSeparator _thousands;
   late DecimalSeparator _decimal;
-  late NegativeFormat _negative;
 
   @override
   void initState() {
@@ -1724,16 +1815,20 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
     final current = ref.read(numberFormatProvider);
     _thousands = current.thousands;
     _decimal = current.decimal;
-    _negative = current.negative;
+  }
+
+  void _applyImmediately() {
+    final prefs = NumberFormatPrefs(
+        thousands: _thousands, decimal: _decimal, negative: NegativeFormat.minus);
+    ref.read(numberFormatProvider.notifier).update(prefs);
   }
 
   String get _preview {
     // Temporarily apply to get a preview
-    final old = NumberFormatPrefs(
-        thousands: _thousands, decimal: _decimal, negative: _negative);
-    setNumberFormatPrefs(old);
+    setNumberFormatPrefs(NumberFormatPrefs(
+        thousands: _thousands, decimal: _decimal, negative: NegativeFormat.minus));
     final pos = formatAmount(1234567.89, currency: 'USD');
-    final neg = formatAmount(-500.00, currency: 'USD');
+    final neg = formatSignedAmount(500.00, currency: 'USD', type: 'expense');
     return '$pos  |  $neg';
   }
 
@@ -1820,7 +1915,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 return GestureDetector(
                   onTap: conflicts
                       ? null
-                      : () => setState(() => _thousands = t),
+                      : () { setState(() => _thousands = t); _applyImmediately(); },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
@@ -1848,6 +1943,14 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 );
               }).toList(),
             ),
+            if (ThousandsSeparator.values.any((t) =>
+                (t == ThousandsSeparator.comma && _decimal == DecimalSeparator.comma) ||
+                (t == ThousandsSeparator.period && _decimal == DecimalSeparator.period)))
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text('Some options are hidden because they conflict with the decimal separator.',
+                    style: TextStyle(fontSize: 11, color: AppColors.th(context))),
+              ),
             const SizedBox(height: 20),
 
             // Decimal separator
@@ -1868,7 +1971,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 return GestureDetector(
                   onTap: conflicts
                       ? null
-                      : () => setState(() => _decimal = d),
+                      : () { setState(() => _decimal = d); _applyImmediately(); },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
@@ -1896,67 +1999,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 20),
-
-            // Negative format
-            Text('Negative Numbers',
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context))),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: NegativeFormat.values.map((n) {
-                final selected = n == _negative;
-                return GestureDetector(
-                  onTap: () => setState(() => _negative = n),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.accent.withValues(alpha: 0.15)
-                          : AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: selected
-                              ? AppColors.accent
-                              : AppColors.bd(context)),
-                    ),
-                    child: Text(n.label,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: selected
-                                ? AppColors.accent
-                                : AppColors.tp(context))),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
-
-            FilledButton(
-              onPressed: () {
-                ref.read(numberFormatProvider.notifier).update(
-                    NumberFormatPrefs(
-                        thousands: _thousands,
-                        decimal: _decimal,
-                        negative: _negative));
-                Navigator.pop(context);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Save',
-                  style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -1965,6 +2008,57 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
 }
 
 // ─── Backup Reminder Banner (moved from dashboard) ──────────────────────────
+
+// ─── Date Format Sheet ──────────────────────────────────────────────────────
+
+class _DateFormatSheet extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(dateFormatProvider);
+    final now = DateTime.now();
+
+    return SafeArea(
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Date Format',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tp(context))),
+          ),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final entry in dateFormatOptions.entries)
+                  ListTile(
+                    leading: Icon(
+                        current == entry.key
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_unchecked,
+                        color: AppColors.accent),
+                    title: Text(DateFormat(entry.key).format(now)),
+                    subtitle: Text(entry.key,
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context))),
+                    onTap: () {
+                      ref.read(dateFormatProvider.notifier).setFormat(entry.key);
+                    },
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+  }
+}
 
 // ─── Daily Reminder Tile ─────────────────────────────────────────────────────
 

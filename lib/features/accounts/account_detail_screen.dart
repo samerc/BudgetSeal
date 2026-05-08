@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/accounts_dao.dart';
 import '../../core/engine/balance_calculator.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -36,6 +37,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   final _currencyController = TextEditingController();
   double _initialBalance = 0;
   String _type = 'cash';
+  int? _decimalPlaces; // null = auto-detect from currency
+  bool _isTravel = false;
   bool _loading = false;
   double? _currentBalance;
 
@@ -64,18 +67,24 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   }
 
   Future<void> _loadAccount() async {
-    final db = ref.read(databaseProvider);
-    final acc = await AccountsDao(db).getById(widget.accountId);
-    if (acc != null && mounted) {
-      final calculator = BalanceCalculator(db);
-      final balance = await calculator.accountBalance(acc.id);
-      setState(() {
-        _nameController.text = acc.name;
-        _currencyController.text = acc.currency;
-        _initialBalance = acc.initialBalance;
-        _type = acc.type;
-        _currentBalance = balance;
-      });
+    try {
+      final db = ref.read(databaseProvider);
+      final acc = await AccountsDao(db).getById(widget.accountId);
+      if (acc != null && mounted) {
+        final calculator = BalanceCalculator(db);
+        final balance = await calculator.accountBalance(acc.id);
+        setState(() {
+          _nameController.text = acc.name;
+          _currencyController.text = acc.currency;
+          _initialBalance = acc.initialBalance;
+          _type = acc.type;
+          _decimalPlaces = acc.decimalPlaces;
+          _isTravel = acc.isTravel;
+          _currentBalance = balance;
+        });
+      }
+    } catch (e) {
+      debugPrint('[AccountDetail] Error loading: $e');
     }
   }
 
@@ -167,6 +176,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               onSelected: (v) {
                 if (v == 'adjust') {
                   _showAdjustBalanceSheet();
+                } else if (v == 'convert_back') {
+                  _convertBack();
                 } else if (v == 'archive') {
                   _confirmArchive();
                 } else if (v == 'delete') {
@@ -184,6 +195,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     ],
                   ),
                 ),
+                if (_isTravel && _currentBalance != null && _currentBalance! > 0)
+                  const PopupMenuItem(
+                    value: 'convert_back',
+                    child: Row(
+                      children: [
+                        Icon(Icons.currency_exchange_rounded, size: 18),
+                        SizedBox(width: 10),
+                        Text('Convert Back & Close'),
+                      ],
+                    ),
+                  ),
                 PopupMenuItem(
                   value: 'archive',
                   child: Row(
@@ -295,6 +317,61 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               ),
               const SizedBox(height: 16),
             ],
+
+            // Travel wallet helper banner
+            if (!_isNew && _isTravel && _currentBalance != null && _currentBalance! > 0) ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flight_land_rounded,
+                            size: 18, color: AppColors.accent),
+                        const SizedBox(width: 8),
+                        Text('Back from your trip?',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.tp(context))),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Convert your remaining ${_currencyController.text} balance back and close this travel wallet.',
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.ts(context),
+                          height: 1.4),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _convertBack,
+                        icon: const Icon(Icons.currency_exchange_rounded, size: 16),
+                        label: const Text('Convert Back & Close'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.accent,
+                          side: BorderSide(color: AppColors.accent.withValues(alpha: 0.3)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Settings section
             if (!_isNew) ...[
               // Collapsible settings toggle
@@ -420,6 +497,34 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       : _currencyController.text,
                   onChanged: (v) =>
                       setState(() => _currencyController.text = v),
+                ),
+              ),
+
+              // ── Decimal places ──
+              const SizedBox(height: 12),
+              _formSection(
+                context,
+                icon: Icons.pin_rounded,
+                title: 'DECIMAL PLACES',
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int?>(
+                    value: _decimalPlaces,
+                    isExpanded: true,
+                    isDense: true,
+                    items: [
+                      DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text('Auto (${currencyDecimals(_currencyController.text)})',
+                            style: TextStyle(fontSize: 14, color: AppColors.tp(context))),
+                      ),
+                      for (final d in [0, 1, 2, 3])
+                        DropdownMenuItem<int?>(
+                          value: d,
+                          child: Text('$d', style: TextStyle(fontSize: 14, color: AppColors.tp(context))),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _decimalPlaces = v),
+                  ),
                 ),
               ),
 
@@ -590,8 +695,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                                 overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 2),
                             Text(
-                              DateFormat('MMM d, yyyy')
-                                  .format(tx.createdAt.toLocal()),
+                              formatDate(tx.createdAt.toLocal()),
                               style: TextStyle(
                                   fontSize: 10,
                                   color: AppColors.th(context)),
@@ -780,6 +884,150 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   }
 
   // ---------------------------------------------------------------------------
+  // Convert Back (travel wallets)
+  // ---------------------------------------------------------------------------
+
+  Future<void> _convertBack() async {
+    final balance = _currentBalance ?? 0;
+    if (balance <= 0) return;
+
+    final accounts = ref.read(accountsProvider).value ?? [];
+    final regularAccounts = accounts
+        .where((a) => !a.archived && !a.isTravel && a.id != widget.accountId)
+        .toList();
+
+    if (regularAccounts.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No account to transfer to'),
+              behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
+
+    String? destAccountId = regularAccounts.first.id;
+    double receivedAmount = 0;
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('Convert Back',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 4),
+            Text(
+              'Convert ${formatAmount(balance, currency: _currencyController.text)} back to your account',
+              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+            ),
+            const SizedBox(height: 20),
+            // Destination account picker
+            DropdownButtonFormField<String>(
+              value: destAccountId,
+              decoration: const InputDecoration(
+                labelText: 'Transfer to',
+              ),
+              items: regularAccounts.map((a) => DropdownMenuItem(
+                value: a.id,
+                child: Text('${a.name} (${a.currency})'),
+              )).toList(),
+              onChanged: (v) => setModalState(() => destAccountId = v),
+            ),
+            const SizedBox(height: 16),
+            // Amount received
+            CalculatorAmountField(
+              value: receivedAmount,
+              label: 'Amount received',
+              currency: regularAccounts
+                  .where((a) => a.id == destAccountId).firstOrNull?.currency,
+              hintText: '0.00',
+              fontSize: 22,
+              onChanged: (v) => setModalState(() => receivedAmount = v),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: receivedAmount > 0
+                    ? () => Navigator.pop(ctx, true)
+                    : null,
+                child: const Text('Convert & Archive'),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final engine = ref.read(allocationEngineProvider);
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+
+      final destAcc = regularAccounts
+          .where((a) => a.id == destAccountId).firstOrNull;
+      if (destAcc == null) return;
+
+      // Record the reverse transfer
+      final rate = balance > 0 ? receivedAmount / balance : 1.0;
+      await engine.recordTransfer(
+        householdId: householdId,
+        fromAccountId: widget.accountId,
+        toAccountId: destAccountId!,
+        amount: balance,
+        currency: _currencyController.text,
+        exchangeRateToBase: rate,
+        createdBy: 'local',
+        deviceId: 'local',
+        note: 'Travel convert back → ${destAcc.currency}',
+        date: DateTime.now(),
+      );
+
+      // Archive the travel account
+      final db = ref.read(databaseProvider);
+      await (db.update(db.accounts)
+            ..where((a) => a.id.equals(widget.accountId)))
+          .write(AccountsCompanion(
+        archived: const Value(true),
+        lastModified: Value(DateTime.now()),
+      ));
+
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountsWithBalanceProvider);
+      ref.invalidate(unallocatedProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Converted back ${formatAmount(receivedAmount, currency: destAcc.currency)} and archived'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'),
+              behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Archive
   // ---------------------------------------------------------------------------
 
@@ -940,6 +1188,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         type: _type,
         currency: currency,
         initialBalance: Value(balance),
+        decimalPlaces: Value(_decimalPlaces),
         deviceId: 'local',
       ));
       // Refresh account list and any balance-dependent screens

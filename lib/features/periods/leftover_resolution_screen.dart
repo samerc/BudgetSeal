@@ -7,6 +7,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/error_retry.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
@@ -279,7 +280,7 @@ class _LeftoverResolutionScreenState
                                     (e) => DropdownMenuItem(
                                       value: e.key,
                                       child: Text(
-                                        '${e.key} — ${e.value.toStringAsFixed(2)}',
+                                        '${e.key} — ${formatNumber(e.value)}',
                                       ),
                                     ),
                                   ),
@@ -474,7 +475,7 @@ class _BalanceRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${amount >= 0 ? '' : '-'}${amount.abs().toStringAsFixed(2)}',
+              formatNumber(amount),
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w600,

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -398,8 +399,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                                               style: const TextStyle(
                                                   fontSize: 13)),
                                           subtitle: Text(
-                                            DateFormat('MMM d')
-                                                .format(r.nextDueDate),
+                                            formatDate(r.nextDueDate),
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color:

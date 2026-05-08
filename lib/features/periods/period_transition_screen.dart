@@ -8,6 +8,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/error_retry.dart';
 
@@ -374,7 +375,7 @@ class _ResolutionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${resolution.balance.toStringAsFixed(2)} ${resolution.currency}',
+                    '${formatAmount(resolution.balance, currency: resolution.currency)}',
                     style: const TextStyle(
                       color: AppColors.healthy,
                       fontWeight: FontWeight.w600,

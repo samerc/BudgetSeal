@@ -24,36 +24,43 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   bool _showQr = false;
   bool _hasPinSet = false;
   bool _wifiWarning = false;
+  bool _hasWifi = true; // assume yes until checked
   String? _wifiName;
 
   @override
   void initState() {
     super.initState();
     _checkPin();
-    _checkWifiSecurity();
+    _checkWifiConnectivity();
   }
 
-  Future<void> _checkWifiSecurity() async {
+  Future<void> _checkWifiConnectivity() async {
     try {
       final info = NetworkInfo();
-      final name = await info.getWifiName(); // e.g. "MyHomeWiFi"
+      final ip = await info.getWifiIP();
+      final name = await info.getWifiName();
       if (!mounted) return;
-      // If we can't get the name, or the name suggests a public network, warn
+
+      final connected = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
+
+      // Check if the network name suggests a public network
       final lower = (name ?? '').replaceAll('"', '').toLowerCase();
       final publicKeywords = [
         'guest', 'public', 'free', 'open', 'airport', 'hotel',
         'cafe', 'coffee', 'starbucks', 'mcdonalds', 'restaurant',
         'library', 'hospital', 'mall', 'shop', 'store',
       ];
-      final isPublic = name == null ||
+      final isPublic = connected && (name == null ||
           name.isEmpty ||
-          publicKeywords.any((k) => lower.contains(k));
+          publicKeywords.any((k) => lower.contains(k)));
+
       setState(() {
+        _hasWifi = connected;
         _wifiWarning = isPublic;
         _wifiName = name?.replaceAll('"', '');
       });
     } catch (_) {
-      // Can't detect — don't show warning
+      if (mounted) setState(() => _hasWifi = false);
     }
   }
 
@@ -230,8 +237,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Network security notice — always visible before starting
-          if (!state.isRunning) ...[
+          // No WiFi banner — blocks starting
+          if (!_hasWifi && !state.isRunning) ...[
+            _buildNoWifiBanner(),
+            const SizedBox(height: 16),
+          ],
+
+          // Network security notice — visible before starting when WiFi is available
+          if (_hasWifi && !state.isRunning) ...[
             _buildNetworkNotice(),
             const SizedBox(height: 16),
           ],
@@ -264,12 +277,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Widget _buildStatusCard(WebCompanionState state) {
-    final (statusText, statusColor, statusIcon) = switch (state.status) {
-      WebServerStatus.stopped => ('Server stopped', AppColors.ts(context), Icons.stop_circle_outlined),
-      WebServerStatus.starting => ('Starting...', const Color(0xFF0EA5E9), Icons.hourglass_top_rounded),
-      WebServerStatus.running => ('Server running', const Color(0xFF059669), Icons.check_circle_rounded),
-      WebServerStatus.error => ('Error', const Color(0xFFDC2626), Icons.error_outline_rounded),
-    };
+    final (statusText, statusColor, statusIcon) = !_hasWifi && !state.isRunning
+        ? ('No WiFi', AppColors.th(context), Icons.wifi_off_rounded)
+        : switch (state.status) {
+            WebServerStatus.stopped => ('Server stopped', AppColors.ts(context), Icons.stop_circle_outlined),
+            WebServerStatus.starting => ('Starting...', const Color(0xFF0EA5E9), Icons.hourglass_top_rounded),
+            WebServerStatus.running => ('Server running', const Color(0xFF059669), Icons.check_circle_rounded),
+            WebServerStatus.error => ('Error', const Color(0xFFDC2626), Icons.error_outline_rounded),
+          };
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -324,7 +339,9 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             child: state.isStarting
                 ? const LinearProgressIndicator()
                 : FilledButton(
-                    onPressed: () => _toggleServer(state),
+                    onPressed: (!state.isRunning && !_hasWifi)
+                        ? null
+                        : () => _toggleServer(state),
                     style: state.isRunning
                         ? FilledButton.styleFrom(
                             backgroundColor:
@@ -529,6 +546,70 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   fontSize: 13,
                   color: Color(0xFF92400E),
                   height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoWifiBanner() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF3B1111) : const Color(0xFFFEE2E2),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        border: Border.all(
+          color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.wifi_off_rounded,
+                  color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                  size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'No WiFi Connection',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                height: 30,
+                child: TextButton(
+                  onPressed: _checkWifiConnectivity,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    minimumSize: Size.zero,
+                  ),
+                  child: Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Connect your phone to a WiFi network to use Web Companion. The server needs WiFi to let your laptop access the budget.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: isDark
+                  ? const Color(0xFFFCA5A5).withValues(alpha: 0.8)
+                  : const Color(0xFFDC2626).withValues(alpha: 0.75),
             ),
           ),
         ],

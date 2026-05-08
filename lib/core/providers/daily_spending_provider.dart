@@ -30,7 +30,8 @@ final dailySpendingProvider =
     final d = tx.createdAt.toLocal();
     final key = '${d.year}-${d.month}-${d.day}';
     final existing = days[key];
-    final amount = tx.amount * tx.exchangeRateToBase;
+    // tx.amount is already stored in base currency by recordTransaction
+    final amount = tx.amount;
     if (existing != null) {
       days[key] = DaySpending(
         date: DateTime(d.year, d.month, d.day),

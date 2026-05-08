@@ -13,6 +13,7 @@ import '../../core/providers/age_of_money_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -2375,7 +2376,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                         if (picked != null && mounted) {
                           setState(() {
                             _compareDate = picked;
-                            _compareLabel = DateFormat('MMM d, yyyy').format(picked);
+                            _compareLabel = formatDate(picked);
                           });
                         }
                       } else {
@@ -2495,7 +2496,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      DateFormat('MMM d, yyyy').format(_compareDate),
+                      formatDate(_compareDate),
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -2504,7 +2505,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     Icon(Icons.arrow_forward_rounded,
                         size: 14, color: AppColors.th(context)),
                     Text(
-                      DateFormat('MMM d, yyyy').format(today),
+                      formatDate(today),
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -2568,7 +2569,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                               ),
                             ),
                             Text(
-                              DateFormat('MMM d').format(_compareDate),
+                              formatDate(_compareDate),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Colors.white.withValues(alpha: 0.5),

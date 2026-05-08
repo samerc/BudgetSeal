@@ -23,12 +23,12 @@ abstract final class AppColors {
         _ThemeMode.light => const Color(0xFFF5F6FA),
       };
   static Color sf(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF0D0D0D),
+        _ThemeMode.black => const Color(0xFF121212),
         _ThemeMode.dark  => const Color(0xFF1A1F2E),
         _ThemeMode.light => const Color(0xFFFFFFFF),
       };
   static Color sfv(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF1A1A1A),
+        _ThemeMode.black => const Color(0xFF1E1E1E),
         _ThemeMode.dark  => const Color(0xFF242B3D),
         _ThemeMode.light => const Color(0xFFF0F1F5),
       };
@@ -48,15 +48,15 @@ abstract final class AppColors {
         _ThemeMode.light => const Color(0xFF94A3B8),
       };
   static Color bd(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF222222),
+        _ThemeMode.black => const Color(0xFF2A2A2A),
         _ThemeMode.dark  => const Color(0xFF2A3348),
         _ThemeMode.light => const Color(0xFFE2E8F0),
       };
 
   /// Card border: faint edge in dark/black modes, subtle in light.
   static Color cardBorder(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => Colors.white.withValues(alpha: 0.07),
-        _ThemeMode.dark  => Colors.white.withValues(alpha: 0.05),
+        _ThemeMode.black => Colors.white.withValues(alpha: 0.12),
+        _ThemeMode.dark  => Colors.white.withValues(alpha: 0.07),
         _ThemeMode.light => const Color(0xFFE8EBF0),
       };
 
@@ -88,8 +88,8 @@ abstract final class AppColors {
 
   // Black (AMOLED) const values
   static const blackBackground = Color(0xFF000000);
-  static const blackSurface = Color(0xFF0D0D0D);
-  static const blackSurfaceVariant = Color(0xFF1A1A1A);
+  static const blackSurface = Color(0xFF121212);
+  static const blackSurfaceVariant = Color(0xFF1E1E1E);
 
   /// Parse a hex color string (e.g. '#FF5733' or 'FF5733') to a Color.
   /// Results are cached to avoid re-parsing during rebuilds.

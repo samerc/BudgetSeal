@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:drift/drift.dart' show Value;
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/services/autofill_service.dart';
@@ -74,6 +76,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   String? _validationError;
   List<String> _receiptFilenames = [];
   List<String> _resolvedReceiptPaths = [];
+  Timer? _titleDebounce;
+  bool _autoFilled = false; // tracks if category was auto-filled
 
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
@@ -150,6 +154,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   @override
   void dispose() {
+    _titleDebounce?.cancel();
     _noteCtrl.dispose();
     _titleCtrl.dispose();
     for (final l in _lines) {
@@ -167,24 +172,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       settings: afSettings,
     );
     if (!fill.hasData) {
-      setState(() {});
+      setState(() => _autoFilled = false);
       return;
     }
     setState(() {
       final line = _lines.isNotEmpty ? _lines[0] : null;
       if (line == null) return;
       final canOverride = afSettings.overrideExisting;
+      bool didFill = false;
       if (fill.accountId != null &&
           (line.accountId == null || canOverride)) {
         _onLineAccountChanged(0, fill.accountId!);
+        didFill = true;
       }
       if (fill.categoryId != null &&
           (line.categoryId == null || canOverride)) {
         line.categoryId = fill.categoryId;
+        didFill = true;
         // Also set transaction type from category
         final categories = ref.read(categoriesProvider).value ?? [];
         final cat = categories.where((c) => c.id == fill.categoryId).firstOrNull;
         if (cat != null) {
+          line.categoryName = cat.name;
+          line.categoryColor = AppColors.fromHex(cat.colorHex);
           final txType = cat.transactionType == 'income'
               ? _TxType.income
               : _TxType.expense;
@@ -194,8 +204,31 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (fill.amount != null && fill.amount! > 0 &&
           (line.amount <= 0 || canOverride)) {
         line.amountCtrl.text = fill.amount!.toString();
+        didFill = true;
       }
+      _autoFilled = didFill;
     });
+  }
+
+  void _onTitleChanged(String value) {
+    _titleDebounce?.cancel();
+    if (value.length >= 3) {
+      _titleDebounce = Timer(const Duration(milliseconds: 500), () {
+        _autofillFromTitle(value);
+      });
+    } else if (_autoFilled) {
+      // Title cleared or too short — reset auto-filled category
+      setState(() {
+        if (_lines.isNotEmpty) {
+          _lines[0].categoryId = null;
+          _lines[0].categoryName = null;
+          _lines[0].categoryColor = AppColors.textSecondary;
+        }
+        _autoFilled = false;
+      });
+      return;
+    }
+    setState(() {}); // rebuild suggestions
   }
 
   Color _typeColor(BuildContext context) {
@@ -365,7 +398,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final diff = today.difference(sel).inDays;
     if (diff == 0) return 'Today';
     if (diff == 1) return 'Yesterday';
-    return DateFormat('MMMM d, yyyy').format(_selectedDate);
+    return formatDate(_selectedDate);
   }
 
   String get _timeLabel {
@@ -848,38 +881,42 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Category hero banner (Cashew-style)
-            if (_type != _TxType.transfer && _lines.isNotEmpty) ...[
+            // Category hero banner — only show when category is selected
+            if (_type != _TxType.transfer &&
+                _lines.isNotEmpty &&
+                _lines.first.categoryId != null) ...[
               _buildCategoryHero(context),
               const SizedBox(height: 12),
             ],
 
-            // Title + Date + Note — grouped in one card
-            TxCard(
-              child: Column(
-                children: [
-                  _buildTitleField(),
-                  Divider(height: 1, indent: 16, endIndent: 16,
-                      color: AppColors.bd(context)),
-                  _buildDateRowInline(),
-                  Divider(height: 1, indent: 16, endIndent: 16,
-                      color: AppColors.bd(context)),
-                  TextField(
-                    controller: _noteCtrl,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: 'Add a note…',
-                      hintStyle: TextStyle(color: AppColors.th(context)),
-                      prefixIcon: Icon(Icons.notes_rounded,
-                          size: 18, color: AppColors.ts(context)),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                    ),
-                    maxLines: 3,
-                    minLines: 1,
-                  ),
-                ],
+            // Title
+            _TxFieldCard(
+              child: _buildTitleField(),
+            ),
+            const SizedBox(height: 8),
+
+            // Date + Time
+            _TxFieldCard(
+              child: _buildDateRowInline(),
+            ),
+            const SizedBox(height: 8),
+
+            // Note
+            _TxFieldCard(
+              child: TextField(
+                controller: _noteCtrl,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: 'Add a note…',
+                  hintStyle: TextStyle(color: AppColors.th(context)),
+                  prefixIcon: Icon(Icons.notes_rounded,
+                      size: 18, color: AppColors.ts(context)),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                ),
+                maxLines: 3,
+                minLines: 1,
               ),
             ),
             const SizedBox(height: 12),
@@ -994,15 +1031,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     color: AppColors.tp(context),
                   ),
                 ),
-                if (cat != null)
+                if (cat != null) ...[
                   Text(
                     cat.name,
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.ts(context),
                     ),
-                  )
-                else
+                  ),
+                  if (_autoFilled)
+                    Text(
+                      'Auto-detected',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.accent.withValues(alpha: 0.7),
+                      ),
+                    ),
+                ] else
                   Text(
                     'No category',
                     style: TextStyle(
@@ -1478,7 +1524,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         TextField(
           controller: _titleCtrl,
           textCapitalization: TextCapitalization.sentences,
-          onChanged: (_) => setState(() {}), // rebuild pills
+          onChanged: _onTitleChanged,
           decoration: InputDecoration(
             hintText: 'Title (e.g. Coffee, Groceries)',
             hintStyle: TextStyle(color: AppColors.th(context)),
@@ -1598,18 +1644,40 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
 
-    return TextButton.icon(
-      onPressed: () async {
-        final filenames = await pickAndSaveReceipts(context);
-        if (filenames.isNotEmpty && mounted) {
-          _receiptFilenames = filenames;
-          _resolveReceiptPaths();
-        }
-      },
-      icon: Icon(Icons.receipt_long_rounded,
-          size: 16, color: AppColors.ts(context)),
-      label: Text('Attach Receipt',
-          style: TextStyle(color: AppColors.ts(context))),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton.icon(
+          onPressed: () async {
+            final filenames = await pickAndSaveReceipts(context, fromCamera: true);
+            if (filenames.isNotEmpty && mounted) {
+              _receiptFilenames = filenames;
+              _resolveReceiptPaths();
+            }
+          },
+          icon: Icon(Icons.camera_alt_rounded,
+              size: 16, color: AppColors.ts(context)),
+          label: Text('Scan Receipt',
+              style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
+        ),
+        Container(
+            width: 1,
+            height: 20,
+            color: AppColors.bd(context)),
+        TextButton.icon(
+          onPressed: () async {
+            final filenames = await pickAndSaveReceipts(context);
+            if (filenames.isNotEmpty && mounted) {
+              _receiptFilenames = filenames;
+              _resolveReceiptPaths();
+            }
+          },
+          icon: Icon(Icons.image_rounded,
+              size: 16, color: AppColors.ts(context)),
+          label: Text('Gallery',
+              style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
+        ),
+      ],
     );
   }
 
@@ -1619,4 +1687,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         'wallet' => Icons.account_balance_wallet_rounded,
         _ => Icons.money_rounded,
       };
+}
+
+/// Consistent styled field card for the transaction form.
+/// Lighter background than TxCard, subtle border, same radius.
+class _TxFieldCard extends StatelessWidget {
+  final Widget child;
+  const _TxFieldCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.bd(context).withValues(alpha: 0.5)),
+      ),
+      child: child,
+    );
+  }
 }

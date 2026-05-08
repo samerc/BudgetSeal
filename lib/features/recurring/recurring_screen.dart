@@ -9,6 +9,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -434,7 +435,7 @@ class _RecurringTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          'Next: ${DateFormat('MMM d').format(item.nextDueDate)} · $frequencyLabel',
+          'Next: ${formatDate(item.nextDueDate)} · $frequencyLabel',
           style: TextStyle(
             fontSize: 12,
             color: AppColors.ts(context),
@@ -630,7 +631,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
               },
               icon: const Icon(Icons.calendar_today_rounded, size: 16),
               label: Text(
-                  'Starts: ${DateFormat('MMMM d, yyyy').format(_startDate)}'),
+                  'Starts: ${formatDate(_startDate)}'),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
@@ -648,7 +649,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
               },
               icon: const Icon(Icons.event_busy_rounded, size: 16),
               label: Text(_endDate != null
-                  ? 'Ends: ${DateFormat('MMMM d, yyyy').format(_endDate!)}'
+                  ? 'Ends: ${formatDate(_endDate!)}'
                   : 'Ends: Never (tap to set)'),
             ),
             if (_endDate != null) ...[
@@ -868,7 +869,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               },
               icon: const Icon(Icons.calendar_today_rounded, size: 16),
               label: Text(
-                  'Next due: ${DateFormat('MMMM d, yyyy').format(_startDate)}'),
+                  'Next due: ${formatDate(_startDate)}'),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
@@ -886,7 +887,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               },
               icon: const Icon(Icons.event_busy_rounded, size: 16),
               label: Text(_endDate != null
-                  ? 'Ends: ${DateFormat('MMMM d, yyyy').format(_endDate!)}'
+                  ? 'Ends: ${formatDate(_endDate!)}'
                   : 'Ends: Never (tap to set)'),
             ),
             if (_endDate != null) ...[

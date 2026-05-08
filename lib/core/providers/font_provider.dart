@@ -10,6 +10,7 @@ const appFonts = <String, String>{
   'Plus Jakarta Sans': 'Plus Jakarta Sans',
   'DM Sans': 'DM Sans',
   'Inter': 'Inter',
+  'Nunito Sans': 'Nunito Sans',
   'Poppins': 'Poppins',
   'Nunito': 'Nunito',
   'Rubik': 'Rubik',
@@ -49,7 +50,9 @@ TextTheme buildTextTheme(String fontName, [Brightness brightness = Brightness.li
 
   return switch (fontName) {
     'Plus Jakarta Sans' => GoogleFonts.plusJakartaSansTextTheme(base),
+    'Inter' => GoogleFonts.interTextTheme(base),
     'Poppins' => GoogleFonts.poppinsTextTheme(base),
+    'Nunito Sans' => GoogleFonts.nunitoSansTextTheme(base),
     'Nunito' => GoogleFonts.nunitoTextTheme(base),
     'Rubik' => GoogleFonts.rubikTextTheme(base),
     'DM Sans' => GoogleFonts.dmSansTextTheme(base),
@@ -66,7 +69,9 @@ TextStyle fontStyle(String fontName, {
 }) {
   return switch (fontName) {
     'Plus Jakarta Sans' => GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
+    'Inter' => GoogleFonts.inter(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Poppins' => GoogleFonts.poppins(fontSize: fontSize, fontWeight: fontWeight, color: color),
+    'Nunito Sans' => GoogleFonts.nunitoSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Nunito' => GoogleFonts.nunito(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Rubik' => GoogleFonts.rubik(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'DM Sans' => GoogleFonts.dmSans(fontSize: fontSize, fontWeight: fontWeight, color: color),

@@ -78,26 +78,52 @@ String _formatNumber(double absValue, int decimalDigits) {
   return formatted;
 }
 
+/// Format a plain number (no currency symbol) respecting user's separator prefs.
+/// Useful for exchange rates, percentages, and converted amounts.
+/// Handles negative values with minus sign.
+String formatNumber(double value, {int decimals = 2}) {
+  final formatted = _formatNumber(value.abs(), decimals);
+  return value < 0 ? '-$formatted' : formatted;
+}
+
 /// Wrap a formatted amount string with the negative indicator.
 String _wrapNegative(String inner, bool isNeg) {
   if (!isNeg) return inner;
-  if (_numberFormat.negative == NegativeFormat.parentheses) {
-    return '($inner)';
-  }
   return '-$inner';
+}
+
+/// Known zero-decimal currencies (ISO 4217).
+const _zeroDecimalCurrencies = <String>{
+  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW',
+  'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+};
+
+/// Known three-decimal currencies (ISO 4217).
+const _threeDecimalCurrencies = <String>{
+  'BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND',
+};
+
+/// Resolve the number of decimal places for a currency.
+/// Returns [accountDecimals] if set, otherwise uses ISO 4217 defaults.
+int currencyDecimals(String? currency, [int? accountDecimals]) {
+  if (accountDecimals != null) return accountDecimals;
+  if (currency == null) return 2;
+  final upper = currency.toUpperCase();
+  if (_zeroDecimalCurrencies.contains(upper)) return 0;
+  if (_threeDecimalCurrencies.contains(upper)) return 3;
+  return 2;
 }
 
 /// Format a number with separators and optional currency symbol.
 ///
 /// Respects user preferences for thousands separator, decimal separator,
-/// and negative format.
+/// and negative format. If [decimals] is null, auto-detects from currency.
 String formatAmount(double value, {String? currency, int? decimals}) {
   final isNeg = value < 0;
   final absValue = value.abs();
 
-  final hasDecimals =
-      decimals != null ? decimals > 0 : (absValue % 1 != 0);
-  final decimalDigits = decimals ?? (hasDecimals ? 2 : 0);
+  // Auto-detect decimals from currency if not explicitly set
+  final decimalDigits = decimals ?? currencyDecimals(currency);
 
   final formatted = _formatNumber(absValue, decimalDigits);
 
@@ -106,42 +132,45 @@ String formatAmount(double value, {String? currency, int? decimals}) {
     if (symbol != null) {
       if (_needsSpace(symbol)) {
         // Spaced symbols: "LBP -1,200,000" (sign after symbol)
-        final sign = isNeg ? '-' : '';
-        return '$symbol $sign$formatted';
+        return '$symbol ${_wrapNegative(formatted, isNeg)}';
       }
       // Tight symbols: "-$1,200" (sign before symbol)
       return _wrapNegative('$symbol$formatted', isNeg);
     }
     // Code fallback: "USD -1,200" (sign after code)
-    final sign = isNeg ? '-' : '';
-    return '$currency $sign$formatted';
+    return '$currency ${_wrapNegative(formatted, isNeg)}';
   }
   return _wrapNegative(formatted, isNeg);
 }
 
 /// Format with an explicit sign prefix: +$1,234 or -$1,234.
+/// Expenses display as negative using the user's negative format preference.
 String formatSignedAmount(
   double value, {
   required String currency,
   required String type,
 }) {
   final absValue = value.abs();
-  final sign = type == 'income' ? '+' : type == 'expense' ? '-' : '';
+  final isExpense = type == 'expense';
+  final isIncome = type == 'income';
   final symbol = _resolveSymbol(currency);
 
-  final hasDecimals = absValue % 1 != 0;
-  final decimalDigits = hasDecimals ? 2 : 0;
+  final decimalDigits = currencyDecimals(currency);
   final formatted = _formatNumber(absValue, decimalDigits);
+
+  String applySign(String inner) {
+    if (isExpense) return _wrapNegative(inner, true);
+    if (isIncome) return '+$inner';
+    return inner;
+  }
 
   if (symbol != null) {
     if (_needsSpace(symbol)) {
-      // Spaced: "LBP +1,200" or "LBP -1,200"
-      return '$symbol $sign$formatted';
+      return '$symbol ${applySign(formatted)}';
     }
-    // Tight: "+$1,200" or "-$1,200"
-    return '$sign$symbol$formatted';
+    return applySign('$symbol$formatted');
   }
-  return '$currency $sign$formatted';
+  return '$currency ${applySign(formatted)}';
 }
 
 /// Format a number for display in calculator/input fields.

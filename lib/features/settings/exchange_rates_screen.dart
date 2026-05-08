@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -72,10 +73,10 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
   }
 
   String _formatRate(double rate) {
-    if (rate >= 1000) return rate.toStringAsFixed(0);
-    if (rate >= 100) return rate.toStringAsFixed(1);
-    if (rate >= 1) return rate.toStringAsFixed(2);
-    return rate.toStringAsFixed(6);
+    if (rate >= 1000) return formatNumber(rate, decimals: 0);
+    if (rate >= 100) return formatNumber(rate, decimals: 1);
+    if (rate >= 1) return formatNumber(rate, decimals: 2);
+    return formatNumber(rate, decimals: 6);
   }
 
   @override

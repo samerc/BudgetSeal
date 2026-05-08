@@ -1,10 +1,16 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/providers/accent_color_provider.dart';
+import 'core/providers/accounts_provider.dart';
 import 'core/providers/currency_symbol_provider.dart';
+import 'core/providers/date_format_provider.dart';
+import 'core/providers/database_provider.dart';
 import 'core/services/auto_backup_service.dart';
+import 'core/services/travel_account_service.dart';
 import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
 import 'shared/utils/format_number.dart';
@@ -24,11 +30,15 @@ import 'features/onboarding/onboarding_screen.dart';
 import 'features/periods/leftover_resolution_screen.dart';
 import 'features/recurring/bill_calendar_screen.dart';
 import 'features/recurring/recurring_screen.dart';
+import 'features/recurring/upcoming_bills_screen.dart';
 import 'features/settings/import_screen.dart';
 import 'features/templates/templates_screen.dart';
 import 'features/periods/period_transition_screen.dart';
 import 'features/reports/export_report_screen.dart';
 import 'features/reports/reports_hub_screen.dart';
+import 'features/objectives/objectives_screen.dart';
+import 'features/objectives/objective_detail_screen.dart';
+import 'features/travel/travel_exchange_screen.dart';
 import 'features/subscriptions/subscriptions_screen.dart';
 import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
@@ -180,6 +190,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
               child: const ExchangeRatesScreen(), state: state),
         ),
         GoRoute(
+          path: '/travel-exchange',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const TravelExchangeScreen(), state: state),
+        ),
+        GoRoute(
           path: '/recurring',
           pageBuilder: (_, state) =>
               slideUpPage(child: const RecurringScreen(), state: state),
@@ -188,6 +203,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/bill-calendar',
           pageBuilder: (_, state) =>
               slideUpPage(child: const BillCalendarScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/upcoming-bills',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const UpcomingBillsScreen(), state: state),
         ),
         GoRoute(
           path: '/templates',
@@ -248,6 +268,19 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           ),
         ),
         GoRoute(
+          path: '/objectives',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const ObjectivesScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/objectives/:id',
+          pageBuilder: (_, state) => slideUpPage(
+            child: ObjectiveDetailScreen(
+                objectiveId: state.pathParameters['id']!),
+            state: state,
+          ),
+        ),
+        GoRoute(
           path: '/bill-splitter',
           pageBuilder: (_, state) => slideUpPage(
               child: const BillSplitterScreen(), state: state),
@@ -295,6 +328,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
       _autoSync();
       // Auto-backup if due
       AutoBackupService.runIfDue();
+      // Auto-archive travel wallets at zero balance
+      _checkTravelAccounts();
     } else if (state == AppLifecycleState.paused) {
       // Sync on app pause (upload local changes)
       _autoSync();
@@ -304,6 +339,20 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
         setState(() => _showLock = true);
       }
     }
+  }
+
+  void _checkTravelAccounts() {
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return;
+    final db = ref.read(databaseProvider);
+    TravelAccountService.checkAndAutoArchive(db, householdId).then((changed) {
+      if (changed) {
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountsWithBalanceProvider);
+      }
+    }).catchError((e) {
+      debugPrint('[Travel] Auto-archive check failed: $e');
+    });
   }
 
   void _autoSync() {
@@ -322,17 +371,35 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final themeMode = themeNotifier.flutterThemeMode;
     final selectedFont = ref.watch(fontProvider);
 
+    // Watch accent color state for Material You support
+    final accentValue = ref.watch(accentColorProvider);
+    final useSystemAccent = accentValue == 'system';
+    final fixedAccent = ref.read(accentColorProvider.notifier).resolve();
+
     // Apply currency symbol overrides and number format whenever they change.
     final symbolOverrides = ref.watch(currencySymbolProvider);
     setCurrencySymbolOverrides(symbolOverrides);
     final numFormat = ref.watch(numberFormatProvider);
     setNumberFormatPrefs(numFormat);
+    final dateFormat = ref.watch(dateFormatProvider);
+    setDateFormatPattern(dateFormat);
 
-    // Rebuild themes with the selected font (applies to all text styles).
-    final lightTheme = buildLightTheme(selectedFont);
-    final darkTheme = themeNotifier.isBlackMode
-        ? buildBlackTheme(selectedFont)
-        : buildDarkTheme(selectedFont);
+    // Helper to build themes with resolved accent color
+    ThemeData buildLight(Color? accent) =>
+        buildLightTheme(selectedFont, accent);
+    ThemeData buildDark(Color? accent) => themeNotifier.isBlackMode
+        ? buildBlackTheme(selectedFont, accent)
+        : buildDarkTheme(selectedFont, accent);
+
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+    // Resolve accent: system dynamic → fixed → default
+    final Color? resolvedAccent = useSystemAccent && lightDynamic != null
+        ? lightDynamic.primary
+        : fixedAccent;
+
+    final lightTheme = buildLight(resolvedAccent);
+    final darkTheme = buildDark(resolvedAccent);
 
     if (_showSplash) {
       return MaterialApp(
@@ -395,6 +462,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
         );
       },
     );
+      },
+    ); // DynamicColorBuilder
   }
 }
 

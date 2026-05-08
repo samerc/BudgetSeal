@@ -107,16 +107,26 @@ AutofillData lookupAutofillByTitle({
   required List<TransactionEntry> entries,
   required AutofillSettings settings,
 }) {
+  // Try exact match first, then partial (contains) match.
+  // Exact matches are more reliable, so they take priority.
+  final lowerTitle = title.toLowerCase();
   TransactionEntry? match;
+  TransactionEntry? partialMatch;
   for (final e in entries) {
     if (e.tx.type == 'transfer') continue;
     final note = e.tx.note;
     final txTitle = note.contains(' — ') ? note.split(' — ').first : note;
-    if (txTitle.toLowerCase() == title.toLowerCase() && txTitle.isNotEmpty) {
+    if (txTitle.isEmpty) continue;
+    final lowerTx = txTitle.toLowerCase();
+    if (lowerTx == lowerTitle) {
       match = e;
-      break;
+      break; // exact match wins immediately
+    }
+    if (partialMatch == null && lowerTx.contains(lowerTitle)) {
+      partialMatch = e;
     }
   }
+  match ??= partialMatch;
 
   if (match == null) return const AutofillData();
 

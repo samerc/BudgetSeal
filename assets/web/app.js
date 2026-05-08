@@ -78,7 +78,8 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 function fmtFreq(f, interval) {
   const map = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
   if (!interval || interval === 1) return map[f] || f;
-  return `Every ${interval} ${f.replace('ly', 's')}`;
+  const plurals = { daily: 'days', weekly: 'weeks', monthly: 'months', yearly: 'years' };
+  return `Every ${interval} ${plurals[f] || f}`;
 }
 
 const _monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -253,6 +254,7 @@ function initAuth() {
     showMainLayout();
     navigate(state.currentRoute);
     getCategories();
+    getAccounts();
     startConnectionCheck();
   }
 }
@@ -298,53 +300,89 @@ async function renderDashboard() {
   cache.accounts = accounts;
   if (household.baseCurrency) cache.baseCurrency = household.baseCurrency;
 
+  // ── Accounts: horizontal scroll cards ──
   const acctHtml = accounts.length
-    ? `<div class="stat-grid">${accounts.map(a => `
-        <div class="stat-card">
-          <div class="stat-label">${esc(a.name)}</div>
-          <div class="stat-value ${a.balance < 0 ? 'amount-expense' : ''}">${fmt(a.balance, a.currency)}</div>
-          <div class="stat-sub">${esc(a.type)}</div>
+    ? `<div class="acct-scroll">${accounts.map(a => `
+        <div class="acct-card">
+          <div class="acct-name">${esc(a.name)}</div>
+          <div class="acct-balance${a.balance < 0 ? ' negative' : ''}">${fmt(a.balance, a.currency)}</div>
+          <span class="acct-type">${esc(a.type)}</span>
         </div>`).join('')}</div>`
     : `<p class="text-secondary text-sm" style="margin-bottom:16px">No accounts yet.</p>`;
 
+  // ── Unallocated: compact banner ──
   const unallocEntries = Object.entries(unallocated);
-  const unallocHtml = unallocEntries.length
+  const unallocPills = unallocEntries.length
     ? unallocEntries.map(([cur, amt]) =>
-        `<span class="unalloc-pill ${amt < 0 ? 'unalloc-pill-warn' : ''}">${fmt(amt, cur)}</span>`).join(' ')
+        `<span class="unalloc-pill ${amt < 0 ? 'unalloc-pill-warn' : ''}">${fmt(amt, cur)}</span>`).join('')
     : '<span class="text-secondary text-sm">—</span>';
 
+  const unallocHtml = `<div class="unalloc-banner">
+    <span class="unalloc-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      Unallocated
+    </span>
+    <span class="unalloc-amounts">${unallocPills}</span>
+  </div>`;
+
+  // ── Envelopes: rich cards with target + color-coded progress ──
   const envsHtml = envelopes.slice(0, 6).length
     ? envelopes.slice(0, 6).map(e => {
-        const entries = Object.entries(e.balanceByCurrency || {});
-        const [cur, bal] = entries[0] ?? ['USD', 0];
-        const pct = e.targetAmount ? Math.min(100, Math.max(0, (bal / e.targetAmount) * 100)) : null;
-        const isOver = pct !== null && pct >= 100;
-        return `<div style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
-            <span class="text-sm" style="font-weight:500">${esc(e.icon || '📁')} ${esc(e.name)}</span>
-            <span class="text-sm ${bal < 0 ? 'amount-expense' : bal > 0 ? 'amount-income' : ''}" style="font-weight:600">${fmt(bal, cur)}</span>
+        const tCur = e.targetCurrency || Object.keys(e.balanceByCurrency || {})[0] || 'USD';
+        const bal = (e.balanceByCurrency || {})[tCur] || 0;
+        const target = e.targetAmount || 0;
+        const pct = target > 0 ? Math.min(100, Math.max(0, (bal / target) * 100)) : null;
+        const isOver = bal < 0;
+
+        // Color: green > 50%, amber 20-50%, red < 20% or negative
+        let barColor = 'accent';
+        if (target > 0) {
+          const ratio = bal / target;
+          if (isOver) barColor = 'red';
+          else if (ratio >= 0.5) barColor = 'green';
+          else if (ratio >= 0.2) barColor = 'amber';
+          else barColor = 'red';
+        }
+        if (isOver) barColor = 'red';
+
+        // Amount color class
+        const amtClass = isOver ? 'amount-expense' : bal > 0 ? 'amount-income' : '';
+
+        // Meta line: "X / Y" or periodicity
+        const metaText = target > 0
+          ? `${fmt(bal, tCur)} of ${fmt(target, tCur)}`
+          : e.periodicity ? e.periodicity.charAt(0).toUpperCase() + e.periodicity.slice(1) : '';
+
+        return `<div class="dash-env-item">
+          <div class="dash-env-row">
+            <div class="dash-env-icon">${esc(e.icon || '📁')}</div>
+            <div class="dash-env-info">
+              <div class="dash-env-name">${esc(e.name)}</div>
+              ${metaText ? `<div class="dash-env-meta">${esc(metaText)}</div>` : ''}
+            </div>
+            <div class="dash-env-amount ${amtClass}">${fmt(bal, tCur)}</div>
           </div>
-          ${pct !== null ? `<div class="progress-bar"><div class="progress-fill ${isOver ? 'over' : ''}" style="width:${pct.toFixed(1)}%"></div></div>` : ''}
+          ${pct !== null ? `<div class="dash-env-progress"><div class="dash-env-progress-fill ${barColor}" style="width:${pct.toFixed(1)}%"></div></div>` : ''}
         </div>`;
       }).join('')
-    : '<p class="text-secondary text-sm">No envelopes yet.</p>';
+    : '<p class="text-secondary text-sm" style="padding:8px 0">No envelopes yet.</p>';
 
+  // ── Recent transactions: compact list ──
   const recHtml = recentTransactions.length
-    ? `<div style="overflow:auto"><table class="data-table">
-        <thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Category / Note</th><th style="text-align:right">Amount</th></tr></thead>
-        <tbody>${recentTransactions.map(t => `
-          <tr>
-            <td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(t.date)}</td>
-            <td>${typeBadge(t.type)}</td>
-            <td class="text-sm">${esc(t.accountName || '')}</td>
-            <td class="text-sm">
-              ${t.categoryName
-                ? `<div style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:${esc(t.categoryColor || '#607D8B')};flex-shrink:0"></span>${esc(t.categoryIcon || '')} ${esc(t.categoryName)}</div>`
-                : `<span class="text-secondary">${esc(t.note || '—')}</span>`}
-            </td>
-            <td style="text-align:right;white-space:nowrap">${amtEl(t.amount, t.currency, t.type)}</td>
-          </tr>`).join('')}
-        </tbody></table></div>`
+    ? recentTransactions.map(t => {
+        const title = t.categoryName
+          ? `${esc(t.categoryIcon || '')} ${esc(t.categoryName)}`
+          : esc(t.note || 'Transaction');
+        const sub = [fmtDate(t.date), t.accountName].filter(Boolean).map(esc).join(' · ');
+        return `<div class="dash-tx-item">
+          <div class="dash-tx-dot ${esc(t.type)}"></div>
+          <div class="dash-tx-info">
+            <div class="dash-tx-title">${title}</div>
+            <div class="dash-tx-sub">${sub}</div>
+          </div>
+          <div class="dash-tx-amount ${t.type === 'income' ? 'amount-income' : t.type === 'expense' ? 'amount-expense' : ''}">${amtEl(t.amount, t.currency, t.type)}</div>
+        </div>`;
+      }).join('')
     : empty('No transactions yet', 'Add your first transaction to get started');
 
   setContent(`
@@ -354,25 +392,18 @@ async function renderDashboard() {
     </div>
     <div class="section-title">Accounts</div>
     ${acctHtml}
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
-      <div class="card" style="flex:1;min-width:200px;margin-bottom:0">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span class="card-title" style="margin-bottom:0">Unallocated</span>
-          <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${unallocHtml}</span>
-        </div>
-      </div>
-    </div>
+    ${unallocHtml}
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <span class="card-title" style="margin-bottom:0">Envelopes</span>
         <a href="#/envelopes" class="btn btn-sm btn-outline">See all</a>
       </div>
       ${envsHtml}
     </div>
-    <div class="card" style="padding:0">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <span class="card-title" style="margin-bottom:0">Recent Transactions</span>
-        <a href="#/transactions" class="btn btn-sm btn-outline">See all</a>
+        <a href="#/transactions" class="btn btn-sm btn-outline">View all</a>
       </div>
       ${recHtml}
     </div>
@@ -403,17 +434,18 @@ async function renderTransactions(page, typeFilter, search) {
   ]);
   if (!txData) return;
 
+  // Type filter — segmented control style
   const filterBtns = [['', 'All'], ['income', 'Income'], ['expense', 'Expense'], ['transfer', 'Transfer']]
-    .map(([f, l]) => `<button class="filter-btn${f === typeFilter ? ' active' : ''}" onclick="renderTransactions(1,'${f}')">${l}</button>`)
+    .map(([f, l]) => `<button class="type-tab${f === typeFilter ? ' active' : ''}" onclick="renderTransactions(1,'${f}')">${l}</button>`)
     .join('');
 
-  // Month tabs
+  // Month tabs — inline with year nav
   const now = new Date();
   const monthTabs = [
-    `<button class="filter-btn${_txMonth < 0 ? ' active' : ''}" onclick="_txMonth=-1;renderTransactions(1)">All</button>`,
+    `<button class="month-tab${_txMonth < 0 ? ' active' : ''}" onclick="_txMonth=-1;renderTransactions(1)">All</button>`,
     ..._monthNames.map((m, i) => {
       if (_txYear === now.getFullYear() && i > now.getMonth()) return '';
-      return `<button class="filter-btn${_txMonth === i ? ' active' : ''}" onclick="_txMonth=${i};renderTransactions(1)">${m}</button>`;
+      return `<button class="month-tab${_txMonth === i ? ' active' : ''}" onclick="_txMonth=${i};renderTransactions(1)">${m}</button>`;
     }).filter(Boolean),
   ].join('');
 
@@ -470,19 +502,21 @@ async function renderTransactions(page, typeFilter, search) {
         <button class="btn btn-primary" onclick="addTransaction()">+ Add</button>
       </div>
     </div>
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-      <div style="flex:1;min-width:200px;position:relative">
-        <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-hint)" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-        <input type="text" id="tx-search" class="form-control" style="padding-left:32px;font-size:13px" placeholder="Search by title…" value="${esc(search)}" onkeydown="if(event.key==='Enter'){_txSearch=this.value;renderTransactions(1)}">
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn btn-outline btn-sm" onclick="_txYear--;renderTransactions(1)">←</button>
-        <span class="text-sm" style="font-weight:600;min-width:40px;text-align:center">${_txYear}</span>
-        <button class="btn btn-outline btn-sm" onclick="_txYear++;renderTransactions(1)" ${_txYear >= now.getFullYear() ? 'disabled' : ''}>→</button>
-      </div>
+    <div style="position:relative;margin-bottom:14px">
+      <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-hint)" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+      <input type="text" id="tx-search" class="form-control" style="padding-left:32px;font-size:13px" placeholder="Search by title…" value="${esc(search)}" onkeydown="if(event.key==='Enter'){_txSearch=this.value;renderTransactions(1)}">
     </div>
-    <div class="filter-row" style="margin-bottom:8px">${monthTabs}</div>
-    <div class="filter-row">${filterBtns}</div>
+    <div class="date-bar">
+      <div class="date-bar-year">
+        <button class="year-arrow" onclick="_txYear--;renderTransactions(1)">‹</button>
+        <span class="year-label">${_txYear}</span>
+        <button class="year-arrow" onclick="_txYear++;renderTransactions(1)" ${_txYear >= now.getFullYear() ? 'disabled' : ''}>›</button>
+      </div>
+      <div class="month-tabs-scroll">${monthTabs}</div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="type-tabs" style="max-width:360px">${filterBtns}</div>
+    </div>
     <div class="card" style="padding:0;overflow:auto">
       <table class="data-table">
         <thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Account</th><th>Category</th><th style="text-align:right">Amount</th><th></th></tr></thead>
@@ -490,9 +524,9 @@ async function renderTransactions(page, typeFilter, search) {
       </table>
     </div>
     <div class="pagination">
-      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="renderTransactions(${page - 1},'${typeFilter}','${esc(search)}')">← Prev</button>
+      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="renderTransactions(${page - 1})">← Prev</button>
       <span class="text-secondary text-sm">Page ${page}</span>
-      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="renderTransactions(${page + 1},'${typeFilter}','${esc(search)}')">Next →</button>
+      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="renderTransactions(${page + 1})">Next →</button>
     </div>
   `);
 
@@ -736,7 +770,7 @@ async function renderCategories() {
   const expense = d.items.filter(c => c.transactionType !== 'income');
   const income  = d.items.filter(c => c.transactionType === 'income');
 
-  function buildHierarchy(items) {
+  function buildGroups(items) {
     const idSet = new Set(items.map(c => c.id));
     const roots = items.filter(c => !c.parentId || !idSet.has(c.parentId));
     const childrenOf = {};
@@ -744,55 +778,66 @@ async function renderCategories() {
       if (!childrenOf[c.parentId]) childrenOf[c.parentId] = [];
       childrenOf[c.parentId].push(c);
     });
-    const result = [];
-    roots.forEach(r => {
-      result.push({ ...r, _isChild: false });
-      (childrenOf[r.id] || []).forEach(ch => result.push({ ...ch, _isChild: true }));
-    });
-    return result;
+    return roots.map(r => ({ parent: r, children: childrenOf[r.id] || [] }));
   }
 
-  function catRow(c) {
-    const emoji = _isEmoji(c.icon) ? c.icon : '';
-    return `
-      <tr>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px;${c._isChild ? 'padding-left:28px' : ''}">
-            <span style="width:30px;height:30px;border-radius:7px;background:${esc(c.colorHex)};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px">${esc(emoji)}</span>
-            <div>
-              <div style="font-weight:${c._isChild ? '400' : '600'}">${esc(c.name)}</div>
-              ${c._isChild ? '<div class="text-secondary" style="font-size:11px">Sub-category</div>' : ''}
-            </div>
-          </div>
-        </td>
-        <td><span class="badge ${c.transactionType === 'income' ? 'badge-income' : 'badge-expense'}">${esc(c.transactionType)}</span></td>
-        <td><button class="btn btn-sm btn-outline" onclick="openEditCategory('${c.id}')">Edit</button></td>
-      </tr>`;
+  function catIcon(icon, name) {
+    // Show icon if present, otherwise first letter of name
+    if (icon && icon.trim()) return icon;
+    return name ? name.charAt(0).toUpperCase() : '?';
   }
 
-  function section(label, items) {
+  function catCard(group) {
+    const p = group.parent;
+    const childCount = group.children.length;
+    const childHtml = group.children.map(ch => {
+      return `<div class="cat-child">
+        <span class="cat-child-icon" style="background:${esc(ch.colorHex)}">${esc(catIcon(ch.icon, ch.name))}</span>
+        <span class="cat-child-name">${esc(ch.name)}</span>
+        <button class="cat-edit-btn" onclick="event.stopPropagation();openEditCategory('${ch.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        </button>
+      </div>`;
+    }).join('');
+
+    return `<div class="cat-card">
+      <div class="cat-card-header">
+        <span class="cat-card-icon" style="background:${esc(p.colorHex)}">${esc(catIcon(p.icon, p.name))}</span>
+        <div class="cat-card-info">
+          <div class="cat-card-name">${esc(p.name)}</div>
+          ${childCount > 0 ? `<div class="cat-card-count">${childCount} sub-categor${childCount === 1 ? 'y' : 'ies'}</div>` : ''}
+        </div>
+        <button class="cat-edit-btn" onclick="openEditCategory('${p.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        </button>
+      </div>
+      ${childCount > 0 ? `<div class="cat-children">${childHtml}</div>` : ''}
+    </div>`;
+  }
+
+  function section(label, badgeCls, items) {
     if (!items.length) return '';
-    const ordered = buildHierarchy(items);
+    const groups = buildGroups(items);
     return `
-      <tr><td colspan="3" style="padding:16px 12px 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-secondary);border-bottom:none">${label}</td></tr>
-      ${ordered.map(catRow).join('')}`;
+      <div style="margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span class="section-title" style="margin-bottom:0">${label}</span>
+          <span class="badge ${badgeCls}" style="font-size:10px">${items.length}</span>
+        </div>
+        <div class="cat-grid">${groups.map(catCard).join('')}</div>
+      </div>`;
   }
 
-  const rows = d.items.length
-    ? section('Expense', expense) + section('Income', income)
-    : `<tr><td colspan="3" style="padding:32px;text-align:center;color:var(--text-secondary)">No categories yet</td></tr>`;
+  const content = d.items.length
+    ? section('Expense', 'badge-expense', expense) + section('Income', 'badge-income', income)
+    : empty('No categories yet', 'Add your first category to get started');
 
   setContent(`
     <div class="page-header">
       <h1 class="page-title">Categories</h1>
       <button class="btn btn-primary" onclick="openAddCategory()">+ Add</button>
     </div>
-    <div class="card" style="padding:0">
-      <table class="data-table">
-        <thead><tr><th>Category</th><th>Type</th><th></th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`);
+    ${content}`);
 }
 
 function _catFormHtml(pre = null) {
@@ -892,44 +937,51 @@ async function renderAccounts() {
   const grouped = {};
   d.items.forEach(a => { const t = a.type || 'bank'; if (!grouped[t]) grouped[t] = []; grouped[t].push(a); });
 
+  // Net worth — horizontal scroll cards (same as dashboard)
   const byCurrency = {};
   d.items.forEach(a => { byCurrency[a.currency] = (byCurrency[a.currency] || 0) + a.balance; });
-  const netWorthHtml = Object.entries(byCurrency).map(([cur, total]) =>
-    `<div class="stat-card">
-      <div class="stat-label">Net Worth · ${esc(cur)}</div>
-      <div class="stat-value ${total < 0 ? 'amount-expense' : ''}">${fmt(total, cur)}</div>
-      <div class="stat-sub">${d.items.filter(a => a.currency === cur).length} account${d.items.filter(a => a.currency === cur).length > 1 ? 's' : ''}</div>
-    </div>`).join('');
+  const netWorthHtml = `<div class="acct-scroll" style="margin-bottom:20px">${Object.entries(byCurrency).map(([cur, total]) => {
+    const count = d.items.filter(a => a.currency === cur).length;
+    return `<div class="acct-card">
+      <div class="acct-name">Net Worth · ${esc(cur)}</div>
+      <div class="acct-balance${total < 0 ? ' negative' : ''}">${fmt(total, cur)}</div>
+      <span class="acct-type">${count} account${count > 1 ? 's' : ''}</span>
+    </div>`;
+  }).join('')}</div>`;
 
+  // Account groups — card rows, clickable
   let sectionsHtml = '';
   typeOrder.forEach(type => {
     const accts = grouped[type]; if (!accts?.length) return;
     const groupTotal = {}; accts.forEach(a => { groupTotal[a.currency] = (groupTotal[a.currency] || 0) + a.balance; });
     const totalStr = Object.entries(groupTotal).map(([c, t]) => fmt(t, c)).join(' + ');
+
+    const rows = accts.map(a => `
+      <div class="acct-row" onclick="viewAccountTransactions('${a.id}','${esc(a.name)}')">
+        <div class="acct-row-left">
+          <div class="acct-row-name">${esc(a.name)}</div>
+          <span class="acct-row-cur">${esc(a.currency)}</span>
+        </div>
+        <div class="acct-row-bal${a.balance < 0 ? ' negative' : ''}">${fmt(a.balance, a.currency)}</div>
+        <svg class="acct-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`).join('');
+
     sectionsHtml += `
-      <div class="card" style="padding:0;margin-bottom:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0">
+      <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden">
+        <div class="acct-group-header">
           <div style="display:flex;align-items:center;gap:8px">
             <span style="color:var(--text-secondary)">${typeIcons[type] || ''}</span>
-            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-secondary)">${typeLabels[type] || type}</span>
+            <span class="acct-group-label">${typeLabels[type] || type}</span>
           </div>
-          <span class="text-secondary text-sm" style="font-weight:600">${totalStr}</span>
+          <span class="acct-group-total">${totalStr}</span>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Account</th><th>Currency</th><th style="text-align:right">Balance</th><th></th></tr></thead>
-          <tbody>${accts.map(a => `<tr>
-              <td style="font-weight:600">${esc(a.name)}</td>
-              <td><span class="badge badge-transfer">${esc(a.currency)}</span></td>
-              <td style="text-align:right;white-space:nowrap"><span class="${a.balance < 0 ? 'amount-expense' : ''}" style="font-weight:700;font-size:15px">${fmt(a.balance, a.currency)}</span></td>
-              <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="viewAccountTransactions('${a.id}','${esc(a.name)}')">Transactions</button></td>
-            </tr>`).join('')}</tbody>
-        </table>
+        ${rows}
       </div>`;
   });
 
   setContent(`
     <div class="page-header"><h1 class="page-title">Accounts</h1><button class="btn btn-primary" onclick="openAddAccount()">+ Add</button></div>
-    <div class="stat-grid" style="margin-bottom:16px">${netWorthHtml}</div>
+    ${netWorthHtml}
     ${sectionsHtml}`);
 }
 
@@ -1003,7 +1055,7 @@ async function renderEnvelopes() {
         const entries = Object.entries(e.balanceByCurrency || {});
         const [cur, bal] = entries[0] ?? ['USD', 0];
         const pct = e.targetAmount ? Math.min(100, Math.max(0, (bal / e.targetAmount) * 100)) : null;
-        const isOver = pct !== null && pct >= 100;
+        const isOver = bal < 0;
         return `<div class="envelope-card"><div class="envelope-header"><div><div class="envelope-name">${esc(e.icon || '📁')} ${esc(e.name)}</div><div class="text-secondary text-sm" style="margin-top:2px">${esc(e.type)} · ${esc(e.periodicity)}</div></div><div style="text-align:right;flex-shrink:0"><div class="${bal < 0 ? 'amount-expense' : bal > 0 ? 'amount-income' : ''}" style="font-weight:700;font-size:15px">${fmt(bal, cur)}</div>${e.targetAmount ? `<div class="text-secondary text-sm">of ${fmt(e.targetAmount, e.targetCurrency || cur)}</div>` : ''}</div></div>${pct !== null ? `<div class="progress-bar" style="margin-bottom:12px"><div class="progress-fill ${isOver ? 'over' : ''}" style="width:${pct.toFixed(1)}%"></div></div>` : '<div style="margin-bottom:12px"></div>'}<button class="btn btn-sm btn-outline" onclick="openFundEnvelope('${e.id}','${esc(cur)}')">+ Fund</button></div>`;
       }).join('')}</div>`
     : empty('No envelopes', 'Envelopes are managed in the PocketPlan app.');
@@ -1299,6 +1351,7 @@ initKeyboardShortcuts();
       showMainLayout();
       navigate(state.currentRoute);
       getCategories();
+      getAccounts();
       startConnectionCheck();
       return;
     }

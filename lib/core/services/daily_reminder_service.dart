@@ -117,10 +117,12 @@ class DailyReminderService {
     await _ensureTz();
 
     // Request notification permission on Android 13+
-    await _plugin
+    final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.requestNotificationsPermission();
+    // Request exact alarm permission on Android 14+ (needed for exactAllowWhileIdle)
+    await androidPlugin?.requestExactAlarmsPermission();
 
     final time = await getTime();
     final customMessage = await getMessage();
@@ -146,7 +148,7 @@ class DailyReminderService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }

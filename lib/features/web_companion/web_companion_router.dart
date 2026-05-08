@@ -188,18 +188,12 @@ Middleware authMiddleware(WebCompanionAuth auth) {
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 String? _extractToken(Request request) {
+  // Only accept Bearer token from Authorization header.
+  // Cookie-based auth is intentionally not supported to prevent CSRF attacks
+  // where a browser auto-sends cookies on cross-origin requests.
   final authHeader = request.headers['authorization'];
   if (authHeader != null && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7).trim();
-  }
-  final cookie = request.headers['cookie'];
-  if (cookie != null) {
-    for (final part in cookie.split(';')) {
-      final kv = part.trim().split('=');
-      if (kv.length == 2 && kv[0].trim() == 'session') {
-        return kv[1].trim();
-      }
-    }
   }
   return null;
 }

@@ -15,6 +15,7 @@ import 'tables/allocations_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/fx_rates_table.dart';
 import 'tables/households_table.dart';
+import 'tables/objectives_table.dart';
 import 'tables/recurring_transactions_table.dart';
 import 'tables/transaction_lines_table.dart';
 import 'tables/transaction_templates_table.dart';
@@ -36,6 +37,7 @@ part 'app_database.g.dart';
     FxRates,
     RecurringTransactions,
     TransactionTemplates,
+    Objectives,
   ],
   daos: [
     AccountsDao,
@@ -50,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -108,6 +110,14 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 13) {
             await m.addColumn(allocations, allocations.autoReset);
+          }
+          if (from < 14) {
+            await m.addColumn(accounts, accounts.decimalPlaces);
+            await m.addColumn(transactions, transactions.status);
+            await m.createTable(objectives);
+          }
+          if (from < 15) {
+            await m.addColumn(accounts, accounts.isTravel);
           }
         },
       );

@@ -197,7 +197,9 @@ class GoogleDriveProvider implements CloudProvider {
       if (name == null || driveFile.id == null) continue;
       if (!filenames.contains(name)) continue;
 
-      final localPath = '$localReceiptsDir/$name';
+      // Sanitize filename to prevent path traversal
+      final safeName = name.replaceAll(RegExp(r'[/\\]'), '_').replaceAll('..', '_');
+      final localPath = '$localReceiptsDir/$safeName';
       if (io.File(localPath).existsSync()) continue;
 
       // Download the file

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
+import '../../shared/utils/format_number.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
@@ -586,8 +588,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                         fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 2),
                 Text(
-                  'Accounts: ${check.accountTotal.toStringAsFixed(2)}  |  '
-                  'Envelopes: ${check.allocationTotal.toStringAsFixed(2)}',
+                  'Accounts: ${formatNumber(check.accountTotal)}  |  '
+                  'Envelopes: ${formatNumber(check.allocationTotal)}',
                   style: TextStyle(
                       fontSize: 11, color: AppColors.ts(context)),
                 ),
@@ -595,7 +597,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             ),
           ),
           Text(
-            'Unalloc: ${check.unallocated.toStringAsFixed(2)}',
+            'Unalloc: ${formatNumber(check.unallocated)}',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -632,7 +634,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                         style: const TextStyle(fontSize: 13)),
                   ),
                   Text(
-                    '${accounts[i].currency} ${accounts[i].balance.toStringAsFixed(2)}',
+                    '${accounts[i].currency} ${formatNumber(accounts[i].balance)}',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -681,7 +683,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                       for (final entry
                           in allocations[i].balanceByCurrency.entries)
                         Text(
-                          '${entry.key} ${entry.value.toStringAsFixed(2)}',
+                          '${entry.key} ${formatNumber(entry.value)}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,

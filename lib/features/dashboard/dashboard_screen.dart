@@ -12,6 +12,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/age_of_money_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
@@ -1074,18 +1075,18 @@ class _NetWorthCard extends StatelessWidget {
           ...totals.entries.map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(e.key,
                         style: const TextStyle(
                             color: Colors.white60,
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 8),
-                    Flexible(
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: AnimatedAmount(
                           amount: e.value,
                           currency: e.key,
+                          textAlign: TextAlign.right,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 22,
@@ -1417,22 +1418,19 @@ class _RecentTxTile extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                     Text(
-                        DateFormat('MMM d')
-                            .format(tx.createdAt.toLocal()),
+                        formatDate(tx.createdAt.toLocal()),
                         style: TextStyle(
                             fontSize: 11,
                             color: AppColors.th(context))),
                   ]),
             ),
-            Flexible(
-              child: Text(formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: typeColor),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis),
-            ),
+            const SizedBox(width: 10),
+            Text(formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: typeColor),
+                textAlign: TextAlign.right),
           ]),
         ),
       ),
@@ -1579,7 +1577,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
             title: Text(cat?.name ??
                 (e.tx.note.isNotEmpty ? e.tx.note : e.tx.type)),
             subtitle: Text(
-                '${DateFormat('MMM d').format(e.tx.createdAt.toLocal())} \u00b7 ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
+                '${formatDate(e.tx.createdAt.toLocal())} \u00b7 ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
             onTap: () {
               close(context, null);
               context.push('/transactions/${e.tx.id}');

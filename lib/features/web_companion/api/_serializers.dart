@@ -24,6 +24,7 @@ Map<String, dynamic> txToJson(
       'categoryIcon': t.categoryId != null ? catMap[t.categoryId]?.icon : null,
       'categoryColor':
           t.categoryId != null ? catMap[t.categoryId]?.colorHex : null,
+      'status': t.status,
     };
 
 Map<String, dynamic> lineToJson(
@@ -52,6 +53,8 @@ Map<String, dynamic> accountToJson(Account a, double balance) => {
       'type': a.type,
       'currency': a.currency,
       'balance': balance,
+      'decimalPlaces': a.decimalPlaces,
+      'isTravel': a.isTravel,
       'archived': a.archived,
     };
 

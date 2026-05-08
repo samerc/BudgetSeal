@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Which fields to auto-fill from the last transaction with the same category.
+/// Which fields to auto-fill from the last transaction with the same category
+/// or same title (Associated Titles).
 class AutofillSettings {
   final bool account;
   final bool title;
@@ -15,7 +16,7 @@ class AutofillSettings {
     this.account = true,
     this.title = true,
     this.amount = false,
-    this.category = false,
+    this.category = true,
     this.overrideExisting = false,
   });
 
@@ -47,7 +48,7 @@ class AutofillSettings {
         account: json['account'] as bool? ?? true,
         title: json['title'] as bool? ?? true,
         amount: json['amount'] as bool? ?? false,
-        category: json['category'] as bool? ?? false,
+        category: json['category'] as bool? ?? true,
         overrideExisting: json['overrideExisting'] as bool? ?? false,
       );
 }

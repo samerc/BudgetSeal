@@ -18,6 +18,7 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../core/providers/tx_list_settings_provider.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/utils/receipt_helper.dart';
@@ -745,7 +746,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ),
                     child: Text(
                       _dateFrom != null
-                          ? DateFormat('MMM d, y').format(_dateFrom!)
+                          ? formatDate(_dateFrom!)
                           : 'From date',
                       style: TextStyle(
                         fontSize: 13,
@@ -776,7 +777,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ),
                     child: Text(
                       _dateTo != null
-                          ? DateFormat('MMM d, y').format(_dateTo!)
+                          ? formatDate(_dateTo!)
                           : 'To date',
                       style: TextStyle(
                         fontSize: 13,
@@ -1575,11 +1576,9 @@ class _DateHeaderTile extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return 'Today, ${DateFormat('MMMM d').format(date)}';
-    if (diff == 1) return 'Yesterday, ${DateFormat('MMMM d').format(date)}';
-    if (diff < 7) return DateFormat('EEEE, MMMM d').format(date);
-    if (date.year == now.year) return DateFormat('EEEE, MMMM d').format(date);
-    return DateFormat('MMMM d, y').format(date);
+    if (diff == 0) return 'Today, ${formatDate(date)}';
+    if (diff == 1) return 'Yesterday, ${formatDate(date)}';
+    return formatDate(date);
   }
 }
 

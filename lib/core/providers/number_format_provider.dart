@@ -37,13 +37,9 @@ enum DecimalSeparator {
 }
 
 enum NegativeFormat {
-  minus,
-  parentheses;
+  minus;
 
-  String get label => switch (this) {
-        minus => 'Minus (-\$100)',
-        parentheses => 'Parentheses ((\$100))',
-      };
+  String get label => 'Minus (-\$100)';
 }
 
 class NumberFormatPrefs {
@@ -63,12 +59,15 @@ class NumberFormatPrefs {
         'negative': negative.index,
       };
 
-  factory NumberFormatPrefs.fromJson(Map<String, dynamic> json) =>
-      NumberFormatPrefs(
-        thousands: ThousandsSeparator.values[json['thousands'] as int? ?? 0],
-        decimal: DecimalSeparator.values[json['decimal'] as int? ?? 0],
-        negative: NegativeFormat.values[json['negative'] as int? ?? 0],
-      );
+  factory NumberFormatPrefs.fromJson(Map<String, dynamic> json) {
+    final tIdx = (json['thousands'] as int? ?? 0).clamp(0, ThousandsSeparator.values.length - 1);
+    final dIdx = (json['decimal'] as int? ?? 0).clamp(0, DecimalSeparator.values.length - 1);
+    return NumberFormatPrefs(
+      thousands: ThousandsSeparator.values[tIdx],
+      decimal: DecimalSeparator.values[dIdx],
+      negative: NegativeFormat.minus, // only option now
+    );
+  }
 }
 
 class NumberFormatNotifier extends Notifier<NumberFormatPrefs> {

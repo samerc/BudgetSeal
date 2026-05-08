@@ -41,14 +41,28 @@ class DateFormatNotifier extends Notifier<String> {
   }
 }
 
+/// Global date format pattern, set from the provider via app.dart.
+String _datePattern = 'MMM d, y';
+
+/// Called from app.dart to keep the global in sync with the provider.
+void setDateFormatPattern(String pattern) {
+  _datePattern = pattern;
+}
+
+/// Format a date with the user's preferred format.
+String formatDate(DateTime date) {
+  return DateFormat(_datePattern).format(date);
+}
+
 /// Format a date with the user's preferred format, with smart "Today"/"Yesterday" prefix.
-String formatDateSmart(DateTime date, String pattern) {
+String formatDateSmart(DateTime date, [String? pattern]) {
+  final p = pattern ?? _datePattern;
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final d = DateTime(date.year, date.month, date.day);
   final diff = today.difference(d).inDays;
 
-  final formatted = DateFormat(pattern).format(date);
+  final formatted = DateFormat(p).format(date);
   if (diff == 0) return 'Today, $formatted';
   if (diff == 1) return 'Yesterday, $formatted';
   return formatted;

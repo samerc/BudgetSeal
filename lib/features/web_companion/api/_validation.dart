@@ -50,19 +50,23 @@ String? requireString(Map<String, dynamic> body, String key) {
 }
 
 /// Extract a required numeric field (accepts int, double, or parseable String).
+/// Returns null for non-finite values (NaN, Infinity).
 double? requireDouble(Map<String, dynamic> body, String key) {
   final v = body[key];
-  if (v is num) return v.toDouble();
-  if (v is String) return double.tryParse(v);
-  return null;
+  double? result;
+  if (v is num) result = v.toDouble();
+  if (v is String) result = double.tryParse(v);
+  return (result != null && result.isFinite) ? result : null;
 }
 
 /// Extract an optional numeric field.
+/// Returns null for non-finite values (NaN, Infinity).
 double? optDouble(Map<String, dynamic> body, String key) {
   final v = body[key];
-  if (v is num) return v.toDouble();
-  if (v is String) return double.tryParse(v);
-  return null;
+  double? result;
+  if (v is num) result = v.toDouble();
+  if (v is String) result = double.tryParse(v);
+  return (result != null && result.isFinite) ? result : null;
 }
 
 /// Extract an optional non-empty String field.

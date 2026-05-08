@@ -49,7 +49,7 @@ lib/
 │   │   ├── app_database.dart   # Drift database definition (schema v13)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
-│   │   └── tables/             # Table definitions (11 tables)
+│   │   └── tables/             # Table definitions (12 tables)
 │   ├── engine/
 │   │   ├── allocation_engine.dart   # Central money flow engine (all writes go through here)
 │   │   ├── balance_calculator.dart  # Computes balances dynamically from ledger
@@ -79,6 +79,8 @@ lib/
 │   │   ├── receipt_sync_provider.dart
 │   │   ├── report_stats_provider.dart  # Pre-aggregated monthly stats (O(N) single pass)
 │   │   ├── tx_colors_provider.dart  # Transaction type color coding
+│   │   ├── accent_color_provider.dart    # Material You dynamic accent color
+│   │   ├── objectives_provider.dart     # Goals & loans data
 │   │   └── web_companion_provider.dart  # Server state (running/stopped/ip/port)
 │   ├── sync/
 │   │   ├── sync_engine.dart         # JSON export/import/merge
@@ -101,9 +103,11 @@ lib/
 │   ├── categories/
 │   ├── subscriptions/          # Subscription tracker: list, detail, price history
 │   ├── reports/                # Hub with 4 tabs: Overview, Categories, Insights, Balance Sheet
-│   ├── recurring/
+│   ├── recurring/              # Recurring transactions + upcoming bills
 │   ├── templates/
 │   ├── periods/                # Period transition + leftover resolution
+│   ├── objectives/             # Goals & loans: list, detail, progress
+│   ├── travel/                 # Travel exchange: temp currency wallets
 │   ├── settings/               # Settings, sync, backup, import/export, about
 │   ├── onboarding/             # 3-page onboarding + guided setup
 │   ├── splash/
@@ -184,7 +188,7 @@ Recurring transactions can be flagged as subscriptions (`isSubscription` column)
 
 ### Cloud Sync
 Single-file sync approach (`PocketPlan_Sync.json`):
-- Exports all 11 tables as JSON
+- Exports all 12 tables as JSON
 - Merge by `lastModified` timestamp (newer row wins)
 - Supports Google Drive (OAuth) and system file picker (Dropbox/OneDrive/local)
 - Auto-syncs on app resume and pause via `WidgetsBindingObserver`
@@ -261,13 +265,15 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 13
-11 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates.
+### Schema Version: 15
+12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
 v11→v12 added `deleted` (BOOLEAN, default false) to `transactions` for soft-delete support.
 v12→v13 added `autoReset` (BOOLEAN, default true) to `allocations` for period reset behavior.
+v13→v14 added `decimalPlaces` (nullable INT) to `accounts` for per-currency decimal precision, `status` (nullable TEXT) to `transactions` for upcoming/skipped bills, and created `objectives` table for goals and loan tracking.
+v14→v15 added `isTravel` (BOOLEAN, default false) to `accounts` for travel wallet support.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -277,6 +283,11 @@ Defined in `app_database.dart` `migration` getter. After schema changes:
 
 ### Key Columns
 Every table has `id` (UUID text primary key). Most have `createdAt`, `lastModified`, `deviceId` for sync support.
+
+Notable additions:
+- `accounts.decimalPlaces` — nullable INT, overrides currency decimal display
+- `accounts.isTravel` — BOOLEAN, marks temporary travel wallets (auto-archive at zero)
+- `transactions.status` — nullable TEXT ('upcoming', 'skipped', or null for posted)
 
 ## Dependencies (key ones)
 
@@ -302,6 +313,7 @@ Every table has `id` (UUID text primary key). Most have `createdAt`, `lastModifi
 | haptic_feedback | ^0.6.0 | Haptic feedback |
 | sliver_tools | ^0.2.12 | Advanced sliver widgets |
 | google_fonts | ^8.0.0 | Custom fonts |
+| dynamic_color | ^1.7.0 | Material You system accent color |
 | confetti | ^0.8.0 | Celebration effects (goal completion) |
 | google_mlkit_text_recognition | ^0.15.1 | Offline receipt OCR (bill splitter) |
 | encrypt | ^5.0.3 | AES-256 encryption for sync files |
@@ -680,7 +692,7 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 ## Theme System
 
-`buildLightTheme(fontName)`, `buildDarkTheme(fontName)`, and `buildBlackTheme(fontName)` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+`buildLightTheme(fontName, [accentColor])`, `buildDarkTheme(fontName, [accentColor])`, and `buildBlackTheme(fontName, [accentColor])` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Nunito Sans, Poppins, Nunito, Rubik, Space Grotesk.
 
 **Theme modes:** `themeModeProvider` stores a String (`'system'`/`'light'`/`'dark'`/`'black'`). `flutterThemeMode` getter maps black → dark for Flutter's ThemeMode. `isBlackMode` getter for AMOLED-specific logic. `app.dart` must `ref.watch(themeModeProvider)` for the state (not `.notifier`) to rebuild on theme change.
 
@@ -754,3 +766,88 @@ Transaction list caps month tabs to current month. No future months shown. Right
 Home | Activity | Budget | Reports | More
 
 Accounts are accessed from More > Accounts.
+
+## Objectives (Goals & Loans)
+
+`lib/features/objectives/` — standalone savings goals and debt tracking, separate from envelope budgeting.
+
+- **Goals**: target amount + currency + optional deadline + progress tracking. Fund via "Add Funds" button.
+- **Loans**: track money lent or borrowed. Has `contactName` (person) and `direction` ('lent' or 'borrowed'). Fund via "Record Payment".
+- `objectives` table: id, householdId, name, type ('goal'/'loan'), icon, targetAmount, targetCurrency, currentAmount, endDate, contactName, direction, colorHex, archived, deviceId, createdAt, lastModified.
+- Full sync support (export, import, merge by lastModified).
+- Routes: `/objectives` (list), `/objectives/:id` (detail), `/objectives/new` (create).
+- Accessible from More > Goals & Loans.
+
+## Travel Exchange
+
+`lib/features/travel/travel_exchange_screen.dart` — temporary currency wallets for trips.
+
+### Flow
+1. User taps "Travel Exchange" in More
+2. Selects source account, amount to exchange, destination currency, amount received
+3. App creates a travel wallet (`isTravel: true` on accounts table) + records the transfer
+4. User spends from the travel wallet during the trip
+5. On return: "Convert Back & Close" (account detail 3-dot menu) transfers remainder back and archives
+6. Auto-archive: `TravelAccountService.checkAndAutoArchive()` runs on app resume, archives travel wallets at zero balance
+
+### Reactivation
+When exchanging to a currency that has an archived travel wallet, a dialog asks: **Reactivate** (unarchive existing) or **Create New**. Prevents account clutter across repeated trips.
+
+### Key Rules
+- Travel accounts have `isTravel = true` — visually distinguished with a plane badge
+- Auto-archive threshold is currency-aware: 0.5 for JPY (0 decimals), 0.005 for USD (2 decimals), 0.0005 for KWD (3 decimals)
+- Same-currency exchange is blocked (no point creating a travel wallet in your own currency)
+- Regular account creation never suggests archived travel wallets
+
+## Material You / Accent Color
+
+`lib/core/providers/accent_color_provider.dart` — supports system dynamic color (Android 12+ Material You) and 10 preset accent colors.
+
+- **Options**: 'system' (device wallpaper accent), 'default' (Royal Blue #2563EB), or any preset hex color
+- **Presets**: Indigo, Violet, Pink, Red, Orange, Yellow, Green, Teal, Cyan
+- `DynamicColorBuilder` wraps the app in `app.dart` — resolves system accent on Android 12+
+- Theme builders (`buildLightTheme`, `buildDarkTheme`, `buildBlackTheme`) accept optional `accentColor` parameter
+- Settings: Appearance > Accent Color — circle grid picker with checkmark selection
+
+## Per-Account Decimal Precision
+
+`accounts.decimalPlaces` (nullable int) — overrides the default decimal display for a currency.
+
+- **Auto-detect**: `currencyDecimals()` in `format_number.dart` returns ISO 4217 defaults (0 for JPY/KRW, 3 for BHD/KWD, 2 for everything else)
+- **Manual override**: Account detail form has a "Decimal Places" dropdown (Auto / 0 / 1 / 2 / 3)
+- `formatAmount()` and `formatSignedAmount()` both respect currency-specific decimals automatically
+
+## Transaction Status
+
+`transactions.status` (nullable TEXT) — supports upcoming/skipped bills from recurring transactions.
+
+- `null` = normal posted transaction (default, backward compatible)
+- `'upcoming'` = pending bill generated but not yet confirmed
+- `'skipped'` = user skipped this occurrence
+- Field is synced across devices and exposed in web companion API
+
+## Upcoming Bills
+
+`lib/features/recurring/upcoming_bills_screen.dart` — shows all enabled recurring transactions sorted by next due date.
+
+- **Urgency indicators**: Red "Overdue by N days", Amber "Due today/tomorrow/in 3 days", Green "Due in N days"
+- Displays frequency, amount, type icon per bill
+- Route: `/upcoming-bills`, accessible from More > Upcoming Bills
+
+## Fonts
+
+Default font: Plus Jakarta Sans. Available: DM Sans, Inter, **Nunito Sans** (closest to Avenir), Poppins, Nunito, Rubik, Space Grotesk.
+
+## Number & Date Formatting
+
+### Number Format
+`formatAmount()` and `formatSignedAmount()` in `format_number.dart` respect user preferences for thousands separator (comma/period/space/none), decimal separator (period/comma), and negative format (minus sign only — parentheses removed). `formatNumber()` formats plain numbers (exchange rates, converted amounts) with the same separator prefs. `currencyDecimals()` returns ISO 4217 defaults (0 for JPY, 3 for KWD, 2 for everything else). Settings apply instantly via global `setNumberFormatPrefs()` called from `app.dart` on provider change.
+
+### Date Format
+`formatDate()` and `formatDateSmart()` in `date_format_provider.dart` use the user's preferred pattern. Global `setDateFormatPattern()` called from `app.dart`. All user-facing date displays use `formatDate()` — month-only headers (`MMMM yyyy`) and machine formats (`yyyy-MM-dd`) are intentionally hardcoded. Settings apply instantly without restart.
+
+### Key Rules
+- Never use `toStringAsFixed()` for user-visible currency amounts — use `formatAmount()` or `formatNumber()`.
+- Never use `DateFormat('...')` for user-facing full dates — use `formatDate()`.
+- Input fields (TextControllers) and percentages may use `toStringAsFixed()` since they need `.` for parsing.
+- Month-only labels (`MMMM`, `MMM yyyy`) stay hardcoded — they're contextual, not configurable.

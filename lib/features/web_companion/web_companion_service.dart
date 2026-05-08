@@ -48,7 +48,7 @@ class WebCompanionService {
           .addMiddleware(_privateIpMiddleware())
           .addMiddleware(_bodySizeLimitMiddleware())
           .addMiddleware(_rateLimitMiddleware())
-          .addMiddleware(_securityMiddleware())
+          .addMiddleware(_securityMiddleware(ip))
           .addHandler(handler);
 
       // Bind shelf server to the WiFi IP only (not 0.0.0.0)
@@ -157,7 +157,7 @@ class WebCompanionService {
         final connInfo =
             request.context['shelf.io.connection_info'] as HttpConnectionInfo?;
         final remoteIp = connInfo?.remoteAddress.address;
-        if (remoteIp != null && !_isPrivateIp(remoteIp)) {
+        if (remoteIp == null || !_isPrivateIp(remoteIp)) {
           return Response.forbidden(
             jsonEncode({'error': 'Access denied: not on local network'}),
             headers: {'content-type': 'application/json'},
@@ -240,31 +240,37 @@ class WebCompanionService {
   }
 
   /// Security and CORS middleware.
-  /// SPA is served from the same origin so CORS is same-origin only.
-  /// Adds security headers to all responses.
-  static Middleware _securityMiddleware() {
+  /// Validates Origin header against the server's own IP — rejects cross-origin requests.
+  /// Adds security headers and CORS headers to all responses.
+  static Middleware _securityMiddleware(String serverIp) {
+    final allowedOrigin = 'http://$serverIp:7432';
+
     return createMiddleware(
       requestHandler: (Request request) {
         if (request.method == 'OPTIONS') {
           final origin = request.headers['origin'] ?? '';
-          return Response.ok('', headers: _buildCorsHeaders(origin));
+          if (origin.isNotEmpty && origin != allowedOrigin) {
+            return Response.forbidden(
+              jsonEncode({'error': 'Cross-origin request denied'}),
+              headers: {'content-type': 'application/json', ..._securityHeaders},
+            );
+          }
+          return Response.ok('', headers: _buildCorsHeaders(allowedOrigin));
         }
         return null;
       },
       responseHandler: (Response response) {
         return response.change(headers: {
           ...response.headers,
-          ..._securityHeaders,
+          ..._buildCorsHeaders(allowedOrigin),
         });
       },
     );
   }
 
-  static Map<String, String> _buildCorsHeaders(String origin) {
-    // Only allow same-origin requests (the phone's own IP)
-    // origin will be like "http://192.168.1.x:7432"
+  static Map<String, String> _buildCorsHeaders(String allowedOrigin) {
     return {
-      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '3600',

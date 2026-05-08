@@ -4,8 +4,9 @@ import '../../core/providers/font_provider.dart';
 import 'app_colors.dart';
 import 'design_tokens.dart';
 
-/// Build the light theme with the given font name.
-ThemeData buildLightTheme(String fontName) {
+/// Build the light theme with the given font name and optional accent color.
+ThemeData buildLightTheme(String fontName, [Color? accentColor]) {
+  final accent = accentColor ?? AppColors.accent;
   final textTheme = buildTextTheme(fontName);
   final fs = (double? sz, FontWeight? fw, Color? c) =>
       fontStyle(fontName, fontSize: sz, fontWeight: fw, color: c);
@@ -14,10 +15,10 @@ ThemeData buildLightTheme(String fontName) {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.accent,
+      seedColor: accent,
       brightness: Brightness.light,
-      primary: AppColors.accent,
-      secondary: AppColors.accent,
+      primary: accent,
+      secondary: accent,
       surface: AppColors.surface,
       error: AppColors.overspent,
     ),
@@ -48,7 +49,7 @@ ThemeData buildLightTheme(String fontName) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.accent, width: 2),
+        borderSide: BorderSide(color: accent, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       labelStyle: fs(null, null, AppColors.textSecondary),
@@ -56,7 +57,7 @@ ThemeData buildLightTheme(String fontName) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.accent,
+        backgroundColor: accent,
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
@@ -66,7 +67,7 @@ ThemeData buildLightTheme(String fontName) {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
-      indicatorColor: AppColors.accent.withValues(alpha: 0.12),
+      indicatorColor: accent.withValues(alpha: 0.12),
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
       ),
@@ -91,8 +92,9 @@ ThemeData buildLightTheme(String fontName) {
   );
 }
 
-/// Build the dark theme with the given font name.
-ThemeData buildDarkTheme(String fontName) {
+/// Build the dark theme with the given font name and optional accent color.
+ThemeData buildDarkTheme(String fontName, [Color? accentColor]) {
+  final accent = accentColor ?? AppColors.accent;
   final textTheme = buildTextTheme(fontName, Brightness.dark);
   final fs = (double? sz, FontWeight? fw, Color? c) =>
       fontStyle(fontName, fontSize: sz, fontWeight: fw, color: c);
@@ -101,10 +103,10 @@ ThemeData buildDarkTheme(String fontName) {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.accent,
+      seedColor: accent,
       brightness: Brightness.dark,
-      primary: AppColors.accent,
-      secondary: AppColors.accent,
+      primary: accent,
+      secondary: accent,
       surface: AppColors.darkSurface,
       error: AppColors.overspent,
     ),
@@ -122,7 +124,7 @@ ThemeData buildDarkTheme(String fontName) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     ),
@@ -135,7 +137,7 @@ ThemeData buildDarkTheme(String fontName) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.accent, width: 2),
+        borderSide: BorderSide(color: accent, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       labelStyle: fs(null, null, AppColors.darkTextSecondary),
@@ -143,7 +145,7 @@ ThemeData buildDarkTheme(String fontName) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.accent,
+        backgroundColor: accent,
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
@@ -153,7 +155,7 @@ ThemeData buildDarkTheme(String fontName) {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
-      indicatorColor: AppColors.accent.withValues(alpha: 0.2),
+      indicatorColor: accent.withValues(alpha: 0.2),
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
       ),
@@ -179,8 +181,8 @@ ThemeData buildDarkTheme(String fontName) {
 }
 
 /// Build the black (AMOLED) theme — same as dark but with pure black surfaces.
-ThemeData buildBlackTheme(String fontName) {
-  final dark = buildDarkTheme(fontName);
+ThemeData buildBlackTheme(String fontName, [Color? accentColor]) {
+  final dark = buildDarkTheme(fontName, accentColor);
   return dark.copyWith(
     scaffoldBackgroundColor: AppColors.blackBackground,
     colorScheme: dark.colorScheme.copyWith(

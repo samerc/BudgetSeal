@@ -30,6 +30,7 @@ class SyncEngine {
     final transactionTemplates =
         await _db.select(_db.transactionTemplates).get();
     final fxRates = await _db.select(_db.fxRates).get();
+    final objectivesList = await _db.select(_db.objectives).get();
 
     final data = {
       'version': 1,
@@ -46,6 +47,7 @@ class SyncEngine {
           recurringTransactions.map(_recurringToMap).toList(),
       'transactionTemplates': transactionTemplates.map(_templateToMap).toList(),
       'fxRates': fxRates.map(_fxRateToMap).toList(),
+      'objectives': objectivesList.map(_objectiveToMap).toList(),
     };
 
     final json = jsonEncode(data);
@@ -69,6 +71,7 @@ class SyncEngine {
       await _db.delete(_db.transactions).go();
       await _db.delete(_db.transactionTemplates).go();
       await _db.delete(_db.recurringTransactions).go();
+      await _db.delete(_db.objectives).go();
       await _db.delete(_db.fxRates).go();
       await _db.delete(_db.categories).go();
       await _db.delete(_db.allocations).go();
@@ -121,6 +124,10 @@ class SyncEngine {
         for (final f in _list(data, 'fxRates')) {
           b.insert(_db.fxRates, _fxRateFromMap(f),
               onConflict: DoUpdate((_) => _fxRateFromMap(f)));
+        }
+        for (final o in _list(data, 'objectives')) {
+          b.insert(_db.objectives, _objectiveFromMap(o),
+              onConflict: DoUpdate((_) => _objectiveFromMap(o)));
         }
       });
     });
@@ -191,6 +198,11 @@ class SyncEngine {
           _db.fxRates, _list(data, 'fxRates'), _fxRateFromMap,
           getId: (m) => m['id'] as String,
           getModified: (m) => _parseDate(m['fetchedAt']));
+
+      changed += await _mergeTable(
+          _db.objectives, _list(data, 'objectives'), _objectiveFromMap,
+          getId: (m) => m['id'] as String,
+          getModified: (m) => _parseDate(m['lastModified']));
     });
 
     return changed;
@@ -302,6 +314,8 @@ class SyncEngine {
         'type': a.type,
         'currency': a.currency,
         'initialBalance': a.initialBalance,
+        'decimalPlaces': a.decimalPlaces,
+        'isTravel': a.isTravel,
         'archived': a.archived,
         'deviceId': a.deviceId,
         'createdAt': a.createdAt.toIso8601String(),
@@ -333,6 +347,8 @@ class SyncEngine {
         'rollover': a.rollover,
         'targetAmount': a.targetAmount,
         'targetCurrency': a.targetCurrency,
+        'icon': a.icon,
+        'autoReset': a.autoReset,
         'archived': a.archived,
         'deviceId': a.deviceId,
         'createdAt': a.createdAt.toIso8601String(),
@@ -351,6 +367,7 @@ class SyncEngine {
         'exchangeRateToBase': t.exchangeRateToBase,
         'note': t.note,
         'receiptPath': t.receiptPath,
+        'status': t.status,
         'createdBy': t.createdBy,
         'deviceId': t.deviceId,
         'createdAt': t.createdAt.toIso8601String(),
@@ -460,6 +477,8 @@ class SyncEngine {
         currency: m['currency'] as String,
         deviceId: m['deviceId'] as String? ?? 'sync',
         initialBalance: Value((m['initialBalance'] as num?)?.toDouble() ?? 0),
+        decimalPlaces: Value(m['decimalPlaces'] as int?),
+        isTravel: Value(m['isTravel'] as bool? ?? false),
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
@@ -493,6 +512,8 @@ class SyncEngine {
         rollover: Value(m['rollover'] as bool? ?? false),
         targetAmount: Value((m['targetAmount'] as num?)?.toDouble()),
         targetCurrency: Value(m['targetCurrency'] as String?),
+        icon: Value(m['icon'] as String?),
+        autoReset: Value(m['autoReset'] as bool? ?? true),
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
@@ -513,6 +534,7 @@ class SyncEngine {
             (m['exchangeRateToBase'] as num?)?.toDouble() ?? 1.0),
         note: Value(m['note'] as String? ?? ''),
         receiptPath: Value(m['receiptPath'] as String?),
+        status: Value(m['status'] as String?),
         createdBy: m['createdBy'] as String? ?? 'sync',
         deviceId: m['deviceId'] as String? ?? 'sync',
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
@@ -594,5 +616,46 @@ class SyncEngine {
         toCurrency: m['targetCurrency'] as String,
         rate: (m['rate'] as num).toDouble(),
         fetchedAt: Value(_parseDate(m['fetchedAt']) ?? DateTime.now()),
+      );
+
+  // ── Objectives ──────────────────────────────────────────────────
+
+  Map<String, dynamic> _objectiveToMap(Objective o) => {
+        'id': o.id,
+        'householdId': o.householdId,
+        'name': o.name,
+        'type': o.type,
+        'icon': o.icon,
+        'targetAmount': o.targetAmount,
+        'targetCurrency': o.targetCurrency,
+        'currentAmount': o.currentAmount,
+        'endDate': o.endDate?.toIso8601String(),
+        'contactName': o.contactName,
+        'direction': o.direction,
+        'colorHex': o.colorHex,
+        'archived': o.archived,
+        'deviceId': o.deviceId,
+        'createdAt': o.createdAt.toIso8601String(),
+        'lastModified': o.lastModified.toIso8601String(),
+      };
+
+  ObjectivesCompanion _objectiveFromMap(Map<String, dynamic> m) =>
+      ObjectivesCompanion.insert(
+        id: m['id'] as String,
+        householdId: m['householdId'] as String,
+        name: m['name'] as String,
+        type: m['type'] as String? ?? 'goal',
+        targetCurrency: m['targetCurrency'] as String? ?? 'USD',
+        deviceId: m['deviceId'] as String? ?? 'sync',
+        icon: Value(m['icon'] as String?),
+        targetAmount: Value((m['targetAmount'] as num?)?.toDouble() ?? 0),
+        currentAmount: Value((m['currentAmount'] as num?)?.toDouble() ?? 0),
+        endDate: Value(_parseDate(m['endDate'])),
+        contactName: Value(m['contactName'] as String?),
+        direction: Value(m['direction'] as String?),
+        colorHex: Value(m['colorHex'] as String? ?? '#2563EB'),
+        archived: Value(m['archived'] as bool? ?? false),
+        createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
+        lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
       );
 }

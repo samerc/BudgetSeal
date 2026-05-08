@@ -59,12 +59,11 @@ Handler listTransactionsHandler(Ref ref) {
             expr = expr & t.createdAt.isSmallerThanValue(toDate);
           }
           if (search != null && search.isNotEmpty) {
-            // Escape SQL LIKE wildcards in user input
-            final escaped = search
-                .replaceAll('\\', '\\\\')
-                .replaceAll('%', '\\%')
-                .replaceAll('_', '\\_');
-            expr = expr & t.note.like('%$escaped%');
+            // Truncate search to prevent performance issues
+            final truncatedSearch = search.length > 200
+                ? search.substring(0, 200)
+                : search;
+            expr = expr & t.note.lower().contains(truncatedSearch.toLowerCase());
           }
           return expr;
         })
@@ -313,8 +312,6 @@ Handler updateTransactionHandler(Ref ref) {
             ..where((l) => l.transactionId.equals(id)))
           .get();
 
-      await engine.deleteTransaction(id);
-
       final type = existing.type;
       final note = truncate(optString(body, 'note') ?? existing.note, 500);
       final date = _parseDate(optString(body, 'date')) ?? existing.createdAt;
@@ -322,17 +319,23 @@ Handler updateTransactionHandler(Ref ref) {
       String newId;
 
       if (type == 'transfer') {
+        // Validate inputs before deleting the original
+        final fromAcct = optString(body, 'accountId') ?? existing.accountId;
+        final toAcct = optString(body, 'destinationAccountId') ??
+            existing.destinationAccountId ?? '';
+        final amount = optDouble(body, 'amount') ?? existing.amount;
+        final currency = optString(body, 'currency') ?? existing.currency;
+        final rate = optDouble(body, 'exchangeRateToBase') ?? existing.exchangeRateToBase;
+
+        await engine.deleteTransaction(id);
+
         newId = await engine.recordTransfer(
           householdId: householdId,
-          fromAccountId:
-              optString(body, 'accountId') ?? existing.accountId,
-          toAccountId: optString(body, 'destinationAccountId') ??
-              existing.destinationAccountId ??
-              '',
-          amount: optDouble(body, 'amount') ?? existing.amount,
-          currency: optString(body, 'currency') ?? existing.currency,
-          exchangeRateToBase:
-              optDouble(body, 'exchangeRateToBase') ?? existing.exchangeRateToBase,
+          fromAccountId: fromAcct,
+          toAccountId: toAcct,
+          amount: amount,
+          currency: currency,
+          exchangeRateToBase: rate,
           createdBy: 'web',
           deviceId: 'web',
           note: note,
@@ -342,6 +345,7 @@ Handler updateTransactionHandler(Ref ref) {
         final accountId =
             optString(body, 'accountId') ?? existing.accountId;
 
+        // Build and validate lines BEFORE deleting the original
         final List<TxLine> lines;
         if (body['lines'] is List && (body['lines'] as List).isNotEmpty) {
           final parsed = <TxLine>[];
@@ -402,6 +406,9 @@ Handler updateTransactionHandler(Ref ref) {
             )
           ];
         }
+
+        // Lines validated — safe to delete the original and re-create
+        await engine.deleteTransaction(id);
 
         newId = await engine.recordTransaction(
           householdId: householdId,

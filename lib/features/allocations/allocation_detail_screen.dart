@@ -9,6 +9,8 @@ import 'package:uuid/uuid.dart';
 
 import 'package:intl/intl.dart';
 
+import '../../core/providers/date_format_provider.dart';
+
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
 import '../../core/database/daos/ledger_dao.dart';
@@ -1237,7 +1239,7 @@ class _AllocationDetailScreenState
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${DateFormat('MMM d').format(entry.createdAt.toLocal())} · $label',
+                            '${formatDate(entry.createdAt.toLocal())} · $label',
                             style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.th(context)),

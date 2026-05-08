@@ -13,6 +13,7 @@ class AnimatedAmount extends StatefulWidget {
   final double amount;
   final String? currency;
   final TextStyle? style;
+  final TextAlign? textAlign;
   final Duration duration;
   final Curve curve;
   final bool lazyFirstRender;
@@ -23,6 +24,7 @@ class AnimatedAmount extends StatefulWidget {
     required this.amount,
     this.currency,
     this.style,
+    this.textAlign,
     this.duration = const Duration(milliseconds: 700),
     this.curve = Curves.easeOutCubic,
     this.lazyFirstRender = true,
@@ -59,6 +61,7 @@ class _AnimatedAmountState extends State<AnimatedAmount> {
       return Text(
         _format(widget.amount),
         style: widget.style ?? Theme.of(context).textTheme.titleLarge,
+        textAlign: widget.textAlign,
       );
     }
 
@@ -77,6 +80,7 @@ class _AnimatedAmountState extends State<AnimatedAmount> {
         return Text(
           _format(value),
           style: widget.style ?? Theme.of(context).textTheme.titleLarge,
+          textAlign: widget.textAlign,
         );
       },
     );

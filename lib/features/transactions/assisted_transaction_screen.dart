@@ -17,6 +17,7 @@ import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -1063,7 +1064,7 @@ class _AssistedTransactionScreenState
     final today = DateTime(now.year, now.month, now.day);
     final selected = DateTime(date.year, date.month, date.day);
     if (selected == today) return 'Today';
-    return DateFormat('MMM d, y').format(date);
+    return formatDate(date);
   }
 
   double _evalExpr(String expr) {

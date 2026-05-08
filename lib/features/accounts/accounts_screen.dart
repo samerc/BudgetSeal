@@ -190,16 +190,30 @@ class _AccountTile extends StatelessWidget {
           ),
           child: Icon(_accountIcon(acc.type), color: color, size: 20),
         ),
-        title: Text(
-          acc.name,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-            color: AppColors.tp(context),
-          ),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                acc.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  color: AppColors.tp(context),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (acc.isTravel) ...[
+              const SizedBox(width: 6),
+              Icon(Icons.flight_rounded, size: 14,
+                  color: AppColors.accent),
+            ],
+          ],
         ),
         subtitle: Text(
-          '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
+          acc.isTravel
+              ? 'Travel wallet · ${acc.currency}'
+              : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
           style:
               TextStyle(color: AppColors.ts(context), fontSize: 12),
         ),

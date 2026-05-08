@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/database/app_database.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
+import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/amount_field.dart';
 
 // ---------------------------------------------------------------------------
@@ -489,7 +490,7 @@ class LineCard extends StatelessWidget {
                   if (line.amount > 0)
                     Flexible(
                       child: Text(
-                        '= ${line.baseAmount.toStringAsFixed(2)} $baseCurrency',
+                        '= ${formatNumber(line.baseAmount)} $baseCurrency',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

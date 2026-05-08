@@ -11,6 +11,7 @@ import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
 import '../sync/sync_engine.dart';
 import 'database_provider.dart';
+import 'household_provider.dart';
 import 'receipt_sync_provider.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
@@ -195,9 +196,13 @@ class SyncNotifier extends Notifier<SyncState> {
   /// Sync receipt files with Google Drive.
   Future<void> _syncReceipts(GoogleDriveProvider provider) async {
     final db = ref.read(databaseProvider);
-    final transactions = await (db.select(db.transactions)
-          ..where((t) => t.deleted.equals(false)))
-        .get();
+    final householdId = ref.read(currentHouseholdIdProvider);
+    final query = db.select(db.transactions)
+      ..where((t) => t.deleted.equals(false));
+    if (householdId != null) {
+      query.where((t) => t.householdId.equals(householdId));
+    }
+    final transactions = await query.get();
 
     // Collect all receipt filenames from the database
     final allFilenames = <String>{};

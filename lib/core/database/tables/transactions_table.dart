@@ -31,6 +31,9 @@ class Transactions extends Table {
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();
+  /// Transaction status: null = posted (normal), 'upcoming' = pending bill,
+  /// 'skipped' = user skipped this occurrence.
+  TextColumn get status => text().nullable()();
   /// Soft-delete flag. Deleted transactions are excluded from all balance
   /// calculations and queries but retained for sync conflict resolution.
   BoolColumn get deleted => boolean().withDefault(const Constant(false))();
