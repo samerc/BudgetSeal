@@ -161,6 +161,10 @@ assets/web/
     index.html    # SPA shell + sidebar with SVG nav icons
     app.js        # ~1200 lines, vanilla JS, hash routing, 8 screens
     styles.css    # Full design system (tokens, dark mode, components)
+    help.html     # Bundled help guide (also hostable as standalone webpage)
+
+docs/
+    i18n_strings.csv  # Master i18n CSV (key, context, english, arabic, french)
 ```
 
 ## Core Concepts
@@ -326,6 +330,7 @@ Notable additions:
 | flutter_foreground_task | ^9.0.0 | Android foreground service (Web Companion) |
 | wakelock_plus | ^1.2.10 | iOS screen-on (Web Companion) |
 | crypto | ^3.0.0 | SHA-256 PIN hashing (Web Companion) |
+| webview_flutter | ^4.10.0 | In-app help guide WebView |
 
 ## Testing
 
@@ -572,7 +577,7 @@ GET  /api/reports/by-category?year&month&type → spending/income per category (
 
 `AutoBackupService` in `lib/core/services/auto_backup_service.dart`:
 - Copies `pocketplan.db` to `app_documents/backups/` with timestamped filenames
-- Runs on app resume via `AutoBackupService.runIfDue()` in `app.dart`
+- Runs on app resume AND pause (exit) via `AutoBackupService.runIfDue()` in `app.dart`
 - User settings: enable/disable, frequency (6h–weekly), retention (3–30 backups)
 - Old backups auto-deleted beyond retention limit
 - Backup history visible on the Backup & Restore screen with per-file restore/delete
@@ -583,7 +588,11 @@ Mixed-type items from the assisted flow (e.g., expense + income in one session) 
 
 ## Daily Reminder
 
-`DailyReminderService` schedules a daily local notification via `flutter_local_notifications`. Users configure in Settings: toggle on/off, pick time (default 7 PM), optional custom message. If no custom message, rotates between 5 default prompts. Initialized in `main()` via `DailyReminderService.init()` which re-schedules if enabled. Uses `timezone` package for `zonedSchedule` with `matchDateTimeComponents.time`. Important: the service has its own `FlutterLocalNotificationsPlugin` instance that must be initialized via `_ensureInitialized()` before any scheduling call.
+`DailyReminderService` schedules a daily local notification via `flutter_local_notifications`. Users configure in Settings: toggle on/off, pick time (default 7 PM), optional custom message. If no custom message, rotates between 5 default prompts. Initialized in `main()` via `DailyReminderService.init()` which re-schedules if enabled. Uses `timezone` package for `zonedSchedule` with `matchDateTimeComponents.time`.
+
+**Critical:** `DailyReminderService` shares the same `FlutterLocalNotificationsPlugin` instance as `NotificationService` via `setSharedPlugin()` — having two separate instances causes the second `initialize()` to break the first's scheduling callbacks on Android. The plugin is initialized once in `NotificationService.init()`, then shared via `DailyReminderService.setSharedPlugin(NotificationService.plugin)` in `main.dart`.
+
+**Exact alarm fallback:** On Android 14+, `SCHEDULE_EXACT_ALARM` requires explicit user grant. The service checks `canScheduleExactNotifications()` first — if denied, falls back to `inexactAllowWhileIdle` (fires within ~15 min window, fine for daily reminders). Never calls `requestExactAlarmsPermission()` automatically as it navigates away from the app.
 
 ## Category Icons
 
@@ -719,15 +728,17 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 The More tab is split into two screens:
 
 **More page** (tab) — feature hub:
-- **TOOLS**: Accounts, Categories, Bill Splitter, Bill Calendar, Exchange Rates, Web Companion
-- **AUTOMATION**: Recurring, Templates, Subscriptions, Period Transition
+- **TOOLS**: Accounts, Categories, Bill Splitter, Bill Calendar, Upcoming Bills, Travel Exchange, Exchange Rates, Web Companion
+- **AUTOMATION**: Recurring, Templates, Subscriptions, Goals & Loans, Period Transition
 - Settings & Customization → navigates to `/settings`
+- Help Guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
 - About PocketPlan
+- Household name + currency shown as subtitle under "More" header (no separate card)
 
 **Settings screen** (`/settings`) — all configuration:
 - **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
-- **PREFERENCES**: Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
+- **PREFERENCES**: Household Name, Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
 - **SECURITY**: Biometric Lock
 
 Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
@@ -777,6 +788,13 @@ Accounts are accessed from More > Accounts.
 - Full sync support (export, import, merge by lastModified).
 - Routes: `/objectives` (list), `/objectives/:id` (detail), `/objectives/new` (create).
 - Accessible from More > Goals & Loans.
+
+### Detail Screen Layout
+- **New objectives**: full creation form (type toggle, name, fields, color picker)
+- **Existing objectives**: summary view by default — progress hero card, summary info card (contact, currency, deadline, remaining), payment history list. Edit form hidden behind 3-dot menu → "Edit Settings".
+- **Payment sheet**: account picker, optional category picker (filtered by tx type), amount calculator. Category choice is remembered per objective for the next payment.
+- **Payments create real transactions** via `AllocationEngine.recordTransaction()` with optional `categoryId` on `TxLine`.
+- **Payment history**: queries transactions matching the objective's note pattern, displays with date, note, and colored amount.
 
 ## Travel Exchange
 
@@ -841,7 +859,7 @@ Default font: Plus Jakarta Sans. Available: DM Sans, Inter, **Nunito Sans** (clo
 ## Number & Date Formatting
 
 ### Number Format
-`formatAmount()` and `formatSignedAmount()` in `format_number.dart` respect user preferences for thousands separator (comma/period/space/none), decimal separator (period/comma), and negative format (minus sign only — parentheses removed). `formatNumber()` formats plain numbers (exchange rates, converted amounts) with the same separator prefs. `currencyDecimals()` returns ISO 4217 defaults (0 for JPY, 3 for KWD, 2 for everything else). Settings apply instantly via global `setNumberFormatPrefs()` called from `app.dart` on provider change.
+`formatAmount()` and `formatSignedAmount()` in `format_number.dart` respect user preferences for thousands separator (comma/period/space/none), decimal separator (period/comma), and negative format (minus `-$100` or parentheses `($100)`). `formatNumber()` formats plain numbers (exchange rates, converted amounts) with the same separator prefs. `currencyDecimals()` returns ISO 4217 defaults (0 for JPY, 3 for KWD, 2 for everything else). Settings apply instantly via global `setNumberFormatPrefs()` called from `app.dart` on provider change.
 
 ### Date Format
 `formatDate()` and `formatDateSmart()` in `date_format_provider.dart` use the user's preferred pattern. Global `setDateFormatPattern()` called from `app.dart`. All user-facing date displays use `formatDate()` — month-only headers (`MMMM yyyy`) and machine formats (`yyyy-MM-dd`) are intentionally hardcoded. Settings apply instantly without restart.
@@ -851,3 +869,29 @@ Default font: Plus Jakarta Sans. Available: DM Sans, Inter, **Nunito Sans** (clo
 - Never use `DateFormat('...')` for user-facing full dates — use `formatDate()`.
 - Input fields (TextControllers) and percentages may use `toStringAsFixed()` since they need `.` for parsing.
 - Month-only labels (`MMMM`, `MMM yyyy`) stay hardcoded — they're contextual, not configurable.
+
+## Archived Accounts
+
+Accounts screen has a 3-dot menu with "Show Archived" / "Hide Archived" toggle. Archived accounts appear in a separate "ARCHIVED" section below active ones, dimmed at 60% opacity with an archive badge. Each has an unarchive icon button that opens a confirmation dialog, sets `archived: false` + `lastModified: now`, and refreshes the provider.
+
+## Unallocated Multi-Currency Display
+
+The Unallocated card on the Budget tab shows only the base currency amount by default. If the user has unallocated funds in other currencies, a "+ N other currencies" link and chevron arrow appear. Tapping expands an animated breakdown showing each currency with its amount. This avoids the anti-pattern of converting/summing across currencies with unreliable exchange rates. Single-currency users see no extra UI.
+
+## Reports Month Navigation
+
+All report tabs (Overview, Categories, Insights) have a `_MonthNav` widget with left/right arrows and swipe gesture support. Users can browse any past month. The `reportStatsProvider.monthRange()` accepts an optional `from` parameter so the 6-month trend chart centers around the selected month. `_DailyPaceChart` accepts an optional `month` parameter — for past months it shows full-month data instead of stopping at `now.day`. The Insights tab filters spending velocity, biggest expense, and savings rate to the selected month using proper `monthStart`/`monthEnd` range checks.
+
+## Help Guide
+
+`assets/web/help.html` — comprehensive user guide bundled in the app. 17 sections covering every feature with step-by-step instructions. Responsive (desktop sidebar + mobile hamburger), dark mode support, screenshot placeholders.
+
+**In-app delivery:** `lib/features/settings/help_screen.dart` — `WebView` loads the HTML from `rootBundle`. Injects dark mode CSS variables based on current app theme. Supports deep-linking to sections via `?section=` query parameter (e.g., `context.push('/help?section=envelopes')`).
+
+Route: `/help`, accessible from More > Help Guide.
+
+## i18n Preparation
+
+`docs/i18n_strings.csv` — master translation file with ~750 strings covering the entire app (Flutter + Web SPA). Columns: `key`, `context`, `english`, `arabic`, `french`. Auto-generated Arabic and French translations for user review. Updated alongside every feature change. When ready to ship i18n, this CSV converts to Flutter ARB files + web JSON files.
+
+**Rule:** Every feature addition/change must also update `docs/i18n_strings.csv` and `assets/web/help.html`.

@@ -41,11 +41,11 @@ class ReportStats {
   }
 
   /// Monthly stats for a range of months (e.g., last 6 months for trend).
-  List<MapEntry<DateTime, MonthlyStats>> monthRange(int count) {
-    final now = DateTime.now();
+  List<MapEntry<DateTime, MonthlyStats>> monthRange(int count, {DateTime? from}) {
+    final ref = from ?? DateTime.now();
     final result = <MapEntry<DateTime, MonthlyStats>>[];
     for (int i = count - 1; i >= 0; i--) {
-      final m = DateTime(now.year, now.month - i, 1);
+      final m = DateTime(ref.year, ref.month - i, 1);
       result.add(MapEntry(
           m, monthly[m] ?? const MonthlyStats(income: 0, expense: 0)));
     }

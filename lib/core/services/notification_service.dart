@@ -9,6 +9,9 @@ import '../database/daos/ledger_dao.dart';
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
 
+  /// Expose the plugin so DailyReminderService can share the same instance.
+  static FlutterLocalNotificationsPlugin get plugin => _plugin;
+
   static const _channelId = 'pocketplan_alerts';
   static const _channelName = 'PocketPlan Alerts';
   static const _channelDesc = 'Low envelope and upcoming bill alerts';

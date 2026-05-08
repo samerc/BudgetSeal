@@ -1,8 +1,13 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/database/app_database.dart';
+import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/database_provider.dart';
+import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -11,20 +16,54 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
-class AccountsScreen extends ConsumerWidget {
+class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountsScreen> createState() => _AccountsScreenState();
+}
+
+class _AccountsScreenState extends ConsumerState<AccountsScreen> {
+  bool _showArchived = false;
+
+  @override
+  Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
 
     return Scaffold(
-      
       appBar: AppBar(
         title: const Text('Accounts'),
-        
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded,
+                color: AppColors.tp(context)),
+            onSelected: (v) {
+              if (v == 'archived') {
+                setState(() => _showArchived = !_showArchived);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'archived',
+                child: Row(children: [
+                  Icon(
+                    _showArchived
+                        ? Icons.visibility_off_rounded
+                        : Icons.archive_rounded,
+                    size: 18,
+                    color: AppColors.ts(context),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(_showArchived
+                      ? 'Hide Archived'
+                      : 'Show Archived'),
+                ]),
+              ),
+            ],
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -33,7 +72,7 @@ class AccountsScreen extends ConsumerWidget {
         },
         child: accountsAsync.when(
           data: (accounts) {
-            if (accounts.isEmpty) {
+            if (accounts.isEmpty && !_showArchived) {
               return ListView(
                 children: const [
                   SizedBox(height: 200),
@@ -46,7 +85,7 @@ class AccountsScreen extends ConsumerWidget {
               );
             }
 
-            // Compute total balance per currency
+            // Compute total balance per currency (active accounts only)
             final Map<String, double> totals = {};
             for (final ab in accounts) {
               totals[ab.account.currency] =
@@ -63,6 +102,7 @@ class AccountsScreen extends ConsumerWidget {
                       accountWithBalance: ab,
                       onTap: () => context.push('/accounts/${ab.account.id}'),
                     )),
+                if (_showArchived) _ArchivedSection(ref: ref),
               ],
             );
           },
@@ -81,6 +121,129 @@ class AccountsScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+}
+
+/// Shows archived accounts in a separate section below active ones.
+class _ArchivedSection extends ConsumerWidget {
+  final WidgetRef ref;
+  const _ArchivedSection({required this.ref});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final db = ref.watch(databaseProvider);
+    final householdId = ref.watch(currentHouseholdIdProvider);
+    if (householdId == null) return const SizedBox.shrink();
+
+    return FutureBuilder<List<AccountWithBalance>>(
+      future: _loadArchived(db, householdId),
+      builder: (context, snap) {
+        if (!snap.hasData || snap.data!.isEmpty) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2, color: AppColors.accent),
+                ),
+              ),
+            );
+          }
+          return Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Center(
+              child: Text('No archived accounts',
+                  style: TextStyle(
+                      color: AppColors.ts(context), fontSize: 13)),
+            ),
+          );
+        }
+
+        final archived = snap.data!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text('ARCHIVED',
+                  style: TextStyle(
+                    fontSize: TypographyTokens.sectionHeaderSize,
+                    fontWeight: TypographyTokens.sectionHeaderWeight,
+                    letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+                    color: AppColors.th(context),
+                  )),
+            ),
+            ...archived.map((ab) => _ArchivedAccountTile(
+                  accountWithBalance: ab,
+                  onTap: () =>
+                      context.push('/accounts/${ab.account.id}'),
+                  onUnarchive: () => _unarchive(context, ref, ab.account),
+                )),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<List<AccountWithBalance>> _loadArchived(
+      AppDatabase db, String householdId) async {
+    final accounts = await (db.select(db.accounts)
+          ..where((t) =>
+              t.householdId.equals(householdId) & t.archived.equals(true))
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .get();
+    if (accounts.isEmpty) return [];
+    final calculator = BalanceCalculator(db);
+    final balances = await calculator.allAccountBalances(householdId);
+    return [
+      for (final acc in accounts)
+        AccountWithBalance(
+            account: acc, balance: balances[acc.id] ?? 0),
+    ];
+  }
+
+  Future<void> _unarchive(
+      BuildContext context, WidgetRef ref, Account account) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Unarchive Account'),
+        content: Text(
+            'Restore "${account.name}" to your active accounts?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Unarchive'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final db = ref.read(databaseProvider);
+    await (db.update(db.accounts)
+          ..where((a) => a.id.equals(account.id)))
+        .write(AccountsCompanion(
+      archived: const Value(false),
+      lastModified: Value(DateTime.now()),
+    ));
+    ref.invalidate(accountsWithBalanceProvider);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${account.name} unarchived'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
 
@@ -220,6 +383,102 @@ class _AccountTile extends StatelessWidget {
         trailing: CurrencyDisplay(
           amount: balance,
           currency: acc.currency,
+        ),
+      ),
+    );
+  }
+}
+
+class _ArchivedAccountTile extends StatelessWidget {
+  final AccountWithBalance accountWithBalance;
+  final VoidCallback onTap;
+  final VoidCallback onUnarchive;
+
+  const _ArchivedAccountTile({
+    required this.accountWithBalance,
+    required this.onTap,
+    required this.onUnarchive,
+  });
+
+  IconData _accountIcon(String type) => switch (type) {
+        'bank' => Icons.account_balance_rounded,
+        'credit' => Icons.credit_card_rounded,
+        'wallet' => Icons.account_balance_wallet_rounded,
+        _ => Icons.money_rounded,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final acc = accountWithBalance.account;
+    final balance = accountWithBalance.balance;
+
+    return Opacity(
+      opacity: 0.6,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          border: Border.all(color: AppColors.bd(context)),
+        ),
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          onTap: onTap,
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.th(context).withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(_accountIcon(acc.type),
+                color: AppColors.th(context), size: 20),
+          ),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  acc.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AppColors.tp(context),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(Icons.archive_rounded, size: 14,
+                  color: AppColors.th(context)),
+              if (acc.isTravel) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.flight_rounded, size: 14,
+                    color: AppColors.th(context)),
+              ],
+            ],
+          ),
+          subtitle: Text(
+            '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
+            style: TextStyle(color: AppColors.ts(context), fontSize: 12),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CurrencyDisplay(
+                amount: balance,
+                currency: acc.currency,
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: Icon(Icons.unarchive_rounded,
+                    size: 20, color: AppColors.accent),
+                tooltip: 'Unarchive',
+                onPressed: onUnarchive,
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
         ),
       ),
     );

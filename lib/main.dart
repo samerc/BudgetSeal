@@ -33,6 +33,8 @@ void main() async {
   );
 
   await NotificationService.init();
+  // Share the same plugin instance to avoid dual-initialize conflicts on Android.
+  DailyReminderService.setSharedPlugin(NotificationService.plugin);
   await DailyReminderService.init();
 
   final container = ProviderContainer();

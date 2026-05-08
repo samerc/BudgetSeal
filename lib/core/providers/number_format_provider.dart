@@ -37,9 +37,13 @@ enum DecimalSeparator {
 }
 
 enum NegativeFormat {
-  minus;
+  minus,
+  parentheses;
 
-  String get label => 'Minus (-\$100)';
+  String get label => switch (this) {
+        minus => '-\$100',
+        parentheses => '(\$100)',
+      };
 }
 
 class NumberFormatPrefs {
@@ -62,10 +66,11 @@ class NumberFormatPrefs {
   factory NumberFormatPrefs.fromJson(Map<String, dynamic> json) {
     final tIdx = (json['thousands'] as int? ?? 0).clamp(0, ThousandsSeparator.values.length - 1);
     final dIdx = (json['decimal'] as int? ?? 0).clamp(0, DecimalSeparator.values.length - 1);
+    final nIdx = (json['negative'] as int? ?? 0).clamp(0, NegativeFormat.values.length - 1);
     return NumberFormatPrefs(
       thousands: ThousandsSeparator.values[tIdx],
       decimal: DecimalSeparator.values[dIdx],
-      negative: NegativeFormat.minus, // only option now
+      negative: NegativeFormat.values[nIdx],
     );
   }
 }

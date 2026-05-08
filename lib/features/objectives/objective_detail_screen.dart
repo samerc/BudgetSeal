@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -38,7 +39,13 @@ class _ObjectiveDetailScreenState
   DateTime? _endDate;
   String? _icon;
   String _colorHex = '#2563EB';
+  String? _categoryId; // optional category for payments
+  String? _categoryName;
   bool _loading = false;
+  bool _showSettings = false; // toggle for edit form (existing objectives)
+
+  // Payment history
+  List<Transaction> _payments = [];
 
   bool get _isNew => widget.objectiveId == 'new';
 
@@ -79,9 +86,32 @@ class _ObjectiveDetailScreenState
           if (obj.contactName != null) _contactCtrl.text = obj.contactName!;
         });
       }
+      // Load payment history
+      await _loadPayments();
     } catch (e) {
       debugPrint('[ObjectiveDetail] Error loading: $e');
     }
+  }
+
+  Future<void> _loadPayments() async {
+    if (_isNew) return;
+    final db = ref.read(databaseProvider);
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return;
+
+    // Search for transactions with matching note pattern
+    final name = _nameCtrl.text.trim();
+    if (name.isEmpty) return;
+
+    final txs = await (db.select(db.transactions)
+          ..where((t) =>
+              t.householdId.equals(householdId) &
+              t.deleted.equals(false) &
+              t.note.like('%$name%'))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .get();
+
+    if (mounted) setState(() => _payments = txs);
   }
 
   @override
@@ -134,7 +164,11 @@ class _ObjectiveDetailScreenState
             behavior: SnackBarBehavior.floating,
           ),
         );
-        context.pop();
+        if (_isNew) {
+          context.pop();
+        } else {
+          setState(() => _showSettings = false);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -161,32 +195,36 @@ class _ObjectiveDetailScreenState
       return;
     }
 
+    // Load categories for picker
+    final categories = ref.read(categoriesProvider).value ?? [];
+
     final isLoan = _type == 'loan';
     final isLent = _direction == 'lent';
-    // For goals: expense (money leaves account into savings)
-    // For loans I borrowed: expense (I'm paying them back)
-    // For loans I lent: income (they're paying me back)
     final txType = isLoan && isLent ? 'income' : 'expense';
     final sheetTitle = isLoan ? 'Record Payment' : 'Add Funds';
     final buttonLabel = isLoan
         ? (isLent ? 'Record Payment Received' : 'Record Payment Sent')
         : 'Save from Account';
 
-    // Capture theme colors for the sheet
     final tpColor = AppColors.tp(context);
     final tsColor = AppColors.ts(context);
     final bdColor = AppColors.bd(context);
+    final sfColor = AppColors.sf(context);
+    final sfvColor = AppColors.sfv(context);
 
-    final result = await showModalBottomSheet<({double amount, String accountId})>(
+    final result = await showModalBottomSheet<({double amount, String accountId, String? categoryId})>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: sfColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
         double amount = 0;
         String? selectedAccountId = activeAccounts.first.id;
+        String? selectedCategoryId = _categoryId;
+        String? selectedCategoryName = _categoryName;
+
         return StatefulBuilder(
           builder: (ctx, setModalState) => Padding(
             padding: EdgeInsets.fromLTRB(
@@ -220,11 +258,112 @@ class _ObjectiveDetailScreenState
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+
+              // Category picker (optional)
+              GestureDetector(
+                onTap: () async {
+                  final expenseCategories = categories
+                      .where((c) => c.transactionType == txType)
+                      .toList();
+                  if (expenseCategories.isEmpty) return;
+
+                  await showModalBottomSheet(
+                    context: ctx,
+                    isScrollControlled: true,
+                    backgroundColor: sfColor,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (catCtx) => Container(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(catCtx).size.height * 0.6,
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Category', style: TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.w700,
+                              color: tpColor)),
+                          const SizedBox(height: 12),
+                          // None option
+                          ListTile(
+                            dense: true,
+                            title: Text('None', style: TextStyle(color: tsColor)),
+                            leading: Icon(Icons.block_rounded, size: 18, color: tsColor),
+                            onTap: () {
+                              setModalState(() {
+                                selectedCategoryId = null;
+                                selectedCategoryName = null;
+                              });
+                              Navigator.pop(catCtx);
+                            },
+                          ),
+                          const Divider(height: 1),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: expenseCategories.length,
+                              itemBuilder: (_, i) {
+                                final cat = expenseCategories[i];
+                                final isParent = cat.parentId == null;
+                                return ListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.only(
+                                    left: isParent ? 16 : 40, right: 16),
+                                  title: Text(cat.name,
+                                      style: TextStyle(
+                                        fontWeight: isParent ? FontWeight.w600 : FontWeight.w400,
+                                        fontSize: 14,
+                                      )),
+                                  trailing: selectedCategoryId == cat.id
+                                      ? Icon(Icons.check_rounded, size: 18, color: AppColors.accent)
+                                      : null,
+                                  onTap: () {
+                                    setModalState(() {
+                                      selectedCategoryId = cat.id;
+                                      selectedCategoryName = cat.name;
+                                    });
+                                    Navigator.pop(catCtx);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: sfvColor,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: bdColor),
+                  ),
+                  child: Row(children: [
+                    Icon(Icons.label_rounded, size: 16, color: tsColor),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        selectedCategoryName ?? 'Category (optional)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: selectedCategoryName != null ? tpColor : tsColor,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, size: 18, color: tsColor),
+                  ]),
+                ),
+              ),
               const SizedBox(height: 16),
 
               // Amount
               CalculatorAmountField(
-                value: 0,
+                value: amount,
                 hintText: '0.00',
                 currency: _currency,
                 fontSize: 28,
@@ -236,7 +375,8 @@ class _ObjectiveDetailScreenState
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: amount > 0 && selectedAccountId != null
-                      ? () => Navigator.pop(ctx, (amount: amount, accountId: selectedAccountId!))
+                      ? () => Navigator.pop(ctx,
+                          (amount: amount, accountId: selectedAccountId!, categoryId: selectedCategoryId))
                       : null,
                   child: Text(buttonLabel),
                 ),
@@ -257,11 +397,10 @@ class _ObjectiveDetailScreenState
       final account = activeAccounts.where((a) => a.id == result.accountId).firstOrNull;
       if (account == null) return;
 
-      final noteName = isLoan && _contactCtrl.text.isNotEmpty
+      final noteName = _type == 'loan' && _contactCtrl.text.isNotEmpty
           ? '${_nameCtrl.text.trim()} — ${_contactCtrl.text.trim()}'
           : _nameCtrl.text.trim();
 
-      // Create a real transaction
       await engine.recordTransaction(
         householdId: householdId,
         accountId: result.accountId,
@@ -271,6 +410,7 @@ class _ObjectiveDetailScreenState
             amount: result.amount,
             currency: _currency,
             exchangeRateToBase: account.currency == _currency ? 1.0 : 1.0,
+            categoryId: result.categoryId,
           ),
         ],
         baseCurrency: ref.read(householdProvider).value?.baseCurrency ?? 'USD',
@@ -291,9 +431,17 @@ class _ObjectiveDetailScreenState
         lastModified: Value(DateTime.now()),
       ));
 
+      // Remember category choice for next time
+      if (result.categoryId != null) {
+        _categoryId = result.categoryId;
+        final cat = categories.where((c) => c.id == result.categoryId).firstOrNull;
+        _categoryName = cat?.name;
+      }
+
       if (mounted) setState(() => _currentAmount = newAmount);
       ref.invalidate(objectivesProvider);
       ref.invalidate(accountsWithBalanceProvider);
+      await _loadPayments();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -316,7 +464,6 @@ class _ObjectiveDetailScreenState
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final initial = _endDate ?? now.add(const Duration(days: 90));
-    // Allow selecting past dates when editing an objective with an existing past deadline
     final first = _endDate != null && _endDate!.isBefore(now) ? _endDate! : now;
     final picked = await showDatePicker(
       context: context,
@@ -333,43 +480,51 @@ class _ObjectiveDetailScreenState
     final progress = _targetAmount > 0
         ? (_currentAmount / _targetAmount).clamp(0.0, 1.0)
         : 0.0;
+    final isLoan = _type == 'loan';
 
+    // New: show creation form
+    if (_isNew) return _buildForm(context, color);
+
+    // Existing: show summary with optional settings
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New Objective' : _nameCtrl.text.isEmpty ? 'Edit' : _nameCtrl.text),
+        title: Text(_nameCtrl.text.isEmpty ? 'Objective' : _nameCtrl.text),
         actions: [
-          if (!_isNew) ...[
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded),
-              tooltip: 'Delete',
-              onPressed: _confirmDelete,
-            ),
-          ],
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FilledButton.icon(
-              onPressed: _loading ? null : _save,
-              icon: _loading
-                  ? const SizedBox(height: 14, width: 14,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.check_rounded, size: 18),
-              label: const Text('Save'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                minimumSize: Size.zero,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: AppColors.tp(context)),
+            onSelected: (v) {
+              if (v == 'edit') setState(() => _showSettings = !_showSettings);
+              if (v == 'delete') _confirmDelete();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(children: [
+                  Icon(_showSettings ? Icons.visibility_off_rounded : Icons.settings_rounded,
+                      size: 18, color: AppColors.ts(context)),
+                  const SizedBox(width: 10),
+                  Text(_showSettings ? 'Hide Settings' : 'Edit Settings'),
+                ]),
               ),
-            ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.overspent),
+                  const SizedBox(width: 10),
+                  Text('Delete', style: TextStyle(color: AppColors.overspent)),
+                ]),
+              ),
+            ],
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: RefreshIndicator(
+        onRefresh: () async { await _load(); },
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            // Progress hero (edit only)
-            if (!_isNew && _targetAmount > 0) ...[
+            // ── Progress hero ──
+            if (_targetAmount > 0)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -413,157 +568,343 @@ class _ObjectiveDetailScreenState
                     child: OutlinedButton.icon(
                       onPressed: _updateAmount,
                       icon: const Icon(Icons.add_rounded, size: 18),
-                      label: Text(_type == 'loan' ? 'Record Payment' : 'Add Funds'),
+                      label: Text(isLoan ? 'Record Payment' : 'Add Funds'),
                     ),
                   ),
                 ]),
               ),
-              const SizedBox(height: 16),
-            ],
 
-            // Type toggle
-            Row(children: [
-              _TypeChip(
-                label: 'Goal', icon: Icons.flag_rounded,
-                selected: _type == 'goal',
-                onTap: () => setState(() => _type = 'goal'),
-              ),
-              const SizedBox(width: 8),
-              _TypeChip(
-                label: 'Loan', icon: Icons.handshake_rounded,
-                selected: _type == 'loan',
-                onTap: () => setState(() { _type = 'loan'; _direction ??= 'lent'; }),
-              ),
-            ]),
+            // ── Summary info ──
             const SizedBox(height: 16),
-
-            // Name
-            _FormCard(child: TextField(
-              controller: _nameCtrl,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: _type == 'loan' ? 'Loan name' : 'Goal name',
-                hintText: _type == 'loan' ? 'e.g. Car loan' : 'e.g. Emergency fund',
-                border: InputBorder.none,
-                prefixIcon: Icon(Icons.edit_rounded, size: 18, color: AppColors.ts(context)),
-              ),
-            )),
-            const SizedBox(height: 10),
-
-            // Loan-specific fields
-            if (_type == 'loan') ...[
-              _FormCard(child: Column(children: [
-                TextField(
-                  controller: _contactCtrl,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    labelText: 'Person',
-                    hintText: 'e.g. Ali, Bank, etc.',
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.person_rounded, size: 18, color: AppColors.ts(context)),
+            _SummaryCard(
+              children: [
+                if (isLoan && _contactCtrl.text.isNotEmpty)
+                  _SummaryRow(
+                    label: _direction == 'lent' ? 'Lent to' : 'Borrowed from',
+                    value: _contactCtrl.text,
+                  ),
+                _SummaryRow(label: 'Currency', value: _currency),
+                if (_endDate != null)
+                  _SummaryRow(
+                    label: 'Deadline',
+                    value: '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
+                  ),
+                _SummaryRow(
+                  label: 'Remaining',
+                  value: formatAmount(
+                    (_targetAmount - _currentAmount).clamp(0, double.infinity),
+                    currency: _currency,
                   ),
                 ),
-                Divider(height: 1, color: AppColors.bd(context)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ],
+            ),
+
+            // ── Payment History ──
+            const SizedBox(height: 20),
+            Text(
+              'PAYMENTS',
+              style: TextStyle(
+                fontSize: TypographyTokens.sectionHeaderSize,
+                fontWeight: TypographyTokens.sectionHeaderWeight,
+                letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+                color: AppColors.th(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (_payments.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text('No payments yet',
+                      style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+                ),
+              )
+            else
+              ...List.generate(_payments.length, (i) {
+                final tx = _payments[i];
+                final isIncome = tx.type == 'income';
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.sf(context),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.bd(context)),
+                  ),
                   child: Row(children: [
-                    Text('Direction', style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
-                    const Spacer(),
-                    SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(value: 'lent', label: Text('I lent')),
-                        ButtonSegment(value: 'borrowed', label: Text('I borrowed')),
-                      ],
-                      selected: {_direction ?? 'lent'},
-                      onSelectionChanged: (s) => setState(() => _direction = s.first),
-                      style: SegmentedButton.styleFrom(
-                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                        color: (isIncome ? AppColors.healthy : AppColors.overspent)
+                            .withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isIncome ? Icons.call_received_rounded : Icons.call_made_rounded,
+                        size: 15,
+                        color: isIncome ? AppColors.healthy : AppColors.overspent,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${tx.createdAt.day}/${tx.createdAt.month}/${tx.createdAt.year}',
+                            style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context),
+                            ),
+                          ),
+                          if (tx.note.isNotEmpty)
+                            Text(tx.note,
+                                style: TextStyle(fontSize: 11, color: AppColors.ts(context)),
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      formatAmount(tx.amount, currency: tx.currency),
+                      style: TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w700,
+                        color: isIncome ? AppColors.healthy : AppColors.overspent,
                       ),
                     ),
                   ]),
-                ),
-              ])),
-              const SizedBox(height: 10),
-            ],
-
-            // Target amount
-            _FormCard(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: CalculatorAmountField(
-                value: _targetAmount,
-                hintText: '0.00',
-                label: 'Target amount',
-                currency: _currency,
-                fontSize: 24,
-                onChanged: (v) => setState(() => _targetAmount = v),
-              ),
-            )),
-            const SizedBox(height: 10),
-            // Currency
-            _FormCard(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: CurrencyPickerField(
-                label: 'Currency',
-                value: _currency,
-                onChanged: (v) => setState(() => _currency = v),
-              ),
-            )),
-            const SizedBox(height: 10),
-
-            // Deadline
-            _FormCard(child: InkWell(
-              onTap: _pickDate,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(children: [
-                  Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.ts(context)),
-                  const SizedBox(width: 10),
-                  Text(
-                    _endDate != null
-                        ? 'Deadline: ${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                        : 'Set a deadline (optional)',
-                    style: TextStyle(fontSize: 14, color: _endDate != null
-                        ? AppColors.tp(context) : AppColors.th(context)),
-                  ),
-                  const Spacer(),
-                  if (_endDate != null)
-                    GestureDetector(
-                      onTap: () => setState(() => _endDate = null),
-                      child: Icon(Icons.close_rounded, size: 16, color: AppColors.th(context)),
-                    ),
-                ]),
-              ),
-            )),
-            const SizedBox(height: 16),
-
-            // Color picker
-            Text('COLOR', style: TextStyle(
-              fontSize: TypographyTokens.sectionHeaderSize,
-              fontWeight: TypographyTokens.sectionHeaderWeight,
-              letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-              color: AppColors.th(context),
-            )),
-            const SizedBox(height: 8),
-            Wrap(spacing: 10, runSpacing: 10,
-              children: _colors.map((hex) {
-                final c = AppColors.fromHex(hex);
-                final selected = _colorHex == hex;
-                return GestureDetector(
-                  onTap: () => setState(() => _colorHex = hex),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      color: c, shape: BoxShape.circle,
-                      border: selected ? Border.all(color: AppColors.tp(context), width: 3) : null,
-                    ),
-                    child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 16) : null,
-                  ),
                 );
-              }).toList(),
-            ),
+              }),
+
+            // ── Settings (hidden, toggled via 3-dot) ──
+            if (_showSettings) ...[
+              const SizedBox(height: 20),
+              Text(
+                'SETTINGS',
+                style: TextStyle(
+                  fontSize: TypographyTokens.sectionHeaderSize,
+                  fontWeight: TypographyTokens.sectionHeaderWeight,
+                  letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+                  color: AppColors.th(context),
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildSettingsForm(context, color),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _loading ? null : _save,
+                  child: _loading
+                      ? const SizedBox(height: 16, width: 16,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Save Changes'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  /// Full creation form (for new objectives).
+  Widget _buildForm(BuildContext context, Color color) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('New Objective'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton.icon(
+              onPressed: _loading ? null : _save,
+              icon: _loading
+                  ? const SizedBox(height: 14, width: 14,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Icon(Icons.check_rounded, size: 18),
+              label: const Text('Save'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                minimumSize: Size.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Type toggle
+            _buildTypeToggle(),
+            const SizedBox(height: 16),
+            _buildSettingsForm(context, color),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeToggle() {
+    return Row(children: [
+      _TypeChip(
+        label: 'Goal', icon: Icons.flag_rounded,
+        selected: _type == 'goal',
+        onTap: () => setState(() => _type = 'goal'),
+      ),
+      const SizedBox(width: 8),
+      _TypeChip(
+        label: 'Loan', icon: Icons.handshake_rounded,
+        selected: _type == 'loan',
+        onTap: () => setState(() { _type = 'loan'; _direction ??= 'lent'; }),
+      ),
+    ]);
+  }
+
+  Widget _buildSettingsForm(BuildContext context, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Name
+        _FormCard(child: TextField(
+          controller: _nameCtrl,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: _type == 'loan' ? 'Loan name' : 'Goal name',
+            hintText: _type == 'loan' ? 'e.g. Car loan' : 'e.g. Emergency fund',
+            border: InputBorder.none,
+            prefixIcon: Icon(Icons.edit_rounded, size: 18, color: AppColors.ts(context)),
+          ),
+        )),
+        const SizedBox(height: 10),
+
+        // Loan-specific fields
+        if (_type == 'loan') ...[
+          _FormCard(child: Column(children: [
+            TextField(
+              controller: _contactCtrl,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: 'Person',
+                hintText: 'e.g. Ali, Bank, etc.',
+                border: InputBorder.none,
+                prefixIcon: Icon(Icons.person_rounded, size: 18, color: AppColors.ts(context)),
+              ),
+            ),
+            Divider(height: 1, color: AppColors.bd(context)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(children: [
+                Text('Direction', style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
+                const Spacer(),
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'lent', label: Text('I lent')),
+                    ButtonSegment(value: 'borrowed', label: Text('I borrowed')),
+                  ],
+                  selected: {_direction ?? 'lent'},
+                  onSelectionChanged: (s) => setState(() => _direction = s.first),
+                  style: SegmentedButton.styleFrom(
+                    textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ]),
+            ),
+          ])),
+          const SizedBox(height: 10),
+        ],
+
+        // Target amount
+        _FormCard(child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: CalculatorAmountField(
+            value: _targetAmount,
+            hintText: '0.00',
+            label: 'Target amount',
+            currency: _currency,
+            fontSize: 24,
+            onChanged: (v) => setState(() => _targetAmount = v),
+          ),
+        )),
+        const SizedBox(height: 10),
+
+        // Currency
+        _FormCard(child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: CurrencyPickerField(
+            label: 'Currency',
+            value: _currency,
+            onChanged: (v) => setState(() => _currency = v),
+          ),
+        )),
+        const SizedBox(height: 10),
+
+        // Deadline
+        _FormCard(child: InkWell(
+          onTap: _pickDate,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(children: [
+              Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.ts(context)),
+              const SizedBox(width: 10),
+              Text(
+                _endDate != null
+                    ? 'Deadline: ${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
+                    : 'Set a deadline (optional)',
+                style: TextStyle(fontSize: 14, color: _endDate != null
+                    ? AppColors.tp(context) : AppColors.th(context)),
+              ),
+              const Spacer(),
+              if (_endDate != null)
+                GestureDetector(
+                  onTap: () => setState(() => _endDate = null),
+                  child: Icon(Icons.close_rounded, size: 16, color: AppColors.th(context)),
+                ),
+            ]),
+          ),
+        )),
+        const SizedBox(height: 16),
+
+        // Color picker
+        Text('COLOR', style: TextStyle(
+          fontSize: TypographyTokens.sectionHeaderSize,
+          fontWeight: TypographyTokens.sectionHeaderWeight,
+          letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+          color: AppColors.th(context),
+        )),
+        const SizedBox(height: 8),
+        Wrap(spacing: 10, runSpacing: 10,
+          children: _colors.map((hex) {
+            final c = AppColors.fromHex(hex);
+            final selected = _colorHex == hex;
+            return GestureDetector(
+              onTap: () => setState(() => _colorHex = hex),
+              child: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                  color: c, shape: BoxShape.circle,
+                  border: selected ? Border.all(color: AppColors.tp(context), width: 3) : null,
+                ),
+                child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 16) : null,
+              ),
+            );
+          }).toList(),
+        ),
+
+        // Type toggle (for existing, allow switching)
+        if (!_isNew) ...[
+          const SizedBox(height: 16),
+          Text('TYPE', style: TextStyle(
+            fontSize: TypographyTokens.sectionHeaderSize,
+            fontWeight: TypographyTokens.sectionHeaderWeight,
+            letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
+            color: AppColors.th(context),
+          )),
+          const SizedBox(height: 8),
+          _buildTypeToggle(),
+        ],
+      ],
     );
   }
 
@@ -594,6 +935,52 @@ class _ObjectiveDetailScreenState
   }
 }
 
+// ─────────────────────────────────────────────
+// Summary Card
+// ─────────────────────────────────────────────
+class _SummaryCard extends StatelessWidget {
+  final List<Widget> children;
+  const _SummaryCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        border: Border.all(color: AppColors.bd(context)),
+      ),
+      child: Column(children: children),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _SummaryRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+          Text(value, style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w600,
+              color: AppColors.tp(context))),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Reusable widgets
+// ─────────────────────────────────────────────
 class _TypeChip extends StatelessWidget {
   final String label;
   final IconData icon;

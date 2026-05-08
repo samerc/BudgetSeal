@@ -37,7 +37,21 @@ class DailyReminderService {
     'Keep your budget honest — add today\'s transactions.',
   ];
 
-  static final _plugin = FlutterLocalNotificationsPlugin();
+  /// Share the same plugin instance as NotificationService to avoid
+  /// dual-initialize conflicts on Android.
+  static FlutterLocalNotificationsPlugin? _sharedPlugin;
+
+  static FlutterLocalNotificationsPlugin get _plugin {
+    _sharedPlugin ??= FlutterLocalNotificationsPlugin();
+    return _sharedPlugin!;
+  }
+
+  /// Allow NotificationService to inject its already-initialized plugin.
+  static void setSharedPlugin(FlutterLocalNotificationsPlugin plugin) {
+    _sharedPlugin = plugin;
+    _initialized = true;
+  }
+
   static bool _initialized = false;
 
   static Future<void> _ensureInitialized() async {
@@ -116,13 +130,33 @@ class DailyReminderService {
     await _ensureInitialized();
     await _ensureTz();
 
-    // Request notification permission on Android 13+
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestNotificationsPermission();
-    // Request exact alarm permission on Android 14+ (needed for exactAllowWhileIdle)
-    await androidPlugin?.requestExactAlarmsPermission();
+
+    // Request notification permission on Android 13+
+    final notifGranted =
+        await androidPlugin?.requestNotificationsPermission() ?? true;
+    if (!notifGranted) {
+      debugPrint('[DailyReminder] Notification permission denied');
+      return;
+    }
+
+    // Check exact alarm permission — don't open settings automatically
+    // (it navigates away from the app). Use inexact if not granted.
+    var scheduleMode = AndroidScheduleMode.inexactAllowWhileIdle;
+    if (androidPlugin != null) {
+      final canExact =
+          await androidPlugin.canScheduleExactNotifications() ?? false;
+      if (canExact) {
+        scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
+      } else {
+        debugPrint('[DailyReminder] Exact alarms not granted, using inexact');
+      }
+    }
+
+    // Cancel any existing scheduled notification before rescheduling
+    await _plugin.cancel(id: _notificationId);
 
     final time = await getTime();
     final customMessage = await getMessage();
@@ -148,9 +182,10 @@ class DailyReminderService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: scheduleMode,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+    debugPrint('[DailyReminder] Scheduled at ${time.hour}:${time.minute.toString().padLeft(2, '0')} (mode: $scheduleMode)');
   }
 
   static Future<void> _cancel() async {

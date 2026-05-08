@@ -42,6 +42,7 @@ import 'features/travel/travel_exchange_screen.dart';
 import 'features/subscriptions/subscriptions_screen.dart';
 import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
+import 'features/settings/help_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/health_check_screen.dart';
 import 'features/transactions/bill_splitter_screen.dart';
@@ -310,6 +311,14 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           pageBuilder: (_, state) => slideUpPage(
               child: const SettingsDetailScreen(), state: state),
         ),
+        GoRoute(
+          path: '/help',
+          pageBuilder: (_, state) {
+            final section = state.uri.queryParameters['section'];
+            return slideUpPage(
+                child: HelpScreen(section: section), state: state);
+          },
+        ),
       ],
     );
   }
@@ -333,6 +342,8 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     } else if (state == AppLifecycleState.paused) {
       // Sync on app pause (upload local changes)
       _autoSync();
+      // Auto-backup if due (runs on exit as well as resume)
+      AutoBackupService.runIfDue();
       // Re-lock if biometric is enabled
       final biometricEnabled = ref.read(biometricLockProvider);
       if (biometricEnabled) {

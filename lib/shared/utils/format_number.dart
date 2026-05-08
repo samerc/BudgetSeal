@@ -80,16 +80,19 @@ String _formatNumber(double absValue, int decimalDigits) {
 
 /// Format a plain number (no currency symbol) respecting user's separator prefs.
 /// Useful for exchange rates, percentages, and converted amounts.
-/// Handles negative values with minus sign.
+/// Handles negative values with the user's preferred negative format.
 String formatNumber(double value, {int decimals = 2}) {
   final formatted = _formatNumber(value.abs(), decimals);
-  return value < 0 ? '-$formatted' : formatted;
+  return _wrapNegative(formatted, value < 0);
 }
 
 /// Wrap a formatted amount string with the negative indicator.
 String _wrapNegative(String inner, bool isNeg) {
   if (!isNeg) return inner;
-  return '-$inner';
+  return switch (_numberFormat.negative) {
+    NegativeFormat.minus => '-$inner',
+    NegativeFormat.parentheses => '($inner)',
+  };
 }
 
 /// Known zero-decimal currencies (ISO 4217).

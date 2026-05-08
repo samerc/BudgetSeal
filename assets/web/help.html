@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PocketPlan — Help Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #2563EB;
+    --accent-light: #DBEAFE;
+    --accent-dark: #1E3A5F;
+    --bg: #F5F6FA;
+    --surface: #FFFFFF;
+    --text: #1A1A2E;
+    --text-secondary: #64748B;
+    --border: #E2E8F0;
+    --expense: #DC2626;
+    --income: #059669;
+    --caution: #D97706;
+    --radius: 14px;
+    --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1219;
+      --surface: #1A1D27;
+      --text: #E8EBF0;
+      --text-secondary: #94A3B8;
+      --border: #2A2D3A;
+      --accent-light: #1E3A5F;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ── */
+  .page {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar (desktop) ── */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 0;
+    z-index: 100;
+  }
+
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-brand h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .sidebar-brand span {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 8px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .sidebar a:hover, .sidebar a.active {
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .sidebar .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    padding: 16px 20px 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── Main content ── */
+  .content {
+    margin-left: 260px;
+    flex: 1;
+    max-width: 780px;
+    padding: 40px 40px 80px;
+  }
+
+  /* ── Mobile nav ── */
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    z-index: 200;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .menu-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text);
+    padding: 4px 8px;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .mobile-header { display: flex; }
+    .content { margin-left: 0; padding: 72px 18px 60px; max-width: 100%; }
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  h1 + .subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 48px 0 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  h2:first-of-type { border-top: none; margin-top: 24px; }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 28px 0 8px;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+
+  .tip {
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+
+  .tip::before {
+    content: '💡 ';
+  }
+
+  .screenshot {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  /* ── Steps ── */
+  ol, ul {
+    margin: 10px 0 16px 20px;
+  }
+
+  ol li, ul li {
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  li strong {
+    color: var(--text);
+  }
+
+  /* ── Inline ── */
+  .key {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font);
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  strong { font-weight: 600; }
+
+  a { color: var(--accent); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Back to top ── */
+  .back-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-header">
+  <h2>PocketPlan Help</h2>
+  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+</div>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="page">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <h2>PocketPlan</h2>
+    <span>Help Guide</span>
+  </div>
+
+  <div class="section-label">Getting Started</div>
+  <a href="#overview">What is PocketPlan?</a>
+  <a href="#setup">Setting Up</a>
+  <a href="#home-screen">The Home Screen</a>
+
+  <div class="section-label">Core Features</div>
+  <a href="#accounts">Accounts</a>
+  <a href="#transactions">Transactions</a>
+  <a href="#envelopes">Envelopes (Budgeting)</a>
+  <a href="#categories">Categories</a>
+  <a href="#funding">Funding Envelopes</a>
+
+  <div class="section-label">Financial Tools</div>
+  <a href="#recurring">Recurring Transactions</a>
+  <a href="#subscriptions">Subscriptions</a>
+  <a href="#templates">Templates</a>
+  <a href="#goals">Goals &amp; Loans</a>
+  <a href="#travel">Travel Exchange</a>
+  <a href="#bill-splitter">Bill Splitter</a>
+
+  <div class="section-label">Insights</div>
+  <a href="#reports">Reports</a>
+  <a href="#age-of-money">Age of Money</a>
+  <a href="#health-check">Health Check</a>
+
+  <div class="section-label">Sync &amp; Security</div>
+  <a href="#cloud-sync">Cloud Sync</a>
+  <a href="#backup">Backup &amp; Restore</a>
+  <a href="#web-companion">Web Companion</a>
+  <a href="#biometric">Biometric Lock</a>
+
+  <div class="section-label">Settings</div>
+  <a href="#appearance">Appearance</a>
+  <a href="#preferences">Preferences</a>
+  <a href="#import-export">Import &amp; Export</a>
+
+  <div class="section-label">Quick Reference</div>
+  <a href="#keyboard-shortcuts">Keyboard Shortcuts (Web)</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<!-- ── Content ── -->
+<main class="content">
+
+<h1>PocketPlan Help Guide</h1>
+<p class="subtitle">Everything you need to know about managing your budget with PocketPlan.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="overview">What is PocketPlan?</h2>
+
+<p>PocketPlan is an envelope budgeting app. The idea is simple: every dollar you earn gets a job. You divide your money into virtual envelopes — groceries, rent, entertainment — and spend from them. When an envelope is empty, you've reached your limit for that category.</p>
+
+<p>The app works entirely offline. Your data lives on your device, not on a server. You can optionally sync to Google Drive, OneDrive, or Dropbox if you want a backup or to share with a partner.</p>
+
+<div class="card">
+  <strong>The basic flow:</strong>
+  <ol>
+    <li><strong>Add accounts</strong> — where your money lives (bank, cash, credit card)</li>
+    <li><strong>Create envelopes</strong> — one for each spending category</li>
+    <li><strong>Fund envelopes</strong> — distribute your income into envelopes</li>
+    <li><strong>Spend</strong> — each expense automatically draws from its envelope</li>
+  </ol>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="setup">Setting Up</h2>
+
+<p>When you open PocketPlan for the first time, a 3-step setup walks you through everything:</p>
+
+<h3>Step 1: Welcome</h3>
+<p>You'll see a quick overview of how envelope budgeting works. From here you can:</p>
+<ul>
+  <li><strong>Get Started</strong> — set up a new household</li>
+  <li><strong>Restore from Cloud</strong> — restore an existing backup from Google Drive or a file</li>
+  <li><strong>Join a Household</strong> — enter an invite code to join someone else's PocketPlan</li>
+</ul>
+
+<h3>Step 2: Your Household</h3>
+<p>Configure the basics:</p>
+<ul>
+  <li><strong>Household name</strong> — a label for your budget (e.g., "My Budget" or "Family")</li>
+  <li><strong>Base currency</strong> — the main currency you use (USD, EUR, etc.)</li>
+  <li><strong>Period start day</strong> — when your monthly budget cycle starts (1st, 15th, etc.)</li>
+  <li><strong>First account</strong> — name, type (Cash/Bank/Credit/Digital), and opening balance</li>
+  <li><strong>Categories</strong> — start with a full set of 30 categories, or create your own from scratch</li>
+  <li><strong>Entry mode</strong> — choose Assisted (step-by-step) or Classic (all fields at once)</li>
+</ul>
+
+<div class="tip">You can change all of these later in Settings. Don't overthink it — just pick what feels right and adjust as you go.</div>
+
+<h3>Step 3: Done</h3>
+<p>You're ready to go! The app opens to your dashboard.</p>
+
+<div class="screenshot">Screenshot: Onboarding setup page with household name, currency picker, and account fields</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="home-screen">The Home Screen</h2>
+
+<p>The bottom navigation bar has 5 tabs:</p>
+
+<table>
+  <tr><th>Tab</th><th>What it does</th></tr>
+  <tr><td><strong>Home</strong></td><td>Dashboard with spending overview, net worth, envelope health, and quick actions</td></tr>
+  <tr><td><strong>Activity</strong></td><td>All transactions grouped by date, with search and filters</td></tr>
+  <tr><td><strong>Budget</strong></td><td>Your envelopes — see how much you've spent and what's left</td></tr>
+  <tr><td><strong>Reports</strong></td><td>Charts, trends, insights, and balance sheet</td></tr>
+  <tr><td><strong>More</strong></td><td>All tools (accounts, categories, recurring, etc.) and settings</td></tr>
+</table>
+
+<h3>Dashboard</h3>
+<p>The Home tab shows your financial overview at a glance. It includes:</p>
+<ul>
+  <li><strong>Quick Actions</strong> — buttons for Expense, Income, Transfer, Fund, and Split</li>
+  <li><strong>Spending Overview</strong> — donut chart showing where your money went (toggle between last 7 days and this month)</li>
+  <li><strong>Your Money</strong> — net worth, unallocated funds, and envelope health</li>
+  <li><strong>Status Card</strong> — budget progress, spending velocity, and Age of Money</li>
+  <li><strong>Recent Activity</strong> — quick templates and latest transactions</li>
+</ul>
+
+<p>To customize what appears on your dashboard:</p>
+<ol>
+  <li>Tap the <strong>tune icon</strong> (top-right corner)</li>
+  <li>Drag sections to reorder them</li>
+  <li>Toggle sections on/off</li>
+  <li>Tap <strong>Reset</strong> to restore the default layout</li>
+</ol>
+
+<div class="screenshot">Screenshot: Dashboard showing spending donut, quick actions, and net worth card</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="accounts">Accounts</h2>
+
+<p>Accounts represent where your money physically lives — a bank account, your wallet, a credit card, or a digital wallet (PayPal, Venmo, etc.).</p>
+
+<h3>Creating an Account</h3>
+<ol>
+  <li>Go to <strong>More</strong> tab → tap <strong>Accounts</strong></li>
+  <li>Tap the <strong>+</strong> button</li>
+  <li>Enter a name (e.g., "Chase Checking")</li>
+  <li>Choose a type: Cash, Bank, Credit card, or Digital wallet</li>
+  <li>Set the currency and opening balance</li>
+  <li>Tap <strong>Create</strong></li>
+</ol>
+
+<h3>Account Detail</h3>
+<p>Tap any account to see its transactions and manage it. From the 3-dot menu, you can:</p>
+<ul>
+  <li><strong>Adjust Balance</strong> — correct the balance without creating a transaction</li>
+  <li><strong>Archive</strong> — hide the account (transactions are preserved)</li>
+  <li><strong>Convert Back &amp; Close</strong> — for travel wallets, return remaining money and archive</li>
+</ul>
+
+<h3>Archived Accounts</h3>
+<p>When you archive an account, it disappears from the main list but its transactions are preserved. To see or restore archived accounts:</p>
+<ol>
+  <li>On the <strong>Accounts</strong> screen, tap the <strong>3-dot menu</strong> (top-right)</li>
+  <li>Tap <strong>Show Archived</strong></li>
+  <li>Archived accounts appear in a separate section at the bottom, dimmed</li>
+  <li>Tap the <strong>unarchive icon</strong> next to an account to restore it</li>
+  <li>Tap the menu again → <strong>Hide Archived</strong> to hide the section</li>
+</ol>
+
+<h3>Decimal Precision</h3>
+<p>Some currencies use 0 decimal places (JPY, KRW), others use 3 (BHD, KWD). PocketPlan auto-detects this based on the currency. You can override it per account if needed:</p>
+<ol>
+  <li>Open the account → 3-dot menu → <strong>Edit</strong></li>
+  <li>Change the <strong>Decimal Places</strong> dropdown (Auto, 0, 1, 2, or 3)</li>
+</ol>
+
+<div class="screenshot">Screenshot: Accounts list showing bank, cash, and credit card accounts with balances</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="transactions">Transactions</h2>
+
+<p>Every time money moves — you spend, earn, or transfer — you record a transaction. PocketPlan supports three types:</p>
+
+<table>
+  <tr><th>Type</th><th>What it does</th></tr>
+  <tr><td><strong>Expense</strong></td><td>Money leaves an account (and its linked envelope)</td></tr>
+  <tr><td><strong>Income</strong></td><td>Money enters an account (goes to Unallocated)</td></tr>
+  <tr><td><strong>Transfer</strong></td><td>Money moves between two accounts</td></tr>
+</table>
+
+<h3>Two Entry Modes</h3>
+
+<p><strong>Assisted mode</strong> (default) walks you through step by step:</p>
+<ol>
+  <li>Choose expense, income, or transfer</li>
+  <li>Enter a title — the app may auto-detect the category</li>
+  <li>Pick or confirm the category</li>
+  <li>Enter the amount using the built-in calculator</li>
+  <li>Select an account</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<p><strong>Classic mode</strong> shows all fields on one screen — useful for complex entries with multiple items, notes, or foreign currencies.</p>
+
+<p>To switch modes: go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Entry Mode</strong>.</p>
+
+<h3>Adding a Transaction (Classic Mode)</h3>
+<ol>
+  <li>Tap the <strong>+</strong> button on the Activity tab</li>
+  <li>Choose <strong>Expense</strong>, <strong>Income</strong>, or <strong>Transfer</strong></li>
+  <li>Fill in the title, date, and optional note (three separate cards at the top)</li>
+  <li>Select a category — tap the category area to open the category picker</li>
+  <li>Enter the amount using the calculator</li>
+  <li>Select an account</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<h3>Multi-Item Transactions (Splits)</h3>
+<p>Need to split a grocery receipt across categories? Use the "Add item" button to add multiple line items, each with its own amount, category, and optionally a different account.</p>
+
+<h3>Transfers Between Accounts</h3>
+<ol>
+  <li>Choose <strong>Transfer</strong> as the type</li>
+  <li>Select the <strong>From</strong> and <strong>To</strong> accounts</li>
+  <li>Enter the amount</li>
+  <li>If the accounts are in different currencies, an exchange rate field appears — enter how much the destination receives</li>
+</ol>
+
+<h3>Auto-fill</h3>
+<p>When you pick a category, PocketPlan can automatically fill in the account, title, and amount from your last transaction with that category. Configure what gets auto-filled in <strong>Settings &amp; Customization</strong> → <strong>Auto-fill</strong>.</p>
+
+<h3>Receipt Scanning</h3>
+<p>In Classic mode, tap the camera icon next to the title field to scan a receipt. The app uses offline OCR to extract text — no internet required. You can also attach receipt photos to any transaction.</p>
+
+<h3>Duplicate Detection</h3>
+<p>If you try to save a transaction with the same amount, category, and date as an existing one, PocketPlan will warn you. You can still save it if it's intentional.</p>
+
+<h3>Managing Transactions</h3>
+<ul>
+  <li><strong>Edit</strong> — tap a transaction, then tap the edit icon</li>
+  <li><strong>Delete</strong> — swipe left on a transaction, or use the context menu (long-press)</li>
+  <li><strong>Duplicate</strong> — long-press → Duplicate</li>
+  <li><strong>Bulk delete</strong> — long-press to enter selection mode, select multiple, then delete</li>
+  <li><strong>Search</strong> — tap the search icon on the Activity tab</li>
+  <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), date range, or amount range</li>
+</ul>
+
+<div class="screenshot">Screenshot: Classic transaction form showing title, date, note cards, category, amount, and account</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="envelopes">Envelopes (Budgeting)</h2>
+
+<p>Envelopes are the heart of PocketPlan. They don't move money between accounts — they help you plan <em>how to use</em> the money you already have.</p>
+
+<p>Think of it like putting cash into labeled envelopes: $500 for groceries, $1,200 for rent, $100 for entertainment. When you spend, the money comes out of the right envelope.</p>
+
+<h3>Three Types of Envelopes</h3>
+
+<table>
+  <tr><th>Type</th><th>Use case</th><th>Behavior</th></tr>
+  <tr><td><strong>Spending</strong></td><td>Groceries, fuel, dining</td><td>Set a monthly budget. Resets each period.</td></tr>
+  <tr><td><strong>Saving (with goal)</strong></td><td>Vacation, emergency fund, taxes</td><td>Set a target amount. Fund it over time.</td></tr>
+  <tr><td><strong>Saving (open)</strong></td><td>General savings</td><td>No target. Put money aside whenever you can.</td></tr>
+</table>
+
+<h3>Creating an Envelope</h3>
+<ol>
+  <li>Go to the <strong>Budget</strong> tab</li>
+  <li>Tap the <strong>+</strong> button</li>
+  <li>Enter a name and optionally pick an emoji icon</li>
+  <li>Choose the envelope type</li>
+  <li>Set a budget amount (spending) or target amount (saving)</li>
+  <li>Pick a currency</li>
+  <li>Link categories — expenses in these categories will automatically debit this envelope</li>
+  <li>Tap <strong>Create Envelope</strong></li>
+</ol>
+
+<h3>Envelope Settings</h3>
+<p>Tap an envelope, then use the 3-dot menu → <strong>Edit Settings</strong> to change:</p>
+<ul>
+  <li><strong>Periodic vs Permanent</strong> — periodic resets each month; permanent accumulates</li>
+  <li><strong>Rollover balance</strong> — carry remaining funds to the next period</li>
+  <li><strong>Auto-reset</strong> — reset automatically at period start, or manually review</li>
+</ul>
+
+<h3>Envelope Detail Screen</h3>
+<p>Tap any envelope to see:</p>
+<ul>
+  <li><strong>Balance card</strong> — how much is available (or saved), with a progress bar</li>
+  <li><strong>Fund button</strong> — add money from your unallocated pool</li>
+  <li><strong>Recent activity</strong> — funded, spent, adjustments, and resets</li>
+  <li><strong>Spending history</strong> — a chart of past periods</li>
+</ul>
+
+<p>The 3-dot menu also has:</p>
+<ul>
+  <li><strong>Withdraw</strong> — move money back to Unallocated (savings envelopes)</li>
+  <li><strong>Revalue Balances</strong> — update exchange rates for foreign-currency balances</li>
+  <li><strong>Archive</strong> — hide the envelope without deleting history</li>
+  <li><strong>Delete</strong> — permanently remove</li>
+</ul>
+
+<div class="tip">When an envelope is overspent, it shows a red border. When a savings envelope reaches its goal, you'll see a confetti celebration!</div>
+
+<div class="screenshot">Screenshot: Envelope detail showing balance hero card, fund button, and recent activity list</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="categories">Categories</h2>
+
+<p>Categories organize your transactions. PocketPlan uses a two-level system: parent categories (groups) and subcategories.</p>
+
+<p>For example: <strong>Food &amp; Dining</strong> (parent) → Groceries, Restaurants, Coffee &amp; Snacks (subcategories).</p>
+
+<h3>Managing Categories</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Categories</strong></li>
+  <li>Tap the <strong>+</strong> button to add a new category</li>
+  <li>Enter a name, choose a parent (or make it top-level), pick an emoji icon and color</li>
+  <li>Set it as Expense or Income type</li>
+</ol>
+
+<h3>Linking to Envelopes</h3>
+<p>Categories become powerful when linked to envelopes. When you spend on "Groceries" and that category is linked to your "Food" envelope, the expense automatically debits the envelope.</p>
+
+<p>Link categories when creating or editing an envelope (see <a href="#envelopes">Envelopes</a>).</p>
+
+<h3>Category Icons</h3>
+<p>Pick from 120+ curated emojis organized by group, or type any emoji in the text field. The app shows the emoji on transaction tiles and category lists.</p>
+
+<div class="screenshot">Screenshot: Categories screen showing parent groups with expandable subcategories</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="funding">Funding Envelopes</h2>
+
+<p>When you receive income, it goes to your <strong>Unallocated</strong> pool — money that hasn't been assigned to any envelope yet. The goal is to distribute it all.</p>
+
+<p>The Unallocated card on the Budget tab shows your base currency amount prominently. If you have unallocated funds in other currencies, you'll see a "+ N other currencies" link — tap it (or the arrow) to expand and see the breakdown per currency.</p>
+
+<h3>Funding from the Dashboard</h3>
+<ol>
+  <li>Tap the <strong>Fund</strong> quick action on the Home tab</li>
+  <li>You'll see all your envelopes with their current balances</li>
+  <li>Enter how much to assign to each envelope</li>
+  <li>Tap <strong>Fund</strong> to confirm</li>
+</ol>
+
+<h3>Funding a Single Envelope</h3>
+<ol>
+  <li>Go to the <strong>Budget</strong> tab</li>
+  <li>Tap an envelope to open its detail screen</li>
+  <li>Tap the <strong>Fund</strong> button on the balance card</li>
+  <li>Enter the amount and tap <strong>Fund</strong></li>
+</ol>
+
+<div class="tip">If you try to fund more than your unallocated balance, PocketPlan will warn you. You can still proceed — your unallocated balance will go negative, which means you've assigned more than you have.</div>
+
+<h3>Period Transitions</h3>
+<p>At the start of each budget period (based on your period start day), periodic envelopes can be reset. You choose what happens to leftover balances:</p>
+<ul>
+  <li><strong>Return to Unallocated</strong> — the leftover goes back to the pool</li>
+  <li><strong>Carry Forward</strong> — keep the balance for the next period</li>
+  <li><strong>Move to...</strong> — transfer the leftover to another envelope (e.g., savings)</li>
+</ul>
+
+<p>Envelopes with <strong>Auto-reset</strong> enabled handle this automatically. Others will prompt you to review.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="recurring">Recurring Transactions</h2>
+
+<p>Set up transactions that repeat on a schedule — rent, salary, utility bills, etc.</p>
+
+<h3>Creating a Recurring Transaction</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Recurring</strong></li>
+  <li>Tap the <strong>+</strong> button</li>
+  <li>Fill in the details: type, title, amount, account, category</li>
+  <li>Set the frequency (daily, weekly, monthly, yearly) and interval</li>
+  <li>Pick a start date</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<p>Recurring transactions are auto-posted when they're due. You can enable or disable them with the toggle switch.</p>
+
+<h3>Bill Calendar</h3>
+<p>Go to <strong>More</strong> → <strong>Bill Calendar</strong> to see a monthly calendar view of all your upcoming bills. Tap a day to see what's due.</p>
+
+<h3>Upcoming Bills</h3>
+<p>Go to <strong>More</strong> → <strong>Upcoming Bills</strong> to see all bills sorted by due date with urgency indicators:</p>
+<ul>
+  <li><span style="color:var(--expense)"><strong>Red</strong></span> — Overdue</li>
+  <li><span style="color:var(--caution)"><strong>Amber</strong></span> — Due today or tomorrow</li>
+  <li><span style="color:var(--income)"><strong>Green</strong></span> — Due in a few days</li>
+</ul>
+
+<div class="screenshot">Screenshot: Upcoming Bills screen showing bills with colored urgency badges</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="subscriptions">Subscriptions</h2>
+
+<p>Subscriptions are recurring transactions with extra tracking — price history, annual cost, and cancellation dates.</p>
+
+<h3>Creating a Subscription</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Subscriptions</strong></li>
+  <li>Tap the <strong>+</strong> button</li>
+  <li>Enter the service name, amount, frequency, account, and category</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<h3>Subscription Detail</h3>
+<p>Tap a subscription to see:</p>
+<ul>
+  <li><strong>Annual cost</strong> — calculated from the frequency and amount</li>
+  <li><strong>Price history</strong> — a timeline of price changes (logged automatically when you edit the amount)</li>
+  <li><strong>Past transactions</strong> — all payments made</li>
+  <li><strong>Upcoming</strong> — next scheduled payment</li>
+</ul>
+
+<p>You can <strong>Pause</strong> (disable) or set a <strong>Cancellation Date</strong> from the detail screen.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="templates">Templates</h2>
+
+<p>Templates save frequent transactions for one-tap reuse. Instead of filling in "Morning coffee, $4.50, Cash, Coffee &amp; Snacks" every day, save it as a template.</p>
+
+<h3>Creating a Template</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Templates</strong></li>
+  <li>Tap the <strong>+</strong> button</li>
+  <li>Enter the transaction details: title, type, amount, account, category</li>
+  <li>Tap <strong>Save Template</strong></li>
+</ol>
+
+<h3>Using a Template</h3>
+<ul>
+  <li>From the <strong>Templates</strong> screen — tap a template → <strong>Use template</strong></li>
+  <li>From the <strong>Dashboard</strong> — your most-used templates appear in the Quick Templates section</li>
+  <li>When adding a transaction — tap the template icon in the form</li>
+</ul>
+
+<p>Templates can be sorted by most used, A-Z, newest, or highest amount. You can also group them by type or category.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="goals">Goals &amp; Loans</h2>
+
+<p>Track savings goals and money you've lent or borrowed — separate from your envelope budgeting.</p>
+
+<h3>Goals</h3>
+<p>A goal is a savings target: emergency fund, vacation, new laptop, etc.</p>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Goals &amp; Loans</strong></li>
+  <li>Tap <strong>Add</strong> → select <strong>Goal</strong></li>
+  <li>Enter a name, target amount, currency, and optional deadline</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<p>To fund a goal:</p>
+<ol>
+  <li>Open the goal — you'll see a progress card with the current amount and a progress bar</li>
+  <li>Tap <strong>Add Funds</strong></li>
+  <li>Choose the account to save from</li>
+  <li>Optionally pick a category for the transaction</li>
+  <li>Enter the amount and confirm</li>
+  <li>A real transaction is created — it appears in your transaction history</li>
+</ol>
+
+<p>The detail screen shows a <strong>summary card</strong> (currency, deadline, remaining) and a <strong>payment history</strong> listing all recorded transactions. To edit the goal's settings, tap the <strong>3-dot menu</strong> → <strong>Edit Settings</strong>.</p>
+
+<h3>Loans</h3>
+<p>Track money you've lent to someone or borrowed from someone.</p>
+<ol>
+  <li>Tap <strong>Add</strong> → select <strong>Loan</strong></li>
+  <li>Enter the loan name, person, amount, and direction (<strong>I lent</strong> or <strong>I borrowed</strong>)</li>
+  <li>Tap <strong>Save</strong></li>
+</ol>
+
+<p>To record payments:</p>
+<ol>
+  <li>Open the loan</li>
+  <li>Tap <strong>Record Payment</strong></li>
+  <li>Select the account, optionally a category, and enter the amount</li>
+  <li>The payment appears in the payment history below</li>
+</ol>
+
+<div class="tip">The category you pick for a payment is remembered for next time on the same objective. This keeps your payments consistently categorized.</div>
+
+<div class="screenshot">Screenshot: Loan detail showing progress card, summary info, and payment history list</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="travel">Travel Exchange</h2>
+
+<p>Going on a trip and need to exchange currency? PocketPlan creates a temporary travel wallet to track your spending abroad.</p>
+
+<h3>Exchanging Money</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Travel Exchange</strong></li>
+  <li>Select the account you're exchanging <strong>from</strong></li>
+  <li>Enter how much you're exchanging</li>
+  <li>Choose the <strong>travel currency</strong> (the currency of your destination)</li>
+  <li>Enter how much you <strong>received</strong> in the foreign currency</li>
+  <li>Tap <strong>Exchange &amp; Create Travel Wallet</strong></li>
+</ol>
+
+<p>A travel wallet account is created automatically. Use it to track your spending during the trip.</p>
+
+<h3>Coming Back</h3>
+<p>When you return and have leftover money:</p>
+<ol>
+  <li>Go to <strong>Accounts</strong> → open the travel wallet</li>
+  <li>Tap the 3-dot menu → <strong>Convert Back &amp; Close</strong></li>
+  <li>Enter how much you got back in your base currency</li>
+  <li>The travel wallet is archived</li>
+</ol>
+
+<div class="tip">If you travel to the same country again, PocketPlan will offer to reactivate the existing travel wallet instead of creating a new one.</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="bill-splitter">Bill Splitter</h2>
+
+<p>Split a restaurant bill, shared groceries, or any group expense.</p>
+
+<h3>Manual Split</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Bill Splitter</strong> (or tap <strong>Split</strong> on the dashboard)</li>
+  <li>Add people — type their names</li>
+  <li>Add items — enter what was ordered and the price</li>
+  <li>Assign each item to the people who shared it</li>
+  <li>Optionally add a tip (percentage or fixed amount)</li>
+  <li>See each person's total — tap <strong>Create Transaction</strong> to log your share</li>
+</ol>
+
+<h3>Receipt Scanning</h3>
+<ol>
+  <li>Tap <strong>Scan Receipt</strong></li>
+  <li>Take a photo or pick from gallery</li>
+  <li>The app extracts line items using offline OCR — no internet needed</li>
+  <li>Review the detected items, fix any misreads, and assign to people</li>
+</ol>
+
+<div class="tip">The bill splitter supports cross-currency splits. If the bill is in a foreign currency, enter the exchange rate and your share will be converted to your base currency.</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="reports">Reports</h2>
+
+<p>The Reports tab has four views to help you understand your finances. All tabs except Balance Sheet have a <strong>month navigator</strong> — use the left/right arrows (or swipe) to browse past months.</p>
+
+<h3>Overview</h3>
+<ul>
+  <li><strong>Monthly summary</strong> — income, expenses, and net for the selected month</li>
+  <li><strong>Spending heatmap</strong> — a GitHub-style grid showing daily spending intensity. Green = income day, red = spending day, gray = no activity. Scroll left to see past months.</li>
+  <li><strong>6-Month Trend</strong> — a bar chart comparing income vs expenses over 6 months</li>
+  <li><strong>Daily Pace</strong> — a cumulative line chart showing your spending pace vs typical month</li>
+</ul>
+
+<h3>Categories</h3>
+<ul>
+  <li><strong>Top Spending</strong> — a donut chart showing your biggest expense categories</li>
+  <li><strong>Top Transactions</strong> — the largest individual transactions this month</li>
+  <li>Tap any category to see its transactions</li>
+</ul>
+
+<h3>Insights</h3>
+<ul>
+  <li><strong>Spending Velocity</strong> — your daily rate, projected total, and whether you're on pace</li>
+  <li><strong>Biggest Expense</strong> — your largest single expense this month</li>
+  <li><strong>Savings Rate</strong> — what percentage of income you're saving</li>
+  <li><strong>Age of Money</strong> — how long money sits before being spent (see <a href="#age-of-money">Age of Money</a>)</li>
+  <li><strong>Recurring Transactions</strong> — how much of your spending is committed</li>
+</ul>
+
+<h3>Balance Sheet</h3>
+<ul>
+  <li><strong>Net Worth</strong> — total of all accounts, grouped by currency</li>
+  <li><strong>Assets</strong> — bank accounts, cash, digital wallets</li>
+  <li><strong>Liabilities</strong> — credit cards</li>
+  <li><strong>Compare</strong> — tap the compare icon to see how your balances changed vs. last week, last month, or any custom date</li>
+</ul>
+
+<h3>Export Report</h3>
+<p>Generate a printable HTML report for any month:</p>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Import &amp; Export</strong> → <strong>Export Report</strong></li>
+  <li>Select a month and year</li>
+  <li>Tap <strong>Generate &amp; Share</strong></li>
+  <li>Open the HTML file in a browser, then use Print → Save as PDF</li>
+</ol>
+
+<div class="screenshot">Screenshot: Reports Overview tab showing monthly stats, spending heatmap, and 6-month trend chart</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="age-of-money">Age of Money</h2>
+
+<p>Age of Money tells you how many days your money sits in your accounts before you spend it. It traces each expense back to the income that funded it (oldest income first).</p>
+
+<div class="card">
+  <strong>What the numbers mean:</strong>
+  <ul>
+    <li><strong>Under 14 days</strong> — you're spending almost as fast as you earn</li>
+    <li><strong>14–30 days</strong> — you have a small cushion, getting ahead</li>
+    <li><strong>30–60 days</strong> — you're spending last month's income — great!</li>
+    <li><strong>60+ days</strong> — strong financial health, big safety net</li>
+  </ul>
+  <p style="margin-top:8px;margin-bottom:0;">The goal is to increase this number over time.</p>
+</div>
+
+<p>Your Age of Money appears on the dashboard status card and in the Reports → Insights tab.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="health-check">Health Check</h2>
+
+<p>A diagnostic tool that verifies your data is consistent.</p>
+
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Health Check</strong></li>
+  <li>The app checks: balance invariants, orphan entries, backup status</li>
+  <li>If issues are found, you can tap <strong>Repair Balances</strong> to fix discrepancies</li>
+  <li><strong>Purge Deleted</strong> permanently removes soft-deleted transactions</li>
+  <li>Use the export button to share a diagnostic report</li>
+</ol>
+
+<div class="tip">Run Health Check if something looks off — like a balance that doesn't match what you expect. It's safe to run anytime.</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="cloud-sync">Cloud Sync</h2>
+
+<p>Sync your data to the cloud so you have a backup or can share with a partner. PocketPlan uses a single JSON file — no server, no account registration.</p>
+
+<h3>Setting Up Sync</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Cloud Sync</strong></li>
+  <li>Choose a provider:
+    <ul>
+      <li><strong>Google Drive</strong> — sign in with your Google account</li>
+      <li><strong>OneDrive</strong> — requires the OneDrive app installed</li>
+      <li><strong>Dropbox</strong> — requires the Dropbox app installed</li>
+      <li><strong>Local File</strong> — pick any file on your device</li>
+    </ul>
+  </li>
+  <li>Tap to connect — the app creates a sync file automatically</li>
+</ol>
+
+<p>Once connected, the app syncs automatically when you open or close it. You can also tap <strong>Sync Now</strong> anytime.</p>
+
+<h3>Sync Encryption</h3>
+<p>For extra security, encrypt your sync file with a password:</p>
+<ol>
+  <li>On the Cloud Sync screen, find the <strong>Sync Encryption</strong> card</li>
+  <li>Tap <strong>Enable</strong></li>
+  <li>Enter a strong password and confirm it</li>
+  <li>The next sync will encrypt the file with AES-256</li>
+</ol>
+
+<div class="tip">If you share a household with someone, both devices must use the same sync password.</div>
+
+<h3>Sharing a Household</h3>
+<p>Share your PocketPlan data with a partner:</p>
+<ol>
+  <li>On the Cloud Sync screen, tap <strong>Share Household</strong></li>
+  <li>Enter their email (for Google Drive sharing) or generate an invite code</li>
+  <li>They enter the code during onboarding → <strong>Join a Household</strong></li>
+</ol>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="backup">Backup &amp; Restore</h2>
+
+<h3>Automatic Backups</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Backup &amp; Restore</strong></li>
+  <li>Enable <strong>Automatic Backups</strong></li>
+  <li>Set the frequency (every 6 hours to weekly)</li>
+  <li>Set retention (how many backups to keep, 3 to 30)</li>
+</ol>
+
+<p>Backups are saved locally on your device and run automatically when you open or close the app (if the frequency interval has passed). You can see all backups at the bottom of the screen and restore or delete any of them.</p>
+
+<h3>Manual Backup</h3>
+<p>Tap <strong>Export &amp; Share</strong> to create a backup file and share it via any app (email, messaging, etc.).</p>
+
+<h3>Restoring</h3>
+<ul>
+  <li><strong>From a local backup</strong> — tap the restore icon next to any backup in the list</li>
+  <li><strong>From a file</strong> — tap <strong>Restore from File</strong> and pick a .db file</li>
+</ul>
+
+<div class="tip">Always make a backup before restoring — the restore replaces ALL current data and cannot be undone.</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="web-companion">Web Companion</h2>
+
+<p>Turn your phone into a local server and manage your budget from a laptop browser. Useful for fast data entry with a real keyboard.</p>
+
+<h3>How It Works</h3>
+<p>Your phone serves a web page over your local WiFi network. No internet needed — both devices just need to be on the same WiFi.</p>
+
+<h3>Starting the Server</h3>
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Web Companion</strong></li>
+  <li>Set a <strong>4-digit PIN</strong> (required for security)</li>
+  <li>Tap <strong>Start Server</strong></li>
+  <li>A URL appears (e.g., <code>http://192.168.1.5:7432</code>)</li>
+  <li>Open that URL on your laptop browser, or scan the QR code</li>
+  <li>Enter the PIN on the web page</li>
+</ol>
+
+<h3>What You Can Do on the Web</h3>
+<ul>
+  <li>View and add transactions (with full form: type, account, category, amount, date, note)</li>
+  <li>Manage categories and accounts</li>
+  <li>View and fund envelopes</li>
+  <li>Manage recurring transactions and subscriptions</li>
+  <li>View reports with charts</li>
+  <li>Export transactions as CSV</li>
+  <li>Switch between light and dark mode</li>
+</ul>
+
+<h3>Security</h3>
+<ul>
+  <li>PIN is required — 5 failed attempts lock the interface for 30 minutes</li>
+  <li>Only devices on the same WiFi network can connect</li>
+  <li>Server stops automatically after 6 hours</li>
+  <li>On Android, the server runs in the background (you can lock your phone)</li>
+  <li>On iOS, keep the app in the foreground — iOS doesn't allow background servers</li>
+</ul>
+
+<div class="tip">Avoid using Web Companion on public WiFi (airports, hotels, cafes). The traffic is not encrypted, so someone on the same network could potentially see your data.</div>
+
+<div class="screenshot">Screenshot: Web Companion phone screen showing server running, URL, QR code, and PIN status</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="biometric">Biometric Lock</h2>
+
+<p>Protect your app with fingerprint, face recognition, or device PIN.</p>
+
+<ol>
+  <li>Go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Biometric Lock</strong></li>
+  <li>Toggle it on</li>
+  <li>The app will now require authentication every time you open it or switch back to it</li>
+</ol>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="appearance">Appearance</h2>
+
+<p>Customize how PocketPlan looks. All options are in <strong>More</strong> → <strong>Settings &amp; Customization</strong>.</p>
+
+<table>
+  <tr><th>Setting</th><th>Options</th></tr>
+  <tr><td><strong>Theme</strong></td><td>System (follows your device), Light, Dark, Black (AMOLED)</td></tr>
+  <tr><td><strong>Accent Color</strong></td><td>System (Material You on Android 12+), Default (Royal Blue), or 10 preset colors</td></tr>
+  <tr><td><strong>Font</strong></td><td>Plus Jakarta Sans (default), DM Sans, Inter, Nunito Sans, Poppins, Nunito, Rubik, Space Grotesk</td></tr>
+  <tr><td><strong>Text Size</strong></td><td>Small, Default, Large, Extra Large</td></tr>
+  <tr><td><strong>Transaction Colors</strong></td><td>Custom colors for Income, Expense, and Transfer</td></tr>
+  <tr><td><strong>Entry Mode</strong></td><td>Assisted (step-by-step) or Classic (single form)</td></tr>
+  <tr><td><strong>Start Screen</strong></td><td>Which tab opens when you launch the app</td></tr>
+  <tr><td><strong>Transaction List</strong></td><td>Layout style, date banner totals, account labels, category icons, time display</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="preferences">Preferences</h2>
+
+<table>
+  <tr><th>Setting</th><th>What it controls</th></tr>
+  <tr><td><strong>Household Name</strong></td><td>Rename your budget household</td></tr>
+  <tr><td><strong>Base Currency</strong></td><td>Your primary currency for all totals and summaries</td></tr>
+  <tr><td><strong>Period Start Day</strong></td><td>When your monthly budget cycle starts</td></tr>
+  <tr><td><strong>Currency Symbols</strong></td><td>Override the default symbol for any currency (e.g., show "L.L." instead of "LBP")</td></tr>
+  <tr><td><strong>Number Format</strong></td><td>Thousands separator (comma/period/space/none), decimal separator (period/comma), negative format (-100 or (100))</td></tr>
+  <tr><td><strong>Date Format</strong></td><td>How dates are displayed throughout the app</td></tr>
+</table>
+
+<p>All format changes apply instantly — no restart needed.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="import-export">Import &amp; Export</h2>
+
+<p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Import &amp; Export</strong>.</p>
+
+<h3>Import CSV</h3>
+<p>Import transactions from a bank CSV file. The app guides you through mapping columns to PocketPlan fields.</p>
+
+<h3>Export CSV</h3>
+<p>Export all transactions as a CSV spreadsheet for use in Excel, Google Sheets, etc.</p>
+
+<h3>Export Report</h3>
+<p>Generate a formatted HTML report for a selected month. Open in a browser and print to PDF.</p>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts (Web Companion)</h2>
+
+<p>When using the Web Companion in a browser, these keyboard shortcuts are available:</p>
+
+<table>
+  <tr><th>Shortcut</th><th>Action</th></tr>
+  <tr><td><span class="key">N</span></td><td>New transaction</td></tr>
+  <tr><td><span class="key">/</span></td><td>Search transactions</td></tr>
+  <tr><td><span class="key">Esc</span></td><td>Close modal or unfocus</td></tr>
+  <tr><td><span class="key">?</span></td><td>Show shortcuts help</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="faq">Frequently Asked Questions</h2>
+
+<h3>What's the difference between accounts and envelopes?</h3>
+<p><strong>Accounts</strong> are where your money physically is (bank, wallet, credit card). <strong>Envelopes</strong> are how you plan to use it. You might have $5,000 across two bank accounts, but envelopes decide: $2,000 for rent, $500 for groceries, $300 for entertainment, and $2,200 ready to assign.</p>
+
+<h3>What does "Unallocated" mean?</h3>
+<p>It's money in your accounts that hasn't been assigned to any envelope yet. When you receive income, it goes to Unallocated. Your goal is to distribute it to envelopes so every dollar has a purpose.</p>
+
+<h3>Can I use multiple currencies?</h3>
+<p>Yes. Each account has its own currency. When you transfer between accounts in different currencies, an exchange rate field appears. Exchange rates are fetched automatically and cached for one hour. Reports and summaries show totals per currency — they're never mixed.</p>
+
+<h3>Is my data sent anywhere?</h3>
+<p>No. Everything stays on your device. Cloud sync is optional and uses your own Google Drive, OneDrive, or Dropbox — PocketPlan never sees your data. There are no servers, no accounts, and no tracking.</p>
+
+<h3>What happens if I delete a transaction?</h3>
+<p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>
+
+<h3>Can two people share a budget?</h3>
+<p>Yes. Set up Cloud Sync with Google Drive on one device, then share the household with your partner. Both devices sync to the same file. Changes merge automatically — the newer edit wins.</p>
+
+<h3>What if I overspend an envelope?</h3>
+<p>The envelope goes negative and shows a red indicator. Your transaction still saves — PocketPlan never blocks spending. It's a signal to either fund the envelope more or spend less.</p>
+
+<h3>How do I change my base currency?</h3>
+<p>Go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Base Currency</strong>. Note: this changes the display currency for summaries and reports. Existing transactions keep their original currency.</p>
+
+<h3>My notifications aren't working</h3>
+<p>Make sure notifications are enabled in your device settings for PocketPlan. On Android 13+, you need to grant notification permission explicitly. Go to <strong>Settings</strong> → <strong>Notifications</strong> to configure daily reminders and bill alerts.</p>
+
+</main>
+</div>
+
+<button class="back-top" id="backTop" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.sidebar-overlay').classList.toggle('open');
+}
+
+// Close sidebar on link click (mobile)
+document.querySelectorAll('.sidebar a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.querySelector('.sidebar-overlay').classList.remove('open');
+  });
+});
+
+// Back to top button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backTop');
+  btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('h2[id]');
+const links = document.querySelectorAll('.sidebar a[href^="#"]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

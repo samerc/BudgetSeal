@@ -59,11 +59,22 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(4, 0, 4, 16),
               child: Row(
                 children: [
-                  Text('More',
-                      style: TextStyle(
-                          fontSize: TypographyTokens.screenTitleSize,
-                          fontWeight: TypographyTokens.screenTitleWeight,
-                          color: AppColors.tp(context))),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('More',
+                          style: TextStyle(
+                              fontSize: TypographyTokens.screenTitleSize,
+                              fontWeight: TypographyTokens.screenTitleWeight,
+                              color: AppColors.tp(context))),
+                      if (household != null)
+                        Text(
+                          '${household.name} · ${household.baseCurrency}',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.ts(context)),
+                        ),
+                    ],
+                  ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () => context.push('/about'),
@@ -75,65 +86,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Backup Reminder Banner (moved from dashboard) ──
+            // ── Backup Reminder Banner ──
             _SettingsBackupBanner(),
-
-            // ── Household banner ──
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.accent, AppColors.accent.withValues(alpha: 0.8)],
-                ),
-                borderRadius: BorderRadius.circular(CardTokens.radius),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.home_rounded,
-                        color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(household?.name ?? 'PocketPlan',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700)),
-                        Text(
-                          '${household?.baseCurrency ?? 'USD'} · Day ${household?.periodStartDay ?? 1}',
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => _editText(context, ref,
-                        title: 'Household Name',
-                        currentValue: household?.name ?? '',
-                        onSave: (val) async {
-                          final db = ref.read(databaseProvider);
-                          await (db.update(db.households)
-                                ..where((h) => h.id.equals(household!.id)))
-                              .write(HouseholdsCompanion(name: Value(val)));
-                        }),
-                    child: const Icon(Icons.edit_rounded,
-                        color: Colors.white70, size: 18),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
 
             // ── Tools ──
             _SectionHeader(title: 'TOOLS'),
@@ -202,6 +156,11 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Theme, font, data, preferences',
                 iconColor: AppColors.ts(context),
                 onTap: () => context.push('/settings')),
+            const SizedBox(height: 8),
+            _SettingsTile(icon: Icons.help_outline_rounded, title: 'Help Guide',
+                subtitle: 'How to use PocketPlan',
+                iconColor: const Color(0xFF0EA5E9),
+                onTap: () => context.push('/help')),
             const SizedBox(height: 8),
             _SettingsTile(icon: Icons.info_outline_rounded, title: 'About PocketPlan',
                 subtitle: 'Version $appVersion', iconColor: AppColors.th(context),
@@ -1352,6 +1311,21 @@ class SettingsDetailScreen extends ConsumerWidget {
           _SectionHeader(title: 'PREFERENCES'),
           const SizedBox(height: 8),
           _SettingsTile(
+            icon: Icons.home_rounded,
+            title: 'Household Name',
+            subtitle: household?.name ?? 'PocketPlan',
+            iconColor: AppColors.accent,
+            onTap: () => _editText(context, ref,
+                title: 'Household Name',
+                currentValue: household?.name ?? '',
+                onSave: (val) async {
+                  final db = ref.read(databaseProvider);
+                  await (db.update(db.households)
+                        ..where((h) => h.id.equals(household!.id)))
+                      .write(HouseholdsCompanion(name: Value(val)));
+                }),
+          ),
+          _SettingsTile(
             icon: Icons.monetization_on_rounded,
             title: 'Base Currency',
             subtitle: household?.baseCurrency ?? 'USD',
@@ -1808,6 +1782,7 @@ class _NumberFormatSheet extends ConsumerStatefulWidget {
 class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
   late ThousandsSeparator _thousands;
   late DecimalSeparator _decimal;
+  late NegativeFormat _negative;
 
   @override
   void initState() {
@@ -1815,18 +1790,19 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
     final current = ref.read(numberFormatProvider);
     _thousands = current.thousands;
     _decimal = current.decimal;
+    _negative = current.negative;
   }
 
   void _applyImmediately() {
     final prefs = NumberFormatPrefs(
-        thousands: _thousands, decimal: _decimal, negative: NegativeFormat.minus);
+        thousands: _thousands, decimal: _decimal, negative: _negative);
     ref.read(numberFormatProvider.notifier).update(prefs);
   }
 
   String get _preview {
     // Temporarily apply to get a preview
     setNumberFormatPrefs(NumberFormatPrefs(
-        thousands: _thousands, decimal: _decimal, negative: NegativeFormat.minus));
+        thousands: _thousands, decimal: _decimal, negative: _negative));
     final pos = formatAmount(1234567.89, currency: 'USD');
     final neg = formatSignedAmount(500.00, currency: 'USD', type: 'expense');
     return '$pos  |  $neg';
@@ -1995,6 +1971,46 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                                 : selected
                                     ? AppColors.accent
                                     : AppColors.tp(context))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+
+            // Negative format
+            Text('Negative Numbers',
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: NegativeFormat.values.map((n) {
+                final selected = n == _negative;
+                return GestureDetector(
+                  onTap: () { setState(() => _negative = n); _applyImmediately(); },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.accent.withValues(alpha: 0.15)
+                          : AppColors.sfv(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: selected
+                              ? AppColors.accent
+                              : AppColors.bd(context)),
+                    ),
+                    child: Text(n.label,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                            color: selected
+                                ? AppColors.accent
+                                : AppColors.tp(context))),
                   ),
                 );
               }).toList(),

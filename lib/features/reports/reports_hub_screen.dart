@@ -165,6 +165,12 @@ class _OverviewTab extends ConsumerStatefulWidget {
 
 class _OverviewTabState extends ConsumerState<_OverviewTab> {
   bool _showDailyPace = false;
+  int _selectedMonthsBack = 0;
+
+  DateTime get _month {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -178,114 +184,142 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
       data: (entries) {
         final stats = statsAsync.value;
         final now = DateTime.now();
-        final monthStart = DateTime(now.year, now.month, 1);
+        final month = _month;
+        final isCurrentMonth =
+            month.year == now.year && month.month == now.month;
 
-        final currentMonth = stats?.monthly[monthStart];
+        final currentMonth = stats?.monthly[month];
         final double totalIncome = currentMonth?.income ?? 0;
         final double totalExpense = currentMonth?.expense ?? 0;
-        final typical = stats?.typicalMonthlySpend(monthStart) ?? 0;
+        final typical = stats?.typicalMonthlySpend(month) ?? 0;
         final net = totalIncome - totalExpense;
 
-        final trend = stats?.monthRange(6) ?? [];
+        // Days elapsed for this month
+        final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+        final daysElapsed = isCurrentMonth ? now.day : daysInMonth;
+        final daysLeft = isCurrentMonth ? daysInMonth - now.day : 0;
+
+        // Previous month for comparison
+        final prevMonth = DateTime(month.year, month.month - 1, 1);
+        final prevExpense = stats?.monthly[prevMonth]?.expense ?? 0.0;
+
+        final trend = stats?.monthRange(6, from: month) ?? [];
         final months = trend.map((e) => e.key).toList();
         final incomeByMonth = trend.map((e) => e.value.income).toList();
         final expenseByMonth = trend.map((e) => e.value.expense).toList();
 
         while (months.length < 6) {
-          months.insert(0, DateTime(now.year, now.month - months.length, 1));
+          months.insert(0, DateTime(month.year, month.month - months.length, 1));
           incomeByMonth.insert(0, 0);
           expenseByMonth.insert(0, 0);
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-          child: Column(
-            children: [
-              _MonthlySummaryCard(
-                income: totalIncome,
-                expense: totalExpense,
-                net: net,
-                lastMonthExpense: () {
-                  final lastMonth = DateTime(now.year, now.month - 1, 1);
-                  return stats?.monthly[lastMonth]?.expense ?? 0.0;
-                }(),
-                dailyRate: now.day > 0 ? totalExpense / now.day : 0,
-                daysLeft: DateUtils.getDaysInMonth(now.year, now.month) - now.day,
-                currency: baseCurrency,
-              ),
-              const SizedBox(height: 16),
-              // Spending Heatmap
-              _HeatmapSection(baseCurrency: baseCurrency),
-              const SizedBox(height: 16),
-              // Toggle: Trend vs Daily Pace
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _showDailyPace = false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: !_showDailyPace
-                              ? AppColors.accent.withValues(alpha: 0.12)
-                              : AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text('6-Month Trend',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: !_showDailyPace
-                                    ? AppColors.accent
-                                    : AppColors.ts(context),
-                              )),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _showDailyPace = true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: _showDailyPace
-                              ? AppColors.accent.withValues(alpha: 0.12)
-                              : AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text('Daily Pace',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: _showDailyPace
-                                    ? AppColors.accent
-                                    : AppColors.ts(context),
-                              )),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (!_showDailyPace)
-                _TrendChart(
-                  months: months,
-                  incomeByMonth: incomeByMonth,
-                  expenseByMonth: expenseByMonth,
-                  baseCurrency: baseCurrency,
-                )
-              else
-                _DailyPaceChart(
-                  entries: entries,
-                  baseCurrency: baseCurrency,
-                  typical: typical,
+        return GestureDetector(
+          onHorizontalDragEnd: (details) {
+            final dx = details.primaryVelocity ?? 0;
+            if (dx > 0) {
+              setState(() => _selectedMonthsBack++);
+            } else if (dx < 0 && _selectedMonthsBack > 0) {
+              setState(() => _selectedMonthsBack--);
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            child: Column(
+              children: [
+                // Month navigator
+                _MonthNav(
+                  month: month,
+                  onPrev: () => setState(() => _selectedMonthsBack++),
+                  onNext: _selectedMonthsBack > 0
+                      ? () => setState(() => _selectedMonthsBack--)
+                      : null,
                 ),
-            ],
+                const SizedBox(height: 12),
+                _MonthlySummaryCard(
+                  income: totalIncome,
+                  expense: totalExpense,
+                  net: net,
+                  lastMonthExpense: prevExpense,
+                  dailyRate: daysElapsed > 0 ? totalExpense / daysElapsed : 0,
+                  daysLeft: daysLeft,
+                  currency: baseCurrency,
+                ),
+                const SizedBox(height: 16),
+                // Spending Heatmap
+                _HeatmapSection(baseCurrency: baseCurrency),
+                const SizedBox(height: 16),
+                // Toggle: Trend vs Daily Pace
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _showDailyPace = false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: !_showDailyPace
+                                ? AppColors.accent.withValues(alpha: 0.12)
+                                : AppColors.sfv(context),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text('6-Month Trend',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: !_showDailyPace
+                                      ? AppColors.accent
+                                      : AppColors.ts(context),
+                                )),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _showDailyPace = true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _showDailyPace
+                                ? AppColors.accent.withValues(alpha: 0.12)
+                                : AppColors.sfv(context),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text('Daily Pace',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: _showDailyPace
+                                      ? AppColors.accent
+                                      : AppColors.ts(context),
+                                )),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (!_showDailyPace)
+                  _TrendChart(
+                    months: months,
+                    incomeByMonth: incomeByMonth,
+                    expenseByMonth: expenseByMonth,
+                    baseCurrency: baseCurrency,
+                  )
+                else
+                  _DailyPaceChart(
+                    entries: entries,
+                    baseCurrency: baseCurrency,
+                    typical: typical,
+                    month: month,
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -304,25 +338,28 @@ class _DailyPaceChart extends StatelessWidget {
   final List<TransactionEntry> entries;
   final String baseCurrency;
   final double typical;
+  final DateTime? month;
 
   const _DailyPaceChart({
     required this.entries,
     required this.baseCurrency,
     required this.typical,
+    this.month,
   });
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final month = DateTime(now.year, now.month, 1);
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final lastDay = now.day;
+    final selectedMonth = month ?? DateTime(now.year, now.month, 1);
+    final daysInMonth = DateUtils.getDaysInMonth(selectedMonth.year, selectedMonth.month);
+    final isCurrentMonth = selectedMonth.year == now.year && selectedMonth.month == now.month;
+    final lastDay = isCurrentMonth ? now.day : daysInMonth;
 
     final dailyCumulative = List.filled(daysInMonth + 1, 0.0);
     for (final e in entries) {
       if (e.tx.type != 'expense') continue;
       final d = e.tx.createdAt.toLocal();
-      if (d.year == month.year && d.month == month.month) {
+      if (d.year == selectedMonth.year && d.month == selectedMonth.month) {
         dailyCumulative[d.day] += _baseAmount(e);
       }
     }
@@ -1538,11 +1575,23 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
 // Tab 5: Insights (analytics moved from dashboard)
 // ═════════════════════════════════════════════════════════════════════════════
 
-class _InsightsTab extends ConsumerWidget {
+class _InsightsTab extends ConsumerStatefulWidget {
   const _InsightsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_InsightsTab> createState() => _InsightsTabState();
+}
+
+class _InsightsTabState extends ConsumerState<_InsightsTab> {
+  int _selectedMonthsBack = 0;
+
+  DateTime get _month {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final txAsync = ref.watch(transactionEntriesProvider);
     final baseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
@@ -1554,15 +1603,21 @@ class _InsightsTab extends ConsumerWidget {
     return txAsync.when(
       data: (entries) {
         final now = DateTime.now();
-        final monthStart = DateTime(now.year, now.month, 1);
-        final daysElapsed = now.difference(monthStart).inDays + 1;
-        final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+        final monthStart = _month;
+        final isCurrentMonth =
+            monthStart.year == now.year && monthStart.month == now.month;
+        final daysInMonth = DateUtils.getDaysInMonth(monthStart.year, monthStart.month);
+        final daysElapsed = isCurrentMonth
+            ? now.difference(monthStart).inDays + 1
+            : daysInMonth;
 
         // ── Spending velocity ──
         double monthExpense = 0;
+        final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
         for (final e in entries) {
           if (e.tx.type == 'expense' &&
-              e.tx.createdAt.isAfter(monthStart)) {
+              !e.tx.createdAt.isBefore(monthStart) &&
+              e.tx.createdAt.isBefore(monthEnd)) {
             monthExpense += _baseAmount(e);
           }
         }
@@ -1598,7 +1653,8 @@ class _InsightsTab extends ConsumerWidget {
         double biggestAmt = 0;
         for (final e in entries) {
           if (e.tx.type == 'expense' &&
-              e.tx.createdAt.isAfter(monthStart)) {
+              !e.tx.createdAt.isBefore(monthStart) &&
+              e.tx.createdAt.isBefore(monthEnd)) {
             final amt = _baseAmount(e);
             if (amt > biggestAmt) {
               biggestAmt = amt;
@@ -1618,7 +1674,8 @@ class _InsightsTab extends ConsumerWidget {
         double totalIncome = 0;
         for (final e in entries) {
           if (e.tx.type == 'income' &&
-              e.tx.createdAt.isAfter(monthStart)) {
+              !e.tx.createdAt.isBefore(monthStart) &&
+              e.tx.createdAt.isBefore(monthEnd)) {
             totalIncome += _baseAmount(e);
           }
         }
@@ -1641,11 +1698,29 @@ class _InsightsTab extends ConsumerWidget {
           tips.add('Your money sits only $ageValue days before being spent. A buffer of 30+ days is healthier.');
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+        return GestureDetector(
+          onHorizontalDragEnd: (details) {
+            final dx = details.primaryVelocity ?? 0;
+            if (dx > 0) {
+              setState(() => _selectedMonthsBack++);
+            } else if (dx < 0 && _selectedMonthsBack > 0) {
+              setState(() => _selectedMonthsBack--);
+            }
+          },
+          child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Month navigator
+              _MonthNav(
+                month: monthStart,
+                onPrev: () => setState(() => _selectedMonthsBack++),
+                onNext: _selectedMonthsBack > 0
+                    ? () => setState(() => _selectedMonthsBack--)
+                    : null,
+              ),
+              const SizedBox(height: 12),
               // ── Spending Velocity ──
               if (monthExpense > 0) ...[
                 _VelocityCard(
@@ -1787,6 +1862,7 @@ class _InsightsTab extends ConsumerWidget {
               ],
             ],
           ),
+        ),
         );
       },
       loading: () => const SkeletonList(),

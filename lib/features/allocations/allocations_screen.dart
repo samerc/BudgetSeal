@@ -623,7 +623,7 @@ class _SummaryDivider extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Unallocated Banner
 // ─────────────────────────────────────────────
-class _UnallocatedBanner extends StatelessWidget {
+class _UnallocatedBanner extends StatefulWidget {
   final Map<String, double> unallocated;
   final String baseCurrency;
   final bool hasAllocations;
@@ -635,12 +635,51 @@ class _UnallocatedBanner extends StatelessWidget {
   });
 
   @override
+  State<_UnallocatedBanner> createState() => _UnallocatedBannerState();
+}
+
+class _UnallocatedBannerState extends State<_UnallocatedBanner>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+  late final AnimationController _animController;
+  late final Animation<double> _expandAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    _expandAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    if (_expanded) {
+      _animController.forward();
+    } else {
+      _animController.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final baseAmount = unallocated[baseCurrency] ?? 0.0;
+    final baseAmount = widget.unallocated[widget.baseCurrency] ?? 0.0;
+    final hasOtherCurrencies = widget.unallocated.length > 1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
@@ -649,60 +688,158 @@ class _UnallocatedBanner extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Unallocated',
-                    style: TextStyle(
-                        color: AppColors.ts(context), fontSize: 13),
+          // ── Main section ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 14, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Unallocated',
+                        style: TextStyle(
+                          color: AppColors.ts(context),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      CurrencyDisplay(
+                        amount: baseAmount,
+                        currency: widget.baseCurrency,
+                        amountStyle: TextStyle(
+                          color: AppColors.tp(context),
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (hasOtherCurrencies) ...[
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: _toggle,
+                          child: Text(
+                            _expanded
+                                ? 'Hide other currencies'
+                                : '+ ${widget.unallocated.length - 1} other ${widget.unallocated.length - 1 == 1 ? 'currency' : 'currencies'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  CurrencyDisplay(
-                    amount: baseAmount,
-                    currency: baseCurrency,
-                    amountStyle: TextStyle(
-                      color: AppColors.tp(context),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
+                ),
+                if (hasOtherCurrencies)
+                  IconButton(
+                    onPressed: _toggle,
+                    icon: AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Icon(
+                        Icons.expand_more_rounded,
+                        color: AppColors.ts(context),
+                        size: 22,
+                      ),
                     ),
+                    visualDensity: VisualDensity.compact,
+                    splashRadius: 18,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(),
                   ),
-                ],
-              ),
-              if (unallocated.length > 1)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: unallocated.entries
-                      .where((e) => e.key != baseCurrency)
-                      .map((e) => Text(
+              ],
+            ),
+          ),
+
+          // ── Expandable currency breakdown ──
+          SizeTransition(
+            sizeFactor: _expandAnim,
+            axisAlignment: -1,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : Colors.black.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  children: widget.unallocated.entries.map((e) {
+                    final isBase = e.key == widget.baseCurrency;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isBase
+                                  ? AppColors.accent.withValues(alpha: 0.1)
+                                  : AppColors.th(context).withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              e.key,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isBase
+                                    ? AppColors.accent
+                                    : AppColors.ts(context),
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
                             formatAmount(e.value, currency: e.key),
                             style: TextStyle(
-                                color: AppColors.ts(context),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600),
-                          ))
-                      .toList(),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: e.value < 0
+                                  ? AppColors.overspent
+                                  : AppColors.tp(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: hasAllocations ? () => context.push('/funding') : null,
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
-              label: const Text(
-                'Fund Envelopes',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+          ),
+
+          // ── Fund button ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: widget.hasAllocations
+                    ? () => context.push('/funding')
+                    : null,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                icon: const Icon(
+                    Icons.account_balance_wallet_outlined, size: 18),
+                label: const Text(
+                  'Fund Envelopes',
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
               ),
             ),
           ),
