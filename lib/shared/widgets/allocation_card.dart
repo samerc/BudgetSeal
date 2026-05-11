@@ -132,13 +132,15 @@ class AllocationCard extends StatelessWidget {
     final progress = rawProgress?.clamp(0.0, 1.0);
     // Overspent: target currency balance is negative
     final isTargetOverspent = targetCcyBalance < -0.01;
-    // Cross-currency debt: another currency has negative balance
-    final crossCurrencyDebt = <String, double>{};
+    // Cross-currency balances: other currencies with non-zero balance
+    final otherCurrencyBalances = <String, double>{};
     for (final entry in balanceByCurrency.entries) {
-      if (entry.key != effectiveTargetCurrency && entry.value < -0.01) {
-        crossCurrencyDebt[entry.key] = entry.value;
+      if (entry.key != effectiveTargetCurrency && entry.value.abs() > 0.01) {
+        otherCurrencyBalances[entry.key] = entry.value;
       }
     }
+    final crossCurrencyDebt = Map.fromEntries(
+        otherCurrencyBalances.entries.where((e) => e.value < -0.01));
     final hasCrossDebt = crossCurrencyDebt.isNotEmpty;
     // Legacy compatibility: either condition counts as "overspent" for border
     final isOverspent = isTargetOverspent;
@@ -320,14 +322,18 @@ class AllocationCard extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 10, color: AppColors.th(context)),
                     ),
-                  // Show cross-currency debt below the amount
-                  for (final debt in crossCurrencyDebt.entries)
+                  // Show other currency balances below the target amount
+                  for (final entry in otherCurrencyBalances.entries)
                     Text(
-                      formatAmount(debt.value, currency: debt.key),
+                      entry.value > 0
+                          ? '+ ${formatAmount(entry.value, currency: entry.key)}'
+                          : formatAmount(entry.value, currency: entry.key),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.caution,
+                        color: entry.value < 0
+                            ? AppColors.caution
+                            : AppColors.ts(context),
                       ),
                     ),
                 ],
