@@ -1604,6 +1604,7 @@ class _TxTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tx = entry.tx;
     final txColors = ref.watch(txColorsProvider);
+    final listSettings = ref.watch(txListSettingsProvider);
     final isTransfer = tx.type == 'transfer';
     final typeColor = txColors.forType(tx.type);
 
@@ -1651,40 +1652,42 @@ class _TxTile extends ConsumerWidget {
           child: Row(
             children: [
               // ── Circular category icon (tap to filter #5) ─────
-            if (isTransfer)
-              Container(
-                width: CategoryIconTokens.listSize,
-                height: CategoryIconTokens.listSize,
-                decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.swap_horiz_rounded,
-                  color: typeColor,
-                  size: 22,
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: () {
-                  final catId = cat?.id;
-                  if (catId != null && onCategoryTap != null) {
-                    onCategoryTap!(catId, catName ?? 'Unknown');
-                  }
-                },
-                child: Hero(
-                  tag: 'tx_${tx.id}',
-                  child: CategoryIcon(
-                    categoryName: catName ?? '',
-                    emoji: cat?.icon,
-                    color: catColor,
-                    size: CategoryIconTokens.listSize,
-                    circular: true,
+            if (listSettings.showCategoryIcon) ...[
+              if (isTransfer)
+                Container(
+                  width: CategoryIconTokens.listSize,
+                  height: CategoryIconTokens.listSize,
+                  decoration: BoxDecoration(
+                    color: typeColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.swap_horiz_rounded,
+                    color: typeColor,
+                    size: 22,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: () {
+                    final catId = cat?.id;
+                    if (catId != null && onCategoryTap != null) {
+                      onCategoryTap!(catId, catName ?? 'Unknown');
+                    }
+                  },
+                  child: Hero(
+                    tag: 'tx_${tx.id}',
+                    child: CategoryIcon(
+                      categoryName: catName ?? '',
+                      emoji: cat?.icon,
+                      color: catColor,
+                      size: CategoryIconTokens.listSize,
+                      circular: true,
+                    ),
                   ),
                 ),
-              ),
-            const SizedBox(width: 14),
+              const SizedBox(width: 14),
+            ],
             // ── Name + note (or transfer sub-rows) ──────────────
             Expanded(
               child: isTransfer
@@ -1743,29 +1746,47 @@ class _TxTile extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (note != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            note,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.ts(context),
+                        if (!listSettings.compact) ...[
+                          if (note != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              note,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.ts(context),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
+                          if (notePreview != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              notePreview,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: AppColors.th(context),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ],
-                        if (notePreview != null) ...[
+                        // Account label + time
+                        if (listSettings.showAccount || listSettings.showTime) ...[
                           const SizedBox(height: 2),
                           Text(
-                            notePreview,
+                            [
+                              if (listSettings.showAccount && entry.accountName.isNotEmpty)
+                                entry.accountName,
+                              if (listSettings.showTime)
+                                '${tx.createdAt.hour.toString().padLeft(2, '0')}:${tx.createdAt.minute.toString().padLeft(2, '0')}',
+                            ].join(' · '),
                             style: TextStyle(
                               fontSize: 11,
-                              fontStyle: FontStyle.italic,
                               color: AppColors.th(context),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ],
