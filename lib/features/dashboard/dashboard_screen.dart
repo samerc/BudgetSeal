@@ -224,7 +224,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         }
                       }
 
-                      return _SpendingOverviewCard(
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, v, child) => Opacity(
+                          opacity: v,
+                          child: Transform.scale(scale: 0.92 + 0.08 * v, child: child),
+                        ),
+                        child: _SpendingOverviewCard(
                         income: totalIncome,
                         expense: totalExpense,
                         currency: baseCurrency,
@@ -233,7 +241,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         showWeekly: _showWeekly,
                         onTogglePeriod: () =>
                             setState(() => _showWeekly = !_showWeekly),
-                      );
+                      ));
                     },
                     loading: () => const _ShimmerCard(height: 220),
                     error: (e, _) => ErrorRetry(
@@ -340,15 +348,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          formatAmount(baseNetWorth, currency: baseCurrency),
+                                        AnimatedAmount(
+                                          amount: baseNetWorth,
+                                          currency: baseCurrency,
+                                          lazyFirstRender: false,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w800,
                                             color: AppColors.tp(context),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         if (otherNetWorthCount > 0)
                                           Text(
@@ -387,8 +395,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          formatAmount(unallocBase, currency: baseCurrency),
+                                        AnimatedAmount(
+                                          amount: unallocBase,
+                                          currency: baseCurrency,
+                                          lazyFirstRender: false,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w800,
@@ -396,8 +406,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                                 ? AppColors.tp(context)
                                                 : AppColors.overspent,
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         if (otherUnallocCount > 0)
                                           Text(
@@ -505,10 +513,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 ),
                               ),
                             ),
-                          ...recent.map((e) => _RecentTxTile(
-                                entry: e,
+                          ...recent.asMap().entries.map((e) =>
+                            TweenAnimationBuilder<double>(
+                              key: ValueKey(e.value.tx.id),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: Duration(milliseconds: 300 + e.key * 80),
+                              curve: Curves.easeOut,
+                              builder: (_, v, child) => Opacity(opacity: v, child: child),
+                              child: _RecentTxTile(
+                                entry: e.value,
                                 categoryMap: categoryMap,
-                              )),
+                              ),
+                            )),
                         ],
                       );
                     },
@@ -790,7 +806,7 @@ class _MiniStat extends StatelessWidget {
 
 // ─── Quick Action ───────────────────────────────────────────────────────────
 
-class _QuickAction extends StatelessWidget {
+class _QuickAction extends StatefulWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -802,40 +818,54 @@ class _QuickAction extends StatelessWidget {
       required this.onTap});
 
   @override
+  State<_QuickAction> createState() => _QuickActionState();
+}
+
+class _QuickActionState extends State<_QuickAction> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Semantics(
-        label: 'Add $label',
+        label: 'Add ${widget.label}',
         button: true,
         child: Tooltip(
-          message: 'Add $label',
+          message: 'Add ${widget.label}',
           child: GestureDetector(
+            onTapDown: (_) => setState(() => _pressed = true),
+            onTapUp: (_) => setState(() => _pressed = false),
+            onTapCancel: () => setState(() => _pressed = false),
             onTap: () {
               hapticLight();
-              onTap();
+              widget.onTap();
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(CardTokens.radius),
-              ),
-              child: Column(children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      shape: BoxShape.circle),
-                  child: Icon(icon, size: 18, color: color),
+            child: AnimatedScale(
+              scale: _pressed ? 0.92 : 1.0,
+              duration: const Duration(milliseconds: 100),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(CardTokens.radius),
                 ),
-                const SizedBox(height: 6),
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: color)),
-              ]),
+                child: Column(children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                        color: widget.color.withValues(alpha: 0.12),
+                        shape: BoxShape.circle),
+                    child: Icon(widget.icon, size: 18, color: widget.color),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(widget.label,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: widget.color)),
+                ]),
+              ),
             ),
           ),
         ),

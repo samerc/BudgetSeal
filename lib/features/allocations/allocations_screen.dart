@@ -543,10 +543,23 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       );
 
       final pendingIds = ref.watch(pendingResetProvider).value ?? [];
-      for (final a in items) {
+      for (int idx = 0; idx < items.length; idx++) {
+        final a = items[idx];
         final cat = a.data.category;
         widgets.add(
-          AllocationCard(
+          TweenAnimationBuilder<double>(
+            key: ValueKey(a.data.allocation.id),
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 300 + idx * 60),
+            curve: Curves.easeOutCubic,
+            builder: (_, v, child) => Opacity(
+              opacity: v,
+              child: Transform.translate(
+                offset: Offset(0, 16 * (1 - v)),
+                child: child,
+              ),
+            ),
+            child: AllocationCard(
             needsReview: pendingIds.contains(a.data.allocation.id),
             name: a.data.allocation.name,
             type: a.data.allocation.type,
@@ -577,7 +590,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 ],
               } : null);
             },
-          ),
+          )),
         );
       }
     }

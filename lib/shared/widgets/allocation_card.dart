@@ -213,32 +213,42 @@ class AllocationCard extends StatelessWidget {
                     // For savings with goal: show progress bar
                     if (_isFlexibleWithGoal && progress != null) ...[
                       const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 4,
-                          backgroundColor: AppColors.bd(context),
-                          color: progress >= 1.0
-                              ? AppColors.healthy
-                              : AppColors.accent,
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: progress),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, val, __) => ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: val,
+                            minHeight: 4,
+                            backgroundColor: AppColors.bd(context),
+                            color: progress >= 1.0
+                                ? AppColors.healthy
+                                : AppColors.accent,
+                          ),
                         ),
                       ),
                     ]
                     // For spending envelopes: show standard progress bar
                     else if (!_isFlexible && hasTarget && progress != null) ...[
                       const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 4,
-                          backgroundColor: AppColors.bd(context),
-                          color: isTargetOverspent
-                              ? AppColors.overspent
-                              : progress >= 1.0
-                                  ? AppColors.healthy
-                                  : _typeColor,
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: progress),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, val, __) => ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: val,
+                            minHeight: 4,
+                            backgroundColor: AppColors.bd(context),
+                            color: isTargetOverspent
+                                ? AppColors.overspent
+                                : progress >= 1.0
+                                    ? AppColors.healthy
+                                    : _typeColor,
+                          ),
                         ),
                       ),
                     ],

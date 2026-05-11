@@ -51,6 +51,7 @@ class _AllocationDetailScreenState
   bool _showEmojiGrid = false;
   final _confettiCtrl = ConfettiController(duration: const Duration(seconds: 2));
   bool _confettiPlayed = false;
+  bool _fundPulse = false;
   List<Category> _linkedCategories = [];
   /// For the creation flow: distinguishes saving-with-goal from saving-open.
 
@@ -807,13 +808,18 @@ class _AllocationDetailScreenState
       ),
       child: Column(
         children: [
-          // Balance
-          Text(
-            formatAmount(mainBalance, currency: targetCurrency),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: TypographyTokens.screenTitleSize,
-              fontWeight: TypographyTokens.screenTitleWeight,
+          // Balance (pulses after funding)
+          AnimatedScale(
+            scale: _fundPulse ? 1.12 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutBack,
+            child: Text(
+              formatAmount(mainBalance, currency: targetCurrency),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: TypographyTokens.screenTitleSize,
+                fontWeight: TypographyTokens.screenTitleWeight,
+              ),
             ),
           ),
           // Other currency balances
@@ -1112,6 +1118,11 @@ class _AllocationDetailScreenState
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
       if (mounted) {
+        // Trigger balance pulse animation
+        setState(() => _fundPulse = true);
+        Future.delayed(const Duration(milliseconds: 350), () {
+          if (mounted) setState(() => _fundPulse = false);
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
