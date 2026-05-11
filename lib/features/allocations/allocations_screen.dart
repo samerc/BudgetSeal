@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/objectives_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -24,11 +25,15 @@ class AllocationsScreen extends ConsumerStatefulWidget {
 
 class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     with AutomaticKeepAliveClientMixin {
-  static const _typeOrder = ['spending', 'saving', 'flexible'];
+  static const _typeOrder = ['spending', 'flexible'];
 
   String _searchQuery = '';
   final _searchController = TextEditingController();
   bool _showSearch = false;
+
+  /// Remap legacy 'saving' type to 'flexible'
+  static String _normalizeType(String type) =>
+      type == 'saving' ? 'flexible' : type;
 
   @override
   void dispose() {
@@ -38,21 +43,18 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
 
   static String _sectionTitle(String type) => switch (type) {
         'spending' => 'Spending',
-        'saving' => 'Savings',
         'flexible' => 'Flexible',
         _ => type[0].toUpperCase() + type.substring(1),
       };
 
   static IconData _sectionIcon(String type) => switch (type) {
         'spending' => Icons.shopping_bag_rounded,
-        'saving' => Icons.savings_rounded,
         'flexible' => Icons.tune_rounded,
         _ => Icons.category_rounded,
       };
 
   static Color _sectionColor(String type, BuildContext context) => switch (type) {
-        'saving' => AppColors.accent,
-        'flexible' => AppColors.caution,
+        'flexible' => AppColors.accent,
         _ => AppColors.tp(context),
       };
 
@@ -360,6 +362,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
+          // ── Goals & Loans shortcut ──
+          if (_searchQuery.isEmpty)
+          SliverToBoxAdapter(
+            child: _GoalsLoansBanner(),
+          ),
+
           // ── Allocations List ──
           allocationsAsync.when(
             data: (allocations) {
@@ -376,17 +384,17 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                           .contains(_searchQuery.toLowerCase()))
                       .toList();
 
-              // Group by type, preserving order.
+              // Group by normalized type, preserving order.
               final grouped = <String, List<AllocationWithBalance>>{};
               for (final type in _typeOrder) {
                 final items = filtered
-                    .where((a) => a.data.allocation.type == type)
+                    .where((a) => _normalizeType(a.data.allocation.type) == type)
                     .toList();
                 if (items.isNotEmpty) grouped[type] = items;
               }
               // Catch any types not in the predefined order.
               for (final a in filtered) {
-                final t = a.data.allocation.type;
+                final t = _normalizeType(a.data.allocation.type);
                 if (!_typeOrder.contains(t)) {
                   grouped.putIfAbsent(t, () => []).add(a);
                 }
@@ -844,6 +852,76 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Empty State
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// Goals & Loans Banner
+// ─────────────────────────────────────────────
+class _GoalsLoansBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final objectivesAsync = ref.watch(objectivesProvider);
+    final objectives = objectivesAsync.value ?? [];
+    if (objectives.isEmpty) return const SizedBox.shrink();
+
+    final goals = objectives.where((o) => o.type == 'goal').length;
+    final loans = objectives.where((o) => o.type == 'loan').length;
+    final label = [
+      if (goals > 0) '$goals goal${goals > 1 ? 's' : ''}',
+      if (loans > 0) '$loans loan${loans > 1 ? 's' : ''}',
+    ].join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: GestureDetector(
+        onTap: () => context.push('/objectives'),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.sf(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.bd(context)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(Icons.flag_rounded,
+                    size: 18, color: AppColors.accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Goals & Loans',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    Text(label,
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.ts(context))),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  size: 18, color: AppColors.th(context)),
+            ],
+          ),
+        ),
       ),
     );
   }

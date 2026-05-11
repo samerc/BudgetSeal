@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PocketPlan** — A YNAB-style envelope budgeting app for Android and iOS. Offline-first, built in Flutter with Drift (SQLite), Riverpod state management, and GoRouter navigation. Single-user consumer app with optional cloud sync via Google Drive or system file picker (Dropbox/OneDrive). Includes subscription tracking, savings envelopes, age-of-money analytics, CSV import/export, and a Web Companion (local WiFi HTTP server so a laptop browser can manage the budget).
+**PocketPlan** — A YNAB-style envelope budgeting app for Android and iOS. Offline-first, built in Flutter with Drift (SQLite), Riverpod state management, and GoRouter navigation. Single-user consumer app with optional cloud sync via Google Drive or system file picker (Dropbox/OneDrive). Includes subscription tracking, envelope budgeting (spending + flexible), goals & loans tracking, age-of-money analytics, CSV import/export, and a Web Companion (local WiFi HTTP server so a laptop browser can manage the budget).
 
 ## Development Commands
 
@@ -98,7 +98,7 @@ lib/
 │   ├── dashboard/
 │   ├── main/                   # Main screen with bottom nav bar
 │   ├── transactions/           # List, add, detail, assisted flow
-│   ├── allocations/            # Envelopes: list, detail, funding, savings
+│   ├── allocations/            # Envelopes: list, detail, funding (spending + flexible)
 │   ├── accounts/
 │   ├── categories/
 │   ├── subscriptions/          # Subscription tracker: list, detail, price history
@@ -171,6 +171,8 @@ docs/
 
 ### Envelope Budgeting (Allocations)
 The primary feature. Money flows: Income → Account → Unallocated pool → Fund envelopes → Spend from envelopes.
+
+Two envelope types: **Spending** (periodic budget, resets each month) and **Flexible** (accumulates, optional target). Legacy `saving` type in DB is treated as `flexible` — no migration needed. Savings goals and debt tracking use the separate **Goals & Loans** feature (`/objectives`), which creates real transactions. Envelopes are virtual budget labels only.
 
 **Critical rule:** All money writes go through `AllocationEngine`. Screens never write to the database directly for transactions, transfers, or ledger entries.
 
@@ -689,7 +691,7 @@ Transaction type filter (All/Income/Expense/Transfer) is saved to SharedPreferen
 
 ## Confetti Celebration
 
-Savings envelopes trigger a 2-second confetti burst (via `confetti` package) when their balance reaches the target amount. Plays once per screen visit. `ConfettiWidget` overlaid at top-center of the allocation detail screen with explosive blast direction.
+Flexible envelopes with a target trigger a 2-second confetti burst (via `confetti` package) when their balance reaches the target amount. Plays once per screen visit. `ConfettiWidget` overlaid at top-center of the allocation detail screen with explosive blast direction.
 
 ## Duplicate Detection
 

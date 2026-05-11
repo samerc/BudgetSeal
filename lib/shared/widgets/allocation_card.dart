@@ -48,14 +48,16 @@ class AllocationCard extends StatelessWidget {
     this.periodEnd,
   });
 
-  Color get _typeColor => switch (type) {
-        'saving' => AppColors.accent,
-        'flexible' => AppColors.caution,
+  /// Normalize: legacy 'saving' type is treated as 'flexible'
+  String get _effectiveType => type == 'saving' ? 'flexible' : type;
+
+  Color get _typeColor => switch (_effectiveType) {
+        'flexible' => AppColors.accent,
         _ => AppColors.accent,
       };
 
-  bool get _isSaving => type == 'saving';
-  bool get _isSavingWithGoal => _isSaving && targetAmount != null && targetAmount! > 0;
+  bool get _isFlexible => _effectiveType == 'flexible';
+  bool get _isFlexibleWithGoal => _isFlexible && targetAmount != null && targetAmount! > 0;
 
   Widget _buildIcon(BuildContext context, bool hasTarget, double? rawProgress,
       bool isOverspent, bool hasCategoryIcon, Color iconColor, IconData savingsIcon) {
@@ -67,7 +69,7 @@ class AllocationCard extends StatelessWidget {
         categoryIcon!.isNotEmpty && categoryIcon != 'category') {
       // Show the category emoji directly (not wrapped in CategoryIcon)
       inner = Text(categoryIcon!, style: const TextStyle(fontSize: 18));
-    } else if (_isSaving) {
+    } else if (_isFlexible) {
       inner = Icon(savingsIcon, size: 18, color: AppColors.accent);
     } else {
       // Fallback: first letter of name
@@ -165,7 +167,7 @@ class AllocationCard extends StatelessWidget {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
     } else if (hasCrossDebt) {
       borderColor = AppColors.caution.withValues(alpha: 0.5);
-    } else if (_isSavingWithGoal && targetCcyBalance >= targetAmount!) {
+    } else if (_isFlexibleWithGoal && targetCcyBalance >= targetAmount!) {
       borderColor = AppColors.healthy.withValues(alpha: 0.35);
     } else if (hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
       borderColor = AppColors.caution.withValues(alpha: 0.45);
@@ -176,7 +178,7 @@ class AllocationCard extends StatelessWidget {
     }
 
     // Icon for savings envelopes when no category icon
-    final IconData savingsIcon = _isSavingWithGoal
+    final IconData savingsIcon = _isFlexibleWithGoal
         ? Icons.track_changes_rounded
         : Icons.savings_rounded;
 
@@ -209,7 +211,7 @@ class AllocationCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                     // For savings with goal: show progress bar
-                    if (_isSavingWithGoal && progress != null) ...[
+                    if (_isFlexibleWithGoal && progress != null) ...[
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(3),
@@ -224,7 +226,7 @@ class AllocationCard extends StatelessWidget {
                       ),
                     ]
                     // For spending envelopes: show standard progress bar
-                    else if (!_isSaving && hasTarget && progress != null) ...[
+                    else if (!_isFlexible && hasTarget && progress != null) ...[
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(3),
@@ -241,7 +243,7 @@ class AllocationCard extends StatelessWidget {
                       ),
                     ],
                     // Daily allowance (Cashew-style) for spending envelopes
-                    if (!_isSaving && hasTarget && displayBalance > 0 &&
+                    if (!_isFlexible && hasTarget && displayBalance > 0 &&
                         periodStart != null && periodEnd != null) ...[
                       () {
                         final now = DateTime.now();
@@ -280,7 +282,7 @@ class AllocationCard extends StatelessWidget {
                           child: Icon(Icons.warning_amber_rounded,
                               size: 14, color: AppColors.overspent),
                         ),
-                      if (_isSaving && !isTargetOverspent)
+                      if (_isFlexible && !isTargetOverspent)
                         Text(
                           'Saved: ',
                           style: TextStyle(
@@ -301,7 +303,7 @@ class AllocationCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (_isSavingWithGoal) ...[
+                  if (_isFlexibleWithGoal) ...[
                     Text(
                       '${(progress! * 100).round()}% saved',
                       style: TextStyle(
@@ -316,7 +318,7 @@ class AllocationCard extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 10, color: AppColors.th(context)),
                     ),
-                  ] else if (hasTarget && !_isSaving)
+                  ] else if (hasTarget && !_isFlexible)
                     Text(
                       '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
                       style: TextStyle(
@@ -339,7 +341,7 @@ class AllocationCard extends StatelessWidget {
                 ],
               ),
               // Spend button (only for non-savings)
-              if (onSpend != null && !_isSaving) ...[
+              if (onSpend != null && !_isFlexible) ...[
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: onSpend,

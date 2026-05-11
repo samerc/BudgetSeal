@@ -53,7 +53,6 @@ class _AllocationDetailScreenState
   bool _confettiPlayed = false;
   List<Category> _linkedCategories = [];
   /// For the creation flow: distinguishes saving-with-goal from saving-open.
-  bool _savingHasGoal = true;
 
   bool get _isNew => widget.allocationId == 'new';
 
@@ -86,7 +85,6 @@ class _AllocationDetailScreenState
             ref.read(householdProvider).value?.baseCurrency ??
             'USD';
         _linkedCategories = linked;
-        _savingHasGoal = alloc.type == 'saving' && alloc.targetAmount != null;
       });
     }
   }
@@ -216,7 +214,7 @@ class _AllocationDetailScreenState
                     const Text('Edit Settings'),
                   ]),
                 ),
-                if (_type == 'saving')
+                if (_type == 'saving' || _type == 'flexible')
                   PopupMenuItem(
                     value: 'withdraw',
                     child: Row(children: [
@@ -441,27 +439,13 @@ class _AllocationDetailScreenState
                 ),
                 const SizedBox(height: 8),
                 _buildTypeOptionCard(
-                  icon: Icons.track_changes_rounded,
-                  title: 'Saving (with goal)',
-                  description: 'For a specific goal like taxes or vacation. Set a target and fund it over time.',
-                  isSelected: _type == 'saving' && _savingHasGoal,
+                  icon: Icons.tune_rounded,
+                  title: 'Flexible',
+                  description: 'For anything else — set an optional target or leave it open. Accumulates over time.',
+                  isSelected: _type == 'flexible' || _type == 'saving',
                   onTap: () => setState(() {
-                    _type = 'saving';
+                    _type = 'flexible';
                     _periodicity = 'permanent';
-                    _savingHasGoal = true;
-                  }),
-                ),
-                const SizedBox(height: 8),
-                _buildTypeOptionCard(
-                  icon: Icons.savings_rounded,
-                  title: 'Saving (open)',
-                  description: 'For general savings with no specific goal. Put money aside whenever you can.',
-                  isSelected: _type == 'saving' && !_savingHasGoal,
-                  onTap: () => setState(() {
-                    _type = 'saving';
-                    _periodicity = 'permanent';
-                    _savingHasGoal = false;
-                    _targetAmount = 0;
                   }),
                 ),
                 const SizedBox(height: 12),
@@ -479,7 +463,7 @@ class _AllocationDetailScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Envelopes don\'t move money between accounts. They help you plan how to use the money you already have.',
+                          'Envelopes plan how to use your money. To save toward a goal or track debts, use Goals & Loans instead.',
                           style: TextStyle(
                               fontSize: 11, color: AppColors.ts(context), height: 1.4),
                         ),
@@ -490,29 +474,25 @@ class _AllocationDetailScreenState
               ]),
               const SizedBox(height: 16),
             ] else ...[
-              // For existing envelopes: show the old-style selector
+              // For existing envelopes: show type selector (remap 'saving' → 'flexible')
               _sectionContainer(children: [
                 _sectionHeader('PURPOSE', icon: Icons.category_outlined),
                 _buildSegmentedSelector<String>(
                   options: const [
                     ('spending', 'Spending', Icons.shopping_bag_outlined),
-                    ('saving', 'Saving', Icons.savings_outlined),
-                    ('flexible', 'Flexible', Icons.swap_horiz_rounded),
+                    ('flexible', 'Flexible', Icons.tune_rounded),
                   ],
-                  selected: _type,
+                  selected: _type == 'saving' ? 'flexible' : _type,
                   onChanged: (v) => setState(() {
                     _type = v;
-                    if (v == 'saving') {
-                      _periodicity = 'permanent';
-                    }
                   }),
                 ),
               ]),
               const SizedBox(height: 16),
             ],
 
-            // Cycle (only for spending/flexible envelopes)
-            if (_type != 'saving') ...[
+            // Cycle (all envelope types)
+            ...[
               _sectionContainer(children: [
                 _sectionHeader('CYCLE', icon: Icons.autorenew_rounded),
                 Padding(
@@ -601,27 +581,25 @@ class _AllocationDetailScreenState
             ],
 
             // Budget / Target Amount
-            // Show for: spending (always), saving with goal, NOT saving-open when creating
-            if (!(_type == 'saving' && !_savingHasGoal && _isNew)) ...[
-              _sectionContainer(children: [
-                _sectionHeader(
-                  _type == 'saving' ? 'SAVINGS TARGET' : 'MONTHLY BUDGET',
-                  icon: Icons.track_changes_rounded,
-                ),
-                Text(
-                  _type == 'saving'
-                      ? 'How much do you want to save in this envelope?'
-                      : 'How much do you want to spend in this envelope each month?',
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.ts(context)),
-                ),
+            _sectionContainer(children: [
+              _sectionHeader(
+                _type == 'spending' ? 'MONTHLY BUDGET' : 'TARGET (OPTIONAL)',
+                icon: Icons.track_changes_rounded,
+              ),
+              Text(
+                _type == 'spending'
+                    ? 'How much do you want to spend in this envelope each month?'
+                    : 'Set a target amount, or leave at zero for open-ended.',
+                style: TextStyle(
+                    fontSize: 12, color: AppColors.ts(context)),
+              ),
                 const SizedBox(height: 12),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(
                     flex: 3,
                     child: CalculatorAmountField(
                       value: _targetAmount,
-                      label: _type == 'saving' ? 'Target amount' : 'Budget amount',
+                      label: _type == 'spending' ? 'Budget amount' : 'Target amount',
                       fontSize: 20,
                       onChanged: (v) => setState(() => _targetAmount = v),
                     ),
@@ -640,11 +618,9 @@ class _AllocationDetailScreenState
                 ]),
               ]),
               const SizedBox(height: 16),
-            ],
 
-            // Linked Categories (hidden for savings envelopes)
-            if (_type != 'saving')
-              _sectionContainer(children: [
+            // Linked Categories
+            _sectionContainer(children: [
                 _sectionHeader('LINKED CATEGORIES',
                     icon: Icons.label_outline_rounded),
                 Text(
@@ -803,7 +779,7 @@ class _AllocationDetailScreenState
         hasTarget ? (mainBalance / _targetAmount).clamp(0.0, 1.0) : null;
 
     // Trigger confetti when savings goal is reached
-    if (_type == 'saving' && hasTarget && mainBalance >= _targetAmount &&
+    if ((_type == 'saving' || _type == 'flexible') && hasTarget && mainBalance >= _targetAmount &&
         !_confettiPlayed) {
       _confettiPlayed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -856,7 +832,7 @@ class _AllocationDetailScreenState
               ),
           const SizedBox(height: 4),
           Text(
-            _type == 'saving' ? 'Saved' : 'Available',
+            'Available',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 13,
@@ -2061,9 +2037,7 @@ class _AllocationDetailScreenState
       final targetAmount =
           _targetAmount > 0 ? _targetAmount : null;
       final targetCurrency = _targetCurrencyController.text.trim();
-      // Savings envelopes always carry forward.
-      final effectivePeriodicity =
-          _type == 'saving' ? 'permanent' : _periodicity;
+      final effectivePeriodicity = _periodicity;
 
       await dao.upsert(AllocationsCompanion.insert(
         id: allocId,
