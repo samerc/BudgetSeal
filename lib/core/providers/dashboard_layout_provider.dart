@@ -5,11 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Dashboard sections that can be reordered and toggled.
 enum DashboardSection {
-  status('Status Card', 'Budget status, velocity, age of money'),
-  spending('Spending Overview', 'Donut chart with category breakdown'),
   quickActions('Quick Actions', 'Expense, income, transfer, fund'),
-  money('Your Money', 'Net worth and envelope health'),
-  unallocated('Ready to Assign', 'Unallocated funds'),
+  spending('Spending Overview', 'Donut chart with category breakdown'),
+  money('Your Money', 'Net worth and unallocated'),
   activity('Recent Activity', 'Templates and recent transactions');
 
   final String label;
@@ -35,18 +33,16 @@ class DashboardSectionConfig {
     return DashboardSectionConfig(
       section: DashboardSection.values
           .firstWhere((s) => s.name == json['section'],
-              orElse: () => DashboardSection.status),
+              orElse: () => DashboardSection.quickActions),
       visible: json['visible'] as bool? ?? true,
     );
   }
 }
 
 const _defaultOrder = [
-  DashboardSectionConfig(section: DashboardSection.status),
-  DashboardSectionConfig(section: DashboardSection.spending),
   DashboardSectionConfig(section: DashboardSection.quickActions),
+  DashboardSectionConfig(section: DashboardSection.spending),
   DashboardSectionConfig(section: DashboardSection.money),
-  DashboardSectionConfig(section: DashboardSection.unallocated),
   DashboardSectionConfig(section: DashboardSection.activity),
 ];
 
@@ -64,8 +60,10 @@ class DashboardLayoutNotifier extends Notifier<List<DashboardSectionConfig>> {
     final json = prefs.getString(_prefsKey);
     if (json != null) {
       try {
+        final validNames = DashboardSection.values.map((s) => s.name).toSet();
         final list = (jsonDecode(json) as List)
             .map((e) => DashboardSectionConfig.fromJson(e))
+            .where((c) => validNames.contains(c.section.name))
             .toList();
         // Ensure all sections are present (in case new ones were added)
         final existing = list.map((c) => c.section).toSet();

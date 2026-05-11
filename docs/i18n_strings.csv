@@ -125,16 +125,14 @@ dashboard_other_category,Fallback category name,Other,أخرى,Autre
 # ──────────────────────────────────────────────
 customize_title,Bottom sheet title,Customize Dashboard,تخصيص لوحة التحكم,Personnaliser le tableau de bord
 customize_instructions,Instructions text,Drag to reorder. Toggle to show/hide sections.,اسحب لإعادة الترتيب. بدّل لإظهار/إخفاء الأقسام.,Glissez pour réorganiser. Basculez pour afficher/masquer.
-dashboard_section_status_label,Section label,Status Card,بطاقة الحالة,Carte de statut
-dashboard_section_status_desc,Section description,"Budget status, velocity, age of money","حالة الميزانية، السرعة، عمر المال","Statut du budget, vélocité, âge de l'argent"
 dashboard_section_spending_label,Section label,Spending Overview,نظرة عامة على الإنفاق,Aperçu des dépenses
 dashboard_section_spending_desc,Section description,Donut chart with category breakdown,رسم بياني دائري مع تفصيل الفئات,Graphique en anneau avec répartition par catégorie
 dashboard_section_quick_label,Section label,Quick Actions,إجراءات سريعة,Actions rapides
 dashboard_section_quick_desc,Section description,"Expense, income, transfer, fund","مصروف، دخل، تحويل، تمويل","Dépense, revenu, virement, financement"
 dashboard_section_money_label,Section label,Your Money,أموالك,Votre argent
-dashboard_section_money_desc,Section description,Net worth and envelope health,صافي الثروة وصحة الأظرف,Patrimoine net et santé des enveloppes
-dashboard_section_unallocated_label,Section label,Ready to Assign,جاهز للتوزيع,Prêt à affecter
-dashboard_section_unallocated_desc,Section description,Unallocated funds,أموال غير موزعة,Fonds non affectés
+dashboard_section_money_desc,Section description,Net worth and unallocated,صافي الثروة والمتبقي,Patrimoine net et non affecté
+dashboard_net_worth,Compact card label,Net Worth,صافي الثروة,Patrimoine net
+dashboard_unallocated_compact,Compact card label,Unallocated,غير موزع,Non affecté
 dashboard_section_activity_label,Section label,Recent Activity,النشاط الأخير,Activité récente
 dashboard_section_activity_desc,Section description,Templates and recent transactions,القوالب والمعاملات الأخيرة,Modèles et transactions récentes
 # ──────────────────────────────────────────────
