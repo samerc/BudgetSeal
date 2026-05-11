@@ -42,13 +42,6 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final household = ref.watch(householdProvider).value;
 
-    final themeLabel = switch (ref.watch(themeModeProvider)) {
-      'light' => 'Light',
-      'dark' => 'Dark',
-      'black' => 'Black',
-      _ => 'System',
-    };
-
     return Scaffold(
       body: SafeArea(
         child: ListView(

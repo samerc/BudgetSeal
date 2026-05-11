@@ -375,7 +375,7 @@ class _ResolutionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${formatAmount(resolution.balance, currency: resolution.currency)}',
+                    formatAmount(resolution.balance, currency: resolution.currency),
                     style: const TextStyle(
                       color: AppColors.healthy,
                       fontWeight: FontWeight.w600,

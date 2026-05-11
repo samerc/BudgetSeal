@@ -263,7 +263,9 @@ class _TravelExchangeScreenState
 
   bool get _canExchange {
     if (_fromAccountId == null || _sourceAmount <= 0 ||
-        _receivedAmount <= 0 || _targetCurrency.isEmpty) return false;
+        _receivedAmount <= 0 || _targetCurrency.isEmpty) {
+      return false;
+    }
     // Prevent same-currency exchange
     final fromAcc = (ref.read(accountsProvider).value ?? [])
         .where((a) => a.id == _fromAccountId).firstOrNull;
@@ -384,6 +386,7 @@ class _TravelExchangeScreenState
   Future<bool?> _askReactivate(Account existing) async {
     final calculator = BalanceCalculator(ref.read(databaseProvider));
     final balance = await calculator.accountBalance(existing.id);
+    if (!mounted) return null;
     // Capture theme colors before dialog to avoid using outer context in builder
     final tsColor = AppColors.ts(context);
     final sfvColor = AppColors.sfv(context);

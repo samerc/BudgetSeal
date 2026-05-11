@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import 'package:drift/drift.dart' show Value;
 
@@ -258,19 +257,18 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                               ],
                             ),
                           );
-                          if (confirmed != true) return;
+                          if (confirmed != true || !mounted) return;
                           final engine = ref.read(recurringEngineProvider);
                           await engine.delete(filtered[i].id);
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Recurring transaction deleted'),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            _load();
-                          }
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Recurring transaction deleted'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          _load();
                         },
                         onEdit: () => _showEditSheet(filtered[i]),
                       ),

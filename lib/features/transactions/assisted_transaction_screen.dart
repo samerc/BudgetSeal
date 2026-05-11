@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
@@ -1398,7 +1397,9 @@ class _AssistedTransactionScreenState
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldPop = await _onWillPop();
-        if (shouldPop && mounted) context.pop();
+        if (shouldPop && context.mounted) {
+          context.pop();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
