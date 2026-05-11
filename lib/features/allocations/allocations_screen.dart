@@ -307,39 +307,58 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
 
                 if (allocations.isEmpty) return const SizedBox.shrink();
 
+                final nonBaseCount = allocations
+                    .where((a) =>
+                        (a.data.allocation.targetCurrency ?? baseCurrency) !=
+                        baseCurrency)
+                    .length;
+
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
-                    child: Row(
-                      children: [
-                        _SummaryItem(
-                          label: 'Budgeted',
-                          amount: totalBudgeted,
-                          currency: baseCurrency,
-                          color: AppColors.tp(context),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.sfv(context),
+                          borderRadius: BorderRadius.circular(CardTokens.radius),
                         ),
-                        _SummaryDivider(context: context),
-                        _SummaryItem(
-                          label: 'Spent',
-                          amount: totalSpent,
-                          currency: baseCurrency,
-                          color: AppColors.overspent,
+                        child: Row(
+                          children: [
+                            _SummaryItem(
+                              label: 'Budgeted',
+                              amount: totalBudgeted,
+                              currency: baseCurrency,
+                              color: AppColors.tp(context),
+                            ),
+                            _SummaryDivider(context: context),
+                            _SummaryItem(
+                              label: 'Spent',
+                              amount: totalSpent,
+                              currency: baseCurrency,
+                              color: AppColors.overspent,
+                            ),
+                            _SummaryDivider(context: context),
+                            _SummaryItem(
+                              label: 'Remaining',
+                              amount: totalRemaining,
+                              currency: baseCurrency,
+                              color: AppColors.healthy,
+                            ),
+                          ],
                         ),
-                        _SummaryDivider(context: context),
-                        _SummaryItem(
-                          label: 'Remaining',
-                          amount: totalRemaining,
-                          currency: baseCurrency,
-                          color: AppColors.healthy,
+                      ),
+                      if (nonBaseCount > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '$baseCurrency envelopes only · $nonBaseCount in other currencies',
+                            style: TextStyle(
+                                fontSize: 10, color: AppColors.th(context)),
+                          ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 );
               },

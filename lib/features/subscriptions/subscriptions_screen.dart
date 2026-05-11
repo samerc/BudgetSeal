@@ -167,15 +167,22 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
     final cancelledCount =
         _subs.where((s) => _status(s) == 'cancelled').length;
 
-    final monthlyTotal = _subs.fold<double>(0.0, (sum, s) {
-      final status = _status(s);
-      if (status == 'cancelled') return sum;
+    // Group monthly totals by currency to avoid mixing
+    final baseCurrency = ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    final monthlyByCurrency = <String, double>{};
+    for (final s in _subs) {
+      if (_status(s) == 'cancelled') continue;
       final amount = (s['amount'] as num?)?.toDouble() ?? 0;
+      final currency = s['currency'] as String? ?? baseCurrency;
       final freq = s['frequency'] as String? ?? 'monthly';
       final interval = (s['interval'] as int?) ?? 1;
-      return sum + _monthlyEquivalent(amount, freq, interval);
-    });
+      monthlyByCurrency[currency] =
+          (monthlyByCurrency[currency] ?? 0) + _monthlyEquivalent(amount, freq, interval);
+    }
+    final monthlyTotal = monthlyByCurrency[baseCurrency] ?? 0.0;
     final annualTotal = monthlyTotal * 12;
+    final hasOtherCurrencies = monthlyByCurrency.keys
+        .any((c) => c != baseCurrency && (monthlyByCurrency[c] ?? 0) > 0);
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -247,7 +254,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${formatAmount(monthlyTotal)}/month',
+                                  '${formatAmount(monthlyTotal, currency: baseCurrency)}/month',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: TypographyTokens.screenTitleSize,
@@ -258,7 +265,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${formatAmount(annualTotal)}/year',
+                                  '${formatAmount(annualTotal, currency: baseCurrency)}/year${hasOtherCurrencies ? ' + more' : ''}',
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 13,

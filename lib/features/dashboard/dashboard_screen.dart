@@ -393,9 +393,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   unallocatedAsync.when(
                     data: (unallocated) {
                       final baseAmount = unallocated[baseCurrency] ?? 0.0;
+                      final otherCount = unallocated.keys
+                          .where((k) => k != baseCurrency && (unallocated[k] ?? 0).abs() > 0.01)
+                          .length;
                       return _SummaryRow(
                         label: 'Ready to assign',
-                        subtitle: 'Money not yet in an envelope',
+                        subtitle: otherCount > 0
+                            ? 'Money not yet in an envelope · + $otherCount other ${otherCount == 1 ? 'currency' : 'currencies'}'
+                            : 'Money not yet in an envelope',
                         amount: baseAmount,
                         currency: baseCurrency,
                         color: baseAmount >= 0
