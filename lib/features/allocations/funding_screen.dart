@@ -401,7 +401,7 @@ class _InstructionStep extends StatelessWidget {
           child: Center(
             child: Text(
               number,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppColors.accent,
@@ -653,7 +653,7 @@ class _QuickFillTile extends StatelessWidget {
                     color: AppColors.accent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_fix_high_rounded,
                     size: 18,
                     color: AppColors.accent,

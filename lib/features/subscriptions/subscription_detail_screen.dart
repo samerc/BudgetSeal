@@ -604,7 +604,7 @@ class _SubscriptionDetailScreenState
                   label: Text(enabled ? 'Pause' : 'Resume'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
-                    side: const BorderSide(color: AppColors.accent),
+                    side: BorderSide(color: AppColors.accent),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

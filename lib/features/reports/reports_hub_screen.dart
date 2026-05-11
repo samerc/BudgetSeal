@@ -1232,7 +1232,7 @@ class _CategoryRow extends StatelessWidget {
           );
         }
       } else if (last == 0 && amount > 0) {
-        comparisonWidget = const Text(
+        comparisonWidget = Text(
           'NEW',
           style: TextStyle(
               fontSize: 9,

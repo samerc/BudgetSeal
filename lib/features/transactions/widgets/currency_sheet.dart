@@ -359,7 +359,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                 color: AppColors.accent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.check_rounded,
+              child: Icon(Icons.check_rounded,
                   color: AppColors.accent, size: 16),
             )
           : null,

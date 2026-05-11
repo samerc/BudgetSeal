@@ -452,7 +452,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         color: AppColors.accent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.storage_rounded,
+                      child: Icon(Icons.storage_rounded,
                           size: 18, color: AppColors.accent),
                     ),
                     title: Text(

@@ -199,11 +199,11 @@ class SyncScreen extends ConsumerWidget {
 
   Widget _statusIcon(BuildContext context, SyncStatus status, bool connected) {
     if (status == SyncStatus.syncing) {
-      return const SizedBox(
+      return SizedBox(
         width: 40,
         height: 40,
         child: Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
             color: AppColors.accent,

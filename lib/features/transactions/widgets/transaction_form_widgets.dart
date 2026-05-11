@@ -412,7 +412,7 @@ class LineCard extends StatelessWidget {
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true),
                       textInputAction: TextInputAction.done,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.accent,

@@ -58,6 +58,7 @@ import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
 import 'features/splash/splash_screen.dart';
+import 'shared/theme/app_colors.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/utils/page_transitions.dart';
 
@@ -408,6 +409,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final Color? resolvedAccent = useSystemAccent && lightDynamic != null
         ? lightDynamic.primary
         : fixedAccent;
+
+    // Update the global AppColors.accent so all widgets pick it up
+    AppColors.setAccentColor(resolvedAccent ?? AppColors.defaultAccent);
 
     final lightTheme = buildLight(resolvedAccent);
     final darkTheme = buildDark(resolvedAccent);

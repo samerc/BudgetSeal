@@ -169,7 +169,7 @@ class _LeftoverResolutionScreenState
                                     color: AppColors.accentLight,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.account_balance_wallet_outlined,
                                     color: AppColors.accent,
                                     size: 22,

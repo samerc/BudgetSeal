@@ -149,7 +149,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+        borderSide: BorderSide(color: AppColors.accent, width: 1.5),
       ),
     );
   }
@@ -580,7 +580,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  const Icon(Icons.receipt_long_rounded,
+                  Icon(Icons.receipt_long_rounded,
                       size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
                   Text(
@@ -779,7 +779,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'Current balance: ${formatAmount(_currentBalance!, currency: currency)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.accent,

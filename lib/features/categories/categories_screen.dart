@@ -948,7 +948,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                             color: AppColors.accent, width: 1.5),
                       ),
                     ),

@@ -166,7 +166,7 @@ class _TravelExchangeScreenState
                   color: AppColors.accent.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_downward_rounded,
+                child: Icon(Icons.arrow_downward_rounded,
                     color: AppColors.accent, size: 20),
               ),
             ),

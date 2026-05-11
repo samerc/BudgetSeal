@@ -1022,8 +1022,8 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
           ),
           const SizedBox(height: 20),
           if (_loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: CircularProgressIndicator(color: AppColors.accent),
               ),
@@ -1240,8 +1240,8 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
             ),
             const SizedBox(height: 20),
             if (_loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: CircularProgressIndicator(color: AppColors.accent),
                 ),

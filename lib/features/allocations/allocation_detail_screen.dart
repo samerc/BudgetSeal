@@ -104,7 +104,7 @@ class _AllocationDetailScreenState
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: AppColors.ts(context), fontSize: 14),
-      floatingLabelStyle: const TextStyle(
+      floatingLabelStyle: TextStyle(
           color: AppColors.accent, fontWeight: FontWeight.w600),
       filled: true,
       fillColor: AppColors.sfv(context),
@@ -116,7 +116,7 @@ class _AllocationDetailScreenState
           borderRadius: _inputRadius, borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
           borderRadius: _inputRadius,
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.5)),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.5)),
     );
   }
 
@@ -2292,7 +2292,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             child: Row(
               children: [
-                const Icon(Icons.currency_exchange_rounded,
+                Icon(Icons.currency_exchange_rounded,
                     size: 22, color: AppColors.accent),
                 const SizedBox(width: 10),
                 Text(
@@ -2407,7 +2407,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 ),
                 child: Text(
                   fb.currency,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.accent,

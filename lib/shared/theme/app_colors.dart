@@ -4,8 +4,25 @@ abstract final class AppColors {
   // ── Brand (same in all themes) ────────────────────────────
   static const primary = Color(0xFF1A2B4A);
   static const primaryLight = Color(0xFF2A3F6A);
-  static const accent = Color(0xFF2563EB);
-  static const accentLight = Color(0xFFDBEAFE);
+
+  /// The active accent color. Defaults to Royal Blue (#2563EB).
+  /// Updated at runtime via [setAccentColor] when the user picks a
+  /// custom color or Material You resolves the system accent.
+  static Color accent = const Color(0xFF2563EB);
+  static const defaultAccent = Color(0xFF2563EB);
+  static Color accentLight = const Color(0xFFDBEAFE);
+
+  /// Call this from app.dart after resolving the accent color
+  /// (from provider + DynamicColorBuilder). All 340+ references to
+  /// AppColors.accent automatically pick up the new value on rebuild.
+  static void setAccentColor(Color color) {
+    accent = color;
+    // Derive a light tint from the accent
+    accentLight = Color.alphaBlend(
+      color.withValues(alpha: 0.12),
+      const Color(0xFFFFFFFF),
+    );
+  }
 
   // ── Semantic (same in all themes) ─────────────────────────
   static const healthy = Color(0xFF059669);

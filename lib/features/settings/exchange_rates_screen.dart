@@ -154,7 +154,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                           const SizedBox(width: 12),
                           Text(
                             'Base: $baseCurrency',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: AppColors.accent,
@@ -162,7 +162,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                           ),
                           const Spacer(),
                           if (_loading)
-                            const SizedBox(
+                            SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(
@@ -200,7 +200,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                             child: Center(
                               child: Text(
                                 e.key,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.accent,

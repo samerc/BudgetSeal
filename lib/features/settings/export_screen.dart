@@ -127,12 +127,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.file_download_outlined,
                           size: 24, color: AppColors.accent),
-                      SizedBox(width: 12),
-                      Text('Export Transactions',
+                      const SizedBox(width: 12),
+                      const Text('Export Transactions',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w700)),
                     ],
