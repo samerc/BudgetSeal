@@ -11,6 +11,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../recurring/recurring_screen.dart' show AddRecurringSheet;
 
 class SubscriptionsScreen extends ConsumerStatefulWidget {
   const SubscriptionsScreen({super.key});
@@ -180,8 +181,15 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add subscription',
         onPressed: () async {
-          await context.push('/recurring');
-          _load();
+          final result = await showModalBottomSheet<bool>(
+            context: context,
+            isScrollControlled: true,
+            isDismissible: true,
+            enableDrag: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => const AddRecurringSheet(forceSubscription: true),
+          );
+          if (result == true) _load();
         },
         child: const Icon(Icons.add),
       ),

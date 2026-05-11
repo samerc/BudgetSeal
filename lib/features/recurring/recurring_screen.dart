@@ -292,7 +292,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _AddRecurringSheet(),
+      builder: (_) => const AddRecurringSheet(),
     );
     if (result == true) _load();
   }
@@ -509,14 +509,18 @@ class _RecurringTile extends StatelessWidget {
   }
 }
 
-class _AddRecurringSheet extends ConsumerStatefulWidget {
-  const _AddRecurringSheet();
+class AddRecurringSheet extends ConsumerStatefulWidget {
+  /// When true, the "This is a subscription" toggle is hidden and
+  /// isSubscription is forced to true. Used from the Subscriptions screen.
+  final bool forceSubscription;
+
+  const AddRecurringSheet({super.key, this.forceSubscription = false});
 
   @override
-  ConsumerState<_AddRecurringSheet> createState() => _AddRecurringSheetState();
+  ConsumerState<AddRecurringSheet> createState() => _AddRecurringSheetState();
 }
 
-class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
+class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
   double _calcAmount = 0;
@@ -526,7 +530,7 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
   String? _accountId;
   String _currency = 'USD';
   DateTime? _endDate;
-  bool _isSubscription = false;
+  late bool _isSubscription = widget.forceSubscription;
   bool _saving = false;
   bool _submitted = false;
 
@@ -551,8 +555,8 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('New Recurring Transaction',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(widget.forceSubscription ? 'New Subscription' : 'New Recurring Transaction',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleCtrl,
@@ -663,17 +667,19 @@ class _AddRecurringSheetState extends ConsumerState<_AddRecurringSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('This is a subscription',
-                  style: TextStyle(fontSize: 14)),
-              subtitle: Text('e.g. Netflix, Spotify',
-                  style: TextStyle(fontSize: 12, color: AppColors.th(context))),
-              value: _isSubscription,
-              onChanged: (v) => setState(() => _isSubscription = v),
-              activeTrackColor: AppColors.accent,
-            ),
+            if (!widget.forceSubscription) ...[
+              const SizedBox(height: 12),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('This is a subscription',
+                    style: TextStyle(fontSize: 14)),
+                subtitle: Text('e.g. Netflix, Spotify',
+                    style: TextStyle(fontSize: 12, color: AppColors.th(context))),
+                value: _isSubscription,
+                onChanged: (v) => setState(() => _isSubscription = v),
+                activeTrackColor: AppColors.accent,
+              ),
+            ],
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,

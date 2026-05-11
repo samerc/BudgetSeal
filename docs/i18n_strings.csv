@@ -551,6 +551,7 @@ upcoming_due_in_days,Urgency label,Due in {days} days,مستحقة خلال {day
 # ──────────────────────────────────────────────
 sub_title,Screen title,Subscriptions,الاشتراكات,Abonnements
 sub_add_tooltip,FAB tooltip,Add subscription,إضافة اشتراك,Ajouter un abonnement
+sub_new_title,Sheet title,New Subscription,اشتراك جديد,Nouvel abonnement
 sub_total,Chip subtitle,Total,الإجمالي,Total
 sub_active,Status label,Active,نشط,Actif
 sub_cancelled,Status label,Cancelled,ملغى,Annulé
