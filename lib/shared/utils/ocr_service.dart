@@ -155,9 +155,17 @@ class OcrService {
     }
   }
 
+  /// Strip trailing tax/note suffixes from a price string.
+  /// e.g. "450,000T" → "450,000", "12.50TTC" → "12.50", "100*" → "100"
+  static String _stripPriceSuffix(String s) {
+    return s.replaceAll(RegExp(r'[A-Za-z*+]+$'), '').trim();
+  }
+
   /// Try to parse a line into (name, amount) using multiple strategies.
   static ExtractedItem? _parseLine(String line) {
-    final trimmed = line.trim();
+    // Pre-clean: strip common trailing suffixes from the entire line
+    // so "450,000T" becomes "450,000" before regex matching.
+    var trimmed = line.trim();
     if (trimmed.length < 2) return null;
 
     final lower = trimmed.toLowerCase();
@@ -165,19 +173,17 @@ class OcrService {
 
     // Find ALL price-like numbers in the line.
     // Match both decimal prices (12.50, 4,50) and thousands-separated (317,100, 1.234.567).
+    // Also match prices starting with a separator (,450,000 or .450.000) — common on receipts.
     final priceMatches = RegExp(
-      r'[\$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?)',
+      r'[\$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
     ).allMatches(trimmed).toList();
 
     // Filter: reject partial matches where a digit follows (e.g., "317,10" from "317,100")
     final validMatches = priceMatches.where((m) {
-      final end = m.end;
-      if (end < trimmed.length && RegExp(r'\d').hasMatch(trimmed[end])) {
-        return false; // partial match — digit continues after
-      }
       // Must contain at least one separator or be 4+ digits to look like a price
-      final text = m.group(1)!;
-      return text.contains(RegExp(r'[.,]')) || text.length >= 4;
+      final text = _stripPriceSuffix(m.group(1)!);
+      final cleaned = text.replaceAll(RegExp(r'^[,.]'), ''); // strip leading sep
+      return cleaned.contains(RegExp(r'[.,]')) || cleaned.replaceAll(RegExp(r'[,. ]'), '').length >= 4;
     }).toList();
 
     if (validMatches.isNotEmpty) {
@@ -215,8 +221,12 @@ class OcrService {
   }
 
   static ExtractedItem? _buildItem(String rawName, String rawPrice) {
-    // Clean price: remove spaces, normalize separators
-    var priceStr = rawPrice.replaceAll(' ', '');
+    // Clean price: strip trailing suffixes (T, TTC, HT, VAT, etc.), remove spaces
+    var priceStr = _stripPriceSuffix(rawPrice).replaceAll(' ', '');
+    // Strip leading separator: ",450,000" → "450,000"
+    if (priceStr.startsWith(',') || priceStr.startsWith('.')) {
+      priceStr = priceStr.substring(1);
+    }
     // Handle various number formats:
     // "1,234.56" (US thousands) → 1234.56
     // "1.234,56" (EU thousands) → 1234.56
