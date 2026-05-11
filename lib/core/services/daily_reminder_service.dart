@@ -20,7 +20,11 @@ class DailyReminderService {
   static const _prefMinute = 'daily_reminder_minute';
   static const _prefMessage = 'daily_reminder_message';
 
-  static const _notificationId = 9999;
+  // Schedule 14 individual notifications (2 weeks), IDs 9900–9913.
+  // This is more reliable than a single repeating notification which
+  // Android may silently drop on some devices.
+  static const _baseNotificationId = 9900;
+  static const _scheduleDays = 14;
   static const _channelId = 'pocketplan_daily_reminder';
   static const _channelName = 'Daily Reminder';
   static const _channelDesc = 'Daily reminder to log transactions';
@@ -77,7 +81,7 @@ class DailyReminderService {
     if (enabled) {
       await _schedule();
     } else {
-      await _cancel();
+      await _cancelAll();
     }
   }
 
@@ -142,55 +146,52 @@ class DailyReminderService {
       return;
     }
 
-    // Check exact alarm permission — don't open settings automatically
-    // (it navigates away from the app). Use inexact if not granted.
-    var scheduleMode = AndroidScheduleMode.inexactAllowWhileIdle;
-    if (androidPlugin != null) {
-      final canExact =
-          await androidPlugin.canScheduleExactNotifications() ?? false;
-      if (canExact) {
-        scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
-      } else {
-        debugPrint('[DailyReminder] Exact alarms not granted, using inexact');
-      }
-    }
-
-    // Cancel any existing scheduled notification before rescheduling
-    await _plugin.cancel(id: _notificationId);
+    // Cancel all previously scheduled daily reminders
+    await _cancelAll();
 
     final time = await getTime();
     final customMessage = await getMessage();
+    final rand = Random();
 
-    // Pick message: use custom if set, otherwise rotate defaults
-    final body = customMessage.isNotEmpty
-        ? customMessage
-        : _defaultMessages[Random().nextInt(_defaultMessages.length)];
+    // Schedule one notification per day for the next 14 days.
+    // Using dateAndTime (not just time) is more reliable across devices.
+    for (int i = 0; i < _scheduleDays; i++) {
+      final body = customMessage.isNotEmpty
+          ? customMessage
+          : _defaultMessages[rand.nextInt(_defaultMessages.length)];
 
-    await _plugin.zonedSchedule(
-      id: _notificationId,
-      title: 'PocketPlan',
-      body: body,
-      scheduledDate: _nextInstanceOfTime(time),
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-          icon: '@mipmap/ic_launcher',
+      final scheduledDate = _dateAtTime(time, dayOffset: i);
+      // Skip if in the past (e.g., today's time already passed when i == 0)
+      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) continue;
+
+      await _plugin.zonedSchedule(
+        id: _baseNotificationId + i,
+        title: 'PocketPlan',
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            channelDescription: _channelDesc,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: scheduleMode,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-    debugPrint('[DailyReminder] Scheduled at ${time.hour}:${time.minute.toString().padLeft(2, '0')} (mode: $scheduleMode)');
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+    }
+    debugPrint('[DailyReminder] Scheduled $_scheduleDays notifications at ${time.hour}:${time.minute.toString().padLeft(2, '0')}');
   }
 
-  static Future<void> _cancel() async {
+  static Future<void> _cancelAll() async {
     await _ensureInitialized();
-    await _plugin.cancel(id: _notificationId);
+    for (int i = 0; i < _scheduleDays; i++) {
+      await _plugin.cancel(id: _baseNotificationId + i);
+    }
   }
 
   /// Ensure timezone data is loaded and local timezone is set.
@@ -208,20 +209,16 @@ class DailyReminderService {
     }
   }
 
-  /// Compute the next occurrence of the given time today or tomorrow.
-  static tz.TZDateTime _nextInstanceOfTime(TimeOfDay time) {
+  /// Compute a TZDateTime at the given time, offset by [dayOffset] days from today.
+  static tz.TZDateTime _dateAtTime(TimeOfDay time, {int dayOffset = 0}) {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(
+    return tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
-      now.day,
+      now.day + dayOffset,
       time.hour,
       time.minute,
     );
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
-    }
-    return scheduled;
   }
 }

@@ -48,6 +48,11 @@
             android:foregroundServiceType="dataSync"
             android:exported="false"/>
 
+        <!-- Fires scheduled notifications at the correct time -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false"/>
+
         <!-- Reschedule notifications after device reboot -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
