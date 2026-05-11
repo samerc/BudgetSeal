@@ -40,11 +40,12 @@ class _HelpScreenState extends State<HelpScreen> {
           return NavigationDecision.navigate;
         },
       ));
-    _loadHtml();
+    // Defer load to after first frame so Theme.of(context) is available
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadHtml());
   }
 
   Future<void> _loadHtml() async {
-    // Capture theme before async gap
+    if (!mounted) return;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     try {
       final html = await rootBundle.loadString('assets/web/help.html');
@@ -56,7 +57,7 @@ class _HelpScreenState extends State<HelpScreen> {
               '<style>:root{--bg:#0F1219;--surface:#1A1D27;--text:#E8EBF0;--text-secondary:#94A3B8;--border:#2A2D3A;--accent-light:#1E3A5F;}',
             )
           : html;
-      _controller.loadHtmlString(themed);
+      await _controller.loadHtmlString(themed);
     } catch (e) {
       debugPrint('[HelpScreen] Error loading help: $e');
       if (mounted) setState(() => _loading = false);
