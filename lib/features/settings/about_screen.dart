@@ -73,7 +73,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'v$appVersion · $appBuildTimestamp',
+                'v$appVersion · $appBuildDate',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
