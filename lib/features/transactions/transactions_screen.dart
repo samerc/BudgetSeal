@@ -323,21 +323,104 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               child: const Icon(Icons.call_split_rounded, size: 18),
             ),
             const SizedBox(height: 8),
-            FloatingActionButton(
-              heroTag: 'fab_add_tx',
-              tooltip: 'Add transaction',
-              onPressed: () async {
-                final txId = await context.push<String?>('/add-transaction');
-                if (txId != null && mounted) {
-                  setState(() => _highlightedTxId = txId);
-                  Future.delayed(const Duration(milliseconds: 1500), () {
-                    if (mounted) setState(() => _highlightedTxId = null);
-                  });
-                }
-              },
-              child: const Icon(Icons.add),
+            GestureDetector(
+              onLongPress: () => _showTypePicker(context),
+              child: FloatingActionButton(
+                heroTag: 'fab_add_tx',
+                tooltip: 'Add expense (hold for more)',
+                onPressed: () async {
+                  // Tap = expense directly (most common action)
+                  final txId = await context.push<String?>('/add-transaction',
+                      extra: {'editType': 'expense'});
+                  _flashTx(txId);
+                },
+                child: const Icon(Icons.add),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _flashTx(String? txId) {
+    if (txId != null && mounted) {
+      setState(() => _highlightedTxId = txId);
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) setState(() => _highlightedTxId = null);
+      });
+    }
+  }
+
+  void _showTypePicker(BuildContext context) {
+    hapticMedium();
+    final txColors = ref.read(txColorsProvider);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.sf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.th(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('New Transaction',
+                  style: TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _TypeOption(
+                    icon: Icons.remove_rounded,
+                    label: 'Expense',
+                    color: txColors.expense,
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final txId = await context.push<String?>('/add-transaction',
+                          extra: {'editType': 'expense'});
+                      _flashTx(txId);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  _TypeOption(
+                    icon: Icons.add_rounded,
+                    label: 'Income',
+                    color: txColors.income,
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final txId = await context.push<String?>('/add-transaction',
+                          extra: {'editType': 'income'});
+                      _flashTx(txId);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  _TypeOption(
+                    icon: Icons.swap_horiz_rounded,
+                    label: 'Transfer',
+                    color: txColors.transfer,
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final txId = await context.push<String?>('/add-transaction',
+                          extra: {'editType': 'transfer'});
+                      _flashTx(txId);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2180,8 +2263,17 @@ class _TxTile extends ConsumerWidget {
                     ],
                   ),
                 );
-                if (confirmed == true) {
-                  ref.read(allocationEngineProvider).deleteTransaction(tx.id);
+                if (confirmed == true && context.mounted) {
+                  await ref.read(allocationEngineProvider).deleteTransaction(tx.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Transaction deleted'),
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  }
                 }
               },
             ),
@@ -2337,6 +2429,52 @@ class _CashFlowFooter extends StatelessWidget {
             color: AppColors.ts(context),
             fontWeight: FontWeight.w500,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _TypeOption({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 22, color: color),
+            ),
+            const SizedBox(height: 8),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: color)),
+          ]),
         ),
       ),
     );

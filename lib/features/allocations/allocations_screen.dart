@@ -65,7 +65,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('How Envelopes Work'),
+        title: const Text('How Budgeting Works'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

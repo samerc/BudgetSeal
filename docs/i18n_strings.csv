@@ -155,7 +155,12 @@ tx_quick_add_hint,Quick-add bar placeholder,"Type name and amount, e.g. Coffee 4
 tx_send_tooltip,Quick-add send tooltip,Send,إرسال,Envoyer
 tx_scroll_top_tooltip,FAB tooltip,Scroll to top,التمرير للأعلى,Retour en haut
 tx_split_bill_tooltip,FAB tooltip,Split Bill,تقسيم الفاتورة,Partager l'addition
-tx_add_tooltip,FAB tooltip,Add transaction,إضافة معاملة,Ajouter une transaction
+tx_add_tooltip,FAB tooltip,Add expense (hold for more),إضافة مصروف (اضغط مطولاً للمزيد),Ajouter une dépense (maintenir pour plus)
+tx_type_picker_title,Sheet title,New Transaction,معاملة جديدة,Nouvelle transaction
+tx_deleted_snackbar,Snackbar,Transaction deleted,تم حذف المعاملة,Transaction supprimée
+settings_recurring_bills,Tile title,Recurring & Bills,المتكررة والفواتير,Récurrents et factures
+settings_recurring_bills_sub,Tile subtitle,Manage recurring transactions and bills,إدارة المعاملات المتكررة والفواتير,Gérer les transactions récurrentes et factures
+alloc_how_budgeting_works,Dialog title,How Budgeting Works,كيف تعمل الميزانية,Comment fonctionne le budget
 tx_from_date,Date range filter,From date,من تاريخ,Du
 tx_to_date,Date range filter,To date,إلى تاريخ,Au
 tx_min_amount,Amount range hint,Min,الحد الأدنى,Min

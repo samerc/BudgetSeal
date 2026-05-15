@@ -13,6 +13,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -53,7 +54,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         icon: Icons.waving_hand_rounded,
         title: 'Welcome to PocketPlan!',
         body:
-            'This is your financial overview. Tap the quick actions below to start recording transactions.',
+            'Start by adding your first expense — tap the + button on the Activity tab. '
+            'Then head to the Budget tab to create envelopes and assign your money.',
       );
     });
   }
@@ -251,6 +253,78 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           ref.invalidate(currentMonthTransactionsProvider),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  // Spending insight — one actionable sentence
+                  Builder(builder: (_) {
+                    final statsAsync = ref.watch(reportStatsProvider);
+                    final stats = statsAsync.value;
+                    if (stats == null) return const SizedBox.shrink();
+                    final now = DateTime.now();
+                    final thisMonth = DateTime(now.year, now.month, 1);
+                    final lastMonth = DateTime(now.year, now.month - 1, 1);
+                    final current = stats.monthly[thisMonth];
+                    final previous = stats.monthly[lastMonth];
+                    if (current == null || previous == null ||
+                        current.expense == 0 || previous.expense == 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    // Find biggest category increase
+                    String? topCat;
+                    double topIncrease = 0;
+                    for (final entry in current.categorySpend.entries) {
+                      final prevAmt = previous.categorySpend[entry.key] ?? 0;
+                      if (prevAmt > 0 && entry.value > prevAmt * 1.2) {
+                        final increase = ((entry.value - prevAmt) / prevAmt * 100).round();
+                        if (increase > topIncrease) {
+                          topIncrease = increase.toDouble();
+                          topCat = categoryMap[entry.key]?.name ?? 'a category';
+                        }
+                      }
+                    }
+
+                    // Overall comparison
+                    final pctChange = ((current.expense - previous.expense) / previous.expense * 100).round();
+
+                    String? message;
+                    IconData? icon;
+                    Color? color;
+
+                    if (topCat != null && topIncrease >= 30) {
+                      message = '$topCat spending is ${topIncrease.round()}% higher than last month';
+                      icon = Icons.trending_up_rounded;
+                      color = AppColors.caution;
+                    } else if (pctChange <= -15) {
+                      message = 'Spending is ${pctChange.abs()}% lower than last month — nice!';
+                      icon = Icons.trending_down_rounded;
+                      color = AppColors.healthy;
+                    } else if (pctChange >= 20) {
+                      message = 'Spending is $pctChange% higher than last month';
+                      icon = Icons.trending_up_rounded;
+                      color = AppColors.caution;
+                    }
+
+                    if (message == null) return const SizedBox.shrink();
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: color!.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(icon, size: 16, color: color),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(message,
+                                style: TextStyle(fontSize: 12, color: color,
+                                    fontWeight: FontWeight.w500)),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 12),
     ];
 
