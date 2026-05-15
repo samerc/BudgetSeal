@@ -323,18 +323,31 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               child: const Icon(Icons.call_split_rounded, size: 18),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
-              onLongPress: () => _showTypePicker(context),
-              child: FloatingActionButton(
-                heroTag: 'fab_add_tx',
-                tooltip: 'Add expense (hold for more)',
-                onPressed: () async {
-                  // Tap = expense directly (most common action)
-                  final txId = await context.push<String?>('/add-transaction',
-                      extra: {'editType': 'expense'});
-                  _flashTx(txId);
-                },
-                child: const Icon(Icons.add),
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Material(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                shape: const CircleBorder(),
+                elevation: 6,
+                shadowColor: Theme.of(context).colorScheme.shadow,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () async {
+                    hapticLight();
+                    final txId = await context.push<String?>('/add-transaction',
+                        extra: {'editType': 'expense'});
+                    _flashTx(txId);
+                  },
+                  onLongPress: () {
+                    hapticMedium();
+                    _showTypePicker(context);
+                  },
+                  child: Center(
+                    child: Icon(Icons.add,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  ),
+                ),
               ),
             ),
           ],
