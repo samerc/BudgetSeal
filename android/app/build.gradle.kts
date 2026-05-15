@@ -25,7 +25,7 @@ android {
         applicationId = "com.pocketplan.pocketplan"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 24 // Android 7.0+ (required by local_auth, webview, notifications)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
