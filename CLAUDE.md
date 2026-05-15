@@ -350,6 +350,9 @@ Tests use `AppDatabase.forTesting(NativeDatabase.memory())` for in-memory databa
 
 ## Android
 
+### Min SDK
+`minSdk = 26` (Android 8.0+). Required by `local_auth`, `webview_flutter`, and `flutter_local_notifications`. Notification channels work properly at API 26+.
+
 ### Permissions (`android/app/src/main/AndroidManifest.xml`)
 Standard: `INTERNET`, `RECEIVE_BOOT_COMPLETED`, `USE_BIOMETRIC`, `USE_FINGERPRINT`, `POST_NOTIFICATIONS`.
 
@@ -669,13 +672,19 @@ Tip: percentage slider (0-30%) or fixed amount toggle. Cross-currency support wi
 
 ## Customizable Dashboard
 
-`lib/core/providers/dashboard_layout_provider.dart` — `DashboardSection` enum with 6 sections (status, spending, quickActions, money, unallocated, activity). Each section has visibility toggle. Order + visibility persisted to SharedPreferences as JSON. `DashboardLayoutNotifier` provides reorder/toggle/reset methods.
+`lib/core/providers/dashboard_layout_provider.dart` — `DashboardSection` enum with 4 sections (quickActions, spending, money, activity). Each section has visibility toggle. Order + visibility persisted to SharedPreferences as JSON. `DashboardLayoutNotifier` provides reorder/toggle/reset methods.
+
+Dashboard flow: Quick Actions (top) → Spending Overview (donut + income/expense/net + spending insight) → Your Money (compact net worth | unallocated split card) → Activity (templates + recent transactions). Status card and envelope health were removed — those live in Reports > Insights and Budget tab respectively.
 
 `lib/features/dashboard/dashboard_customize_sheet.dart` — bottom sheet with `ReorderableListView`, drag handles, and visibility switches. Opened via the tune icon in the dashboard header.
 
 ## Transaction Selection
 
 Long-press a transaction to enter selection mode. Tap tiles to select/deselect (with checkboxes). Action bar shows count + bulk delete button. Dismissible swipe gestures are disabled during selection mode. Haptic feedback on selection changes.
+
+## Activity Tab FAB
+
+The + FAB on the Activity tab uses a custom `Material` + `InkWell` circle (not `FloatingActionButton`) so both `onTap` and `onLongPress` work reliably. Tap opens expense form directly (most common action). Long-press opens a type picker bottom sheet (expense/income/transfer). **Never wrap `FloatingActionButton` with `GestureDetector(onLongPress:)`** — the FAB's internal `InkWell` swallows the long-press gesture.
 
 ## Transaction Flash
 
@@ -730,12 +739,14 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 The More tab is split into two screens:
 
 **More page** (tab) — feature hub:
-- **TOOLS**: Accounts, Categories, Bill Splitter, Bill Calendar, Upcoming Bills, Travel Exchange, Exchange Rates, Web Companion
-- **AUTOMATION**: Recurring, Templates, Subscriptions, Goals & Loans, Period Transition
+- Accounts, Categories (top, no section header — used weekly)
+- **TOOLS**: Recurring & Bills, Subscriptions, Goals & Loans, Bill Splitter, Travel Exchange, Web Companion
 - Settings & Customization → navigates to `/settings`
 - Help Guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
 - About PocketPlan
 - Household name + currency shown as subtitle under "More" header (no separate card)
+
+Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
 
 **Settings screen** (`/settings`) — all configuration:
 - **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
@@ -827,6 +838,7 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 - **Presets**: Indigo, Violet, Pink, Red, Orange, Yellow, Green, Teal, Cyan
 - `DynamicColorBuilder` wraps the app in `app.dart` — resolves system accent on Android 12+
 - Theme builders (`buildLightTheme`, `buildDarkTheme`, `buildBlackTheme`) accept optional `accentColor` parameter
+- **`AppColors.accent` is mutable** — updated via `AppColors.setAccentColor()` in `app.dart` after `DynamicColorBuilder` resolves. All 340+ references to `AppColors.accent` automatically pick up the new color. Also derives `accentLight` dynamically.
 - Settings: Appearance > Accent Color — circle grid picker with checkmark selection
 
 ## Per-Account Decimal Precision
