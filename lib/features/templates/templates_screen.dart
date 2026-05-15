@@ -319,7 +319,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     TxColors txColors,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
       itemCount: list.length,
       itemBuilder: (_, i) =>
           _buildTile(list[i], catMap, acctMap, txColors),
@@ -343,7 +343,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
       children: groups.entries.map((entry) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

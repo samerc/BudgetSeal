@@ -293,7 +293,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         ),
       ),
       floatingActionButton: _isFutureMonth ? null : Padding(
-        padding: const EdgeInsets.only(bottom: 60),
+        padding: const EdgeInsets.only(bottom: 88),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

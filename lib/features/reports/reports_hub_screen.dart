@@ -224,7 +224,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
             }
           },
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
             child: Column(
               children: [
                 // Month navigator
@@ -2532,7 +2532,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
             }
 
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
               children: [
                 // Compare period selector
                 GestureDetector(

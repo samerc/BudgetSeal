@@ -442,17 +442,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   const SizedBox(height: 8),
                   // Quick Templates (above recent transactions)
                   _QuickTemplatesSection(),
-
-                  // Recent Transactions
-                  Text(
-                    'Recent',
-                    style: TextStyle(
-                      fontSize: TypographyTokens.cardTitleSize,
-                      fontWeight: TypographyTokens.cardTitleWeight,
-                      color: AppColors.tp(context),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   recentTxAsync.when(
                     data: (entries) {
                       if (entries.isEmpty) {

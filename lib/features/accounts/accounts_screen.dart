@@ -93,7 +93,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             }
 
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
               children: [
                 // Total balance header
                 _TotalBalanceCard(totals: totals),
@@ -429,11 +429,11 @@ class _ArchivedAccountTile extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.th(context).withValues(alpha: 0.08),
+              color: AppColors.ts(context).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(_accountIcon(acc.type),
-                color: AppColors.th(context), size: 20),
+                color: AppColors.ts(context), size: 20),
           ),
           title: Row(
             children: [
