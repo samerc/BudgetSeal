@@ -251,13 +251,16 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('New period started',
+                            Text(
+                                pendingIds.length == 1
+                                    ? '1 envelope needs reset'
+                                    : '${pendingIds.length} envelopes need reset',
                                 style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.tp(context))),
                             Text(
-                              '${pendingIds.length} envelope(s) need review',
+                              'New budget period started — review leftover balances',
                               style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.ts(context)),

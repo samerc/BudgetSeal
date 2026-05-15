@@ -153,6 +153,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   }
 
   String? _statusFilter; // null = all, 'active', 'cancelled'
+  bool _showOtherCurrencies = false;
 
   List<Map<String, dynamic>> get _filtered {
     if (_statusFilter == null) return _subs;
@@ -264,13 +265,45 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
-                                Text(
-                                  '${formatAmount(annualTotal, currency: baseCurrency)}/year${hasOtherCurrencies ? ' + more' : ''}',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    fontSize: 13,
+                                GestureDetector(
+                                  onTap: hasOtherCurrencies
+                                      ? () => setState(() => _showOtherCurrencies = !_showOtherCurrencies)
+                                      : null,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '${formatAmount(annualTotal, currency: baseCurrency)}/year',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(alpha: 0.7),
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      if (hasOtherCurrencies) ...[
+                                        const SizedBox(width: 4),
+                                        AnimatedRotation(
+                                          turns: _showOtherCurrencies ? 0.5 : 0,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Icon(Icons.expand_more_rounded,
+                                              size: 16, color: Colors.white.withValues(alpha: 0.7)),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
+                                if (_showOtherCurrencies)
+                                  ...monthlyByCurrency.entries
+                                      .where((e) => e.key != baseCurrency && e.value > 0)
+                                      .map((e) => Padding(
+                                            padding: const EdgeInsets.only(top: 2),
+                                            child: Text(
+                                              '${formatAmount(e.value, currency: e.key)}/month',
+                                              style: TextStyle(
+                                                color: Colors.white.withValues(alpha: 0.6),
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          )),
                               ],
                             ),
                           ),
@@ -391,7 +424,9 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                 SliverFillRemaining(
                   child: Center(
                     child: Text(
-                      'No ${_statusFilter ?? ''} subscriptions',
+                      _statusFilter != null
+                          ? 'No $_statusFilter subscriptions'
+                          : 'No subscriptions',
                       style: TextStyle(color: AppColors.ts(context)),
                     ),
                   ),
@@ -643,14 +678,14 @@ class _SubscriptionTile extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 iconSize: 20,
-                tooltip: isEnabled ? 'Pause' : 'Resume',
+                tooltip: isEnabled ? 'Pause subscription' : 'Resume subscription',
                 icon: Icon(
                   isEnabled
-                      ? Icons.pause_circle_outline_rounded
-                      : Icons.play_circle_outline_rounded,
+                      ? Icons.pause_circle_rounded
+                      : Icons.play_circle_rounded,
                   color: isEnabled
-                      ? AppColors.ts(context)
-                      : AppColors.overspent,
+                      ? AppColors.th(context)
+                      : AppColors.healthy,
                 ),
                 onPressed: onToggleEnabled,
               ),

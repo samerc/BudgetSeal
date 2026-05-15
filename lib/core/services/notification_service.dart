@@ -19,7 +19,8 @@ class NotificationService {
   static const _envelopeNotifId = 1001;
   static const _billNotifId = 1002;
 
-  static const _cooldownKey = 'notif_last_check';
+  static const _envelopeCooldownKey = 'notif_last_check_envelopes';
+  static const _billCooldownKey = 'notif_last_check_bills';
   static const _cooldownHours = 24;
 
   static Future<void> init() async {
@@ -30,10 +31,10 @@ class NotificationService {
     );
   }
 
-  /// Check if enough time has passed since the last notification check.
-  static Future<bool> _shouldCheck() async {
+  /// Check if enough time has passed since the last check for a given key.
+  static Future<bool> _shouldCheck(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    final lastCheck = prefs.getString(_cooldownKey);
+    final lastCheck = prefs.getString(key);
     if (lastCheck != null) {
       final last = DateTime.tryParse(lastCheck);
       if (last != null &&
@@ -41,14 +42,14 @@ class NotificationService {
         return false;
       }
     }
-    await prefs.setString(_cooldownKey, DateTime.now().toIso8601String());
+    await prefs.setString(key, DateTime.now().toIso8601String());
     return true;
   }
 
   /// Check all envelopes and show a single grouped notification if any are overspent.
   static Future<void> checkEnvelopes(
       AppDatabase db, String householdId) async {
-    if (!await _shouldCheck()) return;
+    if (!await _shouldCheck(_envelopeCooldownKey)) return;
 
     final dao = AllocationsDao(db);
     final ledgerDao = LedgerDao(db);
@@ -92,6 +93,8 @@ class NotificationService {
   /// Check upcoming bills and show a single grouped notification.
   static Future<void> checkRecurring(
       AppDatabase db, String householdId) async {
+    if (!await _shouldCheck(_billCooldownKey)) return;
+
     final now = DateTime.now();
     final cutoff = now.add(const Duration(days: 2));
 

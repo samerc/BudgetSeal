@@ -569,7 +569,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   /// Check if a transaction with the same amount, category, and date exists.
-  bool _checkForDuplicate() {
+  TransactionEntry? _checkForDuplicate() {
     final existingEntries =
         ref.read(transactionEntriesProvider).value ?? [];
     final selectedDay = DateTime(
@@ -595,13 +595,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (!amountMatch) continue;
 
         // Check category match
-        if (existing.tx.categoryId == line.categoryId) return true;
+        if (existing.tx.categoryId == line.categoryId) return existing;
         for (final el in existing.lines) {
-          if (el.categoryId == line.categoryId) return true;
+          if (el.categoryId == line.categoryId) return existing;
         }
       }
     }
-    return false;
+    return null;
   }
 
   Future<void> _save() async {
@@ -653,15 +653,44 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     // Duplicate detection (skip when editing existing transaction)
     if (widget.editTransactionId == null && _type != _TxType.transfer) {
-      final isDuplicate = _checkForDuplicate();
-      if (isDuplicate && mounted) {
+      final duplicateMatch = _checkForDuplicate();
+      if (duplicateMatch != null && mounted) {
+        final matchTx = duplicateMatch.tx;
+        final matchNote = matchTx.note.isNotEmpty ? matchTx.note : 'No title';
+        final matchAmount = formatAmount(matchTx.amount, currency: matchTx.currency);
+        final matchDate = formatDate(matchTx.createdAt);
         final proceed = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Possible Duplicate'),
-            content: const Text(
-              'A similar transaction with the same amount, category, '
-              'and date already exists. Save anyway?',
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('A similar transaction already exists:'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(matchNote,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 4),
+                      Text('$matchAmount  •  $matchDate',
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text('Save anyway?'),
+              ],
             ),
             actions: [
               TextButton(

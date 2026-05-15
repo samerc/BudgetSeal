@@ -171,6 +171,20 @@ class AutoBackupService {
   static Future<void> restoreFromBackup(String backupPath) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dbFile = File(p.join(appDir.path, 'pocketplan.db'));
+
+    // Safety: auto-backup current DB before overwriting
+    if (dbFile.existsSync()) {
+      try {
+        final dir = await _backupDirectory();
+        final safetyName = 'pre_restore_${DateTime.now().millisecondsSinceEpoch}.db';
+        await dbFile.copy(p.join(dir.path, safetyName));
+        debugPrint('[AutoBackup] Safety backup created: $safetyName');
+      } catch (e) {
+        debugPrint('[AutoBackup] Safety backup failed: $e');
+        // Continue with restore — the user confirmed they want to proceed
+      }
+    }
+
     await File(backupPath).copy(dbFile.path);
   }
 

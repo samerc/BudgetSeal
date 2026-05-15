@@ -79,18 +79,21 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
         widget.trackColor ?? Theme.of(context).dividerColor.withValues(alpha: 0.3);
     final overspendColor = widget.overspendColor ?? const Color(0xFFEF4444);
 
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, __) => CustomPaint(
-          painter: _CircularProgressPainter(
-            progress: _animation.value.clamp(0.0, 3.0),
-            color: widget.color,
-            overspendColor: overspendColor,
-            trackColor: trackColor,
-            strokeWidth: widget.strokeWidth,
+    return RepaintBoundary(
+      child: SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (_, child) => CustomPaint(
+            painter: _CircularProgressPainter(
+              progress: _animation.value.clamp(0.0, 3.0),
+              color: widget.color,
+              overspendColor: overspendColor,
+              trackColor: trackColor,
+              strokeWidth: widget.strokeWidth,
+            ),
+            child: child,
           ),
           child: Center(child: widget.child),
         ),

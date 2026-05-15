@@ -182,7 +182,22 @@ class AllocationCard extends StatelessWidget {
         ? Icons.track_changes_rounded
         : Icons.savings_rounded;
 
-    return Container(
+    // Build semantic label for screen readers
+    final semanticParts = <String>[name];
+    if (displayBalance != 0 || hasTarget) {
+      semanticParts.add(formatAmount(displayBalance, currency: displayCurrency));
+    }
+    if (hasTarget) {
+      final pct = progress != null ? (progress * 100).round() : 0;
+      semanticParts.add('$pct% of ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}');
+    }
+    if (_isFlexible) semanticParts.add('flexible envelope');
+    if (needsReview) semanticParts.add('needs review');
+
+    return Semantics(
+      label: semanticParts.join(', '),
+      button: onTap != null,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
@@ -367,6 +382,6 @@ class AllocationCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }

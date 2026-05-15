@@ -70,19 +70,21 @@ class _AnimatedAmountState extends State<AnimatedAmount> {
     final beginCents = (_previousAmount * multiplier).round();
     final endCents = (widget.amount * multiplier).round();
 
-    return TweenAnimationBuilder<int>(
-      key: ValueKey('${widget.amount}_${widget.currency}'),
-      tween: IntTween(begin: beginCents, end: endCents),
-      duration: widget.duration,
-      curve: widget.curve,
-      builder: (_, cents, __) {
-        final value = cents / multiplier;
-        return Text(
-          _format(value),
-          style: widget.style ?? Theme.of(context).textTheme.titleLarge,
-          textAlign: widget.textAlign,
-        );
-      },
+    return RepaintBoundary(
+      child: TweenAnimationBuilder<int>(
+        key: ValueKey('${widget.amount}_${widget.currency}'),
+        tween: IntTween(begin: beginCents, end: endCents),
+        duration: widget.duration,
+        curve: widget.curve,
+        builder: (_, cents, __) {
+          final value = cents / multiplier;
+          return Text(
+            _format(value),
+            style: widget.style ?? Theme.of(context).textTheme.titleLarge,
+            textAlign: widget.textAlign,
+          );
+        },
+      ),
     );
   }
 

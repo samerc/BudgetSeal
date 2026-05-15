@@ -1461,3 +1461,25 @@ heatmap_no_activity,Tooltip,No activity,لا نشاط,Aucune activité
 backup_size_bytes,Size format,{size} B,{size} ب,{size} o
 backup_size_kb,Size format,{size} KB,{size} ك.ب,{size} Ko
 backup_size_mb,Size format,{size} MB,{size} م.ب,{size} Mo
+# ──────────────────────────────────────────────
+# UX IMPROVEMENTS (May 2026)
+# ──────────────────────────────────────────────
+insight_on_track,Dashboard spending insight,Spending is on track this month,الإنفاق في المسار الصحيح هذا الشهر,Les dépenses sont en bonne voie ce mois-ci
+quick_action_fund_tooltip,Dashboard quick action tooltip,Fund envelopes,تمويل المخصصات,Alimenter les enveloppes
+quick_action_split_tooltip,Dashboard quick action tooltip,Split a bill,تقسيم فاتورة,Partager une addition
+step_indicator,Assisted flow step label,Step {current} of {total},الخطوة {current} من {total},Étape {current} sur {total}
+duplicate_title,Dialog title,Possible Duplicate,تكرار محتمل,Doublon possible
+duplicate_exists,Dialog content,A similar transaction already exists:,معاملة مشابهة موجودة بالفعل:,Une transaction similaire existe déjà :
+duplicate_save_anyway,Dialog button,Save Anyway,حفظ على أي حال,Enregistrer quand même
+reset_banner_one,Budget tab banner,1 envelope needs reset,مخصص واحد يحتاج إعادة تعيين,1 enveloppe à réinitialiser
+reset_banner_many,Budget tab banner,{count} envelopes need reset,{count} مخصصات تحتاج إعادة تعيين,{count} enveloppes à réinitialiser
+reset_banner_subtitle,Budget tab banner,New budget period started — review leftover balances,بدأت فترة ميزانية جديدة — راجع الأرصدة المتبقية,Nouvelle période budgétaire — vérifiez les soldes restants
+loan_direction_lent_hint,Objective detail,You gave money — payments are incoming,أنت أعطيت المال — المدفوعات واردة,Vous avez prêté — les paiements sont entrants
+loan_direction_borrowed_hint,Objective detail,You owe money — payments are outgoing,أنت مدين — المدفوعات صادرة,Vous devez — les paiements sont sortants
+sub_filter_no_active,Subscriptions empty filter,No active subscriptions,لا اشتراكات نشطة,Aucun abonnement actif
+sub_filter_no_cancelled,Subscriptions empty filter,No cancelled subscriptions,لا اشتراكات ملغاة,Aucun abonnement annulé
+sub_pause,Subscription action tooltip,Pause subscription,إيقاف الاشتراك مؤقتاً,Mettre en pause l'abonnement
+sub_resume,Subscription action tooltip,Resume subscription,استئناف الاشتراك,Reprendre l'abonnement
+onboarding_name_required,Onboarding validation,Enter a household name,أدخل اسم الأسرة,Entrez un nom de foyer
+onboarding_acct_required,Onboarding validation,Enter an account name,أدخل اسم الحساب,Entrez un nom de compte
+onboarding_more_options,Onboarding section label,More options,خيارات إضافية,Plus d'options

@@ -93,26 +93,95 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     _personCtrl.clear();
   }
 
-  void _removePerson(String name) {
+  void _removePerson(String name) async {
     if (_people.length <= 1) return;
-    setState(() {
-      _people.remove(name);
-      if (_activePersonForSelection == name) _activePersonForSelection = null;
-      _selectedLineIndices.removeWhere((_, p) => p == name);
-      final toRemove = <int>[];
-      for (var i = 0; i < _items.length; i++) {
-        _items[i].assignedTo.remove(name);
-        if (_items[i].assignedTo.isEmpty) {
-          if (_items[i].ocrLineIndex != null) {
-            _selectedLineIndices.remove(_items[i].ocrLineIndex);
+
+    // Count items solely assigned to this person
+    final soloItems = _items.where((item) =>
+        item.assignedTo.contains(name) && item.assignedTo.length == 1).length;
+    final others = _people.where((p) => p != name).toList();
+
+    if (soloItems > 0 && others.isNotEmpty && mounted) {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Remove person'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$name has $soloItems item${soloItems == 1 ? '' : 's'} assigned only to them. '
+                'Reassign to someone else, or delete those items?',
+              ),
+              if (others.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text('Reassign to:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                const SizedBox(height: 8),
+                ...others.map((other) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(ctx, other),
+                      child: Text(other),
+                    ),
+                  ),
+                )),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, '_delete'),
+              child: const Text('Delete items'),
+            ),
+          ],
+        ),
+      );
+      if (result == null || !mounted) return;
+
+      setState(() {
+        if (result != '_delete') {
+          // Reassign solo items to the chosen person
+          for (final item in _items) {
+            if (item.assignedTo.contains(name) && item.assignedTo.length == 1) {
+              item.assignedTo.add(result);
+            }
           }
-          toRemove.add(i);
         }
-      }
-      for (var i = toRemove.length - 1; i >= 0; i--) {
-        _items.removeAt(toRemove[i]);
-      }
-    });
+        _people.remove(name);
+        if (_activePersonForSelection == name) _activePersonForSelection = null;
+        _selectedLineIndices.removeWhere((_, p) => p == name);
+        final toRemove = <int>[];
+        for (var i = 0; i < _items.length; i++) {
+          _items[i].assignedTo.remove(name);
+          if (_items[i].assignedTo.isEmpty) {
+            if (_items[i].ocrLineIndex != null) {
+              _selectedLineIndices.remove(_items[i].ocrLineIndex);
+            }
+            toRemove.add(i);
+          }
+        }
+        for (var i = toRemove.length - 1; i >= 0; i--) {
+          _items.removeAt(toRemove[i]);
+        }
+      });
+    } else {
+      // No solo items — just remove
+      setState(() {
+        _people.remove(name);
+        if (_activePersonForSelection == name) _activePersonForSelection = null;
+        _selectedLineIndices.removeWhere((_, p) => p == name);
+        for (final item in _items) {
+          item.assignedTo.remove(name);
+        }
+      });
+    }
   }
 
   // ─── Items ────────────────────────────────────────────────────────────────

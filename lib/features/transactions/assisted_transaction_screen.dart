@@ -202,11 +202,18 @@ class _AssistedTransactionScreenState
                   setState(() => _type = newType);
                 }),
                 const SizedBox(height: 20),
-                Text('Enter Title',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Enter Title',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.tp(context))),
+                    ),
+                    _StepIndicator(current: 1),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: ctrl,
@@ -450,11 +457,18 @@ class _AssistedTransactionScreenState
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text('Select Category',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.tp(context))),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text('Select Category',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.tp(context))),
+                            ),
+                            _StepIndicator(current: 2),
+                          ],
+                        ),
                         const SizedBox(height: 10),
                         TextField(
                           focusNode: searchFocus,
@@ -1404,6 +1418,12 @@ class _AssistedTransactionScreenState
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Enter Amount'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: _StepIndicator(current: 3),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -2054,4 +2074,32 @@ class _AssistedTransactionScreenState
     );
   }
 
+}
+
+class _StepIndicator extends StatelessWidget {
+  final int current;
+  static const _total = 3;
+  const _StepIndicator({required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int i = 1; i <= _total; i++) ...[
+          if (i > 1) const SizedBox(width: 4),
+          Container(
+            width: i == current ? 18 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: i <= current
+                  ? AppColors.accent.withValues(alpha: 0.8)
+                  : AppColors.accent.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }

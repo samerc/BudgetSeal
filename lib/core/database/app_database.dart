@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +118,27 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 15) {
             await m.addColumn(accounts, accounts.isTravel);
+          }
+          if (from < 16) {
+            // Performance indexes for hot query paths
+            await m.createIndex(Index('idx_transactions_household_date',
+                'CREATE INDEX IF NOT EXISTS idx_transactions_household_date '
+                'ON transactions (household_id, created_at)'));
+            await m.createIndex(Index('idx_transactions_household_deleted',
+                'CREATE INDEX IF NOT EXISTS idx_transactions_household_deleted '
+                'ON transactions (household_id, deleted)'));
+            await m.createIndex(Index('idx_transaction_lines_tx',
+                'CREATE INDEX IF NOT EXISTS idx_transaction_lines_tx '
+                'ON transaction_lines (transaction_id)'));
+            await m.createIndex(Index('idx_ledger_allocation',
+                'CREATE INDEX IF NOT EXISTS idx_ledger_allocation '
+                'ON allocation_ledger (allocation_id)'));
+            await m.createIndex(Index('idx_allocations_household',
+                'CREATE INDEX IF NOT EXISTS idx_allocations_household '
+                'ON allocations (household_id)'));
+            await m.createIndex(Index('idx_categories_household',
+                'CREATE INDEX IF NOT EXISTS idx_categories_household '
+                'ON categories (household_id)'));
           }
         },
       );

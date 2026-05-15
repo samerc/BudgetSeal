@@ -47,6 +47,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String _entryMode = 'assisted';
 
   bool _loading = false;
+  String? _nameError;
+  String? _acctNameError;
 
   @override
   void dispose() {
@@ -66,11 +68,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // ── Submit: create household + account + categories + entry mode ──
   Future<void> _submit() async {
     final householdName = _nameController.text.trim();
-    if (householdName.isEmpty) return;
     final acctName = _acctNameCtrl.text.trim();
-    if (acctName.isEmpty) return;
 
-    setState(() => _loading = true);
+    // Validate
+    String? nameErr, acctErr;
+    if (householdName.isEmpty) nameErr = 'Enter a household name';
+    if (acctName.isEmpty) acctErr = 'Enter an account name';
+    if (nameErr != null || acctErr != null) {
+      setState(() {
+        _nameError = nameErr;
+        _acctNameError = acctErr;
+      });
+      return;
+    }
+
+    setState(() {
+      _nameError = null;
+      _acctNameError = null;
+      _loading = true;
+    });
     try {
       // 1. Create household
       await ref.read(householdServiceProvider).createHousehold(
@@ -84,53 +100,49 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (householdId == null) return;
       final db = ref.read(databaseProvider);
 
-      // 2. Create account
-      await db.into(db.accounts).insert(
-            AccountsCompanion.insert(
+      // 2. Create account + categories in a single batch (atomic)
+      await db.batch((batch) {
+        batch.insert(db.accounts, AccountsCompanion.insert(
+          id: const Uuid().v4(),
+          householdId: householdId,
+          name: acctName,
+          type: _acctType,
+          currency: _baseCurrency,
+          initialBalance: Value(_acctInitialBalance),
+          deviceId: 'local',
+        ));
+
+        // 3. Seed categories (if selected)
+        if (_seedCategories) {
+          final presets = detailedPresets;
+          final groupIds = <String, String>{};
+
+          for (final p in presets.where((p) => p.parentName == null)) {
+            final id = const Uuid().v4();
+            groupIds[p.name] = id;
+            batch.insert(db.categories, CategoriesCompanion.insert(
+              id: id,
+              householdId: householdId,
+              name: p.name,
+              icon: Value(p.emoji),
+              colorHex: Value(p.colorHex),
+              transactionType: Value(p.type),
+            ));
+          }
+          for (final p in presets.where((p) => p.parentName != null)) {
+            final parentId = groupIds[p.parentName];
+            batch.insert(db.categories, CategoriesCompanion.insert(
               id: const Uuid().v4(),
               householdId: householdId,
-              name: acctName,
-              type: _acctType,
-              currency: _baseCurrency,
-              initialBalance: Value(_acctInitialBalance),
-              deviceId: 'local',
-            ),
-          );
-
-      // 3. Seed categories (if selected)
-      if (_seedCategories) {
-        final presets = detailedPresets;
-        final groupIds = <String, String>{};
-
-        for (final p in presets.where((p) => p.parentName == null)) {
-          final id = const Uuid().v4();
-          groupIds[p.name] = id;
-          await db.into(db.categories).insert(
-                CategoriesCompanion.insert(
-                  id: id,
-                  householdId: householdId,
-                  name: p.name,
-                  icon: Value(p.emoji),
-                  colorHex: Value(p.colorHex),
-                  transactionType: Value(p.type),
-                ),
-              );
+              name: p.name,
+              parentId: Value(parentId),
+              icon: Value(p.emoji),
+              colorHex: Value(p.colorHex),
+              transactionType: Value(p.type),
+            ));
+          }
         }
-        for (final p in presets.where((p) => p.parentName != null)) {
-          final parentId = groupIds[p.parentName];
-          await db.into(db.categories).insert(
-                CategoriesCompanion.insert(
-                  id: const Uuid().v4(),
-                  householdId: householdId,
-                  name: p.name,
-                  parentId: Value(parentId),
-                  icon: Value(p.emoji),
-                  colorHex: Value(p.colorHex),
-                  transactionType: Value(p.type),
-                ),
-              );
-        }
-      }
+      });
 
       // 4. Set entry mode
       ref.read(entryModeProvider.notifier).setMode(_entryMode);
@@ -200,6 +212,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       seedCategories: _seedCategories,
                       entryMode: _entryMode,
                       loading: _loading,
+                      nameError: _nameError,
+                      acctNameError: _acctNameError,
+                      onNameErrorClear: () => setState(() => _nameError = null),
+                      onAcctNameErrorClear: () => setState(() => _acctNameError = null),
                       onCurrencyChanged: (v) =>
                           setState(() => _baseCurrency = v ?? 'USD'),
                       onDayChanged: (v) =>
@@ -422,6 +438,10 @@ class _SetupPage extends StatelessWidget {
   final bool seedCategories;
   final String entryMode;
   final bool loading;
+  final String? nameError;
+  final String? acctNameError;
+  final VoidCallback? onNameErrorClear;
+  final VoidCallback? onAcctNameErrorClear;
   final ValueChanged<String?> onCurrencyChanged;
   final ValueChanged<int?> onDayChanged;
   final ValueChanged<String> onAcctTypeChanged;
@@ -440,6 +460,10 @@ class _SetupPage extends StatelessWidget {
     required this.seedCategories,
     required this.entryMode,
     required this.loading,
+    this.nameError,
+    this.acctNameError,
+    this.onNameErrorClear,
+    this.onAcctNameErrorClear,
     required this.onCurrencyChanged,
     required this.onDayChanged,
     required this.onAcctTypeChanged,
@@ -487,7 +511,11 @@ class _SetupPage extends StatelessWidget {
                   TextField(
                     controller: nameController,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
-                    decoration: _inputDeco('Household name'),
+                    onChanged: nameError != null ? (_) => onNameErrorClear?.call() : null,
+                    decoration: _inputDeco('Household name').copyWith(
+                      errorText: nameError,
+                      errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   CurrencyPickerField(
@@ -528,7 +556,11 @@ class _SetupPage extends StatelessWidget {
                     controller: acctNameCtrl,
                     textCapitalization: TextCapitalization.words,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
-                    decoration: _inputDeco('Account name'),
+                    onChanged: acctNameError != null ? (_) => onAcctNameErrorClear?.call() : null,
+                    decoration: _inputDeco('Account name').copyWith(
+                      errorText: acctNameError,
+                      errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   // Type chips
@@ -609,51 +641,12 @@ class _SetupPage extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            // ── Categories ──
-            _SectionLabel('CATEGORIES'),
-            const SizedBox(height: 8),
-            _FormCard(
-              child: Column(
-                children: [
-                  _ToggleOption(
-                    title: 'Full set',
-                    subtitle: '30 categories with subcategories',
-                    isSelected: seedCategories,
-                    onTap: () => onSeedChanged(true),
-                  ),
-                  const SizedBox(height: 8),
-                  _ToggleOption(
-                    title: 'Empty',
-                    subtitle: 'Create your own from scratch',
-                    isSelected: !seedCategories,
-                    onTap: () => onSeedChanged(false),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // ── Entry Mode ──
-            _SectionLabel('TRANSACTION ENTRY'),
-            const SizedBox(height: 8),
-            _FormCard(
-              child: Column(
-                children: [
-                  _ToggleOption(
-                    title: 'Assisted',
-                    subtitle: 'Step-by-step, fast for daily use',
-                    isSelected: entryMode == 'assisted',
-                    onTap: () => onEntryModeChanged('assisted'),
-                  ),
-                  const SizedBox(height: 8),
-                  _ToggleOption(
-                    title: 'Classic form',
-                    subtitle: 'All fields at once, for complex entries',
-                    isSelected: entryMode == 'classic',
-                    onTap: () => onEntryModeChanged('classic'),
-                  ),
-                ],
-              ),
+            // ── More Options (collapsed by default) ──
+            _ExpandableOptions(
+              seedCategories: seedCategories,
+              entryMode: entryMode,
+              onSeedChanged: onSeedChanged,
+              onEntryModeChanged: onEntryModeChanged,
             ),
             const SizedBox(height: 24),
 
@@ -1302,6 +1295,115 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ExpandableOptions extends StatefulWidget {
+  final bool seedCategories;
+  final String entryMode;
+  final ValueChanged<bool> onSeedChanged;
+  final ValueChanged<String> onEntryModeChanged;
+
+  const _ExpandableOptions({
+    required this.seedCategories,
+    required this.entryMode,
+    required this.onSeedChanged,
+    required this.onEntryModeChanged,
+  });
+
+  @override
+  State<_ExpandableOptions> createState() => _ExpandableOptionsState();
+}
+
+class _ExpandableOptionsState extends State<_ExpandableOptions> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Row(
+            children: [
+              AnimatedRotation(
+                turns: _expanded ? 0.25 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(Icons.chevron_right_rounded,
+                    color: Colors.white54, size: 20),
+              ),
+              const SizedBox(width: 4),
+              Text('More options',
+                  style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white54)),
+              const Spacer(),
+              Text(
+                'Categories: ${widget.seedCategories ? "Full set" : "Empty"} · Entry: ${widget.entryMode == "assisted" ? "Assisted" : "Classic"}',
+                style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
+              ),
+            ],
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              _SectionLabel('CATEGORIES'),
+              const SizedBox(height: 8),
+              _FormCard(
+                child: Column(
+                  children: [
+                    _ToggleOption(
+                      title: 'Full set',
+                      subtitle: '30 categories with subcategories',
+                      isSelected: widget.seedCategories,
+                      onTap: () => widget.onSeedChanged(true),
+                    ),
+                    const SizedBox(height: 8),
+                    _ToggleOption(
+                      title: 'Empty',
+                      subtitle: 'Create your own from scratch',
+                      isSelected: !widget.seedCategories,
+                      onTap: () => widget.onSeedChanged(false),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              _SectionLabel('TRANSACTION ENTRY'),
+              const SizedBox(height: 8),
+              _FormCard(
+                child: Column(
+                  children: [
+                    _ToggleOption(
+                      title: 'Assisted',
+                      subtitle: 'Step-by-step, fast for daily use',
+                      isSelected: widget.entryMode == 'assisted',
+                      onTap: () => widget.onEntryModeChanged('assisted'),
+                    ),
+                    const SizedBox(height: 8),
+                    _ToggleOption(
+                      title: 'Classic form',
+                      subtitle: 'All fields at once, for complex entries',
+                      isSelected: widget.entryMode == 'classic',
+                      onTap: () => widget.onEntryModeChanged('classic'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          crossFadeState:
+              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 250),
+        ),
+      ],
     );
   }
 }

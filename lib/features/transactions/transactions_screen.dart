@@ -1015,64 +1015,60 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Widget _buildContent(List<TransactionEntry> entries,
       Map<String, Category> categoryMap, BuildContext context) {
     // Month filtering is already done at the SQL level via
-    // monthlyTransactionsProvider. Apply optional date-range narrowing.
+    // monthlyTransactionsProvider. Apply all filters in a single pass.
     final hasDateFilter = _dateFrom != null || _dateTo != null;
-    var filtered = hasDateFilter
+    final hasTypeFilter = _typeFilter != null;
+    final hasCategoryFilter = _categoryFilter != null;
+    final hasAmountFilter = _amountMin != null || _amountMax != null;
+    final hasSearch = _searchQuery.isNotEmpty;
+    final q = hasSearch ? _searchQuery.toLowerCase() : '';
+    final hasAnyFilter = hasDateFilter || hasTypeFilter || hasCategoryFilter ||
+        hasAmountFilter || hasSearch;
+
+    final filtered = hasAnyFilter
         ? entries.where((e) {
-            final d = e.tx.createdAt.toLocal();
-            final dayOnly = DateTime(d.year, d.month, d.day);
-            if (_dateFrom != null && dayOnly.isBefore(_dateFrom!)) return false;
-            if (_dateTo != null && dayOnly.isAfter(_dateTo!)) return false;
+            // Date range
+            if (hasDateFilter) {
+              final d = e.tx.createdAt.toLocal();
+              final dayOnly = DateTime(d.year, d.month, d.day);
+              if (_dateFrom != null && dayOnly.isBefore(_dateFrom!)) return false;
+              if (_dateTo != null && dayOnly.isAfter(_dateTo!)) return false;
+            }
+            // Type
+            if (hasTypeFilter && e.tx.type != _typeFilter) return false;
+            // Category
+            if (hasCategoryFilter) {
+              var match = e.tx.categoryId == _categoryFilter;
+              if (!match) {
+                for (final l in e.lines) {
+                  if (l.categoryId == _categoryFilter) { match = true; break; }
+                }
+              }
+              if (!match) return false;
+            }
+            // Amount range
+            if (hasAmountFilter) {
+              final amt = e.tx.amount;
+              if (_amountMin != null && amt < _amountMin!) return false;
+              if (_amountMax != null && amt > _amountMax!) return false;
+            }
+            // Search
+            if (hasSearch) {
+              if (e.tx.note.toLowerCase().contains(q)) return true;
+              if (e.accountName.toLowerCase().contains(q)) return true;
+              if (e.tx.amount.toStringAsFixed(2).contains(q)) return true;
+              final cat = e.tx.categoryId != null ? categoryMap[e.tx.categoryId] : null;
+              if (cat != null && cat.name.toLowerCase().contains(q)) return true;
+              for (final line in e.lines) {
+                if (line.note.toLowerCase().contains(q)) return true;
+                final lineCat = line.categoryId != null ? categoryMap[line.categoryId] : null;
+                if (lineCat != null && lineCat.name.toLowerCase().contains(q)) return true;
+              }
+              return false;
+            }
             return true;
           }).toList()
         : entries.toList();
-
-    if (_typeFilter != null) {
-      filtered = filtered.where((e) => e.tx.type == _typeFilter).toList();
-    }
-
-    // Category quick filter (#5)
-    if (_categoryFilter != null) {
-      filtered = filtered.where((e) {
-        if (e.tx.categoryId == _categoryFilter) return true;
-        for (final l in e.lines) {
-          if (l.categoryId == _categoryFilter) return true;
-        }
-        return false;
-      }).toList();
-    }
-
-    // Amount range filter
-    if (_amountMin != null || _amountMax != null) {
-      filtered = filtered.where((e) {
-        final amt = e.tx.amount;
-        if (_amountMin != null && amt < _amountMin!) return false;
-        if (_amountMax != null && amt > _amountMax!) return false;
-        return true;
-      }).toList();
-    }
-
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      filtered = filtered.where((e) {
-        if (e.tx.note.toLowerCase().contains(q)) return true;
-        if (e.accountName.toLowerCase().contains(q)) return true;
-        if (e.tx.amount.toStringAsFixed(2).contains(q)) return true;
-        final cat =
-            e.tx.categoryId != null ? categoryMap[e.tx.categoryId] : null;
-        if (cat != null && cat.name.toLowerCase().contains(q)) return true;
-        for (final line in e.lines) {
-          if (line.note.toLowerCase().contains(q)) return true;
-          final lineCat = line.categoryId != null
-              ? categoryMap[line.categoryId]
-              : null;
-          if (lineCat != null && lineCat.name.toLowerCase().contains(q)) {
-            return true;
-          }
-        }
-        return false;
-      }).toList();
-    }
 
     if (filtered.isEmpty) {
       final hasFilters = _searchQuery.isNotEmpty || _typeFilter != null || hasDateFilter || _amountMin != null || _amountMax != null || _categoryFilter != null;
@@ -1735,7 +1731,8 @@ class _TxTile extends ConsumerWidget {
     final notePreview = _buildNotePreview(catName, displayName);
 
     return Semantics(
-      label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}',
+      label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}, ${tx.type}',
+      hint: 'Long press for options',
       button: true,
       child: GestureDetector(
         onTap: disableTap ? null : () => context.push('/transactions/${tx.id}'),

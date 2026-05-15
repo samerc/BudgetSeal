@@ -28,6 +28,7 @@ import '../../shared/widgets/animated_amount.dart';
 import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -46,6 +47,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   @override
   void initState() {
     super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      if (mounted) {
+        setState(() => _showWeekly = prefs.getBool('dashboard_show_weekly') ?? false);
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showHintIfNeeded(
@@ -241,8 +247,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         categorySpend: catSpend,
                         categoryColors: catColors,
                         showWeekly: _showWeekly,
-                        onTogglePeriod: () =>
-                            setState(() => _showWeekly = !_showWeekly),
+                        onTogglePeriod: () {
+                            setState(() => _showWeekly = !_showWeekly);
+                            SharedPreferences.getInstance().then((p) =>
+                                p.setBool('dashboard_show_weekly', _showWeekly));
+                          },
                       ));
                     },
                     loading: () => const _ShimmerCard(height: 220),
@@ -304,7 +313,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       color = AppColors.caution;
                     }
 
-                    if (message == null) return const SizedBox.shrink();
+                    if (message == null) {
+                      message = 'Spending is on track this month';
+                      icon = Icons.check_circle_outline_rounded;
+                      color = AppColors.healthy;
+                    }
 
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -358,6 +371,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: Icons.savings_rounded,
                         label: 'Fund',
+                        tooltip: 'Fund envelopes',
                         color: const Color(0xFF7E57C2),
                         onTap: () => context.push('/funding'),
                       ),
@@ -365,6 +379,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: Icons.call_split_rounded,
                         label: 'Split',
+                        tooltip: 'Split a bill',
                         color: const Color(0xFFFF8A65),
                         onTap: () => context.push('/bill-splitter'),
                       ),
@@ -699,7 +714,11 @@ class _SpendingOverviewCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              SizedBox(
+              Semantics(
+                label: expense > 0
+                    ? 'Spending chart, total ${formatAmount(expense, currency: currency)}, ${topCategories.length} categories'
+                    : 'No spending this period',
+                child: SizedBox(
                 width: 120,
                 height: 120,
                 child: expense > 0
@@ -761,7 +780,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                           ],
                         ),
                       ),
-              ),
+              )),
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
@@ -875,11 +894,13 @@ class _QuickAction extends StatefulWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final String? tooltip;
   const _QuickAction(
       {required this.icon,
       required this.label,
       required this.color,
-      required this.onTap});
+      required this.onTap,
+      this.tooltip});
 
   @override
   State<_QuickAction> createState() => _QuickActionState();
@@ -892,10 +913,10 @@ class _QuickActionState extends State<_QuickAction> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Semantics(
-        label: 'Add ${widget.label}',
+        label: widget.tooltip ?? 'Add ${widget.label}',
         button: true,
         child: Tooltip(
-          message: 'Add ${widget.label}',
+          message: widget.tooltip ?? 'Add ${widget.label}',
           child: GestureDetector(
             onTapDown: (_) => setState(() => _pressed = true),
             onTapUp: (_) => setState(() => _pressed = false),

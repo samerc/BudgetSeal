@@ -780,7 +780,7 @@ class _AllocationDetailScreenState
         hasTarget ? (mainBalance / _targetAmount).clamp(0.0, 1.0) : null;
 
     // Trigger confetti when savings goal is reached
-    if ((_type == 'saving' || _type == 'flexible') && hasTarget && mainBalance >= _targetAmount &&
+    if (_type == 'flexible' && hasTarget && mainBalance >= _targetAmount &&
         !_confettiPlayed) {
       _confettiPlayed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {

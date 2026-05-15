@@ -271,7 +271,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 15
+### Schema Version: 16
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -280,6 +280,7 @@ v11→v12 added `deleted` (BOOLEAN, default false) to `transactions` for soft-de
 v12→v13 added `autoReset` (BOOLEAN, default true) to `allocations` for period reset behavior.
 v13→v14 added `decimalPlaces` (nullable INT) to `accounts` for per-currency decimal precision, `status` (nullable TEXT) to `transactions` for upcoming/skipped bills, and created `objectives` table for goals and loan tracking.
 v14→v15 added `isTravel` (BOOLEAN, default false) to `accounts` for travel wallet support.
+v15→v16 added performance indexes: `idx_transactions_household_date`, `idx_transactions_household_deleted`, `idx_transaction_lines_tx`, `idx_ledger_allocation`, `idx_allocations_household`, `idx_categories_household`.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -479,6 +480,18 @@ All 4 main tabs (Dashboard, Transactions, Allocations, Reports) use `AutomaticKe
 
 ### Sync Batching
 `SyncEngine.restoreFromJson()` uses Drift `batch()` for bulk inserts (one DB round-trip instead of N). `_mergeTable()` bulk-fetches all existing IDs in one query instead of N+1 per-row lookups.
+
+### Database Indexes (v16)
+Six indexes on hot query paths: transactions by (household_id, created_at) and (household_id, deleted), transaction_lines by transaction_id, allocation_ledger by allocation_id, allocations and categories by household_id. Eliminates full table scans for all core list/balance queries.
+
+### Allocation Engine Batching
+`recordTransaction()` pre-fetches all category→allocation mappings and allocation currencies in 3 batched queries before the line loop, instead of 2 queries per line (N+1 → O(1) per write).
+
+### Transaction List Filtering
+All filters (date range, type, category, amount, search) applied in a single `.where()` pass instead of 5 sequential `.toList()` copies. Reduces allocations and iteration from O(5N) to O(N).
+
+### RepaintBoundary on Animations
+`AnimatedCircularProgress` and `AnimatedAmount` wrapped in `RepaintBoundary` to isolate their repaints from parent widget trees. `AnimatedCircularProgress` also hoists child into `AnimatedBuilder.child` to avoid rebuilding children on every animation frame.
 
 ## Web Companion
 
@@ -704,7 +717,7 @@ Flexible envelopes with a target trigger a 2-second confetti burst (via `confett
 
 ## Duplicate Detection
 
-Both the assisted flow and classic form check for duplicate transactions before saving. If a transaction with the same amount, category, and date already exists, a "Possible Duplicate" dialog asks the user to confirm. Skipped when editing existing transactions or for transfers.
+Both the assisted flow and classic form check for duplicate transactions before saving. If a transaction with the same amount, category, and date already exists, a "Possible Duplicate" dialog shows the matched transaction's title, amount, and date so the user can compare before confirming. Skipped when editing existing transactions or for transfers.
 
 ## Transfer Display
 
@@ -758,7 +771,7 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 ## Onboarding
 
-3-page flow: Welcome (how-it-works + Restore/Join buttons) → Setup (household name, currency, period day, account, categories toggle, entry mode) → Done.
+3-page flow: Welcome (how-it-works + Restore/Join buttons) → Setup (household name, currency, period day, account + expandable "More options" for categories & entry mode) → Done. Setup uses `db.batch()` for atomic account + category creation. Field-level validation shows amber error text when household or account name is empty, cleared on typing.
 
 ## Auto-fill
 
@@ -807,7 +820,8 @@ Accounts are accessed from More > Accounts.
 - **Existing objectives**: summary view by default — progress hero card, summary info card (contact, currency, deadline, remaining), payment history list. Edit form hidden behind 3-dot menu → "Edit Settings".
 - **Payment sheet**: account picker, optional category picker (filtered by tx type), amount calculator. Category choice is remembered per objective for the next payment.
 - **Payments create real transactions** via `AllocationEngine.recordTransaction()` with optional `categoryId` on `TxLine`.
-- **Payment history**: queries transactions matching the objective's note pattern, displays with date, note, and colored amount.
+- **Payment history**: payments are linked by `[obj:UUID]` tag embedded in the transaction note. Query searches by ID tag first, falls back to name matching for legacy payments. The tag is stripped from display. Renaming an objective does not break payment history.
+- **Loan direction hint**: a text hint below the direction toggle explains what each direction means ("You gave money — payments are incoming" / "You owe money — payments are outgoing").
 
 ## Travel Exchange
 

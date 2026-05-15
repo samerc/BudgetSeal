@@ -428,6 +428,9 @@
   <li><strong>Base currency</strong> — the main currency you use (USD, EUR, etc.)</li>
   <li><strong>Period start day</strong> — when your monthly budget cycle starts (1st, 15th, etc.)</li>
   <li><strong>First account</strong> — name, type (Cash/Bank/Credit/Digital), and opening balance</li>
+</ul>
+<p>Under <strong>More options</strong> (tap to expand), you can also customize:</p>
+<ul>
   <li><strong>Categories</strong> — start with a full set of 30 categories, or create your own from scratch</li>
   <li><strong>Entry mode</strong> — choose Assisted (step-by-step) or Classic (all fields at once)</li>
 </ul>
@@ -530,14 +533,11 @@
 
 <h3>Two Entry Modes</h3>
 
-<p><strong>Assisted mode</strong> (default) walks you through step by step:</p>
+<p><strong>Assisted mode</strong> (default) walks you through step by step. A progress indicator (dots) shows which step you're on:</p>
 <ol>
-  <li>Choose expense, income, or transfer</li>
-  <li>Enter a title — the app may auto-detect the category</li>
-  <li>Pick or confirm the category</li>
-  <li>Enter the amount using the built-in calculator</li>
-  <li>Select an account</li>
-  <li>Tap <strong>Save</strong></li>
+  <li><strong>Step 1</strong> — Choose expense/income/transfer, then enter a title (the app may auto-detect the category)</li>
+  <li><strong>Step 2</strong> — Pick or confirm the category</li>
+  <li><strong>Step 3</strong> — Enter the amount, select an account, and tap <strong>Save</strong></li>
 </ol>
 
 <p><strong>Classic mode</strong> shows all fields on one screen — useful for complex entries with multiple items, notes, or foreign currencies.</p>
@@ -565,6 +565,9 @@
   <li>Enter the amount</li>
   <li>If the accounts are in different currencies, an exchange rate field appears — enter how much the destination receives</li>
 </ol>
+
+<h3>Duplicate Detection</h3>
+<p>Before saving, PocketPlan checks if a transaction with the same amount, category, and date already exists. If a possible duplicate is found, a dialog shows the existing transaction's details so you can decide whether to save or cancel.</p>
 
 <h3>Auto-fill</h3>
 <p>When you pick a category, PocketPlan can automatically fill in the account, title, and amount from your last transaction with that category. Configure what gets auto-filled in <strong>Settings &amp; Customization</strong> → <strong>Auto-fill</strong>.</p>
@@ -703,7 +706,7 @@
   <li><strong>Move to...</strong> — transfer the leftover to another envelope (e.g., savings)</li>
 </ul>
 
-<p>Envelopes with <strong>Auto-reset</strong> enabled handle this automatically. Others will prompt you to review.</p>
+<p>Envelopes with <strong>Auto-reset</strong> enabled handle this automatically. Others will trigger a banner on the Budget tab showing exactly how many envelopes need your review (e.g., "3 envelopes need reset").</p>
 
 <!-- ══════════════════════════════════════════ -->
 <h2 id="recurring">Recurring Transactions</h2>
@@ -806,13 +809,13 @@
   <li>A real transaction is created — it appears in your transaction history</li>
 </ol>
 
-<p>The detail screen shows a <strong>summary card</strong> (currency, deadline, remaining) and a <strong>payment history</strong> listing all recorded transactions. To edit the goal's settings, tap the <strong>3-dot menu</strong> → <strong>Edit Settings</strong>.</p>
+<p>The detail screen shows a <strong>summary card</strong> (currency, deadline, remaining) and a <strong>payment history</strong> listing all recorded transactions. Payments are linked to the goal by an internal ID, so renaming the goal won't break the history. To edit the goal's settings, tap the <strong>3-dot menu</strong> → <strong>Edit Settings</strong>.</p>
 
 <h3>Loans</h3>
 <p>Track money you've lent to someone or borrowed from someone.</p>
 <ol>
   <li>Tap <strong>Add</strong> → select <strong>Loan</strong></li>
-  <li>Enter the loan name, person, amount, and direction (<strong>I lent</strong> or <strong>I borrowed</strong>)</li>
+  <li>Enter the loan name, person, amount, and direction (<strong>I lent</strong> or <strong>I borrowed</strong>) — a hint below explains what each direction means</li>
   <li>Tap <strong>Save</strong></li>
 </ol>
 

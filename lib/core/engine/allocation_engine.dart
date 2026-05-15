@@ -332,6 +332,8 @@ class AllocationEngine {
     assert(lines.every((l) => l.amount >= 0), 'line amounts must be non-negative');
 
     final txId = _uuid.v4();
+
+    await _db.transaction(() async {
     // Total in base currency (sum of each line converted via its rate).
     // Skip lines with bogus rate (different currency but rate=1.0 means not set).
     final totalBaseAmount = lines.fold(0.0, (sum, l) {
@@ -377,16 +379,56 @@ class AllocationEngine {
     // Convert to the envelope's target currency (or base) so envelopes
     // always track a single currency instead of accumulating foreign debt.
     if (type == 'expense') {
+      // Pre-fetch category→allocation mappings and allocation currencies
+      // in batch to avoid N+1 queries per line.
+      final categoryIds = lines
+          .where((l) => l.categoryId != null)
+          .map((l) => l.categoryId!)
+          .toSet();
+      final catAllocMap = <String, String>{};
+      final allocCurrencyMap = <String, String>{};
+
+      if (categoryIds.isNotEmpty) {
+        // Batch fetch categories
+        final cats = await (_db.select(_db.categories)
+              ..where((c) => c.id.isIn(categoryIds)))
+            .get();
+        final linkedAllocIds = <String>{};
+        final unlinkedCatIds = <String>[];
+        for (final cat in cats) {
+          if (cat.allocationId != null) {
+            catAllocMap[cat.id] = cat.allocationId!;
+            linkedAllocIds.add(cat.allocationId!);
+          } else {
+            unlinkedCatIds.add(cat.id);
+          }
+        }
+        // Legacy fallback: categories without allocationId
+        if (unlinkedCatIds.isNotEmpty) {
+          final legacyAllocs = await (_db.select(_db.allocations)
+                ..where((a) => a.categoryId.isIn(unlinkedCatIds)))
+              .get();
+          for (final a in legacyAllocs) {
+            catAllocMap[a.categoryId] = a.id;
+            linkedAllocIds.add(a.id);
+          }
+        }
+        // Batch fetch allocation currencies
+        if (linkedAllocIds.isNotEmpty) {
+          final allocs = await (_db.select(_db.allocations)
+                ..where((a) => a.id.isIn(linkedAllocIds)))
+              .get();
+          for (final a in allocs) {
+            allocCurrencyMap[a.id] = a.targetCurrency ?? baseCurrency;
+          }
+        }
+      }
+
       for (final line in lines) {
         if (line.categoryId != null) {
-          final allocationId = await _allocationIdForCategory(line.categoryId!);
+          final allocationId = catAllocMap[line.categoryId!];
           if (allocationId != null) {
-            // Look up the envelope's target currency
-            final alloc = await (_db.select(_db.allocations)
-                  ..where((a) => a.id.equals(allocationId))
-                  ..limit(1))
-                .getSingleOrNull();
-            final targetCurrency = alloc?.targetCurrency ?? baseCurrency;
+            final targetCurrency = allocCurrencyMap[allocationId] ?? baseCurrency;
 
             double debitAmount;
             String debitCurrency;
@@ -431,6 +473,8 @@ class AllocationEngine {
         }
       }
     }
+
+    }); // end db.transaction
 
     return txId;
   }
@@ -480,22 +524,4 @@ class AllocationEngine {
     ));
   }
 
-  /// Look up the allocation (envelope) linked to a category.
-  /// Uses categories.allocationId (many categories → one envelope).
-  /// Falls back to legacy allocations.categoryId for backward compatibility.
-  Future<String?> _allocationIdForCategory(String categoryId) async {
-    // Primary: check category.allocationId.
-    final cat = await (_db.select(_db.categories)
-          ..where((c) => c.id.equals(categoryId))
-          ..limit(1))
-        .getSingleOrNull();
-    if (cat?.allocationId != null) return cat!.allocationId;
-
-    // Fallback: legacy 1:1 via allocations.categoryId.
-    final results = await (_db.select(_db.allocations)
-          ..where((a) => a.categoryId.equals(categoryId))
-          ..limit(1))
-        .get();
-    return results.isEmpty ? null : results.first.id;
-  }
 }

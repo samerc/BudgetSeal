@@ -488,13 +488,13 @@ class _RecurringTile extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 iconSize: 20,
-                tooltip: item.enabled ? 'Pause' : 'Resume',
+                tooltip: item.enabled ? 'Pause recurring' : 'Resume recurring',
                 icon: Icon(
                   item.enabled
-                      ? Icons.pause_circle_outline_rounded
-                      : Icons.play_circle_outline_rounded,
+                      ? Icons.pause_circle_rounded
+                      : Icons.play_circle_rounded,
                   color: item.enabled
-                      ? AppColors.ts(context)
+                      ? AppColors.th(context)
                       : AppColors.healthy,
                 ),
                 onPressed: () => onToggle(!item.enabled),

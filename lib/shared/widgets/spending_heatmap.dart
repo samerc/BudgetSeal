@@ -120,17 +120,21 @@ class SpendingHeatmap extends StatelessWidget {
 
                   final color = _cellColor(
                     context, day, maxExpense, maxIncome);
+                  final tip = _tooltipText(date, day);
 
                   return Padding(
                     padding: EdgeInsets.all(cellSpacing / 2),
-                    child: Tooltip(
-                      message: _tooltipText(date, day),
-                      child: Container(
-                        width: cellSize,
-                        height: cellSize,
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(3),
+                    child: Semantics(
+                      label: tip,
+                      child: Tooltip(
+                        message: tip,
+                        child: Container(
+                          width: cellSize,
+                          height: cellSize,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
                         ),
                       ),
                     ),

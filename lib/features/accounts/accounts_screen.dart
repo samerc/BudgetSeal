@@ -25,6 +25,7 @@ class AccountsScreen extends ConsumerStatefulWidget {
 
 class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   bool _showArchived = false;
+  String _sortBy = 'name'; // 'name', 'balance', 'type'
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +43,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             onSelected: (v) {
               if (v == 'archived') {
                 setState(() => _showArchived = !_showArchived);
+              } else if (v == 'sort_name' || v == 'sort_balance' || v == 'sort_type') {
+                setState(() => _sortBy = v.replaceFirst('sort_', ''));
               }
             },
             itemBuilder: (_) => [
@@ -59,6 +62,43 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   Text(_showArchived
                       ? 'Hide Archived'
                       : 'Show Archived'),
+                ]),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'sort_name',
+                child: Row(children: [
+                  Icon(Icons.sort_by_alpha_rounded, size: 18,
+                      color: _sortBy == 'name' ? AppColors.accent : AppColors.ts(context)),
+                  const SizedBox(width: 10),
+                  Text('Sort by name',
+                      style: TextStyle(
+                        fontWeight: _sortBy == 'name' ? FontWeight.w700 : FontWeight.w400,
+                      )),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'sort_balance',
+                child: Row(children: [
+                  Icon(Icons.account_balance_wallet_rounded, size: 18,
+                      color: _sortBy == 'balance' ? AppColors.accent : AppColors.ts(context)),
+                  const SizedBox(width: 10),
+                  Text('Sort by balance',
+                      style: TextStyle(
+                        fontWeight: _sortBy == 'balance' ? FontWeight.w700 : FontWeight.w400,
+                      )),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'sort_type',
+                child: Row(children: [
+                  Icon(Icons.category_rounded, size: 18,
+                      color: _sortBy == 'type' ? AppColors.accent : AppColors.ts(context)),
+                  const SizedBox(width: 10),
+                  Text('Sort by type',
+                      style: TextStyle(
+                        fontWeight: _sortBy == 'type' ? FontWeight.w700 : FontWeight.w400,
+                      )),
                 ]),
               ),
             ],
@@ -92,13 +132,25 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   (totals[ab.account.currency] ?? 0) + ab.balance;
             }
 
+            // Apply sort
+            final sorted = List.of(accounts);
+            switch (_sortBy) {
+              case 'balance':
+                sorted.sort((a, b) => b.balance.compareTo(a.balance));
+              case 'type':
+                sorted.sort((a, b) => a.account.type.compareTo(b.account.type));
+              default:
+                // already sorted by name from provider
+                break;
+            }
+
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
               children: [
                 // Total balance header
                 _TotalBalanceCard(totals: totals),
                 const SizedBox(height: 16),
-                ...accounts.map((ab) => _AccountTile(
+                ...sorted.map((ab) => _AccountTile(
                       accountWithBalance: ab,
                       onTap: () => context.push('/accounts/${ab.account.id}'),
                     )),

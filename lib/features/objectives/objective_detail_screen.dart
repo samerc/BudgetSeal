@@ -99,17 +99,29 @@ class _ObjectiveDetailScreenState
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return;
 
-    // Search for transactions with matching note pattern
+    // Primary: search by objective ID tag (new format)
+    // Fallback: search by name (legacy transactions before ID tagging)
+    final idTag = '[obj:${widget.objectiveId}]';
     final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
 
-    final txs = await (db.select(db.transactions)
+    var txs = await (db.select(db.transactions)
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
-              t.note.like('%$name%'))
+              t.note.like('%$idTag%'))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .get();
+
+    // Fallback: match by name for pre-existing payments
+    if (txs.isEmpty && name.isNotEmpty) {
+      txs = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.deleted.equals(false) &
+                t.note.like('%$name%'))
+            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+          .get();
+    }
 
     if (mounted) setState(() => _payments = txs);
   }
@@ -415,8 +427,8 @@ class _ObjectiveDetailScreenState
         ],
         baseCurrency: ref.read(householdProvider).value?.baseCurrency ?? 'USD',
         note: isLoan
-            ? (isLent ? 'Payment received — $noteName' : 'Payment — $noteName')
-            : 'Goal savings — $noteName',
+            ? (isLent ? 'Payment received — $noteName [obj:${widget.objectiveId}]' : 'Payment — $noteName [obj:${widget.objectiveId}]')
+            : 'Goal savings — $noteName [obj:${widget.objectiveId}]',
         deviceId: 'local',
         date: DateTime.now(),
       );
@@ -658,7 +670,7 @@ class _ObjectiveDetailScreenState
                             ),
                           ),
                           if (tx.note.isNotEmpty)
-                            Text(tx.note,
+                            Text(tx.note.replaceAll(RegExp(r'\s*\[obj:[^\]]+\]'), ''),
                                 style: TextStyle(fontSize: 11, color: AppColors.ts(context)),
                                 maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],
@@ -795,21 +807,33 @@ class _ObjectiveDetailScreenState
             Divider(height: 1, color: AppColors.bd(context)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(children: [
-                Text('Direction', style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
-                const Spacer(),
-                SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'lent', label: Text('I lent')),
-                    ButtonSegment(value: 'borrowed', label: Text('I borrowed')),
-                  ],
-                  selected: {_direction ?? 'lent'},
-                  onSelectionChanged: (s) => setState(() => _direction = s.first),
-                  style: SegmentedButton.styleFrom(
-                    textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    Text('Direction', style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
+                    const Spacer(),
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(value: 'lent', label: Text('I lent')),
+                        ButtonSegment(value: 'borrowed', label: Text('I borrowed')),
+                      ],
+                      selected: {_direction ?? 'lent'},
+                      onSelectionChanged: (s) => setState(() => _direction = s.first),
+                      style: SegmentedButton.styleFrom(
+                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 4),
+                  Text(
+                    (_direction ?? 'lent') == 'lent'
+                        ? 'You gave money — payments are incoming'
+                        : 'You owe money — payments are outgoing',
+                    style: TextStyle(fontSize: 11, color: AppColors.th(context)),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
           ])),
           const SizedBox(height: 10),
