@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -46,7 +45,7 @@ class _TappableState extends State<Tappable>
   late final Animation<double> _scaleAnimation;
   late final Animation<double> _opacityAnimation;
 
-  static final bool _isIOS = Platform.isIOS;
+  static final bool _isIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   void initState() {

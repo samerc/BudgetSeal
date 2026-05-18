@@ -87,6 +87,15 @@ class _RollingNumberState extends State<RollingNumber>
       return Text(_newText, style: style, textAlign: widget.textAlign);
     }
 
+    // Measure digit size once per build (not per animation frame)
+    final digitPainter = TextPainter(
+      text: TextSpan(text: '0', style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final digitHeight = digitPainter.height;
+    final digitWidth = digitPainter.width;
+    digitPainter.dispose();
+
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _animation,
@@ -125,6 +134,8 @@ class _RollingNumberState extends State<RollingNumber>
                   newDigit: int.parse(newChar),
                   progress: _animation.value,
                   style: style,
+                  digitHeight: digitHeight,
+                  digitWidth: digitWidth,
                 );
               }
 
@@ -151,22 +162,20 @@ class _RollingDigit extends StatelessWidget {
   final int newDigit;
   final double progress;
   final TextStyle style;
+  final double digitHeight;
+  final double digitWidth;
 
   const _RollingDigit({
     required this.oldDigit,
     required this.newDigit,
     required this.progress,
     required this.style,
+    required this.digitHeight,
+    required this.digitWidth,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Measure digit height
-    final textPainter = TextPainter(
-      text: TextSpan(text: '0', style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    final digitHeight = textPainter.height;
 
     // Determine shortest roll direction (wrap around 0↔9)
     int diff = newDigit - oldDigit;
@@ -176,7 +185,7 @@ class _RollingDigit extends StatelessWidget {
     final offset = diff * progress * digitHeight;
 
     return SizedBox(
-      width: textPainter.width,
+      width: digitWidth,
       height: digitHeight,
       child: ClipRect(
         child: Transform.translate(
