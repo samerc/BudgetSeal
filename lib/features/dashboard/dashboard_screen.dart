@@ -24,6 +24,7 @@ import '../../shared/widgets/section_header.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../shared/widgets/animated_amount.dart';
+import '../../shared/widgets/rolling_number.dart';
 import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
@@ -437,7 +438,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        AnimatedAmount(
+                                        RollingNumber(
                                           amount: baseNetWorth,
                                           currency: baseCurrency,
                                           lazyFirstRender: false,
@@ -484,7 +485,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        AnimatedAmount(
+                                        RollingNumber(
                                           amount: unallocBase,
                                           currency: baseCurrency,
                                           lazyFirstRender: false,
