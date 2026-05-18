@@ -55,12 +55,15 @@ class NotificationService {
     final ledgerDao = LedgerDao(db);
 
     final allocations = await dao.watchAll(householdId).first;
-    final overspent = <String>[];
+    if (allocations.isEmpty) return;
 
+    // Batch-fetch all balances in one query
+    final allBalances = await ledgerDao.getAllBalances(
+        allocations.map((a) => a.allocation.id).toList());
+
+    final overspent = <String>[];
     for (final awc in allocations) {
-      final balances =
-          await ledgerDao.getBalanceByCurrency(awc.allocation.id);
-      // Check each currency independently — don't sum across currencies
+      final balances = allBalances[awc.allocation.id] ?? {};
       final hasNegative = balances.values.any((v) => v < -0.01);
       if (hasNegative) {
         overspent.add(awc.allocation.name);

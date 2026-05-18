@@ -45,12 +45,15 @@ class PeriodResetService {
           ..where((a) => a.periodicity.equals('periodic')))
         .get();
 
+    // Batch-fetch all balances in one query instead of per-allocation
+    final allocIds = allocs.map((a) => a.id).toList();
+    final allBalances = await ledgerDao.getAllBalances(allocIds);
+
     int autoResetCount = 0;
     for (final alloc in allocs) {
       if (!alloc.autoReset) continue; // manual — skip
 
-      // Get current balance per currency
-      final balances = await ledgerDao.getBalanceByCurrency(alloc.id);
+      final balances = allBalances[alloc.id] ?? {};
       for (final entry in balances.entries) {
         final balance = entry.value;
         if (balance.abs() < 0.01) continue;
@@ -98,11 +101,14 @@ class PeriodResetService {
           ..where((a) => a.autoReset.equals(false)))
         .get();
 
+    if (allocs.isEmpty) return 0;
+    final allBalances = await ledgerDao.getAllBalances(
+        allocs.map((a) => a.id).toList());
+
     int pending = 0;
     for (final alloc in allocs) {
-      final balances = await ledgerDao.getBalanceByCurrency(alloc.id);
-      final hasBalance = balances.values.any((v) => v.abs() > 0.01);
-      if (hasBalance) pending++;
+      final balances = allBalances[alloc.id] ?? {};
+      if (balances.values.any((v) => v.abs() > 0.01)) pending++;
     }
     return pending;
   }
@@ -118,13 +124,14 @@ class PeriodResetService {
           ..where((a) => a.autoReset.equals(false)))
         .get();
 
-    final ids = <String>[];
-    for (final alloc in allocs) {
-      final balances = await ledgerDao.getBalanceByCurrency(alloc.id);
-      if (balances.values.any((v) => v.abs() > 0.01)) {
-        ids.add(alloc.id);
-      }
-    }
-    return ids;
+    if (allocs.isEmpty) return [];
+    final allBalances = await ledgerDao.getAllBalances(
+        allocs.map((a) => a.id).toList());
+
+    return [
+      for (final alloc in allocs)
+        if ((allBalances[alloc.id] ?? {}).values.any((v) => v.abs() > 0.01))
+          alloc.id,
+    ];
   }
 }

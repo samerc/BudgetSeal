@@ -56,13 +56,18 @@ class PeriodEngine {
   Future<List<FundingSuggestion>> generateFundingSuggestions(
       String householdId) async {
     final allocs = await _allocationsDao.watchAll(householdId).first;
+    final periodicAllocs = allocs
+        .where((awc) => awc.allocation.periodicity != 'permanent')
+        .toList();
+    if (periodicAllocs.isEmpty) return [];
+
+    // Batch-fetch all balances in one query
+    final allBalances = await _ledgerDao.getAllBalances(
+        periodicAllocs.map((a) => a.allocation.id).toList());
+
     final suggestions = <FundingSuggestion>[];
-
-    for (final awc in allocs) {
-      if (awc.allocation.periodicity == 'permanent') continue;
-
-      // Find last period's funding entries
-      final ledger = await _ledgerDao.getBalanceByCurrency(awc.allocation.id);
+    for (final awc in periodicAllocs) {
+      final ledger = allBalances[awc.allocation.id] ?? {};
       final fundingAmounts = <String, double>{};
 
       // Use current balance as funding suggestion baseline
