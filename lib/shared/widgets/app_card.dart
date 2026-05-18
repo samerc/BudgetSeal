@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
+import 'tappable.dart';
 
 /// Standardized card container used across all screens.
 ///
-/// Uses the design token values: radius 14, padding 16h/14v,
-/// theme-aware background and border.
+/// Uses the design token values: radius 16, padding 16h/14v,
+/// theme-aware background and border. Tappable cards get premium
+/// scale-down physics and platform-aware touch feedback.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -14,12 +16,14 @@ class AppCard extends StatelessWidget {
     this.padding,
     this.margin,
     this.onTap,
+    this.onLongPress,
   });
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -34,33 +38,17 @@ class AppCard extends StatelessWidget {
       child: child,
     );
 
-    Widget card = DecoratedBox(
-      decoration: decoration,
-      child: onTap != null
-          ? Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: CardTokens.borderRadius,
-                child: content,
-              ),
-            )
-          : content,
-    );
-
-    if (onTap != null) {
-      // Wrap with ClipRRect so ink splash respects radius
+    Widget card;
+    if (onTap != null || onLongPress != null) {
       card = ClipRRect(
         borderRadius: CardTokens.borderRadius,
         child: DecoratedBox(
           decoration: decoration,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: CardTokens.borderRadius,
-              child: content,
-            ),
+          child: Tappable(
+            onTap: onTap,
+            onLongPress: onLongPress,
+            borderRadius: CardTokens.borderRadius,
+            child: content,
           ),
         ),
       );

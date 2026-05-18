@@ -16,6 +16,7 @@ import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/faded_edges.dart';
 import '../../core/providers/tx_list_settings_provider.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -692,6 +693,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ),
                 // Month list
                 Expanded(
+                  child: FadedEdges(
+                  startFade: 12,
+                  endFade: 12,
                   child: ListView.builder(
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
@@ -739,7 +743,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       );
                     },
                   ),
-                ),
+                )),
                 // Right arrow (hidden if at current month)
                 if (!_isFutureMonth && !(_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month))
                 GestureDetector(

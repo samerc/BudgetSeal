@@ -19,7 +19,6 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
-import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
@@ -28,6 +27,7 @@ import '../../shared/widgets/animated_amount.dart';
 import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
+import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -889,7 +889,7 @@ class _MiniStat extends StatelessWidget {
 
 // ─── Quick Action ───────────────────────────────────────────────────────────
 
-class _QuickAction extends StatefulWidget {
+class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -903,54 +903,40 @@ class _QuickAction extends StatefulWidget {
       this.tooltip});
 
   @override
-  State<_QuickAction> createState() => _QuickActionState();
-}
-
-class _QuickActionState extends State<_QuickAction> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Semantics(
-        label: widget.tooltip ?? 'Add ${widget.label}',
+        label: tooltip ?? 'Add $label',
         button: true,
         child: Tooltip(
-          message: widget.tooltip ?? 'Add ${widget.label}',
-          child: GestureDetector(
-            onTapDown: (_) => setState(() => _pressed = true),
-            onTapUp: (_) => setState(() => _pressed = false),
-            onTapCancel: () => setState(() => _pressed = false),
-            onTap: () {
-              hapticLight();
-              widget.onTap();
-            },
-            child: AnimatedScale(
-              scale: _pressed ? 0.92 : 1.0,
-              duration: const Duration(milliseconds: 100),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: widget.color.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                ),
-                child: Column(children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                        color: widget.color.withValues(alpha: 0.12),
-                        shape: BoxShape.circle),
-                    child: Icon(widget.icon, size: 18, color: widget.color),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(widget.label,
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: widget.color)),
-                ]),
+          message: tooltip ?? 'Add $label',
+          child: Tappable(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(CardTokens.radius),
+            scaleFactor: 0.93,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
+              child: Column(children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 18, color: color),
+                ),
+                const SizedBox(height: 6),
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: color)),
+              ]),
             ),
           ),
         ),
@@ -959,7 +945,7 @@ class _QuickActionState extends State<_QuickAction> {
   }
 }
 
-// ─── Recent Transaction Tile ────────────────────────────────────────────────
+// ─── Recent Transaction Tile ──────────────────────────────────────────────── ────────────────────────────────────────────────
 
 class _RecentTxTile extends ConsumerWidget {
   final TransactionEntry entry;
