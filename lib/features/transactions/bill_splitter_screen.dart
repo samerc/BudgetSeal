@@ -75,7 +75,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   // ─── Navigation ───────────────────────────────────────────────────────────
 
-  void _goToStep(int step) => setState(() => _step = step);
+  void _goToStep(int step) => setState(() {
+    _step = step;
+    _currencyExpanded = false; // reset expansion when changing steps
+  });
 
   bool get _canProceedFromItems => _items.isNotEmpty;
 
