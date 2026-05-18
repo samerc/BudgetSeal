@@ -172,5 +172,10 @@ Future<String?> _savePickedFile(XFile picked) async {
   final savedPath = p.join(receiptsDir.path, fileName);
   await File(picked.path).copy(savedPath);
 
+  // Clean up the temp file from ImagePicker
+  try {
+    await File(picked.path).delete();
+  } catch (_) {}
+
   return fileName; // Return filename only, not the full path
 }

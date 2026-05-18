@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/ledger_dao.dart';
+import '../../shared/utils/receipt_helper.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -362,7 +363,16 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           ..where((t) => t.deleted.equals(true)))
         .get();
 
+    // Delete receipt files before purging DB rows
+    final receiptsDir = await getReceiptsDirectory();
     for (final tx in deleted) {
+      final paths = parseReceiptPaths(tx.receiptPath);
+      for (final filename in paths) {
+        try {
+          final file = File(p.join(receiptsDir.path, filename));
+          if (file.existsSync()) await file.delete();
+        } catch (_) {}
+      }
       await (db.delete(db.transactionLines)
             ..where((l) => l.transactionId.equals(tx.id)))
           .go();

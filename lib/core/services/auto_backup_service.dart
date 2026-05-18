@@ -125,7 +125,7 @@ class AutoBackupService {
         .whereType<File>()
         .where((f) => f.path.endsWith('.db'))
         .toList()
-      ..sort((a, b) => b.path.compareTo(a.path)); // newest first
+      ..sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync())); // newest first
 
     if (files.length > retention) {
       for (final old in files.skip(retention)) {

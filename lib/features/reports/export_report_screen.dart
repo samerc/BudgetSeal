@@ -206,6 +206,14 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       }
     } finally {
       if (mounted) setState(() => _exporting = false);
+      // Clean up temp file after sharing
+      try {
+        final tempDir = await getTemporaryDirectory();
+        final fileName =
+            'pocketplan_report_${DateFormat('yyyy_MM').format(_month)}.html';
+        final file = File('${tempDir.path}/$fileName');
+        if (file.existsSync()) await file.delete();
+      } catch (_) {}
     }
   }
 
