@@ -674,6 +674,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
   Future<void> _setPassword() async {
     final ctrl = TextEditingController();
     final confirmCtrl = TextEditingController();
+    try {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -738,6 +739,10 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
           behavior: SnackBarBehavior.floating,
         ));
       }
+    }
+    } finally {
+      ctrl.dispose();
+      confirmCtrl.dispose();
     }
   }
 

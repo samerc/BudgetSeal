@@ -333,6 +333,7 @@ class _AssistedTransactionScreenState
         );
       },
     ).then((_) {
+      ctrl.dispose();
       // Only pop the screen if the user didn't proceed to category selection.
       if (!movedForward && mounted) {
         context.pop();
@@ -345,6 +346,7 @@ class _AssistedTransactionScreenState
   void _showCategoryPopup() {
     final categories = ref.read(categoriesProvider).value ?? [];
 
+    final searchFocus = FocusNode();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -355,7 +357,6 @@ class _AssistedTransactionScreenState
         var localType = _type;
         String? expandedParentId;
         var searchQuery = '';
-        final searchFocus = FocusNode();
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final allForType = categories
@@ -660,6 +661,7 @@ class _AssistedTransactionScreenState
         );
       },
     ).then((_) {
+      searchFocus.dispose();
       // If the category popup closed without a selection (e.g. user navigated
       // to /categories), remove the incomplete line item.
       if (!mounted) return;

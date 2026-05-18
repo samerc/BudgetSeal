@@ -327,6 +327,7 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _router.dispose();
     super.dispose();
   }
 

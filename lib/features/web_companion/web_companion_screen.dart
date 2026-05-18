@@ -217,7 +217,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           },
         );
       },
-    );
+    ).then((_) => controller.dispose());
   }
 
   // ── Build ────────────────────────────────────────────────────────────────────
