@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
 import '../engine/balance_calculator.dart';
@@ -44,17 +43,9 @@ final allocationsProvider =
     if (list == null) return;
 
     final allocIds = list.map((awc) => awc.allocation.id).toList();
-    List<AllocationLedgerData> allEntries = [];
-    if (allocIds.isNotEmpty) {
-      allEntries = await ledgerDao.getAllForHousehold(allocIds);
-    }
-
-    final balancesByAlloc = <String, Map<String, double>>{};
-    for (final e in allEntries) {
-      balancesByAlloc.putIfAbsent(e.allocationId, () => {});
-      balancesByAlloc[e.allocationId]![e.currency] =
-          (balancesByAlloc[e.allocationId]![e.currency] ?? 0) + e.amount;
-    }
+    final balancesByAlloc = allocIds.isNotEmpty
+        ? await ledgerDao.getAllBalances(allocIds)
+        : <String, Map<String, double>>{};
 
     if (!controller.isClosed) {
       controller.add([

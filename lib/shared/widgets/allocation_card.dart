@@ -349,15 +349,26 @@ class AllocationCard extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 10, color: AppColors.th(context)),
                     ),
-                  // Show cross-currency debt only (negative balances = overspend in other currency)
-                  // Positive cross-currency balances are visible on the detail screen
-                  for (final entry in crossCurrencyDebt.entries)
-                    Text(
-                      formatAmount(entry.value, currency: entry.key),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.caution,
+                  // Cross-currency debt: show amber dot indicator (details on detail screen)
+                  if (hasCrossDebt)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6, height: 6,
+                            decoration: BoxDecoration(
+                              color: AppColors.caution,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${crossCurrencyDebt.length} other ${crossCurrencyDebt.length == 1 ? 'currency' : 'currencies'}',
+                            style: TextStyle(fontSize: 9, color: AppColors.caution),
+                          ),
+                        ],
                       ),
                     ),
                 ],

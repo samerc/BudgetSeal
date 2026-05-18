@@ -131,15 +131,7 @@ class BalanceCalculator {
     final allocIds = allocs.map((a) => a.id).toList();
     if (allocIds.isEmpty) return {};
 
-    final entries = await _ledgerDao.getAllForHousehold(allocIds);
-
-    final result = <String, Map<String, double>>{};
-    for (final e in entries) {
-      result.putIfAbsent(e.allocationId, () => {});
-      result[e.allocationId]![e.currency] =
-          (result[e.allocationId]![e.currency] ?? 0) + e.amount;
-    }
-    return result;
+    return _ledgerDao.getAllBalances(allocIds);
   }
 
   // ─── Single-account (kept for detail screens) ──────────────────────────────
