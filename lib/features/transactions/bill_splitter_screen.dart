@@ -537,6 +537,39 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           if (_step == 0) ...[
+            // Currency indicator — tap to change
+            GestureDetector(
+              onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.payments_rounded, size: 16, color: AppColors.ts(context)),
+                    const SizedBox(width: 6),
+                    Text('Bill in $_billCurrency',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    const SizedBox(width: 4),
+                    Icon(Icons.edit_rounded, size: 12, color: AppColors.th(context)),
+                  ],
+                ),
+              ),
+            ),
+            if (_currencyExpanded) ...[
+              CurrencyPickerField(value: _billCurrency, label: 'Bill currency',
+                onChanged: (c) => setState(() {
+                  _billCurrency = c;
+                  if (c == _baseCurrency) _exchangeRate = 1.0;
+                  _currencyExpanded = false;
+                })),
+              const SizedBox(height: 12),
+            ],
             if (_items.isEmpty && _ocrResult == null) ...[
               const SizedBox(height: 40),
               Center(child: Icon(Icons.receipt_long_rounded,
@@ -698,8 +731,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                               ? item.amount.toInt().toString()
                               : item.amount.toStringAsFixed(2))
                           : '',
-                      decoration: const InputDecoration(
-                        hintText: '0.00',
+                      decoration: InputDecoration(
+                        hintText: '0',
+                        prefixText: '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
+                        prefixStyle: TextStyle(fontSize: 12, color: AppColors.th(context)),
                         isDense: true,
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
