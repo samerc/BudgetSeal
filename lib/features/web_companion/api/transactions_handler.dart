@@ -182,7 +182,7 @@ Handler createTransactionHandler(Ref ref) {
           .getSingleOrNull();
       final baseCurrency = household?.baseCurrency ?? 'USD';
 
-      final note = truncate(optString(body, 'note') ?? '', 500);
+      final note = truncate(optString(body, 'note') ?? '', kMaxNoteLength);
       final date = _parseDate(optString(body, 'date'));
 
       String txId;
@@ -203,6 +203,17 @@ Handler createTransactionHandler(Ref ref) {
         if (amount == null || amount <= 0) {
           return badRequest('amount must be a positive number');
         }
+        if (amount > kMaxAmount) {
+          return badRequest('amount exceeds maximum allowed value');
+        }
+        if (rate <= 0) return badRequest('exchangeRateToBase must be positive');
+        // Validate accounts exist
+        if (await validateIdExists(db, 'accounts', fromAccountId) == null) {
+          return badRequest('accountId does not exist');
+        }
+        if (await validateIdExists(db, 'accounts', toAccountId) == null) {
+          return badRequest('destinationAccountId does not exist');
+        }
 
         txId = await engine.recordTransfer(
           householdId: householdId,
@@ -219,9 +230,15 @@ Handler createTransactionHandler(Ref ref) {
       } else {
         final accountId = requireString(body, 'accountId');
         if (accountId == null) return badRequest('accountId is required');
+        if (await validateIdExists(db, 'accounts', accountId) == null) {
+          return badRequest('accountId does not exist');
+        }
 
         final List<TxLine> lines;
         if (body['lines'] is List && (body['lines'] as List).isNotEmpty) {
+          if ((body['lines'] as List).length > 50) {
+            return badRequest('Too many lines (max 50)');
+          }
           final parsed = <TxLine>[];
           for (final raw in body['lines'] as List) {
             if (raw is! Map<String, dynamic>) {
@@ -231,13 +248,26 @@ Handler createTransactionHandler(Ref ref) {
             if (amt == null || amt <= 0) {
               return badRequest('Each line must have a positive amount');
             }
+            if (amt > kMaxAmount) {
+              return badRequest('Line amount exceeds maximum allowed value');
+            }
+            final lineCatId = optString(raw, 'categoryId');
+            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId) == null) {
+              return badRequest('categoryId "$lineCatId" does not exist');
+            }
+            final lineAcctId = optString(raw, 'accountId');
+            if (lineAcctId != null && await validateIdExists(db, 'accounts', lineAcctId) == null) {
+              return badRequest('line accountId "$lineAcctId" does not exist');
+            }
+            final lineRate = optDouble(raw, 'exchangeRateToBase') ?? 1.0;
+            if (lineRate <= 0) return badRequest('exchangeRateToBase must be positive');
             parsed.add(TxLine(
               amount: amt,
               currency: optString(raw, 'currency') ?? baseCurrency,
-              categoryId: optString(raw, 'categoryId'),
-              accountId: optString(raw, 'accountId'),
-              exchangeRateToBase: optDouble(raw, 'exchangeRateToBase') ?? 1.0,
-              note: truncate(optString(raw, 'note') ?? '', 500),
+              categoryId: lineCatId,
+              accountId: lineAcctId,
+              exchangeRateToBase: lineRate,
+              note: truncate(optString(raw, 'note') ?? '', kMaxNoteLength),
             ));
           }
           lines = parsed;
@@ -246,14 +276,22 @@ Handler createTransactionHandler(Ref ref) {
           if (amount == null || amount <= 0) {
             return badRequest('amount must be a positive number');
           }
+          if (amount > kMaxAmount) {
+            return badRequest('amount exceeds maximum allowed value');
+          }
+          final catId = optString(body, 'categoryId');
+          if (catId != null && await validateIdExists(db, 'categories', catId) == null) {
+            return badRequest('categoryId does not exist');
+          }
+          final rate = optDouble(body, 'exchangeRateToBase') ?? 1.0;
+          if (rate <= 0) return badRequest('exchangeRateToBase must be positive');
           lines = [
             TxLine(
               amount: amount,
               currency: optString(body, 'currency') ?? baseCurrency,
-              categoryId: optString(body, 'categoryId'),
+              categoryId: catId,
               accountId: accountId,
-              exchangeRateToBase:
-                  optDouble(body, 'exchangeRateToBase') ?? 1.0,
+              exchangeRateToBase: rate,
               note: note,
             )
           ];

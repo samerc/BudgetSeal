@@ -63,6 +63,9 @@ Handler createRecurringHandler(Ref ref) {
     if (amount == null || amount <= 0) {
       return badRequest('amount must be a positive number');
     }
+    if (amount > kMaxAmount) {
+      return badRequest('amount exceeds maximum allowed value');
+    }
 
     final currency = requireString(body, 'currency');
     if (currency == null) return badRequest('currency is required');
@@ -83,22 +86,43 @@ Handler createRecurringHandler(Ref ref) {
     final startDate = DateTime.tryParse(startDateStr);
     if (startDate == null) return badRequest('Invalid startDate');
 
+    final db = ref.read(databaseProvider);
+    // Validate FK references
+    if (await validateIdExists(db, 'accounts', accountId) == null) {
+      return badRequest('accountId does not exist');
+    }
+    final destAcctId = optString(body, 'destinationAccountId');
+    if (type == 'transfer' && destAcctId == null) {
+      return badRequest('destinationAccountId is required for transfers');
+    }
+    if (destAcctId != null && await validateIdExists(db, 'accounts', destAcctId) == null) {
+      return badRequest('destinationAccountId does not exist');
+    }
+    final categoryId = optString(body, 'categoryId');
+    if (categoryId != null && await validateIdExists(db, 'categories', categoryId) == null) {
+      return badRequest('categoryId does not exist');
+    }
+    final endDate = _parseDate(optString(body, 'endDate'));
+    if (endDate != null && endDate.isBefore(startDate)) {
+      return badRequest('endDate must be after startDate');
+    }
+
     try {
       final engine = ref.read(recurringEngineProvider);
       final id = await engine.create(
         householdId: householdId,
         type: type,
-        title: truncate(optString(body, 'title') ?? '', 100),
+        title: truncate(optString(body, 'title') ?? '', kMaxNameLength),
         amount: amount,
         currency: currency,
         accountId: accountId,
-        destinationAccountId: optString(body, 'destinationAccountId'),
-        categoryId: optString(body, 'categoryId'),
+        destinationAccountId: destAcctId,
+        categoryId: categoryId,
         frequency: frequency,
         interval: (requireInt(body, 'interval') ?? 1).clamp(1, 365),
         startDate: startDate,
-        endDate: _parseDate(optString(body, 'endDate')),
-        note: truncate(optString(body, 'note') ?? '', 500),
+        endDate: endDate,
+        note: truncate(optString(body, 'note') ?? '', kMaxNoteLength),
         isSubscription: false,
       );
       return created({'id': id});

@@ -59,18 +59,32 @@ Handler createCategoryHandler(Ref ref) {
 
     final db = ref.read(databaseProvider);
 
+    // Validate FK references
+    final parentId = optString(body, 'parentId');
+    if (parentId != null && await validateIdExists(db, 'categories', parentId) == null) {
+      return badRequest('parentId does not exist');
+    }
+    final allocationId = optString(body, 'allocationId');
+    if (allocationId != null && await validateIdExists(db, 'allocations', allocationId) == null) {
+      return badRequest('allocationId does not exist');
+    }
+    final defaultAccountId = optString(body, 'defaultAccountId');
+    if (defaultAccountId != null && await validateIdExists(db, 'accounts', defaultAccountId) == null) {
+      return badRequest('defaultAccountId does not exist');
+    }
+
     try {
       final id = _uuid.v4();
       await db.into(db.categories).insert(CategoriesCompanion.insert(
             id: id,
             householdId: householdId,
-            name: truncate(name, 100),
+            name: truncate(name, kMaxNameLength),
             icon: Value(truncate(optString(body, 'icon') ?? 'category', 20)),
             colorHex: Value(colorHex),
             transactionType: Value(transactionType),
-            parentId: Value(optString(body, 'parentId')),
-            allocationId: Value(optString(body, 'allocationId')),
-            defaultAccountId: Value(optString(body, 'defaultAccountId')),
+            parentId: Value(parentId),
+            allocationId: Value(allocationId),
+            defaultAccountId: Value(defaultAccountId),
           ));
       return created({'id': id});
     } catch (e) {

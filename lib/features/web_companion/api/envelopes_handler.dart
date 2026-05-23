@@ -59,9 +59,15 @@ Handler fundEnvelopeHandler(Ref ref) {
     if (amount == null || amount <= 0) {
       return badRequest('amount must be a positive number');
     }
+    if (amount > kMaxAmount) {
+      return badRequest('amount exceeds maximum allowed value');
+    }
 
     final currency = requireString(body, 'currency');
     if (currency == null) return badRequest('currency is required');
+    if (!RegExp(r'^[A-Za-z]{1,10}$').hasMatch(currency)) {
+      return badRequest('currency must be a 1-10 letter code');
+    }
 
     final db = ref.read(databaseProvider);
 
@@ -77,7 +83,7 @@ Handler fundEnvelopeHandler(Ref ref) {
         amount: amount,
         currency: currency,
         deviceId: 'web',
-        note: truncate(optString(body, 'note') ?? '', 500),
+        note: truncate(optString(body, 'note') ?? '', kMaxNoteLength),
       );
 
       return ok({'success': true});

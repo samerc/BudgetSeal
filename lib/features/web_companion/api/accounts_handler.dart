@@ -72,10 +72,11 @@ Handler createAccountHandler(Ref ref) {
       await db.accountsDao.upsert(AccountsCompanion.insert(
         id: id,
         householdId: householdId,
-        name: truncate(name, 100),
+        name: truncate(name, kMaxNameLength),
         type: type,
-        currency: currency,
-        initialBalance: Value(optDouble(body, 'initialBalance') ?? 0.0),
+        currency: currency.toUpperCase(),
+        initialBalance: Value((optDouble(body, 'initialBalance') ?? 0.0)
+            .clamp(-kMaxAmount, kMaxAmount)),
         deviceId: 'web',
       ));
       return created({'id': id});
