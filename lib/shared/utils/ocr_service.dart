@@ -176,7 +176,7 @@ class OcrService {
     // prices starting with a separator (,450,000), and plain large numbers (765000, 90000).
     // Optional currency symbol before ($/€/£/¥) or letters after (T, TTC, LBP, etc.).
     final priceMatches = RegExp(
-      r'[\$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?|\d{4,})\s*[A-Za-z*+]{0,4}(?=\s|$)',
+      r'[\$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?|\d{4,}(?:[.,]\d{1,2})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
     ).allMatches(trimmed).toList();
 
     // Filter: reject partial matches where a digit follows (e.g., "317,10" from "317,100")

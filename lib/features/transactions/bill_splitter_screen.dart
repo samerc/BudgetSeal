@@ -471,6 +471,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             'Total: ${formatAmount(total, currency: _billCurrency)}';
 
     if (!mounted) return;
+    // Pop bill splitter first, then push transaction form
+    // so saving the transaction returns to the previous screen (not the splitter)
+    context.pop();
+    if (!mounted) return;
     context.push('/add-transaction', extra: {
       'editType': 'expense',
       'editNote': 'Bill Split — $note',
@@ -540,6 +544,14 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           if (_step == 0) ...[
+            // Step instruction
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Step 1: Add items from your receipt — scan or enter manually.',
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              ),
+            ),
             // Currency indicator — tap to change
             GestureDetector(
               onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
@@ -572,6 +584,57 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   _currencyExpanded = false;
                 })),
               const SizedBox(height: 12),
+            ],
+            // Show exchange rate inline when cross-currency
+            if (_billCurrency != _baseCurrency) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.caution.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.caution.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Exchange Rate',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                            color: AppColors.caution)),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
+                          style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+                      Expanded(child: TextField(controller: _rateCtrl,
+                        decoration: InputDecoration(hintText: 'Rate', isDense: true,
+                          filled: true, fillColor: AppColors.sfv(context),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none)),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (v) {
+                          final r = double.tryParse(v) ?? 0;
+                          if (r > 0) _exchangeRate = _rateInverted ? 1.0 / r : r;
+                          setState(() {});
+                        })),
+                      Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
+                          style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => setState(() {
+                          _rateInverted = !_rateInverted;
+                          if (_exchangeRate > 0 && _exchangeRate != 1.0) {
+                            _rateCtrl.text = (_rateInverted
+                                ? 1.0 / _exchangeRate
+                                : _exchangeRate).toStringAsFixed(4);
+                          }
+                        }),
+                        child: Icon(Icons.swap_vert_rounded,
+                            size: 20, color: AppColors.accent),
+                      ),
+                    ]),
+                  ],
+                ),
+              ),
             ],
             if (_items.isEmpty && _ocrResult == null) ...[
               const SizedBox(height: 40),
@@ -620,6 +683,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ],
           ],
           if (_step == 1) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Step 2: Add people and assign items. Toggle "Split evenly" to divide the total equally.',
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              ),
+            ),
             _buildPeopleSection(),
             const SizedBox(height: 12),
             _buildSplitEvenlyToggle(),
@@ -633,6 +703,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ],
           ],
           if (_step == 2) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Step 3: Review the split, add tip, and confirm.',
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              ),
+            ),
             _buildSummaryCard(splits, grandTotal),
             const SizedBox(height: 10),
             _buildTipSection(),
