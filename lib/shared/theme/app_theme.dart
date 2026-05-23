@@ -80,6 +80,15 @@ ThemeData buildLightTheme(String fontName, [Color? accentColor]) {
         textStyle: fs(14, FontWeight.w600, null),
       ),
     ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.md)),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+    ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
       indicatorColor: accent.withValues(alpha: 0.12),
@@ -181,6 +190,15 @@ ThemeData buildDarkTheme(String fontName, [Color? accentColor]) {
       style: TextButton.styleFrom(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
         textStyle: fs(14, FontWeight.w600, null),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.md)),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
