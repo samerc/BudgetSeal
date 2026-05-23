@@ -133,6 +133,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   String _calcDisplay = '0';
   String _calcExpression = '';
   double _amount = 0;
+  bool _startNewOperand = false;
 
   /// True when the expression contains an operator (user is mid-calculation).
   bool get _hasOperator =>
@@ -151,14 +152,23 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     }
   }
 
-  // ── Calculator logic (matches assisted_transaction_screen) ──
+  // ── Calculator logic ──
 
   void _calcDigit(String d) {
     HapticFeedback.lightImpact();
     setState(() {
-      if (_calcDisplay == '0' && d != '.') {
+      if (_startNewOperand) {
+        // After an operator: reset display to new number, keep expression building
+        _calcDisplay = (d == '.') ? '0.' : d;
+        _calcExpression += d;
+        _startNewOperand = false;
+      } else if (_calcDisplay == '0' && d != '.') {
         _calcDisplay = d;
-        _calcExpression = d;
+        if (_calcExpression.isEmpty || _calcExpression == '0') {
+          _calcExpression = d;
+        } else {
+          _calcExpression += d;
+        }
       } else {
         _calcDisplay += d;
         _calcExpression += d;
@@ -173,6 +183,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
       _amount = _evalExpr(_calcExpression);
       _calcDisplay = _fmtCalc(_amount);
       _calcExpression = '$_calcDisplay$op';
+      _startNewOperand = true;
     });
   }
 

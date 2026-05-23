@@ -40,6 +40,7 @@ class _LineItem {
   double amount = 0;
   String calcDisplay = '0';
   String calcExpression = '';
+  bool startNewOperand = false;
   String? currency;   // captured from account at entry time
   String? accountId;  // captured from account at entry time
   double exchangeRateToBase = 1.0;
@@ -985,9 +986,18 @@ class _AssistedTransactionScreenState
     HapticFeedback.lightImpact();
     setState(() {
       final line = _activeLine;
-      if (line.calcDisplay == '0' && d != '.') {
+      if (line.startNewOperand) {
+        // After operator: reset display, keep expression building
+        line.calcDisplay = (d == '.') ? '0.' : d;
+        line.calcExpression += d;
+        line.startNewOperand = false;
+      } else if (line.calcDisplay == '0' && d != '.') {
         line.calcDisplay = d;
-        line.calcExpression = d;
+        if (line.calcExpression.isEmpty || line.calcExpression == '0') {
+          line.calcExpression = d;
+        } else {
+          line.calcExpression += d;
+        }
       } else {
         line.calcDisplay += d;
         line.calcExpression += d;
@@ -1003,6 +1013,7 @@ class _AssistedTransactionScreenState
       line.amount = _evalExpr(line.calcExpression);
       line.calcDisplay = _fmtCalc(line.amount);
       line.calcExpression = '${line.calcDisplay}$op';
+      line.startNewOperand = true;
     });
   }
 
@@ -1435,7 +1446,15 @@ class _AssistedTransactionScreenState
                 child: Column(
                   children: [
             // Category / Transfer banner
-            Container(
+            GestureDetector(
+              onTap: isTransfer ? null : () {
+                // Pop back to category selection
+                if (mounted) {
+                  context.pop();
+                  _showCategoryPopup();
+                }
+              },
+              child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               color: typeColor.withValues(alpha: 0.08),
@@ -1486,7 +1505,7 @@ class _AssistedTransactionScreenState
                   ),
                 ],
               ),
-            ),
+            )),
             // Date picker
             GestureDetector(
               onTap: () async {
@@ -1770,7 +1789,7 @@ class _AssistedTransactionScreenState
                       Expanded(
                         child: Text(
                           _expenseExchangeRate > 0 && _expenseExchangeRate != 1.0
-                              ? '1 $_selectedCurrency ≈ ${formatAmount(1.0 / _expenseExchangeRate, currency: '')} $_baseCurrency'
+                              ? '1 $_baseCurrency ≈ ${formatNumber(1.0 / _expenseExchangeRate)} $_selectedCurrency'
                               : 'Fetching rate for $_selectedCurrency...',
                           style: TextStyle(
                             fontSize: 12,
