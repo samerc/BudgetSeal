@@ -190,7 +190,7 @@ class _ObjectiveDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'),
+          SnackBar(content: const Text('Something went wrong. Please try again.'),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -471,7 +471,7 @@ class _ObjectiveDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'),
+          SnackBar(content: const Text('Payment failed. Please try again.'),
               behavior: SnackBarBehavior.floating),
         );
       }

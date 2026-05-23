@@ -86,7 +86,7 @@ class _LeftoverResolutionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to resolve: $e'),
+            content: const Text('Failed to resolve leftovers. Please try again.'),
             backgroundColor: AppColors.overspent,
           ),
         );

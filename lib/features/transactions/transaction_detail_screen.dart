@@ -60,7 +60,7 @@ class TransactionDetailScreen extends ConsumerWidget {
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) =>
-          Scaffold(body: Center(child: Text('Error: $e'))),
+          Scaffold(body: Center(child: Text('Could not load transaction'))),
     );
   }
 }

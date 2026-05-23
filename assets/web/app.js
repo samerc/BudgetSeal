@@ -42,7 +42,18 @@ async function api(path, opts = {}) {
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    toast(err.error || `Error ${res.status}`, true);
+    // Show user-friendly message; log technical details to console only
+    const msg = err.error || '';
+    if (res.status >= 500) {
+      console.error('[api] Server error:', path, res.status, msg);
+      toast('Something went wrong. Please try again.', true);
+    } else if (res.status === 429) {
+      toast('Too many requests. Please wait a moment.', true);
+    } else {
+      // 400-level: show validation message (safe — our API controls these)
+      console.warn('[api]', path, res.status, msg);
+      toast(msg || 'Request failed', true);
+    }
     return null;
   }
 

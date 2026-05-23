@@ -4,6 +4,10 @@ import '../theme/app_colors.dart';
 
 /// A reusable error display with an icon, message, and retry button.
 /// Optionally shows expandable technical details.
+///
+/// Details are automatically sanitized to remove exception type names,
+/// file paths, and stack traces. Full technical details are logged via
+/// debugPrint for developer debugging.
 class ErrorRetry extends StatelessWidget {
   final String message;
   final String? details;
@@ -15,6 +19,31 @@ class ErrorRetry extends StatelessWidget {
     this.details,
     required this.onRetry,
   });
+
+  /// Strip exception class names, file paths, line numbers, and stack traces
+  /// from error details to avoid exposing internals to users.
+  static String _sanitize(String raw) {
+    // Log full details for developer debugging
+    debugPrint('[ErrorRetry] $raw');
+
+    var s = raw;
+    // Strip exception type prefix: "SqliteException(1): ..." → "..."
+    s = s.replaceAll(RegExp(r'^[A-Z]\w*Exception\([^)]*\):\s*'), '');
+    s = s.replaceAll(RegExp(r'^[A-Z]\w*Exception:\s*'), '');
+    s = s.replaceAll(RegExp(r'^[A-Z]\w*Error:\s*'), '');
+    // Strip file paths and line numbers
+    s = s.replaceAll(RegExp(r'(?:file:///|/[\w/]+\.dart)[:\d]*'), '');
+    s = s.replaceAll(RegExp(r'package:\w+/[\w/]+\.dart[:\d]*'), '');
+    // Strip "Causing statement..." SQL details
+    s = s.replaceAll(RegExp(r'Causing statement.*', dotAll: true), '');
+    // Strip stack trace lines
+    s = s.replaceAll(RegExp(r'#\d+\s+.*', multiLine: true), '');
+    // Clean up leftover whitespace
+    s = s.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
+    // If nothing left after stripping, use generic message
+    if (s.isEmpty) s = 'An unexpected error occurred';
+    return s;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +72,7 @@ class ErrorRetry extends StatelessWidget {
             ),
             if (details != null) ...[
               const SizedBox(height: 8),
-              _ExpandableDetails(details: details!),
+              _ExpandableDetails(details: _sanitize(details!)),
             ],
             const SizedBox(height: 16),
             FilledButton.icon(

@@ -137,7 +137,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error funding allocations: $e'),
+            content: const Text('Could not fund allocations. Please try again.'),
             backgroundColor: AppColors.overspent,
             behavior: SnackBarBehavior.floating,
           ),

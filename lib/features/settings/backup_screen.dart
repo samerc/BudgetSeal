@@ -218,7 +218,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Restore failed: $e'),
+            content: const Text('Restore failed. The backup may be corrupted.'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),

@@ -54,12 +54,11 @@ class WebCompanionAuth {
         _lockoutUntil = DateTime.now().add(_lockoutDuration);
         _failedAttempts = 0;
         throw const AuthException(
-          'Too many failed attempts. Locked for 30 minutes.',
+          'Too many failed attempts. Please try again later.',
           isLockout: true,
         );
       }
-      final remaining = _maxAttempts - _failedAttempts;
-      throw AuthException('Incorrect PIN. $remaining attempt${remaining == 1 ? '' : 's'} remaining.');
+      throw const AuthException('Incorrect PIN. Please try again.');
     }
 
     _failedAttempts = 0;
@@ -117,8 +116,8 @@ class WebCompanionAuth {
   void _checkLockout() {
     final status = lockoutStatus;
     if (status.isLocked) {
-      throw AuthException(
-        'Too many failed attempts. Try again in ${status.remainingMinutes} minute${status.remainingMinutes == 1 ? '' : 's'}.',
+      throw const AuthException(
+        'Too many failed attempts. Please try again later.',
         isLockout: true,
       );
     }

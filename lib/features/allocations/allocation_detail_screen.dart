@@ -1136,7 +1136,7 @@ class _AllocationDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not fund: $e'),
+            content: const Text('Could not fund envelope. Please try again.'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),
@@ -1962,7 +1962,7 @@ class _AllocationDetailScreenState
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Could not delete: $e'),
+              content: const Text('Could not delete. Please try again.'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: AppColors.overspent,
             ));
@@ -2009,7 +2009,7 @@ class _AllocationDetailScreenState
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Could not delete: $e'),
+              content: const Text('Could not delete. Please try again.'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: AppColors.overspent,
             ));
@@ -2261,7 +2261,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error applying revaluation: $e'),
+            content: const Text('Could not apply revaluation. Please try again.'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),

@@ -263,7 +263,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         setState(() => _running = false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text('Repair failed: $e'),
+          content: const Text('Repair failed. Please try again.'),
         ));
       }
     }

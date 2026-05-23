@@ -832,7 +832,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error saving: $e'),
+          content: const Text('Could not save transaction. Please try again.'),
           behavior: SnackBarBehavior.floating,
         ));
       }

@@ -106,7 +106,7 @@ class _PeriodTransitionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to complete transition: $e'),
+            content: const Text('Failed to complete transition. Please try again.'),
             backgroundColor: AppColors.overspent,
           ),
         );

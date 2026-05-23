@@ -358,7 +358,7 @@ class _TravelExchangeScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Exchange failed: $e'),
+              content: const Text('Exchange failed. Please try again.'),
               behavior: SnackBarBehavior.floating),
         );
       }
