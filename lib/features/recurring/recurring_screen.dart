@@ -561,6 +561,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               autofocus: true,
               decoration: const InputDecoration(labelText: 'Title (e.g. Rent, Salary)'),
               textCapitalization: TextCapitalization.words,
+              maxLength: InputLimits.nameMaxLength,
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Title is required' : null,
             ),

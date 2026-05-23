@@ -935,6 +935,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: TextField(
                 controller: _noteCtrl,
                 textCapitalization: TextCapitalization.sentences,
+                maxLength: InputLimits.noteMaxLength,
                 decoration: InputDecoration(
                   hintText: 'Add a note…',
                   hintStyle: TextStyle(color: AppColors.th(context)),
@@ -1554,6 +1555,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           controller: _titleCtrl,
           textCapitalization: TextCapitalization.sentences,
           onChanged: _onTitleChanged,
+          maxLength: InputLimits.nameMaxLength,
           decoration: InputDecoration(
             hintText: 'Title (e.g. Coffee, Groceries)',
             hintStyle: TextStyle(color: AppColors.th(context)),

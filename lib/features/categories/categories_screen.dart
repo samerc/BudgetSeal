@@ -938,6 +938,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     controller: _nameCtrl,
                     autofocus: _isNew && !_showEmojiGrid,
                     textInputAction: TextInputAction.done,
+                    maxLength: InputLimits.nameMaxLength,
                     decoration: InputDecoration(
                       labelText: 'Name',
                       filled: true,

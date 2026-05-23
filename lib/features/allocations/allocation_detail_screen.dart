@@ -337,6 +337,7 @@ class _AllocationDetailScreenState
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.done,
                       autofocus: _isNew && !_showEmojiGrid,
+                      maxLength: InputLimits.nameMaxLength,
                       style: TextStyle(
                           color: AppColors.tp(context), fontSize: 15),
                       onTap: () {

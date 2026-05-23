@@ -327,9 +327,15 @@ class AllocationEngine {
     String deviceId = 'local',
     DateTime? date,
   }) async {
-    assert(type == 'transfer' || lines.isNotEmpty,
-        'income/expense must have at least one line');
-    assert(lines.every((l) => l.amount >= 0), 'line amounts must be non-negative');
+    if (type != 'transfer' && lines.isEmpty) {
+      throw ArgumentError('income/expense must have at least one line');
+    }
+    if (lines.any((l) => l.amount < 0)) {
+      throw ArgumentError('line amounts must be non-negative');
+    }
+    if (lines.any((l) => l.amount > 1e9)) {
+      throw ArgumentError('line amount exceeds maximum (1 billion)');
+    }
 
     final txId = _uuid.v4();
 

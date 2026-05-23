@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/foundation.dart';
 import 'package:shelf/shelf.dart';
+
+import '../../../core/database/app_database.dart';
 
 const _jsonHeaders = {'content-type': 'application/json; charset=utf-8'};
 
@@ -95,3 +98,39 @@ int? requireInt(Map<String, dynamic> body, String key) {
 /// Safely truncate a string to max characters.
 String truncate(String s, int max) =>
     s.length <= max ? s : s.substring(0, max);
+
+/// Max characters for name/title fields (mirrors InputLimits.nameMaxLength).
+const kMaxNameLength = 100;
+
+/// Max characters for note fields (mirrors InputLimits.noteMaxLength).
+const kMaxNoteLength = 500;
+
+/// Max amount for any financial value.
+const kMaxAmount = 1e9;
+
+/// Extract a required non-empty String with length limit.
+String? requireStringLimited(Map<String, dynamic> body, String key,
+    [int maxLen = kMaxNameLength]) {
+  final v = body[key];
+  if (v is String && v.isNotEmpty) return truncate(v.trim(), maxLen);
+  return null;
+}
+
+/// Extract a required positive amount within bounds.
+/// Returns null if missing, negative, zero, or exceeds kMaxAmount.
+double? requireAmount(Map<String, dynamic> body, String key) {
+  final v = requireDouble(body, key);
+  if (v == null || v <= 0 || v > kMaxAmount) return null;
+  return v;
+}
+
+/// Validate that an ID exists in a database table.
+/// Returns the ID if found, null if not.
+Future<String?> validateIdExists(
+    AppDatabase db, String table, String id) async {
+  final rows = await db.customSelect(
+    'SELECT 1 FROM $table WHERE id = ? LIMIT 1',
+    variables: [Variable.withString(id)],
+  ).get();
+  return rows.isNotEmpty ? id : null;
+}

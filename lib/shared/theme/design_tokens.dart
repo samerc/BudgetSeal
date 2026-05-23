@@ -95,3 +95,15 @@ abstract final class TypographyTokens {
   static const double dateHeaderSize = 14;
   static const FontWeight dateHeaderWeight = FontWeight.w600;
 }
+
+// ── Input validation limits ──────────────────────────────────────────────────
+abstract final class InputLimits {
+  /// Max characters for name/title fields (account, category, envelope, etc.)
+  static const int nameMaxLength = 100;
+
+  /// Max characters for note/description fields
+  static const int noteMaxLength = 500;
+
+  /// Max transaction/balance amount (1 billion)
+  static const double maxAmount = 1e9;
+}

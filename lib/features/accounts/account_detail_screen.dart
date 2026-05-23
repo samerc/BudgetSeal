@@ -422,6 +422,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.done,
                   autofocus: _isNew,
+                  maxLength: InputLimits.nameMaxLength,
                   style: TextStyle(color: AppColors.tp(context)),
                 ),
               ),

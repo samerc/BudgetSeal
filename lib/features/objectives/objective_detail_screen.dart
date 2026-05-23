@@ -782,6 +782,7 @@ class _ObjectiveDetailScreenState
         _FormCard(child: TextField(
           controller: _nameCtrl,
           textCapitalization: TextCapitalization.sentences,
+          maxLength: InputLimits.nameMaxLength,
           decoration: InputDecoration(
             labelText: _type == 'loan' ? 'Loan name' : 'Goal name',
             hintText: _type == 'loan' ? 'e.g. Car loan' : 'e.g. Emergency fund',
@@ -797,6 +798,7 @@ class _ObjectiveDetailScreenState
             TextField(
               controller: _contactCtrl,
               textCapitalization: TextCapitalization.words,
+              maxLength: InputLimits.nameMaxLength,
               decoration: InputDecoration(
                 labelText: 'Person',
                 hintText: 'e.g. Ali, Bank, etc.',
