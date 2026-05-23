@@ -6,6 +6,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/app_card.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -136,17 +137,10 @@ class _ObjectiveCard extends StatelessWidget {
     final isLoan = o.type == 'loan';
     final isLent = o.direction == 'lent';
 
-    return GestureDetector(
+    return AppCard(
       onTap: () => context.push('/objectives/${o.id}'),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: CardTokens.padding,
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          border: Border.all(color: AppColors.bd(context)),
-        ),
-        child: Column(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row: icon + name + amount
@@ -263,7 +257,6 @@ class _ObjectiveCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 

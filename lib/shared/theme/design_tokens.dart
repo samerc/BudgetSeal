@@ -31,6 +31,36 @@ abstract final class CardTokens {
       BorderRadius.circular(radius);
 }
 
+// ── Border radius scale ─────────────────────────────────────────────────────
+abstract final class RadiusTokens {
+  /// Small elements: chips, badges, input fields
+  static const double sm = 8;
+
+  /// Medium elements: banners, inline containers, buttons
+  static const double md = 12;
+
+  /// Standard cards and sheets
+  static const double lg = 16;
+
+  /// Pill-shaped chips and toggle buttons
+  static const double pill = 20;
+
+  /// Bottom sheets and modals
+  static const double sheet = 24;
+}
+
+// ── Animation durations ─────────────────────────────────────────────────────
+abstract final class Durations {
+  /// Quick feedback (tap, toggle)
+  static const Duration fast = Duration(milliseconds: 150);
+
+  /// Standard transitions (expand, fade)
+  static const Duration standard = Duration(milliseconds: 250);
+
+  /// Emphasized motion (page transitions, large reveals)
+  static const Duration emphasis = Duration(milliseconds: 350);
+}
+
 // ── Category icon tokens ────────────────────────────────────────────────────
 abstract final class CategoryIconTokens {
   /// Large circle used in transaction list rows and detail screens.
@@ -82,6 +112,14 @@ abstract final class TypographyTokens {
   // Overline: 11 / w600
   static const double overlineSize = 11;
   static const FontWeight overlineWeight = FontWeight.w600;
+
+  // Mini label: 10 / w500 — subtle secondary info (e.g., "/ $120" under amounts)
+  static const double miniSize = 10;
+  static const FontWeight miniWeight = FontWeight.w500;
+
+  // Amount display: 18 / w800 — hero amounts on dashboard cards
+  static const double amountDisplaySize = 18;
+  static const FontWeight amountDisplayWeight = FontWeight.w800;
 
   // Transaction row title: 15 / w600
   static const double txTitleSize = 15;

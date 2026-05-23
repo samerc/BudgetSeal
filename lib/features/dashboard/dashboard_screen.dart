@@ -421,8 +421,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                               children: [
                                 // Net Worth
                                 Expanded(
-                                  child: GestureDetector(
+                                  child: Tappable(
                                     onTap: () => context.push('/accounts'),
+                                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -468,8 +469,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 ),
                                 // Unallocated
                                 Expanded(
-                                  child: GestureDetector(
+                                  child: Tappable(
                                     onTap: () => context.push('/funding'),
+                                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -698,19 +700,21 @@ class _SpendingOverviewCard extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.ts(context))),
-              GestureDetector(
+              Tappable(
                 onTap: onTogglePeriod,
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                scaleFactor: 0.95,
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                   child: Text(
                     showWeekly ? 'This Month' : 'Last 7 Days',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: TypographyTokens.overlineSize,
                       fontWeight: FontWeight.w600,
                       color: AppColors.accent,
                     ),
