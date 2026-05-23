@@ -351,19 +351,29 @@ Handler updateTransactionHandler(Ref ref) {
           .get();
 
       final type = existing.type;
-      final note = truncate(optString(body, 'note') ?? existing.note, 500);
+      final note = truncate(optString(body, 'note') ?? existing.note, kMaxNoteLength);
       final date = _parseDate(optString(body, 'date')) ?? existing.createdAt;
 
       String newId;
 
       if (type == 'transfer') {
-        // Validate inputs before deleting the original
         final fromAcct = optString(body, 'accountId') ?? existing.accountId;
         final toAcct = optString(body, 'destinationAccountId') ??
             existing.destinationAccountId ?? '';
         final amount = optDouble(body, 'amount') ?? existing.amount;
         final currency = optString(body, 'currency') ?? existing.currency;
         final rate = optDouble(body, 'exchangeRateToBase') ?? existing.exchangeRateToBase;
+
+        // Validate updated values
+        if (amount <= 0) return badRequest('amount must be positive');
+        if (amount > kMaxAmount) return badRequest('amount exceeds maximum');
+        if (rate <= 0) return badRequest('exchangeRateToBase must be positive');
+        if (await validateIdExists(db, 'accounts', fromAcct) == null) {
+          return badRequest('accountId does not exist');
+        }
+        if (toAcct.isNotEmpty && await validateIdExists(db, 'accounts', toAcct) == null) {
+          return badRequest('destinationAccountId does not exist');
+        }
 
         await engine.deleteTransaction(id);
 
@@ -382,10 +392,16 @@ Handler updateTransactionHandler(Ref ref) {
       } else {
         final accountId =
             optString(body, 'accountId') ?? existing.accountId;
+        if (await validateIdExists(db, 'accounts', accountId) == null) {
+          return badRequest('accountId does not exist');
+        }
 
         // Build and validate lines BEFORE deleting the original
         final List<TxLine> lines;
         if (body['lines'] is List && (body['lines'] as List).isNotEmpty) {
+          if ((body['lines'] as List).length > 50) {
+            return badRequest('Too many lines (max 50)');
+          }
           final parsed = <TxLine>[];
           for (final raw in body['lines'] as List) {
             if (raw is! Map<String, dynamic>) {
@@ -395,14 +411,22 @@ Handler updateTransactionHandler(Ref ref) {
             if (amt == null || amt <= 0) {
               return badRequest('Each line must have a positive amount');
             }
+            if (amt > kMaxAmount) {
+              return badRequest('Line amount exceeds maximum');
+            }
+            final lineCatId = optString(raw, 'categoryId');
+            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId) == null) {
+              return badRequest('categoryId does not exist');
+            }
+            final lineRate = optDouble(raw, 'exchangeRateToBase') ?? 1.0;
+            if (lineRate <= 0) return badRequest('exchangeRateToBase must be positive');
             parsed.add(TxLine(
               amount: amt,
               currency: optString(raw, 'currency') ?? baseCurrency,
-              categoryId: optString(raw, 'categoryId'),
+              categoryId: lineCatId,
               accountId: optString(raw, 'accountId'),
-              exchangeRateToBase:
-                  optDouble(raw, 'exchangeRateToBase') ?? 1.0,
-              note: truncate(optString(raw, 'note') ?? '', 500),
+              exchangeRateToBase: lineRate,
+              note: truncate(optString(raw, 'note') ?? '', kMaxNoteLength),
             ));
           }
           lines = parsed;

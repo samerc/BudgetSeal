@@ -134,11 +134,18 @@ Handler updateCategoryHandler(Ref ref) {
         txTypeValue = Value(t);
       }
 
+      // Validate FK references
+      final allocId = body.containsKey('allocationId')
+          ? optString(body, 'allocationId') : null;
+      if (allocId != null && await validateIdExists(db, 'allocations', allocId) == null) {
+        return badRequest('allocationId does not exist');
+      }
+
       await (db.update(db.categories)..where((c) => c.id.equals(id))).write(
         CategoriesCompanion(
           name: body.containsKey('name')
               ? Value(truncate(
-                  requireString(body, 'name') ?? existing.name, 100))
+                  requireString(body, 'name') ?? existing.name, kMaxNameLength))
               : const Value.absent(),
           icon: body.containsKey('icon')
               ? Value(truncate(optString(body, 'icon') ?? existing.icon, 20))
@@ -146,7 +153,7 @@ Handler updateCategoryHandler(Ref ref) {
           colorHex: colorHexValue,
           transactionType: txTypeValue,
           allocationId: body.containsKey('allocationId')
-              ? Value(optString(body, 'allocationId'))
+              ? Value(allocId)
               : const Value.absent(),
           archived: body.containsKey('archived')
               ? Value(optBool(body, 'archived') ?? existing.archived)

@@ -161,27 +161,32 @@ Handler updateRecurringHandler(Ref ref) {
         await engine.toggleEnabled(id, enabled);
       }
 
+      double? validatedAmount;
       if (body.containsKey('amount')) {
         final newAmt = requireDouble(body, 'amount');
         if (newAmt == null || newAmt <= 0) {
           return badRequest('amount must be a positive number');
         }
+        if (newAmt > kMaxAmount) {
+          return badRequest('amount exceeds maximum allowed value');
+        }
+        validatedAmount = newAmt;
       }
 
-      if (body.containsKey('amount') ||
+      if (validatedAmount != null ||
           body.containsKey('title') ||
           body.containsKey('note')) {
         await (db.update(db.recurringTransactions)
               ..where((r) => r.id.equals(id)))
             .write(RecurringTransactionsCompanion(
-          amount: body.containsKey('amount')
-              ? Value(requireDouble(body, 'amount') ?? existing.amount)
+          amount: validatedAmount != null
+              ? Value(validatedAmount)
               : const Value.absent(),
           title: body.containsKey('title')
-              ? Value(truncate(optString(body, 'title') ?? existing.title, 100))
+              ? Value(truncate(optString(body, 'title') ?? existing.title, kMaxNameLength))
               : const Value.absent(),
           note: body.containsKey('note')
-              ? Value(truncate(optString(body, 'note') ?? existing.note, 500))
+              ? Value(truncate(optString(body, 'note') ?? existing.note, kMaxNoteLength))
               : const Value.absent(),
         ));
       }

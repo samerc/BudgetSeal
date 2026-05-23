@@ -151,6 +151,9 @@ Handler updateSubscriptionHandler(Ref ref) {
       if (body.containsKey('amount') && (newAmount == null || newAmount <= 0)) {
         return badRequest('amount must be a positive number');
       }
+      if (newAmount != null && newAmount > kMaxAmount) {
+        return badRequest('amount exceeds maximum allowed value');
+      }
       String? updatedPriceHistory = existing.priceHistory;
 
       if (newAmount != null && (newAmount - existing.amount).abs() > 0.001) {
@@ -174,10 +177,10 @@ Handler updateSubscriptionHandler(Ref ref) {
           amount: newAmount != null ? Value(newAmount) : const Value.absent(),
           title: body.containsKey('title')
               ? Value(truncate(
-                  optString(body, 'title') ?? existing.title, 100))
+                  optString(body, 'title') ?? existing.title, kMaxNameLength))
               : const Value.absent(),
           note: body.containsKey('note')
-              ? Value(truncate(optString(body, 'note') ?? existing.note, 500))
+              ? Value(truncate(optString(body, 'note') ?? existing.note, kMaxNoteLength))
               : const Value.absent(),
           priceHistory: updatedPriceHistory != existing.priceHistory
               ? Value(updatedPriceHistory)
