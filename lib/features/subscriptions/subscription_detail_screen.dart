@@ -84,7 +84,7 @@ class _SubscriptionDetailScreenState
           'SELECT * FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
           variables: [
             drift.Variable.withString(householdId),
-            drift.Variable.withString('%$title%'),
+            drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),
             drift.Variable.withString(title),
             drift.Variable.withString(subType),
           ],

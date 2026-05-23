@@ -114,11 +114,16 @@ class _ObjectiveDetailScreenState
 
     // Fallback: match by name for pre-existing payments
     if (txs.isEmpty && name.isNotEmpty) {
+      // Escape SQL LIKE wildcards in user input
+      final escapedName = name
+          .replaceAll('\\', '\\\\')
+          .replaceAll('%', '\\%')
+          .replaceAll('_', '\\_');
       txs = await (db.select(db.transactions)
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
-                t.note.like('%$name%'))
+                t.note.like('%$escapedName%'))
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();
     }

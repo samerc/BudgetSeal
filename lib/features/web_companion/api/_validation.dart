@@ -124,10 +124,20 @@ double? requireAmount(Map<String, dynamic> body, String key) {
   return v;
 }
 
+/// Allowed table names for FK validation (whitelist prevents SQL injection).
+const _allowedTables = {
+  'accounts', 'categories', 'allocations', 'transactions',
+  'recurring_transactions', 'objectives', 'households',
+};
+
 /// Validate that an ID exists in a database table.
 /// Returns the ID if found, null if not.
+/// Table name must be in the whitelist — rejects unknown tables.
 Future<String?> validateIdExists(
     AppDatabase db, String table, String id) async {
+  if (!_allowedTables.contains(table)) {
+    throw ArgumentError('Invalid table name: $table');
+  }
   final rows = await db.customSelect(
     'SELECT 1 FROM $table WHERE id = ? LIMIT 1',
     variables: [Variable.withString(id)],
