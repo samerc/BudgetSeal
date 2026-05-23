@@ -60,8 +60,7 @@ class PeriodResetService {
 
         if (alloc.rollover) {
           // Rollover — do nothing, balance carries forward
-          debugPrint('[PeriodReset] ${alloc.name}: rolling over '
-              '${entry.key} ${balance.toStringAsFixed(2)}');
+          debugPrint('[PeriodReset] Rolling over ${entry.key} balance');
         } else {
           // Return leftover to unallocated
           if (balance > 0) {
@@ -74,8 +73,7 @@ class PeriodResetService {
               note: const Value('Period auto-reset'),
               deviceId: 'period-reset',
             ));
-            debugPrint('[PeriodReset] ${alloc.name}: returned '
-                '${entry.key} ${balance.toStringAsFixed(2)} to unallocated');
+            debugPrint('[PeriodReset] Reset ${entry.key} balance to unallocated');
           }
         }
       }

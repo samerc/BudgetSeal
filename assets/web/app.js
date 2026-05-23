@@ -28,8 +28,7 @@ async function api(path, opts = {}) {
   let res;
   try {
     res = await fetch(path, { ...opts, headers });
-  } catch (e) {
-    console.error('[api] fetch failed:', path, e);
+  } catch (_) {
     toast('Server unreachable', true);
     return null;
   }
@@ -45,13 +44,10 @@ async function api(path, opts = {}) {
     // Show user-friendly message; log technical details to console only
     const msg = err.error || '';
     if (res.status >= 500) {
-      console.error('[api] Server error:', path, res.status, msg);
       toast('Something went wrong. Please try again.', true);
     } else if (res.status === 429) {
       toast('Too many requests. Please wait a moment.', true);
     } else {
-      // 400-level: show validation message (safe — our API controls these)
-      console.warn('[api]', path, res.status, msg);
       toast(msg || 'Request failed', true);
     }
     return null;
@@ -59,8 +55,7 @@ async function api(path, opts = {}) {
 
   try {
     return await res.json();
-  } catch (e) {
-    console.error('[api] JSON parse failed:', path, res.status, e);
+  } catch (_) {
     toast('Unexpected server response', true);
     return null;
   }

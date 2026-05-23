@@ -105,8 +105,8 @@ class _SubscriptionDetailScreenState
           _loading = false;
         });
       }
-    } catch (e, st) {
-      debugPrint('[SubscriptionDetail] Error loading: $e\n$st');
+    } catch (e) {
+      debugPrint('[SubscriptionDetail] Error loading: $e');
       if (mounted) {
         setState(() {
           _loading = false;

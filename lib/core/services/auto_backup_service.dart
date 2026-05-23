@@ -113,7 +113,7 @@ class AutoBackupService {
     // Enforce retention
     await _enforceRetention();
 
-    debugPrint('[AutoBackup] Created: ${backupFile.path}');
+    debugPrint('[AutoBackup] Backup created');
   }
 
   /// Delete oldest backups beyond retention limit.
@@ -131,7 +131,7 @@ class AutoBackupService {
       for (final old in files.skip(retention)) {
         try {
           await old.delete();
-          debugPrint('[AutoBackup] Deleted old: ${old.path}');
+          debugPrint('[AutoBackup] Pruned old backup');
         } catch (_) {}
       }
     }

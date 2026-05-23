@@ -453,12 +453,12 @@ class AllocationEngine {
               debitCurrency = baseCurrency;
               debitRate = 1.0;
               debugPrint('[AllocationEngine] Cross-currency debit: '
-                  '${line.amount} ${line.currency} → $baseAmount $baseCurrency');
+                  '${line.currency} → $baseCurrency');
             } else {
               // Foreign currency with no real rate — skip deduction
               // to avoid inflating the envelope with unconverted amounts.
               debugPrint('[AllocationEngine] Skipping ledger entry: '
-                  '${line.amount} ${line.currency} has no exchange rate');
+                  '${line.currency} has no exchange rate');
               continue;
             }
 

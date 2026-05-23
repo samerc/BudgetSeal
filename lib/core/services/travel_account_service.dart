@@ -38,7 +38,7 @@ class TravelAccountService {
             archived: const Value(true),
             lastModified: Value(DateTime.now()),
           ));
-          debugPrint('[Travel] Auto-archived "${acc.name}" (balance: $balance)');
+          debugPrint('[Travel] Auto-archived travel wallet');
           archived = true;
         }
       }
