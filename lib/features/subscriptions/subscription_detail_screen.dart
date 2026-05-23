@@ -219,7 +219,7 @@ class _SubscriptionDetailScreenState
       'SELECT COUNT(*) as cnt FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
       variables: [
         drift.Variable.withString(householdId),
-        drift.Variable.withString('%$title%'),
+        drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),
         drift.Variable.withString(title),
         drift.Variable.withDateTime(picked),
       ],
@@ -262,7 +262,7 @@ class _SubscriptionDetailScreenState
     if (futureCount > 0) {
       await db.customStatement(
         'DELETE FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
-        [householdId, '%$title%', title, picked.millisecondsSinceEpoch ~/ 1000],
+        [householdId, '%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%', title, picked.millisecondsSinceEpoch ~/ 1000],
       );
     }
 
