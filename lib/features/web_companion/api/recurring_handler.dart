@@ -88,18 +88,18 @@ Handler createRecurringHandler(Ref ref) {
 
     final db = ref.read(databaseProvider);
     // Validate FK references
-    if (await validateIdExists(db, 'accounts', accountId) == null) {
+    if (await validateIdExists(db, 'accounts', accountId, householdId) == null) {
       return badRequest('accountId does not exist');
     }
     final destAcctId = optString(body, 'destinationAccountId');
     if (type == 'transfer' && destAcctId == null) {
       return badRequest('destinationAccountId is required for transfers');
     }
-    if (destAcctId != null && await validateIdExists(db, 'accounts', destAcctId) == null) {
+    if (destAcctId != null && await validateIdExists(db, 'accounts', destAcctId, householdId) == null) {
       return badRequest('destinationAccountId does not exist');
     }
     final categoryId = optString(body, 'categoryId');
-    if (categoryId != null && await validateIdExists(db, 'categories', categoryId) == null) {
+    if (categoryId != null && await validateIdExists(db, 'categories', categoryId, householdId) == null) {
       return badRequest('categoryId does not exist');
     }
     final endDate = _parseDate(optString(body, 'endDate'));

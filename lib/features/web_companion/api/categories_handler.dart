@@ -61,15 +61,15 @@ Handler createCategoryHandler(Ref ref) {
 
     // Validate FK references
     final parentId = optString(body, 'parentId');
-    if (parentId != null && await validateIdExists(db, 'categories', parentId) == null) {
+    if (parentId != null && await validateIdExists(db, 'categories', parentId, householdId) == null) {
       return badRequest('parentId does not exist');
     }
     final allocationId = optString(body, 'allocationId');
-    if (allocationId != null && await validateIdExists(db, 'allocations', allocationId) == null) {
+    if (allocationId != null && await validateIdExists(db, 'allocations', allocationId, householdId) == null) {
       return badRequest('allocationId does not exist');
     }
     final defaultAccountId = optString(body, 'defaultAccountId');
-    if (defaultAccountId != null && await validateIdExists(db, 'accounts', defaultAccountId) == null) {
+    if (defaultAccountId != null && await validateIdExists(db, 'accounts', defaultAccountId, householdId) == null) {
       return badRequest('defaultAccountId does not exist');
     }
 
@@ -137,7 +137,7 @@ Handler updateCategoryHandler(Ref ref) {
       // Validate FK references
       final allocId = body.containsKey('allocationId')
           ? optString(body, 'allocationId') : null;
-      if (allocId != null && await validateIdExists(db, 'allocations', allocId) == null) {
+      if (allocId != null && await validateIdExists(db, 'allocations', allocId, householdId) == null) {
         return badRequest('allocationId does not exist');
       }
 
