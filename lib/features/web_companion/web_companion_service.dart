@@ -48,6 +48,8 @@ class WebCompanionService {
           .addMiddleware(_privateIpMiddleware())
           .addMiddleware(_bodySizeLimitMiddleware())
           .addMiddleware(_rateLimitMiddleware())
+          .addMiddleware(_writeRateLimitMiddleware())
+          .addMiddleware(_abuseDetectionMiddleware())
           .addMiddleware(_securityMiddleware(ip))
           .addHandler(handler);
 
@@ -235,6 +237,149 @@ class WebCompanionService {
         hits.add(now);
         tracker[ip] = hits;
         return inner(request);
+      };
+    };
+  }
+
+  /// Stricter rate limit for write operations (POST/PUT/DELETE).
+  /// 10 submissions per minute per IP — blocks rapid-fire form abuse.
+  static Middleware _writeRateLimitMiddleware({int maxPerMinute = 10}) {
+    final tracker = <String, List<DateTime>>{};
+    const writeMethods = {'POST', 'PUT', 'DELETE'};
+    return (Handler inner) {
+      return (Request request) async {
+        if (!writeMethods.contains(request.method)) return inner(request);
+
+        final connInfo =
+            request.context['shelf.io.connection_info'] as HttpConnectionInfo?;
+        final ip = connInfo?.remoteAddress.address ?? 'unknown';
+        final now = DateTime.now();
+        final windowStart = now.subtract(const Duration(minutes: 1));
+
+        final hits = tracker[ip] ?? [];
+        hits.removeWhere((t) => t.isBefore(windowStart));
+        if (hits.length >= maxPerMinute) {
+          debugPrint('[Abuse] Write rate limit hit: $ip (${hits.length} writes/min)');
+          return Response(
+            429,
+            body: jsonEncode({
+              'error': 'Too many submissions. Please wait before trying again.',
+            }),
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        hits.add(now);
+        tracker[ip] = hits;
+        return inner(request);
+      };
+    };
+  }
+
+  /// Attack pattern detection + honeypot field.
+  ///
+  /// Scans POST/PUT bodies for:
+  /// - SQL injection keywords (DROP, UNION SELECT, --, etc.)
+  /// - Script/HTML injection (<script>, javascript:, onerror=)
+  /// - Extremely long field values (>10,000 chars per field)
+  /// - Honeypot field ("website" — hidden in the SPA, bots fill it)
+  ///
+  /// Logs the attempt and returns 400.
+  static Middleware _abuseDetectionMiddleware() {
+    // Patterns that should never appear in legitimate financial data
+    final sqlPattern = RegExp(
+      r"(\bDROP\s+TABLE\b|\bUNION\s+SELECT\b|\bINSERT\s+INTO\b"
+      r"|\bDELETE\s+FROM\b|\bUPDATE\s+\w+\s+SET\b|--\s|;\s*DROP"
+      r"|\bOR\s+1\s*=\s*1\b|\bAND\s+1\s*=\s*1\b)",
+      caseSensitive: false,
+    );
+    final xssPattern = RegExp(
+      r'(<script\b|javascript\s*:|on(error|load|click|mouseover)\s*=|<iframe\b|<img\b[^>]+onerror)',
+      caseSensitive: false,
+    );
+
+    return (Handler inner) {
+      return (Request request) async {
+        if (request.method != 'POST' && request.method != 'PUT') {
+          return inner(request);
+        }
+
+        // Read body — need to buffer it so inner handler can also read
+        final bodyStr = await request.readAsString();
+
+        // Honeypot check: reject if "website" field is present and non-empty
+        if (bodyStr.isNotEmpty) {
+          try {
+            final parsed = jsonDecode(bodyStr);
+            if (parsed is Map<String, dynamic>) {
+              final honeypot = parsed['website'];
+              if (honeypot != null && honeypot is String && honeypot.isNotEmpty) {
+                final connInfo = request.context['shelf.io.connection_info']
+                    as HttpConnectionInfo?;
+                debugPrint('[Abuse] Honeypot triggered from ${connInfo?.remoteAddress.address}: website="$honeypot"');
+                return Response(
+                  400,
+                  body: jsonEncode({'error': 'Invalid request'}),
+                  headers: {'content-type': 'application/json'},
+                );
+              }
+            }
+          } catch (_) {
+            // Not valid JSON — let inner handler deal with it
+          }
+        }
+
+        // Attack pattern detection on raw body string
+        if (bodyStr.length > 100) {
+          if (sqlPattern.hasMatch(bodyStr)) {
+            final connInfo = request.context['shelf.io.connection_info']
+                as HttpConnectionInfo?;
+            debugPrint('[Abuse] SQL injection attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, 200)}');
+            return Response(
+              400,
+              body: jsonEncode({'error': 'Request contains invalid characters'}),
+              headers: {'content-type': 'application/json'},
+            );
+          }
+          if (xssPattern.hasMatch(bodyStr)) {
+            final connInfo = request.context['shelf.io.connection_info']
+                as HttpConnectionInfo?;
+            debugPrint('[Abuse] XSS attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, 200)}');
+            return Response(
+              400,
+              body: jsonEncode({'error': 'Request contains invalid characters'}),
+              headers: {'content-type': 'application/json'},
+            );
+          }
+        }
+
+        // Check individual field lengths (>10K chars is abuse)
+        if (bodyStr.isNotEmpty) {
+          try {
+            final parsed = jsonDecode(bodyStr);
+            if (parsed is Map<String, dynamic>) {
+              for (final entry in parsed.entries) {
+                if (entry.value is String && (entry.value as String).length > 10000) {
+                  debugPrint('[Abuse] Oversized field "${entry.key}": ${(entry.value as String).length} chars');
+                  return Response(
+                    400,
+                    body: jsonEncode({'error': 'Field "${entry.key}" exceeds maximum length'}),
+                    headers: {'content-type': 'application/json'},
+                  );
+                }
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Re-create request with buffered body so inner handler can read it
+        final newRequest = Request(
+          request.method,
+          request.requestedUri,
+          headers: request.headers,
+          body: bodyStr,
+          context: request.context,
+        );
+        return inner(newRequest);
       };
     };
   }

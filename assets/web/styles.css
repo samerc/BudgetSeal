@@ -1614,3 +1614,6 @@ select:focus:not(:focus-visible) {
   .unalloc-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
   .cat-grid { grid-template-columns: 1fr; }
 }
+
+/* Honeypot field — hidden from real users, filled by bots */
+.hp-field { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; overflow: hidden; pointer-events: none; tabindex: -1; }

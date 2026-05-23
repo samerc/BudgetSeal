@@ -153,6 +153,7 @@ function openModal(title, bodyHtml, onConfirm, confirmLabel = 'Save') {
     <div class="modal" role="dialog" aria-modal="true">
       <h2 class="modal-title">${esc(title)}</h2>
       ${bodyHtml}
+      <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="hp-website" name="website" autocomplete="off" tabindex="-1"></label></div>
       <div class="modal-actions">
         <button class="btn btn-outline" id="modal-cancel">Cancel</button>
         <button class="btn btn-primary" id="modal-confirm">${esc(confirmLabel)}</button>
