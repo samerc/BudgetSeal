@@ -336,6 +336,9 @@ class AllocationEngine {
     if (lines.any((l) => l.amount > 1e9)) {
       throw ArgumentError('line amount exceeds maximum (1 billion)');
     }
+    if (lines.any((l) => l.exchangeRateToBase <= 0)) {
+      throw ArgumentError('exchange rate must be positive');
+    }
 
     final txId = _uuid.v4();
 

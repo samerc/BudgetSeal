@@ -62,7 +62,16 @@ class SyncEngine {
   /// Automatically decrypts if the file is encrypted.
   Future<void> restoreFromJson(String rawContent) async {
     final jsonStr = await SyncEncryption.decrypt(rawContent);
-    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final dynamic decoded;
+    try {
+      decoded = jsonDecode(jsonStr);
+    } catch (e) {
+      throw FormatException('Sync file is corrupted or not valid JSON');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw FormatException('Sync file has unexpected format');
+    }
+    final data = decoded;
 
     await _db.transaction(() async {
       // Delete all existing data (order matters for foreign keys)
@@ -141,7 +150,16 @@ class SyncEngine {
   /// Returns the number of rows updated/inserted.
   Future<int> mergeFromJson(String rawContent) async {
     final jsonStr = await SyncEncryption.decrypt(rawContent);
-    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final dynamic decoded;
+    try {
+      decoded = jsonDecode(jsonStr);
+    } catch (e) {
+      throw FormatException('Sync file is corrupted or not valid JSON');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw FormatException('Sync file has unexpected format');
+    }
+    final data = decoded;
     int changed = 0;
 
     await _db.transaction(() async {

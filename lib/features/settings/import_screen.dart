@@ -251,7 +251,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     try {
       final db = ref.read(databaseProvider);
       final account = (ref.read(accountsProvider).value ?? [])
-          .firstWhere((a) => a.id == _selectedAccountId);
+          .where((a) => a.id == _selectedAccountId).firstOrNull;
+      if (account == null) return;
 
       // Build a name -> id lookup for category matching
       final categories = ref.read(categoriesProvider).value ?? [];

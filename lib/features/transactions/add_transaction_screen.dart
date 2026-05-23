@@ -268,7 +268,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _onLineAccountChanged(int lineIndex, String? accountId) async {
     if (accountId == null) return;
     final accounts = ref.read(accountsProvider).value ?? [];
-    final acc = accounts.firstWhere((a) => a.id == accountId);
+    final acc = accounts.where((a) => a.id == accountId).firstOrNull;
+    if (acc == null) return;
 
     setState(() {
       _lines[lineIndex].accountId = accountId;
@@ -330,8 +331,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _fetchTransferRate() async {
     if (_fromAccountId == null || _destAccountId == null) return;
     final accounts = ref.read(accountsProvider).value ?? [];
-    final fromAcc = accounts.firstWhere((a) => a.id == _fromAccountId);
-    final toAcc = accounts.firstWhere((a) => a.id == _destAccountId);
+    final fromAcc = accounts.where((a) => a.id == _fromAccountId).firstOrNull;
+    final toAcc = accounts.where((a) => a.id == _destAccountId).firstOrNull;
+    if (fromAcc == null || toAcc == null) return;
     if (fromAcc.currency == toAcc.currency) {
       setState(() {
         _lines.first.exchangeRateToBase = 1.0;
