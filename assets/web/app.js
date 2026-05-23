@@ -304,6 +304,7 @@ function navigate(hash) {
   document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === route));
   (routes[route] || renderDashboard)();
 }
+function refreshPage() { invalidateAll(); navigate(state.currentRoute); }
 
 window.addEventListener('hashchange', () => navigate(location.hash));
 
@@ -1111,7 +1112,7 @@ async function renderRecurring() {
   const rows = items(d).length
     ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">No recurring transactions<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddRecurring()">+ Add Recurring</button></td></tr>`;
-  setContent(`<div class="page-header"><h1 class="page-title">Recurring</h1><button class="btn btn-primary" onclick="openAddRecurring()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Title</th><th>Type</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  setContent(`<div class="page-header"><h1 class="page-title">Recurring</h1><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="exportCSV()" title="Export CSV">CSV</button><button class="btn btn-primary" onclick="openAddRecurring()">+ Add</button></div></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Title</th><th>Type</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
 
 function _recurFormHtml(pre = null, isSub = false) {
@@ -1180,7 +1181,7 @@ async function renderSubscriptions() {
   const rows = items(d).length
     ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">No subscriptions yet<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddSubscription()">+ Add Subscription</button></td></tr>`;
-  setContent(`<div class="page-header"><h1 class="page-title">Subscriptions</h1><button class="btn btn-primary" onclick="openAddSubscription()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Service</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  setContent(`<div class="page-header"><h1 class="page-title">Subscriptions</h1><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="exportCSV()" title="Export CSV">CSV</button><button class="btn btn-primary" onclick="openAddSubscription()">+ Add</button></div></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Service</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
 
 async function openAddSubscription() {
@@ -1339,6 +1340,7 @@ function initKeyboardShortcuts() {
     if (e.key === 'Escape') { closeModal(); return; }
     if (modalOpen) return; // Don't fire action shortcuts while a modal is open
     if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addTransaction(); return; }
+    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); refreshPage(); return; }
     if (e.key === '/') { e.preventDefault(); location.hash = '#/transactions'; setTimeout(() => { const el = document.getElementById('tx-search'); if (el) el.focus(); }, 100); return; }
     if (e.key === '?') { showShortcutsHelp(); return; }
   });
@@ -1348,6 +1350,7 @@ function showShortcutsHelp() {
   openModal('Keyboard Shortcuts', `
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:13.5px">
       <kbd class="kbd">N</kbd><span>New transaction</span>
+      <kbd class="kbd">R</kbd><span>Refresh current page</span>
       <kbd class="kbd">/</kbd><span>Search transactions</span>
       <kbd class="kbd">Esc</kbd><span>Close modal / unfocus</span>
       <kbd class="kbd">?</kbd><span>Show this help</span>

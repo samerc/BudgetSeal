@@ -9,7 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
+import 'package:drift/drift.dart' hide Column;
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/database_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -2278,13 +2280,28 @@ class _TxTile extends ConsumerWidget {
                   ),
                 );
                 if (confirmed == true && context.mounted) {
+                  // Soft-delete immediately for visual removal
                   await ref.read(allocationEngineProvider).deleteTransaction(tx.id);
                   if (context.mounted) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('Transaction deleted'),
                         behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 4),
+                        duration: const Duration(seconds: 5),
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () async {
+                            // Restore: set deleted=false
+                            final db = ref.read(databaseProvider);
+                            await (db.update(db.transactions)
+                                  ..where((t) => t.id.equals(tx.id)))
+                                .write(const TransactionsCompanion(
+                                    deleted: Value(false)));
+                            ref.invalidate(transactionEntriesProvider);
+                            ref.invalidate(monthlyTransactionsProvider);
+                          },
+                        ),
                       ),
                     );
                   }

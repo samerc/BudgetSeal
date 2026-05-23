@@ -236,7 +236,9 @@ class SyncScreen extends ConsumerWidget {
     if (state.status == SyncStatus.error) return 'Last sync failed';
     if (state.lastSyncTime != null) {
       final formatted = DateFormat.yMMMd().add_jm().format(state.lastSyncTime!);
-      return 'Last synced $formatted';
+      final changes = state.lastChanges ?? 0;
+      final changeSuffix = changes > 0 ? ' · $changes change${changes == 1 ? '' : 's'} merged' : ' · up to date';
+      return 'Last synced $formatted$changeSuffix';
     }
     if (state.activeProvider != null) return 'Not yet synced';
     return 'Connect a cloud provider to sync your data';
