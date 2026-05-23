@@ -73,7 +73,7 @@ dependencies:
   shelf: ^1.4.2
   shelf_router: ^1.1.4
   network_info_plus: ^7.0.0
-  qr_flutter: ^4.1.0
+  qr_widget: ^4.1.0
   flutter_foreground_task: ^9.0.0
   wakelock_plus: ^1.5.0
   crypto: ^3.0.0

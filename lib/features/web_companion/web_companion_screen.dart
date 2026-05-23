@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr_widget/qr_widget.dart';
 
 import '../../core/providers/web_companion_provider.dart';
 import '../../shared/theme/app_colors.dart';
