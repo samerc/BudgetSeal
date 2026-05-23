@@ -65,6 +65,21 @@ ThemeData buildLightTheme(String fontName, [Color? accentColor]) {
         textStyle: fs(15, FontWeight.w600, null),
       ),
     ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
+        side: BorderSide(color: accent.withValues(alpha: 0.4)),
+        foregroundColor: accent,
+        textStyle: fs(15, FontWeight.w600, null),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
+        textStyle: fs(14, FontWeight.w600, null),
+      ),
+    ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
       indicatorColor: accent.withValues(alpha: 0.12),
@@ -151,6 +166,21 @@ ThemeData buildDarkTheme(String fontName, [Color? accentColor]) {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
         elevation: 0,
         textStyle: fs(15, FontWeight.w600, null),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
+        side: BorderSide(color: accent.withValues(alpha: 0.4)),
+        foregroundColor: accent,
+        textStyle: fs(15, FontWeight.w600, null),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(CardTokens.radius)),
+        textStyle: fs(14, FontWeight.w600, null),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
