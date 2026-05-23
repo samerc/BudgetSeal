@@ -1168,7 +1168,13 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
 
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a category name'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return;
 

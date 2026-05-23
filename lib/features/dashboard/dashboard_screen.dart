@@ -551,6 +551,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 Text('No transactions yet',
                                     style: TextStyle(
                                         color: AppColors.ts(context))),
+                                const SizedBox(height: 12),
+                                FilledButton.tonal(
+                                  onPressed: () => context.push(
+                                      '/add-transaction',
+                                      extra: {'editType': 'expense'}),
+                                  child: const Text('Add your first expense'),
+                                ),
                               ],
                             ),
                           ),

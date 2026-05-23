@@ -710,10 +710,23 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final title = _titleCtrl.text.trim();
-    if (_calcAmount <= 0) return;
+    if (_calcAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid amount'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
 
     final householdId = ref.read(currentHouseholdIdProvider);
-    if (householdId == null || _accountId == null) return;
+    if (householdId == null) return;
+    if (_accountId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select an account'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
 
     setState(() => _saving = true);
     try {
@@ -965,8 +978,27 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
 
   Future<void> _save() async {
     final title = _titleCtrl.text.trim();
-    if (title.isEmpty || _calcAmount <= 0) return;
-    if (_accountId == null) return;
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a title'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+    if (_calcAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid amount'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+    if (_accountId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select an account'),
+            behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
 
     setState(() => _saving = true);
     try {
