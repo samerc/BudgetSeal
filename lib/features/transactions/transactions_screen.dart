@@ -2280,9 +2280,18 @@ class _TxTile extends ConsumerWidget {
                   ),
                 );
                 if (confirmed == true && context.mounted) {
-                  // Soft-delete immediately for visual removal
-                  await ref.read(allocationEngineProvider).deleteTransaction(tx.id);
+                  // Mark deleted=true immediately (visual removal)
+                  // but DON'T remove ledger entries yet — allows undo
+                  final db = ref.read(databaseProvider);
+                  await (db.update(db.transactions)
+                        ..where((t) => t.id.equals(tx.id)))
+                      .write(const TransactionsCompanion(
+                          deleted: Value(true)));
+                  ref.invalidate(transactionEntriesProvider);
+                  ref.invalidate(monthlyTransactionsProvider);
+
                   if (context.mounted) {
+                    var undone = false;
                     ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -2292,8 +2301,7 @@ class _TxTile extends ConsumerWidget {
                         action: SnackBarAction(
                           label: 'Undo',
                           onPressed: () async {
-                            // Restore: set deleted=false
-                            final db = ref.read(databaseProvider);
+                            undone = true;
                             await (db.update(db.transactions)
                                   ..where((t) => t.id.equals(tx.id)))
                                 .write(const TransactionsCompanion(
@@ -2303,7 +2311,14 @@ class _TxTile extends ConsumerWidget {
                           },
                         ),
                       ),
-                    );
+                    ).closed.then((_) async {
+                      // After SnackBar closes: if NOT undone, do the full
+                      // engine delete (removes ledger entries permanently)
+                      if (!undone) {
+                        await ref.read(allocationEngineProvider)
+                            .deleteTransaction(tx.id);
+                      }
+                    });
                   }
                 }
               },

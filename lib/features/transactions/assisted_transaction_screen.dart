@@ -1448,11 +1448,8 @@ class _AssistedTransactionScreenState
             // Category / Transfer banner
             GestureDetector(
               onTap: isTransfer ? null : () {
-                // Pop back to category selection
-                if (mounted) {
-                  context.pop();
-                  _showCategoryPopup();
-                }
+                // Re-open category selection as bottom sheet (don't pop)
+                if (mounted) _showCategoryPopup();
               },
               child: Container(
               padding:
@@ -1788,7 +1785,7 @@ class _AssistedTransactionScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _expenseExchangeRate > 0 && _expenseExchangeRate != 1.0
+                          _expenseExchangeRate > 0
                               ? '1 $_baseCurrency ≈ ${formatNumber(1.0 / _expenseExchangeRate)} $_selectedCurrency'
                               : 'Fetching rate for $_selectedCurrency...',
                           style: TextStyle(
