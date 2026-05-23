@@ -45,6 +45,7 @@ class WebCompanionService {
       // Build the request handler pipeline
       final handler = buildRouter(_ref, auth);
       final pipeline = const Pipeline()
+          .addMiddleware(_catchAllErrorMiddleware())
           .addMiddleware(_privateIpMiddleware())
           .addMiddleware(_bodySizeLimitMiddleware())
           .addMiddleware(_rateLimitMiddleware())
@@ -150,6 +151,27 @@ class WebCompanionService {
     );
 
     debugPrint('[WebCompanion] Foreground service start result: $result');
+  }
+
+  /// Global catch-all: wraps every request in try-catch so no unhandled
+  /// exception ever returns a stack trace or internal details to the client.
+  /// Logs the full error server-side via debugPrint.
+  static Middleware _catchAllErrorMiddleware() {
+    return (Handler inner) {
+      return (Request request) async {
+        try {
+          return await inner(request);
+        } catch (e) {
+          debugPrint('[WebCompanion] Unhandled error on '
+              '${request.method} ${request.requestedUri.path}: $e');
+          return Response(
+            500,
+            body: jsonEncode({'error': 'Internal server error'}),
+            headers: {'content-type': 'application/json'},
+          );
+        }
+      };
+    };
   }
 
   /// Rejects requests from non-private IP ranges.

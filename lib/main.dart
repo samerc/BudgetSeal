@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +14,25 @@ import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error handler for Flutter framework errors (build, layout, paint)
+  FlutterError.onError = (details) {
+    debugPrint('[FlutterError] ${details.exceptionAsString()}');
+    // In release mode, silently log — don't show red screen
+    if (kReleaseMode) {
+      FlutterError.presentError(details);
+    }
+  };
+
+  // Global error zone for all uncaught async errors
+  runZonedGuarded(() async {
+    await _startApp();
+  }, (error, stackTrace) {
+    debugPrint('[Uncaught] $error');
+  });
+}
+
+Future<void> _startApp() async {
 
   // Initialize flutter_foreground_task for the Web Companion server.
   FlutterForegroundTask.initCommunicationPort();

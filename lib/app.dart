@@ -61,6 +61,7 @@ import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_colors.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/utils/page_transitions.dart';
+import 'shared/widgets/error_boundary.dart';
 
 class PocketPlanApp extends ConsumerStatefulWidget {
   const PocketPlanApp({super.key});
@@ -473,7 +474,7 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           ),
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
-            child: child,
+            child: ErrorBoundary(child: child ?? const SizedBox.shrink()),
           ),
         );
       },
