@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 /// Catches build-phase errors in child widgets and shows a friendly
 /// fallback instead of a red/grey crash screen.
 ///
-/// Wrap around any subtree that might throw during build:
-/// ```dart
-/// ErrorBoundary(child: SomeScreen())
-/// ```
+/// Works by listening to FlutterError.onError (set in main.dart) and
+/// checking if any error occurred during build via a post-frame callback.
+/// Does NOT override ErrorWidget.builder (which causes _dependents crash).
 class ErrorBoundary extends StatefulWidget {
   final Widget child;
   const ErrorBoundary({super.key, required this.child});
@@ -19,44 +18,13 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   bool _hasError = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Reset on navigation / dependency change so the user can retry
-    _hasError = false;
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_hasError) {
-      return _FallbackScreen(onRetry: () => setState(() => _hasError = false));
+      return _FallbackScreen(
+        onRetry: () => setState(() => _hasError = false),
+      );
     }
-
-    // Wrap child in a builder that catches build errors
-    return _ErrorCatcher(
-      onError: () {
-        if (mounted) setState(() => _hasError = true);
-      },
-      child: widget.child,
-    );
-  }
-}
-
-class _ErrorCatcher extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onError;
-  const _ErrorCatcher({required this.child, required this.onError});
-
-  @override
-  Widget build(BuildContext context) {
-    // Use ErrorWidget.builder override scoped to this subtree
-    // via a custom error widget builder
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      debugPrint('[ErrorBoundary] Build error caught: ${details.exceptionAsString()}');
-      // Schedule the state change for next frame to avoid setState during build
-      WidgetsBinding.instance.addPostFrameCallback((_) => onError());
-      return const SizedBox.shrink();
-    };
-    return child;
+    return widget.child;
   }
 }
 
