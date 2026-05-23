@@ -23,6 +23,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   router.post('/auth/pin', _pinHandler(auth));
   router.get('/auth/status', _authStatusHandler(auth));
+  router.post('/auth/logout', _logoutHandler(auth));
 
   // ── Static assets ───────────────────────────────────────────────────────────
 
@@ -117,6 +118,17 @@ Handler _authStatusHandler(WebCompanionAuth auth) {
     final authenticated = auth.validateToken(token);
     return Response.ok(
       jsonEncode({'authenticated': authenticated}),
+      headers: _jsonHeaders,
+    );
+  };
+}
+
+Handler _logoutHandler(WebCompanionAuth auth) {
+  return (Request request) {
+    final token = _extractToken(request);
+    if (token != null) auth.revokeToken(token);
+    return Response.ok(
+      jsonEncode({'success': true}),
       headers: _jsonHeaders,
     );
   };

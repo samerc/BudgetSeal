@@ -18,6 +18,7 @@ class WebCompanionAuth {
   static const _maxAttempts = 5;
   static const _lockoutDuration = Duration(minutes: 30);
   static const _sessionTimeout = Duration(hours: 4);
+  static const _absoluteSessionTimeout = Duration(hours: 8);
   static const _maxSessions = 10;
 
   // ── PIN management ──────────────────────────────────────────────────────────
@@ -81,8 +82,14 @@ class WebCompanionAuth {
     if (token == null) return false;
     final session = _sessions[token];
     if (session == null) return false;
-    final age = DateTime.now().difference(session.lastActivity);
-    if (age > _sessionTimeout) {
+    final now = DateTime.now();
+    // Absolute timeout — session can't live forever even with activity
+    if (now.difference(session.createdAt) > _absoluteSessionTimeout) {
+      _sessions.remove(token);
+      return false;
+    }
+    // Inactivity timeout
+    if (now.difference(session.lastActivity) > _sessionTimeout) {
       _sessions.remove(token);
       return false;
     }

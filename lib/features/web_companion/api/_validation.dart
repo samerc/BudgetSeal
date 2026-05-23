@@ -130,13 +130,27 @@ const _allowedTables = {
   'recurring_transactions', 'objectives', 'households',
 };
 
-/// Validate that an ID exists in a database table.
+/// Validate that an ID exists in a database table AND belongs to
+/// the given household (if the table has a household_id column).
 /// Returns the ID if found, null if not.
 /// Table name must be in the whitelist — rejects unknown tables.
 Future<String?> validateIdExists(
-    AppDatabase db, String table, String id) async {
+    AppDatabase db, String table, String id,
+    [String? householdId]) async {
   if (!_allowedTables.contains(table)) {
     throw ArgumentError('Invalid table name: $table');
+  }
+  // Tables with household_id column — enforce ownership
+  const householdTables = {
+    'accounts', 'categories', 'allocations', 'transactions',
+    'recurring_transactions', 'objectives',
+  };
+  if (householdId != null && householdTables.contains(table)) {
+    final rows = await db.customSelect(
+      'SELECT 1 FROM $table WHERE id = ? AND household_id = ? LIMIT 1',
+      variables: [Variable.withString(id), Variable.withString(householdId)],
+    ).get();
+    return rows.isNotEmpty ? id : null;
   }
   final rows = await db.customSelect(
     'SELECT 1 FROM $table WHERE id = ? LIMIT 1',

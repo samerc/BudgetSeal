@@ -94,6 +94,9 @@ const _monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 function esc(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+function safeHex(v) {
+  return /^#[0-9A-Fa-f]{3,8}$/.test(v) ? v : '#607D8B';
+}
 
 function setContent(html) { document.getElementById('content').innerHTML = html; }
 
@@ -479,7 +482,7 @@ async function renderTransactions(page, typeFilter, search) {
         }
 
         return `
-        <tr class="tx-row${missingRate ? ' tx-warn' : ''}" onclick="toggleTxDetail('${t.id}', this)">
+        <tr class="tx-row${missingRate ? ' tx-warn' : ''}" onclick="toggleTxDetail('${esc(t.id)}', this)">
           <td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(t.date)}</td>
           <td>${typeBadge(t.type)}</td>
           <td class="text-sm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.note || '—')}</td>
@@ -491,8 +494,8 @@ async function renderTransactions(page, typeFilter, search) {
           </td>
           <td style="text-align:right;white-space:nowrap">${amountHtml}</td>
           <td style="white-space:nowrap" onclick="event.stopPropagation()">
-            <button class="btn btn-sm btn-outline" onclick="editTransaction('${t.id}')">Edit</button>
-            <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteTransaction('${t.id}')">Del</button>
+            <button class="btn btn-sm btn-outline" onclick="editTransaction('${esc(t.id)}')">Edit</button>
+            <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteTransaction('${esc(t.id)}')">Del</button>
           </td>
         </tr>`;
       }).join('')
@@ -799,9 +802,9 @@ async function renderCategories() {
     const childCount = group.children.length;
     const childHtml = group.children.map(ch => {
       return `<div class="cat-child">
-        <span class="cat-child-icon" style="background:${esc(ch.colorHex)}">${esc(catIcon(ch.icon, ch.name))}</span>
+        <span class="cat-child-icon" style="background:${safeHex(ch.colorHex)}">${esc(catIcon(ch.icon, ch.name))}</span>
         <span class="cat-child-name">${esc(ch.name)}</span>
-        <button class="cat-edit-btn" onclick="event.stopPropagation();openEditCategory('${ch.id}')">
+        <button class="cat-edit-btn" onclick="event.stopPropagation();openEditCategory('${esc(ch.id)}')">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
         </button>
       </div>`;
@@ -809,12 +812,12 @@ async function renderCategories() {
 
     return `<div class="cat-card">
       <div class="cat-card-header">
-        <span class="cat-card-icon" style="background:${esc(p.colorHex)}">${esc(catIcon(p.icon, p.name))}</span>
+        <span class="cat-card-icon" style="background:${safeHex(p.colorHex)}">${esc(catIcon(p.icon, p.name))}</span>
         <div class="cat-card-info">
           <div class="cat-card-name">${esc(p.name)}</div>
           ${childCount > 0 ? `<div class="cat-card-count">${childCount} sub-categor${childCount === 1 ? 'y' : 'ies'}</div>` : ''}
         </div>
-        <button class="cat-edit-btn" onclick="openEditCategory('${p.id}')">
+        <button class="cat-edit-btn" onclick="openEditCategory('${esc(p.id)}')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
         </button>
       </div>
@@ -964,7 +967,7 @@ async function renderAccounts() {
     const totalStr = Object.entries(groupTotal).map(([c, t]) => fmt(t, c)).join(' + ');
 
     const rows = accts.map(a => `
-      <div class="acct-row" onclick="viewAccountTransactions('${a.id}','${esc(a.name)}')">
+      <div class="acct-row" onclick="viewAccountTransactions('${esc(a.id)}','${esc(a.name)}')">
         <div class="acct-row-left">
           <div class="acct-row-name">${esc(a.name)}</div>
           <span class="acct-row-cur">${esc(a.currency)}</span>
@@ -1024,9 +1027,9 @@ async function viewAccountTransactions(accountId, accountName, page) {
       <thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Category</th><th>Account</th><th style="text-align:right">Amount</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <div class="pagination">
-      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="viewAccountTransactions('${accountId}','${esc(accountName)}',${page - 1})">← Prev</button>
+      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page - 1})">← Prev</button>
       <span class="text-secondary text-sm">Page ${page}</span>
-      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="viewAccountTransactions('${accountId}','${esc(accountName)}',${page + 1})">Next →</button>
+      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page + 1})">Next →</button>
     </div>`);
 }
 
@@ -1063,7 +1066,7 @@ async function renderEnvelopes() {
         const [cur, bal] = entries[0] ?? ['USD', 0];
         const pct = e.targetAmount ? Math.min(100, Math.max(0, (bal / e.targetAmount) * 100)) : null;
         const isOver = bal < 0;
-        return `<div class="envelope-card"><div class="envelope-header"><div><div class="envelope-name">${esc(e.icon || '📁')} ${esc(e.name)}</div><div class="text-secondary text-sm" style="margin-top:2px">${esc(e.type)} · ${esc(e.periodicity)}</div></div><div style="text-align:right;flex-shrink:0"><div class="${bal < 0 ? 'amount-expense' : bal > 0 ? 'amount-income' : ''}" style="font-weight:700;font-size:15px">${fmt(bal, cur)}</div>${e.targetAmount ? `<div class="text-secondary text-sm">of ${fmt(e.targetAmount, e.targetCurrency || cur)}</div>` : ''}</div></div>${pct !== null ? `<div class="progress-bar" style="margin-bottom:12px"><div class="progress-fill ${isOver ? 'over' : ''}" style="width:${pct.toFixed(1)}%"></div></div>` : '<div style="margin-bottom:12px"></div>'}<button class="btn btn-sm btn-outline" onclick="openFundEnvelope('${e.id}','${esc(cur)}')">+ Fund</button></div>`;
+        return `<div class="envelope-card"><div class="envelope-header"><div><div class="envelope-name">${esc(e.icon || '📁')} ${esc(e.name)}</div><div class="text-secondary text-sm" style="margin-top:2px">${esc(e.type)} · ${esc(e.periodicity)}</div></div><div style="text-align:right;flex-shrink:0"><div class="${bal < 0 ? 'amount-expense' : bal > 0 ? 'amount-income' : ''}" style="font-weight:700;font-size:15px">${fmt(bal, cur)}</div>${e.targetAmount ? `<div class="text-secondary text-sm">of ${fmt(e.targetAmount, e.targetCurrency || cur)}</div>` : ''}</div></div>${pct !== null ? `<div class="progress-bar" style="margin-bottom:12px"><div class="progress-fill ${isOver ? 'over' : ''}" style="width:${pct.toFixed(1)}%"></div></div>` : '<div style="margin-bottom:12px"></div>'}<button class="btn btn-sm btn-outline" onclick="openFundEnvelope('${esc(e.id)}','${esc(cur)}')">+ Fund</button></div>`;
       }).join('')}</div>`
     : empty('No envelopes', 'Envelopes are managed in the PocketPlan app.');
   setContent(`<div class="page-header"><h1 class="page-title">Envelopes</h1><div style="display:flex;align-items:center;gap:12px"><span class="text-secondary text-sm">Unallocated: ${unallocHtml}</span></div></div>${envsHtml}`);
@@ -1090,7 +1093,7 @@ async function renderRecurring() {
   if (!d) return;
   cache._recurringItems = d.items;
   const rows = d.items.length
-    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${r.id}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${r.id}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${r.id}')">Del</button></td></tr>`; }).join('')
+    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">No recurring transactions</td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Recurring</h1><button class="btn btn-primary" onclick="openAddRecurring()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Title</th><th>Type</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
@@ -1159,7 +1162,7 @@ async function renderSubscriptions() {
   if (!d) return;
   cache._subItems = d.items;
   const rows = d.items.length
-    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${r.id}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${r.id}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${r.id}')">Del</button></td></tr>`; }).join('')
+    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">No subscriptions yet</td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Subscriptions</h1><button class="btn btn-primary" onclick="openAddSubscription()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Service</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
@@ -1236,8 +1239,8 @@ async function loadReports() {
   const incomeTotal = incomeCatItems.reduce((s, i) => s + i.total, 0);
   const topExpenses = cashflow.topExpenses || [];
 
-  const catRows = expenseCatItems.map(item => { const pct = cashflow.expense > 0 ? Math.min(100, (item.total / cashflow.expense) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${esc(item.colorHex || '#607D8B')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-expense">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td><td style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${esc(item.colorHex || '#607D8B')}"></div></div></td></tr>`; }).join('');
-  const incomeCatRows = incomeCatItems.map(item => { const pct = incomeTotal > 0 ? Math.min(100, (item.total / incomeTotal) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${esc(item.colorHex || '#059669')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-income">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td></tr>`; }).join('');
+  const catRows = expenseCatItems.map(item => { const pct = cashflow.expense > 0 ? Math.min(100, (item.total / cashflow.expense) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${safeHex(item.colorHex || '#607D8B')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-expense">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td><td style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${safeHex(item.colorHex || '#607D8B')}"></div></div></td></tr>`; }).join('');
+  const incomeCatRows = incomeCatItems.map(item => { const pct = incomeTotal > 0 ? Math.min(100, (item.total / incomeTotal) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${safeHex(item.colorHex || '#059669')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-income">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td></tr>`; }).join('');
   const topExpHtml = topExpenses.length ? topExpenses.map(t => `<tr><td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(t.date)}</td><td class="text-sm">${t.categoryIcon ? esc(t.categoryIcon) + ' ' : ''}${esc(t.categoryName || '—')}</td><td class="text-sm">${esc(t.accountName || '')}</td><td class="text-sm text-secondary" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.note || '')}</td><td style="text-align:right;white-space:nowrap" class="amount-expense">${fmt(t.amount, cur)}</td></tr>`).join('') : '';
 
   content.innerHTML = `
