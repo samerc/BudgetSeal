@@ -176,11 +176,23 @@ function openModal(title, bodyHtml, onConfirm, confirmLabel = 'Save') {
   o.querySelector('#modal-cancel').onclick = closeModal;
   const btn = o.querySelector('#modal-confirm');
   btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = 'Saving…';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px"></span>Saving…';
     try { await onConfirm(); } catch { toast('Unexpected error', true); }
     finally { if (btn.isConnected) { btn.disabled = false; btn.textContent = confirmLabel; } }
   };
   o.addEventListener('click', e => { if (e.target === o) closeModal(); });
+  // Focus trap: Tab cycles within modal
+  const modal = o.querySelector('.modal');
+  modal.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const focusable = modal.querySelectorAll('input:not([tabindex="-1"]),select,textarea,button:not([disabled])');
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  // Auto-focus first input
+  setTimeout(() => { const fi = modal.querySelector('input:not([type=hidden]):not([tabindex="-1"]),select'); if (fi) fi.focus(); }, 50);
 }
 
 function closeModal() { document.getElementById('modal-overlay')?.remove(); }
@@ -518,7 +530,7 @@ async function renderTransactions(page, typeFilter, search) {
     </div>
     <div style="position:relative;margin-bottom:14px">
       <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-hint)" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-      <input type="text" id="tx-search" class="form-control" style="padding-left:32px;font-size:13px" placeholder="Search by title…" value="${esc(search)}" onkeydown="if(event.key==='Enter'){_txSearch=this.value;renderTransactions(1)}">
+      <input type="text" id="tx-search" class="form-control" style="padding-left:32px;font-size:13px" placeholder="Search by title…" value="${esc(search)}" oninput="clearTimeout(window._searchTimer);window._searchTimer=setTimeout(()=>{_txSearch=this.value;renderTransactions(1)},400)">
     </div>
     <div class="date-bar">
       <div class="date-bar-year">
@@ -1098,7 +1110,7 @@ async function renderRecurring() {
   cache._recurringItems = d.items;
   const rows = items(d).length
     ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
-    : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">No recurring transactions</td></tr>`;
+    : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">No recurring transactions<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddRecurring()">+ Add Recurring</button></td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Recurring</h1><button class="btn btn-primary" onclick="openAddRecurring()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Title</th><th>Type</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
 
@@ -1167,7 +1179,7 @@ async function renderSubscriptions() {
   cache._subItems = d.items;
   const rows = items(d).length
     ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
-    : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">No subscriptions yet</td></tr>`;
+    : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">No subscriptions yet<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddSubscription()">+ Add Subscription</button></td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Subscriptions</h1><button class="btn btn-primary" onclick="openAddSubscription()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Service</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
 
@@ -1348,6 +1360,22 @@ document.getElementById('sign-out-btn').addEventListener('click', () => {
   sessionStorage.removeItem('pp_token');
   Object.keys(cache).forEach(k => delete cache[k]);
   showAuthScreen();
+});
+
+// ── Mobile sidebar toggle ────────────────────────────────────────────────────
+const _hamburger = document.getElementById('hamburger-btn');
+const _sidebarOverlay = document.getElementById('sidebar-overlay');
+const _sidebar = document.getElementById('sidebar');
+function toggleSidebar(open) {
+  const isOpen = open ?? !_sidebar.classList.contains('open');
+  _sidebar.classList.toggle('open', isOpen);
+  _sidebarOverlay.classList.toggle('open', isOpen);
+}
+_hamburger?.addEventListener('click', () => toggleSidebar());
+_sidebarOverlay?.addEventListener('click', () => toggleSidebar(false));
+// Close sidebar when a nav link is clicked (mobile)
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => { if (window.innerWidth <= 768) toggleSidebar(false); });
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
