@@ -47,6 +47,8 @@ async function api(path, opts = {}) {
       toast('Something went wrong. Please try again.', true);
     } else if (res.status === 429) {
       toast('Too many requests. Please wait a moment.', true);
+    } else if (res.status === 413) {
+      toast('Request too large. Try reducing the data.', true);
     } else {
       toast(msg || 'Request failed', true);
     }
@@ -97,6 +99,8 @@ function esc(s) {
 function safeHex(v) {
   return /^#[0-9A-Fa-f]{3,8}$/.test(v) ? v : '#607D8B';
 }
+// Safe array accessor — prevents crash if API response is missing 'items'
+function items(d) { return d?.items ?? []; }
 
 function setContent(html) { document.getElementById('content').innerHTML = html; }
 
@@ -461,8 +465,8 @@ async function renderTransactions(page, typeFilter, search) {
 
   const baseCur = txData.baseCurrency || cache.baseCurrency || 'USD';
 
-  const rows = txData.items.length
-    ? txData.items.map(t => {
+  const rows = items(txData).length
+    ? items(txData).map(t => {
         const lineCur = t.lineCurrency || t.currency;
         const lineAmt = t.lineAmount ?? t.amount;
         const isForeign = lineCur !== baseCur;
@@ -536,7 +540,7 @@ async function renderTransactions(page, typeFilter, search) {
     <div class="pagination">
       <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="renderTransactions(${page - 1})">← Prev</button>
       <span class="text-secondary text-sm">Page ${page}</span>
-      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="renderTransactions(${page + 1})">Next →</button>
+      <button class="btn btn-outline btn-sm" ${items(txData).length < 25 ? 'disabled' : ''} onclick="renderTransactions(${page + 1})">Next →</button>
     </div>
   `);
 
@@ -838,7 +842,7 @@ async function renderCategories() {
       </div>`;
   }
 
-  const content = d.items.length
+  const content = items(d).length
     ? section('Expense', 'badge-expense', expense) + section('Income', 'badge-income', income)
     : empty('No categories yet', 'Add your first category to get started');
 
@@ -926,7 +930,7 @@ async function renderAccounts() {
   if (!d) return;
   cache.accounts = d.items;
 
-  if (!d.items.length) {
+  if (!items(d).length) {
     setContent(`
       <div class="page-header">
         <h1 class="page-title">Accounts</h1>
@@ -1002,8 +1006,8 @@ async function viewAccountTransactions(accountId, accountName, page) {
   const txData = await api(`/api/transactions?page=${page}&limit=25&accountId=${accountId}`);
   if (!txData) return;
   const baseCur = txData.baseCurrency || cache.baseCurrency || 'USD';
-  const rows = txData.items.length
-    ? txData.items.map(t => {
+  const rows = items(txData).length
+    ? items(txData).map(t => {
         const lineCur = t.lineCurrency || t.currency;
         const lineAmt = t.lineAmount ?? t.amount;
         const isForeign = lineCur !== baseCur;
@@ -1029,7 +1033,7 @@ async function viewAccountTransactions(accountId, accountName, page) {
     <div class="pagination">
       <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page - 1})">← Prev</button>
       <span class="text-secondary text-sm">Page ${page}</span>
-      <button class="btn btn-outline btn-sm" ${txData.items.length < 25 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page + 1})">Next →</button>
+      <button class="btn btn-outline btn-sm" ${items(txData).length < 25 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page + 1})">Next →</button>
     </div>`);
 }
 
@@ -1060,8 +1064,8 @@ async function renderEnvelopes() {
   const unallocHtml = unallocEntries.length
     ? unallocEntries.map(([cur, amt]) => `<span class="unalloc-pill ${amt < 0 ? 'unalloc-pill-warn' : ''}">${fmt(amt, cur)}</span>`).join(' ')
     : '<span class="text-secondary">—</span>';
-  const envsHtml = d.items.length
-    ? `<div class="env-grid">${d.items.map(e => {
+  const envsHtml = items(d).length
+    ? `<div class="env-grid">${items(d).map(e => {
         const entries = Object.entries(e.balanceByCurrency || {});
         const [cur, bal] = entries[0] ?? ['USD', 0];
         const pct = e.targetAmount ? Math.min(100, Math.max(0, (bal / e.targetAmount) * 100)) : null;
@@ -1092,8 +1096,8 @@ async function renderRecurring() {
   const [d, accounts, cats] = await Promise.all([api('/api/recurring'), getAccounts(), getCategories()]);
   if (!d) return;
   cache._recurringItems = d.items;
-  const rows = d.items.length
-    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
+  const rows = items(d).length
+    ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? 'Enabled' : 'Disabled'}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">No recurring transactions</td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Recurring</h1><button class="btn btn-primary" onclick="openAddRecurring()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Title</th><th>Type</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
@@ -1161,8 +1165,8 @@ async function renderSubscriptions() {
   const [d, accounts, cats] = await Promise.all([api('/api/subscriptions'), getAccounts(), getCategories()]);
   if (!d) return;
   cache._subItems = d.items;
-  const rows = d.items.length
-    ? d.items.map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
+  const rows = items(d).length
+    ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">Edit</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">Del</button></td></tr>`; }).join('')
     : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">No subscriptions yet</td></tr>`;
   setContent(`<div class="page-header"><h1 class="page-title">Subscriptions</h1><button class="btn btn-primary" onclick="openAddSubscription()">+ Add</button></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>Service</th><th>Account</th><th>Category</th><th>Frequency</th><th>Amount</th><th>Next Due</th><th>On</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }

@@ -21,7 +21,7 @@ Handler listTransactionsHandler(Ref ref) {
 
     try {
       final params = request.url.queryParameters;
-      final page = int.tryParse(params['page'] ?? '1') ?? 1;
+      final page = (int.tryParse(params['page'] ?? '1') ?? 1).clamp(1, 10000);
       final limit =
           (int.tryParse(params['limit'] ?? '50') ?? 50).clamp(1, 200);
       final offset = (page - 1) * limit;
@@ -208,10 +208,10 @@ Handler createTransactionHandler(Ref ref) {
         }
         if (rate <= 0) return badRequest('exchangeRateToBase must be positive');
         // Validate accounts exist
-        if (await validateIdExists(db, 'accounts', fromAccountId) == null) {
+        if (await validateIdExists(db, 'accounts', fromAccountId, householdId) == null) {
           return badRequest('accountId does not exist');
         }
-        if (await validateIdExists(db, 'accounts', toAccountId) == null) {
+        if (await validateIdExists(db, 'accounts', toAccountId, householdId) == null) {
           return badRequest('destinationAccountId does not exist');
         }
 
@@ -230,7 +230,7 @@ Handler createTransactionHandler(Ref ref) {
       } else {
         final accountId = requireString(body, 'accountId');
         if (accountId == null) return badRequest('accountId is required');
-        if (await validateIdExists(db, 'accounts', accountId) == null) {
+        if (await validateIdExists(db, 'accounts', accountId, householdId) == null) {
           return badRequest('accountId does not exist');
         }
 
@@ -252,11 +252,11 @@ Handler createTransactionHandler(Ref ref) {
               return badRequest('Line amount exceeds maximum allowed value');
             }
             final lineCatId = optString(raw, 'categoryId');
-            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId) == null) {
+            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId, householdId) == null) {
               return badRequest('categoryId "$lineCatId" does not exist');
             }
             final lineAcctId = optString(raw, 'accountId');
-            if (lineAcctId != null && await validateIdExists(db, 'accounts', lineAcctId) == null) {
+            if (lineAcctId != null && await validateIdExists(db, 'accounts', lineAcctId, householdId) == null) {
               return badRequest('line accountId "$lineAcctId" does not exist');
             }
             final lineRate = optDouble(raw, 'exchangeRateToBase') ?? 1.0;
@@ -280,7 +280,7 @@ Handler createTransactionHandler(Ref ref) {
             return badRequest('amount exceeds maximum allowed value');
           }
           final catId = optString(body, 'categoryId');
-          if (catId != null && await validateIdExists(db, 'categories', catId) == null) {
+          if (catId != null && await validateIdExists(db, 'categories', catId, householdId) == null) {
             return badRequest('categoryId does not exist');
           }
           final rate = optDouble(body, 'exchangeRateToBase') ?? 1.0;
@@ -368,15 +368,14 @@ Handler updateTransactionHandler(Ref ref) {
         if (amount <= 0) return badRequest('amount must be positive');
         if (amount > kMaxAmount) return badRequest('amount exceeds maximum');
         if (rate <= 0) return badRequest('exchangeRateToBase must be positive');
-        if (await validateIdExists(db, 'accounts', fromAcct) == null) {
+        if (await validateIdExists(db, 'accounts', fromAcct, householdId) == null) {
           return badRequest('accountId does not exist');
         }
-        if (toAcct.isNotEmpty && await validateIdExists(db, 'accounts', toAcct) == null) {
+        if (toAcct.isNotEmpty && await validateIdExists(db, 'accounts', toAcct, householdId) == null) {
           return badRequest('destinationAccountId does not exist');
         }
 
-        await engine.deleteTransaction(id);
-
+        // Create new BEFORE deleting old — prevents data loss if create fails
         newId = await engine.recordTransfer(
           householdId: householdId,
           fromAccountId: fromAcct,
@@ -389,10 +388,12 @@ Handler updateTransactionHandler(Ref ref) {
           note: note,
           date: date,
         );
+        // Delete old AFTER new is created — prevents data loss if create fails
+        await engine.deleteTransaction(id);
       } else {
         final accountId =
             optString(body, 'accountId') ?? existing.accountId;
-        if (await validateIdExists(db, 'accounts', accountId) == null) {
+        if (await validateIdExists(db, 'accounts', accountId, householdId) == null) {
           return badRequest('accountId does not exist');
         }
 
@@ -415,7 +416,7 @@ Handler updateTransactionHandler(Ref ref) {
               return badRequest('Line amount exceeds maximum');
             }
             final lineCatId = optString(raw, 'categoryId');
-            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId) == null) {
+            if (lineCatId != null && await validateIdExists(db, 'categories', lineCatId, householdId) == null) {
               return badRequest('categoryId does not exist');
             }
             final lineRate = optDouble(raw, 'exchangeRateToBase') ?? 1.0;
@@ -469,9 +470,7 @@ Handler updateTransactionHandler(Ref ref) {
           ];
         }
 
-        // Lines validated — safe to delete the original and re-create
-        await engine.deleteTransaction(id);
-
+        // Create new BEFORE deleting old — prevents data loss if create fails
         newId = await engine.recordTransaction(
           householdId: householdId,
           accountId: accountId,
@@ -482,6 +481,7 @@ Handler updateTransactionHandler(Ref ref) {
           deviceId: 'web',
           date: date,
         );
+        await engine.deleteTransaction(id);
       }
 
       return ok({'id': newId});

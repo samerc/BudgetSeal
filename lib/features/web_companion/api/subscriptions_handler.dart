@@ -84,11 +84,11 @@ Handler createSubscriptionHandler(Ref ref) {
 
     final db = ref.read(databaseProvider);
     // Validate FK references
-    if (await validateIdExists(db, 'accounts', accountId) == null) {
+    if (await validateIdExists(db, 'accounts', accountId, householdId) == null) {
       return badRequest('accountId does not exist');
     }
     final categoryId = optString(body, 'categoryId');
-    if (categoryId != null && await validateIdExists(db, 'categories', categoryId) == null) {
+    if (categoryId != null && await validateIdExists(db, 'categories', categoryId, householdId) == null) {
       return badRequest('categoryId does not exist');
     }
 
@@ -160,10 +160,15 @@ Handler updateSubscriptionHandler(Ref ref) {
         final dateStr =
             DateTime.now().toIso8601String().substring(0, 10);
         final entry = {'amount': newAmount, 'from': dateStr};
-        final history = existing.priceHistory != null
-            ? (jsonDecode(existing.priceHistory!) as List)
-                .cast<Map<String, dynamic>>()
-            : <Map<String, dynamic>>[];
+        List<Map<String, dynamic>> history;
+        try {
+          history = existing.priceHistory != null
+              ? (jsonDecode(existing.priceHistory!) as List)
+                  .cast<Map<String, dynamic>>()
+              : <Map<String, dynamic>>[];
+        } catch (_) {
+          history = <Map<String, dynamic>>[];
+        }
         history.add(entry);
         updatedPriceHistory = jsonEncode(history);
       }
