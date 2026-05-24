@@ -1483,3 +1483,59 @@ sub_resume,Subscription action tooltip,Resume subscription,استئناف الا
 onboarding_name_required,Onboarding validation,Enter a household name,أدخل اسم الأسرة,Entrez un nom de foyer
 onboarding_acct_required,Onboarding validation,Enter an account name,أدخل اسم الحساب,Entrez un nom de compte
 onboarding_more_options,Onboarding section label,More options,خيارات إضافية,Plus d'options
+# ──────────────────────────────────────────────
+# CALCULATOR & ASSISTED FLOW (May 2026)
+# ──────────────────────────────────────────────
+af_step1_hint,Assisted flow instruction,Step 1: Add items from your receipt — scan or enter manually.,الخطوة 1: أضف العناصر من الإيصال — مسح ضوئي أو إدخال يدوي.,Étape 1 : Ajoutez les articles — scannez ou saisissez manuellement.
+af_step2_hint,Assisted flow instruction,"Step 2: Add people and assign items. Toggle ""Split evenly"" to divide the total equally.","الخطوة 2: أضف الأشخاص وعيّن العناصر. فعّل ""تقسيم بالتساوي"" لتوزيع المبلغ.","Étape 2 : Ajoutez des personnes et attribuez les articles. Activez ""Répartir également""."
+af_step3_hint,Assisted flow instruction,"Step 3: Review the split, add tip, and confirm.",الخطوة 3: راجع التقسيم وأضف البقشيش وأكد.,Étape 3 : Vérifiez la répartition et confirmez.
+bill_currency_label,Bill splitter currency chip,Bill in {currency},الفاتورة بعملة {currency},Facture en {currency}
+exchange_rate_title,Bill splitter rate card,Exchange Rate,سعر الصرف,Taux de change
+# ──────────────────────────────────────────────
+# VALIDATION FEEDBACK (May 2026)
+# ──────────────────────────────────────────────
+validation_enter_amount,Recurring/form validation,Enter a valid amount,أدخل مبلغاً صحيحاً,Entrez un montant valide
+validation_select_account,Recurring/form validation,Select an account,اختر حساباً,Sélectionnez un compte
+validation_enter_title,Recurring/form validation,Enter a title,أدخل عنواناً,Entrez un titre
+validation_enter_category_name,Category validation,Enter a category name,أدخل اسم الفئة,Entrez un nom de catégorie
+# ──────────────────────────────────────────────
+# TRANSACTION DELETE UNDO (May 2026)
+# ──────────────────────────────────────────────
+tx_deleted,Transaction SnackBar,Transaction deleted,تم حذف المعاملة,Transaction supprimée
+tx_undo,Transaction SnackBar action,Undo,تراجع,Annuler
+# ──────────────────────────────────────────────
+# SYNC INFO (May 2026)
+# ──────────────────────────────────────────────
+sync_changes_merged,Sync subtitle,{count} change(s) merged,تم دمج {count} تغيير(ات),{count} modification(s) fusionnée(s)
+sync_up_to_date,Sync subtitle,up to date,محدّث,à jour
+# ──────────────────────────────────────────────
+# ERROR MESSAGES (May 2026)
+# ──────────────────────────────────────────────
+error_something_wrong,Generic error,Something went wrong. Please try again.,حدث خطأ ما. يرجى المحاولة مرة أخرى.,Quelque chose s'est mal passé. Veuillez réessayer.
+error_could_not_save,Transaction error,Could not save transaction. Please try again.,تعذر حفظ المعاملة. يرجى المحاولة مرة أخرى.,Impossible d'enregistrer. Veuillez réessayer.
+error_could_not_fund,Funding error,Could not fund envelope. Please try again.,تعذر تمويل المخصص. يرجى المحاولة مرة أخرى.,Impossible d'alimenter l'enveloppe. Veuillez réessayer.
+error_could_not_delete,Delete error,Could not delete. Please try again.,تعذر الحذف. يرجى المحاولة مرة أخرى.,Impossible de supprimer. Veuillez réessayer.
+error_restore_failed,Backup error,Restore failed. The backup may be corrupted.,فشل الاستعادة. قد يكون النسخ الاحتياطي تالفاً.,La restauration a échoué. La sauvegarde est peut-être corrompue.
+error_import_failed,Import error,Import failed. Please check the file format.,فشل الاستيراد. يرجى التحقق من تنسيق الملف.,L'importation a échoué. Vérifiez le format du fichier.
+# ──────────────────────────────────────────────
+# PRIVACY & TERMS (May 2026)
+# ──────────────────────────────────────────────
+privacy_title,Privacy screen,Privacy & Terms,الخصوصية والشروط,Confidentialité et Conditions
+privacy_policy_title,Privacy section,Privacy Policy,سياسة الخصوصية,Politique de confidentialité
+terms_title,Terms section,Terms of Use,شروط الاستخدام,Conditions d'utilisation
+privacy_data_storage,Privacy section,Data Storage,تخزين البيانات,Stockage des données
+privacy_cloud_sync,Privacy section,Cloud Sync (Optional),المزامنة السحابية (اختياري),Synchronisation cloud (optionnelle)
+privacy_web_companion,Privacy section,Web Companion,المرافق الإلكتروني,Compagnon Web
+privacy_analytics,Privacy section,Analytics & Tracking,التحليلات والتتبع,Analyse et suivi
+privacy_permissions,Privacy section,Permissions,الأذونات,Autorisations
+privacy_receipts,Privacy section,Receipt Images,صور الإيصالات,Images de reçus
+privacy_backups,Privacy section,Backups,النسخ الاحتياطي,Sauvegardes
+privacy_no_tracking,About screen badge,No tracking. Your data stays on your device.,لا تتبع. بياناتك تبقى على جهازك.,Aucun suivi. Vos données restent sur votre appareil.
+about_licenses,About screen link,Licenses,التراخيص,Licences
+about_privacy_terms,About screen link,Privacy & Terms,الخصوصية والشروط,Confidentialité et Conditions
+# ──────────────────────────────────────────────
+# ACCESSIBILITY (May 2026)
+# ──────────────────────────────────────────────
+a11y_long_press_hint,Transaction tile,Long press for options,اضغط مطولاً للخيارات,Appui long pour les options
+a11y_spending_on_track,Dashboard insight,Spending is on track this month,الإنفاق في المسار الصحيح هذا الشهر,Les dépenses sont en bonne voie ce mois-ci
+a11y_add_first_expense,Dashboard empty state,Add your first expense,أضف أول مصروف لك,Ajoutez votre première dépense
