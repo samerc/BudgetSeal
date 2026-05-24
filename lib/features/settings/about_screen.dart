@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../shared/theme/app_colors.dart';
@@ -116,9 +117,33 @@ class AboutScreen extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            // ── Privacy ──
+            // ── Legal links ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () => context.push('/privacy'),
+                  child: Text('Privacy & Terms',
+                      style: TextStyle(fontSize: 12, color: AppColors.accent)),
+                ),
+                Text('·', style: TextStyle(color: AppColors.th(context))),
+                TextButton(
+                  onPressed: () => showLicensePage(
+                    context: context,
+                    applicationName: 'PocketPlan',
+                    applicationVersion: 'v$appVersion',
+                    applicationLegalese: '© ${DateTime.now().year} Samer Cheaib. All rights reserved.',
+                  ),
+                  child: Text('Licenses',
+                      style: TextStyle(fontSize: 12, color: AppColors.accent)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // ── Privacy badge ──
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

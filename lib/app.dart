@@ -42,6 +42,7 @@ import 'features/travel/travel_exchange_screen.dart';
 import 'features/subscriptions/subscriptions_screen.dart';
 import 'features/subscriptions/subscription_detail_screen.dart';
 import 'features/settings/about_screen.dart';
+import 'features/settings/privacy_screen.dart';
 import 'features/settings/help_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/health_check_screen.dart';
@@ -297,6 +298,11 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/about',
           pageBuilder: (_, state) => slideUpPage(
               child: const AboutScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/privacy',
+          pageBuilder: (_, state) => slideUpPage(
+              child: const PrivacyScreen(), state: state),
         ),
         GoRoute(
           path: '/web-companion',
