@@ -140,22 +140,26 @@ lib/
     │   ├── app_info.dart
     │   └── responsive.dart
     └── widgets/                # Reusable widgets
-        ├── app_card.dart             # Standard card container (radius 14, theme-aware)
-        ├── allocation_card.dart      # Envelope card with circular progress
+        ├── app_card.dart             # Standard card container (radius 16, Tappable touch)
+        ├── allocation_card.dart      # Envelope card with circular progress + semantics
         ├── amount_field.dart         # Opens calculator sheet (not keyboard)
-        ├── animated_amount.dart      # Count-up/down currency animation
-        ├── animated_circular_progress.dart # Custom-painted progress ring
+        ├── animated_amount.dart      # Count-up/down currency animation (RepaintBoundary)
+        ├── animated_circular_progress.dart # Custom-painted progress ring (RepaintBoundary)
         ├── breathing_widget.dart     # Pulsing attention animation
         ├── calculator_amount_field.dart
         ├── category_icon.dart        # Maps category names to PNG icons
         ├── currency_display.dart
         ├── currency_picker_field.dart
         ├── empty_state.dart
-        ├── error_retry.dart
+        ├── error_boundary.dart       # Catches build errors, shows fallback screen
+        ├── error_retry.dart          # Error display with auto-sanitized details
+        ├── faded_edges.dart          # ShaderMask gradient fade on scroll boundaries
         ├── hint_banner.dart
+        ├── rolling_number.dart       # Odometer-style digit rolling animation
         ├── section_header.dart       # Standard section header (13px, w700, ls 0.8)
         ├── skeleton_loader.dart
-        └── spending_heatmap.dart     # GitHub-style daily spending grid
+        ├── spending_heatmap.dart     # GitHub-style daily spending grid
+        └── tappable.dart             # Premium tactile button (scale + haptic, platform-aware)
 
 assets/web/
     index.html    # SPA shell + sidebar with SVG nav icons
@@ -345,9 +349,14 @@ flutter test
 flutter test test/core/engine/allocation_engine_test.dart
 flutter test test/core/engine/balance_calculator_test.dart
 flutter test test/core/database/migration_test.dart
+flutter test test/widgets/   # Tappable, RollingNumber, FadedEdges, ErrorBoundary (15 tests)
 ```
 
 Tests use `AppDatabase.forTesting(NativeDatabase.memory())` for in-memory databases.
+
+Manual test scripts:
+- `test/manual_test_script.md` — full app test checklist (14 sections, 100+ items)
+- `test/web_companion_test_script.md` — Web Companion API + security tests (40+ curl commands)
 
 ## Android
 
@@ -505,19 +514,25 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - Auto-stop after **6 hours** (Android 15+ caps dataSync foreground services at 6h; we match this on all platforms).
 - PIN stored as SHA-256 hash in FlutterSecureStorage.
 - Session tokens: UUID4, 4-hour inactivity expiry, server-side in-memory map, max 10 sessions (oldest evicted).
-- Security middleware pipeline order: `privateIp → bodySize (512 KB) → rateLimit (120 req/min) → security headers → router`.
+- Security middleware pipeline order: `catchAll → privateIp → bodySize (512 KB) → rateLimit (120 req/min) → writeRateLimit (10 writes/min) → abuseDetection (SQL/XSS/honeypot/field size) → security headers (CSP, X-Frame-Options, etc.) → auth → router`.
 - Handlers use `ref.read(databaseProvider)` and `.get()` (one-shot Future), not `.watch()` (streams). Web client polls on demand.
 
 ### Security
 - **CORS**: Same-origin only (echoes request `Origin` header). Never use `Access-Control-Allow-Origin: *` — it allows any malicious website to exfiltrate budget data via CSRF.
-- **Security headers** on all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
+- **Security headers** on all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`, `Content-Security-Policy` (restricts scripts/styles/fonts), `Permissions-Policy` (denies camera/mic/geo).
 - **`serverError()`** logs exception details locally via `debugPrint` but returns generic "Internal server error" to the client. Never leak stack traces, DB schema, or internal types.
 - **`/auth/status`** does not expose `activeSessions` count — prevents session enumeration.
+- **`/auth/logout`** endpoint revokes the session token explicitly.
+- **Session timeouts**: 4-hour inactivity timeout + 8-hour absolute session lifetime. Max 10 concurrent sessions (oldest evicted).
 - **Private IP check** validates IPv4 (127.x, 10.x, 192.168.x, 172.16-31.x) and IPv6 (::1, fe80: link-local, fc/fd ULA).
-- **Rate limiter** evicts stale IP entries every 5 minutes to prevent memory growth.
+- **Rate limiter** evicts stale IP entries every 5 minutes to prevent memory growth. Global: 120 req/min. Writes (POST/PUT/DELETE): 10/min per IP.
+- **Abuse detection**: regex patterns block SQL injection keywords (DROP, UNION SELECT, etc.) and XSS patterns (`<script>`, `javascript:`, `onerror=`). Oversized fields (>10K chars) rejected. Honeypot field ("website") catches bots.
 - **WiFi security warning**: Phone screen shows a network security notice before the Start button. Detects public networks by WiFi name keywords (guest, public, airport, hotel, cafe, etc.) and shows an elevated amber warning.
-- **`esc()` in app.js** escapes `'` (single quotes) as `&#39;` — prevents XSS in onclick attributes when account/category names contain quotes.
+- **`esc()` in app.js** escapes `& < > " '` — used on ALL user-generated values including IDs in onclick handlers. `safeHex()` validates color hex values in style attributes to prevent CSS injection.
 - **Search input** escapes SQL LIKE wildcards (`%`, `_`, `\`) in the backend before passing to Drift's `.like()`.
+- **FK validation** checks household ownership: `validateIdExists()` verifies the referenced ID belongs to the authenticated user's household, preventing IDOR attacks.
+- **Input validation** on all POST/PUT endpoints: type checks, string length limits (kMaxNameLength=100, kMaxNoteLength=500), amount bounds (>0, ≤1B), enum validation, FK existence + household checks. Invalid data returns 400 with clear error message.
+- **Error sanitization**: `ErrorRetry` widget auto-strips exception types, file paths, SQL details, and stack traces. All SnackBars use generic messages. No `console.log/error/warn` in web SPA.
 
 ### Multi-Currency in Web Companion
 - Transaction list handler returns `lineCurrency`, `lineAmount`, `lineExchangeRate` from the first transaction line alongside the header data. The frontend displays the native currency amount, not the base currency header amount.
@@ -526,7 +541,13 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 
 ### Web SPA Notes
 - Token stored in `sessionStorage` (clears on browser close), sent as `Authorization: Bearer <token>`.
-- `api()` function in `app.js` separates fetch failures from JSON parse failures — each logs to `console.error` with the path.
+- `api()` function in `app.js` shows user-friendly errors: 500→"Something went wrong", 429→"Too many requests", 413→"Request too large". No console logging of errors.
+- `items()` safe accessor used on all API responses to prevent crash on missing `items` key.
+- Mobile responsive: hamburger menu slides sidebar in/out on screens ≤768px. Nav links auto-close sidebar.
+- Transaction search uses `oninput` with 400ms debounce (real-time, not Enter-only).
+- Modal focus trap: Tab cycles within modal, auto-focuses first input.
+- Keyboard shortcuts: `N`=new tx, `R`=refresh, `/`=search, `Esc`=close, `?`=help. Help icon in sidebar.
+- CSV export available on Transactions, Recurring, and Subscriptions pages.
 - `getAccounts()` / `getCategories()` use `if (!('accounts' in cache))` — only populate cache on success (`if (d) cache.accounts = ...`). Failed loads leave the key absent so the next call retries. Do NOT use `if (!cache.accounts)` — an empty array `[]` is truthy, permanently poisoning the cache after a failed load.
 - `Content-Type: application/json` is only sent on requests that have a body (POST/PUT), not on GETs.
 - Categories and accounts are prefetched in the background after auth success.
@@ -534,7 +555,7 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 
 ### SPA Features
 - **Skeleton loaders** on all pages instead of spinner.
-- **Keyboard shortcuts**: `N` = new transaction, `/` = search, `Esc` = close modal, `?` = help. Disabled during input focus and when modal is open.
+- **Keyboard shortcuts**: `N` = new transaction, `R` = refresh page, `/` = search, `Esc` = close modal, `?` = help. Disabled during input focus and when modal is open. Help icon visible in sidebar.
 - **Transaction search**: server-side LIKE query on `note` field with SQL wildcard escaping.
 - **Month navigation**: year arrows + month tabs (Jan–Dec + All). Backend supports `from`/`to` date params.
 - **Account filtering**: transactions list supports `accountId` param (matches both source and destination for transfers).
@@ -649,7 +670,10 @@ Three levels in one screen:
 
 ## Soft Delete
 
-Transactions use a `deleted` boolean column (schema v12) instead of hard deletion. `AllocationEngine.deleteTransaction()` sets `deleted = true` and removes ledger entries. All transaction queries filter `deleted = false` except sync export (which includes deleted rows so they propagate across devices). The Health Check screen offers a "Purge" action to permanently remove soft-deleted transactions.
+Transactions use a `deleted` boolean column (schema v12) instead of hard deletion. `AllocationEngine.deleteTransaction()` sets `deleted = true` and removes ledger entries. All transaction queries filter `deleted = false` except sync export (which includes deleted rows so they propagate across devices). The Health Check screen offers a "Purge" action to permanently remove soft-deleted transactions (also cleans up receipt files).
+
+### Undo Delete
+Single-transaction delete from the context menu shows a 5-second SnackBar with "Undo" action. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
 
 ## Animation Widgets
 
@@ -659,11 +683,20 @@ Transactions use a `deleted` boolean column (schema v12) instead of hard deletio
 ### AnimatedCircularProgress
 `lib/shared/widgets/animated_circular_progress.dart` — custom-painted circular progress ring with overspend indicator. Main arc (0-100%) in `color`, second arc overlay in `overspendColor` for values > 100%. AnimationController at 1500ms with `easeInOutCubicEmphasized`. Used on allocation cards for envelopes with targets.
 
-### BreathingWidget
-`lib/shared/widgets/breathing_widget.dart` — pulsing scale animation (1.0→1.15, 2500ms, repeating). Set `active: false` to render statically. Used on dashboard for overspent envelope warning icons.
+### RollingNumber
+`lib/shared/widgets/rolling_number.dart` — odometer-style rolling digit animation. Each digit scrolls independently (rightmost fastest, leftmost slowest). Non-digit characters (currency symbols, separators) crossfade. Wraps around 0↔9 via shortest path. Used on dashboard net worth and unallocated amounts.
 
-### Platform Curves
-`lib/shared/utils/platform_curves.dart` — `PlatformCurves.page`, `.standard`, `.emphasis` return platform-appropriate curves (iOS: snappy easeInOut, Android: easeInOutCubicEmphasized). Matching duration helpers.
+### Tappable
+`lib/shared/widgets/tappable.dart` — premium tactile button widget. iOS: opacity fade + scale-down. Android: InkSparkle shimmer + scale-down. Both: automatic haptic feedback. Drop-in replacement for InkWell/GestureDetector. Used in AppCard (propagates to all cards), dashboard quick actions, and objectives cards.
+
+### FadedEdges
+`lib/shared/widgets/faded_edges.dart` — ShaderMask-based gradient fade at scroll boundaries. Supports top/bottom/start/end fades. Used on transaction month tabs for smooth horizontal scroll fade.
+
+### ErrorBoundary
+`lib/shared/widgets/error_boundary.dart` — wraps child subtree; shows friendly fallback ("Something went wrong" + Try Again + Go Back) when `_hasError` is set. Does NOT override `ErrorWidget.builder` (that causes `_dependents.isEmpty` crash). Error catching handled by `FlutterError.onError` in main.dart.
+
+### BreathingWidget
+`lib/shared/widgets/breathing_widget.dart` — pulsing scale animation (1.0→1.15, 2500ms, repeating). Set `active: false` to render statically.
 
 ## Spending Heatmap
 
@@ -733,8 +766,11 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 `lib/shared/theme/design_tokens.dart` defines the single source of truth:
 - **Spacing**: xs(4), sm(8), md(12), lg(16), xl(24), xxl(32), sectionGap(16), headerToCard(8)
 - **CardTokens**: radius(16), paddingH(16), paddingV(14), borderRadius, padding
+- **RadiusTokens**: sm(8), md(12), lg(16), pill(20), sheet(24) — for elements that need different radii than cards
+- **Durations**: fast(150ms), standard(250ms), emphasis(350ms) — animation timing
 - **CategoryIconTokens**: listSize(48), compactSize(36), heroSize(64)
-- **TypographyTokens**: screenTitle(28/w800), sectionHeader(13/w700/ls0.8), cardTitle(15/w600), amountLarge(24/w700), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600), txTitle(15/w600), txSubtitle(12/w400), dateHeader(14/w600)
+- **TypographyTokens**: screenTitle(28/w800), sectionHeader(13/w700/ls0.8), cardTitle(15/w600), amountLarge(24/w700), amountDisplay(18/w800), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600), mini(10/w500), txTitle(15/w600), txSubtitle(12/w400), dateHeader(14/w600)
+- **InputLimits**: nameMaxLength(100), noteMaxLength(500), maxAmount(1e9)
 
 ### Color Palette
 - Accent: `#2563EB` (Royal Blue)
