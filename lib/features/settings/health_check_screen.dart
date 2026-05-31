@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show Value, Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
@@ -143,28 +144,31 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     }
 
     // 5. Soft-deleted transaction count
-    final deletedTxs = await (db.select(db.transactions)
-          ..where((t) => t.householdId.equals(householdId))
-          ..where((t) => t.deleted.equals(true)))
-        .get();
+    final deletedCount = await db.customSelect(
+      'SELECT COUNT(*) AS c FROM transactions WHERE household_id = ? AND deleted = 1',
+      variables: [Variable.withString(householdId)],
+    ).getSingle().then((r) => r.read<int>('c'));
 
     // 6. Last backup
     final lastBackup = await AutoBackupService.getLastBackupTime();
 
     // 7. Total transaction count
-    final totalTxs = await (db.select(db.transactions)
-          ..where((t) => t.householdId.equals(householdId))
-          ..where((t) => t.deleted.equals(false)))
-        .get();
+    final totalTxCount = await db.customSelect(
+      'SELECT COUNT(*) AS c FROM transactions WHERE household_id = ? AND deleted = 0',
+      variables: [Variable.withString(householdId)],
+    ).getSingle().then((r) => r.read<int>('c'));
+
+    // 8. Total ledger entries count
+    final ledgerCount = allEntries.length;
 
     return _HealthReport(
       checks: checks,
       accounts: accountInfos,
       allocations: allocInfos,
       orphanLedgerCount: orphanCount,
-      softDeletedCount: deletedTxs.length,
-      totalTransactions: totalTxs.length,
-      totalLedgerEntries: allEntries.length,
+      softDeletedCount: deletedCount,
+      totalTransactions: totalTxCount,
+      totalLedgerEntries: ledgerCount,
       lastBackup: lastBackup,
     );
   }
@@ -175,21 +179,16 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Repair Balances'),
-        content: const Text(
-          'This will create adjustment ledger entries to bring '
-          'allocation balances back in line with account balances. '
-          'A backup is recommended before proceeding.\n\n'
-          'Continue?',
-        ),
+        title: Text(S.of(context).healthRepairTitle),
+        content: Text(S.of(context).healthRepairMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Repair'),
+            child: Text(S.of(context).healthRepairDone),
           ),
         ],
       ),
@@ -241,7 +240,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             entryType: 'adjustment',
             amount: check.unallocated, // negative value corrects the overshoot
             currency: check.currency,
-            note: const Value('Health check auto-adjustment'),
+            note: Value(S.of(context).healthAutoAdjustment),
             deviceId: 'health-check',
           ));
           adjustments++;
@@ -252,8 +251,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Text(adjustments > 0
-              ? '$adjustments adjustment(s) created'
-              : 'No adjustments needed'),
+              ? S.of(context).healthAdjustmentsCreated(adjustments)
+              : S.of(context).healthNoAdjustments),
         ));
       }
       await _runCheck();
@@ -263,7 +262,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         setState(() => _running = false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: const Text('Repair failed. Please try again.'),
+          content: Text(S.of(context).healthRepairFailed),
         ));
       }
     }
@@ -286,7 +285,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       if (!mounted) return;
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path)],
-        title: 'PocketPlan Health Check Report',
+        title: S.of(context).healthReportTitle,
       ));
     } finally {
       if (file.existsSync()) file.deleteSync();
@@ -332,22 +331,20 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Purge Deleted Transactions'),
+        title: Text(S.of(context).healthPurgeTitle),
         content: Text(
-          'Permanently remove ${report.softDeletedCount} soft-deleted '
-          'transaction(s) and their lines from the database?\n\n'
-          'This cannot be undone.',
+          S.of(context).healthPurgeContent(report.softDeletedCount, S.of(context).healthPurgeSuffix),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: AppColors.overspent),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Purge'),
+            child: Text(S.of(context).healthPurgeButton),
           ),
         ],
       ),
@@ -373,17 +370,19 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           if (file.existsSync()) await file.delete();
         } catch (_) {}
       }
-      await (db.delete(db.transactionLines)
-            ..where((l) => l.transactionId.equals(tx.id)))
-          .go();
-      await (db.delete(db.transactions)..where((t) => t.id.equals(tx.id)))
-          .go();
     }
+
+    // Batch delete DB rows
+    final ids = deleted.map((t) => t.id).toList();
+    await (db.delete(db.transactionLines)
+          ..where((l) => l.transactionId.isIn(ids)))
+        .go();
+    await (db.delete(db.transactions)..where((t) => t.id.isIn(ids))).go();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
-        content: Text('${deleted.length} transaction(s) purged'),
+        content: Text(S.of(context).healthPurged(deleted.length)),
       ));
     }
     await _runCheck();
@@ -395,17 +394,17 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Health Check'),
+        title: Text(S.of(context).healthTitle),
         actions: [
           if (_report != null) ...[
             IconButton(
               icon: const Icon(Icons.share_rounded),
-              tooltip: 'Export report',
+              tooltip: S.of(context).healthExportTooltip,
               onPressed: _exportReport,
             ),
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'Re-run check',
+              tooltip: S.of(context).healthRerunTooltip,
               onPressed: _running ? null : _runCheck,
             ),
           ],
@@ -415,7 +414,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _report == null
               ? Center(
-                  child: Text('No data',
+                  child: Text(S.of(context).commonNoData,
                       style: TextStyle(color: AppColors.ts(context))))
               : _buildReport(context),
     );
@@ -434,25 +433,25 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         const SizedBox(height: 16),
 
         // ── Balance invariant per currency ──
-        _sectionHeader(context, 'Balance Invariant'),
+        _sectionHeader(context, S.of(context).healthBalanceInvariant),
         const SizedBox(height: 8),
         for (final check in report.checks.values) _invariantTile(context, check),
         const SizedBox(height: 16),
 
         // ── Accounts ──
-        _sectionHeader(context, 'Account Balances'),
+        _sectionHeader(context, S.of(context).healthAccountBalances),
         const SizedBox(height: 8),
         _accountsCard(context, report.accounts),
         const SizedBox(height: 16),
 
         // ── Allocations ──
-        _sectionHeader(context, 'Envelope Balances'),
+        _sectionHeader(context, S.of(context).healthEnvelopeBalances),
         const SizedBox(height: 8),
         _allocationsCard(context, report.allocations),
         const SizedBox(height: 16),
 
         // ── Data quality ──
-        _sectionHeader(context, 'Data Quality'),
+        _sectionHeader(context, S.of(context).healthDataQuality),
         const SizedBox(height: 8),
         _dataCard(context, report),
         const SizedBox(height: 24),
@@ -462,7 +461,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           FilledButton.icon(
             onPressed: _repair,
             icon: const Icon(Icons.build_rounded),
-            label: const Text('Repair Balances'),
+            label: Text(S.of(context).healthRepairButton),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.caution,
               minimumSize: const Size.fromHeight(48),
@@ -473,7 +472,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           OutlinedButton.icon(
             onPressed: _purgeSoftDeleted,
             icon: const Icon(Icons.delete_sweep_rounded),
-            label: Text('Purge ${report.softDeletedCount} deleted transaction(s)'),
+            label: Text(S.of(context).healthPurgeButtonN(report.softDeletedCount)),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
@@ -508,7 +507,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            healthy ? 'All Clear' : 'Issues Found',
+            healthy ? S.of(context).healthAllClear : S.of(context).healthIssuesFound,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -518,21 +517,21 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           const SizedBox(height: 4),
           Text(
             healthy
-                ? 'Your data is consistent and healthy'
-                : 'Some balance discrepancies detected',
+                ? S.of(context).healthDataConsistent
+                : S.of(context).healthDiscrepancies,
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _statBadge('Transactions', '${report.totalTransactions}'),
-              _statBadge('Ledger', '${report.totalLedgerEntries}'),
+              _statBadge(S.of(context).healthTransactionsStat, '${report.totalTransactions}'),
+              _statBadge(S.of(context).healthLedgerStat, '${report.totalLedgerEntries}'),
               _statBadge(
-                'Backup',
+                S.of(context).healthBackupStat,
                 report.lastBackup != null
                     ? _formatDate(report.lastBackup!)
-                    : 'Never',
+                    : S.of(context).healthNever,
               ),
             ],
           ),
@@ -621,7 +620,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
   Widget _accountsCard(BuildContext context, List<_AccountInfo> accounts) {
     if (accounts.isEmpty) {
-      return _emptyCard(context, 'No accounts');
+      return _emptyCard(context, S.of(context).healthNoAccounts);
     }
     return Container(
       decoration: BoxDecoration(
@@ -665,7 +664,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   Widget _allocationsCard(
       BuildContext context, List<_AllocationInfo> allocations) {
     if (allocations.isEmpty) {
-      return _emptyCard(context, 'No envelopes');
+      return _emptyCard(context, S.of(context).healthNoEnvelopes);
     }
     return Container(
       decoration: BoxDecoration(
@@ -729,7 +728,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           _dataRow(
             context,
             icon: Icons.receipt_long_rounded,
-            label: 'Transactions',
+            label: S.of(context).healthTransactionsStat,
             value: '${report.totalTransactions}',
           ),
           Divider(height: 1, indent: 16, endIndent: 16,
@@ -737,7 +736,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           _dataRow(
             context,
             icon: Icons.menu_book_rounded,
-            label: 'Ledger entries',
+            label: S.of(context).healthLedgerEntries,
             value: '${report.totalLedgerEntries}',
           ),
           Divider(height: 1, indent: 16, endIndent: 16,
@@ -745,7 +744,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           _dataRow(
             context,
             icon: Icons.delete_outline_rounded,
-            label: 'Soft-deleted',
+            label: S.of(context).healthSoftDeleted,
             value: '${report.softDeletedCount}',
             valueColor: report.softDeletedCount > 0
                 ? AppColors.caution
@@ -756,7 +755,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           _dataRow(
             context,
             icon: Icons.link_off_rounded,
-            label: 'Orphan ledger entries',
+            label: S.of(context).healthOrphanEntries,
             value: '${report.orphanLedgerCount}',
             valueColor: report.orphanLedgerCount > 0
                 ? AppColors.overspent
@@ -767,10 +766,10 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           _dataRow(
             context,
             icon: Icons.backup_rounded,
-            label: 'Last backup',
+            label: S.of(context).healthLastBackup,
             value: report.lastBackup != null
                 ? _formatDateTime(report.lastBackup!)
-                : 'Never',
+                : S.of(context).healthNever,
             valueColor:
                 report.lastBackup == null ? AppColors.caution : null,
           ),

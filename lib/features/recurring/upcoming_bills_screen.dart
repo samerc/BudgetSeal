@@ -10,6 +10,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Shows recurring transactions sorted by next due date,
 /// with visual urgency indicators for overdue / due soon items.
@@ -59,15 +60,15 @@ class _UpcomingBillsScreenState
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Upcoming Bills'),
+        title: Text(S.of(context).upcomingTitle),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _bills.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.event_available_rounded,
-                  title: 'No upcoming bills',
-                  subtitle: 'Create recurring transactions to see them here.',
+                  title: S.of(context).upcomingNoTitle,
+                  subtitle: S.of(context).upcomingNoSubtitle,
                 )
               : RefreshIndicator(
                   onRefresh: _load,
@@ -100,13 +101,14 @@ class _BillCard extends StatelessWidget {
             ? const Color(0xFFD97706)
             : AppColors.healthy;
 
+    final tr = S.of(context);
     final urgencyLabel = isOverdue
-        ? 'Overdue by ${-daysUntil} day${daysUntil == -1 ? '' : 's'}'
+        ? tr.upcomingOverdue(-daysUntil)
         : daysUntil == 0
-            ? 'Due today'
+            ? tr.upcomingDueToday
             : daysUntil == 1
-                ? 'Due tomorrow'
-                : 'Due in $daysUntil days';
+                ? tr.upcomingDueTomorrow
+                : tr.upcomingDueInDays(daysUntil);
 
     final typeIcon = switch (bill.type) {
       'income' => Icons.arrow_downward_rounded,
@@ -151,7 +153,7 @@ class _BillCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      bill.title.isNotEmpty ? bill.title : 'Untitled',
+                      bill.title.isNotEmpty ? bill.title : tr.subUntitled,
                       style: TextStyle(
                         fontSize: TypographyTokens.cardTitleSize,
                         fontWeight: TypographyTokens.cardTitleWeight,
@@ -159,7 +161,7 @@ class _BillCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _formatFrequency(bill),
+                      _formatFrequency(bill, tr),
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.ts(context),
@@ -218,20 +220,22 @@ class _BillCard extends StatelessWidget {
     );
   }
 
-  String _formatFrequency(RecurringTransaction r) {
-    final map = {
-      'daily': 'Daily',
-      'weekly': 'Weekly',
-      'monthly': 'Monthly',
-      'yearly': 'Yearly',
+  String _formatFrequency(RecurringTransaction r, S tr) {
+    if (r.interval <= 1) {
+      return switch (r.frequency) {
+        'daily' => tr.freqDaily,
+        'weekly' => tr.freqWeekly,
+        'monthly' => tr.freqMonthly,
+        'yearly' => tr.freqYearly,
+        _ => r.frequency,
+      };
+    }
+    return switch (r.frequency) {
+      'daily' => tr.freqEveryNDays(r.interval),
+      'weekly' => tr.freqEveryNWeeks(r.interval),
+      'monthly' => tr.freqEveryNMonths(r.interval),
+      'yearly' => tr.freqEveryNYears(r.interval),
+      _ => 'Every ${r.interval} ${r.frequency}',
     };
-    if (r.interval <= 1) return map[r.frequency] ?? r.frequency;
-    final plurals = {
-      'daily': 'days',
-      'weekly': 'weeks',
-      'monthly': 'months',
-      'yearly': 'years',
-    };
-    return 'Every ${r.interval} ${plurals[r.frequency] ?? r.frequency}';
   }
 }

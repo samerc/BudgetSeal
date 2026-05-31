@@ -27,7 +27,7 @@ Handler dashboardHandler(Ref ref) {
 
       final txs = await (db.select(db.transactions)
             ..where((t) =>
-                t.householdId.equals(householdId) & t.deleted.equals(false))
+                t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
             ..limit(10))
           .get();
@@ -48,7 +48,28 @@ Handler dashboardHandler(Ref ref) {
       final accountBalances = await calculator.allAccountBalances(householdId);
       final allocBalances =
           await calculator.allAllocationBalancesByCurrency(householdId);
-      final unallocated = await calculator.unallocatedByCurrency(householdId);
+
+      // Compute unallocated from already-fetched data instead of
+      // calling unallocatedByCurrency() which re-queries both.
+      final accountTotals = <String, double>{};
+      for (final acc in accounts) {
+        final bal = accountBalances[acc.id] ?? 0;
+        accountTotals[acc.currency] =
+            (accountTotals[acc.currency] ?? 0.0) + bal;
+      }
+      final allocTotals = <String, double>{};
+      for (final allocEntry in allocBalances.values) {
+        for (final entry in allocEntry.entries) {
+          allocTotals[entry.key] =
+              (allocTotals[entry.key] ?? 0.0) + entry.value;
+        }
+      }
+      final unallocated = <String, double>{};
+      final allCurrencies = {...accountTotals.keys, ...allocTotals.keys};
+      for (final currency in allCurrencies) {
+        unallocated[currency] =
+            (accountTotals[currency] ?? 0.0) - (allocTotals[currency] ?? 0.0);
+      }
 
       return ok({
         'household': {

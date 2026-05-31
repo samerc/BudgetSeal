@@ -15,6 +15,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class RecurringScreen extends ConsumerStatefulWidget {
   const RecurringScreen({super.key});
@@ -53,20 +54,21 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
   }
 
   String _frequencyLabel(String freq, int interval) {
+    final tr = S.of(context);
     if (interval == 1) {
       return switch (freq) {
-        'daily' => 'Daily',
-        'weekly' => 'Weekly',
-        'monthly' => 'Monthly',
-        'yearly' => 'Yearly',
+        'daily' => tr.freqDaily,
+        'weekly' => tr.freqWeekly,
+        'monthly' => tr.freqMonthly,
+        'yearly' => tr.freqYearly,
         _ => freq,
       };
     }
     return switch (freq) {
-      'daily' => 'Every $interval days',
-      'weekly' => 'Every $interval weeks',
-      'monthly' => 'Every $interval months',
-      'yearly' => 'Every $interval years',
+      'daily' => tr.freqEveryNDays(interval),
+      'weekly' => tr.freqEveryNWeeks(interval),
+      'monthly' => tr.freqEveryNMonths(interval),
+      'yearly' => tr.freqEveryNYears(interval),
       _ => 'Every $interval $freq',
     };
   }
@@ -79,7 +81,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add recurring transaction',
+        tooltip: S.of(context).recurringAddTooltip,
         onPressed: () => _showAddSheet(),
         child: const Icon(Icons.add),
       ),
@@ -102,7 +104,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Recurring',
+                          S.of(context).recurringTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
@@ -111,7 +113,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Bill calendar',
+                        tooltip: S.of(context).billCalTitle,
                         icon: Icon(Icons.calendar_month_rounded,
                             color: AppColors.ts(context)),
                         onPressed: () =>
@@ -139,14 +141,14 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           _SummaryChip(
                             icon: Icons.repeat_rounded,
                             label: '${_items.length}',
-                            subtitle: 'Total',
+                            subtitle: S.of(context).recurringSummaryTotal,
                             color: AppColors.accent,
                           ),
                           const SizedBox(width: 16),
                           _SummaryChip(
                             icon: Icons.play_arrow_rounded,
                             label: '$activeCount',
-                            subtitle: 'Active',
+                            subtitle: S.of(context).recurringSummaryActive,
                             color: AppColors.healthy,
                           ),
                           if (pausedCount > 0) ...[
@@ -154,7 +156,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                             _SummaryChip(
                               icon: Icons.pause_rounded,
                               label: '$pausedCount',
-                              subtitle: 'Paused',
+                              subtitle: S.of(context).recurringSummaryPaused,
                               color: AppColors.caution,
                             ),
                           ],
@@ -171,14 +173,14 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                   child: Row(
                     children: [
                       _TypeChip(
-                        label: 'All',
+                        label: S.of(context).typeAll,
                         selected: _typeFilter == null,
                         onTap: () =>
                             setState(() => _typeFilter = null),
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: 'Expense',
+                        label: S.of(context).typeExpense,
                         selected: _typeFilter == 'expense',
                         color: AppColors.overspent,
                         onTap: () =>
@@ -186,7 +188,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: 'Income',
+                        label: S.of(context).typeIncome,
                         selected: _typeFilter == 'income',
                         color: AppColors.healthy,
                         onTap: () =>
@@ -203,18 +205,18 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                   child: Center(child: CircularProgressIndicator()),
                 )
               else if (_items.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: EmptyState(
                     icon: Icons.repeat_rounded,
-                    title: 'No recurring transactions',
-                    subtitle: 'Tap + to create one',
+                    title: S.of(context).recurringEmptyTitle,
+                    subtitle: S.of(context).recurringEmptySubtitle,
                   ),
                 )
               else if (filtered.isEmpty)
                 SliverFillRemaining(
                   child: Center(
                     child: Text(
-                      'No ${_typeFilter ?? ''} recurring transactions',
+                      S.of(context).recurringFilteredEmpty(_typeFilter ?? ''),
                       style: TextStyle(color: AppColors.ts(context)),
                     ),
                   ),
@@ -238,21 +240,21 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                             context: context,
                             builder: (dialogCtx) => AlertDialog(
                               title:
-                                  const Text('Delete recurring transaction?'),
-                              content: const Text(
-                                  'This will be permanently removed.'),
+                                  Text(S.of(context).recurringDeleteTitle),
+                              content: Text(
+                                  S.of(context).recurringDeleteBody),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogCtx, false),
-                                  child: const Text('Cancel'),
+                                  child: Text(S.of(context).commonCancel),
                                 ),
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogCtx, true),
                                   style: TextButton.styleFrom(
                                       foregroundColor: AppColors.overspent),
-                                  child: const Text('Delete'),
+                                  child: Text(S.of(context).commonDelete),
                                 ),
                               ],
                             ),
@@ -262,9 +264,9 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           await engine.delete(filtered[i].id);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content:
-                                  Text('Recurring transaction deleted'),
+                                  Text(S.of(context).recurringDeleted),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -433,7 +435,7 @@ class _RecurringTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          'Next: ${formatDate(item.nextDueDate)} · $frequencyLabel',
+          '${S.of(context).recurringTileNext(formatDate(item.nextDueDate))} · $frequencyLabel',
           style: TextStyle(
             fontSize: 12,
             color: AppColors.ts(context),
@@ -471,7 +473,7 @@ class _RecurringTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      item.enabled ? 'Active' : 'Paused',
+                      item.enabled ? S.of(context).recurringStatusActive : S.of(context).recurringStatusPaused,
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.ts(context),
@@ -488,7 +490,7 @@ class _RecurringTile extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 iconSize: 20,
-                tooltip: item.enabled ? 'Pause recurring' : 'Resume recurring',
+                tooltip: item.enabled ? S.of(context).recurringPauseTooltip : S.of(context).recurringResumeTooltip,
                 icon: Icon(
                   item.enabled
                       ? Icons.pause_circle_rounded
@@ -553,22 +555,24 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(widget.forceSubscription ? 'New Subscription' : 'New Recurring Transaction',
+            Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.th(context), borderRadius: BorderRadius.circular(2)))),
+            const SizedBox(height: 12),
+            Text(widget.forceSubscription ? S.of(context).recurringNewSubTitle : S.of(context).recurringNewTitle,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleCtrl,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Title (e.g. Rent, Salary)'),
+              decoration: InputDecoration(labelText: S.of(context).recurringFormTitleHint),
               textCapitalization: TextCapitalization.words,
               maxLength: InputLimits.nameMaxLength,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                  (v == null || v.trim().isEmpty) ? S.of(context).recurringFormTitleRequired : null,
             ),
             const SizedBox(height: 12),
             CalculatorAmountField(
               value: _calcAmount,
-              label: 'Amount',
+              label: S.of(context).recurringFormAmount,
               fontSize: 20,
               onChanged: (v) => setState(() => _calcAmount = v),
             ),
@@ -580,7 +584,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               return DropdownButtonFormField<String>(
                 initialValue: _accountId,
                 decoration:
-                    const InputDecoration(labelText: 'Account'),
+                    InputDecoration(labelText: S.of(context).recurringFormAccount),
                 items: accounts
                     .map((a) => DropdownMenuItem(
                           value: a.id,
@@ -598,24 +602,24 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                   });
                 },
                 validator: (v) =>
-                    (_submitted && _accountId == null) ? 'Account is required' : null,
+                    (_submitted && _accountId == null) ? S.of(context).recurringFormAccountRequired : null,
               );
             }),
             const SizedBox(height: 12),
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'expense', label: Text('Expense')),
-                ButtonSegment(value: 'income', label: Text('Income')),
+              segments: [
+                ButtonSegment(value: 'expense', label: Text(S.of(context).typeExpense)),
+                ButtonSegment(value: 'income', label: Text(S.of(context).typeIncome)),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() => _type = s.first),
             ),
             const SizedBox(height: 12),
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'weekly', label: Text('Weekly')),
-                ButtonSegment(value: 'monthly', label: Text('Monthly')),
-                ButtonSegment(value: 'yearly', label: Text('Yearly')),
+              segments: [
+                ButtonSegment(value: 'weekly', label: Text(S.of(context).freqWeekly)),
+                ButtonSegment(value: 'monthly', label: Text(S.of(context).freqMonthly)),
+                ButtonSegment(value: 'yearly', label: Text(S.of(context).freqYearly)),
               ],
               selected: {_frequency},
               onSelectionChanged: (s) =>
@@ -634,7 +638,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               },
               icon: const Icon(Icons.calendar_today_rounded, size: 16),
               label: Text(
-                  'Starts: ${formatDate(_startDate)}'),
+                  S.of(context).recurringFormStarts(formatDate(_startDate))),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
@@ -652,8 +656,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               },
               icon: const Icon(Icons.event_busy_rounded, size: 16),
               label: Text(_endDate != null
-                  ? 'Ends: ${formatDate(_endDate!)}'
-                  : 'Ends: Never (tap to set)'),
+                  ? S.of(context).recurringFormEnds(formatDate(_endDate!))
+                  : S.of(context).recurringFormEndsNever),
             ),
             if (_endDate != null) ...[
               const SizedBox(height: 4),
@@ -661,8 +665,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
-                  child: const Text('Clear end date',
-                      style: TextStyle(fontSize: 12)),
+                  child: Text(S.of(context).recurringFormClearEndDate,
+                      style: const TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -670,9 +674,9 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               const SizedBox(height: 12),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('This is a subscription',
-                    style: TextStyle(fontSize: 14)),
-                subtitle: Text('e.g. Netflix, Spotify',
+                title: Text(S.of(context).recurringFormIsSubscription,
+                    style: const TextStyle(fontSize: 14)),
+                subtitle: Text(S.of(context).recurringFormSubscriptionHint,
                     style: TextStyle(fontSize: 12, color: AppColors.th(context))),
                 value: _isSubscription,
                 onChanged: (v) => setState(() => _isSubscription = v),
@@ -694,8 +698,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                       width: 20,
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
-                  : const Text('Create',
-                      style: TextStyle(
+                  : Text(S.of(context).recurringFormCreate,
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ],
@@ -712,7 +716,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
     final title = _titleCtrl.text.trim();
     if (_calcAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid amount'),
+        SnackBar(content: Text(S.of(context).recurringFormEnterAmount),
             behavior: SnackBarBehavior.floating),
       );
       return;
@@ -722,7 +726,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
     if (householdId == null) return;
     if (_accountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select an account'),
+        SnackBar(content: Text(S.of(context).recurringFormSelectAccount),
             behavior: SnackBarBehavior.floating),
       );
       return;
@@ -745,8 +749,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Recurring transaction created'),
+          SnackBar(
+            content: Text(S.of(context).recurringCreated),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -819,22 +823,24 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Edit Recurring Transaction',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.th(context), borderRadius: BorderRadius.circular(2)))),
+            const SizedBox(height: 12),
+            Text(S.of(context).recurringEditTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleCtrl,
               autofocus: false,
               decoration:
-                  const InputDecoration(labelText: 'Title (e.g. Rent, Salary)'),
+                  InputDecoration(labelText: S.of(context).recurringFormTitleHint),
               textCapitalization: TextCapitalization.words,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                  (v == null || v.trim().isEmpty) ? S.of(context).recurringFormTitleRequired : null,
             ),
             const SizedBox(height: 12),
             CalculatorAmountField(
               value: _calcAmount,
-              label: 'Amount',
+              label: S.of(context).recurringFormAmount,
               fontSize: 20,
               onChanged: (v) => setState(() => _calcAmount = v),
             ),
@@ -844,7 +850,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               final accounts = ref.watch(accountsProvider).value ?? [];
               return DropdownButtonFormField<String>(
                 initialValue: _accountId,
-                decoration: const InputDecoration(labelText: 'Account'),
+                decoration: InputDecoration(labelText: S.of(context).recurringFormAccount),
                 items: accounts
                     .map((a) => DropdownMenuItem(
                           value: a.id,
@@ -861,15 +867,15 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                   });
                 },
                 validator: (v) =>
-                    (_submitted && _accountId == null) ? 'Account is required' : null,
+                    (_submitted && _accountId == null) ? S.of(context).recurringFormAccountRequired : null,
               );
             }),
             const SizedBox(height: 12),
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'weekly', label: Text('Weekly')),
-                ButtonSegment(value: 'monthly', label: Text('Monthly')),
-                ButtonSegment(value: 'yearly', label: Text('Yearly')),
+              segments: [
+                ButtonSegment(value: 'weekly', label: Text(S.of(context).freqWeekly)),
+                ButtonSegment(value: 'monthly', label: Text(S.of(context).freqMonthly)),
+                ButtonSegment(value: 'yearly', label: Text(S.of(context).freqYearly)),
               ],
               selected: {_frequency},
               onSelectionChanged: (s) => setState(() => _frequency = s.first),
@@ -887,7 +893,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               },
               icon: const Icon(Icons.calendar_today_rounded, size: 16),
               label: Text(
-                  'Next due: ${formatDate(_startDate)}'),
+                  S.of(context).recurringFormNextDue(formatDate(_startDate))),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
@@ -905,8 +911,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               },
               icon: const Icon(Icons.event_busy_rounded, size: 16),
               label: Text(_endDate != null
-                  ? 'Ends: ${formatDate(_endDate!)}'
-                  : 'Ends: Never (tap to set)'),
+                  ? S.of(context).recurringFormEnds(formatDate(_endDate!))
+                  : S.of(context).recurringFormEndsNever),
             ),
             if (_endDate != null) ...[
               const SizedBox(height: 4),
@@ -914,17 +920,17 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
-                  child: const Text('Clear end date',
-                      style: TextStyle(fontSize: 12)),
+                  child: Text(S.of(context).recurringFormClearEndDate,
+                      style: const TextStyle(fontSize: 12)),
                 ),
               ),
             ],
             const SizedBox(height: 12),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              title: const Text('This is a subscription',
-                  style: TextStyle(fontSize: 14)),
-              subtitle: Text('e.g. Netflix, Spotify',
+              title: Text(S.of(context).recurringFormIsSubscription,
+                  style: const TextStyle(fontSize: 14)),
+              subtitle: Text(S.of(context).recurringFormSubscriptionHint,
                   style: TextStyle(fontSize: 12, color: AppColors.th(context))),
               value: _isSubscription,
               onChanged: (v) => setState(() => _isSubscription = v),
@@ -941,8 +947,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
-                    child: const Text('Cancel',
-                        style: TextStyle(
+                    child: Text(S.of(context).commonCancel,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
@@ -962,8 +968,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                             width: 20,
                             child: CircularProgressIndicator(
                                 color: Colors.white, strokeWidth: 2))
-                        : const Text('Save',
-                            style: TextStyle(
+                        : Text(S.of(context).commonSave,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
@@ -980,21 +986,21 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
     final title = _titleCtrl.text.trim();
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a title'),
+        SnackBar(content: Text(S.of(context).recurringFormEnterTitle),
             behavior: SnackBarBehavior.floating),
       );
       return;
     }
     if (_calcAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid amount'),
+        SnackBar(content: Text(S.of(context).recurringFormEnterAmount),
             behavior: SnackBarBehavior.floating),
       );
       return;
     }
     if (_accountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select an account'),
+        SnackBar(content: Text(S.of(context).recurringFormSelectAccount),
             behavior: SnackBarBehavior.floating),
       );
       return;
@@ -1017,8 +1023,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
       ));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Recurring transaction updated'),
+          SnackBar(
+            content: Text(S.of(context).recurringUpdated),
             behavior: SnackBarBehavior.floating,
           ),
         );

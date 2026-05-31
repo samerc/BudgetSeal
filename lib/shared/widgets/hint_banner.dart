@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 /// Shows a one-time hint dialog. If the user has already dismissed it
@@ -55,7 +56,7 @@ Future<void> showHintIfNeeded(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: const Text('Got it'),
+          child: Text(S.of(ctx).commonGotIt),
         ),
       ],
     ),

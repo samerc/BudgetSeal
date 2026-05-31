@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 
 class HelpScreen extends StatefulWidget {
@@ -67,7 +68,7 @@ class _HelpScreenState extends State<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Help Guide')),
+      appBar: AppBar(title: Text(S.of(context).helpGuideTitle)),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),

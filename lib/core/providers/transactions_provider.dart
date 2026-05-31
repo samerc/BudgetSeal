@@ -170,7 +170,7 @@ final transactionEntriesProvider =
   }
 
   final txStream = (db.select(db.transactions)
-        ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false))
+        ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull())
         ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
       .watch();
 

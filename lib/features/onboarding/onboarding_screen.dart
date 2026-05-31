@@ -14,6 +14,7 @@ import '../../core/providers/sync_provider.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -36,7 +37,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _periodStartDay = 1;
 
   // Account
-  final _acctNameCtrl = TextEditingController(text: 'Cash');
+  final _acctNameCtrl = TextEditingController();
+  bool _acctNameSet = false;
   String _acctType = 'cash';
   double _acctInitialBalance = 0;
 
@@ -49,6 +51,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _loading = false;
   String? _nameError;
   String? _acctNameError;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_acctNameSet) {
+      _acctNameCtrl.text = S.of(context).onboardTypeCash;
+      _acctNameSet = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -72,8 +83,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     // Validate
     String? nameErr, acctErr;
-    if (householdName.isEmpty) nameErr = 'Enter a household name';
-    if (acctName.isEmpty) acctErr = 'Enter an account name';
+    final s = S.of(context);
+    if (householdName.isEmpty) nameErr = s.onboardHouseholdNameError;
+    if (acctName.isEmpty) acctErr = s.onboardAccountNameError;
     if (nameErr != null || acctErr != null) {
       setState(() {
         _nameError = nameErr;
@@ -117,24 +129,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           final presets = detailedPresets;
           final groupIds = <String, String>{};
 
-          for (final p in presets.where((p) => p.parentName == null)) {
+          for (final p in presets.where((p) => p.parentKey == null)) {
             final id = const Uuid().v4();
-            groupIds[p.name] = id;
+            groupIds[p.nameKey] = id;
             batch.insert(db.categories, CategoriesCompanion.insert(
               id: id,
               householdId: householdId,
-              name: p.name,
+              name: p.translatedName(s),
               icon: Value(p.emoji),
               colorHex: Value(p.colorHex),
               transactionType: Value(p.type),
             ));
           }
-          for (final p in presets.where((p) => p.parentName != null)) {
-            final parentId = groupIds[p.parentName];
+          for (final p in presets.where((p) => p.parentKey != null)) {
+            final parentId = groupIds[p.parentKey];
             batch.insert(db.categories, CategoriesCompanion.insert(
               id: const Uuid().v4(),
               householdId: householdId,
-              name: p.name,
+              name: p.translatedName(s),
               parentId: Value(parentId),
               icon: Value(p.emoji),
               colorHex: Value(p.colorHex),
@@ -149,6 +161,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
       // 5. Go to done page
       if (mounted) _nextPage();
+    } catch (e) {
+      debugPrint('[Onboarding] Error during setup: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).commonErrorDesc),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -319,7 +341,7 @@ class _WelcomePageState extends State<_WelcomePage>
             child: FadeTransition(
               opacity: _fadeTitle,
               child: Text(
-                'Pocket Plan',
+                S.of(context).onboardWelcomeTitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 30,
@@ -333,7 +355,7 @@ class _WelcomePageState extends State<_WelcomePage>
           FadeTransition(
             opacity: _fadeSub,
             child: Text(
-              'Give every dollar a purpose.',
+              S.of(context).onboardTagline,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 15,
@@ -350,25 +372,25 @@ class _WelcomePageState extends State<_WelcomePage>
               children: [
                 _CompactStep(
                   number: '1',
-                  text: 'Add accounts — where your money lives',
+                  text: S.of(context).onboardStep1,
                 ),
                 const SizedBox(height: 8),
                 _CompactStep(
                   number: '2',
-                  text: 'Create envelopes — budget for each category',
+                  text: S.of(context).onboardStep2,
                 ),
                 const SizedBox(height: 8),
                 _CompactStep(
                   number: '3',
-                  text: 'Fund envelopes — distribute your income',
+                  text: S.of(context).onboardStep3,
                 ),
                 const SizedBox(height: 8),
                 _CompactStep(
                   number: '4',
-                  text: 'Spend — each expense draws from its envelope',
+                  text: S.of(context).onboardStep4,
                 ),
                 const SizedBox(height: 32),
-                _OnboardingButton(label: 'Get Started', onTap: widget.onNext),
+                _OnboardingButton(label: S.of(context).onboardGetStarted, onTap: widget.onNext),
                 const SizedBox(height: 12),
                 _RestoreFromCloudButton(),
                 const SizedBox(height: 8),
@@ -475,11 +497,12 @@ class _SetupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final accountTypes = [
-      ('cash', 'Cash', Icons.wallet),
-      ('bank', 'Bank', Icons.account_balance),
-      ('credit', 'Credit', Icons.credit_card),
-      ('wallet', 'Digital', Icons.account_balance_wallet),
+      ('cash', s.onboardTypeCash, Icons.wallet),
+      ('bank', s.onboardTypeBank, Icons.account_balance),
+      ('credit', s.onboardTypeCredit, Icons.credit_card),
+      ('wallet', s.onboardTypeDigital, Icons.account_balance_wallet),
     ];
 
     return GestureDetector(
@@ -490,20 +513,20 @@ class _SetupPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            Text('Set up your household',
+            Text(s.onboardSetupTitle,
                 style: GoogleFonts.inter(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: Colors.white)),
             const SizedBox(height: 4),
-            Text('You can change everything later in Settings.',
+            Text(s.onboardChangeLater,
                 style: GoogleFonts.inter(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.6))),
             const SizedBox(height: 20),
 
             // ── Household ──
-            _SectionLabel('HOUSEHOLD'),
+            _SectionLabel(s.onboardHouseholdSection),
             const SizedBox(height: 8),
             _FormCard(
               child: Column(
@@ -512,14 +535,14 @@ class _SetupPage extends StatelessWidget {
                     controller: nameController,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     onChanged: nameError != null ? (_) => onNameErrorClear?.call() : null,
-                    decoration: _inputDeco('Household name').copyWith(
+                    decoration: _inputDeco(s.onboardHouseholdName).copyWith(
                       errorText: nameError,
                       errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
                   ),
                   const SizedBox(height: 14),
                   CurrencyPickerField(
-                    label: 'Base currency',
+                    label: s.onboardBaseCurrency,
                     value: baseCurrency,
                     onChanged: (v) => onCurrencyChanged(v),
                     textColor: Colors.white,
@@ -531,11 +554,11 @@ class _SetupPage extends StatelessWidget {
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     icon: const Icon(Icons.keyboard_arrow_down_rounded,
                         color: Colors.white54),
-                    decoration: _inputDeco('Period start day'),
+                    decoration: _inputDeco(s.onboardPeriodStart),
                     items: List.generate(28, (i) => i + 1)
                         .map((d) => DropdownMenuItem(
                               value: d,
-                              child: Text('Day $d',
+                              child: Text(s.onboardDayN(d),
                                   style: const TextStyle(color: Colors.white)),
                             ))
                         .toList(),
@@ -547,7 +570,7 @@ class _SetupPage extends StatelessWidget {
             const SizedBox(height: 18),
 
             // ── First Account ──
-            _SectionLabel('FIRST ACCOUNT'),
+            _SectionLabel(s.onboardFirstAccountSection),
             const SizedBox(height: 8),
             _FormCard(
               child: Column(
@@ -557,7 +580,7 @@ class _SetupPage extends StatelessWidget {
                     textCapitalization: TextCapitalization.words,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     onChanged: acctNameError != null ? (_) => onAcctNameErrorClear?.call() : null,
-                    decoration: _inputDeco('Account name').copyWith(
+                    decoration: _inputDeco(s.onboardAccountName).copyWith(
                       errorText: acctNameError,
                       errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
@@ -651,7 +674,7 @@ class _SetupPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             _OnboardingButton(
-              label: loading ? null : 'Create & Start',
+              label: loading ? null : s.onboardCreateStart,
               loading: loading,
               onTap: onSubmit,
             ),
@@ -808,7 +831,7 @@ class _DonePage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'You\'re all set!',
+            S.of(context).onboardAllSet,
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -817,7 +840,7 @@ class _DonePage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Start tracking your expenses.\nYour financial clarity begins now.',
+            S.of(context).onboardDoneSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 15,
@@ -827,7 +850,7 @@ class _DonePage extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           _OnboardingButton(
-            label: 'Start Using Pocket Plan',
+            label: S.of(context).onboardStartUsing,
             onTap: onFinish,
           ),
         ],
@@ -899,7 +922,7 @@ class _RestoreFromCloudButton extends ConsumerWidget {
         onPressed: () => _showRestoreSheet(context, ref),
         icon: const Icon(Icons.cloud_download_rounded, size: 18),
         label: Text(
-          'Restore from Cloud',
+          S.of(context).onboardRestoreCloud,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
@@ -1002,15 +1025,14 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Restore from Cloud',
+          Text(S.of(context).onboardRestoreTitle,
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: AppColors.tp(context))),
           const SizedBox(height: 8),
           Text(
-            'Choose where your backup is stored. '
-            'This will replace any local data.',
+            S.of(context).onboardRestoreDesc,
             style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
           ),
           const SizedBox(height: 20),
@@ -1035,7 +1057,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
                             ? Icons.add_to_drive_rounded
                             : Icons.folder_open_rounded,
                         size: 20),
-                    label: Text(isGoogle ? 'Google Drive' : 'Pick a File',
+                    label: Text(isGoogle ? S.of(context).onboardGoogleDrive : S.of(context).onboardPickFile,
                         style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     style: OutlinedButton.styleFrom(
@@ -1092,7 +1114,7 @@ class _JoinHouseholdButton extends ConsumerWidget {
         onPressed: () => _showJoinSheet(context),
         icon: const Icon(Icons.people_outline_rounded, size: 18),
         label: Text(
-          'Join a Household',
+          S.of(context).onboardJoinHousehold,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
@@ -1138,13 +1160,13 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
   Future<void> _join() async {
     final code = _codeController.text.trim();
     if (code.isEmpty) {
-      setState(() => _error = 'Please enter an invite code');
+      setState(() => _error = S.of(context).onboardEnterCodeError);
       return;
     }
 
     final folderId = decodeInviteCode(code);
     if (folderId == null) {
-      setState(() => _error = 'Invalid invite code. It should start with PP-');
+      setState(() => _error = S.of(context).onboardInvalidCodeError);
       return;
     }
 
@@ -1220,15 +1242,14 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Join a Household',
+            Text(S.of(context).onboardJoinHousehold,
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.tp(context))),
             const SizedBox(height: 8),
             Text(
-              'Enter the invite code shared with you to join an existing '
-              'PocketPlan household.',
+              S.of(context).onboardJoinDesc,
               style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             ),
             const SizedBox(height: 20),
@@ -1243,8 +1264,8 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
               TextField(
                 controller: _codeController,
                 decoration: InputDecoration(
-                  labelText: 'Invite code',
-                  hintText: 'PP-...',
+                  labelText: S.of(context).onboardInviteCode,
+                  hintText: S.of(context).onboardInviteHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
@@ -1258,9 +1279,9 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
                 child: FilledButton.icon(
                   onPressed: _join,
                   icon: const Icon(Icons.login_rounded, size: 20),
-                  label: const Text('Join Household',
+                  label: Text(S.of(context).onboardJoinButton,
                       style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                          const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
@@ -1335,14 +1356,14 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
                     color: Colors.white54, size: 20),
               ),
               const SizedBox(width: 4),
-              Text('More options',
+              Text(S.of(context).onboardMoreOptions,
                   style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.white54)),
               const Spacer(),
               Text(
-                'Categories: ${widget.seedCategories ? "Full set" : "Empty"} · Entry: ${widget.entryMode == "assisted" ? "Assisted" : "Classic"}',
+                '${widget.seedCategories ? S.of(context).onboardFullSet : S.of(context).onboardEmpty} · ${widget.entryMode == "assisted" ? S.of(context).onboardAssisted : S.of(context).onboardClassic}',
                 style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
               ),
             ],
@@ -1354,21 +1375,21 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
-              _SectionLabel('CATEGORIES'),
+              _SectionLabel(S.of(context).onboardCategoriesSection),
               const SizedBox(height: 8),
               _FormCard(
                 child: Column(
                   children: [
                     _ToggleOption(
-                      title: 'Full set',
-                      subtitle: '30 categories with subcategories',
+                      title: S.of(context).onboardFullSet,
+                      subtitle: S.of(context).onboardFullSetSub,
                       isSelected: widget.seedCategories,
                       onTap: () => widget.onSeedChanged(true),
                     ),
                     const SizedBox(height: 8),
                     _ToggleOption(
-                      title: 'Empty',
-                      subtitle: 'Create your own from scratch',
+                      title: S.of(context).onboardEmpty,
+                      subtitle: S.of(context).onboardEmptySub,
                       isSelected: !widget.seedCategories,
                       onTap: () => widget.onSeedChanged(false),
                     ),
@@ -1376,21 +1397,21 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionLabel('TRANSACTION ENTRY'),
+              _SectionLabel(S.of(context).onboardEntrySection),
               const SizedBox(height: 8),
               _FormCard(
                 child: Column(
                   children: [
                     _ToggleOption(
-                      title: 'Assisted',
-                      subtitle: 'Step-by-step, fast for daily use',
+                      title: S.of(context).onboardAssisted,
+                      subtitle: S.of(context).onboardAssistedSub,
                       isSelected: widget.entryMode == 'assisted',
                       onTap: () => widget.onEntryModeChanged('assisted'),
                     ),
                     const SizedBox(height: 8),
                     _ToggleOption(
-                      title: 'Classic form',
-                      subtitle: 'All fields at once, for complex entries',
+                      title: S.of(context).onboardClassic,
+                      subtitle: S.of(context).onboardClassicSub,
                       isSelected: widget.entryMode == 'classic',
                       onTap: () => widget.onEntryModeChanged('classic'),
                     ),

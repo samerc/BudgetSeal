@@ -65,8 +65,13 @@ final allocationsProvider =
         (e) => debugPrint('[allocationsProvider] recompute error: $e'));
   });
 
-  // Watch ledger table — re-compute when balances change
-  final ledgerSub = db.select(db.allocationLedger).watch().listen((_) {
+  // Watch ledger table — lightweight change-detection trigger
+  // instead of streaming all rows on every change.
+  final ledgerSub = db
+      .customSelect('SELECT MAX(rowid) AS r FROM allocation_ledger',
+          readsFrom: {db.allocationLedger})
+      .watch()
+      .listen((_) {
     recompute().catchError(
         (e) => debugPrint('[allocationsProvider] recompute error: $e'));
   });

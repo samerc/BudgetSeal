@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 
@@ -43,7 +44,7 @@ class SpendingHeatmap extends StatelessWidget {
       return SizedBox(
         height: 100,
         child: Center(
-          child: Text('No data yet',
+          child: Text(S.of(context).heatmapNoData,
               style: TextStyle(color: AppColors.th(context), fontSize: 12)),
         ),
       );
@@ -120,7 +121,7 @@ class SpendingHeatmap extends StatelessWidget {
 
                   final color = _cellColor(
                     context, day, maxExpense, maxIncome);
-                  final tip = _tooltipText(date, day);
+                  final tip = _tooltipText(context, date, day);
 
                   return Padding(
                     padding: EdgeInsets.all(cellSpacing / 2),
@@ -176,9 +177,9 @@ class SpendingHeatmap extends StatelessWidget {
     }
   }
 
-  String _tooltipText(DateTime date, DaySpending? day) {
+  String _tooltipText(BuildContext context, DateTime date, DaySpending? day) {
     final dateStr = DateFormat.MMMd().format(date);
-    if (day == null) return '$dateStr\nNo activity';
+    if (day == null) return '$dateStr\n${S.of(context).heatmapNoActivity}';
     final parts = <String>[dateStr];
     if (day.income > 0) {
       parts.add('+${formatAmount(day.income, currency: baseCurrency)}');

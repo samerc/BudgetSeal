@@ -8,6 +8,7 @@ import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../core/sync/sync_encryption.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -21,7 +22,7 @@ class SyncScreen extends ConsumerWidget {
     final isConnected = syncState.activeProvider != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cloud Sync')),
+      appBar: AppBar(title: Text(S.of(context).syncTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         children: [
@@ -47,7 +48,7 @@ class SyncScreen extends ConsumerWidget {
                           Text(
                             isConnected
                                 ? syncState.activeProvider!.displayName
-                                : 'Not connected',
+                                : S.of(context).syncNotConnected,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -56,7 +57,7 @@ class SyncScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _statusSubtitle(syncState),
+                            _statusSubtitle(context, syncState),
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.ts(context),
@@ -104,7 +105,7 @@ class SyncScreen extends ConsumerWidget {
           if (isConnected) ...[
             _ActionButton(
               icon: Icons.sync_rounded,
-              label: 'Sync Now',
+              label: S.of(context).syncNow,
               color: AppColors.accent,
               loading: syncState.status == SyncStatus.syncing,
               onTap: syncState.status == SyncStatus.syncing
@@ -115,7 +116,7 @@ class SyncScreen extends ConsumerWidget {
             if (syncState.activeProvider is GoogleDriveProvider)
               _ActionButton(
                 icon: Icons.people_outline_rounded,
-                label: 'Share Household',
+                label: S.of(context).syncShareHousehold,
                 color: const Color(0xFF7E57C2),
                 onTap: () => _showShareSheet(context, notifier),
               ),
@@ -123,7 +124,7 @@ class SyncScreen extends ConsumerWidget {
               const SizedBox(height: 12),
             _ActionButton(
               icon: Icons.link_off_rounded,
-              label: 'Disconnect',
+              label: S.of(context).syncDisconnect,
               color: AppColors.overspent,
               onTap: () => _confirmDisconnect(context, notifier),
             ),
@@ -138,7 +139,7 @@ class SyncScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 12),
               child: Text(
-                'CONNECT A PROVIDER',
+                S.of(context).syncConnectSection,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -165,7 +166,7 @@ class SyncScreen extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(56, 4, 8, 0),
                         child: Text(
-                          'Receipt sync coming soon for this provider',
+                          S.of(context).syncReceiptComingSoon,
                           style: TextStyle(
                             fontSize: 11,
                             fontStyle: FontStyle.italic,
@@ -181,9 +182,7 @@ class SyncScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'OneDrive and Dropbox open the system file picker, which can '
-                'access those services when their apps are installed on your device. '
-                'Google Drive requires a Google Cloud project with OAuth configured.',
+                S.of(context).syncProviderInfo,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.ts(context),
@@ -231,17 +230,17 @@ class SyncScreen extends ConsumerWidget {
     );
   }
 
-  String _statusSubtitle(SyncState state) {
-    if (state.status == SyncStatus.syncing) return 'Syncing...';
-    if (state.status == SyncStatus.error) return 'Last sync failed';
+  String _statusSubtitle(BuildContext context, SyncState state) {
+    if (state.status == SyncStatus.syncing) return S.of(context).syncSyncing;
+    if (state.status == SyncStatus.error) return S.of(context).syncLastFailed;
     if (state.lastSyncTime != null) {
       final formatted = DateFormat.yMMMd().add_jm().format(state.lastSyncTime!);
       final changes = state.lastChanges ?? 0;
-      final changeSuffix = changes > 0 ? ' · $changes change${changes == 1 ? '' : 's'} merged' : ' · up to date';
-      return 'Last synced $formatted$changeSuffix';
+      final changeSuffix = changes > 0 ? S.of(context).syncChangesMerged(changes) : S.of(context).syncUpToDate;
+      return S.of(context).syncLastSynced(formatted, changeSuffix);
     }
-    if (state.activeProvider != null) return 'Not yet synced';
-    return 'Connect a cloud provider to sync your data';
+    if (state.activeProvider != null) return S.of(context).syncNotYet;
+    return S.of(context).syncConnectPrompt;
   }
 
   Future<void> _connect(
@@ -251,24 +250,24 @@ class SyncScreen extends ConsumerWidget {
     if (ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Connected to ${provider.displayName}'),
+          content: Text(S.of(context).syncConnectedTo(provider.displayName)),
           behavior: SnackBarBehavior.floating,
         ),
       );
     } else if (!ok && context.mounted) {
-      String errorMsg = 'Failed to connect';
+      String errorMsg = S.of(context).syncFailedToConnect;
       if (provider is GoogleDriveProvider && provider.lastConnectError != null) {
         errorMsg = provider.lastConnectError!;
       }
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Connection Failed'),
+          title: Text(S.of(context).syncConnectionFailed),
           content: Text(errorMsg),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(S.of(context).commonOk),
             ),
           ],
         ),
@@ -292,20 +291,17 @@ class SyncScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Disconnect'),
-        content: const Text(
-          'Your data will remain on your device, but automatic '
-          'sync will stop. You can reconnect at any time.',
-        ),
+        title: Text(S.of(context).syncDisconnect),
+        content: Text(S.of(context).syncDisconnectMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Disconnect'),
+            child: Text(S.of(context).syncDisconnect),
           ),
         ],
       ),
@@ -452,7 +448,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
   Future<void> _share() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = 'Please enter a valid email address');
+      setState(() => _error = S.of(context).syncValidEmailError);
       return;
     }
 
@@ -514,7 +510,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Share Household',
+              S.of(context).syncShareHousehold,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -523,8 +519,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Share your PocketPlan data with another person. '
-              'They will be able to sync to the same file on Google Drive.',
+              S.of(context).syncShareDesc,
               style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             ),
             const SizedBox(height: 20),
@@ -533,8 +528,8 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'Their email address',
-                  hintText: 'partner@gmail.com',
+                  labelText: S.of(context).syncTheirEmail,
+                  hintText: S.of(context).syncEmailHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
@@ -555,7 +550,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                         )
                       : const Icon(Icons.share_rounded, size: 20),
                   label: Text(
-                    _loading ? 'Sharing...' : 'Generate Invite Code',
+                    _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),
@@ -580,7 +575,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Invite Code',
+                      S.of(context).syncInviteCode,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -606,8 +601,8 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 child: FilledButton.icon(
                   onPressed: _shareCode,
                   icon: const Icon(Icons.share_rounded, size: 20),
-                  label: const Text(
-                    'Share Code',
+                  label: Text(
+                    S.of(context).syncShareCode,
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),
@@ -680,31 +675,29 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Set Sync Password'),
+        title: Text(S.of(context).syncSetPasswordTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'This password encrypts your sync file on Google Drive. '
-              'You\'ll need the same password on any other device that syncs '
-              'with this household.',
-              style: TextStyle(fontSize: 13),
+            Text(
+              S.of(context).syncPasswordDesc,
+              style: const TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: ctrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter a strong password',
+              decoration: InputDecoration(
+                labelText: S.of(context).syncPasswordLabel,
+                hintText: S.of(context).syncPasswordHint,
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: confirmCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm Password',
+              decoration: InputDecoration(
+                labelText: S.of(context).syncConfirmPassword,
               ),
             ),
           ],
@@ -712,21 +705,21 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
             onPressed: () {
               if (ctrl.text.isEmpty) return;
               if (ctrl.text != confirmCtrl.text) {
-                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-                  content: Text('Passwords don\'t match'),
+                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                  content: Text(S.of(context).syncPasswordsDontMatch),
                   behavior: SnackBarBehavior.floating,
                 ));
                 return;
               }
               Navigator.pop(ctx, ctrl.text);
             },
-            child: const Text('Set Password'),
+            child: Text(S.of(context).syncSetPasswordButton),
           ),
         ],
       ),
@@ -736,8 +729,8 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       await SyncEncryption.setPassword(result);
       await _checkPassword();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Sync encryption enabled. Next sync will be encrypted.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).syncEncryptionEnabled),
           behavior: SnackBarBehavior.floating,
         ));
       }
@@ -752,20 +745,17 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove Encryption?'),
-        content: const Text(
-          'Future sync files will be unencrypted. '
-          'Other devices will need to remove their password too.',
-        ),
+        title: Text(S.of(context).syncRemoveEncryptionTitle),
+        content: Text(S.of(context).syncRemoveEncryptionMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Remove'),
+            child: Text(S.of(context).commonRemove),
           ),
         ],
       ),
@@ -775,8 +765,8 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       await SyncEncryption.clearPassword();
       await _checkPassword();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Sync encryption removed'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).syncEncryptionRemoved),
           behavior: SnackBarBehavior.floating,
         ));
       }
@@ -809,15 +799,15 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Sync Encryption',
+                    Text(S.of(context).syncEncryptionTitle,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
                     Text(
                       _hasPassword
-                          ? 'Your sync file is encrypted with AES-256'
-                          : 'Sync file is not encrypted',
+                          ? S.of(context).syncEncrypted
+                          : S.of(context).syncNotEncrypted,
                       style: TextStyle(
                           fontSize: 12, color: AppColors.ts(context)),
                     ),
@@ -826,7 +816,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
               ),
               TextButton(
                 onPressed: _hasPassword ? _removePassword : _setPassword,
-                child: Text(_hasPassword ? 'Change' : 'Enable'),
+                child: Text(_hasPassword ? S.of(context).commonChange : S.of(context).commonEnable),
               ),
             ],
           ),
@@ -839,7 +829,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Anyone with access to your Google Drive can read your financial data',
+                    S.of(context).syncGdriveWarning,
                     style: TextStyle(fontSize: 11, color: AppColors.caution),
                   ),
                 ),

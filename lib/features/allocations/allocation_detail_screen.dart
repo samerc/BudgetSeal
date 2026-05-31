@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers/date_format_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
@@ -179,14 +180,15 @@ class _AllocationDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l = S.of(context);
     final envelopeName = _nameController.text.isNotEmpty
         ? _nameController.text
-        : 'Envelope';
+        : l.allocFallbackName;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(_isNew ? 'New Envelope' : envelopeName,
+        title: Text(_isNew ? l.allocNewEnvelope : envelopeName,
             maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           if (!_isNew)
@@ -212,7 +214,7 @@ class _AllocationDetailScreenState
                     Icon(Icons.settings_outlined,
                         size: 18, color: AppColors.ts(context)),
                     const SizedBox(width: 10),
-                    const Text('Edit Settings'),
+                    Text(l.allocEditSettings),
                   ]),
                 ),
                 if (_type == 'saving' || _type == 'flexible')
@@ -222,7 +224,7 @@ class _AllocationDetailScreenState
                       Icon(Icons.output_rounded,
                           size: 18, color: AppColors.accent),
                       const SizedBox(width: 10),
-                      const Text('Withdraw'),
+                      Text(l.allocWithdrawMenu),
                     ]),
                   ),
                 PopupMenuItem(
@@ -231,7 +233,7 @@ class _AllocationDetailScreenState
                     Icon(Icons.currency_exchange_rounded,
                         size: 18, color: AppColors.accent),
                     const SizedBox(width: 10),
-                    const Text('Revalue Balances'),
+                    Text(l.allocRevalueMenu),
                   ]),
                 ),
                 PopupMenuItem(
@@ -240,7 +242,7 @@ class _AllocationDetailScreenState
                     Icon(Icons.archive_outlined,
                         size: 18, color: AppColors.caution),
                     const SizedBox(width: 10),
-                    Text('Archive',
+                    Text(l.allocArchiveMenu,
                         style: TextStyle(color: AppColors.caution)),
                   ]),
                 ),
@@ -250,7 +252,7 @@ class _AllocationDetailScreenState
                     Icon(Icons.delete_forever_rounded,
                         size: 18, color: AppColors.overspent),
                     const SizedBox(width: 10),
-                    Text('Delete',
+                    Text(l.allocDeleteMenu,
                         style: TextStyle(color: AppColors.overspent)),
                   ]),
                 ),
@@ -276,7 +278,7 @@ class _AllocationDetailScreenState
                           width: 20,
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2))
-                      : Text(_isNew ? 'Create Envelope' : 'Save Changes',
+                      : Text(_isNew ? l.allocCreateButtonDetail : l.allocSaveChanges,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
@@ -299,7 +301,7 @@ class _AllocationDetailScreenState
             if (_isNew || _showSettings) ...[
             // Icon + Name
             _sectionContainer(children: [
-              _sectionHeader('NAME & ICON', icon: Icons.label_outline_rounded),
+              _sectionHeader(l.allocNameIconSection, icon: Icons.label_outline_rounded),
               Row(
                 children: [
                   GestureDetector(
@@ -333,7 +335,7 @@ class _AllocationDetailScreenState
                     child: TextField(
                       controller: _nameController,
                       decoration:
-                          _inputDecoration('Envelope name (e.g. Groceries)'),
+                          _inputDecoration(l.allocNameHint),
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.done,
                       autofocus: _isNew && !_showEmojiGrid,
@@ -358,8 +360,8 @@ class _AllocationDetailScreenState
                         _icon = null;
                         _showEmojiGrid = false;
                       }),
-                      child: const Text('Remove icon',
-                          style: TextStyle(fontSize: 12)),
+                      child: Text(l.allocRemoveIcon,
+                          style: const TextStyle(fontSize: 12)),
                     ),
                   ),
                 Container(
@@ -428,11 +430,11 @@ class _AllocationDetailScreenState
             // Envelope Type Selection
             if (_isNew) ...[
               _sectionContainer(children: [
-                _sectionHeader('ENVELOPE TYPE', icon: Icons.category_outlined),
+                _sectionHeader(l.allocTypeSection, icon: Icons.category_outlined),
                 _buildTypeOptionCard(
                   icon: Icons.shopping_bag_rounded,
-                  title: 'Spending',
-                  description: 'For recurring expenses like groceries or fuel. Set a monthly budget and spend from it.',
+                  title: l.allocSpendingTitle,
+                  description: l.allocSpendingDesc,
                   isSelected: _type == 'spending',
                   onTap: () => setState(() {
                     _type = 'spending';
@@ -442,8 +444,8 @@ class _AllocationDetailScreenState
                 const SizedBox(height: 8),
                 _buildTypeOptionCard(
                   icon: Icons.tune_rounded,
-                  title: 'Flexible',
-                  description: 'For anything else — set an optional target or leave it open. Accumulates over time.',
+                  title: l.allocFlexibleTitle,
+                  description: l.allocFlexibleDesc,
                   isSelected: _type == 'flexible' || _type == 'saving',
                   onTap: () => setState(() {
                     _type = 'flexible';
@@ -465,7 +467,7 @@ class _AllocationDetailScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Envelopes plan how to use your money. To save toward a goal or track debts, use Goals & Loans instead.',
+                          l.allocInfoBanner,
                           style: TextStyle(
                               fontSize: 11, color: AppColors.ts(context), height: 1.4),
                         ),
@@ -478,11 +480,11 @@ class _AllocationDetailScreenState
             ] else ...[
               // For existing envelopes: show type selector (remap 'saving' → 'flexible')
               _sectionContainer(children: [
-                _sectionHeader('PURPOSE', icon: Icons.category_outlined),
+                _sectionHeader(l.allocPurposeSection, icon: Icons.category_outlined),
                 _buildSegmentedSelector<String>(
-                  options: const [
-                    ('spending', 'Spending', Icons.shopping_bag_outlined),
-                    ('flexible', 'Flexible', Icons.tune_rounded),
+                  options: [
+                    ('spending', l.allocSpendingTitle, Icons.shopping_bag_outlined),
+                    ('flexible', l.allocFlexibleTitle, Icons.tune_rounded),
                   ],
                   selected: _type == 'saving' ? 'flexible' : _type,
                   onChanged: (v) => setState(() {
@@ -496,20 +498,19 @@ class _AllocationDetailScreenState
             // Cycle (all envelope types)
             ...[
               _sectionContainer(children: [
-                _sectionHeader('CYCLE', icon: Icons.autorenew_rounded),
+                _sectionHeader(l.allocCycleSection, icon: Icons.autorenew_rounded),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
-                    '• Periodic: resets each month (e.g. groceries budget)\n'
-                    '• Permanent: accumulates over time (e.g. emergency fund)',
+                    l.allocCycleHelp,
                     style: TextStyle(
                         fontSize: 11, color: AppColors.ts(context), height: 1.5),
                   ),
                 ),
                 _buildSegmentedSelector<String>(
-                  options: const [
-                    ('periodic', 'Periodic', Icons.event_repeat_rounded),
-                    ('permanent', 'Permanent', Icons.all_inclusive_rounded),
+                  options: [
+                    ('periodic', l.allocPeriodic, Icons.event_repeat_rounded),
+                    ('permanent', l.allocPermanent, Icons.all_inclusive_rounded),
                   ],
                   selected: _periodicity,
                   onChanged: (v) => setState(() => _periodicity = v),
@@ -530,12 +531,12 @@ class _AllocationDetailScreenState
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Rollover balance',
+                              Text(l.allocRolloverBalance,
                                   style: TextStyle(
                                       color: AppColors.tp(context),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500)),
-                              Text('Carry remaining funds to the next period',
+                              Text(l.allocRolloverDesc,
                                   style: TextStyle(
                                       color: AppColors.ts(context),
                                       fontSize: 12)),
@@ -559,12 +560,12 @@ class _AllocationDetailScreenState
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Auto-reset',
+                              Text(l.allocAutoReset,
                                   style: TextStyle(
                                       color: AppColors.tp(context),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500)),
-                              Text('Reset automatically at period start',
+                              Text(l.allocAutoResetDesc,
                                   style: TextStyle(
                                       color: AppColors.ts(context),
                                       fontSize: 12)),
@@ -585,13 +586,13 @@ class _AllocationDetailScreenState
             // Budget / Target Amount
             _sectionContainer(children: [
               _sectionHeader(
-                _type == 'spending' ? 'MONTHLY BUDGET' : 'TARGET (OPTIONAL)',
+                _type == 'spending' ? l.allocMonthlyBudget : l.allocTargetOptional,
                 icon: Icons.track_changes_rounded,
               ),
               Text(
                 _type == 'spending'
-                    ? 'How much do you want to spend in this envelope each month?'
-                    : 'Set a target amount, or leave at zero for open-ended.',
+                    ? l.allocMonthlyBudgetDesc
+                    : l.allocTargetDesc,
                 style: TextStyle(
                     fontSize: 12, color: AppColors.ts(context)),
               ),
@@ -601,7 +602,7 @@ class _AllocationDetailScreenState
                     flex: 3,
                     child: CalculatorAmountField(
                       value: _targetAmount,
-                      label: _type == 'spending' ? 'Budget amount' : 'Target amount',
+                      label: _type == 'spending' ? l.allocBudgetAmount : l.allocTargetAmount,
                       fontSize: 20,
                       onChanged: (v) => setState(() => _targetAmount = v),
                     ),
@@ -610,7 +611,7 @@ class _AllocationDetailScreenState
                   Expanded(
                     flex: 2,
                     child: CurrencyPickerField(
-                      label: 'Currency',
+                      label: l.allocCurrency,
                       value: _targetCurrencyController.text,
                       onChanged: (v) {
                         setState(() => _targetCurrencyController.text = v);
@@ -623,10 +624,10 @@ class _AllocationDetailScreenState
 
             // Linked Categories
             _sectionContainer(children: [
-                _sectionHeader('LINKED CATEGORIES',
+                _sectionHeader(l.allocLinkedCategoriesSection,
                     icon: Icons.label_outline_rounded),
                 Text(
-                  'Expenses with these categories will debit this envelope.',
+                  l.allocLinkedCategoriesDesc,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context)),
                 ),
@@ -640,14 +641,14 @@ class _AllocationDetailScreenState
                       border: Border.all(
                           color: AppColors.caution.withValues(alpha: 0.3)),
                     ),
-                    child: const Row(children: [
-                      Icon(Icons.info_outline_rounded,
+                    child: Row(children: [
+                      const Icon(Icons.info_outline_rounded,
                           size: 16, color: AppColors.caution),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'No categories linked. Tap + to link categories so expenses debit this envelope.',
-                          style: TextStyle(
+                          l.allocNoCategoriesLinked,
+                          style: const TextStyle(
                               fontSize: 12, color: AppColors.caution),
                         ),
                       ),
@@ -683,7 +684,7 @@ class _AllocationDetailScreenState
                 OutlinedButton.icon(
                   onPressed: _showLinkCategorySheet,
                   icon: const Icon(Icons.add_rounded, size: 16),
-                  label: const Text('Link Category'),
+                  label: Text(l.allocLinkCategory),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
                     side: BorderSide(
@@ -839,7 +840,7 @@ class _AllocationDetailScreenState
               ),
           const SizedBox(height: 4),
           Text(
-            'Available',
+            S.of(context).allocAvailable,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 13,
@@ -862,14 +863,14 @@ class _AllocationDetailScreenState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${(progress! * 100).round()}% of ${formatAmount(_targetAmount, currency: targetCurrency)}',
+                  S.of(context).allocPercentOfTarget((progress! * 100).round(), formatAmount(_targetAmount, currency: targetCurrency)),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
                 Text(
-                  '${formatAmount((_targetAmount - mainBalance).clamp(0, double.infinity), currency: targetCurrency)} left',
+                  S.of(context).allocAmountLeft(formatAmount((_targetAmount - mainBalance).clamp(0, double.infinity), currency: targetCurrency)),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -885,7 +886,7 @@ class _AllocationDetailScreenState
             child: FilledButton.icon(
               onPressed: () => _showFundSheet(targetCurrency),
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Fund'),
+              label: Text(S.of(context).allocFund),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white.withValues(alpha: 0.2),
                 foregroundColor: Colors.white,
@@ -913,6 +914,7 @@ class _AllocationDetailScreenState
       availableCurrencies.insert(0, defaultCurrency);
     }
 
+    final tr = S.of(context);
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       backgroundColor: AppColors.sf(context),
@@ -939,7 +941,7 @@ class _AllocationDetailScreenState
               ),
               const SizedBox(height: 16),
               Text(
-                'Fund ${_nameController.text}',
+                tr.allocFundEnvelope(_nameController.text),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -948,7 +950,7 @@ class _AllocationDetailScreenState
               ),
               const SizedBox(height: 4),
               Text(
-                'From your unallocated balance',
+                tr.allocFromUnallocated,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.ts(context),
@@ -1037,7 +1039,7 @@ class _AllocationDetailScreenState
                       child: CalculatorAmountField(
                         value: amount,
                         onChanged: (v) => setSheetState(() => amount = v),
-                        hintText: 'Amount',
+                        hintText: tr.allocAmount,
                         fontSize: 16,
                         style: TextStyle(
                           fontSize: 16,
@@ -1061,8 +1063,8 @@ class _AllocationDetailScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Fund',
-                      style: TextStyle(
+                  child: Text(tr.allocFund,
+                      style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ),
@@ -1085,21 +1087,21 @@ class _AllocationDetailScreenState
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Over-funding'),
+          title: Text(S.of(context).allocOverFundingTitle),
           content: Text(
-            'You\'re assigning ${formatAmount(deficit, currency: fundCurrency)} '
-            'more than your available ${formatAmount(available, currency: fundCurrency)} '
-            'unallocated balance.\n\n'
-            'Your unallocated balance will go negative. Continue anyway?',
+            S.of(context).allocOverFundingMsg(
+              formatAmount(deficit, currency: fundCurrency),
+              formatAmount(available, currency: fundCurrency),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Fund Anyway'),
+              child: Text(S.of(context).allocFundAnyway),
             ),
           ],
         ),
@@ -1114,7 +1116,7 @@ class _AllocationDetailScreenState
         amount: fundAmount,
         currency: fundCurrency,
         deviceId: 'local',
-        note: 'Funded from Unallocated',
+        note: S.of(context).allocFundedNote,
       );
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
@@ -1127,7 +1129,7 @@ class _AllocationDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Funded ${formatAmount(fundAmount, currency: fundCurrency)} to ${_nameController.text}'),
+                S.of(context).allocFundedSuccess(formatAmount(fundAmount, currency: fundCurrency), _nameController.text)),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1136,7 +1138,7 @@ class _AllocationDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not fund envelope. Please try again.'),
+            content: Text(S.of(context).allocFundError),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),
@@ -1154,7 +1156,7 @@ class _AllocationDetailScreenState
     final ledgerDao = LedgerDao(db);
 
     return _sectionContainer(children: [
-      _sectionHeader('RECENT ACTIVITY', icon: Icons.receipt_outlined),
+      _sectionHeader(S.of(context).allocRecentActivity, icon: Icons.receipt_outlined),
       StreamBuilder<List<AllocationLedgerData>>(
         stream: ledgerDao.watchByAllocation(widget.allocationId),
         builder: (context, snapshot) {
@@ -1169,7 +1171,7 @@ class _AllocationDetailScreenState
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
-                child: Text('No activity yet',
+                child: Text(S.of(context).allocNoActivity,
                     style:
                         TextStyle(fontSize: 13, color: AppColors.th(context))),
               ),
@@ -1182,12 +1184,13 @@ class _AllocationDetailScreenState
               final color =
                   isPositive ? AppColors.healthy : AppColors.overspent;
 
+              final sl = S.of(context);
               final label = switch (entry.entryType) {
-                'funding' => 'Funded',
-                'consumption' => 'Spent',
-                'adjustment' => 'Adjustment',
-                'period_reset' => 'Period Reset',
-                'carry_forward' => 'Carried Forward',
+                'funding' => sl.allocEntryFunded,
+                'consumption' => sl.allocEntrySpent,
+                'adjustment' => sl.allocEntryAdjustment,
+                'period_reset' => sl.allocEntryPeriodReset,
+                'carry_forward' => sl.allocEntryCarryForward,
                 _ => entry.entryType,
               };
 
@@ -1309,7 +1312,7 @@ class _AllocationDetailScreenState
         if (maxVal == 0) return const SizedBox.shrink();
 
         return _sectionContainer(children: [
-          _sectionHeader('SPENDING HISTORY', icon: Icons.bar_chart_rounded),
+          _sectionHeader(S.of(context).allocSpendingHistory, icon: Icons.bar_chart_rounded),
           const SizedBox(height: 4),
           SizedBox(
             height: 105,
@@ -1447,6 +1450,7 @@ class _AllocationDetailScreenState
     double withdrawAmount = 0;
     final currency = _targetCurrencyController.text;
 
+    final tr = S.of(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -1463,19 +1467,19 @@ class _AllocationDetailScreenState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Withdraw from Savings',
-                  style: TextStyle(
+              Text(tr.allocWithdrawTitle,
+                  style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
               Text(
-                'Move money from this envelope back to Unallocated.',
+                tr.allocWithdrawDesc,
                 style: TextStyle(
                     fontSize: 13, color: AppColors.ts(context)),
               ),
               const SizedBox(height: 16),
               CalculatorAmountField(
                 value: withdrawAmount,
-                label: 'Amount to withdraw',
+                label: tr.allocWithdrawAmountLabel,
                 currency: currency,
                 fontSize: 22,
                 onChanged: (v) => setSheetState(() => withdrawAmount = v),
@@ -1491,7 +1495,7 @@ class _AllocationDetailScreenState
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(tr.commonCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1506,8 +1510,8 @@ class _AllocationDetailScreenState
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Withdraw',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      child: Text(tr.allocWithdrawButton,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -1519,22 +1523,34 @@ class _AllocationDetailScreenState
     );
 
     if (confirmed == true && withdrawAmount > 0 && mounted) {
-      final engine = ref.read(allocationEngineProvider);
-      await engine.withdrawFromAllocation(
-        allocationId: widget.allocationId,
-        amount: withdrawAmount,
-        currency: currency,
-      );
-      ref.invalidate(allocationsProvider);
-      ref.invalidate(unallocatedProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Withdrew ${formatAmount(withdrawAmount, currency: currency)} to Unallocated'),
-            behavior: SnackBarBehavior.floating,
-          ),
+      try {
+        final engine = ref.read(allocationEngineProvider);
+        await engine.withdrawFromAllocation(
+          allocationId: widget.allocationId,
+          amount: withdrawAmount,
+          currency: currency,
         );
+        ref.invalidate(allocationsProvider);
+        ref.invalidate(unallocatedProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                S.of(context).allocWithdrawSuccess(formatAmount(withdrawAmount, currency: currency))),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.overspent,
+            ),
+          );
+        }
       }
     }
   }
@@ -1554,8 +1570,8 @@ class _AllocationDetailScreenState
     if (available.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All categories are already linked to envelopes'),
+          SnackBar(
+            content: Text(S.of(context).allocAllCategoriesLinked),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1563,6 +1579,7 @@ class _AllocationDetailScreenState
       return;
     }
 
+    final tr = S.of(context);
     final selected = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -1604,7 +1621,7 @@ class _AllocationDetailScreenState
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text('Link a Category',
+                        Text(tr.allocLinkCategoryTitle,
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -1618,7 +1635,7 @@ class _AllocationDetailScreenState
                               fontSize: 14,
                               color: AppColors.tp(context)),
                           decoration: InputDecoration(
-                            hintText: 'Search categories...',
+                            hintText: tr.allocSearchCategories,
                             hintStyle: TextStyle(
                                 color: AppColors.th(context)),
                             prefixIcon: Icon(Icons.search_rounded,
@@ -1641,7 +1658,7 @@ class _AllocationDetailScreenState
                   Expanded(
                     child: filtered.isEmpty
                         ? Center(
-                            child: Text('No matching categories',
+                            child: Text(tr.allocNoMatchingCategories,
                                 style: TextStyle(
                                     color: AppColors.ts(context))))
                         : ListView.builder(
@@ -1758,8 +1775,8 @@ class _AllocationDetailScreenState
     if (foreignEntries.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No foreign-currency balances to revalue'),
+          SnackBar(
+            content: Text(S.of(context).allocNoForeignBalances),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1799,8 +1816,8 @@ class _AllocationDetailScreenState
     if (foreignBalances.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No foreign-currency balances to revalue'),
+          SnackBar(
+            content: Text(S.of(context).allocNoForeignBalances),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1828,8 +1845,8 @@ class _AllocationDetailScreenState
     if (applied == true && mounted) {
       ref.invalidate(allocationsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Revaluation applied'),
+        SnackBar(
+          content: Text(S.of(context).allocRevalApplied),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1845,22 +1862,20 @@ class _AllocationDetailScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Archive Envelope'),
-        content: const Text(
-          'This envelope will be hidden from all lists. '
-          'Linked categories and transaction history will be preserved.\n\n'
-          'You can unarchive it later from Settings.',
+        title: Text(S.of(context).allocArchiveTitle),
+        content: Text(
+          S.of(context).allocArchiveMsg,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Archive'),
+            child: Text(S.of(context).commonArchive),
           ),
         ],
       ),
@@ -1872,8 +1887,8 @@ class _AllocationDetailScreenState
       ref.invalidate(allocationsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Envelope archived'),
+          SnackBar(
+            content: Text(S.of(context).allocArchived),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1899,40 +1914,36 @@ class _AllocationDetailScreenState
     final warnings = <String>[];
     if (linkedCount > 0) {
       final names = linked.take(3).map((c) => c.name).join(', ');
-      final suffix = linkedCount > 3 ? ' and ${linkedCount - 3} more' : '';
+      final suffix = linkedCount > 3 ? S.of(context).allocDeleteAndMore(linkedCount - 3) : '';
       warnings.add(
-          '$linkedCount categor${linkedCount == 1 ? 'y is' : 'ies are'} '
-          'linked to this envelope ($names$suffix)');
+          S.of(context).allocDeleteLinkedWarning(linkedCount, '$names$suffix'));
     }
 
     if (warnings.isNotEmpty) {
       final action = await showDialog<String>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: const Text('Delete Envelope'),
+          title: Text(S.of(context).allocDeleteTitle),
           content: Text(
             '${warnings.join('. ')}.\n\n'
-            'Deleting will:\n'
-            '  \u2022 Unlink all categories from this envelope\n'
-            '  \u2022 Remove all ledger history for this envelope\n\n'
-            'Consider archiving instead to preserve history.',
+            '${S.of(context).allocDeleteConsequences}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'cancel'),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'archive'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: const Text('Archive Instead'),
+              child: Text(S.of(context).allocArchiveInstead),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'delete'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: const Text('Delete Permanently'),
+              child: Text(S.of(context).allocDeletePermanently),
             ),
           ],
         ),
@@ -1962,7 +1973,7 @@ class _AllocationDetailScreenState
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Text('Could not delete. Please try again.'),
+              content: Text(S.of(context).allocDeleteError),
               behavior: SnackBarBehavior.floating,
               backgroundColor: AppColors.overspent,
             ));
@@ -1974,22 +1985,20 @@ class _AllocationDetailScreenState
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: const Text('Delete Envelope Permanently'),
-          content: const Text(
-            'This envelope has no linked categories. '
-            'All ledger history will be removed.\n\n'
-            'Are you sure? This cannot be undone.',
+          title: Text(S.of(context).allocDeleteNoLinksTitle),
+          content: Text(
+            S.of(context).allocDeleteNoLinksMsg,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: const Text('Delete Permanently'),
+              child: Text(S.of(context).allocDeletePermanently),
             ),
           ],
         ),
@@ -2009,7 +2018,7 @@ class _AllocationDetailScreenState
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Text('Could not delete. Please try again.'),
+              content: Text(S.of(context).allocDeleteError),
               behavior: SnackBarBehavior.floating,
               backgroundColor: AppColors.overspent,
             ));
@@ -2068,7 +2077,7 @@ class _AllocationDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isNew ? 'Envelope created' : 'Envelope updated'),
+            content: Text(_isNew ? S.of(context).allocEnvelopeCreated : S.of(context).allocEnvelopeUpdated),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2219,7 +2228,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not fetch rate for $foreignCurrency'),
+            content: Text(S.of(context).allocFetchRateError(foreignCurrency)),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),
@@ -2261,7 +2270,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not apply revaluation. Please try again.'),
+            content: Text(S.of(context).allocRevalError),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),
@@ -2308,7 +2317,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                     size: 22, color: AppColors.accent),
                 const SizedBox(width: 10),
                 Text(
-                  'Revalue Foreign Balances',
+                  S.of(context).allocRevalueForeignTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -2336,7 +2345,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total adjustment',
+                        S.of(context).allocTotalAdjustment,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -2380,7 +2389,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                           width: 20,
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2))
-                      : const Text('Apply Revaluation',
+                      : Text(S.of(context).allocApplyRevaluation,
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
@@ -2429,7 +2438,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'balance in this envelope',
+                  S.of(context).allocBalanceInEnvelope,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.ts(context),
@@ -2451,12 +2460,12 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           const SizedBox(height: 14),
           // Original rate & value
           _infoRow(
-            'Original rate',
+            S.of(context).allocOriginalRate,
             formatAmount(fb.originalRate),
           ),
           const SizedBox(height: 4),
           _infoRow(
-            'Original value',
+            S.of(context).allocOriginalValue,
             formatAmount(fb.originalValue, currency: widget.targetCurrency),
           ),
           const SizedBox(height: 14),
@@ -2467,7 +2476,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
               Expanded(
                 child: CalculatorAmountField(
                   value: newRate,
-                  label: 'New rate',
+                  label: S.of(context).allocNewRate,
                   fontSize: 18,
                   onChanged: (v) {
                     setState(() {
@@ -2482,7 +2491,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 child: OutlinedButton.icon(
                   onPressed: () => _fetchRate(fb.currency),
                   icon: const Icon(Icons.sync_rounded, size: 16),
-                  label: const Text('Fetch'),
+                  label: Text(S.of(context).allocFetch),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
                     side: BorderSide(
@@ -2498,7 +2507,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           const SizedBox(height: 12),
           // New value
           _infoRow(
-            'New value',
+            S.of(context).allocNewValue,
             formatAmount(newValue, currency: widget.targetCurrency),
             bold: true,
           ),
@@ -2516,7 +2525,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  gain >= 0 ? 'Gain' : 'Loss',
+                  gain >= 0 ? S.of(context).allocGain : S.of(context).allocLoss,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

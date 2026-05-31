@@ -1,10 +1,13 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/providers/accent_color_provider.dart';
+import 'core/providers/locale_provider.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'core/providers/accounts_provider.dart';
 import 'core/providers/currency_symbol_provider.dart';
 import 'core/providers/date_format_provider.dart';
@@ -55,6 +58,8 @@ import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
 import 'features/settings/import_export_screen.dart';
 import 'features/settings/sync_screen.dart';
+import 'features/planned/planned_payments_screen.dart';
+import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
@@ -290,6 +295,18 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
               child: const BillSplitterScreen(), state: state),
         ),
         GoRoute(
+          path: '/planned-payments',
+          pageBuilder: (_, state) => fadePage(
+              child: const PlannedPaymentsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/plan-payment',
+          pageBuilder: (_, state) => slideUpPage(
+              child: PlanPaymentScreen(
+                  editTx: state.extra as Map<String, dynamic>?),
+              state: state),
+        ),
+        GoRoute(
           path: '/health-check',
           pageBuilder: (_, state) => slideUpPage(
               child: const HealthCheckScreen(), state: state),
@@ -424,12 +441,21 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final lightTheme = buildLight(resolvedAccent);
     final darkTheme = buildDark(resolvedAccent);
 
+    // Resolve locale early — needed by splash, lock, and main screens.
+    final localeCode = ref.watch(localeProvider);
+    final locale = localeCode != null ? Locale(localeCode) : null;
+    Intl.defaultLocale = localeCode ??
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+
     if (_showSplash) {
       return MaterialApp(
         theme: lightTheme,
         darkTheme: darkTheme,
         themeMode: themeMode,
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: S.localizationsDelegates,
+        supportedLocales: S.supportedLocales,
+        locale: locale,
         home: SplashScreen(
           onComplete: () async {
             final prefs = await SharedPreferences.getInstance();
@@ -451,6 +477,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
         darkTheme: darkTheme,
         themeMode: themeMode,
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: S.localizationsDelegates,
+        supportedLocales: S.supportedLocales,
+        locale: locale,
         home: LockScreen(
           onUnlocked: () {
             setState(() => _showLock = false);
@@ -469,6 +498,9 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
       themeMode: themeMode,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: S.localizationsDelegates,
+      supportedLocales: S.supportedLocales,
+      locale: locale,
       // Dismiss keyboard when tapping outside any text field (globally).
       // Apply user's text scale preference.
       builder: (context, child) {

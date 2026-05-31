@@ -41,6 +41,17 @@ class FadedEdges extends StatelessWidget {
       return child;
     }
 
+    final isVertical = topFade > 0 || bottomFade > 0;
+    final AlignmentGeometry begin;
+    final AlignmentGeometry end;
+    if (isVertical) {
+      begin = Alignment.topCenter;
+      end = Alignment.bottomCenter;
+    } else {
+      begin = AlignmentDirectional.centerStart;
+      end = AlignmentDirectional.centerEnd;
+    }
+
     return ShaderMask(
       shaderCallback: (Rect rect) {
         final stops = <double>[];
@@ -69,10 +80,9 @@ class FadedEdges extends StatelessWidget {
           colors.add(Colors.white);
         }
 
-        final isVertical = topFade > 0 || bottomFade > 0;
         return LinearGradient(
-          begin: isVertical ? Alignment.topCenter : Alignment.centerLeft,
-          end: isVertical ? Alignment.bottomCenter : Alignment.centerRight,
+          begin: begin.resolve(Directionality.of(context)),
+          end: end.resolve(Directionality.of(context)),
           colors: colors,
           stops: stops,
         ).createShader(rect);

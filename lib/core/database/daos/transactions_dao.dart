@@ -12,7 +12,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<Transaction>> watchByHousehold(String householdId, {int limit = 50}) =>
       (select(transactions)
-            ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false))
+            ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
             ..limit(limit))
           .watch();
@@ -39,6 +39,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
+              t.status.isNull() &
               t.createdAt.isBiggerOrEqualValue(start) &
               t.createdAt.isSmallerThanValue(end))
           ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
@@ -57,6 +58,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
+              t.status.isNull() &
               t.createdAt.isSmallerThanValue(start))
           ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
         .get();
@@ -65,7 +67,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
   /// Fetch the most recent N transactions for a household.
   Stream<List<Transaction>> watchRecent(String householdId, {int limit = 10}) =>
       (select(transactions)
-            ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false))
+            ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
             ..limit(limit))
           .watch();
@@ -95,7 +97,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
       '''SELECT tl.account_id, t.type, SUM(tl.amount) as total
          FROM transaction_lines tl
          INNER JOIN transactions t ON t.id = tl.transaction_id
-         WHERE t.household_id = ? AND t.deleted = 0
+         WHERE t.household_id = ? AND t.deleted = 0 AND t.status IS NULL
            AND t.created_at < ? AND t.type IN ('income', 'expense')
            AND tl.account_id IS NOT NULL
          GROUP BY tl.account_id, t.type''',
@@ -120,7 +122,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     final headerResults = await db.customSelect(
       '''SELECT t.account_id, t.type, SUM(t.amount) as total
          FROM transactions t
-         WHERE t.household_id = ? AND t.deleted = 0
+         WHERE t.household_id = ? AND t.deleted = 0 AND t.status IS NULL
            AND t.created_at < ? AND t.type IN ('income', 'expense')
            AND t.id NOT IN (
              SELECT DISTINCT transaction_id FROM transaction_lines
@@ -145,7 +147,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     final outResults = await db.customSelect(
       '''SELECT account_id, SUM(amount) as total
          FROM transactions
-         WHERE household_id = ? AND deleted = 0
+         WHERE household_id = ? AND deleted = 0 AND status IS NULL
            AND created_at < ? AND type = 'transfer'
          GROUP BY account_id''',
       variables: [Variable.withString(householdId), Variable.withInt(beforeMs)],
@@ -161,7 +163,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     final inResults = await db.customSelect(
       '''SELECT destination_account_id, SUM(amount * exchange_rate_to_base) as total
          FROM transactions
-         WHERE household_id = ? AND deleted = 0
+         WHERE household_id = ? AND deleted = 0 AND status IS NULL
            AND created_at < ? AND type = 'transfer'
            AND destination_account_id IS NOT NULL
          GROUP BY destination_account_id''',

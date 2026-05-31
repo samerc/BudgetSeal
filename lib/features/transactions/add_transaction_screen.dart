@@ -30,6 +30,7 @@ import '../../shared/widgets/amount_field.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
 import 'widgets/transaction_form_widgets.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 bool _isEmoji(String s) => s.isNotEmpty && s.runes.first > 255;
 
@@ -398,8 +399,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final sel =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
     final diff = today.difference(sel).inDays;
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Yesterday';
+    if (diff == 0) return S.of(context).commonToday;
+    if (diff == 1) return S.of(context).commonYesterday;
     return formatDate(_selectedDate);
   }
 
@@ -548,22 +549,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   String? _validate() {
     if (_type == _TxType.transfer) {
-      if (_fromAccountId == null) return 'Select a source account';
-      if (_destAccountId == null) return 'Select a destination account';
+      if (_fromAccountId == null) return S.of(context).txFormSelectSource;
+      if (_destAccountId == null) return S.of(context).txFormSelectDest;
       if (_fromAccountId == _destAccountId) {
-        return 'Source and destination must differ';
+        return S.of(context).txFormSourceDestDiffer;
       }
       if (_lines.isEmpty || _lines.first.amount <= 0) {
-        return 'Enter an amount';
+        return S.of(context).txFormEnterAmount;
       }
     } else {
       for (var i = 0; i < _lines.length; i++) {
         final l = _lines[i];
         if (l.accountId == null) {
-          return 'Select an account for ${_lines.length > 1 ? "item ${i + 1}" : "the transaction"}';
+          return _lines.length > 1
+              ? S.of(context).txFormSelectAccountItem(i + 1)
+              : S.of(context).txFormSelectAccount;
         }
         if (l.amount <= 0) {
-          return 'Enter an amount for ${_lines.length > 1 ? "item ${i + 1}" : "the transaction"}';
+          return _lines.length > 1
+              ? S.of(context).txFormEnterAmountItem(i + 1)
+              : S.of(context).txFormEnterAmountTx;
         }
       }
     }
@@ -632,20 +637,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Exchange rate not set'),
-          content: Text(
-            '$items has no exchange rate to $_baseCurrency. '
-            'The amount won\'t be included in your base currency totals.\n\n'
-            'Save anyway, or go back to set the rate?',
-          ),
+          title: Text(S.of(context).txFormRateNotSetTitle),
+          content: Text(S.of(context).txFormRateNotSetBody(items, _baseCurrency)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Go Back'),
+              child: Text(S.of(context).commonGoBack),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Save Anyway'),
+              child: Text(S.of(context).commonSaveAnyway),
             ),
           ],
         ),
@@ -658,18 +659,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final duplicateMatch = _checkForDuplicate();
       if (duplicateMatch != null && mounted) {
         final matchTx = duplicateMatch.tx;
-        final matchNote = matchTx.note.isNotEmpty ? matchTx.note : 'No title';
+        final matchNote = matchTx.note.isNotEmpty ? matchTx.note : S.of(context).txFormNoTitle;
         final matchAmount = formatAmount(matchTx.amount, currency: matchTx.currency);
         final matchDate = formatDate(matchTx.createdAt);
         final proceed = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text('Possible Duplicate'),
+            title: Text(S.of(context).txFormDuplicateTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('A similar transaction already exists:'),
+                Text(S.of(context).txFormDuplicateSimilarExists),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -691,17 +692,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Save anyway?'),
+                Text(S.of(context).txFormDuplicateSaveAnyway),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(S.of(context).commonCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Save Anyway'),
+                child: Text(S.of(context).commonSaveAnyway),
               ),
             ],
           ),
@@ -787,7 +788,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (!mounted) return;
 
       // Build envelope feedback message
-      String snackText = 'Transaction saved';
+      String snackText = S.of(context).txFormSaved;
       try {
         if (_type != _TxType.transfer) {
           final categories = ref.read(categoriesProvider).value ?? [];
@@ -807,7 +808,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   .firstOrNull;
               if (alloc != null) {
                 snackText =
-                    'Transaction saved \u00b7 ${alloc.data.allocation.name} envelope updated';
+                    S.of(context).txFormSavedEnvelope(alloc.data.allocation.name);
               }
             }
           }
@@ -834,7 +835,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text('Could not save transaction. Please try again.'),
+          content: Text(S.of(context).txFormCouldNotSave),
           behavior: SnackBarBehavior.floating,
         ));
       }
@@ -855,8 +856,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.editTransactionId != null
-            ? 'Edit'
-            : 'New Transaction'),
+            ? S.of(context).txFormEditTitle
+            : S.of(context).txFormNewTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -877,8 +878,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
                   : const Icon(Icons.check_rounded, size: 18),
-              label: const Text('Save',
-                  style: TextStyle(
+              label: Text(S.of(context).txFormSave,
+                  style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ),
@@ -896,7 +897,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 if (widget.editTransactionId == null) ...[
                   const SizedBox(width: 10),
                   IconButton(
-                    tooltip: 'Use Template',
+                    tooltip: S.of(context).txFormUseTemplate,
                     onPressed: () => context.push('/templates'),
                     icon: Icon(Icons.bolt_rounded,
                         color: AppColors.accent, size: 22),
@@ -939,7 +940,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 maxLength: InputLimits.noteMaxLength,
                 decoration: InputDecoration(
-                  hintText: 'Add a note…',
+                  hintText: S.of(context).txFormNoteHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   prefixIcon: Icon(Icons.notes_rounded,
                       size: 18, color: AppColors.ts(context)),
@@ -1073,7 +1074,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ),
                   if (_autoFilled)
                     Text(
-                      'Auto-detected',
+                      S.of(context).txFormAutoDetected,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -1082,7 +1083,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                 ] else
                   Text(
-                    'No category',
+                    S.of(context).txFormNoCategory,
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.th(context),
@@ -1100,7 +1101,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Row(
       children: [
         TypeChip(
-          label: 'Income',
+          label: S.of(context).typeIncome,
           icon: Icons.arrow_downward_rounded,
           selected: _type == _TxType.income,
           color: AppColors.healthy,
@@ -1111,7 +1112,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         const SizedBox(width: 8),
         TypeChip(
-          label: 'Expense',
+          label: S.of(context).typeExpense,
           icon: Icons.arrow_upward_rounded,
           selected: _type == _TxType.expense,
           color: AppColors.overspent,
@@ -1122,7 +1123,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         const SizedBox(width: 8),
         TypeChip(
-          label: 'Transfer',
+          label: S.of(context).typeTransfer,
           icon: Icons.swap_horiz_rounded,
           selected: _type == _TxType.transfer,
           color: AppColors.accent,
@@ -1215,7 +1216,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           // From account
           _buildAccountDropdown(
             value: _fromAccountId,
-            hint: 'From account',
+            hint: S.of(context).txFormFromAccount,
             icon: Icons.arrow_upward_rounded,
             accounts: accounts,
             onChanged: (v) {
@@ -1235,7 +1236,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           // To account
           _buildAccountDropdown(
             value: _destAccountId,
-            hint: 'To account',
+            hint: S.of(context).txFormToAccount,
             icon: Icons.arrow_downward_rounded,
             accounts: accounts.where((a) => a.id != _fromAccountId).toList(),
             onChanged: (v) {
@@ -1364,7 +1365,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Destination receives:',
+                            S.of(context).txFormDestReceives,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.ts(context)),
@@ -1485,7 +1486,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }),
         TextButton.icon(
           icon: Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
-          label: Text('Add item',
+          label: Text(S.of(context).txFormAddItem,
               style: TextStyle(color: AppColors.accent)),
           onPressed: _addLine,
         ),
@@ -1504,8 +1505,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               children: [
                 Text(
                   _hasMultiCurrency
-                      ? 'Total ($_baseCurrency)'
-                      : 'Total',
+                      ? '${S.of(context).txFormTotal} ($_baseCurrency)'
+                      : S.of(context).txFormTotal,
                   style: TextStyle(
                       color: _typeColor(context),
                       fontWeight: FontWeight.w600,
@@ -1559,7 +1560,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           onChanged: _onTitleChanged,
           maxLength: InputLimits.nameMaxLength,
           decoration: InputDecoration(
-            hintText: 'Title (e.g. Coffee, Groceries)',
+            hintText: S.of(context).txFormTitleHint,
             hintStyle: TextStyle(color: AppColors.th(context)),
             prefixIcon: Icon(Icons.edit_rounded,
                 size: 18, color: AppColors.ts(context)),
@@ -1643,8 +1644,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               Expanded(
                 child: Text(
                   _receiptFilenames.length == 1
-                      ? 'Receipt attached'
-                      : '${_receiptFilenames.length} receipts attached',
+                      ? S.of(context).txFormReceiptAttached
+                      : S.of(context).txFormNReceipts(_receiptFilenames.length),
                   style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -1654,7 +1655,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               IconButton(
                 icon: Icon(Icons.add_rounded,
                     size: 18, color: AppColors.th(context)),
-                tooltip: 'Add more',
+                tooltip: S.of(context).txFormAddMore,
                 onPressed: () async {
                   final newFilenames = await pickAndSaveReceipts(context);
                   if (newFilenames.isNotEmpty && mounted) {
@@ -1690,7 +1691,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           },
           icon: Icon(Icons.camera_alt_rounded,
               size: 16, color: AppColors.ts(context)),
-          label: Text('Scan Receipt',
+          label: Text(S.of(context).txFormScanReceipt,
               style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
         ),
         Container(
@@ -1707,7 +1708,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           },
           icon: Icon(Icons.image_rounded,
               size: 16, color: AppColors.ts(context)),
-          label: Text('Gallery',
+          label: Text(S.of(context).txFormGallery,
               style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
         ),
       ],

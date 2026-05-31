@@ -94,6 +94,10 @@ lib/
 │       ├── daily_reminder_service.dart # Daily transaction logging reminder
 │       ├── period_reset_service.dart   # Auto/manual envelope period resets
 │       └── autofill_service.dart       # Last-transaction lookup for auto-fill
+├── l10n/                       # Localization
+│   ├── app_{en,ar,fr}.arb      # ARB translation files (~1,700 keys each)
+│   ├── generated/              # Auto-generated S class (flutter gen-l10n)
+│   └── s_lookup.dart           # currentS() helper for non-widget code
 ├── features/                   # Screen-level code, one folder per feature
 │   ├── dashboard/
 │   ├── main/                   # Main screen with bottom nav bar
@@ -108,6 +112,9 @@ lib/
 │   ├── periods/                # Period transition + leftover resolution
 │   ├── objectives/             # Goals & loans: list, detail, progress
 │   ├── travel/                 # Travel exchange: temp currency wallets
+│   ├── planned/                # Planned payments: list, form
+│   │   ├── planned_payments_screen.dart  # List grouped by month, post/delete
+│   │   └── plan_payment_screen.dart      # Create/edit planned payment form
 │   ├── settings/               # Settings, sync, backup, import/export, about
 │   ├── onboarding/             # 3-page onboarding + guided setup
 │   ├── splash/
@@ -275,7 +282,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 16
+### Schema Version: 17
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -285,6 +292,7 @@ v12→v13 added `autoReset` (BOOLEAN, default true) to `allocations` for period 
 v13→v14 added `decimalPlaces` (nullable INT) to `accounts` for per-currency decimal precision, `status` (nullable TEXT) to `transactions` for upcoming/skipped bills, and created `objectives` table for goals and loan tracking.
 v14→v15 added `isTravel` (BOOLEAN, default false) to `accounts` for travel wallet support.
 v15→v16 added performance indexes: `idx_transactions_household_date`, `idx_transactions_household_deleted`, `idx_transaction_lines_tx`, `idx_ledger_allocation`, `idx_allocations_household`, `idx_categories_household`.
+v16→v17 added indexes: `idx_ledger_source_tx` on `allocation_ledger(source_transaction_id)`, `idx_categories_allocation` on `categories(allocation_id)`.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -901,12 +909,27 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 
 ## Transaction Status
 
-`transactions.status` (nullable TEXT) — supports upcoming/skipped bills from recurring transactions.
+`transactions.status` (nullable TEXT) — supports upcoming/skipped bills and planned payments.
 
 - `null` = normal posted transaction (default, backward compatible)
 - `'upcoming'` = pending bill generated but not yet confirmed
 - `'skipped'` = user skipped this occurrence
+- `'planned'` = user-created planned future payment (not yet posted)
 - Field is synced across devices and exposed in web companion API
+- **All balance/report queries must filter `status IS NULL`** to exclude non-posted transactions
+
+## Planned Payments
+
+`lib/features/planned/` — plan future one-time payments without affecting current balances.
+
+- **Entry**: More > Planned Payments > + FAB opens `plan_payment_screen.dart`
+- **Form fields**: type, amount (calculator), account, category, title/note, target month + optional exact date
+- **Storage**: normal transaction with `status = 'planned'`, excluded from all balance/report queries
+- **Posting**: swipe right or tap "Post" — creates a real transaction via AllocationEngine (with proper ledger entries), then soft-deletes the planned one. Order: create first, delete after (prevents data loss on failure).
+- **Post All**: month header button posts all planned items for that month in batch
+- **Transaction list**: planned items appear dimmed at top of target month, excluded from daily totals
+- **Envelope preview**: Budget tab shows `$X planned` on envelope cards when planned expenses exist for linked categories
+- Routes: `/planned-payments`, `/plan-payment`
 
 ## Upcoming Bills
 
@@ -954,8 +977,49 @@ All report tabs (Overview, Categories, Insights) have a `_MonthNav` widget with 
 
 Route: `/help`, accessible from More > Help Guide.
 
-## i18n Preparation
+## i18n (Internationalization)
 
-`docs/i18n_strings.csv` — master translation file with ~750 strings covering the entire app (Flutter + Web SPA). Columns: `key`, `context`, `english`, `arabic`, `french`. Auto-generated Arabic and French translations for user review. Updated alongside every feature change. When ready to ship i18n, this CSV converts to Flutter ARB files + web JSON files.
+Fully wired for 3 locales: **English**, **Arabic**, **French**. Language picker in Settings > Appearance.
 
-**Rule:** Every feature addition/change must also update `docs/i18n_strings.csv` and `assets/web/help.html`.
+### Flutter App
+- `lib/l10n/app_{en,ar,fr}.arb` — ~1,700 keys per locale
+- Generated `S` class at `lib/l10n/generated/app_localizations.dart`, accessed via `S.of(context).keyName`
+- `l10n.yaml` configures ARB dir, output class `S`, `nullable-getter: false`
+- `lib/core/providers/locale_provider.dart` persists language choice to SharedPreferences
+- `lib/l10n/s_lookup.dart` — `currentS()` helper for services/engines without BuildContext (reads `Intl.defaultLocale`)
+- `Intl.defaultLocale` set in both `main.dart` (before engine/notification init) and `app.dart` (on locale change)
+- Numbers always use Western numerals (0-9) via `locale: 'en_US'` in NumberFormat — standard for finance apps even in Arabic
+
+### Web SPA
+- `assets/web/locale_{en,ar,fr}.json` — ~240 web keys (snake_case)
+- `t(key, params)` function in `app.js` for string lookup with `{param}` substitution
+- `loadLocale(lang)` fetches JSON on init, persists in `localStorage`
+
+### Tooling
+```bash
+# Convert CSV → ARB files (snake_case → camelCase, auto-detects {param} placeholders)
+dart tool/csv_to_arb.dart
+
+# Convert CSV → web JSON locale files
+dart tool/csv_to_web_json.dart
+
+# Regenerate Flutter S class from ARB files
+flutter gen-l10n
+
+# Local translation editor (browser-based, reads/writes CSV)
+dart tool/translation_editor.dart   # then open http://localhost:4488
+```
+
+### Key Rules
+- `docs/i18n_strings.csv` is the master source (~1,500 strings). Update CSV first, then run tooling.
+- Every feature addition/change must update `docs/i18n_strings.csv`, ARB files, and `assets/web/help.html`.
+- **Never use `S.of(context)` inside `StatefulBuilder` within `showModalBottomSheet`** — capture `final tr = S.of(context)` BEFORE the sheet to avoid `_dependents.isEmpty` crash.
+- Use `currentS()` from `s_lookup.dart` in services/engines without BuildContext.
+- Category presets use `translatedName(S s)` — categories are created in the user's language during onboarding.
+
+### RTL Support (Arabic)
+- `EdgeInsetsDirectional.only(start:/end:)` for directional padding (not `left:/right:`)
+- `AlignmentDirectional.centerStart/centerEnd` for directional alignment
+- Transfer arrows use direction-aware `→`/`←` based on `Directionality.of(context)`
+- Month swipe gestures invert in RTL
+- `FadedEdges` gradient resolved directionally

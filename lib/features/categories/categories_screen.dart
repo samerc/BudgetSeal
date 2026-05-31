@@ -7,6 +7,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -46,6 +47,13 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   String _search = '';
   String? _typeFilter; // null = all
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +68,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_categories',
-        tooltip: 'Add category',
+        tooltip: S.of(context).catAddTooltip,
         onPressed: () => _showForm(categories: categories),
         child: const Icon(Icons.add),
       ),
@@ -86,7 +94,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Categories',
+                          S.of(context).catTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: TypographyTokens.screenTitleWeight,
@@ -107,17 +115,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     child: Row(
                       children: [
                         _SummaryPill(
-                          label: '${categories.length} total',
+                          label: S.of(context).catTotal(categories.length),
                           color: AppColors.accent,
                         ),
                         const SizedBox(width: 8),
                         _SummaryPill(
-                          label: '$expenseCount expense',
+                          label: S.of(context).catExpenseCount(expenseCount),
                           color: AppColors.overspent,
                         ),
                         const SizedBox(width: 8),
                         _SummaryPill(
-                          label: '$incomeCount income',
+                          label: S.of(context).catIncomeCount(incomeCount),
                           color: AppColors.healthy,
                         ),
                       ],
@@ -130,14 +138,25 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: TextField(
+                    controller: _searchController,
                     onChanged: (v) => setState(() => _search = v),
                     textInputAction: TextInputAction.search,
                     style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
                     decoration: InputDecoration(
-                      hintText: 'Search categories...',
+                      hintText: S.of(context).catSearchHint,
                       hintStyle: TextStyle(color: AppColors.th(context)),
                       prefixIcon: Icon(Icons.search_rounded,
                           size: 20, color: AppColors.th(context)),
+                      suffixIcon: _search.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear_rounded,
+                                  size: 18, color: AppColors.th(context)),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _search = '');
+                              },
+                            )
+                          : null,
                       filled: true,
                       fillColor: AppColors.sfv(context),
                       border: OutlineInputBorder(
@@ -159,13 +178,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: Row(
                     children: [
                       _TypeChip(
-                        label: 'All',
+                        label: S.of(context).catAll,
                         selected: _typeFilter == null,
                         onTap: () => setState(() => _typeFilter = null),
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: 'Expense',
+                        label: S.of(context).catExpense,
                         selected: _typeFilter == 'expense',
                         color: AppColors.overspent,
                         onTap: () =>
@@ -173,7 +192,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: 'Income',
+                        label: S.of(context).catIncome,
                         selected: _typeFilter == 'income',
                         color: AppColors.healthy,
                         onTap: () =>
@@ -188,11 +207,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               categoriesAsync.when(
                 data: (cats) {
                   if (cats.isEmpty) {
-                    return const SliverFillRemaining(
+                    return SliverFillRemaining(
                       child: EmptyState(
                         icon: Icons.label_outline_rounded,
-                        title: 'No categories yet',
-                        subtitle: 'Tap + to create one',
+                        title: S.of(context).catNoYet,
+                        subtitle: S.of(context).catTapPlus,
                       ),
                     );
                   }
@@ -202,7 +221,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     return SliverFillRemaining(
                       child: Center(
                         child: Text(
-                          'No matching categories',
+                          S.of(context).catNoMatch,
                           style: TextStyle(color: AppColors.ts(context)),
                         ),
                       ),
@@ -222,7 +241,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     const SliverToBoxAdapter(child: SkeletonList()),
                 error: (e, _) => SliverFillRemaining(
                   child: ErrorRetry(
-                    message: "Couldn't load categories",
+                    message: S.of(context).catCouldntLoad,
                     details: '$e',
                     onRetry: () => ref.invalidate(categoriesProvider),
                   ),
@@ -278,7 +297,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
-              Text(wasArchived ? 'Category restored' : 'Category archived'),
+              Text(wasArchived ? S.of(context).catRestored : S.of(context).catArchived),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -310,40 +329,37 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
     final warnings = <String>[];
     if (totalTx > 0) {
-      warnings.add(
-          '$totalTx transaction${totalTx == 1 ? '' : 's'} use this category');
+      warnings.add(S.of(context).catDeleteTxCount(totalTx));
     }
     if (envelopeName != null) {
-      warnings.add('linked to envelope "$envelopeName"');
+      warnings.add(S.of(context).catDeleteLinkedEnvelope(envelopeName));
     }
 
     String? action;
     if (warnings.isNotEmpty) {
-      final warningText = warnings.join(' and is ');
+      final warningText = warnings.join(', ');
       action = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Delete Category'),
+          title: Text(S.of(context).catDeleteTitle),
           content: Text(
-            'This category has $warningText.\n\n'
-            'Deleting will uncategorize those transactions and unlink it from the envelope.\n\n'
-            'Consider archiving instead.',
+            S.of(context).catDeleteWarning(warningText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'cancel'),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'archive'),
               style: TextButton.styleFrom(foregroundColor: AppColors.accent),
-              child: const Text('Archive Instead'),
+              child: Text(S.of(context).allocArchiveInstead),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'delete'),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: const Text('Delete'),
+              child: Text(S.of(context).catDelete),
             ),
           ],
         ),
@@ -352,19 +368,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Delete Category'),
-          content: const Text(
-              'This category has no transactions. Delete permanently?'),
+          title: Text(S.of(context).catDeleteTitle),
+          content: Text(S.of(context).catDeleteNoTx),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: const Text('Delete'),
+              child: Text(S.of(context).catDelete),
             ),
           ],
         ),
@@ -382,8 +397,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Category archived'),
+          SnackBar(
+            content: Text(S.of(context).catArchived),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -395,8 +410,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ref.invalidate(allocationsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Category deleted'),
+          SnackBar(
+            content: Text(S.of(context).catDeleted),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -519,14 +534,14 @@ class _CategoriesSliver extends ConsumerWidget {
     final tiles = <Widget>[];
 
     if (expenseGroups.isNotEmpty) {
-      tiles.add(_sectionLabel(context, 'EXPENSE', AppColors.overspent));
+      tiles.add(_sectionLabel(context, S.of(context).catSectionExpense, AppColors.overspent));
       for (final g in expenseGroups) {
         tiles.add(_buildGroupTile(
             context, g, subsByParent[g.id] ?? [], accountMap, allocMap));
       }
     }
     if (incomeGroups.isNotEmpty) {
-      tiles.add(_sectionLabel(context, 'INCOME', AppColors.healthy));
+      tiles.add(_sectionLabel(context, S.of(context).catSectionIncome, AppColors.healthy));
       for (final g in incomeGroups) {
         tiles.add(_buildGroupTile(
             context, g, subsByParent[g.id] ?? [], accountMap, allocMap));
@@ -558,9 +573,9 @@ class _CategoriesSliver extends ConsumerWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
+              fontSize: TypographyTokens.sectionHeaderSize,
+              fontWeight: TypographyTokens.sectionHeaderWeight,
+              letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
               color: color,
             ),
           ),
@@ -587,130 +602,119 @@ class _CategoriesSliver extends ConsumerWidget {
         border: Border.all(color: AppColors.bd(context)),
       ),
       clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // Colored left accent bar
-            Container(width: 4, color: color),
-            Expanded(
-              child: Column(
+      child: Column(
+        children: [
+          // Main category tile
+          InkWell(
+            onTap: () => onEdit(group),
+            onLongPress: () => _showActions(context, group),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 14, 10),
+              child: Row(
                 children: [
-                  // Main category tile
-                  InkWell(
-                    onTap: () => onEdit(group),
-                    onLongPress: () => _showActions(context, group),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 14, 10),
-                      child: Row(
-                        children: [
-                          // Emoji icon in colored circle
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                hasEmoji ? group.icon : group.name[0],
-                                style: TextStyle(
-                                  fontSize: hasEmoji ? 18 : 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: hasEmoji ? null : color,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  group.name,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: group.archived
-                                        ? AppColors.th(context)
-                                        : AppColors.tp(context),
-                                    decoration: group.archived
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (subs.isNotEmpty)
-                                  Text(
-                                    '${subs.length} subcategor${subs.length == 1 ? 'y' : 'ies'}',
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.ts(context)),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.chevron_right_rounded,
-                              size: 18, color: AppColors.th(context)),
-                        ],
+                  // Emoji icon in colored circle
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        hasEmoji ? group.icon : group.name[0],
+                        style: TextStyle(
+                          fontSize: hasEmoji ? 18 : 16,
+                          fontWeight: FontWeight.w700,
+                          color: hasEmoji ? null : color,
+                        ),
                       ),
                     ),
                   ),
-                  // Subcategories
-                  if (subs.isNotEmpty) ...[
-                    Divider(
-                        height: 1,
-                        indent: 12,
-                        endIndent: 12,
-                        color: AppColors.bd(context)),
-                    ...subs.map((sub) {
-                      final subEmoji =
-                          sub.icon.length <= 4 && sub.icon != 'category';
-                      return InkWell(
-                        onTap: () => onEdit(sub),
-                        onLongPress: () => _showActions(context, sub),
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(16, 8, 14, 8),
-                          child: Row(
-                            children: [
-                              Text(
-                                subEmoji ? sub.icon : '·',
-                                style: TextStyle(
-                                  fontSize: subEmoji ? 16 : 20,
-                                  color: color,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  sub.name,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: sub.archived
-                                        ? AppColors.th(context)
-                                        : AppColors.tp(context),
-                                    decoration: sub.archived
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          group.name,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: group.archived
+                                ? AppColors.th(context)
+                                : AppColors.tp(context),
+                            decoration: group.archived
+                                ? TextDecoration.lineThrough
+                                : null,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    }),
-                  ],
+                        if (subs.isNotEmpty)
+                          Text(
+                            S.of(context).catSubcategories(subs.length),
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.ts(context)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 18, color: AppColors.th(context)),
                 ],
               ),
             ),
+          ),
+          // Subcategories
+          if (subs.isNotEmpty) ...[
+            Divider(
+                height: 1,
+                indent: 12,
+                endIndent: 12,
+                color: AppColors.bd(context)),
+            ...subs.map((sub) {
+              final subEmoji =
+                  sub.icon.length <= 4 && sub.icon != 'category';
+              return InkWell(
+                onTap: () => onEdit(sub),
+                onLongPress: () => _showActions(context, sub),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 14, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        subEmoji ? sub.icon : '·',
+                        style: TextStyle(
+                          fontSize: subEmoji ? 16 : 20,
+                          color: color,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          sub.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: sub.archived
+                                ? AppColors.th(context)
+                                : AppColors.tp(context),
+                            decoration: sub.archived
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -745,7 +749,7 @@ class _CategoriesSliver extends ConsumerWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.edit_rounded),
-                title: const Text('Edit'),
+                title: Text(S.of(context).catEdit),
                 onTap: () {
                   Navigator.pop(ctx);
                   onEdit(cat);
@@ -755,7 +759,7 @@ class _CategoriesSliver extends ConsumerWidget {
                 leading: Icon(cat.archived
                     ? Icons.unarchive_rounded
                     : Icons.archive_rounded),
-                title: Text(cat.archived ? 'Unarchive' : 'Archive'),
+                title: Text(cat.archived ? S.of(context).catUnarchive : S.of(context).catArchive),
                 onTap: () {
                   Navigator.pop(ctx);
                   onArchive(cat);
@@ -764,7 +768,7 @@ class _CategoriesSliver extends ConsumerWidget {
               ListTile(
                 leading: Icon(Icons.delete_rounded,
                     color: AppColors.overspent),
-                title: Text('Delete',
+                title: Text(S.of(context).catDelete,
                     style: TextStyle(color: AppColors.overspent)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -894,7 +898,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ),
             const SizedBox(height: 16),
             Text(
-              _isNew ? 'New Category' : 'Edit Category',
+              _isNew ? S.of(context).catNewTitle : S.of(context).catEditTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -940,7 +944,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     textInputAction: TextInputAction.done,
                     maxLength: InputLimits.nameMaxLength,
                     decoration: InputDecoration(
-                      labelText: 'Name',
+                      labelText: S.of(context).catName,
                       filled: true,
                       fillColor: AppColors.sfv(context),
                       border: OutlineInputBorder(
@@ -1027,9 +1031,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
 
             // Type toggle
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'expense', label: Text('Expense')),
-                ButtonSegment(value: 'income', label: Text('Income')),
+              segments: [
+                ButtonSegment(value: 'expense', label: Text(S.of(context).catExpense)),
+                ButtonSegment(value: 'income', label: Text(S.of(context).catIncome)),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() => _type = s.first),
@@ -1074,7 +1078,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     initialValue: _parentId,
                     isExpanded: true,
                     decoration: InputDecoration(
-                      labelText: 'Parent',
+                      labelText: S.of(context).catParent,
                       labelStyle: const TextStyle(fontSize: 13),
                       filled: true,
                       fillColor: AppColors.sfv(context),
@@ -1087,8 +1091,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       isDense: true,
                     ),
                     items: [
-                      const DropdownMenuItem(
-                          value: null, child: Text('None', style: TextStyle(fontSize: 13))),
+                      DropdownMenuItem(
+                          value: null, child: Text(S.of(context).catNone, style: const TextStyle(fontSize: 13))),
                       ...groups.map((g) => DropdownMenuItem(
                           value: g.id,
                           child: Text(g.name, style: const TextStyle(fontSize: 13),
@@ -1106,7 +1110,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       initialValue: _defaultAccountId,
                       isExpanded: true,
                       decoration: InputDecoration(
-                        labelText: 'Account',
+                        labelText: S.of(context).catAccount,
                         labelStyle: const TextStyle(fontSize: 13),
                         filled: true,
                         fillColor: AppColors.sfv(context),
@@ -1119,8 +1123,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                         isDense: true,
                       ),
                       items: [
-                        const DropdownMenuItem(
-                            value: null, child: Text('None', style: TextStyle(fontSize: 13))),
+                        DropdownMenuItem(
+                            value: null, child: Text(S.of(context).catNone, style: const TextStyle(fontSize: 13))),
                         ...accounts.map((a) => DropdownMenuItem(
                             value: a.id,
                             child: Text('${a.name} (${a.currency})',
@@ -1154,7 +1158,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                           color: Colors.white, strokeWidth: 2),
                     )
                   : Text(
-                      _isNew ? 'Create' : 'Save',
+                      _isNew ? S.of(context).catCreate : S.of(context).catSaveButton,
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w600),
                     ),
@@ -1170,7 +1174,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a category name'),
+        SnackBar(content: Text(S.of(context).catEnterName),
             behavior: SnackBarBehavior.floating),
       );
       return;
@@ -1198,10 +1202,11 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             ),
           );
 
+      ref.invalidate(categoriesProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isNew ? 'Category created' : 'Category updated'),
+            content: Text(_isNew ? S.of(context).catCreated : S.of(context).catUpdated),
             behavior: SnackBarBehavior.floating,
           ),
         );

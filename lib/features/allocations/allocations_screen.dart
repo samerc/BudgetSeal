@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:drift/drift.dart' hide Column;
+
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -31,9 +35,20 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   final _searchController = TextEditingController();
   bool _showSearch = false;
 
+  /// Planned amounts per allocation ID (allocationId → amount).
+  Map<String, double> _plannedByAllocation = {};
+  /// Planned currency per allocation ID.
+  Map<String, String> _plannedCurrencyByAllocation = {};
+
   /// Remap legacy 'saving' type to 'flexible'
   static String _normalizeType(String type) =>
       type == 'saving' ? 'flexible' : type;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlannedAmounts();
+  }
 
   @override
   void dispose() {
@@ -41,9 +56,86 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     super.dispose();
   }
 
-  static String _sectionTitle(String type) => switch (type) {
-        'spending' => 'Spending',
-        'flexible' => 'Flexible',
+  Future<void> _loadPlannedAmounts() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+
+      // Fetch all planned expense transactions
+      final planned = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.status.equals('planned') &
+                t.deleted.equals(false) &
+                t.type.equals('expense')))
+          .get();
+
+      if (planned.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _plannedByAllocation = {};
+            _plannedCurrencyByAllocation = {};
+          });
+        }
+        return;
+      }
+
+      // Fetch their lines
+      final txIds = planned.map((t) => t.id).toList();
+      final lines = await (db.select(db.transactionLines)
+            ..where((l) => l.transactionId.isIn(txIds)))
+          .get();
+
+      // Fetch all categories to get categoryId → allocationId mapping
+      final categories = await (db.select(db.categories)
+            ..where((c) => c.householdId.equals(householdId)))
+          .get();
+      final catToAlloc = <String, String>{};
+      for (final c in categories) {
+        if (c.allocationId != null) {
+          catToAlloc[c.id] = c.allocationId!;
+        }
+      }
+
+      // Map lines → allocations and sum amounts
+      final amountMap = <String, double>{};
+      final currencyMap = <String, String>{};
+
+      for (final line in lines) {
+        if (line.categoryId == null) continue;
+        final allocId = catToAlloc[line.categoryId];
+        if (allocId == null) continue;
+        amountMap[allocId] = (amountMap[allocId] ?? 0) + line.amount;
+        currencyMap.putIfAbsent(allocId, () => line.currency);
+      }
+
+      // For transactions without lines, use header categoryId
+      for (final tx in planned) {
+        if (tx.categoryId == null) continue;
+        // Check if this tx already had lines processed
+        final hasLines = lines.any((l) => l.transactionId == tx.id);
+        if (hasLines) continue;
+        final allocId = catToAlloc[tx.categoryId];
+        if (allocId == null) continue;
+        amountMap[allocId] = (amountMap[allocId] ?? 0) + tx.amount;
+        currencyMap.putIfAbsent(allocId, () => tx.currency);
+      }
+
+      if (mounted) {
+        setState(() {
+          _plannedByAllocation = amountMap;
+          _plannedCurrencyByAllocation = currencyMap;
+        });
+      }
+    } catch (e) {
+      debugPrint('[AllocationsScreen] Error loading planned amounts: $e');
+    }
+  }
+
+  String _sectionTitle(String type) => switch (type) {
+        'spending' => S.of(context).allocSectionSpending,
+        'flexible' => S.of(context).allocSectionFlexible,
         _ => type[0].toUpperCase() + type.substring(1),
       };
 
@@ -62,27 +154,28 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   bool get wantKeepAlive => true;
 
   void _showEnvelopeHelp(BuildContext context) {
+    final l = S.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('How Budgeting Works'),
+        title: Text(l.allocHelpTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _helpRow('1', 'Create envelopes for each spending category'),
+            _helpRow('1', l.allocHelpStep1),
             const SizedBox(height: 10),
-            _helpRow('2', 'Set a monthly budget target for each'),
+            _helpRow('2', l.allocHelpStep2),
             const SizedBox(height: 10),
-            _helpRow('3', 'Fund envelopes when you get paid'),
+            _helpRow('3', l.allocHelpStep3),
             const SizedBox(height: 10),
-            _helpRow('4', 'Spend from envelopes — track what\'s left'),
+            _helpRow('4', l.allocHelpStep4),
           ],
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Got it'),
+            child: Text(l.allocGotIt),
           ),
         ],
       ),
@@ -122,6 +215,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l = S.of(context);
     final allocationsAsync = ref.watch(allocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
     final household = ref.watch(householdProvider).value;
@@ -132,11 +226,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         onRefresh: () async {
           ref.invalidate(allocationsProvider);
           ref.invalidate(unallocatedProvider);
+          _loadPlannedAmounts();
           await Future.delayed(const Duration(milliseconds: 300));
         },
         child: CustomScrollView(
         slivers: [
-          // ── Header (dashboard style) ──
+          // -- Header (dashboard style) --
           SliverToBoxAdapter(
             child: SafeArea(
               bottom: false,
@@ -146,7 +241,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   children: [
                     Expanded(
                       child: Text(
-                        'Budget',
+                        l.allocTitle,
                         style: TextStyle(
                           color: AppColors.tp(context),
                           fontSize: TypographyTokens.screenTitleSize,
@@ -155,7 +250,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Search envelopes',
+                      tooltip: l.allocSearchTooltip,
                       icon: Icon(
                         _showSearch
                             ? Icons.search_off_rounded
@@ -173,7 +268,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                       },
                     ),
                     IconButton(
-                      tooltip: 'How envelopes work',
+                      tooltip: l.allocHelpTooltip,
                       icon: Icon(Icons.help_outline_rounded,
                           color: AppColors.ts(context)),
                       onPressed: () => _showEnvelopeHelp(context),
@@ -184,7 +279,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // ── Search bar ──
+          // -- Search bar --
           if (_showSearch)
             SliverToBoxAdapter(
               child: Padding(
@@ -195,7 +290,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   textInputAction: TextInputAction.search,
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
-                    hintText: 'Search envelopes...',
+                    hintText: l.allocSearchHint,
                     hintStyle: TextStyle(color: AppColors.th(context)),
                     prefixIcon:
                         Icon(Icons.search_rounded, color: AppColors.ts(context)),
@@ -226,7 +321,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               ),
             ),
 
-          // ── Period Reset Banner ──
+          // -- Period Reset Banner --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: ref.watch(pendingResetProvider).when(
@@ -252,15 +347,13 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                                pendingIds.length == 1
-                                    ? '1 envelope needs reset'
-                                    : '${pendingIds.length} envelopes need reset',
+                                l.allocNEnvelopesNeedReset(pendingIds.length),
                                 style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.tp(context))),
                             Text(
-                              'New budget period started — review leftover balances',
+                              l.allocNewPeriodStarted,
                               style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.ts(context)),
@@ -271,7 +364,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                       TextButton(
                         onPressed: () =>
                             context.push('/period-transition'),
-                        child: const Text('Review'),
+                        child: Text(l.allocReview),
                       ),
                     ],
                   ),
@@ -282,7 +375,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // ── Budget Summary (hidden during search) ──
+          // -- Budget Summary (hidden during search) --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: allocationsAsync.when(
@@ -330,21 +423,21 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                         child: Row(
                           children: [
                             _SummaryItem(
-                              label: 'Budgeted',
+                              label: l.allocBudgeted,
                               amount: totalBudgeted,
                               currency: baseCurrency,
                               color: AppColors.tp(context),
                             ),
                             _SummaryDivider(context: context),
                             _SummaryItem(
-                              label: 'Spent',
+                              label: l.allocSpent,
                               amount: totalSpent,
                               currency: baseCurrency,
                               color: AppColors.overspent,
                             ),
                             _SummaryDivider(context: context),
                             _SummaryItem(
-                              label: 'Remaining',
+                              label: l.allocRemaining,
                               amount: totalRemaining,
                               currency: baseCurrency,
                               color: AppColors.healthy,
@@ -356,7 +449,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            '$baseCurrency envelopes only · $nonBaseCount in other currencies',
+                            l.allocBaseCurrencyOnly(baseCurrency, nonBaseCount),
                             style: TextStyle(
                                 fontSize: 10, color: AppColors.th(context)),
                           ),
@@ -370,7 +463,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // ── Unallocated Banner (hidden during search) ──
+          // -- Unallocated Banner (hidden during search) --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: unallocatedAsync.when(
@@ -384,13 +477,13 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // ── Goals & Loans shortcut ──
+          // -- Goals & Loans shortcut --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: _GoalsLoansBanner(),
           ),
 
-          // ── Allocations List ──
+          // -- Allocations List --
           allocationsAsync.when(
             data: (allocations) {
               if (allocations.isEmpty) {
@@ -432,7 +525,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                             size: 48, color: AppColors.th(context)),
                         const SizedBox(height: 12),
                         Text(
-                          'No envelopes match "$_searchQuery"',
+                          l.allocNoMatch(_searchQuery),
                           style: TextStyle(
                             color: AppColors.ts(context),
                             fontSize: 15,
@@ -458,7 +551,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
             error: (e, _) => SliverFillRemaining(
               child: ErrorRetry(
-                message: "Couldn't load your data",
+                message: l.allocCouldntLoad,
                 details: '$e',
                 onRetry: () => ref.invalidate(allocationsProvider),
               ),
@@ -472,7 +565,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_allocations',
-        tooltip: 'Create envelope',
+        tooltip: l.allocCreateTooltip,
         onPressed: () => context.push('/allocations/new'),
         child: const Icon(Icons.add),
       ),
@@ -575,6 +668,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             categoryName: cat?.name,
             categoryIcon: cat?.icon,
             categoryColorHex: cat?.colorHex,
+            plannedAmount: _plannedByAllocation[a.data.allocation.id],
+            plannedCurrency: _plannedCurrencyByAllocation[a.data.allocation.id],
             onTap: () {
               hapticLight();
               context.push('/allocations/${a.data.allocation.id}');
@@ -602,9 +697,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   }
 }
 
-// ─────────────────────────────────────────────
+// -----------------------------------------
 // Budget Summary Item
-// ─────────────────────────────────────────────
+// -----------------------------------------
 class _SummaryItem extends StatelessWidget {
   final String label;
   final double amount;
@@ -663,9 +758,9 @@ class _SummaryDivider extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
+// -----------------------------------------
 // Unallocated Banner
-// ─────────────────────────────────────────────
+// -----------------------------------------
 class _UnallocatedBanner extends StatefulWidget {
   final Map<String, double> unallocated;
   final String baseCurrency;
@@ -717,6 +812,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
 
   @override
   Widget build(BuildContext context) {
+    final l = S.of(context);
     final baseAmount = widget.unallocated[widget.baseCurrency] ?? 0.0;
     final hasOtherCurrencies = widget.unallocated.length > 1;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -731,7 +827,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Main section ──
+          // -- Main section --
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 18, 14, 0),
             child: Row(
@@ -742,7 +838,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Unallocated',
+                        l.allocUnallocated,
                         style: TextStyle(
                           color: AppColors.ts(context),
                           fontSize: 13,
@@ -764,8 +860,8 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                           onTap: _toggle,
                           child: Text(
                             _expanded
-                                ? 'Hide other currencies'
-                                : '+ ${widget.unallocated.length - 1} other ${widget.unallocated.length - 1 == 1 ? 'currency' : 'currencies'}',
+                                ? l.allocHideOtherCurrencies
+                                : l.allocOtherCurrencies(widget.unallocated.length - 1),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -798,7 +894,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
             ),
           ),
 
-          // ── Expandable currency breakdown ──
+          // -- Expandable currency breakdown --
           SizeTransition(
             sizeFactor: _expandAnim,
             axisAlignment: -1,
@@ -861,7 +957,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
             ),
           ),
 
-          // ── Fund button ──
+          // -- Fund button --
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
             child: SizedBox(
@@ -878,10 +974,9 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                 ),
                 icon: const Icon(
                     Icons.account_balance_wallet_outlined, size: 18),
-                label: const Text(
-                  'Fund Envelopes',
-                  style:
-                      TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                label: Text(
+                  l.allocFundEnvelopes,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ),
             ),
@@ -892,15 +987,13 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
   }
 }
 
-// ─────────────────────────────────────────────
-// Empty State
-// ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
+// -----------------------------------------
 // Goals & Loans Banner
-// ─────────────────────────────────────────────
+// -----------------------------------------
 class _GoalsLoansBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = S.of(context);
     final objectivesAsync = ref.watch(objectivesProvider);
     final objectives = objectivesAsync.value ?? [];
     if (objectives.isEmpty) return const SizedBox.shrink();
@@ -908,9 +1001,9 @@ class _GoalsLoansBanner extends ConsumerWidget {
     final goals = objectives.where((o) => o.type == 'goal').length;
     final loans = objectives.where((o) => o.type == 'loan').length;
     final label = [
-      if (goals > 0) '$goals goal${goals > 1 ? 's' : ''}',
-      if (loans > 0) '$loans loan${loans > 1 ? 's' : ''}',
-    ].join(' · ');
+      if (goals > 0) l.allocGoalsCount(goals),
+      if (loans > 0) l.allocLoansCount(loans),
+    ].join(' \u00b7 ');
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -940,7 +1033,7 @@ class _GoalsLoansBanner extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Goals & Loans',
+                    Text(l.allocGoalsLoans,
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -962,14 +1055,15 @@ class _GoalsLoansBanner extends ConsumerWidget {
   }
 }
 
-// ─────────────────────────────────────────────
+// -----------------------------------------
 // Empty State
-// ─────────────────────────────────────────────
+// -----------------------------------------
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
+    final l = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -988,7 +1082,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'No envelopes yet',
+              l.allocNoYet,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -997,7 +1091,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Create an envelope to start budgeting.\nTap ? for help.',
+              l.allocCreateHelp,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -1011,9 +1105,9 @@ class _EmptyState extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: () => context.push('/allocations/new'),
                 icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text(
-                  'Create Envelope',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                label: Text(
+                  l.allocCreateButton,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),

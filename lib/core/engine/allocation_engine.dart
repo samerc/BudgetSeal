@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../l10n/s_lookup.dart';
 import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
@@ -158,7 +159,7 @@ class AllocationEngine {
           amount: shortfall,
           currency: currency,
           deviceId: deviceId,
-          note: 'Auto-covered from Unallocated',
+          note: currentS().engineAutoCovered,
         );
       }
     }
@@ -189,32 +190,34 @@ class AllocationEngine {
     String note = '',
   }) async {
     final txId = _uuid.v4();
-    await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
-          id: txId,
-          householdId: householdId,
-          type: 'expense',
-          accountId: accountId,
-          amount: amount,
-          currency: currency,
-          exchangeRateToBase: Value(exchangeRateToBase),
-          createdBy: createdBy,
-          deviceId: deviceId,
-          categoryId: Value(categoryId),
-          note: Value(note),
-        ));
+    await _db.transaction(() async {
+      await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
+            id: txId,
+            householdId: householdId,
+            type: 'expense',
+            accountId: accountId,
+            amount: amount,
+            currency: currency,
+            exchangeRateToBase: Value(exchangeRateToBase),
+            createdBy: createdBy,
+            deviceId: deviceId,
+            categoryId: Value(categoryId),
+            note: Value(note),
+          ));
 
-    await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-      id: _uuid.v4(),
-      allocationId: allocationId,
-      sourceTransactionId: Value(txId),
-      sourceAccountId: Value(accountId),
-      entryType: 'consumption',
-      amount: -amount,
-      currency: currency,
-      exchangeRateToBase: Value(exchangeRateToBase),
-      note: Value(note),
-      deviceId: deviceId,
-    ));
+      await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+        id: _uuid.v4(),
+        allocationId: allocationId,
+        sourceTransactionId: Value(txId),
+        sourceAccountId: Value(accountId),
+        entryType: 'consumption',
+        amount: -amount,
+        currency: currency,
+        exchangeRateToBase: Value(exchangeRateToBase),
+        note: Value(note),
+        deviceId: deviceId,
+      ));
+    });
     return txId;
   }
 
@@ -282,30 +285,32 @@ class AllocationEngine {
     required String deviceId,
     String note = '',
   }) async {
-    final txId = await recordIncome(
-      householdId: householdId,
-      accountId: accountId,
-      amount: amount,
-      currency: currency,
-      exchangeRateToBase: exchangeRateToBase,
-      createdBy: createdBy,
-      deviceId: deviceId,
-      note: note,
-    );
+    return _db.transaction(() async {
+      final txId = await recordIncome(
+        householdId: householdId,
+        accountId: accountId,
+        amount: amount,
+        currency: currency,
+        exchangeRateToBase: exchangeRateToBase,
+        createdBy: createdBy,
+        deviceId: deviceId,
+        note: note,
+      );
 
-    await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-      id: _uuid.v4(),
-      allocationId: allocationId,
-      sourceTransactionId: Value(txId),
-      entryType: 'funding',
-      amount: amount,
-      currency: currency,
-      exchangeRateToBase: Value(exchangeRateToBase),
-      note: Value('Direct from income'),
-      deviceId: deviceId,
-    ));
+      await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+        id: _uuid.v4(),
+        allocationId: allocationId,
+        sourceTransactionId: Value(txId),
+        entryType: 'funding',
+        amount: amount,
+        currency: currency,
+        exchangeRateToBase: Value(exchangeRateToBase),
+        note: Value(currentS().engineDirectIncome),
+        deviceId: deviceId,
+      ));
 
-    return txId;
+      return txId;
+    });
   }
 
   /// Record a transaction entered from the UI.
@@ -528,7 +533,7 @@ class AllocationEngine {
       entryType: 'withdrawal',
       amount: -amount, // negative = money leaving the allocation
       currency: currency,
-      note: Value(note.isNotEmpty ? note : 'Withdrawn to Unallocated'),
+      note: Value(note.isNotEmpty ? note : currentS().engineWithdrawn),
       deviceId: deviceId,
     ));
   }

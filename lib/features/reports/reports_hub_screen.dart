@@ -3,7 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import 'package:drift/drift.dart' hide Column;
 
@@ -17,6 +17,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -72,9 +73,8 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
         context,
         hintId: 'reports_intro',
         icon: Icons.insights_rounded,
-        title: 'Explore your spending patterns',
-        body:
-            'Switch between tabs to see different views. The Insights tab shows your financial health.',
+        title: S.of(context).reportsHintTitle,
+        body: S.of(context).reportsHintBody,
       );
     });
   }
@@ -103,7 +103,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                'Reports',
+                S.of(context).reportsTitle,
                 style: TextStyle(
                   fontSize: TypographyTokens.screenTitleSize,
                   fontWeight: TypographyTokens.screenTitleWeight,
@@ -126,11 +126,11 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
               indicatorWeight: 3,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               dividerHeight: 0,
-              tabs: const [
-                Tab(text: 'Overview'),
-                Tab(text: 'Categories'),
-                Tab(text: 'Insights'),
-                Tab(text: 'Balance Sheet'),
+              tabs: [
+                Tab(text: S.of(context).reportsOverviewTab),
+                Tab(text: S.of(context).reportsCategoriesTab),
+                Tab(text: S.of(context).reportsInsightsTab),
+                Tab(text: S.of(context).reportsBalanceTab),
               ],
             ),
             // ── Tab content ──
@@ -217,9 +217,12 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
         return GestureDetector(
           onHorizontalDragEnd: (details) {
             final dx = details.primaryVelocity ?? 0;
-            if (dx > 0) {
+            final isRtl = Directionality.of(context) == TextDirection.rtl;
+            final goPrev = isRtl ? dx < 0 : dx > 0;
+            final goNext = isRtl ? dx > 0 : dx < 0;
+            if (goPrev) {
               setState(() => _selectedMonthsBack++);
-            } else if (dx < 0 && _selectedMonthsBack > 0) {
+            } else if (goNext && _selectedMonthsBack > 0) {
               setState(() => _selectedMonthsBack--);
             }
           },
@@ -244,6 +247,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
                   dailyRate: daysElapsed > 0 ? totalExpense / daysElapsed : 0,
                   daysLeft: daysLeft,
                   currency: baseCurrency,
+                  month: month,
                 ),
                 const SizedBox(height: 16),
                 // Spending Heatmap
@@ -264,7 +268,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
-                            child: Text('6-Month Trend',
+                            child: Text(S.of(context).reports6MonthTrend,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -289,7 +293,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
-                            child: Text('Daily Pace',
+                            child: Text(S.of(context).reportsDailyPaceToggle,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -325,7 +329,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
       },
       loading: () => const SkeletonList(),
       error: (e, _) => ErrorRetry(
-        message: "Couldn't load your data",
+        message: S.of(context).commonCouldntLoadData,
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
       ),
@@ -379,7 +383,7 @@ class _DailyPaceChart extends StatelessWidget {
 
     if (maxY == 0) {
       return Center(
-          child: Text('No spending this month',
+          child: Text(S.of(context).reportsNoSpending,
               style: TextStyle(color: AppColors.ts(context))));
     }
 
@@ -467,7 +471,7 @@ class _HeatmapSection extends ConsumerWidget {
             Icon(Icons.grid_view_rounded, size: 16,
                 color: AppColors.ts(context)),
             const SizedBox(width: 8),
-            Text('Spending Activity',
+            Text(S.of(context).reportsSpendingActivity,
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -488,9 +492,9 @@ class _HeatmapSection extends ConsumerWidget {
               child: Center(
                   child: CircularProgressIndicator(strokeWidth: 2)),
             ),
-            error: (_, __) => const SizedBox(
+            error: (_, __) => SizedBox(
               height: 100,
-              child: Center(child: Text('Failed to load')),
+              child: Center(child: Text(S.of(context).commonSomethingWentWrong)),
             ),
           ),
           const SizedBox(height: 8),
@@ -498,17 +502,16 @@ class _HeatmapSection extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _legendDot(context, AppColors.sfv(context), 'None'),
+              _legendDot(context, AppColors.sfv(context), S.of(context).reportsHeatmapNone),
               const SizedBox(width: 12),
-              _legendDot(context, AppColors.overspent.withValues(alpha: 0.4), 'Expense'),
+              _legendDot(context, AppColors.overspent.withValues(alpha: 0.4), S.of(context).typeExpense),
               const SizedBox(width: 12),
-              _legendDot(context, AppColors.healthy.withValues(alpha: 0.4), 'Income'),
+              _legendDot(context, AppColors.healthy.withValues(alpha: 0.4), S.of(context).typeIncome),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            'Each square is one day. Darker = higher amount. '
-            'Scroll left to see past months.',
+            S.of(context).reportsHeatmapHelp,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 10, color: AppColors.th(context)),
           ),
@@ -544,6 +547,7 @@ class _MonthlySummaryCard extends StatelessWidget {
   final double dailyRate;
   final int daysLeft;
   final String currency;
+  final DateTime month;
 
   const _MonthlySummaryCard({
     required this.income,
@@ -553,12 +557,12 @@ class _MonthlySummaryCard extends StatelessWidget {
     required this.dailyRate,
     required this.daysLeft,
     required this.currency,
+    required this.month,
   });
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final projected = dailyRate * DateUtils.getDaysInMonth(now.year, now.month);
+    final projected = dailyRate * DateUtils.getDaysInMonth(month.year, month.month);
 
     // Comparison with last month
     String? comparison;
@@ -566,13 +570,13 @@ class _MonthlySummaryCard extends StatelessWidget {
     if (lastMonthExpense > 0) {
       final diff = ((expense - lastMonthExpense) / lastMonthExpense * 100).abs();
       if (expense < lastMonthExpense) {
-        comparison = '${diff.round()}% less than last month';
+        comparison = S.of(context).reportsLessThanLast(diff.roundToDouble());
         comparisonColor = AppColors.healthy;
       } else if (expense > lastMonthExpense) {
-        comparison = '${diff.round()}% more than last month';
+        comparison = S.of(context).reportsMoreThanLast(diff.roundToDouble());
         comparisonColor = AppColors.overspent;
       } else {
-        comparison = 'Same as last month';
+        comparison = S.of(context).reportsSameAsLast;
         comparisonColor = AppColors.ts(context);
       }
     }
@@ -587,7 +591,7 @@ class _MonthlySummaryCard extends StatelessWidget {
       child: Column(
         children: [
           // Header
-          Text(DateFormat('MMMM yyyy').format(now),
+          Text(DateFormat('MMMM yyyy').format(month),
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -599,7 +603,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _statColumn(
                   context,
-                  label: 'Income',
+                  label: S.of(context).dashboardLabelIncome,
                   amount: income,
                   color: AppColors.healthy,
                 ),
@@ -609,7 +613,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _statColumn(
                   context,
-                  label: 'Expenses',
+                  label: S.of(context).dashboardLabelExpenses,
                   amount: expense,
                   color: AppColors.overspent,
                 ),
@@ -619,7 +623,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _statColumn(
                   context,
-                  label: 'Net',
+                  label: S.of(context).dashboardLabelNet,
                   amount: net,
                   color: net >= 0 ? AppColors.healthy : AppColors.overspent,
                   prefix: net >= 0 ? '+' : '',
@@ -634,7 +638,7 @@ class _MonthlySummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Daily pace',
+              Text(S.of(context).reportsDailyPace,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context))),
               Text(
@@ -650,7 +654,7 @@ class _MonthlySummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Projected total',
+              Text(S.of(context).reportsProjectedTotal,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context))),
               Text(
@@ -749,7 +753,7 @@ class _TrendChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('6-Month Trend',
+          Text(S.of(context).reports6MonthTrend,
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -814,7 +818,7 @@ class _TrendChart extends StatelessWidget {
                       color: AppColors.healthy,
                       borderRadius: BorderRadius.circular(3))),
               const SizedBox(width: 4),
-              Text('Income',
+              Text(S.of(context).typeIncome,
                   style: TextStyle(
                       fontSize: 10, color: AppColors.ts(context))),
               const SizedBox(width: 16),
@@ -825,7 +829,7 @@ class _TrendChart extends StatelessWidget {
                       color: AppColors.overspent,
                       borderRadius: BorderRadius.circular(3))),
               const SizedBox(width: 4),
-              Text('Expense',
+              Text(S.of(context).typeExpense,
                   style: TextStyle(
                       fontSize: 10, color: AppColors.ts(context))),
             ],
@@ -949,7 +953,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             Expanded(
               child: catTxns.isEmpty
                   ? Center(
-                      child: Text('No transactions',
+                      child: Text(S.of(ctx).reportsNoExpenses,
                           style: TextStyle(color: AppColors.ts(ctx))))
                   : ListView.separated(
                       controller: scrollCtrl,
@@ -970,7 +974,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                     Text(
                                       e.tx.note.isNotEmpty
                                           ? e.tx.note
-                                          : 'No note',
+                                          : S.of(ctx).reportsNoNote,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
@@ -1071,10 +1075,13 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           dragStartBehavior: DragStartBehavior.start,
           onHorizontalDragEnd: (details) {
             final dx = details.primaryVelocity ?? 0;
-            if (dx > 0) {
+            final isRtl = Directionality.of(context) == TextDirection.rtl;
+            final goPrev = isRtl ? dx < 0 : dx > 0;
+            final goNext = isRtl ? dx > 0 : dx < 0;
+            if (goPrev) {
               setState(() => _selectedMonthsBack++);
               hapticLight();
-            } else if (dx < 0 && _selectedMonthsBack > 0) {
+            } else if (goNext && _selectedMonthsBack > 0) {
               setState(() => _selectedMonthsBack--);
               hapticLight();
             }
@@ -1098,14 +1105,14 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
               child: Row(
                 children: [
                   _ToggleChip(
-                    label: 'TOP SPENDING',
+                    label: S.of(context).reportsTopSpending,
                     selected: !_showByTransactions,
                     onTap: () =>
                         setState(() => _showByTransactions = false),
                   ),
                   const SizedBox(width: 8),
                   _ToggleChip(
-                    label: 'TOP TRANSACTIONS',
+                    label: S.of(context).reportsTopTransactions,
                     selected: _showByTransactions,
                     onTap: () =>
                         setState(() => _showByTransactions = true),
@@ -1117,7 +1124,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             Expanded(
               child: filtered.isEmpty
                   ? Center(
-                      child: Text('No expenses this period',
+                      child: Text(S.of(context).reportsNoExpenses,
                           style: TextStyle(color: AppColors.ts(context))))
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
@@ -1173,7 +1180,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
       },
       loading: () => const SkeletonList(),
       error: (e, _) => ErrorRetry(
-        message: "Couldn't load your data",
+        message: S.of(context).commonCouldntLoadData,
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
       ),
@@ -1233,7 +1240,7 @@ class _CategoryRow extends StatelessWidget {
         }
       } else if (last == 0 && amount > 0) {
         comparisonWidget = Text(
-          'NEW',
+          S.of(context).reportsNewBadge,
           style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w700,
@@ -1381,10 +1388,13 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
           dragStartBehavior: DragStartBehavior.start,
           onHorizontalDragEnd: (details) {
             final dx = details.primaryVelocity ?? 0;
-            if (dx > 0) {
+            final isRtl = Directionality.of(context) == TextDirection.rtl;
+            final goPrev = isRtl ? dx < 0 : dx > 0;
+            final goNext = isRtl ? dx > 0 : dx < 0;
+            if (goPrev) {
               setState(() => _selectedMonthsBack++);
               hapticLight();
-            } else if (dx < 0 && _selectedMonthsBack > 0) {
+            } else if (goNext && _selectedMonthsBack > 0) {
               setState(() => _selectedMonthsBack--);
               hapticLight();
             }
@@ -1414,7 +1424,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                           color: AppColors.healthy,
                           borderRadius: BorderRadius.circular(3))),
                   const SizedBox(width: 6),
-                  Text('Current',
+                  Text(S.of(context).reportsCurrentLegend,
                       style: TextStyle(
                           fontSize: 12, color: AppColors.ts(context))),
                   const SizedBox(width: 20),
@@ -1423,7 +1433,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                       height: 3,
                       color: AppColors.th(context)),
                   const SizedBox(width: 6),
-                  Text('Typical',
+                  Text(S.of(context).reportsTypicalLegend,
                       style: TextStyle(
                           fontSize: 12, color: AppColors.ts(context))),
                 ],
@@ -1563,7 +1573,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
       },
       loading: () => const SkeletonList(),
       error: (e, _) => ErrorRetry(
-        message: "Couldn't load your data",
+        message: S.of(context).commonCouldntLoadData,
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
       ),
@@ -1701,9 +1711,12 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
         return GestureDetector(
           onHorizontalDragEnd: (details) {
             final dx = details.primaryVelocity ?? 0;
-            if (dx > 0) {
+            final isRtl = Directionality.of(context) == TextDirection.rtl;
+            final goPrev = isRtl ? dx < 0 : dx > 0;
+            final goNext = isRtl ? dx > 0 : dx < 0;
+            if (goPrev) {
               setState(() => _selectedMonthsBack++);
-            } else if (dx < 0 && _selectedMonthsBack > 0) {
+            } else if (goNext && _selectedMonthsBack > 0) {
               setState(() => _selectedMonthsBack--);
             }
           },
@@ -1779,7 +1792,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Savings Rate',
+                            Text(S.of(context).reportsSavingsRate,
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: AppColors.ts(context))),
@@ -1826,7 +1839,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
               if (tips.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 8),
-                  child: Text('TIPS',
+                  child: Text(S.of(context).reportsTipsSection,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -1867,7 +1880,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
       },
       loading: () => const SkeletonList(),
       error: (e, _) => ErrorRetry(
-        message: "Couldn't load your data",
+        message: S.of(context).commonCouldntLoadData,
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
       ),
@@ -1914,7 +1927,7 @@ class _VelocityCard extends StatelessWidget {
             children: [
               Icon(Icons.speed_rounded, size: 18, color: velocityColor),
               const SizedBox(width: 8),
-              Text('Spending Velocity',
+              Text(S.of(context).reportsVelocityTitle,
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1937,10 +1950,10 @@ class _VelocityCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Projected',
+                Text(S.of(context).reportsProjected,
                     style: TextStyle(
                         fontSize: 12, color: AppColors.ts(context))),
-                Text('Budget',
+                Text(S.of(context).reportsBudget,
                     style: TextStyle(
                         fontSize: 12, color: AppColors.ts(context))),
               ],
@@ -1965,12 +1978,12 @@ class _VelocityCard extends StatelessWidget {
           Row(
             children: [
               _VelocityStat(
-                  label: 'Daily rate',
+                  label: S.of(context).reportsDailyRate,
                   value:
                       '${formatAmount(dailyRate, currency: baseCurrency)}/day'),
               const SizedBox(width: 16),
               _VelocityStat(
-                  label: 'Day',
+                  label: S.of(context).reportsDay,
                   value: '$daysElapsed of $daysInMonth'),
             ],
           ),
@@ -2051,7 +2064,7 @@ class _BiggestExpenseCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Biggest Expense',
+                  Text(S.of(context).reportsBiggestExpense,
                       style: TextStyle(
                           fontSize: 12,
                           color: AppColors.ts(context))),
@@ -2155,7 +2168,7 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Recurring Transactions',
+                        Text(S.of(context).reportsRecurringTitle,
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -2193,19 +2206,16 @@ class _AgeOfMoneyCard extends StatelessWidget {
     final String description;
     if (age >= 30) {
       color = AppColors.healthy;
-      label = 'Excellent';
-      description =
-          'You\'re spending last month\'s income -- a sign of financial stability.';
+      label = S.of(context).reportsAgeExcellent;
+      description = S.of(context).reportsAgeExcellentDesc;
     } else if (age >= 15) {
       color = AppColors.caution;
-      label = 'Getting there';
-      description =
-          'You\'re building a buffer but not quite there yet. Keep it up!';
+      label = S.of(context).reportsAgeGettingThere;
+      description = S.of(context).reportsAgeGettingDesc;
     } else {
       color = AppColors.overspent;
-      label = 'Needs work';
-      description =
-          'You\'re living paycheck to paycheck. Try to build up a buffer over time.';
+      label = S.of(context).reportsAgeNeedsWork;
+      description = S.of(context).reportsAgeNeedsDesc;
     }
 
     // Gauge value (target is 30 days)
@@ -2224,13 +2234,13 @@ class _AgeOfMoneyCard extends StatelessWidget {
             children: [
               Icon(Icons.schedule_rounded, size: 18, color: color),
               const SizedBox(width: 8),
-              Text('Age of Money',
+              Text(S.of(context).reportsAgeTitle,
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.tp(context))),
               const Spacer(),
-              Text('$age days',
+              Text(S.of(context).reportsAgeDays(age),
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -2257,7 +2267,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: color)),
-              Text('Goal: 30+ days',
+              Text(S.of(context).reportsAgeGoal,
                   style: TextStyle(
                       fontSize: 11, color: AppColors.ts(context))),
             ],
@@ -2272,9 +2282,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Age of Money measures how many days your money sits before '
-            'you spend it. It traces each expense back to the income that '
-            'funded it (oldest income first).',
+            S.of(context).reportsAgeExplanation,
             style: TextStyle(
                 fontSize: 11,
                 color: AppColors.th(context),
@@ -2392,22 +2400,23 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     _compareDate = DateTime(now.year, now.month, 0); // last day of prev month
   }
 
-  String _compareLabel = 'End of Last Month';
+  String? _compareLabel;
 
   void _showComparePicker(BuildContext context) {
     final now = DateTime.now();
+    final l = S.of(context);
     final options = <(String, DateTime)>[
-      ('End of Last Week',
+      (l.reportsEndLastWeek,
           now.subtract(Duration(days: now.weekday)).subtract(const Duration(days: 0))),
-      ('End of Last Month', DateTime(now.year, now.month, 0)),
-      ('Same Time Last Month', DateTime(now.year, now.month - 1, now.day)),
-      ('End of Last Quarter', () {
+      (l.reportsEndLastMonth, DateTime(now.year, now.month, 0)),
+      (l.reportsSameTimeLastMonth, DateTime(now.year, now.month - 1, now.day)),
+      (l.reportsEndLastQuarter, () {
         final qMonth = ((now.month - 1) ~/ 3) * 3;
         return qMonth > 0 ? DateTime(now.year, qMonth + 1, 0) : DateTime(now.year - 1, 12, 31);
       }()),
-      ('End of Last Year', DateTime(now.year - 1, 12, 31)),
-      ('Same Time Last Year', DateTime(now.year - 1, now.month, now.day)),
-      ('Custom...', now),
+      (l.reportsEndLastYear, DateTime(now.year - 1, 12, 31)),
+      (l.reportsSameTimeLastYear, DateTime(now.year - 1, now.month, now.day)),
+      (l.reportsCustom, now),
     ];
 
     showModalBottomSheet(
@@ -2425,7 +2434,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: Text('Compare balances to:',
+                child: Text(l.reportsCompareTo,
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -2436,13 +2445,13 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     title: Text(opt.$1,
                         style: TextStyle(
                             fontSize: 15,
-                            fontWeight: _compareLabel == opt.$1
+                            fontWeight: (_compareLabel ?? l.reportsEndLastMonth) == opt.$1
                                 ? FontWeight.w700
                                 : FontWeight.w400,
                             color: AppColors.tp(ctx))),
                     onTap: () async {
                       Navigator.pop(ctx);
-                      if (opt.$1 == 'Custom...') {
+                      if (opt.$1 == l.reportsCustom) {
                         final picked = await showDatePicker(
                           context: context,
                           initialDate: _compareDate,
@@ -2481,7 +2490,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       data: (accounts) {
         if (accounts.isEmpty) {
           return Center(
-              child: Text('No accounts',
+              child: Text(S.of(context).healthNoAccounts,
                   style: TextStyle(color: AppColors.ts(context))));
         }
 
@@ -2552,7 +2561,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                             size: 14, color: AppColors.ts(context)),
                         const SizedBox(width: 8),
                         Text(
-                          _compareLabel,
+                          _compareLabel ?? S.of(context).reportsEndLastMonth,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -2593,8 +2602,8 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
 
                 // Assets section
                 if (assets.isNotEmpty) ...[
-                  _bsSectionHeader(context, 'ASSETS',
-                      totalAssetsCompare, totalAssetsNow, baseCurrency),
+                  _bsSectionHeader(context, S.of(context).reportsAssets,
+                      totalAssetsCompare, totalAssetsNow, baseCurrency, isAsset: true),
                   ..._groupByType(assets).entries.map((group) =>
                       _bsGroup(context, group.key, group.value,
                           historicalBalances, baseCurrency, totalAssetsNow)),
@@ -2603,7 +2612,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 // Liabilities section
                 if (liabilities.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  _bsSectionHeader(context, 'LIABILITIES',
+                  _bsSectionHeader(context, S.of(context).reportsLiabilities,
                       totalLiabilitiesCompare, totalLiabilitiesNow,
                       baseCurrency),
                   ..._groupByType(liabilities).entries.map((group) =>
@@ -2624,7 +2633,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                   ),
                   child: Column(
                     children: [
-                      Text('NET WORTH',
+                      Text(S.of(context).reportsNetWorth,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -2664,8 +2673,8 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                                 color: Colors.white,
                               ),
                             ),
-                            const Text('Today',
-                                style: TextStyle(
+                            Text(S.of(context).commonToday,
+                                style: const TextStyle(
                                     fontSize: 10, color: Colors.white60)),
                           ]),
                         ],
@@ -2703,7 +2712,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       },
       loading: () => const SkeletonList(),
       error: (e, _) => ErrorRetry(
-        message: "Couldn't load accounts",
+        message: S.of(context).commonCouldntLoadAccounts,
         details: '$e',
         onRetry: () => ref.invalidate(accountsWithBalanceProvider),
       ),
@@ -2721,7 +2730,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
   }
 
   Widget _bsSectionHeader(BuildContext context, String label,
-      double compareTotal, double nowTotal, String currency) {
+      double compareTotal, double nowTotal, String currency, {bool isAsset = false}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
       child: Row(
@@ -2733,7 +2742,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
-                color: label == 'ASSETS' ? AppColors.healthy : AppColors.overspent,
+                color: isAsset ? AppColors.healthy : AppColors.overspent,
               )),
           ),
           Expanded(
@@ -2979,6 +2988,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
+              t.status.isNull() &
               t.createdAt.isBiggerThanValue(asOfDate)))
         .get();
 

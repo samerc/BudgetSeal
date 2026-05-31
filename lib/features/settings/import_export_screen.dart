@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -11,7 +12,7 @@ class ImportExportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import & Export'),
+        title: Text(S.of(context).ieTitle),
         centerTitle: true,
       ),
       body: ListView(
@@ -20,24 +21,24 @@ class ImportExportScreen extends StatelessWidget {
           _HubTile(
             icon: Icons.upload_file_rounded,
             iconColor: const Color(0xFF26A69A),
-            title: 'Import CSV',
-            subtitle: 'Import transactions from a bank CSV file',
+            title: S.of(context).ieImportCsv,
+            subtitle: S.of(context).ieImportCsvSub,
             onTap: () => context.push('/import'),
           ),
           const SizedBox(height: 12),
           _HubTile(
             icon: Icons.download_rounded,
             iconColor: const Color(0xFF66BB6A),
-            title: 'Export CSV',
-            subtitle: 'Export transactions as a spreadsheet',
+            title: S.of(context).ieExportCsv,
+            subtitle: S.of(context).ieExportCsvSub,
             onTap: () => context.push('/export'),
           ),
           const SizedBox(height: 12),
           _HubTile(
             icon: Icons.picture_as_pdf_rounded,
             iconColor: const Color(0xFFEF5350),
-            title: 'Export Report',
-            subtitle: 'Generate a printable monthly report',
+            title: S.of(context).ieExportReport,
+            subtitle: S.of(context).ieExportReportSub,
             onTap: () => context.push('/export-report'),
           ),
         ],

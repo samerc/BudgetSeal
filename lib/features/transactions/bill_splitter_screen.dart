@@ -11,6 +11,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import 'widgets/currency_sheet.dart' show kCurrencySymbols;
+import '../../l10n/generated/app_localizations.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bill Splitter — 3-step guided flow
@@ -108,18 +109,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       final result = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Remove person'),
+          title: Text(S.of(context).billRemovePersonTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '$name has $soloItems item${soloItems == 1 ? '' : 's'} assigned only to them. '
-                'Reassign to someone else, or delete those items?',
-              ),
+              Text(S.of(context).billRemovePersonContent(name, soloItems)),
               if (others.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Text('Reassign to:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text(S.of(context).billReassignTo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                 const SizedBox(height: 8),
                 ...others.map((other) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -137,11 +135,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, '_delete'),
-              child: const Text('Delete items'),
+              child: Text(S.of(context).billDeleteItems),
             ),
           ],
         ),
@@ -206,12 +204,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_rounded),
-              title: const Text('Take Photo'),
+              title: Text(S.of(context).billTakePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded),
-              title: const Text('Choose from Gallery'),
+              title: Text(S.of(context).billFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
           ],
@@ -236,8 +234,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         _items.clear();
       });
       if (result.lines.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('No text detected. Try a clearer photo.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).billNoText),
           behavior: SnackBarBehavior.floating,
         ));
       }
@@ -269,7 +267,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Enter amount'),
+        title: Text(S.of(context).billEnterAmount),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +285,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '0.00',
-                labelText: 'Amount',
+                labelText: S.of(context).billAmount,
                 filled: true,
                 fillColor: AppColors.sfv(ctx),
                 border: OutlineInputBorder(
@@ -316,7 +314,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(S.of(context).commonCancel)),
           FilledButton(
             onPressed: () {
               final amount =
@@ -334,7 +332,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     _activePersonForSelection ?? _people.first);
               }
             },
-            child: const Text('OK'),
+            child: Text(S.of(context).commonOk),
           ),
         ],
       ),
@@ -350,16 +348,16 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       final split = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text('$qty × $name'),
+          title: Text(S.of(context).billSplitQtyTitle(qty, name)),
           content: Text(
-              'Split into $qty items (${formatAmount(qty > 0 ? amount / qty : 0, currency: _billCurrency)} each)?'),
+              S.of(context).billSplitQtyContent(qty, formatAmount(qty > 0 ? amount / qty : 0, currency: _billCurrency))),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Keep as one')),
+                child: Text(S.of(context).billKeepAsOne)),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Split')),
+                child: Text(S.of(context).billSplit)),
           ],
         ),
       );
@@ -444,17 +442,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Exchange rate not set'),
-          content: Text(
-              'Bill is in $_billCurrency but no rate was entered.\n'
-              'The transaction will be saved without conversion.'),
+          title: Text(S.of(context).billRateNotSetTitle),
+          content: Text(S.of(context).billRateNotSetContent(_billCurrency)),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Go back')),
+                child: Text(S.of(context).billGoBackBtn)),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Continue anyway')),
+                child: Text(S.of(context).billContinueAnyway)),
           ],
         ),
       );
@@ -510,14 +506,14 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget build(BuildContext context) {
     if (_scanning) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Bill Splitter')),
-        body: const Center(
+        appBar: AppBar(title: Text(S.of(context).billTitle)),
+        body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Scanning receipt...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(S.of(context).billScanning),
             ],
           ),
         ),
@@ -530,12 +526,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bill Splitter'),
+        title: Text(S.of(context).billTitle),
         actions: [
           if (_step == 0)
             IconButton(
               icon: const Icon(Icons.camera_alt_rounded),
-              tooltip: 'Scan receipt',
+              tooltip: S.of(context).billScanTooltip,
               onPressed: _scanReceipt,
             ),
         ],
@@ -548,7 +544,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                'Step 1: Add items from your receipt — scan or enter manually.',
+                S.of(context).billStep1Desc,
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
             ),
@@ -567,7 +563,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   children: [
                     Icon(Icons.payments_rounded, size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 6),
-                    Text('Bill in $_billCurrency',
+                    Text(S.of(context).billBillIn(_billCurrency),
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
                     const SizedBox(width: 4),
@@ -577,7 +573,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               ),
             ),
             if (_currencyExpanded) ...[
-              CurrencyPickerField(value: _billCurrency, label: 'Bill currency',
+              CurrencyPickerField(value: _billCurrency, label: S.of(context).billBillCurrency,
                 onChanged: (c) => setState(() {
                   _billCurrency = c;
                   if (c == _baseCurrency) _exchangeRate = 1.0;
@@ -598,7 +594,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Exchange Rate',
+                    Text(S.of(context).billExchangeRateTitle,
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
                             color: AppColors.caution)),
                     const SizedBox(height: 8),
@@ -606,7 +602,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
                           style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
                       Expanded(child: TextField(controller: _rateCtrl,
-                        decoration: InputDecoration(hintText: 'Rate', isDense: true,
+                        decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true,
                           filled: true, fillColor: AppColors.sfv(context),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none)),
@@ -641,17 +637,17 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               Center(child: Icon(Icons.receipt_long_rounded,
                   size: 48, color: AppColors.ts(context))),
               const SizedBox(height: 12),
-              Center(child: Text('Add items to split',
+              Center(child: Text(S.of(context).billEmptyTitle,
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
                       color: AppColors.tp(context)))),
               const SizedBox(height: 6),
-              Center(child: Text('Scan a receipt or add items manually',
+              Center(child: Text(S.of(context).billEmptySubtitle,
                   style: TextStyle(fontSize: 13, color: AppColors.ts(context)))),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _scanReceipt,
                 icon: const Icon(Icons.camera_alt_rounded, size: 20),
-                label: const Text('Scan Receipt'),
+                label: Text(S.of(context).billScanButton),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
@@ -662,7 +658,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               OutlinedButton.icon(
                 onPressed: _addManualItem,
                 icon: const Icon(Icons.edit_rounded, size: 18),
-                label: const Text('Add Manually'),
+                label: Text(S.of(context).billAddManually),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
@@ -678,7 +674,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               TextButton.icon(
                 onPressed: _addManualItem,
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Add item'),
+                label: Text(S.of(context).billAddItem),
               ),
             ],
           ],
@@ -686,7 +682,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                'Step 2: Add people and assign items. Toggle "Split evenly" to divide the total equally.',
+                S.of(context).billStep2Desc,
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
             ),
@@ -695,7 +691,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             _buildSplitEvenlyToggle(),
             const SizedBox(height: 12),
             if (!_splitEvenly && _people.length > 1) ...[
-              Text('ASSIGN ITEMS', style: TextStyle(fontSize: 11,
+              Text(S.of(context).billAssignItems, style: TextStyle(fontSize: 11,
                   fontWeight: FontWeight.w700, letterSpacing: 0.8,
                   color: AppColors.ts(context))),
               const SizedBox(height: 8),
@@ -706,7 +702,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                'Step 3: Review the split, add tip, and confirm.',
+                S.of(context).billStep3Desc,
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
             ),
@@ -724,7 +720,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _goToStep(_step - 1),
-                    child: const Text('Back'),
+                    child: Text(S.of(context).commonBack),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -735,13 +731,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                         onPressed: grandTotal > 0 && myShare > 0
                             ? _createTransaction : null,
                         icon: const Icon(Icons.check_rounded, size: 18),
-                        label: const Text('Save'),
+                        label: Text(S.of(context).commonSave),
                       )
                     : FilledButton(
                         onPressed: _step == 0
                             ? (_canProceedFromItems ? () => _goToStep(1) : null)
                             : (_canProceedFromSplit ? () => _goToStep(2) : null),
-                        child: const Text('Next'),
+                        child: Text(S.of(context).commonNext),
                       ),
               ),
             ],
@@ -782,8 +778,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     overflow: TextOverflow.ellipsis)
                 : TextFormField(
                     initialValue: item.name,
-                    decoration: const InputDecoration(
-                      hintText: 'Item name',
+                    decoration: InputDecoration(
+                      hintText: S.of(context).billItemName,
                       isDense: true,
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
@@ -842,7 +838,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('WHO\'S SPLITTING?', style: TextStyle(fontSize: 11,
+          Text(S.of(context).billWhosSplitting, style: TextStyle(fontSize: 11,
               fontWeight: FontWeight.w700, letterSpacing: 0.8,
               color: AppColors.ts(context))),
           const SizedBox(height: 10),
@@ -853,7 +849,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           Row(children: [
             Expanded(child: TextField(
               controller: _personCtrl,
-              decoration: InputDecoration(hintText: 'Add person', isDense: true,
+              decoration: InputDecoration(hintText: S.of(context).billAddPerson, isDense: true,
                 filled: true, fillColor: AppColors.sfv(context),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none)),
@@ -874,10 +870,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return _card(
       child: SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('Split evenly',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        title: Text(S.of(context).billSplitEvenly,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         subtitle: Text(
-          'Each person pays ${formatAmount(_items.fold(0.0, (s, i) => s + i.amount) / (_people.isNotEmpty ? _people.length : 1), currency: _billCurrency)}',
+          S.of(context).billEachPays(formatAmount(_items.fold(0.0, (s, i) => s + i.amount) / (_people.isNotEmpty ? _people.length : 1), currency: _billCurrency)),
           style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
         value: _splitEvenly,
         onChanged: (v) => setState(() => _splitEvenly = v),
@@ -913,7 +909,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ])),
         Divider(color: AppColors.bd(context)),
         Row(children: [
-          Expanded(child: Text('Total', style: TextStyle(fontSize: 15,
+          Expanded(child: Text(S.of(context).billTotal, style: TextStyle(fontSize: 15,
               fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           Text(formatAmount(grandTotal, currency: _billCurrency),
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
@@ -925,7 +921,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   Widget _buildTipSection() {
     return _collapsibleCard(
-      title: 'Tip',
+      title: S.of(context).billTip,
       trailing: _tipPercent > 0 || _tipAmount > 0
           ? _tipIsAmount
               ? formatAmount(_tipAmount, currency: _billCurrency)
@@ -935,10 +931,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       onTap: () => setState(() => _tipExpanded = !_tipExpanded),
       child: Column(children: [
         Row(children: [
-          _segmentButton('Percentage', !_tipIsAmount,
+          _segmentButton(S.of(context).billPercentage, !_tipIsAmount,
               () => setState(() => _tipIsAmount = false)),
           const SizedBox(width: 8),
-          _segmentButton('Amount', _tipIsAmount,
+          _segmentButton(S.of(context).billAmount, _tipIsAmount,
               () => setState(() => _tipIsAmount = true)),
         ]),
         const SizedBox(height: 12),
@@ -954,7 +950,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         else
           TextField(
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(hintText: '0.00', labelText: 'Tip amount',
+            decoration: InputDecoration(hintText: '0.00', labelText: S.of(context).billTipAmount,
               prefixText: '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
               isDense: true, filled: true, fillColor: AppColors.sfv(context),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
@@ -968,12 +964,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget _buildCurrencySection() {
     final isCross = _billCurrency != _baseCurrency;
     return _collapsibleCard(
-      title: 'Currency',
+      title: S.of(context).billCurrency,
       trailing: _billCurrency,
       expanded: _currencyExpanded,
       onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
       child: Column(children: [
-        CurrencyPickerField(value: _billCurrency, label: 'Bill currency',
+        CurrencyPickerField(value: _billCurrency, label: S.of(context).billBillCurrency,
           onChanged: (c) => setState(() {
             _billCurrency = c;
             if (c == _baseCurrency) _exchangeRate = 1.0;
@@ -984,7 +980,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
             Expanded(child: TextField(controller: _rateCtrl,
-              decoration: InputDecoration(hintText: 'Rate', isDense: true,
+              decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true,
                 filled: true, fillColor: AppColors.sfv(context),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none)),
@@ -1257,7 +1253,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 color: AppColors.ts(context),
               ),
               const SizedBox(width: 4),
-              Text('$detected lines ($withPrice with prices)',
+              Text(S.of(context).billNLines(detected, withPrice),
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context))),
               const Spacer(),
@@ -1267,7 +1263,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     padding: EdgeInsets.zero,
                     minimumSize: const Size(0, 30)),
                 child:
-                    const Text('Re-scan', style: TextStyle(fontSize: 12)),
+                    Text(S.of(context).billReScan, style: const TextStyle(fontSize: 12)),
               ),
             ],
           ),

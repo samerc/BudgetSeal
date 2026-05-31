@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../../l10n/s_lookup.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -33,13 +34,16 @@ class DailyReminderService {
   static const defaultMinute = 0;
   static const defaultMessage = '';
 
-  static const _defaultMessages = [
-    'How did you spend today? Tap to record.',
-    "Don't forget to log today's transactions!",
-    'Stay on track — record today\'s spending.',
-    'A minute now saves hours later. Log your day!',
-    'Keep your budget honest — add today\'s transactions.',
-  ];
+  static List<String> _defaultMessages() {
+    final l = currentS();
+    return [
+      l.notifReminder1,
+      l.notifReminder2,
+      l.notifReminder3,
+      l.notifReminder4,
+      l.notifReminder5,
+    ];
+  }
 
   /// Share the same plugin instance as NotificationService to avoid
   /// dual-initialize conflicts on Android.
@@ -156,9 +160,10 @@ class DailyReminderService {
     // Schedule one notification per day for the next 14 days.
     // Using dateAndTime (not just time) is more reliable across devices.
     for (int i = 0; i < _scheduleDays; i++) {
+      final msgs = _defaultMessages();
       final body = customMessage.isNotEmpty
           ? customMessage
-          : _defaultMessages[rand.nextInt(_defaultMessages.length)];
+          : msgs[rand.nextInt(msgs.length)];
 
       final scheduledDate = _dateAtTime(time, dayOffset: i);
       // Skip if in the past (e.g., today's time already passed when i == 0)
@@ -166,7 +171,7 @@ class DailyReminderService {
 
       await _plugin.zonedSchedule(
         id: _baseNotificationId + i,
-        title: 'PocketPlan',
+        title: currentS().notifReminderTitle,
         body: body,
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(

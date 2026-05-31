@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/s_lookup.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
@@ -70,7 +71,7 @@ class PeriodResetService {
               entryType: 'period_reset',
               amount: -balance,
               currency: entry.key,
-              note: const Value('Period auto-reset'),
+              note: Value(currentS().engineAutoReset),
               deviceId: 'period-reset',
             ));
             debugPrint('[PeriodReset] Reset ${entry.key} balance to unallocated');

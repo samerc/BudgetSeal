@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
@@ -30,6 +30,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -86,12 +87,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   // Quick-add bar
   final _quickAddCtrl = TextEditingController();
 
+  // Planned payments for the visible month
+  List<Transaction> _plannedTxs = [];
+  Map<String, List<TransactionLine>> _plannedLinesByTx = {};
+  Map<String, Account> _plannedAccountMap = {};
+  Map<String, Category> _plannedCategoryMap = {};
+
   @override
   void initState() {
     super.initState();
     _monthScrollCtrl = ScrollController();
     _listScrollCtrl.addListener(_onListScroll);
     _restoreFilters();
+    _loadPlanned();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final offset = (_selectedMonth - 1) * 80.0;
       if (_monthScrollCtrl.hasClients) {
@@ -104,9 +112,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         context,
         hintId: 'transactions_intro',
         icon: Icons.receipt_long_rounded,
-        title: 'Your transactions',
-        body:
-            'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.',
+        title: S.of(context).txIntroTitle,
+        body: S.of(context).txIntroBody,
       );
     });
   }
@@ -136,18 +143,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete selected?'),
-        content: Text('Delete $count transaction(s)? This will reverse '
-            'any envelope deductions.'),
+        title: Text(S.of(context).txDeleteSelectedTitle),
+        content: Text(S.of(context).txDeleteSelectedContent(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Delete'),
+            child: Text(S.of(context).commonDelete),
           ),
         ],
       ),
@@ -160,13 +166,77 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('$count transaction(s) deleted'),
+        content: Text(S.of(context).txNDeleted(count)),
         behavior: SnackBarBehavior.floating,
       ));
       setState(() {
         _selectionMode = false;
         _selectedIds.clear();
       });
+    }
+  }
+
+  void _setMonth(int year, int month) {
+    setState(() {
+      _selectedYear = year;
+      _selectedMonth = month;
+    });
+    _loadPlanned();
+  }
+
+  Future<void> _loadPlanned() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+
+      final monthStart = DateTime(_selectedYear, _selectedMonth, 1);
+      final monthEnd = DateTime(_selectedYear, _selectedMonth + 1, 1);
+
+      final txs = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.status.equals('planned') &
+                t.deleted.equals(false) &
+                t.createdAt.isBiggerOrEqualValue(monthStart) &
+                t.createdAt.isSmallerThanValue(monthEnd))
+            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+          .get();
+
+      if (txs.isEmpty) {
+        if (mounted) setState(() { _plannedTxs = []; _plannedLinesByTx = {}; });
+        return;
+      }
+
+      final txIds = txs.map((t) => t.id).toList();
+      final lines = await (db.select(db.transactionLines)
+            ..where((l) => l.transactionId.isIn(txIds)))
+          .get();
+      final linesByTx = <String, List<TransactionLine>>{};
+      for (final l in lines) {
+        linesByTx.putIfAbsent(l.transactionId, () => []).add(l);
+      }
+
+      final accounts = await (db.select(db.accounts)
+            ..where((a) => a.householdId.equals(householdId)))
+          .get();
+      final accountMap = {for (final a in accounts) a.id: a};
+
+      final categories = await (db.select(db.categories)
+            ..where((c) => c.householdId.equals(householdId)))
+          .get();
+      final catMap = {for (final c in categories) c.id: c};
+
+      if (mounted) {
+        setState(() {
+          _plannedTxs = txs;
+          _plannedLinesByTx = linesByTx;
+          _plannedAccountMap = accountMap;
+          _plannedCategoryMap = catMap;
+        });
+      }
+    } catch (e) {
+      debugPrint('[TransactionsScreen] Error loading planned: $e');
     }
   }
 
@@ -217,13 +287,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         _selectedIds.clear();
                       }),
                     ),
-                    Text('${_selectedIds.length} selected',
+                    Text(S.of(context).txNSelected(_selectedIds.length),
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.delete_outline_rounded),
-                      tooltip: 'Delete selected',
+                      tooltip: S.of(context).txDeleteSelectedTooltip,
                       color: AppColors.overspent,
                       onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
                     ),
@@ -242,29 +312,26 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 dragStartBehavior: DragStartBehavior.start,
                 onHorizontalDragEnd: (details) {
                   final dx = details.primaryVelocity ?? 0;
-                  if (dx > 0) {
-                    // Swipe right → previous month
-                    setState(() {
-                      if (_selectedMonth == 1) {
-                        _selectedMonth = 12;
-                        _selectedYear--;
-                      } else {
-                        _selectedMonth--;
-                      }
-                    });
+                  final isRtl = Directionality.of(context) == TextDirection.rtl;
+                  final goPrev = isRtl ? dx < 0 : dx > 0;
+                  final goNext = isRtl ? dx > 0 : dx < 0;
+                  if (goPrev) {
+                    // Swipe toward start → previous month
+                    if (_selectedMonth == 1) {
+                      _setMonth(_selectedYear - 1, 12);
+                    } else {
+                      _setMonth(_selectedYear, _selectedMonth - 1);
+                    }
                     hapticLight();
-                  } else if (dx < 0) {
-                    // Swipe left → next month (capped at current)
+                  } else if (goNext) {
+                    // Swipe toward end → next month (capped at current)
                     final now = DateTime.now();
                     if (_selectedYear < now.year || _selectedMonth < now.month) {
-                      setState(() {
-                        if (_selectedMonth == 12) {
-                          _selectedMonth = 1;
-                          _selectedYear++;
-                        } else {
-                          _selectedMonth++;
-                        }
-                      });
+                      if (_selectedMonth == 12) {
+                        _setMonth(_selectedYear + 1, 1);
+                      } else {
+                        _setMonth(_selectedYear, _selectedMonth + 1);
+                      }
                       hapticLight();
                     }
                   }
@@ -273,6 +340,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   onRefresh: () async {
                     final key = (year: _selectedYear, month: _selectedMonth);
                     ref.invalidate(monthlyTransactionsProvider(key));
+                    _loadPlanned();
                     await ref.read(monthlyTransactionsProvider(key).future);
                   },
                   child: entriesAsync.when(
@@ -280,7 +348,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         _buildContent(entries, categoryMap, context),
                     loading: () => const SkeletonList(),
                     error: (e, _) => ErrorRetry(
-                      message: "Couldn't load your data",
+                      message: S.of(context).txCouldntLoad,
                       details: '$e',
                       onRetry: () => ref.invalidate(
                           monthlyTransactionsProvider(
@@ -303,7 +371,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             if (_showScrollToTop) ...[
               FloatingActionButton.small(
                 heroTag: 'fab_scroll_top',
-                tooltip: 'Scroll to top',
+                tooltip: S.of(context).txScrollTopTooltip,
                 backgroundColor: AppColors.sf(context),
                 foregroundColor: AppColors.tp(context),
                 elevation: 2,
@@ -318,7 +386,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ],
             FloatingActionButton.small(
               heroTag: 'fab_split',
-              tooltip: 'Split Bill',
+              tooltip: S.of(context).txSplitBillTooltip,
               backgroundColor: const Color(0xFFFF8A65),
               foregroundColor: Colors.white,
               elevation: 2,
@@ -391,7 +459,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ),
               ),
               const SizedBox(height: 16),
-              Text('New Transaction',
+              Text(S.of(context).txNewTransactionSheet,
                   style: TextStyle(
                       fontSize: 17, fontWeight: FontWeight.w700,
                       color: AppColors.tp(context))),
@@ -400,7 +468,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 children: [
                   _TypeOption(
                     icon: Icons.remove_rounded,
-                    label: 'Expense',
+                    label: S.of(context).typeExpense,
                     color: txColors.expense,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -412,7 +480,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   const SizedBox(width: 12),
                   _TypeOption(
                     icon: Icons.add_rounded,
-                    label: 'Income',
+                    label: S.of(context).typeIncome,
                     color: txColors.income,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -424,7 +492,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   const SizedBox(width: 12),
                   _TypeOption(
                     icon: Icons.swap_horiz_rounded,
-                    label: 'Transfer',
+                    label: S.of(context).typeTransfer,
                     color: txColors.transfer,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -455,7 +523,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 autofocus: false,
                 style: const TextStyle(fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: 'Search transactions...',
+                  hintText: S.of(context).txSearchHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   border: InputBorder.none,
                   isDense: true,
@@ -470,7 +538,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
             ),
             IconButton(
-              tooltip: 'Close search',
+              tooltip: S.of(context).txCloseSearch,
               icon: const Icon(Icons.close_rounded, size: 22),
               onPressed: () {
                 setState(() {
@@ -490,7 +558,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       child: Row(
         children: [
           Text(
-            'Transactions',
+            S.of(context).txTitle,
             style: TextStyle(
               fontSize: TypographyTokens.screenTitleSize,
               fontWeight: TypographyTokens.screenTitleWeight,
@@ -499,7 +567,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           ),
           const Spacer(),
           IconButton(
-            tooltip: 'Filter transactions',
+            tooltip: S.of(context).txFilterTooltip,
             icon: Icon(
               Icons.filter_list_rounded,
               size: 22,
@@ -510,13 +578,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
           IconButton(
-            tooltip: 'Search transactions',
+            tooltip: S.of(context).txSearchTooltip,
             icon: Icon(Icons.search_rounded,
                 size: 22, color: AppColors.ts(context)),
             onPressed: () => setState(() => _showSearch = true),
           ),
           IconButton(
-            tooltip: 'List settings',
+            tooltip: S.of(context).txListSettingsTooltip,
             icon: Icon(Icons.tune_rounded,
                 size: 21, color: AppColors.ts(context)),
             onPressed: () => context.push('/tx-list-settings'),
@@ -546,7 +614,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   color: AppColors.tp(context),
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Type name and amount, e.g. Coffee 4.50',
+                  hintText: S.of(context).txQuickAddHint,
                   hintStyle: TextStyle(
                     color: AppColors.th(context),
                     fontSize: 14,
@@ -570,7 +638,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               width: 38,
               height: 38,
               child: IconButton.filled(
-                tooltip: 'Send',
+                tooltip: S.of(context).txSendTooltip,
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
@@ -625,7 +693,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               final picked = await showDialog<int>(
                 context: context,
                 builder: (ctx) => SimpleDialog(
-                  title: const Text('Select Year'),
+                  title: Text(S.of(context).txSelectYear),
                   children: List.generate(DateTime.now().year - (DateTime.now().year - 5) + 1, (i) {
                     final y = DateTime.now().year - 5 + i;
                     return SimpleDialogOption(
@@ -644,7 +712,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ),
               );
               if (picked != null) {
-                setState(() => _selectedYear = picked);
+                _setMonth(picked, _selectedMonth);
               }
             },
             child: Padding(
@@ -672,14 +740,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 GestureDetector(
                   onTap: () {
                     hapticLight();
-                    setState(() {
-                      if (_selectedMonth == 1) {
-                        _selectedMonth = 12;
-                        _selectedYear--;
-                      } else {
-                        _selectedMonth--;
-                      }
-                    });
+                    if (_selectedMonth == 1) {
+                      _setMonth(_selectedYear - 1, 12);
+                    } else {
+                      _setMonth(_selectedYear, _selectedMonth - 1);
+                    }
                     final offset = (_selectedMonth - 1) * 80.0;
                     if (_monthScrollCtrl.hasClients) {
                       _monthScrollCtrl.animateTo(offset - 120,
@@ -713,7 +778,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       return GestureDetector(
                         onTap: () {
                           hapticLight();
-                          setState(() => _selectedMonth = month);
+                          _setMonth(_selectedYear, month);
                         },
                         child: Container(
                           padding:
@@ -752,18 +817,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   onTap: () {
                     final now = DateTime.now();
                     hapticLight();
-                    setState(() {
-                      if (_selectedMonth == 12) {
-                        if (_selectedYear < now.year) {
-                          _selectedMonth = 1;
-                          _selectedYear++;
-                        }
-                      } else {
-                        if (_selectedYear < now.year || _selectedMonth < now.month) {
-                          _selectedMonth++;
-                        }
+                    if (_selectedMonth == 12) {
+                      if (_selectedYear < now.year) {
+                        _setMonth(_selectedYear + 1, 1);
                       }
-                    });
+                    } else {
+                      if (_selectedYear < now.year || _selectedMonth < now.month) {
+                        _setMonth(_selectedYear, _selectedMonth + 1);
+                      }
+                    }
                     final offset = (_selectedMonth - 1) * 80.0;
                     if (_monthScrollCtrl.hasClients) {
                       _monthScrollCtrl.animateTo(offset - 120,
@@ -799,27 +861,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           child: Row(
             children: [
               _FilterChip(
-                label: 'All',
+                label: S.of(context).typeAll,
                 selected: _typeFilter == null,
                 onTap: () { setState(() => _typeFilter = null); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label: 'Income',
+                label: S.of(context).typeIncome,
                 selected: _typeFilter == 'income',
                 color: AppColors.healthy,
                 onTap: () { setState(() => _typeFilter = 'income'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label: 'Expense',
+                label: S.of(context).typeExpense,
                 selected: _typeFilter == 'expense',
                 color: AppColors.overspent,
                 onTap: () { setState(() => _typeFilter = 'expense'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label: 'Transfer',
+                label: S.of(context).typeTransfer,
                 selected: _typeFilter == 'transfer',
                 color: AppColors.accent,
                 onTap: () { setState(() => _typeFilter = 'transfer'); _saveFilters(); },
@@ -849,7 +911,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     child: Text(
                       _dateFrom != null
                           ? formatDate(_dateFrom!)
-                          : 'From date',
+                          : S.of(context).txFromDate,
                       style: TextStyle(
                         fontSize: 13,
                         color: _dateFrom != null
@@ -880,7 +942,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     child: Text(
                       _dateTo != null
                           ? formatDate(_dateTo!)
-                          : 'To date',
+                          : S.of(context).txToDate,
                       style: TextStyle(
                         fontSize: 13,
                         color: _dateTo != null
@@ -910,7 +972,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   style: TextStyle(
                       fontSize: 13, color: AppColors.tp(context)),
                   decoration: InputDecoration(
-                    hintText: 'Min',
+                    hintText: S.of(context).txMinAmount,
                     hintStyle: TextStyle(color: AppColors.th(context)),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
@@ -945,7 +1007,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   style: TextStyle(
                       fontSize: 13, color: AppColors.tp(context)),
                   decoration: InputDecoration(
-                    hintText: 'Max',
+                    hintText: S.of(context).txMaxAmount,
                     hintStyle: TextStyle(color: AppColors.th(context)),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
@@ -983,7 +1045,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 _amountMaxCtrl.clear();
               }),
               child: Text(
-                'Clear advanced filters',
+                S.of(context).txClearFilters,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -1104,7 +1166,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Filtered: ${_categoryFilterName ?? 'Category'}',
+                        S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).txDetailCategory),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -1124,12 +1186,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ? Icons.search_off_rounded
                 : Icons.receipt_long_rounded,
             title: _categoryFilter != null
-                ? 'No ${_categoryFilterName ?? 'category'} transactions in $monthLabel'
+                ? S.of(context).txNoCategoryInMonth(_categoryFilterName ?? S.of(context).txDetailCategory, monthLabel)
                 : hasFilters
-                    ? 'No matching transactions'
-                    : 'No transactions yet',
-            subtitle: hasFilters ? null : 'Tap + to record one',
-            actionLabel: hasFilters ? null : 'Add your first transaction',
+                    ? S.of(context).txNoMatching
+                    : S.of(context).txNoYet,
+            subtitle: hasFilters ? null : S.of(context).txTapPlus,
+            actionLabel: hasFilters ? null : S.of(context).txAddFirst,
             onAction: hasFilters ? null : () => context.push('/add-transaction'),
           ),
         ],
@@ -1234,7 +1296,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 Row(
                   children: [
                     Text(
-                      'Spent ${formatAmount(monthExpense, currency: baseCurrency)} of ${formatAmount(totalBudget, currency: baseCurrency)} budget',
+                      S.of(context).txSpentOfBudget(formatAmount(monthExpense, currency: baseCurrency), formatAmount(totalBudget, currency: baseCurrency)),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -1297,7 +1359,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Filtered: ${_categoryFilterName ?? 'Category'}',
+                          S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).txDetailCategory),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1329,6 +1391,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   ),
                 ),
               ),
+              // Planned payments section (dimmed, above real transactions)
+              if (_plannedTxs.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                    child: _PlannedSection(
+                      transactions: _plannedTxs,
+                      linesByTx: _plannedLinesByTx,
+                      accountMap: _plannedAccountMap,
+                      categoryMap: _plannedCategoryMap,
+                      onRefresh: _loadPlanned,
+                    ),
+                  ),
+                ),
               // Date-grouped slivers with sticky headers
               for (final group in groups)
                 MultiSliver(
@@ -1417,8 +1493,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                               direction: DismissDirection.horizontal,
                               // Left background (swipe right → edit) (#6)
                               background: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.only(left: 20),
+                                alignment: AlignmentDirectional.centerStart,
+                                padding: const EdgeInsetsDirectional.only(start: 20),
                                 margin: const EdgeInsets.only(bottom: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.accent,
@@ -1429,8 +1505,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                               ),
                               // Right background (swipe left → delete)
                               secondaryBackground: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 20),
+                                alignment: AlignmentDirectional.centerEnd,
+                                padding: const EdgeInsetsDirectional.only(end: 20),
                                 margin: const EdgeInsets.only(bottom: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.overspent,
@@ -1454,21 +1530,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                 return await showDialog<bool>(
                                       context: context,
                                       builder: (_) => AlertDialog(
-                                        title: const Text('Delete?'),
+                                        title: Text(S.of(context).txDeleteShort),
                                         content: Text(
-                                            'Delete $deleteLabel? This will reverse any envelope deductions.'),
+                                            S.of(context).txDeleteWithReversal(deleteLabel)),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context, false),
-                                            child: const Text('Cancel'),
+                                            child: Text(S.of(context).commonCancel),
                                           ),
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context, true),
                                             style: TextButton.styleFrom(
                                                 foregroundColor: AppColors.overspent),
-                                            child: const Text('Delete'),
+                                            child: Text(S.of(context).commonDelete),
                                           ),
                                         ],
                                       ),
@@ -1575,6 +1651,201 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 }
 
 // ---------------------------------------------------------------------------
+// Planned payments section (dimmed, above real transactions)
+// ---------------------------------------------------------------------------
+
+class _PlannedSection extends StatelessWidget {
+  final List<Transaction> transactions;
+  final Map<String, List<TransactionLine>> linesByTx;
+  final Map<String, Account> accountMap;
+  final Map<String, Category> categoryMap;
+  final VoidCallback? onRefresh;
+
+  const _PlannedSection({
+    required this.transactions,
+    required this.linesByTx,
+    required this.accountMap,
+    required this.categoryMap,
+    this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  S.of(context).plannedBadge,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: const Color(0xFF7E57C2),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Divider(
+                  color: AppColors.bd(context),
+                  height: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          for (final tx in transactions)
+            _PlannedTile(
+              tx: tx,
+              lines: linesByTx[tx.id] ?? [],
+              accountMap: accountMap,
+              categoryMap: categoryMap,
+              onRefresh: onRefresh,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlannedTile extends StatelessWidget {
+  final Transaction tx;
+  final List<TransactionLine> lines;
+  final Map<String, Account> accountMap;
+  final Map<String, Category> categoryMap;
+  final VoidCallback? onRefresh;
+
+  const _PlannedTile({
+    required this.tx,
+    required this.lines,
+    required this.accountMap,
+    required this.categoryMap,
+    this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Resolve category
+    String? catName;
+    Category? cat;
+    if (lines.isNotEmpty && lines.first.categoryId != null) {
+      cat = categoryMap[lines.first.categoryId];
+    }
+    cat ??= tx.categoryId != null ? categoryMap[tx.categoryId] : null;
+    catName = cat?.name;
+
+    // Display name
+    final displayName = catName ?? (tx.note.isNotEmpty ? tx.note : tx.type);
+
+    // Amount
+    final displayCurrency = lines.isNotEmpty ? lines.first.currency : tx.currency;
+    final displayAmount = lines.isNotEmpty ? lines.first.amount : tx.amount;
+
+    // Date
+    final date = tx.createdAt.toLocal();
+
+    return GestureDetector(
+      onTap: () async {
+        await context.push('/plan-payment', extra: {
+          'transaction': tx,
+          'lines': lines,
+        });
+        onRefresh?.call();
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: [
+            // Purple dot icon
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  tx.type == 'income'
+                      ? Icons.add_rounded
+                      : tx.type == 'transfer'
+                          ? Icons.swap_horiz_rounded
+                          : Icons.remove_rounded,
+                  size: 16,
+                  color: const Color(0xFF7E57C2),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Name + note
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tp(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (catName != null && tx.note.isNotEmpty)
+                    Text(
+                      tx.note,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.ts(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Amount + date
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatSignedAmount(displayAmount,
+                      currency: displayCurrency, type: tx.type),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context),
+                  ),
+                ),
+                Text(
+                  formatDate(date),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.th(context),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Filter chip
 // ---------------------------------------------------------------------------
 
@@ -1648,7 +1919,7 @@ class _DateHeaderTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            _label(date),
+            _label(context, date),
             style: TextStyle(
               fontSize: TypographyTokens.dateHeaderSize,
               fontWeight: TypographyTokens.dateHeaderWeight,
@@ -1669,13 +1940,13 @@ class _DateHeaderTile extends StatelessWidget {
     );
   }
 
-  String _label(DateTime date) {
+  String _label(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return 'Today, ${formatDate(date)}';
-    if (diff == 1) return 'Yesterday, ${formatDate(date)}';
+    if (diff == 0) return '${S.of(context).txTodayPrefix}, ${formatDate(date)}';
+    if (diff == 1) return '${S.of(context).txYesterdayPrefix}, ${formatDate(date)}';
     return formatDate(date);
   }
 }
@@ -1722,7 +1993,8 @@ class _TxTile extends ConsumerWidget {
     if (isTransfer) {
       transferFrom = entry.accountName.isNotEmpty ? entry.accountName : 'account';
       transferTo = entry.destinationAccountName ?? 'account';
-      displayName = '$transferFrom → $transferTo';
+      final arrow = Directionality.of(context) == TextDirection.rtl ? '←' : '→';
+      displayName = '$transferFrom $arrow $transferTo';
       note = tx.note.isNotEmpty ? tx.note : null;
       transferDestAmt = tx.amount * tx.exchangeRateToBase;
       transferDestCcy = entry.destinationAccountCurrency ?? tx.currency;
@@ -1731,14 +2003,14 @@ class _TxTile extends ConsumerWidget {
       transferTo = null;
       transferDestAmt = null;
       transferDestCcy = null;
-      displayName = _buildDisplayName(catName);
+      displayName = _buildDisplayName(context, catName);
       note = _buildNote(catName);
     }
     final notePreview = _buildNotePreview(catName, displayName);
 
     return Semantics(
       label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}, ${tx.type}',
-      hint: 'Long press for options',
+      hint: S.of(context).txLongPressHint,
       button: true,
       child: GestureDetector(
         onTap: disableTap ? null : () => context.push('/transactions/${tx.id}'),
@@ -1954,7 +2226,7 @@ class _TxTile extends ConsumerWidget {
     return null;
   }
 
-  String _buildDisplayName(String? catName) {
+  String _buildDisplayName(BuildContext context, String? catName) {
     final tx = entry.tx;
     final lines = entry.lines;
 
@@ -1968,15 +2240,15 @@ class _TxTile extends ConsumerWidget {
               l.categoryId != null ? categoryMap[l.categoryId]?.name : null)
           .whereType<String>()
           .toList();
-      if (names.isEmpty) return '${lines.length} items';
+      if (names.isEmpty) return S.of(context).txNItems(lines.length);
       final extra = lines.length - names.length;
       return extra > 0
-          ? '${names.join(', ')} +$extra more'
+          ? '${names.join(', ')} ${S.of(context).txNMore(extra)}'
           : names.join(', ');
     }
 
     if (tx.note.isNotEmpty) return tx.note;
-    return _typeLabel(tx.type);
+    return _typeLabel(context, tx.type);
   }
 
   String? _buildNote(String? catName) {
@@ -2182,7 +2454,7 @@ class _TxTile extends ConsumerWidget {
         ),
       if (!isSingleAccount)
         Text(
-          '${entry.involvedAccountNames.length} accounts',
+          S.of(context).txNAccounts(entry.involvedAccountNames.length),
           textAlign: TextAlign.end,
           style: TextStyle(
             fontSize: 11,
@@ -2202,10 +2474,10 @@ class _TxTile extends ConsumerWidget {
     }
   }
 
-  String _typeLabel(String type) => switch (type) {
-        'income' => 'Income',
-        'expense' => 'Expense',
-        'transfer' => 'Transfer',
+  String _typeLabel(BuildContext context, String type) => switch (type) {
+        'income' => S.of(context).typeIncome,
+        'expense' => S.of(context).typeExpense,
+        'transfer' => S.of(context).typeTransfer,
         _ => type,
       };
 
@@ -2225,7 +2497,7 @@ class _TxTile extends ConsumerWidget {
           children: [
             ListTile(
               leading: Icon(Icons.edit_rounded, color: AppColors.tp(context)),
-              title: Text('Edit',
+              title: Text(S.of(context).txContextEdit,
                   style: TextStyle(color: AppColors.tp(context))),
               onTap: () {
                 Navigator.pop(ctx);
@@ -2234,7 +2506,7 @@ class _TxTile extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(Icons.copy_rounded, color: AppColors.tp(context)),
-              title: Text('Duplicate',
+              title: Text(S.of(context).txContextDuplicate,
                   style: TextStyle(color: AppColors.tp(context))),
               onTap: () {
                 Navigator.pop(ctx);
@@ -2256,24 +2528,23 @@ class _TxTile extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(Icons.delete_rounded, color: AppColors.overspent),
-              title: Text('Delete',
+              title: Text(S.of(context).txContextDelete,
                   style: TextStyle(color: AppColors.overspent)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (dCtx) => AlertDialog(
-                    title: const Text('Delete transaction?'),
-                    content: const Text(
-                        'This action cannot be undone.'),
+                    title: Text(S.of(context).txDeleteTitle),
+                    content: Text(S.of(context).txDeleteCannotUndo),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(dCtx, false),
-                        child: const Text('Cancel'),
+                        child: Text(S.of(context).commonCancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(dCtx, true),
-                        child: Text('Delete',
+                        child: Text(S.of(context).commonDelete,
                             style: TextStyle(color: AppColors.overspent)),
                       ),
                     ],
@@ -2295,11 +2566,11 @@ class _TxTile extends ConsumerWidget {
                     ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('Transaction deleted'),
+                        content: Text(S.of(context).txTransactionDeleted),
                         behavior: SnackBarBehavior.floating,
                         duration: const Duration(seconds: 5),
                         action: SnackBarAction(
-                          label: 'Undo',
+                          label: S.of(context).txUndoAction,
                           onPressed: () async {
                             undone = true;
                             await (db.update(db.transactions)
@@ -2469,7 +2740,7 @@ class _CashFlowFooter extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 12),
       child: Center(
         child: Text(
-          'Total cash flow: ${formatAmount(total, currency: baseCurrency)} · $count transaction${count == 1 ? '' : 's'}',
+          S.of(context).txTotalCashFlow(formatAmount(total, currency: baseCurrency), count),
           style: TextStyle(
             fontSize: 13,
             color: AppColors.ts(context),

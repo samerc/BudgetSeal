@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
@@ -11,8 +12,10 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = S.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('About')),
+      appBar: AppBar(title: Text(l.aboutTitle)),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
@@ -57,7 +60,7 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Envelope budgeting, simplified.',
+              l.appTaglineAbout,
               style: TextStyle(
                 fontSize: 14,
                 color: AppColors.ts(context),
@@ -91,11 +94,9 @@ class AboutScreen extends StatelessWidget {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.share_rounded,
-                    label: 'Share',
+                    label: l.aboutShare,
                     onTap: () => SharePlus.instance.share(
-                      ShareParams(
-                          text:
-                              'Check out PocketPlan — envelope budgeting made simple!'),
+                      ShareParams(text: l.aboutShareText),
                     ),
                   ),
                 ),
@@ -103,7 +104,7 @@ class AboutScreen extends StatelessWidget {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.mail_outline_rounded,
-                    label: 'Contact',
+                    label: l.aboutContact,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -125,7 +126,7 @@ class AboutScreen extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => context.push('/privacy'),
-                  child: Text('Privacy & Terms',
+                  child: Text(l.aboutPrivacyTerms,
                       style: TextStyle(fontSize: 12, color: AppColors.accent)),
                 ),
                 Text('·', style: TextStyle(color: AppColors.th(context))),
@@ -134,9 +135,9 @@ class AboutScreen extends StatelessWidget {
                     context: context,
                     applicationName: 'PocketPlan',
                     applicationVersion: 'v$appVersion',
-                    applicationLegalese: '© ${DateTime.now().year} Samer Cheaib. All rights reserved.',
+                    applicationLegalese: l.aboutLegalese(DateTime.now().year),
                   ),
-                  child: Text('Licenses',
+                  child: Text(l.aboutLicenses,
                       style: TextStyle(fontSize: 12, color: AppColors.accent)),
                 ),
               ],
@@ -151,7 +152,7 @@ class AboutScreen extends StatelessWidget {
                     size: 14, color: AppColors.healthy),
                 const SizedBox(width: 6),
                 Text(
-                  'No tracking. Your data stays on your device.',
+                  l.aboutPrivacy,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.ts(context),
@@ -163,7 +164,7 @@ class AboutScreen extends StatelessWidget {
 
             // ── Credit ──
             Text(
-              'Made by Samer',
+              l.aboutCredit,
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.th(context),

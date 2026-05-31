@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -27,6 +28,10 @@ class _LockScreenState extends State<LockScreen> {
     if (_authenticating) return;
     setState(() => _authenticating = true);
 
+    // Capture i18n strings before async gap
+    final setupReason = S.of(context).lockSetupReason;
+    final unlockReason = S.of(context).lockUnlockReason;
+
     try {
       final canAuth = await _auth.canCheckBiometrics ||
           await _auth.isDeviceSupported();
@@ -35,7 +40,7 @@ class _LockScreenState extends State<LockScreen> {
         // Attempt device-credential auth anyway — local_auth will prompt
         // the user to set up a screen lock if none exists.
         final didAuth = await _auth.authenticate(
-          localizedReason: 'Set up a screen lock to protect Pocket Plan',
+          localizedReason: setupReason,
           biometricOnly: false,
         );
         if (didAuth && mounted) widget.onUnlocked();
@@ -43,7 +48,7 @@ class _LockScreenState extends State<LockScreen> {
       }
 
       final didAuth = await _auth.authenticate(
-        localizedReason: 'Unlock Pocket Plan',
+        localizedReason: unlockReason,
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
@@ -56,7 +61,7 @@ class _LockScreenState extends State<LockScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Unlock failed: ${e.toString()}'),
+            content: Text(S.of(context).lockFailed(e.toString())),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 4),
           ),
@@ -87,7 +92,7 @@ class _LockScreenState extends State<LockScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Pocket Plan',
+              S.of(context).appName,
               style: GoogleFonts.inter(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -96,7 +101,7 @@ class _LockScreenState extends State<LockScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap to unlock',
+              S.of(context).lockTapToUnlock,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: Colors.white60,
@@ -106,7 +111,7 @@ class _LockScreenState extends State<LockScreen> {
             FilledButton.icon(
               onPressed: _authenticating ? null : _authenticate,
               icon: const Icon(Icons.fingerprint_rounded, size: 22),
-              label: const Text('Unlock'),
+              label: Text(S.of(context).lockUnlockButton),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white.withValues(alpha: 0.15),
                 foregroundColor: Colors.white,

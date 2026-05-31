@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'app.dart';
 import 'core/providers/database_provider.dart';
 import 'core/providers/engine_provider.dart';
@@ -53,6 +56,11 @@ Future<void> _startApp() async {
       allowWakeLock: false,
     ),
   );
+
+  // Set locale early so engine/notification code uses the right language.
+  final prefs = await SharedPreferences.getInstance();
+  Intl.defaultLocale = prefs.getString('app_locale') ??
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
 
   await NotificationService.init();
   // Share the same plugin instance to avoid dual-initialize conflicts on Android.

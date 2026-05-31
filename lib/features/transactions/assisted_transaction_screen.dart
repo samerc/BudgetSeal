@@ -21,6 +21,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
@@ -137,19 +138,18 @@ class _AssistedTransactionScreenState
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Discard transaction?'),
-        content: const Text(
-            'You have an unsaved transaction. Are you sure you want to go back?'),
+        title: Text(S.of(context).txAfDiscardTitle),
+        content: Text(S.of(context).txAfDiscardContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('Keep editing'),
+            child: Text(S.of(context).txAfKeepEditing),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Discard'),
+            child: Text(S.of(context).txAfDiscard),
           ),
         ],
       ),
@@ -173,6 +173,8 @@ class _AssistedTransactionScreenState
     }
     final suggestions = previousTitles.toList()..sort();
     var movedForward = false;
+    // Capture S before opening sheet to avoid _dependents.isEmpty crash
+    final tr = S.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -206,7 +208,7 @@ class _AssistedTransactionScreenState
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Enter Title',
+                      child: Text(tr.txAfEnterTitle,
                           style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
@@ -223,8 +225,8 @@ class _AssistedTransactionScreenState
                   style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
                     hintText: localType == 'transfer'
-                        ? 'Note (e.g. rent, savings)'
-                        : 'Title',
+                        ? tr.txAfTransferNoteHint
+                        : tr.txAfTitleHint,
                     suffixIcon: Icon(
                         localType == 'transfer'
                             ? Icons.notes_rounded
@@ -323,8 +325,8 @@ class _AssistedTransactionScreenState
                   ),
                   child: Text(
                       localType == 'transfer'
-                          ? 'Enter Amount'
-                          : 'Select Category',
+                          ? tr.txAfEnterAmountButton
+                          : tr.txAfSelectCategoryButton,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
@@ -346,6 +348,8 @@ class _AssistedTransactionScreenState
 
   void _showCategoryPopup() {
     final categories = ref.read(categoriesProvider).value ?? [];
+    // Capture S before opening sheet to avoid _dependents.isEmpty crash
+    final tr = S.of(context);
 
     final searchFocus = FocusNode();
     showModalBottomSheet(
@@ -422,7 +426,7 @@ class _AssistedTransactionScreenState
                         Row(
                           children: [
                             _buildSmallTypeChip(
-                              'Expense',
+                              tr.typeExpense,
                               localType == 'expense',
                               ref.watch(txColorsProvider).expense,
                               () {
@@ -434,7 +438,7 @@ class _AssistedTransactionScreenState
                             ),
                             const SizedBox(width: 8),
                             _buildSmallTypeChip(
-                              'Income',
+                              tr.typeIncome,
                               localType == 'income',
                               ref.watch(txColorsProvider).income,
                               () {
@@ -446,7 +450,7 @@ class _AssistedTransactionScreenState
                             ),
                             const SizedBox(width: 8),
                             _buildSmallTypeChip(
-                              'Transfer',
+                              tr.typeTransfer,
                               localType == 'transfer',
                               ref.watch(txColorsProvider).transfer,
                               () {
@@ -462,7 +466,7 @@ class _AssistedTransactionScreenState
                         Row(
                           children: [
                             Expanded(
-                              child: Text('Select Category',
+                              child: Text(tr.txAfSelectCategoryTitle,
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
@@ -482,7 +486,7 @@ class _AssistedTransactionScreenState
                               fontSize: 14,
                               color: AppColors.tp(context)),
                           decoration: InputDecoration(
-                            hintText: 'Search categories...',
+                            hintText: tr.txAfSearchCategories,
                             hintStyle: TextStyle(
                                 color: AppColors.th(context)),
                             prefixIcon: Icon(Icons.search_rounded,
@@ -533,7 +537,7 @@ class _AssistedTransactionScreenState
                                 context.push('/categories');
                               },
                               icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text('New Category'),
+                              label: Text(tr.txAfNewCategory),
                               style: OutlinedButton.styleFrom(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 12),
@@ -631,7 +635,7 @@ class _AssistedTransactionScreenState
                             if (isExpanded)
                               Padding(
                                 padding:
-                                    const EdgeInsets.only(left: 20, bottom: 4),
+                                    const EdgeInsetsDirectional.only(start: 20, bottom: 4),
                                 child: Column(
                                   children: subs
                                       .map((sub) => _buildCategoryTile(
@@ -729,6 +733,7 @@ class _AssistedTransactionScreenState
     required List<Account> accounts,
     required Color color,
     required void Function(Account) onSelected,
+    bool isDestination = false,
   }) {
     final selected =
         selectedId != null
@@ -761,7 +766,7 @@ class _AssistedTransactionScreenState
           child: Row(
             children: [
               Icon(
-                label.contains('To')
+                isDestination
                     ? Icons.arrow_forward_rounded
                     : Icons.account_balance_wallet_outlined,
                 size: 18,
@@ -790,7 +795,7 @@ class _AssistedTransactionScreenState
                       )
                     else
                       Text(
-                        'Tap to select',
+                        S.of(context).txAfTapToSelect,
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.th(context),
@@ -815,6 +820,7 @@ class _AssistedTransactionScreenState
     required Color color,
     required void Function(Account) onSelected,
   }) {
+    final tr = S.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.sf(context),
@@ -914,7 +920,7 @@ class _AssistedTransactionScreenState
                   context.push('/accounts/new');
                 },
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Add Account'),
+                label: Text(tr.txAfAddAccount),
               ),
             ],
           ),
@@ -1050,8 +1056,8 @@ class _AssistedTransactionScreenState
     // Save current line and open category picker for next item
     if (_activeLine.amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter an amount for this item first'),
+        SnackBar(
+          content: Text(S.of(context).txAfEnterAmountFirst),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1089,7 +1095,7 @@ class _AssistedTransactionScreenState
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final selected = DateTime(date.year, date.month, date.day);
-    if (selected == today) return 'Today';
+    if (selected == today) return S.of(context).commonToday;
     return formatDate(date);
   }
 
@@ -1180,8 +1186,8 @@ class _AssistedTransactionScreenState
       hapticHeavy();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select an account'),
+          SnackBar(
+            content: Text(S.of(context).txAfPleaseSelectAccount),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1192,8 +1198,8 @@ class _AssistedTransactionScreenState
       hapticHeavy();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a destination account'),
+          SnackBar(
+            content: Text(S.of(context).txAfPleaseSelectDest),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1207,24 +1213,24 @@ class _AssistedTransactionScreenState
       final proceed = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: Text('Possible Duplicate',
+          title: Text(S.of(context).txFormDuplicateTitle,
               style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: AppColors.tp(context))),
           content: Text(
-            'A similar transaction with the same amount, category, and date already exists. Save anyway?',
+            S.of(context).txFormDuplicateContent,
             style: TextStyle(color: AppColors.ts(context)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: const Text('Save Anyway'),
+              child: Text(S.of(context).commonSaveAnyway),
             ),
           ],
         ),
@@ -1244,7 +1250,7 @@ class _AssistedTransactionScreenState
 
       if (byType.length > 1 && mounted) {
         final summaryLines = byType.entries.map((e) {
-          final typeLabel = e.key == 'income' ? 'Income' : 'Expense';
+          final typeLabel = e.key == 'income' ? S.of(context).typeIncome : S.of(context).typeExpense;
           // Group amounts by currency within this type
           final byCur = <String, double>{};
           for (final item in e.value) {
@@ -1260,20 +1266,18 @@ class _AssistedTransactionScreenState
         final proceed = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Mixed transaction'),
+            title: Text(S.of(context).txAfMixedTitle),
             content: Text(
-              'This will create ${byType.length} linked transactions:\n\n'
-              '$summaryLines\n\n'
-              'They will appear as separate transactions but linked together.',
+              S.of(context).txAfMixedContent(byType.length, summaryLines),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancel'),
+                child: Text(S.of(context).commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Save'),
+                child: Text(S.of(context).commonSave),
               ),
             ],
           ),
@@ -1351,7 +1355,7 @@ class _AssistedTransactionScreenState
 
       if (mounted) {
         // Build envelope feedback message
-        String snackText = 'Transaction saved';
+        String snackText = S.of(context).txFormSaved;
         if (_type != 'transfer') {
           final categories = ref.read(categoriesProvider).value ?? [];
           final allocations = ref.read(allocationsProvider).value ?? [];
@@ -1370,7 +1374,7 @@ class _AssistedTransactionScreenState
                   .firstOrNull;
               if (alloc != null) {
                 snackText =
-                    'Transaction saved \u00b7 ${alloc.data.allocation.name} envelope updated';
+                    S.of(context).txFormSavedEnvelope(alloc.data.allocation.name);
               }
             }
           }
@@ -1406,7 +1410,7 @@ class _AssistedTransactionScreenState
       return PopScope(
         canPop: true,
         child: Scaffold(
-          appBar: AppBar(title: const Text('New Transaction')),
+          appBar: AppBar(title: Text(S.of(context).txFormNewTitle)),
           body: const Center(child: CircularProgressIndicator()),
         ),
       );
@@ -1430,7 +1434,7 @@ class _AssistedTransactionScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Enter Amount'),
+          title: Text(S.of(context).txAfEnterAmountTitle),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -1490,7 +1494,7 @@ class _AssistedTransactionScreenState
                         ),
                         Text(
                           isTransfer
-                              ? 'Transfer'
+                              ? S.of(context).typeTransfer
                               : _activeLine.category!.name,
                           style: TextStyle(
                             fontSize: 13,
@@ -1572,7 +1576,7 @@ class _AssistedTransactionScreenState
             if (_lineItems.length > 1) _buildLineItemsSummary(typeColor),
             // Account selector (labeled "From Account" for transfers)
             _buildAccountSelector(
-              label: isTransfer ? 'From Account' : 'Account',
+              label: isTransfer ? S.of(context).txAfFromAccount : S.of(context).txAfAccount,
               selectedId: _accountId,
               accounts: accounts,
               color: AppColors.accent,
@@ -1584,8 +1588,9 @@ class _AssistedTransactionScreenState
             // Destination account (transfers only)
             if (isTransfer)
               _buildAccountSelector(
-                label: 'To Account',
+                label: S.of(context).txAfToAccount,
                 selectedId: _destinationAccountId,
+                isDestination: true,
                 accounts: accounts
                     .where((a) => a.id != _accountId)
                     .toList(),
@@ -1622,7 +1627,7 @@ class _AssistedTransactionScreenState
                                   : AppColors.healthy),
                           const SizedBox(width: 8),
                           Text(
-                            'Exchange Rate Required',
+                            S.of(context).txAfExchangeRateRequired,
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -1638,8 +1643,8 @@ class _AssistedTransactionScreenState
                           Expanded(
                             child: Text(
                               _rateInverted
-                                  ? 'How many $_selectedCurrency per 1 $_destinationCurrency?'
-                                  : 'How many $_destinationCurrency per 1 $_selectedCurrency?',
+                                  ? S.of(context).txAfHowManyPer(_selectedCurrency, _destinationCurrency)
+                                  : S.of(context).txAfHowManyPer(_destinationCurrency, _selectedCurrency),
                               style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.ts(context)),
@@ -1704,7 +1709,7 @@ class _AssistedTransactionScreenState
                                     ? 0
                                     : _transferExchangeRate,
                                 fontSize: 18,
-                                hintText: 'Tap to enter rate',
+                                hintText: S.of(context).txAfTapToEnterRate,
                                 onChanged: (v) {
                                   if (v > 0) {
                                     setState(
@@ -1745,7 +1750,7 @@ class _AssistedTransactionScreenState
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Recipient gets = ${formatAmount(totalAmount * destPerSource, currency: _destinationCurrency)}',
+                                    S.of(context).txAfRecipientGets(formatAmount(totalAmount * destPerSource, currency: _destinationCurrency)),
                                   style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
@@ -1787,7 +1792,7 @@ class _AssistedTransactionScreenState
                         child: Text(
                           _expenseExchangeRate > 0
                               ? '1 $_baseCurrency ≈ ${formatNumber(1.0 / _expenseExchangeRate)} $_selectedCurrency'
-                              : 'Fetching rate for $_selectedCurrency...',
+                              : S.of(context).txAfFetchingRate(_selectedCurrency),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1835,8 +1840,8 @@ class _AssistedTransactionScreenState
                           icon: const Icon(Icons.add_rounded, size: 18),
                           label: Text(
                             _lineItems.length > 1
-                                ? 'Add another item (${_lineItems.length} items · ${_itemsTotalLabel()})'
-                                : 'Add another item',
+                                ? S.of(context).txAfAnotherWithCount(_lineItems.length, _itemsTotalLabel())
+                                : S.of(context).txAfAddAnother,
                             style: const TextStyle(fontSize: 14),
                           ),
                           style: OutlinedButton.styleFrom(
@@ -1873,10 +1878,10 @@ class _AssistedTransactionScreenState
                                     color: Colors.white, strokeWidth: 2))
                             : Text(
                                 isTransfer
-                                    ? 'Save Transfer'
+                                    ? S.of(context).txAfSaveTransfer
                                     : _lineItems.length > 1
-                                        ? 'Save ${_lineItems.length} Items'
-                                        : 'Add Transaction',
+                                        ? S.of(context).txAfSaveNItems(_lineItems.length)
+                                        : S.of(context).txAfAddTransaction,
                                 style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600)),
@@ -2020,13 +2025,13 @@ class _AssistedTransactionScreenState
       ),
       child: Row(
         children: [
-          _buildToggleItemSheet('Expense', 'expense',
+          _buildToggleItemSheet(S.of(context).typeExpense, 'expense',
               Icons.arrow_upward_rounded, txColors.expense, currentType,
               onChanged),
-          _buildToggleItemSheet('Income', 'income',
+          _buildToggleItemSheet(S.of(context).typeIncome, 'income',
               Icons.arrow_downward_rounded, txColors.income, currentType,
               onChanged),
-          _buildToggleItemSheet('Transfer', 'transfer',
+          _buildToggleItemSheet(S.of(context).typeTransfer, 'transfer',
               Icons.swap_horiz_rounded, txColors.transfer, currentType,
               onChanged),
         ],

@@ -17,6 +17,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class ObjectiveDetailScreen extends ConsumerStatefulWidget {
   final String objectiveId; // 'new' for creating
@@ -142,7 +143,7 @@ class _ObjectiveDetailScreenState
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name is required'),
+        SnackBar(content: Text(S.of(context).objNameRequired),
             behavior: SnackBarBehavior.floating),
       );
       return;
@@ -177,7 +178,7 @@ class _ObjectiveDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isNew ? 'Objective created' : 'Objective updated'),
+            content: Text(_isNew ? S.of(context).objCreated : S.of(context).objUpdated),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -190,7 +191,7 @@ class _ObjectiveDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Something went wrong. Please try again.'),
+          SnackBar(content: Text(S.of(context).commonSomethingWentWrong),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -205,7 +206,7 @@ class _ObjectiveDetailScreenState
     if (activeAccounts.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No accounts available'),
+          SnackBar(content: Text(S.of(context).objNoAccounts),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -218,10 +219,11 @@ class _ObjectiveDetailScreenState
     final isLoan = _type == 'loan';
     final isLent = _direction == 'lent';
     final txType = isLoan && isLent ? 'income' : 'expense';
-    final sheetTitle = isLoan ? 'Record Payment' : 'Add Funds';
+    final tr = S.of(context);
+    final sheetTitle = isLoan ? tr.objRecordPayment : tr.objAddFunds;
     final buttonLabel = isLoan
-        ? (isLent ? 'Record Payment Received' : 'Record Payment Sent')
-        : 'Save from Account';
+        ? (isLent ? tr.objRecordReceived : tr.objRecordSent)
+        : tr.objSaveFromAccount;
 
     final tpColor = AppColors.tp(context);
     final tsColor = AppColors.ts(context);
@@ -251,7 +253,7 @@ class _ObjectiveDetailScreenState
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
                       color: tpColor)),
               const SizedBox(height: 4),
-              Text('Current: ${formatAmount(_currentAmount, currency: _currency)}',
+              Text(tr.objCurrent(formatAmount(_currentAmount, currency: _currency)),
                   style: TextStyle(fontSize: 13, color: tsColor)),
               const SizedBox(height: 20),
 
@@ -301,14 +303,14 @@ class _ObjectiveDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Category', style: TextStyle(
+                          Text(tr.txDetailCategory, style: TextStyle(
                               fontSize: 17, fontWeight: FontWeight.w700,
                               color: tpColor)),
                           const SizedBox(height: 12),
                           // None option
                           ListTile(
                             dense: true,
-                            title: Text('None', style: TextStyle(color: tsColor)),
+                            title: Text(tr.commonNone, style: TextStyle(color: tsColor)),
                             leading: Icon(Icons.block_rounded, size: 18, color: tsColor),
                             onTap: () {
                               setModalState(() {
@@ -365,7 +367,7 @@ class _ObjectiveDetailScreenState
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        selectedCategoryName ?? 'Category (optional)',
+                        selectedCategoryName ?? tr.objCategoryOptional,
                         style: TextStyle(
                           fontSize: 14,
                           color: selectedCategoryName != null ? tpColor : tsColor,
@@ -463,7 +465,9 @@ class _ObjectiveDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${txType == 'income' ? 'Received' : 'Paid'} ${formatAmount(result.amount, currency: _currency)} from ${account.name}'),
+            content: Text(txType == 'income'
+                ? S.of(context).objReceivedFrom(formatAmount(result.amount, currency: _currency), account.name)
+                : S.of(context).objPaidFrom(formatAmount(result.amount, currency: _currency), account.name)),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -471,7 +475,7 @@ class _ObjectiveDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Payment failed. Please try again.'),
+          SnackBar(content: Text(S.of(context).objPaymentFailed),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -520,7 +524,7 @@ class _ObjectiveDetailScreenState
                   Icon(_showSettings ? Icons.visibility_off_rounded : Icons.settings_rounded,
                       size: 18, color: AppColors.ts(context)),
                   const SizedBox(width: 10),
-                  Text(_showSettings ? 'Hide Settings' : 'Edit Settings'),
+                  Text(_showSettings ? S.of(context).objHideSettings : S.of(context).objEditSettings),
                 ]),
               ),
               PopupMenuItem(
@@ -528,7 +532,7 @@ class _ObjectiveDetailScreenState
                 child: Row(children: [
                   Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.overspent),
                   const SizedBox(width: 10),
-                  Text('Delete', style: TextStyle(color: AppColors.overspent)),
+                  Text(S.of(context).commonDelete, style: TextStyle(color: AppColors.overspent)),
                 ]),
               ),
             ],
@@ -563,7 +567,7 @@ class _ObjectiveDetailScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'of ${formatAmount(_targetAmount, currency: _currency)}',
+                    S.of(context).objOfTarget(formatAmount(_targetAmount, currency: _currency)),
                     style: TextStyle(fontSize: 14, color: AppColors.ts(context)),
                   ),
                   const SizedBox(height: 14),
@@ -585,7 +589,7 @@ class _ObjectiveDetailScreenState
                     child: OutlinedButton.icon(
                       onPressed: _updateAmount,
                       icon: const Icon(Icons.add_rounded, size: 18),
-                      label: Text(isLoan ? 'Record Payment' : 'Add Funds'),
+                      label: Text(isLoan ? S.of(context).objRecordPayment : S.of(context).objAddFunds),
                     ),
                   ),
                 ]),
@@ -597,17 +601,19 @@ class _ObjectiveDetailScreenState
               children: [
                 if (isLoan && _contactCtrl.text.isNotEmpty)
                   _SummaryRow(
-                    label: _direction == 'lent' ? 'Lent to' : 'Borrowed from',
+                    label: _direction == 'lent'
+                        ? S.of(context).objLentTo('').trim()
+                        : S.of(context).objBorrowedFrom('').trim(),
                     value: _contactCtrl.text,
                   ),
-                _SummaryRow(label: 'Currency', value: _currency),
+                _SummaryRow(label: S.of(context).objSummaryCurrency, value: _currency),
                 if (_endDate != null)
                   _SummaryRow(
-                    label: 'Deadline',
+                    label: S.of(context).objSummaryDeadline,
                     value: '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
                   ),
                 _SummaryRow(
-                  label: 'Remaining',
+                  label: S.of(context).objSummaryRemaining,
                   value: formatAmount(
                     (_targetAmount - _currentAmount).clamp(0, double.infinity),
                     currency: _currency,
@@ -619,7 +625,7 @@ class _ObjectiveDetailScreenState
             // ── Payment History ──
             const SizedBox(height: 20),
             Text(
-              'PAYMENTS',
+              S.of(context).objPaymentsSection,
               style: TextStyle(
                 fontSize: TypographyTokens.sectionHeaderSize,
                 fontWeight: TypographyTokens.sectionHeaderWeight,
@@ -632,7 +638,7 @@ class _ObjectiveDetailScreenState
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Center(
-                  child: Text('No payments yet',
+                  child: Text(S.of(context).objNoPayments,
                       style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
                 ),
               )
@@ -696,7 +702,7 @@ class _ObjectiveDetailScreenState
             if (_showSettings) ...[
               const SizedBox(height: 20),
               Text(
-                'SETTINGS',
+                S.of(context).objSettingsSection,
                 style: TextStyle(
                   fontSize: TypographyTokens.sectionHeaderSize,
                   fontWeight: TypographyTokens.sectionHeaderWeight,
@@ -714,7 +720,7 @@ class _ObjectiveDetailScreenState
                   child: _loading
                       ? const SizedBox(height: 16, width: 16,
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Save Changes'),
+                      : Text(S.of(context).allocSaveChanges),
                 ),
               ),
             ],
@@ -728,7 +734,7 @@ class _ObjectiveDetailScreenState
   Widget _buildForm(BuildContext context, Color color) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Objective'),
+        title: Text(S.of(context).objNewTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -738,7 +744,7 @@ class _ObjectiveDetailScreenState
                   ? const SizedBox(height: 14, width: 14,
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Icon(Icons.check_rounded, size: 18),
-              label: const Text('Save'),
+              label: Text(S.of(context).commonSave),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: Size.zero,
@@ -766,13 +772,13 @@ class _ObjectiveDetailScreenState
   Widget _buildTypeToggle() {
     return Row(children: [
       _TypeChip(
-        label: 'Goal', icon: Icons.flag_rounded,
+        label: S.of(context).objGoalChip, icon: Icons.flag_rounded,
         selected: _type == 'goal',
         onTap: () => setState(() => _type = 'goal'),
       ),
       const SizedBox(width: 8),
       _TypeChip(
-        label: 'Loan', icon: Icons.handshake_rounded,
+        label: S.of(context).objLoanChip, icon: Icons.handshake_rounded,
         selected: _type == 'loan',
         onTap: () => setState(() { _type = 'loan'; _direction ??= 'lent'; }),
       ),
@@ -789,8 +795,8 @@ class _ObjectiveDetailScreenState
           textCapitalization: TextCapitalization.sentences,
           maxLength: InputLimits.nameMaxLength,
           decoration: InputDecoration(
-            labelText: _type == 'loan' ? 'Loan name' : 'Goal name',
-            hintText: _type == 'loan' ? 'e.g. Car loan' : 'e.g. Emergency fund',
+            labelText: _type == 'loan' ? S.of(context).objLoanName : S.of(context).objGoalName,
+            hintText: _type == 'loan' ? S.of(context).objLoanNameHint : S.of(context).objGoalNameHint,
             border: InputBorder.none,
             prefixIcon: Icon(Icons.edit_rounded, size: 18, color: AppColors.ts(context)),
           ),
@@ -805,8 +811,8 @@ class _ObjectiveDetailScreenState
               textCapitalization: TextCapitalization.words,
               maxLength: InputLimits.nameMaxLength,
               decoration: InputDecoration(
-                labelText: 'Person',
-                hintText: 'e.g. Ali, Bank, etc.',
+                labelText: S.of(context).objPerson,
+                hintText: S.of(context).objPersonHint,
                 border: InputBorder.none,
                 prefixIcon: Icon(Icons.person_rounded, size: 18, color: AppColors.ts(context)),
               ),
@@ -818,12 +824,12 @@ class _ObjectiveDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(children: [
-                    Text('Direction', style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
+                    Text(S.of(context).objDirection, style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
                     const Spacer(),
                     SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(value: 'lent', label: Text('I lent')),
-                        ButtonSegment(value: 'borrowed', label: Text('I borrowed')),
+                      segments: [
+                        ButtonSegment(value: 'lent', label: Text(S.of(context).objILent)),
+                        ButtonSegment(value: 'borrowed', label: Text(S.of(context).objIBorrowed)),
                       ],
                       selected: {_direction ?? 'lent'},
                       onSelectionChanged: (s) => setState(() => _direction = s.first),
@@ -835,8 +841,8 @@ class _ObjectiveDetailScreenState
                   const SizedBox(height: 4),
                   Text(
                     (_direction ?? 'lent') == 'lent'
-                        ? 'You gave money — payments are incoming'
-                        : 'You owe money — payments are outgoing',
+                        ? S.of(context).objLoanDirLentHint
+                        : S.of(context).objLoanDirBorrowedHint,
                     style: TextStyle(fontSize: 11, color: AppColors.th(context)),
                   ),
                 ],
@@ -852,7 +858,7 @@ class _ObjectiveDetailScreenState
           child: CalculatorAmountField(
             value: _targetAmount,
             hintText: '0.00',
-            label: 'Target amount',
+            label: S.of(context).objTargetAmountLabel,
             currency: _currency,
             fontSize: 24,
             onChanged: (v) => setState(() => _targetAmount = v),
@@ -864,7 +870,7 @@ class _ObjectiveDetailScreenState
         _FormCard(child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: CurrencyPickerField(
-            label: 'Currency',
+            label: S.of(context).objSummaryCurrency,
             value: _currency,
             onChanged: (v) => setState(() => _currency = v),
           ),
@@ -881,8 +887,8 @@ class _ObjectiveDetailScreenState
               const SizedBox(width: 10),
               Text(
                 _endDate != null
-                    ? 'Deadline: ${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                    : 'Set a deadline (optional)',
+                    ? S.of(context).objDeadlinePrefix('${_endDate!.day}/${_endDate!.month}/${_endDate!.year}')
+                    : S.of(context).objSetDeadline,
                 style: TextStyle(fontSize: 14, color: _endDate != null
                     ? AppColors.tp(context) : AppColors.th(context)),
               ),
@@ -898,7 +904,7 @@ class _ObjectiveDetailScreenState
         const SizedBox(height: 16),
 
         // Color picker
-        Text('COLOR', style: TextStyle(
+        Text(S.of(context).objColorSection, style: TextStyle(
           fontSize: TypographyTokens.sectionHeaderSize,
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
@@ -926,7 +932,7 @@ class _ObjectiveDetailScreenState
         // Type toggle (for existing, allow switching)
         if (!_isNew) ...[
           const SizedBox(height: 16),
-          Text('TYPE', style: TextStyle(
+          Text(S.of(context).objTypeSection, style: TextStyle(
             fontSize: TypographyTokens.sectionHeaderSize,
             fontWeight: TypographyTokens.sectionHeaderWeight,
             letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
@@ -943,14 +949,14 @@ class _ObjectiveDetailScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Objective'),
-        content: const Text('This cannot be undone.'),
+        title: Text(S.of(context).objDeleteTitle),
+        content: Text(S.of(context).objCannotUndo),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(S.of(context).commonCancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Delete'),
+            child: Text(S.of(context).commonDelete),
           ),
         ],
       ),

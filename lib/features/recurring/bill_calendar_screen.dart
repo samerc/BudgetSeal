@@ -9,6 +9,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class BillCalendarScreen extends ConsumerStatefulWidget {
   const BillCalendarScreen({super.key});
@@ -128,7 +129,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              '${items.length} ${items.length == 1 ? 'bill' : 'bills'} due',
+              S.of(context).billCalNDue(items.length),
               style: TextStyle(
                 fontSize: 13,
                 color: AppColors.ts(context),
@@ -203,16 +204,23 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
   }
 
   String _frequencyLabel(String freq, int interval) {
+    final tr = S.of(context);
     if (interval == 1) {
       return switch (freq) {
-        'daily' => 'Daily',
-        'weekly' => 'Weekly',
-        'monthly' => 'Monthly',
-        'yearly' => 'Yearly',
+        'daily' => tr.freqDaily,
+        'weekly' => tr.freqWeekly,
+        'monthly' => tr.freqMonthly,
+        'yearly' => tr.freqYearly,
         _ => freq,
       };
     }
-    return 'Every $interval $freq';
+    return switch (freq) {
+      'daily' => tr.freqEveryNDays(interval),
+      'weekly' => tr.freqEveryNWeeks(interval),
+      'monthly' => tr.freqEveryNMonths(interval),
+      'yearly' => tr.freqEveryNYears(interval),
+      _ => 'Every $interval $freq',
+    };
   }
 
   @override
@@ -224,7 +232,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bill Calendar'),
+        title: Text(S.of(context).billCalTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.chevron_left_rounded),
@@ -365,7 +373,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('UPCOMING',
+                      Text(S.of(context).billCalUpcoming,
                           style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -375,7 +383,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                       Expanded(
                         child: _items.where((r) => r.enabled).isEmpty
                             ? Center(
-                                child: Text('No upcoming bills',
+                                child: Text(S.of(context).billCalNoUpcoming,
                                     style: TextStyle(
                                         color: AppColors.th(context))))
                             : ListView(

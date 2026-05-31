@@ -20,6 +20,7 @@ import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/font_provider.dart';
+import '../../core/providers/locale_provider.dart';
 import '../../core/providers/text_scale_provider.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/providers/receipt_sync_provider.dart';
@@ -33,6 +34,7 @@ import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -41,6 +43,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final household = ref.watch(householdProvider).value;
+    final l = S.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -55,7 +58,7 @@ class SettingsScreen extends ConsumerWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('More',
+                      Text(l.settingsMoreTitle,
                           style: TextStyle(
                               fontSize: TypographyTokens.screenTitleSize,
                               fontWeight: TypographyTokens.screenTitleWeight,
@@ -83,58 +86,62 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsBackupBanner(),
 
             // ── Essentials (used weekly) ──
-            _SettingsTile(icon: Icons.credit_card_rounded, title: 'Accounts',
-                subtitle: 'Manage your accounts and balances',
+            _SettingsTile(icon: Icons.credit_card_rounded, title: l.navAccounts,
+                subtitle: l.settingsAccountsSub,
                 iconColor: const Color(0xFF1565C0),
                 onTap: () => context.push('/accounts')),
-            _SettingsTile(icon: Icons.label_rounded, title: 'Categories',
-                subtitle: 'Manage groups and categories',
+            _SettingsTile(icon: Icons.label_rounded, title: l.navCategories,
+                subtitle: l.settingsCategoriesSub,
                 iconColor: const Color(0xFFBA68C8),
                 onTap: () => context.push('/categories')),
             const SizedBox(height: 20),
 
             // ── Tools ──
-            _SectionHeader(title: 'TOOLS'),
+            _SectionHeader(title: l.settingsToolsSection),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.repeat_rounded, title: 'Recurring & Bills',
-                subtitle: 'Manage recurring transactions and bills',
+            _SettingsTile(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
+                subtitle: l.settingsRecurringSub,
                 iconColor: const Color(0xFFFF7043),
                 onTap: () => context.push('/recurring')),
-            _SettingsTile(icon: Icons.subscriptions_rounded, title: 'Subscriptions',
-                subtitle: 'Track recurring subscriptions',
+            _SettingsTile(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
+                subtitle: l.settingsSubscriptionsSub,
                 iconColor: AppColors.accent,
                 onTap: () => context.push('/subscriptions')),
-            _SettingsTile(icon: Icons.flag_rounded, title: 'Goals & Loans',
-                subtitle: 'Savings goals and debt tracking',
+            _SettingsTile(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
+                subtitle: l.settingsGoalsSub,
                 iconColor: const Color(0xFF22C55E),
                 onTap: () => context.push('/objectives')),
-            _SettingsTile(icon: Icons.call_split_rounded, title: 'Bill Splitter',
-                subtitle: 'Split bills & scan receipts',
+            _SettingsTile(icon: Icons.event_note_rounded, title: l.plannedTitle,
+                subtitle: l.plannedSubtitle,
+                iconColor: const Color(0xFF7E57C2),
+                onTap: () => context.push('/planned-payments')),
+            _SettingsTile(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
+                subtitle: l.settingsBillSplitterSub,
                 iconColor: const Color(0xFF26A69A),
                 onTap: () => context.push('/bill-splitter')),
-            _SettingsTile(icon: Icons.flight_takeoff_rounded, title: 'Travel Exchange',
-                subtitle: 'Exchange currency for a trip',
+            _SettingsTile(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
+                subtitle: l.settingsTravelSub,
                 iconColor: const Color(0xFF42A5F5),
                 onTap: () => context.push('/travel-exchange')),
-            _SettingsTile(icon: Icons.computer_rounded, title: 'Web Companion',
-                subtitle: 'Manage your budget from a browser',
+            _SettingsTile(icon: Icons.computer_rounded, title: l.tileWebCompanion,
+                subtitle: l.settingsWebCompanionSub,
                 iconColor: const Color(0xFF0EA5E9),
                 onTap: () => context.push('/web-companion')),
             const SizedBox(height: 20),
 
             // ── Settings (navigates to dedicated screen) ──
-            _SettingsTile(icon: Icons.settings_rounded, title: 'Settings & Customization',
-                subtitle: 'Theme, font, data, preferences',
+            _SettingsTile(icon: Icons.settings_rounded, title: l.settingsCustomization,
+                subtitle: l.settingsCustomizationSub,
                 iconColor: AppColors.ts(context),
                 onTap: () => context.push('/settings')),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.help_outline_rounded, title: 'Help Guide',
-                subtitle: 'How to use PocketPlan',
+            _SettingsTile(icon: Icons.help_outline_rounded, title: l.tileHelpGuide,
+                subtitle: l.settingsHelpSub,
                 iconColor: const Color(0xFF0EA5E9),
                 onTap: () => context.push('/help')),
             const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.info_outline_rounded, title: 'About PocketPlan',
-                subtitle: 'Version $appVersion', iconColor: AppColors.th(context),
+            _SettingsTile(icon: Icons.info_outline_rounded, title: l.settingsAbout,
+                subtitle: l.settingsVersionN(appVersion), iconColor: AppColors.th(context),
                 onTap: () => context.push('/about')),
           ],
         ),
@@ -177,6 +184,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               setSheetState(() {}); // force sheet rebuild
             }
 
+            final al = S.of(ctx);
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               child: Column(
@@ -193,59 +201,58 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('Auto-fill Settings',
+                  Text(al.autofillTitle,
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.tp(ctx))),
                   const SizedBox(height: 4),
                   Text(
-                    'When you pick a category, these fields are '
-                    'pre-filled from your last transaction with that category.',
+                    al.autofillDesc,
                     style: TextStyle(
                         fontSize: 12, color: AppColors.ts(ctx)),
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Account', style: TextStyle(fontSize: 14)),
-                    subtitle: const Text('Use the same account as last time',
-                        style: TextStyle(fontSize: 11)),
+                    title: Text(al.autofillAccount, style: const TextStyle(fontSize: 14)),
+                    subtitle: Text(al.autofillAccountSub,
+                        style: const TextStyle(fontSize: 11)),
                     value: settings.account,
                     onChanged: (v) => toggle((s) => s.copyWith(account: v)),
                   ),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Title', style: TextStyle(fontSize: 14)),
-                    subtitle: const Text('Copy the title from last time',
-                        style: TextStyle(fontSize: 11)),
+                    title: Text(al.autofillTitleToggle, style: const TextStyle(fontSize: 14)),
+                    subtitle: Text(al.autofillTitleSub,
+                        style: const TextStyle(fontSize: 11)),
                     value: settings.title,
                     onChanged: (v) => toggle((s) => s.copyWith(title: v)),
                   ),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Amount', style: TextStyle(fontSize: 14)),
-                    subtitle: const Text('Copy the amount from last time',
-                        style: TextStyle(fontSize: 11)),
+                    title: Text(al.autofillAmountToggle, style: const TextStyle(fontSize: 14)),
+                    subtitle: Text(al.autofillAmountSub,
+                        style: const TextStyle(fontSize: 11)),
                     value: settings.amount,
                     onChanged: (v) => toggle((s) => s.copyWith(amount: v)),
                   ),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Category', style: TextStyle(fontSize: 14)),
-                    subtitle: const Text('Remember last used category per account',
-                        style: TextStyle(fontSize: 11)),
+                    title: Text(al.autofillCategoryToggle, style: const TextStyle(fontSize: 14)),
+                    subtitle: Text(al.autofillCategorySub,
+                        style: const TextStyle(fontSize: 11)),
                     value: settings.category,
                     onChanged: (v) => toggle((s) => s.copyWith(category: v)),
                   ),
                   const Divider(),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Override existing values',
-                        style: TextStyle(fontSize: 14)),
-                    subtitle: const Text(
-                        'Replace fields even if you already filled them',
-                        style: TextStyle(fontSize: 11)),
+                    title: Text(al.autofillOverride,
+                        style: const TextStyle(fontSize: 14)),
+                    subtitle: Text(
+                        al.autofillOverrideSub,
+                        style: const TextStyle(fontSize: 11)),
                     value: settings.overrideExisting,
                     onChanged: (v) =>
                         toggle((s) => s.copyWith(overrideExisting: v)),
@@ -269,28 +276,22 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
+    final l = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Reset Everything'),
-        content: const Text(
-          'This will permanently delete ALL your data:\n\n'
-          '• All accounts and balances\n'
-          '• All transactions\n'
-          '• All envelopes and categories\n'
-          '• All settings\n\n'
-          'This cannot be undone. Are you absolutely sure?',
-        ),
+        title: Text(l.resetTitle),
+        content: Text(l.resetContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('Cancel'),
+            child: Text(l.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: TextButton.styleFrom(
                 foregroundColor: AppColors.overspent),
-            child: const Text('Delete Everything'),
+            child: Text(l.resetButton),
           ),
         ],
       ),
@@ -387,8 +388,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
-              child: const Text('Save',
-                  style:
+              child: Text(S.of(context).commonSave,
+                  style: const
                       TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ],
@@ -420,6 +421,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     Color expenseColor = current.expense;
     Color transferColor = current.transfer;
 
+    final tr = S.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -454,16 +456,14 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('Transaction Colors',
+                  Text(tr.txColorsTitle,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: AppColors.tp(context))),
                   const SizedBox(height: 6),
                   Text(
-                    'Choose a color for each transaction type. '
-                    'These colors are used throughout the app to '
-                    'visually distinguish income, expenses, and transfers.',
+                    tr.txColorsDesc,
                     style: TextStyle(
                         fontSize: 13,
                         color: AppColors.ts(context),
@@ -481,25 +481,25 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _colorPreviewChip(
-                            'Income', '+\$500', incomeColor, context),
+                            tr.typeIncome, '+\$500', incomeColor, context),
                         _colorPreviewChip(
-                            'Expense', '-\$120', expenseColor, context),
+                            tr.typeExpense, '-\$120', expenseColor, context),
                         _colorPreviewChip(
-                            'Transfer', '\$200', transferColor, context),
+                            tr.typeTransfer, '\$200', transferColor, context),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   // Color pickers
-                  _colorPickerRow('Expense', expenseColor, presets, (c) {
+                  _colorPickerRow(tr.typeExpense, expenseColor, presets, (c) {
                     setSheetState(() => expenseColor = c);
                   }, Icons.arrow_upward_rounded, context),
                   const SizedBox(height: 16),
-                  _colorPickerRow('Income', incomeColor, presets, (c) {
+                  _colorPickerRow(tr.typeIncome, incomeColor, presets, (c) {
                     setSheetState(() => incomeColor = c);
                   }, Icons.arrow_downward_rounded, context),
                   const SizedBox(height: 16),
-                  _colorPickerRow('Transfer', transferColor, presets, (c) {
+                  _colorPickerRow(tr.typeTransfer, transferColor, presets, (c) {
                     setSheetState(() => transferColor = c);
                   }, Icons.swap_horiz_rounded, context),
                   const SizedBox(height: 24),
@@ -518,8 +518,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Save',
-                        style: TextStyle(
+                    child: Text(tr.commonSave,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(height: 10),
@@ -531,7 +531,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                         transferColor = const Color(0xFF6366F1);
                       });
                     },
-                    child: Text('Reset to Defaults',
+                    child: Text(tr.txColorsReset,
                         style: TextStyle(
                             color: AppColors.ts(context), fontSize: 13)),
                   ),
@@ -705,8 +705,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
-              child: const Text('Save',
-                  style:
+              child: Text(S.of(context).commonSave,
+                  style: const
                       TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ],
@@ -725,13 +725,13 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Theme', style: TextStyle(fontSize: 18,
+              child: Text(S.of(context).themeTitle, style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           for (final entry in [
-            ('system', 'System', 'Follow device settings'),
-            ('light', 'Light', null),
-            ('dark', 'Dark', null),
-            ('black', 'Black', 'AMOLED pure black'),
+            ('system', S.of(context).themeSystem, S.of(context).themeFollowDevice),
+            ('light', S.of(context).themeLight, null),
+            ('dark', S.of(context).themeDark, null),
+            ('black', S.of(context).themeBlack, S.of(context).themeAmoled),
           ])
             ListTile(
               leading: Icon(mode == entry.$1
@@ -755,15 +755,15 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Accent Color', style: TextStyle(fontSize: 18,
+              child: Text(S.of(context).accentColorTitle, style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           // System option
           ListTile(
             leading: Icon(current == 'system'
                 ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: AppColors.accent),
-            title: const Text('System'),
-            subtitle: const Text('Material You (Android 12+)'),
+            title: Text(S.of(context).accentColorSystem),
+            subtitle: Text(S.of(context).accentColorSystemSub),
             onTap: () => Navigator.pop(ctx, 'system'),
           ),
           // Default
@@ -771,8 +771,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             leading: Icon(current == 'default'
                 ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: const Color(0xFF2563EB)),
-            title: const Text('Royal Blue'),
-            subtitle: const Text('Default'),
+            title: Text(S.of(context).accentColorRoyalBlue),
+            subtitle: Text(S.of(context).accentColorDefault),
             trailing: Container(width: 24, height: 24,
                 decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle)),
             onTap: () => Navigator.pop(ctx, 'default'),
@@ -826,9 +826,9 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Start Screen', style: TextStyle(fontSize: 18,
+              child: Text(S.of(context).startScreenTitle, style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
-          Text('Opens when you launch the app.',
+          Text(S.of(context).startScreenDesc,
               style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
           const SizedBox(height: 8),
           for (var i = 0; i < homeTabLabels.length; i++)
@@ -874,7 +874,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Choose Font', style: TextStyle(fontSize: 18,
+              child: Text(S.of(context).chooseFontTitle, style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           Flexible(
             child: SingleChildScrollView(
@@ -886,7 +886,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                             ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                             color: AppColors.accent),
                         title: Text(font, style: fontStyle(font, fontSize: 16)),
-                        subtitle: Text('The quick brown fox jumps over the lazy dog',
+                        subtitle: Text(S.of(context).fontPreview,
                             style: fontStyle(font, fontSize: 12,
                                 color: AppColors.ts(context))),
                         onTap: () => Navigator.pop(ctx, font),
@@ -909,7 +909,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text('Text Size', style: TextStyle(fontSize: 18,
+              child: Text(S.of(context).textSizeTitle, style: TextStyle(fontSize: 18,
                   fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
           ...textScaleOptions.entries.map((e) => ListTile(
                 leading: Icon(
@@ -918,7 +918,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                         : Icons.radio_button_unchecked,
                     color: AppColors.accent),
                 title: Text(e.value),
-                subtitle: Text('Preview text at this size',
+                subtitle: Text(S.of(context).textSizePreview,
                     style: TextStyle(fontSize: 14 * e.key,
                         color: AppColors.ts(context))),
                 onTap: () => Navigator.pop(ctx, e.key),
@@ -928,6 +928,43 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       ),
     );
     if (picked != null) ref.read(textScaleProvider.notifier).setScale(picked);
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(localeProvider);
+    final options = <(String?, String, String?)>[
+      (null, S.of(context).languageSystem, S.of(context).languageSystemDesc),
+      ('en', S.of(context).languageEnglish, null),
+      ('ar', S.of(context).languageArabic, null),
+      ('fr', S.of(context).languageFrench, null),
+    ];
+    final picked = await showModalBottomSheet<String?>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(padding: const EdgeInsets.all(16),
+              child: Text(S.of(context).languagePickerTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+          for (final (code, label, subtitle) in options)
+            ListTile(
+              leading: Icon(
+                  current == code
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: AppColors.accent),
+              title: Text(label),
+              subtitle: subtitle != null ? Text(subtitle,
+                  style: TextStyle(fontSize: 12, color: AppColors.ts(context))) : null,
+              onTap: () => Navigator.pop(ctx, code ?? '__system__'),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (picked != null) {
+      ref.read(localeProvider.notifier).setLocale(
+          picked == '__system__' ? null : picked);
+    }
   }
 
 // ─── Entry Mode Selection Sheet ───────────────────────────────────────────
@@ -958,13 +995,13 @@ class _EntryModeSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Entry Mode',
+          Text(S.of(context).entryModeTitle,
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: AppColors.tp(context))),
           const SizedBox(height: 6),
-          Text('Choose how you add new transactions.',
+          Text(S.of(context).entryModeDesc,
               style: TextStyle(
                   fontSize: 13,
                   color: AppColors.ts(context),
@@ -972,11 +1009,8 @@ class _EntryModeSheet extends ConsumerWidget {
           const SizedBox(height: 20),
           _EntryModeCard(
             icon: Icons.auto_fix_high_rounded,
-            title: 'Assisted (Step-by-step)',
-            description:
-                'Guides you through adding a transaction step by step. '
-                'First pick a title, then a category, then enter the amount. '
-                'Best for beginners.',
+            title: S.of(context).entryModeAssisted,
+            description: S.of(context).entryModeAssistedDesc,
             isSelected: currentMode == 'assisted',
             onTap: () {
               ref.read(entryModeProvider.notifier).setMode('assisted');
@@ -986,10 +1020,8 @@ class _EntryModeSheet extends ConsumerWidget {
           const SizedBox(height: 12),
           _EntryModeCard(
             icon: Icons.list_alt_rounded,
-            title: 'Classic (Single form)',
-            description:
-                'All fields on one screen. Fill in what you need and save. '
-                'Faster for experienced users.',
+            title: S.of(context).entryModeClassic,
+            description: S.of(context).entryModeClassicDesc,
             isSelected: currentMode == 'classic',
             onTap: () {
               ref.read(entryModeProvider.notifier).setMode('classic');
@@ -1099,98 +1131,115 @@ class SettingsDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final household = ref.watch(householdProvider).value;
 
+    final l = S.of(context);
     final themeLabel = switch (ref.watch(themeModeProvider)) {
-      'light' => 'Light',
-      'dark' => 'Dark',
-      'black' => 'Black',
-      _ => 'System',
+      'light' => l.themeLight,
+      'dark' => l.themeDark,
+      'black' => l.themeBlack,
+      _ => l.themeSystem,
     };
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           // ── Appearance ──
-          _SectionHeader(title: 'APPEARANCE'),
+          _SectionHeader(title: l.settingsAppearanceSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.palette_outlined, title: 'Theme',
+          _SettingsTile(icon: Icons.palette_outlined, title: l.tileTheme,
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
           Builder(builder: (context) {
             final accentVal = ref.watch(accentColorProvider);
-            final accentLabel = accentVal == 'system' ? 'System (Material You)'
-                : accentVal == 'default' ? 'Royal Blue' : accentVal;
-            return _SettingsTile(icon: Icons.colorize_rounded, title: 'Accent Color',
+            final accentLabel = accentVal == 'system' ? S.of(context).accentColorSystemLabel
+                : accentVal == 'default' ? S.of(context).accentColorRoyalBlue : accentVal;
+            return _SettingsTile(icon: Icons.colorize_rounded, title: S.of(context).tileAccentColor,
                 subtitle: accentLabel, iconColor: ref.read(accentColorProvider.notifier).resolve() ?? AppColors.accent,
                 onTap: () => _showAccentColorPicker(context, ref));
           }),
-          _SettingsTile(icon: Icons.color_lens_outlined, title: 'Colors',
-              subtitle: 'Income, expense & transfer', iconColor: const Color(0xFFEC407A),
+          _SettingsTile(icon: Icons.color_lens_outlined, title: l.tileColors,
+              subtitle: l.tileColorsSub, iconColor: const Color(0xFFEC407A),
               onTap: () => _showColorConfig(context, ref)),
           Builder(builder: (context) {
             final mode = ref.watch(entryModeProvider);
-            return _SettingsTile(icon: Icons.touch_app_outlined, title: 'Entry Mode',
-                subtitle: mode == 'assisted' ? 'Assisted (step-by-step)' : 'Classic (single form)',
+            return _SettingsTile(icon: Icons.touch_app_outlined, title: S.of(context).tileEntryMode,
+                subtitle: mode == 'assisted' ? S.of(context).entryModeAssistedShort : S.of(context).entryModeClassicShort,
                 iconColor: const Color(0xFF42A5F5),
                 onTap: () => _showEntryModePicker(context, ref));
           }),
           _SettingsTile(
             icon: Icons.auto_fix_high_rounded,
-            title: 'Auto-fill',
-            subtitle: 'Pre-fill fields from last transaction',
+            title: l.tileAutofill,
+            subtitle: l.tileAutofillSub,
             iconColor: const Color(0xFF26A69A),
             onTap: () => _showAutofillSettings(context, ref),
           ),
           Builder(builder: (context) {
             final homeTab = ref.watch(homeTabProvider);
-            return _SettingsTile(icon: Icons.home_outlined, title: 'Start Screen',
-                subtitle: homeTabLabels[homeTab],
+            final sl = S.of(context);
+            final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
+            return _SettingsTile(icon: Icons.home_outlined, title: sl.tileStartScreen,
+                subtitle: homeTabLabel,
                 iconColor: const Color(0xFF26A69A),
                 onTap: () => _showHomeTabPicker(context, ref));
           }),
           Builder(builder: (context) {
             final font = ref.watch(fontProvider);
-            return _SettingsTile(icon: Icons.text_fields_rounded, title: 'Font',
+            return _SettingsTile(icon: Icons.text_fields_rounded, title: S.of(context).tileFont,
                 subtitle: font, iconColor: const Color(0xFF7E57C2),
                 onTap: () => _showFontPicker(context, ref));
           }),
           Builder(builder: (context) {
             final scale = ref.watch(textScaleProvider);
-            final label = textScaleOptions[scale] ?? '${(scale * 100).round()}%';
-            return _SettingsTile(icon: Icons.format_size_rounded, title: 'Text Size',
+            final sl = S.of(context);
+            final scaleLabels = <double, String>{0.85: sl.textScaleSmall, 1.0: sl.textScaleDefault, 1.15: sl.textScaleLarge, 1.3: sl.textScaleExtraLarge};
+            final label = scaleLabels[scale] ?? '${(scale * 100).round()}%';
+            return _SettingsTile(icon: Icons.format_size_rounded, title: sl.tileTextSize,
                 subtitle: label, iconColor: const Color(0xFF5C6BC0),
                 onTap: () => _showTextSizePicker(context, ref));
           }),
-          _SettingsTile(icon: Icons.view_list_rounded, title: 'Transaction List',
-              subtitle: 'Layout, icons, date banner',
+          Builder(builder: (context) {
+            final localeCode = ref.watch(localeProvider);
+            final langLabel = switch (localeCode) {
+              'en' => S.of(context).languageEnglish,
+              'ar' => S.of(context).languageArabic,
+              'fr' => S.of(context).languageFrench,
+              _ => S.of(context).languageSystem,
+            };
+            return _SettingsTile(icon: Icons.language_rounded, title: S.of(context).tileLanguage,
+                subtitle: langLabel, iconColor: const Color(0xFF26A69A),
+                onTap: () => _showLanguagePicker(context, ref));
+          }),
+          _SettingsTile(icon: Icons.view_list_rounded, title: l.tileTxList,
+              subtitle: l.tileTxListSub,
               iconColor: const Color(0xFF42A5F5),
               onTap: () => context.push('/tx-list-settings')),
           const SizedBox(height: 20),
 
           // ── Data & Sync ──
-          _SectionHeader(title: 'DATA'),
+          _SectionHeader(title: l.settingsDataSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.cloud_sync_rounded, title: 'Cloud Sync',
-              subtitle: 'Sync across devices', iconColor: AppColors.accent,
+          _SettingsTile(icon: Icons.cloud_sync_rounded, title: l.tileCloudSync,
+              subtitle: l.tileCloudSyncSub, iconColor: AppColors.accent,
               onTap: () => context.push('/sync')),
           Builder(builder: (context) {
             final syncState = ref.watch(syncProvider);
             final isConnected = syncState.activeProvider is GoogleDriveProvider;
             return _SettingsTile(
               icon: Icons.people_outline_rounded,
-              title: 'Share Household',
+              title: S.of(context).tileShareHousehold,
               subtitle: isConnected
-                  ? 'Invite someone to share your data'
-                  : 'Connect Cloud Sync first to share',
+                  ? S.of(context).tileShareHouseholdConnected
+                  : S.of(context).tileShareHouseholdDisconnected,
               iconColor: const Color(0xFF7E57C2),
               onTap: () {
                 if (isConnected) {
                   _showShareHousehold(context, ref);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Set up Cloud Sync with Google Drive first to share your household.'),
+                    SnackBar(
+                      content: Text(S.of(context).tileShareHouseholdSnackbar),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -1198,22 +1247,22 @@ class SettingsDetailScreen extends ConsumerWidget {
               },
             );
           }),
-          _SettingsTile(icon: Icons.backup_rounded, title: 'Backup & Restore',
-              subtitle: 'Export or restore database', iconColor: const Color(0xFF42A5F5),
+          _SettingsTile(icon: Icons.backup_rounded, title: l.tileBackupRestore,
+              subtitle: l.tileBackupRestoreSub, iconColor: const Color(0xFF42A5F5),
               onTap: () => context.push('/backup')),
-          _SettingsTile(icon: Icons.import_export_rounded, title: 'Import & Export',
-              subtitle: 'CSV import, export, and reports', iconColor: const Color(0xFF66BB6A),
+          _SettingsTile(icon: Icons.import_export_rounded, title: l.tileImportExport,
+              subtitle: l.tileImportExportSub, iconColor: const Color(0xFF66BB6A),
               onTap: () => context.push('/import-export')),
           _SettingsTile(
               icon: Icons.notifications_active_rounded,
-              title: 'Notifications',
-              subtitle: 'Daily reminder, envelope & bill alerts',
+              title: l.tileNotifications,
+              subtitle: l.tileNotificationsSub,
               iconColor: const Color(0xFFFF9800),
               onTap: () => context.push('/notifications')),
           _SettingsTile(
               icon: Icons.monitor_heart_rounded,
-              title: 'Health Check',
-              subtitle: 'Verify data integrity & repair',
+              title: l.tileHealthCheck,
+              subtitle: l.tileHealthCheckSub,
               iconColor: const Color(0xFF4DB6AC),
               onTap: () => context.push('/health-check')),
           // ── Receipt Sync toggle ──
@@ -1241,15 +1290,15 @@ class SettingsDetailScreen extends ConsumerWidget {
                       child: const Icon(Icons.photo_library_rounded,
                           size: 18, color: Color(0xFF7E57C2)),
                     ),
-                    title: Text('Sync Receipts',
+                    title: Text(S.of(context).tileSyncReceipts,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
                     subtitle: Text(
                       receiptSyncEnabled
-                          ? 'Upload receipt photos to cloud storage'
-                          : 'Receipts are stored on this device only',
+                          ? S.of(context).tileSyncReceiptsOn
+                          : S.of(context).tileSyncReceiptsOff,
                       style: TextStyle(
                           fontSize: 12, color: AppColors.ts(context)),
                     ),
@@ -1267,7 +1316,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                         Icon(Icons.warning_amber_rounded,
                             size: 14, color: AppColors.caution),
                         const SizedBox(width: 6),
-                        Text('Receipts are stored on this device only',
+                        Text(S.of(context).tileSyncReceiptsOff,
                             style: TextStyle(
                                 fontSize: 11, color: AppColors.caution)),
                       ],
@@ -1279,15 +1328,15 @@ class SettingsDetailScreen extends ConsumerWidget {
           const SizedBox(height: 20),
 
           // ── Preferences ──
-          _SectionHeader(title: 'PREFERENCES'),
+          _SectionHeader(title: l.settingsPreferencesSection),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.home_rounded,
-            title: 'Household Name',
+            title: l.householdNameTitle,
             subtitle: household?.name ?? 'PocketPlan',
             iconColor: AppColors.accent,
             onTap: () => _editText(context, ref,
-                title: 'Household Name',
+                title: l.householdNameTitle,
                 currentValue: household?.name ?? '',
                 onSave: (val) async {
                   final db = ref.read(databaseProvider);
@@ -1298,7 +1347,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           ),
           _SettingsTile(
             icon: Icons.monetization_on_rounded,
-            title: 'Base Currency',
+            title: l.tileBaseCurrency,
             subtitle: household?.baseCurrency ?? 'USD',
             iconColor: AppColors.caution,
             onTap: () async {
@@ -1319,14 +1368,14 @@ class SettingsDetailScreen extends ConsumerWidget {
           ),
           _SettingsTile(
             icon: Icons.calendar_today_rounded,
-            title: 'Period Start Day',
-            subtitle: 'Day ${household?.periodStartDay ?? 1}',
+            title: l.tilePeriodStartDay,
+            subtitle: l.onboardDayN(household?.periodStartDay ?? 1),
             iconColor: AppColors.caution,
             onTap: () => _editNumber(context, ref,
-                title: 'Period Start Day',
+                title: l.tilePeriodStartDay,
                 currentValue: household?.periodStartDay ?? 1,
                 min: 1, max: 28,
-                description: 'The day of the month when a new budget period starts.',
+                description: l.tilePeriodStartDayDesc,
                 onSave: (val) async {
                   final db = ref.read(databaseProvider);
                   await (db.update(db.households)
@@ -1336,8 +1385,8 @@ class SettingsDetailScreen extends ConsumerWidget {
           ),
           _SettingsTile(
             icon: Icons.attach_money_rounded,
-            title: 'Currency Symbols',
-            subtitle: 'Override how currencies are displayed',
+            title: l.tileCurrencySymbols,
+            subtitle: l.tileCurrencySymbolsSub,
             iconColor: const Color(0xFF4DB6AC),
             onTap: () => _showCurrencySymbolEditor(context, ref),
           ),
@@ -1346,8 +1395,8 @@ class SettingsDetailScreen extends ConsumerWidget {
             final preview = formatAmount(1234567.89);
             return _SettingsTile(
               icon: Icons.format_list_numbered_rounded,
-              title: 'Number Format',
-              subtitle: 'Preview: $preview',
+              title: l.tileNumberFormat,
+              subtitle: l.settingsPreview(preview),
               iconColor: const Color(0xFF5C6BC0),
               onTap: () => _showNumberFormatEditor(context, ref),
             );
@@ -1357,7 +1406,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final preview = DateFormat(dateFmt).format(DateTime.now());
             return _SettingsTile(
               icon: Icons.date_range_rounded,
-              title: 'Date Format',
+              title: l.tileDateFormat,
               subtitle: preview,
               iconColor: const Color(0xFF7E57C2),
               onTap: () => _showDateFormatPicker(context, ref),
@@ -1366,14 +1415,14 @@ class SettingsDetailScreen extends ConsumerWidget {
           const SizedBox(height: 20),
 
           // ── Security ──
-          _SectionHeader(title: 'SECURITY'),
+          _SectionHeader(title: l.settingsSecuritySection),
           const SizedBox(height: 8),
           _BiometricTile(),
           const SizedBox(height: 20),
 
           // ── Danger zone ──
-          _SettingsTile(icon: Icons.delete_forever_rounded, title: 'Reset Everything',
-              subtitle: 'Erase all data and start fresh', iconColor: AppColors.overspent,
+          _SettingsTile(icon: Icons.delete_forever_rounded, title: l.tileResetEverything,
+              subtitle: l.tileResetSub, iconColor: AppColors.overspent,
               onTap: () => _confirmReset(context, ref)),
         ],
       ),
@@ -1474,9 +1523,9 @@ class _BiometricTile extends ConsumerWidget {
           child: const Icon(Icons.fingerprint_rounded,
               color: Color(0xFF7C4DFF), size: 18),
         ),
-        title: const Text('Biometric Lock',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-        subtitle: Text('Require fingerprint or face to open',
+        title: Text(S.of(context).tileBiometricLock,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        subtitle: Text(S.of(context).tileBiometricSub,
             style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
         trailing: Switch.adaptive(
           value: enabled,
@@ -1504,8 +1553,8 @@ class _BiometricTile extends ConsumerWidget {
       if (!canAuth) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Biometric authentication is not available on this device'),
+            SnackBar(
+              content: Text(S.of(context).biometricNotAvailable),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -1514,7 +1563,7 @@ class _BiometricTile extends ConsumerWidget {
       }
 
       final didAuth = await auth.authenticate(
-        localizedReason: 'Verify to enable biometric lock',
+        localizedReason: S.of(context).biometricVerify,
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
@@ -1523,30 +1572,24 @@ class _BiometricTile extends ConsumerWidget {
         await ref.read(biometricLockProvider.notifier).enable();
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Authentication failed — biometric lock not enabled'),
+          SnackBar(
+            content: Text(S.of(context).biometricFailed),
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        String message = 'Authentication error — biometric lock not enabled';
+        String message = S.of(context).biometricError;
         final errorStr = e.toString();
         if (errorStr.contains('NotAvailable') || errorStr.contains('NotEnrolled')) {
-          message =
-              'No biometrics enrolled on this device. '
-              'Please set up fingerprint or face unlock in your device settings, '
-              'then try again.';
+          message = S.of(context).biometricNotEnrolled;
         } else if (errorStr.contains('LockedOut')) {
-          message = 'Too many attempts. Please wait and try again.';
+          message = S.of(context).biometricLockedOut;
         } else if (errorStr.contains('PasscodeNotSet')) {
-          message =
-              'No screen lock is set up on this device. '
-              'Please set up a PIN, pattern, or password first.';
+          message = S.of(context).biometricPasscodeNotSet;
         } else {
-          message = 'Authentication error: $errorStr\n\n'
-              'Make sure biometric or screen lock is configured in device settings.';
+          message = '${S.of(context).biometricError}: $errorStr';
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1607,15 +1650,14 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Currency Symbols',
+                Text(S.of(context).currencySymbolsTitle,
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.tp(context))),
                 const SizedBox(height: 6),
                 Text(
-                  'Tap any currency to change how its symbol is displayed. '
-                  'For example, change ل.ل to LBP.',
+                  S.of(context).currencySymbolsDesc,
                   style: TextStyle(
                       fontSize: 13,
                       color: AppColors.ts(context),
@@ -1639,7 +1681,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                       Expanded(child: Divider(color: AppColors.bd(context))),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('ALL CURRENCIES',
+                        child: Text(S.of(context).currencySymbolsAllSection,
                             style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
@@ -1679,7 +1721,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                           fontWeight: FontWeight.w600,
                           color: AppColors.tp(context))),
                   subtitle: isOverridden
-                      ? Text('Default: $defaultSymbol',
+                      ? Text(S.of(context).currencySymbolDefault(defaultSymbol),
                           style: TextStyle(
                               fontSize: 11,
                               color: AppColors.ts(context)))
@@ -1710,7 +1752,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Symbol for $code'),
+        title: Text(S.of(context).currencySymbolFor(code)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -1727,11 +1769,11 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Save'),
+            child: Text(S.of(context).commonSave),
           ),
         ],
       ),
@@ -1804,13 +1846,13 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Number Format',
+            Text(S.of(context).numberFormatTitle,
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: AppColors.tp(context))),
             const SizedBox(height: 6),
-            Text('Choose how numbers are displayed throughout the app.',
+            Text(S.of(context).numberFormatDesc,
                 style: TextStyle(
                     fontSize: 13,
                     color: AppColors.ts(context),
@@ -1826,7 +1868,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
               ),
               child: Column(
                 children: [
-                  Text('Preview',
+                  Text(S.of(context).numberFormatPreview,
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -1843,7 +1885,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
             const SizedBox(height: 20),
 
             // Thousands separator
-            Text('Thousands Separator',
+            Text(S.of(context).numberFormatThousands,
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -1895,13 +1937,13 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 (t == ThousandsSeparator.period && _decimal == DecimalSeparator.period)))
               Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text('Some options are hidden because they conflict with the decimal separator.',
+                child: Text(S.of(context).numberFormatConflict,
                     style: TextStyle(fontSize: 11, color: AppColors.th(context))),
               ),
             const SizedBox(height: 20),
 
             // Decimal separator
-            Text('Decimal Separator',
+            Text(S.of(context).numberFormatDecimal,
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -1949,7 +1991,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
             const SizedBox(height: 20),
 
             // Negative format
-            Text('Negative Numbers',
+            Text(S.of(context).numberFormatNegative,
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -2012,7 +2054,7 @@ class _DateFormatSheet extends ConsumerWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Date Format',
+            child: Text(S.of(context).dateFormatTitle,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -2111,12 +2153,12 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
               child: const Icon(Icons.notifications_active_rounded,
                   size: 18, color: Color(0xFFFF9800)),
             ),
-            title: const Text('Daily Reminder',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            title: Text(S.of(context).notifDailyTitle,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
             subtitle: Text(
               _enabled
                   ? 'Every day at ${_time.format(context)}'
-                  : 'Remind me to log transactions',
+                  : S.of(context).notifDailyDisabled,
               style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
             ),
             value: _enabled,
@@ -2135,7 +2177,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
               dense: true,
               leading: Icon(Icons.schedule_rounded,
                   size: 18, color: AppColors.ts(context)),
-              title: Text('Time',
+              title: Text(S.of(context).notifTime,
                   style: TextStyle(
                       fontSize: 13, color: AppColors.tp(context))),
               trailing: TextButton(
@@ -2165,7 +2207,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
                     fontSize: 13, color: AppColors.tp(context)),
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
-                  hintText: 'Custom message (optional)',
+                  hintText: S.of(context).notifCustomMessage,
                   hintStyle: TextStyle(
                       fontSize: 13, color: AppColors.th(context)),
                   filled: true,
@@ -2214,9 +2256,10 @@ class _SettingsBackupBanner extends ConsumerWidget {
       data: (show) {
         if (!show) return const SizedBox.shrink();
         final days = daysSince.value ?? -1;
+        final l = S.of(context);
         final message = days == -1
-            ? "You haven't backed up yet"
-            : "You haven't backed up in $days days";
+            ? l.backupBannerNoBackup
+            : l.backupBannerDaysAgo(days);
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
@@ -2262,8 +2305,8 @@ class _SettingsBackupBanner extends ConsumerWidget {
                   child: FilledButton.icon(
                     onPressed: () => context.push('/backup'),
                     icon: const Icon(Icons.backup_rounded, size: 16),
-                    label: const Text('Backup Now',
-                        style: TextStyle(fontSize: 12)),
+                    label: Text(l.backupNowButton,
+                        style: const TextStyle(fontSize: 12)),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.caution,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -2311,7 +2354,7 @@ class _ShareHouseholdSettingsSheetState
   Future<void> _share() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = 'Please enter a valid email address');
+      setState(() => _error = S.of(context).syncValidEmailError);
       return;
     }
 
@@ -2340,7 +2383,7 @@ class _ShareHouseholdSettingsSheetState
     if (_inviteCode == null) return;
     SharePlus.instance.share(
       ShareParams(
-        text: 'Join my PocketPlan household! Enter this code in the app:\n$_inviteCode',
+        text: S.of(context).syncShareInviteText(_inviteCode!),
       ),
     );
   }
@@ -2373,7 +2416,7 @@ class _ShareHouseholdSettingsSheetState
             ),
             const SizedBox(height: 20),
             Text(
-              'Share Household',
+              S.of(context).syncShareHousehold,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -2382,8 +2425,7 @@ class _ShareHouseholdSettingsSheetState
             ),
             const SizedBox(height: 8),
             Text(
-              'Share your PocketPlan data with another person. '
-              'They will be able to sync to the same file on Google Drive.',
+              S.of(context).syncShareDesc,
               style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             ),
             const SizedBox(height: 20),
@@ -2392,8 +2434,8 @@ class _ShareHouseholdSettingsSheetState
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'Their email address',
-                  hintText: 'partner@gmail.com',
+                  labelText: S.of(context).syncTheirEmail,
+                  hintText: S.of(context).syncEmailHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
@@ -2414,7 +2456,7 @@ class _ShareHouseholdSettingsSheetState
                         )
                       : const Icon(Icons.share_rounded, size: 20),
                   label: Text(
-                    _loading ? 'Sharing...' : 'Generate Invite Code',
+                    _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),
@@ -2439,7 +2481,7 @@ class _ShareHouseholdSettingsSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Invite Code',
+                      S.of(context).syncInviteCode,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -2465,8 +2507,8 @@ class _ShareHouseholdSettingsSheetState
                 child: FilledButton.icon(
                   onPressed: _shareCode,
                   icon: const Icon(Icons.share_rounded, size: 20),
-                  label: const Text(
-                    'Share Code',
+                  label: Text(
+                    S.of(context).syncShareCode,
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),

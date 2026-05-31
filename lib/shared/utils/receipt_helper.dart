@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 // ── Receipt path encoding helpers ──────────────────────────────────────────
 
 /// Parse the receiptPath column value into a list of filenames.
@@ -137,18 +139,18 @@ Future<_PickerChoice?> _showPickerSheet(BuildContext context) async {
         children: [
           ListTile(
             leading: const Icon(Icons.camera_alt_rounded),
-            title: const Text('Take Photo'),
+            title: Text(S.of(ctx).receiptTakePhoto),
             onTap: () => Navigator.pop(ctx, _PickerChoice.camera),
           ),
           ListTile(
             leading: const Icon(Icons.photo_library_rounded),
-            title: const Text('Choose from Gallery'),
-            subtitle: const Text('Select multiple photos'),
+            title: Text(S.of(ctx).receiptChooseGallery),
+            subtitle: Text(S.of(ctx).receiptSelectMultiple),
             onTap: () => Navigator.pop(ctx, _PickerChoice.gallery),
           ),
           ListTile(
             leading: const Icon(Icons.close_rounded),
-            title: const Text('Cancel'),
+            title: Text(S.of(ctx).commonCancel),
             onTap: () => Navigator.pop(ctx),
           ),
         ],

@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +139,14 @@ class AppDatabase extends _$AppDatabase {
             await m.createIndex(Index('idx_categories_household',
                 'CREATE INDEX IF NOT EXISTS idx_categories_household '
                 'ON categories (household_id)'));
+          }
+          if (from < 17) {
+            await m.createIndex(Index('idx_ledger_source_tx',
+                'CREATE INDEX IF NOT EXISTS idx_ledger_source_tx '
+                'ON allocation_ledger (source_transaction_id)'));
+            await m.createIndex(Index('idx_categories_allocation',
+                'CREATE INDEX IF NOT EXISTS idx_categories_allocation '
+                'ON categories (allocation_id)'));
           }
         },
       );

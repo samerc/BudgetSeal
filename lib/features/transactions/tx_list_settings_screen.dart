@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/tx_list_settings_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class TxListSettingsScreen extends ConsumerWidget {
   const TxListSettingsScreen({super.key});
@@ -14,12 +15,12 @@ class TxListSettingsScreen extends ConsumerWidget {
     final notifier = ref.read(txListSettingsProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaction List')),
+      appBar: AppBar(title: Text(S.of(context).txListTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // ── Live Preview ──────────────────────────────────────────
-          Text('Select Layout',
+          Text(S.of(context).txListSelectLayout,
               style: TextStyle(
                 fontSize: TypographyTokens.screenTitleSize,
                 fontWeight: TypographyTokens.screenTitleWeight,
@@ -32,9 +33,9 @@ class TxListSettingsScreen extends ConsumerWidget {
           // ── Date Banner Total ─────────────────────────────────────
           _SettingRow(
             icon: Icons.calendar_today_rounded,
-            title: 'Date Banner Total',
+            title: S.of(context).txListDateBanner,
             trailing: _DropdownChip(
-              value: s.dateBannerTotal == 'dayTotal' ? 'Day Total' : 'None',
+              value: s.dateBannerTotal == 'dayTotal' ? S.of(context).txListDayTotal : S.of(context).txListNone,
               onTap: () {
                 final next =
                     s.dateBannerTotal == 'dayTotal' ? 'none' : 'dayTotal';
@@ -47,8 +48,8 @@ class TxListSettingsScreen extends ConsumerWidget {
           // ── Account Label ─────────────────────────────────────────
           _ToggleRow(
             icon: Icons.account_balance_wallet_outlined,
-            title: 'Account Label',
-            subtitle: 'Show account name on each transaction',
+            title: S.of(context).txListAccountLabel,
+            subtitle: S.of(context).txListAccountSubtitle,
             value: s.showAccount,
             onChanged: (v) =>
                 notifier.update((s) => s.copyWith(showAccount: v)),
@@ -58,8 +59,8 @@ class TxListSettingsScreen extends ConsumerWidget {
           // ── Category Icon ─────────────────────────────────────────
           _ToggleRow(
             icon: Icons.category_outlined,
-            title: 'Category Icon',
-            subtitle: 'Show category icon circle',
+            title: S.of(context).txListCategoryIcon,
+            subtitle: S.of(context).txListCategorySubtitle,
             value: s.showCategoryIcon,
             onChanged: (v) =>
                 notifier.update((s) => s.copyWith(showCategoryIcon: v)),
@@ -69,8 +70,8 @@ class TxListSettingsScreen extends ConsumerWidget {
           // ── Time ──────────────────────────────────────────────────
           _ToggleRow(
             icon: Icons.schedule_rounded,
-            title: 'Time',
-            subtitle: 'Show time of the transaction',
+            title: S.of(context).txListTime,
+            subtitle: S.of(context).txListTimeSubtitle,
             value: s.showTime,
             onChanged: (v) =>
                 notifier.update((s) => s.copyWith(showTime: v)),
@@ -171,7 +172,7 @@ class _CompactPreviewRow extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              Text('Transaction Name',
+              Text(S.of(context).txListPreviewName,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -233,7 +234,7 @@ class _ExpandedPreviewRow extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text('Transaction Name',
+                    child: Text(S.of(context).txListPreviewName,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -248,7 +249,7 @@ class _ExpandedPreviewRow extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 3),
-              Text('This is a note that is part of the transaction.',
+              Text(S.of(context).txListPreviewNote,
                   style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),

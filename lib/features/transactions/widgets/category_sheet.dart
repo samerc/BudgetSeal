@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/category_icon.dart';
 
@@ -155,7 +156,7 @@ class _CategorySheetState extends State<CategorySheet>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Category',
+                        Text(S.of(context).catSheetTitle,
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -163,7 +164,7 @@ class _CategorySheetState extends State<CategorySheet>
                         if (!_creating)
                           TextButton.icon(
                             icon: const Icon(Icons.add_rounded, size: 16),
-                            label: const Text('New'),
+                            label: Text(S.of(context).catSheetNew),
                             onPressed: () =>
                                 setState(() => _creating = true),
                           ),
@@ -179,7 +180,7 @@ class _CategorySheetState extends State<CategorySheet>
                               controller: _newCatCtrl,
                               autofocus: true,
                               decoration: InputDecoration(
-                                hintText: 'Category name',
+                                hintText: S.of(context).catSheetCategoryName,
                                 isDense: true,
                                 filled: true,
                                 fillColor: AppColors.sfv(context),
@@ -198,7 +199,7 @@ class _CategorySheetState extends State<CategorySheet>
                             style: FilledButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 10)),
-                            child: const Text('Add'),
+                            child: Text(S.of(context).catSheetAdd),
                           ),
                           IconButton(
                             icon: const Icon(Icons.close_rounded, size: 18),
@@ -212,9 +213,9 @@ class _CategorySheetState extends State<CategorySheet>
                     // Type toggle
                     Row(
                       children: [
-                        _typeChip('Expense', 'expense', AppColors.overspent),
+                        _typeChip(S.of(context).catSheetExpense, 'expense', AppColors.overspent),
                         const SizedBox(width: 8),
-                        _typeChip('Income', 'income', AppColors.healthy),
+                        _typeChip(S.of(context).catSheetIncome, 'income', AppColors.healthy),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -225,7 +226,7 @@ class _CategorySheetState extends State<CategorySheet>
                       style: TextStyle(
                           fontSize: 14, color: AppColors.tp(context)),
                       decoration: InputDecoration(
-                        hintText: 'Search categories...',
+                        hintText: S.of(context).catSheetSearchHint,
                         hintStyle:
                             TextStyle(color: AppColors.th(context)),
                         prefixIcon: Icon(Icons.search_rounded,
@@ -252,8 +253,8 @@ class _CategorySheetState extends State<CategorySheet>
                           padding: const EdgeInsets.all(24),
                           child: Text(
                             _search.isNotEmpty
-                                ? 'No matching categories'
-                                : 'No categories yet.\nTap "New" above to create one.',
+                                ? S.of(context).catSheetNoMatch
+                                : S.of(context).catSheetNoCategories,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: AppColors.ts(context)),
@@ -349,7 +350,7 @@ class _CategorySheetState extends State<CategorySheet>
                             color: AppColors.tp(context),
                           )),
                       if (subs.isNotEmpty)
-                        Text('${subs.length} subcategories',
+                        Text(S.of(context).catSheetSubcategories(subs.length),
                             style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.ts(context))),
@@ -375,7 +376,7 @@ class _CategorySheetState extends State<CategorySheet>
             onTap: () => widget.onSelected(
                 sub.id, sub.name, subColor, sub.transactionType),
             child: Container(
-              margin: const EdgeInsets.only(left: 28),
+              margin: const EdgeInsetsDirectional.only(start: 28),
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(

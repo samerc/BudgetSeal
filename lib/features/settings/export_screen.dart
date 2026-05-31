@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -34,19 +35,27 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       final txs = await (db.select(db.transactions)
             ..where((t) => t.householdId.equals(householdId))
             ..where((t) => t.deleted.equals(false))
+            ..where((t) => t.status.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();
 
-      final allLines = await db.select(db.transactionLines).get();
+      final txIds = txs.map((t) => t.id).toSet();
+      final allLines = await (db.select(db.transactionLines)
+            ..where((l) => l.transactionId.isIn(txIds)))
+          .get();
       final linesByTx = <String, List<dynamic>>{};
       for (final l in allLines) {
         linesByTx.putIfAbsent(l.transactionId, () => []).add(l);
       }
 
       // Fetch accounts and categories for names.
-      final accounts = await db.select(db.accounts).get();
+      final accounts = await (db.select(db.accounts)
+            ..where((a) => a.householdId.equals(householdId)))
+          .get();
       final accountMap = {for (final a in accounts) a.id: a.name};
-      final categories = await db.select(db.categories).get();
+      final categories = await (db.select(db.categories)
+            ..where((c) => c.householdId.equals(householdId)))
+          .get();
       final catMap = {for (final c in categories) c.id: c.name};
 
       // Build CSV rows.
@@ -112,7 +121,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       
-      appBar: AppBar(title: const Text('Export Data')),
+      appBar: AppBar(title: Text(S.of(context).exportDataTitle)),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -132,15 +141,14 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                       Icon(Icons.file_download_outlined,
                           size: 24, color: AppColors.accent),
                       const SizedBox(width: 12),
-                      const Text('Export Transactions',
-                          style: TextStyle(
+                      Text(S.of(context).exportTransTitle,
+                          style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Export all your transactions as a CSV file. '
-                    'You can open it in Excel, Google Sheets, or any spreadsheet app.',
+                    S.of(context).exportTransDesc,
                     style: TextStyle(
                         fontSize: 13, color: AppColors.ts(context)),
                   ),
@@ -155,7 +163,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                                 color: Colors.white, strokeWidth: 2))
                         : const Icon(Icons.share_rounded, size: 18),
                     label: Text(
-                        _exporting ? 'Exporting...' : 'Export & Share'),
+                        _exporting ? S.of(context).backupExporting : S.of(context).backupExportShare),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.accent,
                       padding: const EdgeInsets.symmetric(vertical: 16),

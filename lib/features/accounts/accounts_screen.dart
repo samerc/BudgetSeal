@@ -8,6 +8,7 @@ import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -33,7 +34,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Accounts'),
+        title: Text(S.of(context).acctTitle),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -60,8 +61,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   ),
                   const SizedBox(width: 10),
                   Text(_showArchived
-                      ? 'Hide Archived'
-                      : 'Show Archived'),
+                      ? S.of(context).acctHideArchived
+                      : S.of(context).acctShowArchived),
                 ]),
               ),
               const PopupMenuDivider(),
@@ -71,7 +72,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   Icon(Icons.sort_by_alpha_rounded, size: 18,
                       color: _sortBy == 'name' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
-                  Text('Sort by name',
+                  Text(S.of(context).acctSortByName,
                       style: TextStyle(
                         fontWeight: _sortBy == 'name' ? FontWeight.w700 : FontWeight.w400,
                       )),
@@ -83,7 +84,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   Icon(Icons.account_balance_wallet_rounded, size: 18,
                       color: _sortBy == 'balance' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
-                  Text('Sort by balance',
+                  Text(S.of(context).acctSortByBalance,
                       style: TextStyle(
                         fontWeight: _sortBy == 'balance' ? FontWeight.w700 : FontWeight.w400,
                       )),
@@ -95,7 +96,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   Icon(Icons.category_rounded, size: 18,
                       color: _sortBy == 'type' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
-                  Text('Sort by type',
+                  Text(S.of(context).acctSortByType,
                       style: TextStyle(
                         fontWeight: _sortBy == 'type' ? FontWeight.w700 : FontWeight.w400,
                       )),
@@ -114,12 +115,12 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           data: (accounts) {
             if (accounts.isEmpty && !_showArchived) {
               return ListView(
-                children: const [
-                  SizedBox(height: 200),
+                children: [
+                  const SizedBox(height: 200),
                   EmptyState(
                     icon: Icons.credit_card_rounded,
-                    title: 'No accounts yet',
-                    subtitle: 'Tap + to add one',
+                    title: S.of(context).acctNoYet,
+                    subtitle: S.of(context).acctTapPlus,
                   ),
                 ],
               );
@@ -160,7 +161,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           },
           loading: () => const SkeletonList(),
           error: (e, _) => ErrorRetry(
-            message: "Couldn't load your data",
+            message: S.of(context).acctCouldntLoad,
             details: '$e',
             onRetry: () => ref.invalidate(accountsWithBalanceProvider),
           ),
@@ -168,7 +169,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_accounts',
-        tooltip: 'Add account',
+        tooltip: S.of(context).acctAddTooltip,
         onPressed: () => context.push('/accounts/new'),
         child: const Icon(Icons.add),
       ),
@@ -206,7 +207,7 @@ class _ArchivedSection extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.only(top: 20),
             child: Center(
-              child: Text('No archived accounts',
+              child: Text(S.of(context).acctNoArchived,
                   style: TextStyle(
                       color: AppColors.ts(context), fontSize: 13)),
             ),
@@ -220,7 +221,7 @@ class _ArchivedSection extends ConsumerWidget {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8),
-              child: Text('ARCHIVED',
+              child: Text(S.of(context).acctArchived,
                   style: TextStyle(
                     fontSize: TypographyTokens.sectionHeaderSize,
                     fontWeight: TypographyTokens.sectionHeaderWeight,
@@ -262,17 +263,17 @@ class _ArchivedSection extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unarchive Account'),
+        title: Text(S.of(context).acctUnarchiveTitle),
         content: Text(
-            'Restore "${account.name}" to your active accounts?'),
+            S.of(context).acctUnarchiveMsg(account.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Unarchive'),
+            child: Text(S.of(context).acctUnarchive),
           ),
         ],
       ),
@@ -291,7 +292,7 @@ class _ArchivedSection extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${account.name} unarchived'),
+          content: Text(S.of(context).acctUnarchived(account.name)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -318,7 +319,7 @@ class _TotalBalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Total Balance',
+          Text(S.of(context).acctTotalBalance,
               style: TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 10),
           ...totals.entries.map((e) => Padding(
@@ -427,8 +428,8 @@ class _AccountTile extends StatelessWidget {
         ),
         subtitle: Text(
           acc.isTravel
-              ? 'Travel wallet · ${acc.currency}'
-              : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
+              ? S.of(context).acctTravelWallet(acc.currency)
+              : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} \u00b7 ${acc.currency}',
           style:
               TextStyle(color: AppColors.ts(context), fontSize: 12),
         ),
@@ -525,7 +526,7 @@ class _ArchivedAccountTile extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.unarchive_rounded,
                     size: 20, color: AppColors.accent),
-                tooltip: 'Unarchive',
+                tooltip: S.of(context).acctUnarchive,
                 onPressed: onUnarchive,
                 visualDensity: VisualDensity.compact,
               ),

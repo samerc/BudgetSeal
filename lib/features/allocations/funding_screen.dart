@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -82,20 +83,18 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Over-funding'),
+          title: Text(S.of(context).fundOverfundingTitle),
           content: Text(
-            'You\'re assigning $exceedDetails. '
-            'Your unallocated balance will go negative.\n\n'
-            'Continue anyway?',
+            S.of(context).fundOverfundingMsg(exceedDetails!),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Fund Anyway'),
+              child: Text(S.of(context).fundAnyway),
             ),
           ],
         ),
@@ -116,15 +115,15 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
           amount: amount,
           currency: currency,
           deviceId: 'local',
-          note: 'Funded from Unallocated',
+          note: S.of(context).fundNote,
         );
       }
 
       if (mounted) {
         hapticMedium();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Allocations funded successfully'),
+          SnackBar(
+            content: Text(S.of(context).fundSuccess),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -137,7 +136,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not fund allocations. Please try again.'),
+            content: Text(S.of(context).fundErrorMsg('$e')),
             backgroundColor: AppColors.overspent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -157,12 +156,12 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fund Envelopes'),
+        title: Text(S.of(context).fundTitle),
       ),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorRetry(
-          message: "Couldn't load envelopes",
+          message: S.of(context).fundCouldntLoad,
           details: '$e',
           onRetry: () => ref.invalidate(allocationsProvider),
         ),
@@ -217,7 +216,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                 child: allocations.isEmpty
                     ? Center(
                         child: Text(
-                          'No allocations to fund.\nCreate allocations first.',
+                          S.of(context).fundNoAllocations,
                           textAlign: TextAlign.center,
                           style: TextStyle(color: AppColors.ts(context)),
                         ),
@@ -330,7 +329,7 @@ class _InstructionsPanel extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'How does funding work?',
+                      S.of(context).fundHowTitle,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -357,20 +356,17 @@ class _InstructionsPanel extends StatelessWidget {
                 children: [
                   _InstructionStep(
                     number: '1',
-                    text:
-                        'Check your unallocated balance \u2014 this is money you haven\'t assigned to any envelope yet.',
+                    text: S.of(context).fundStep1,
                   ),
                   const SizedBox(height: 8),
                   _InstructionStep(
                     number: '2',
-                    text:
-                        'Enter how much to put in each envelope, or use "Quick Fill" to auto-fill periodic envelopes up to their target.',
+                    text: S.of(context).fundStep2,
                   ),
                   const SizedBox(height: 8),
                   _InstructionStep(
                     number: '3',
-                    text:
-                        'Tap "Fund All" to move the money into your envelopes.',
+                    text: S.of(context).fundStep3,
                   ),
                 ],
               ),
@@ -485,7 +481,7 @@ class _FundingBanner extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Available to distribute',
+                  Text(S.of(context).fundAvailableToDistribute,
                       style: TextStyle(color: Colors.white70, fontSize: 13)),
                   const SizedBox(height: 4),
                   CurrencyDisplay(
@@ -524,8 +520,10 @@ class _FundingBanner extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Distributing ${formatAmount(baseDistributed, currency: baseCurrency)}'
-                      ' of ${formatAmount(available, currency: baseCurrency)}',
+                      S.of(context).fundDistributing(
+                        formatAmount(baseDistributed, currency: baseCurrency),
+                        formatAmount(available, currency: baseCurrency),
+                      ),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -591,15 +589,15 @@ class _FundingBanner extends StatelessWidget {
 
           if (exceeds) ...[
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.warning_amber_rounded,
+                const Icon(Icons.warning_amber_rounded,
                     color: Color(0xFFFFCDD2), size: 16),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Total exceeds available unallocated funds',
-                    style: TextStyle(color: Color(0xFFFFCDD2), fontSize: 12),
+                    S.of(context).fundExceedsWarning,
+                    style: const TextStyle(color: Color(0xFFFFCDD2), fontSize: 12),
                   ),
                 ),
               ],
@@ -667,7 +665,7 @@ class _QuickFillTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Quick Fill',
+                        S.of(context).fundQuickFill,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -679,8 +677,8 @@ class _QuickFillTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         hasEnvelopes
-                            ? 'Auto-fill $fillableCount periodic ${fillableCount == 1 ? 'envelope' : 'envelopes'} up to ${fillableCount == 1 ? 'its' : 'their'} target'
-                            : 'All periodic envelopes are at their target',
+                            ? S.of(context).fundQuickFillDesc(fillableCount)
+                            : S.of(context).fundAllAtTarget,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.ts(context),
@@ -776,15 +774,15 @@ class _FundingAllocationTile extends StatelessWidget {
                       color: AppColors.healthy.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_rounded,
+                        const Icon(Icons.check_circle_rounded,
                             size: 13, color: AppColors.healthy),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          'Funded',
-                          style: TextStyle(
+                          S.of(context).fundFunded,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: AppColors.healthy,
@@ -831,7 +829,7 @@ class _FundingAllocationTile extends StatelessWidget {
               // No target — just show current balance
               const SizedBox(height: 4),
               Text(
-                'Balance: ${formatAmount(currentBalance, currency: currency)}',
+                S.of(context).fundBalance(formatAmount(currentBalance, currency: currency)),
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.ts(context),
@@ -871,7 +869,7 @@ class _FundingAllocationTile extends StatelessWidget {
                       child: CalculatorAmountField(
                         value: amount,
                         onChanged: onAmountChanged,
-                        hintText: 'Amount',
+                        hintText: S.of(context).allocAmount,
                         fontSize: 16,
                         style: TextStyle(
                           fontSize: 16,
@@ -897,7 +895,7 @@ class _FundingAllocationTile extends StatelessWidget {
                         minimumSize: const Size(0, 0),
                       ),
                       child: Text(
-                        'Fill ${formatAmount(suggestedAmount!, currency: currency)}',
+                        S.of(context).fundFill(formatAmount(suggestedAmount!, currency: currency)),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -936,8 +934,9 @@ class _BottomFundBar extends StatelessWidget {
     required this.onFund,
   });
 
-  String _fundLabel() {
-    if (!hasAnyAmount) return 'Enter amounts to fund';
+  String _fundLabel(BuildContext context) {
+    final l = S.of(context);
+    if (!hasAnyAmount) return l.fundEnterAmounts;
     // Build a label like "Fund All  ($500 + LBP 100,000)"
     final parts = <String>[];
     // Base currency first
@@ -950,7 +949,7 @@ class _BottomFundBar extends StatelessWidget {
       if (entry.key == baseCurrency || entry.value <= 0) continue;
       parts.add(formatAmount(entry.value, currency: entry.key));
     }
-    return 'Fund All  (${parts.join(' + ')})';
+    return l.fundAllWithTotal(parts.join(' + '));
   }
 
   @override
@@ -1004,7 +1003,7 @@ class _BottomFundBar extends StatelessWidget {
                       const SizedBox(width: 10),
                       Flexible(
                         child: Text(
-                          _fundLabel(),
+                          _fundLabel(context),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,

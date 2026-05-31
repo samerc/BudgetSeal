@@ -55,8 +55,10 @@ bool _needsSpace(String symbol) {
 
 /// Format the raw number with the user's preferred separators.
 String _formatNumber(double absValue, int decimalDigits) {
-  // Use intl to get the base formatted number (always comma + period)
+  // Always use 'en' locale for digit rendering — Arabic-Indic numerals (١٢٣)
+  // are not standard for finance apps. User separator prefs are applied below.
   final formatter = NumberFormat.currency(
+    locale: 'en_US',
     symbol: '',
     decimalDigits: decimalDigits,
   );

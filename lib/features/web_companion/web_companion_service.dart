@@ -10,6 +10,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../l10n/s_lookup.dart';
 import '../../core/providers/web_companion_provider.dart';
 import 'web_companion_auth.dart';
 import 'web_companion_router.dart';
@@ -38,7 +39,7 @@ class WebCompanionService {
       // Get local WiFi IP
       final ip = await _getWifiIp();
       if (ip == null) {
-        notifier.setError('Not connected to WiFi. Connect to a network and try again.');
+        notifier.setError(currentS().wcNoWifiDesc);
         return;
       }
 
@@ -106,9 +107,24 @@ class WebCompanionService {
 
   static Future<String?> _getWifiIp() async {
     try {
-      final ip = await NetworkInfo().getWifiIP();
-      if (ip != null && ip.isNotEmpty && ip != '0.0.0.0') return ip;
-      return null;
+      final info = NetworkInfo();
+      final ip = await info.getWifiIP();
+      if (ip == null || ip.isEmpty || ip == '0.0.0.0') return null;
+
+      // Verify WiFi is actually connected — not cellular.
+      // On some devices, getWifiIP() returns a valid IP on mobile data.
+      // WiFi BSSID is null when only cellular is active.
+      final bssid = await info.getWifiBSSID();
+      if (bssid == null || bssid.isEmpty || bssid == '02:00:00:00:00:00') {
+        // No WiFi access point — likely on cellular data.
+        // Also check WiFi name as a fallback.
+        final name = await info.getWifiName();
+        if (name == null || name.isEmpty || name == '<unknown ssid>') {
+          return null;
+        }
+      }
+
+      return ip;
     } catch (_) {
       return null;
     }
@@ -453,7 +469,7 @@ class WebCompanionService {
     'Cache-Control': 'no-store',
     'Content-Security-Policy':
         "default-src 'self'; "
-        "script-src 'self' https://cdn.jsdelivr.net; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src https://fonts.gstatic.com; "
         "img-src 'self' data:; "

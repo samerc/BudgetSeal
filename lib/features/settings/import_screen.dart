@@ -12,24 +12,25 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 
 /// The role a CSV column can be assigned to.
 enum ColumnRole { skip, date, description, amount, category }
 
 extension ColumnRoleLabel on ColumnRole {
-  String get label {
+  String localizedLabel(BuildContext context) {
     switch (this) {
       case ColumnRole.skip:
-        return 'Skip';
+        return S.of(context).importColSkip;
       case ColumnRole.date:
-        return 'Date';
+        return S.of(context).importColDate;
       case ColumnRole.description:
-        return 'Description';
+        return S.of(context).importColDescription;
       case ColumnRole.amount:
-        return 'Amount';
+        return S.of(context).importColAmount;
       case ColumnRole.category:
-        return 'Category';
+        return S.of(context).importColCategory;
     }
   }
 
@@ -93,7 +94,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Import failed. Please check the file format.')),
+          SnackBar(content: Text(S.of(context).importFailed)),
         );
       }
     }
@@ -238,7 +239,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
     if (amountCol == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please assign an Amount column')),
+        SnackBar(content: Text(S.of(context).importAssignAmount)),
       );
       return;
     }
@@ -327,7 +328,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Imported $_imported transactions'),
+            content: Text(S.of(context).importSuccess(_imported)),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -360,7 +361,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     final accounts = ref.watch(accountsProvider).value ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Import CSV')),
+      appBar: AppBar(title: Text(S.of(context).importCsvTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -370,7 +371,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             if (_csvData != null) ...[
               const SizedBox(height: 16),
               Text(
-                'Found ${_csvData!.length} rows in $_fileName',
+                S.of(context).importFoundRows(_csvData!.length, _fileName ?? ''),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
@@ -405,20 +406,20 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             children: [
               Icon(Icons.upload_file_rounded, size: 24, color: AppColors.accent),
               const SizedBox(width: 12),
-              const Text('Import from Bank CSV',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(S.of(context).importFromBank,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'Select a CSV export from your bank. Column roles will be auto-detected.',
+            S.of(context).importCsvDesc,
             style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _pickFile,
             icon: const Icon(Icons.folder_open_rounded, size: 18),
-            label: const Text('Load CSV'),
+            label: Text(S.of(context).importLoadCsv),
           ),
         ],
       ),
@@ -445,7 +446,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               Icon(Icons.view_column_rounded, size: 20, color: AppColors.accent),
               const SizedBox(width: 8),
               Text(
-                'Column Mapping',
+                S.of(context).importColumnMapping,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -456,7 +457,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Assign a role to each column. Roles were auto-detected -- adjust as needed.',
+            S.of(context).importColumnMapDesc,
             style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
           ),
           const SizedBox(height: 12),
@@ -552,7 +553,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    role.label,
+                                    role.localizedLabel(context),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: alreadyUsed
@@ -620,7 +621,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               Icon(Icons.preview_rounded, size: 20, color: AppColors.accent),
               const SizedBox(width: 8),
               Text(
-                'Import Preview',
+                S.of(context).importPreview,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -640,11 +641,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             child: Row(
               children: [
                 if (dateCol != null)
-                  _previewHeaderCell('Date'),
-                _previewHeaderCell('Description'),
-                _previewHeaderCell('Amount'),
+                  _previewHeaderCell(S.of(context).importColDate),
+                _previewHeaderCell(S.of(context).importColDescription),
+                _previewHeaderCell(S.of(context).importColAmount),
                 if (categoryCol != null)
-                  _previewHeaderCell('Category'),
+                  _previewHeaderCell(S.of(context).importColCategory),
               ],
             ),
           ),
@@ -701,7 +702,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'No Amount column assigned. Please map at least one column to Amount.',
+                      S.of(context).importNoAmount,
                       style: TextStyle(
                           fontSize: 12, color: AppColors.caution),
                     ),
@@ -748,7 +749,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   Widget _buildAccountSelector(List<Account> accounts) {
     return DropdownButtonFormField<String>(
       initialValue: _selectedAccountId,
-      decoration: const InputDecoration(labelText: 'Import into account'),
+      decoration: InputDecoration(labelText: S.of(context).importIntoAccount),
       items: accounts
           .map((a) => DropdownMenuItem(
               value: a.id, child: Text('${a.name} (${a.currency})')))
@@ -767,8 +768,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               ? null
               : _import,
       child: _importing
-          ? Text('Importing... ($_imported)')
-          : Text('Import $rowCount transactions'),
+          ? Text(S.of(context).importImporting(_imported))
+          : Text(S.of(context).importButton(rowCount)),
     );
   }
 }

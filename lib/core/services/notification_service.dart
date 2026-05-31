@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../l10n/s_lookup.dart';
 import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
@@ -72,13 +73,19 @@ class NotificationService {
 
     if (overspent.isEmpty) return;
 
+    final l = currentS();
     final body = overspent.length == 1
-        ? '${overspent.first} is overspent. Consider adding funds.'
-        : '${overspent.length} envelopes are overspent: ${overspent.take(3).join(', ')}${overspent.length > 3 ? ' and ${overspent.length - 3} more' : ''}.';
+        ? l.notifSingleOverspent(overspent.first)
+        : l.notifMultipleOverspent(
+            overspent.length,
+            overspent.take(3).join(', '),
+            overspent.length > 3
+                ? l.notifAndMore(overspent.length - 3)
+                : '');
 
     await _plugin.show(
       id: _envelopeNotifId,
-      title: 'Low Envelopes',
+      title: l.notifLowEnvelopesTitle,
       body: body,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -113,13 +120,17 @@ class NotificationService {
         .map((r) => r.title.isNotEmpty ? r.title : r.type)
         .toList();
 
+    final l = currentS();
     final body = titles.length == 1
-        ? '${titles.first} is due soon.'
-        : '${titles.length} bills due: ${titles.take(3).join(', ')}${titles.length > 3 ? ' and more' : ''}.';
+        ? l.notifSingleDue(titles.first)
+        : l.notifMultipleDue(
+            titles.length,
+            titles.take(3).join(', '),
+            titles.length > 3 ? l.notifBillsAndMore : '');
 
     await _plugin.show(
       id: _billNotifId,
-      title: 'Upcoming Bills',
+      title: l.notifUpcomingBillsTitle,
       body: body,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(

@@ -3,14 +3,15 @@ import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/error_retry.dart';
 import '../recurring/recurring_screen.dart' show EditRecurringSheet;
+import '../../l10n/generated/app_localizations.dart';
 
 class SubscriptionDetailScreen extends ConsumerStatefulWidget {
   final String subscriptionId;
@@ -125,20 +126,21 @@ class _SubscriptionDetailScreenState
   }
 
   String _frequencySuffix(String frequency, int interval) {
+    final tr = S.of(context);
     if (interval == 1) {
       return switch (frequency) {
-        'daily' => '/day',
-        'weekly' => '/week',
-        'monthly' => '/month',
-        'yearly' => '/year',
+        'daily' => tr.subFreqDay,
+        'weekly' => tr.subFreqWeek,
+        'monthly' => tr.subFreqMonth,
+        'yearly' => tr.subFreqYear,
         _ => '/$frequency',
       };
     }
     return switch (frequency) {
-      'daily' => '/$interval days',
-      'weekly' => '/$interval weeks',
-      'monthly' => '/$interval months',
-      'yearly' => '/$interval years',
+      'daily' => tr.subFreqDays(interval),
+      'weekly' => tr.subFreqWeeks(interval),
+      'monthly' => tr.subFreqMonths(interval),
+      'yearly' => tr.subFreqYears(interval),
       _ => '/$interval $frequency',
     };
   }
@@ -232,20 +234,20 @@ class _SubscriptionDetailScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel subscription'),
+        title: Text(S.of(context).subDetailCancelTitle),
         content: Text(
           futureCount > 0
-              ? 'This will cancel future billing and remove $futureCount transaction${futureCount == 1 ? '' : 's'} after ${DateFormat.yMMMd().format(picked)}.'
-              : 'This will set the cancellation date to ${DateFormat.yMMMd().format(picked)}.',
+              ? S.of(context).subCancelBodyWithTx(futureCount, formatDate(picked))
+              : S.of(context).subCancelBodyNoTx(formatDate(picked)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Back'),
+            child: Text(S.of(context).commonBack),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm'),
+            child: Text(S.of(context).commonConfirm),
           ),
         ],
       ),
@@ -312,34 +314,16 @@ class _SubscriptionDetailScreenState
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline_rounded,
-                    size: 48, color: AppColors.overspent),
-                const SizedBox(height: 12),
-                const Text('Could not load subscription'),
-                const SizedBox(height: 8),
-                Text(_error!,
-                    style: TextStyle(fontSize: 12, color: AppColors.th(context)),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 16),
-                FilledButton.tonal(
-                  onPressed: () {
-                    setState(() {
-                      _loading = true;
-                      _error = null;
-                    });
-                    _load();
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+        body: ErrorRetry(
+          message: S.of(context).subDetailError,
+          details: _error,
+          onRetry: () {
+            setState(() {
+              _loading = true;
+              _error = null;
+            });
+            _load();
+          },
         ),
       );
     }
@@ -347,12 +331,12 @@ class _SubscriptionDetailScreenState
     if (_sub == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const Center(child: Text('Subscription not found')),
+        body: Center(child: Text(S.of(context).subDetailNotFound)),
       );
     }
 
     final sub = _sub!;
-    final title = sub['title']?.toString() ?? 'Untitled';
+    final title = sub['title']?.toString() ?? S.of(context).subUntitled;
     final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
     final currency = sub['currency']?.toString();
     final frequency = sub['frequency']?.toString() ?? 'monthly';
@@ -378,7 +362,7 @@ class _SubscriptionDetailScreenState
     }
 
     final catColor = _categoryColor != null
-        ? Color(int.parse(_categoryColor!.replaceFirst('#', '0xFF')))
+        ? AppColors.fromHex(_categoryColor!)
         : AppColors.accent;
 
     final statusDotColor = switch (status) {
@@ -388,10 +372,11 @@ class _SubscriptionDetailScreenState
       _ => AppColors.healthy,
     };
 
+    final tr = S.of(context);
     final statusLabel = switch (status) {
-      'active' => 'Active',
-      'ending_soon' => 'Ending soon',
-      'cancelled' => 'Cancelled',
+      'active' => tr.subActive,
+      'ending_soon' => tr.subEndingSoon,
+      'cancelled' => tr.subCancelled,
       _ => '',
     };
 
@@ -442,7 +427,7 @@ class _SubscriptionDetailScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Annual cost: ${formatAmount(annualCost, currency: currency)}',
+                  tr.subDetailAnnualCost(formatAmount(annualCost, currency: currency)),
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.ts(context),
@@ -464,7 +449,7 @@ class _SubscriptionDetailScreenState
             child: Column(
               children: [
                 _DetailRow(
-                  label: 'Status',
+                  label: tr.subDetailStatus,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -486,21 +471,21 @@ class _SubscriptionDetailScreenState
                 ),
                 if (createdAt != null)
                   _DetailRow(
-                    label: 'Active since',
-                    value: DateFormat.yMMMd().format(createdAt),
+                    label: tr.subDetailActiveSince,
+                    value: formatDate(createdAt),
                   ),
                 if (nextDue != null)
                   _DetailRow(
-                    label: 'Next billing',
-                    value: DateFormat.yMMMd().format(nextDue),
+                    label: tr.subDetailNextBilling,
+                    value: formatDate(nextDue),
                   ),
                 if (endDate != null)
                   _DetailRow(
-                    label: 'Ends on',
-                    value: DateFormat.yMMMd().format(endDate),
+                    label: tr.subDetailEndsOn,
+                    value: formatDate(endDate),
                   ),
                 _DetailRow(
-                  label: 'Total paid (est.)',
+                  label: tr.subDetailTotalPaid,
                   value: formatAmount(totalPaid, currency: currency),
                 ),
               ],
@@ -513,7 +498,7 @@ class _SubscriptionDetailScreenState
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
               child: Text(
-                'PRICE HISTORY',
+                tr.subDetailPriceHistory,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -556,7 +541,7 @@ class _SubscriptionDetailScreenState
                           ),
                           const Spacer(),
                           Text(
-                            '${priceHistory[i]['from'] ?? ''}${i < priceHistory.length - 1 ? ' - ${priceHistory[i + 1]['from'] ?? ''}' : ' - present'}',
+                            '${priceHistory[i]['from'] ?? ''}${i < priceHistory.length - 1 ? ' - ${priceHistory[i + 1]['from'] ?? ''}' : ' - ${tr.subDetailPresent}'}',
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.ts(context),
@@ -579,8 +564,8 @@ class _SubscriptionDetailScreenState
                   onPressed: _setCancellationDate,
                   icon: const Icon(Icons.event_rounded, size: 18),
                   label: Text(endDate != null
-                      ? 'Change Cancel Date'
-                      : 'Set Cancellation Date'),
+                      ? tr.subDetailChangeCancel
+                      : tr.subDetailSetCancel),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.overspent,
                     side: const BorderSide(color: AppColors.overspent),
@@ -601,7 +586,7 @@ class _SubscriptionDetailScreenState
                         : Icons.play_arrow_rounded,
                     size: 18,
                   ),
-                  label: Text(enabled ? 'Pause' : 'Resume'),
+                  label: Text(enabled ? tr.subPause : tr.subResume),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
                     side: BorderSide(color: AppColors.accent),
@@ -621,7 +606,7 @@ class _SubscriptionDetailScreenState
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
               child: Text(
-                'PAST TRANSACTIONS',
+                tr.subDetailPastTx,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -651,7 +636,7 @@ class _SubscriptionDetailScreenState
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
               child: Text(
-                'UPCOMING',
+                tr.subDetailUpcoming,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -674,7 +659,7 @@ class _SubscriptionDetailScreenState
                       leading: Icon(Icons.schedule_rounded,
                           size: 18, color: AppColors.th(context)),
                       title: Text(
-                        DateFormat.yMMMd().format(date),
+                        formatDate(date),
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.tp(context),
@@ -688,7 +673,7 @@ class _SubscriptionDetailScreenState
                         ),
                       ),
                       subtitle: Text(
-                        'scheduled',
+                        tr.subDetailScheduled,
                         style: TextStyle(
                           fontSize: 11,
                           color: AppColors.th(context),
@@ -751,7 +736,7 @@ class _PastTransactionTile extends StatelessWidget {
       leading: Icon(Icons.check_circle_rounded,
           size: 18, color: AppColors.healthy),
       title: Text(
-        date != null ? DateFormat.yMMMd().format(date) : '—',
+        date != null ? formatDate(date) : '—',
         style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
       ),
       trailing: Text(

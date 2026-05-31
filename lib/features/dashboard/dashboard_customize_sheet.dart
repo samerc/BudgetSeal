@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/dashboard_layout_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 
 /// Bottom sheet for reordering and toggling dashboard sections.
@@ -50,7 +51,7 @@ class _CustomizeSheet extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Customize Dashboard',
+                Text(S.of(context).customizeTitle,
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -60,7 +61,7 @@ class _CustomizeSheet extends ConsumerWidget {
                     notifier.reset();
                     Navigator.pop(context);
                   },
-                  child: const Text('Reset'),
+                  child: Text(S.of(context).commonReset),
                 ),
               ],
             ),
@@ -69,7 +70,7 @@ class _CustomizeSheet extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'Drag to reorder. Toggle to show/hide sections.',
+              S.of(context).customizeDesc,
               style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
             ),
           ),

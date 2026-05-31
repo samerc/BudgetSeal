@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 /// A reusable error display with an icon, message, and retry button.
@@ -9,13 +10,13 @@ import '../theme/app_colors.dart';
 /// file paths, and stack traces. Full technical details are logged via
 /// debugPrint for developer debugging.
 class ErrorRetry extends StatelessWidget {
-  final String message;
+  final String? message;
   final String? details;
   final VoidCallback onRetry;
 
   const ErrorRetry({
     super.key,
-    this.message = 'Something went wrong',
+    this.message,
     this.details,
     required this.onRetry,
   });
@@ -47,6 +48,7 @@ class ErrorRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayMessage = message ?? S.of(context).commonSomethingWentWrong;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -60,7 +62,7 @@ class ErrorRetry extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              message,
+              displayMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -87,9 +89,9 @@ class ErrorRetry extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(
-                'Retry',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              label: Text(
+                S.of(context).commonRetry,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ),
           ],
@@ -120,7 +122,7 @@ class _ExpandableDetailsState extends State<_ExpandableDetails> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _expanded ? 'Hide details' : 'Show details',
+                _expanded ? S.of(context).commonHideDetails : S.of(context).commonShowDetails,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.ts(context),

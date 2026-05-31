@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
@@ -170,7 +171,7 @@ class CategoryPill extends StatelessWidget {
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                name ?? 'Category',
+                name ?? S.of(context).txDetailCategory,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,
@@ -300,7 +301,7 @@ class LineCard extends StatelessWidget {
                         Icon(Icons.account_balance_rounded,
                             size: 16, color: AppColors.th(context)),
                         const SizedBox(width: 8),
-                        Text('Select account',
+                        Text(S.of(context).txWidgetSelectAccount,
                             style: TextStyle(
                                 color: AppColors.th(context), fontSize: 13)),
                       ],

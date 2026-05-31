@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
+import '../../l10n/s_lookup.dart';
 import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
@@ -106,7 +107,7 @@ class PeriodEngine {
           entryType: 'period_reset',
           amount: -leftoverAmount,
           currency: currency,
-          note: Value('Period reset — returned to Unallocated'),
+          note: Value(currentS().enginePeriodReturned),
           deviceId: deviceId,
         ));
 
@@ -119,7 +120,7 @@ class PeriodEngine {
           entryType: 'period_reset',
           amount: -leftoverAmount,
           currency: currency,
-          note: Value('Period reset — transferred out'),
+          note: Value(currentS().enginePeriodOut),
           deviceId: deviceId,
         ));
         // Credit target
@@ -129,7 +130,7 @@ class PeriodEngine {
           entryType: 'funding',
           amount: leftoverAmount,
           currency: currency,
-          note: Value('Received from period reset'),
+          note: Value(currentS().enginePeriodReceived),
           deviceId: deviceId,
         ));
 
@@ -141,7 +142,7 @@ class PeriodEngine {
           entryType: 'carry_forward',
           amount: 0, // balance unchanged, just a marker
           currency: currency,
-          note: Value('Period carry-forward'),
+          note: Value(currentS().engineCarryForward),
           deviceId: deviceId,
         ));
     }

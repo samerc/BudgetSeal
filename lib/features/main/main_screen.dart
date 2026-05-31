@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/haptics.dart';
 import '../allocations/allocations_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -95,9 +96,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         }
         _lastBackPress = now;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Press back again to exit'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(S.of(context).navPressBackToExit),
+            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -113,31 +114,31 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabTapped,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded),
+              label: S.of(context).tabHome,
             ),
             NavigationDestination(
-              icon: Icon(Icons.swap_vert),
-              selectedIcon: Icon(Icons.swap_vert_rounded),
-              label: 'Activity',
+              icon: const Icon(Icons.swap_vert),
+              selectedIcon: const Icon(Icons.swap_vert_rounded),
+              label: S.of(context).tabActivity,
             ),
             NavigationDestination(
-              icon: Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: Icon(Icons.account_balance_wallet_rounded),
-              label: 'Budget',
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: const Icon(Icons.account_balance_wallet_rounded),
+              label: S.of(context).tabBudget,
             ),
             NavigationDestination(
-              icon: Icon(Icons.pie_chart_outline_rounded),
-              selectedIcon: Icon(Icons.pie_chart_rounded),
-              label: 'Reports',
+              icon: const Icon(Icons.pie_chart_outline_rounded),
+              selectedIcon: const Icon(Icons.pie_chart_rounded),
+              label: S.of(context).tabReports,
             ),
             NavigationDestination(
-              icon: Icon(Icons.grid_view),
-              selectedIcon: Icon(Icons.grid_view_rounded),
-              label: 'More',
+              icon: const Icon(Icons.grid_view),
+              selectedIcon: const Icon(Icons.grid_view_rounded),
+              label: S.of(context).tabMore,
             ),
           ],
         ),

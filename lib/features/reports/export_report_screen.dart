@@ -11,6 +11,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -42,7 +43,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Report'),
+        title: Text(S.of(context).exportReportTitle),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
@@ -65,7 +66,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                     Icon(Icons.picture_as_pdf_rounded,
                         size: 24, color: AppColors.accent),
                     const SizedBox(width: 12),
-                    Text('Monthly Report',
+                    Text(S.of(context).exportMonthlyTitle,
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -73,8 +74,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                   ]),
                   const SizedBox(height: 12),
                   Text(
-                    'Generate a printable HTML report for a selected month. '
-                    'Open it in a browser and use Print > Save as PDF.',
+                    S.of(context).exportMonthlyDesc,
                     style: TextStyle(
                         fontSize: 13, color: AppColors.ts(context)),
                   ),
@@ -113,7 +113,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                                 color: Colors.white, strokeWidth: 2))
                         : const Icon(Icons.share_rounded, size: 18),
                     label: Text(
-                        _exporting ? 'Generating...' : 'Generate & Share'),
+                        _exporting ? S.of(context).exportGenerating : S.of(context).exportGenerateShare),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.accent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -188,6 +188,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
         categoryBreakdown: sortedCats,
         transactions: filtered,
         categoryMap: categoryMap,
+        spendingByCatLabel: S.of(context).exportSpendingByCat,
       );
 
       final tempDir = await getTemporaryDirectory();
@@ -223,6 +224,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
     required String baseCurrency,
     required double totalIncome,
     required double totalExpense,
+    required String spendingByCatLabel,
     required double net,
     required List<MapEntry<String, double>> categoryBreakdown,
     required List<TransactionEntry> transactions,
@@ -299,7 +301,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
   </div>
 </div>
 
-<h2>Spending by Category</h2>
+<h2>$spendingByCatLabel</h2>
 <table>
   <thead><tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">%</th></tr></thead>
   <tbody>$catRows</tbody>

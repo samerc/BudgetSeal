@@ -8,6 +8,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:qr_widget/qr_widget.dart';
 
 import '../../core/providers/web_companion_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import 'web_companion_auth.dart';
@@ -39,9 +40,15 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       final info = NetworkInfo();
       final ip = await info.getWifiIP();
       final name = await info.getWifiName();
+      final bssid = await info.getWifiBSSID();
       if (!mounted) return;
 
-      final connected = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
+      // Verify actual WiFi — not just cellular with an IP.
+      // BSSID is null or 02:00:00:00:00:00 when only cellular is active.
+      final hasIp = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
+      final hasWifiAP = bssid != null && bssid.isNotEmpty && bssid != '02:00:00:00:00:00';
+      final hasWifiName = name != null && name.isNotEmpty && name != '<unknown ssid>';
+      final connected = hasIp && (hasWifiAP || hasWifiName);
 
       // Check if the network name suggests a public network
       final lower = (name ?? '').replaceAll('"', '').toLowerCase();
@@ -90,13 +97,18 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Future<void> _doStart(WebCompanionService service) async {
+    // Re-check WiFi right before starting (state may have changed since screen opened)
+    await _checkWifiConnectivity();
+    if (!_hasWifi) return;
+
     if (Platform.isAndroid) {
       // Request POST_NOTIFICATIONS on Android 13+ before starting
       final result = await FlutterForegroundTask.requestNotificationPermission();
       if (result != NotificationPermission.granted && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notification permission is needed to keep the server running in the background.'),
+          SnackBar(
+            content: Text(S.of(context).wcNotifPermission),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -108,9 +120,9 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
 
   void _showSetPinSheet({VoidCallback? onSuccess}) {
     _showPinInputSheet(
-      title: 'Set Web PIN',
-      subtitle: 'This PIN protects your budget data. Anyone on the same WiFi will need it to access the web interface.',
-      confirmLabel: 'Set PIN',
+      title: S.of(context).wcSetPinTitle,
+      subtitle: S.of(context).wcSetPinSubtitle,
+      confirmLabel: S.of(context).wcSetPin,
       onConfirm: (pin) async {
         await WebCompanionAuth.setPin(pin);
         if (mounted) {
@@ -124,9 +136,9 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
 
   void _showChangePinSheet() {
     _showPinInputSheet(
-      title: 'Change PIN',
-      subtitle: 'Enter a new 4-digit PIN for your web interface.',
-      confirmLabel: 'Update PIN',
+      title: S.of(context).wcChangePinTitle,
+      subtitle: S.of(context).wcChangePinSubtitle,
+      confirmLabel: S.of(context).wcUpdatePin,
       onConfirm: (pin) async {
         await WebCompanionAuth.setPin(pin);
         // Revoke existing sessions since PIN changed
@@ -134,7 +146,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('PIN updated. All active sessions signed out.')),
+            SnackBar(content: Text(S.of(context).wcPinUpdated), behavior: SnackBarBehavior.floating),
           );
         }
       },
@@ -150,6 +162,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     final controller = TextEditingController();
     String? error;
 
+    final tr = S.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -186,7 +199,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     maxLength: 4,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: '4-digit PIN',
+                      labelText: tr.wc4DigitPin,
                       errorText: error,
                       counterText: '',
                       border: OutlineInputBorder(
@@ -203,7 +216,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       onPressed: () async {
                         final pin = controller.text.trim();
                         if (pin.length != 4) {
-                          setModalState(() => error = 'Enter exactly 4 digits');
+                          setModalState(() => error = tr.wcEnter4DigitsError);
                           return;
                         }
                         await onConfirm(pin);
@@ -227,7 +240,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     final state = ref.watch(webCompanionProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Web Companion')),
+      appBar: AppBar(title: Text(S.of(context).wcTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         children: [
@@ -277,13 +290,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Widget _buildStatusCard(WebCompanionState state) {
+    final tr = S.of(context);
     final (statusText, statusColor, statusIcon) = !_hasWifi && !state.isRunning
-        ? ('No WiFi', AppColors.th(context), Icons.wifi_off_rounded)
+        ? (tr.wcNoWifi, AppColors.th(context), Icons.wifi_off_rounded)
         : switch (state.status) {
-            WebServerStatus.stopped => ('Server stopped', AppColors.ts(context), Icons.stop_circle_outlined),
-            WebServerStatus.starting => ('Starting...', const Color(0xFF0EA5E9), Icons.hourglass_top_rounded),
-            WebServerStatus.running => ('Server running', const Color(0xFF059669), Icons.check_circle_rounded),
-            WebServerStatus.error => ('Error', const Color(0xFFDC2626), Icons.error_outline_rounded),
+            WebServerStatus.stopped => (tr.wcStopped, AppColors.ts(context), Icons.stop_circle_outlined),
+            WebServerStatus.starting => (tr.wcStarting, const Color(0xFF0EA5E9), Icons.hourglass_top_rounded),
+            WebServerStatus.running => (tr.wcRunning, const Color(0xFF059669), Icons.check_circle_rounded),
+            WebServerStatus.error => (tr.wcError, const Color(0xFFDC2626), Icons.error_outline_rounded),
           };
 
     return Container(
@@ -323,7 +337,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     ] else if (state.isRunning && state.startedAt != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'Stops automatically after 6 hours',
+                        tr.wcAutoStop,
                         style:
                             TextStyle(fontSize: 13, color: AppColors.ts(context)),
                       ),
@@ -347,7 +361,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                             backgroundColor:
                                 Theme.of(context).colorScheme.error)
                         : null,
-                    child: Text(state.isRunning ? 'Stop Server' : 'Start Server'),
+                    child: Text(state.isRunning ? tr.wcStopButton : tr.wcStartButton),
                   ),
           ),
         ],
@@ -368,7 +382,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Open on your laptop',
+            S.of(context).wcOpenOnLaptop,
             style: TextStyle(
                 fontSize: TypographyTokens.cardTitleSize,
                 fontWeight: FontWeight.w700,
@@ -411,11 +425,11 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: url));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('URL copied to clipboard')),
+                    SnackBar(content: Text(S.of(context).wcUrlCopied), behavior: SnackBarBehavior.floating),
                   );
                 },
                 icon: const Icon(Icons.copy_rounded),
-                tooltip: 'Copy URL',
+                tooltip: S.of(context).wcCopyUrl,
               ),
             ],
           ),
@@ -434,7 +448,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  _showQr ? 'Hide QR code' : 'Show QR code',
+                  _showQr ? S.of(context).wcHideQr : S.of(context).wcShowQr,
                   style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF2563EB),
@@ -477,7 +491,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Security',
+            S.of(context).wcSecurityTitle,
             style: TextStyle(
                 fontSize: TypographyTokens.cardTitleSize,
                 fontWeight: FontWeight.w700,
@@ -485,7 +499,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'A PIN is required to access the web interface.',
+            S.of(context).wcPinRequired,
             style: TextStyle(fontSize: 14, color: AppColors.ts(context)),
           ),
           const SizedBox(height: 16),
@@ -502,7 +516,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                _hasPinSet ? 'PIN is set' : 'No PIN set',
+                _hasPinSet ? S.of(context).wcPinIsSet : S.of(context).wcNoPin,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -516,7 +530,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 onPressed: _hasPinSet
                     ? _showChangePinSheet
                     : () => _showSetPinSheet(),
-                child: Text(_hasPinSet ? 'Change PIN' : 'Set PIN'),
+                child: Text(_hasPinSet ? S.of(context).wcChangePin : S.of(context).wcSetPin),
               ),
             ],
           ),
@@ -541,7 +555,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Keep PocketPlan in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.',
+              S.of(context).wcIosWarning,
               style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF92400E),
@@ -574,7 +588,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   size: 20),
               const SizedBox(width: 8),
               Text(
-                'No WiFi Connection',
+                S.of(context).wcNoWifiTitle,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -591,7 +605,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     minimumSize: Size.zero,
                   ),
                   child: Text(
-                    'Retry',
+                    S.of(context).commonRetry,
                     style: TextStyle(
                       fontSize: 13,
                       color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
@@ -603,7 +617,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Connect your phone to a WiFi network to use Web Companion. The server needs WiFi to let your laptop access the budget.',
+            S.of(context).wcNoWifiDesc,
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
@@ -650,7 +664,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                isPublic ? 'Public Network Detected' : 'Network Security',
+                isPublic ? S.of(context).wcPublicNetwork : S.of(context).wcNetworkSecurity,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -666,10 +680,10 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           const SizedBox(height: 8),
           Text(
             isPublic
-                ? 'You appear to be on a public network${_wifiName != null && _wifiName!.isNotEmpty ? ' ("$_wifiName")' : ''}. '
-                  'Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.'
-                : 'Web Companion uses HTTP (unencrypted). Only use it on your private home or office WiFi. '
-                  'Never start the server on public networks (hotels, airports, cafes) — anyone on the same network could see your data.',
+                ? (_wifiName != null && _wifiName!.isNotEmpty
+                    ? S.of(context).wcPublicNetworkDescNamed(_wifiName!)
+                    : S.of(context).wcPublicNetworkDescUnnamed)
+                : S.of(context).wcNetworkSecurityDesc,
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
@@ -703,9 +717,9 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Security Warning',
-                  style: TextStyle(
+                Text(
+                  S.of(context).wcSecurityWarning,
+                  style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF92400E)),
@@ -713,8 +727,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 const SizedBox(height: 4),
                 Text(
                   _wifiName != null && _wifiName!.isNotEmpty
-                      ? 'Network "$_wifiName" may be public. Traffic is unencrypted — avoid using Web Companion on public WiFi, as others on the same network could intercept your data.'
-                      : 'Could not detect your WiFi network name. If you\'re on a public network, avoid using Web Companion — traffic is unencrypted and could be intercepted.',
+                      ? S.of(context).wcSecurityWarningNamed(_wifiName!)
+                      : S.of(context).wcSecurityWarningUnnamed,
                   style: const TextStyle(
                       fontSize: 13,
                       color: Color(0xFF92400E),
@@ -740,16 +754,16 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _infoRow(Icons.wifi_rounded,
-              'Only accessible on the same WiFi network'),
+              S.of(context).wcInfo1),
           const SizedBox(height: 10),
           _infoRow(Icons.timer_outlined,
-              'Server stops automatically after 6 hours'),
+              S.of(context).wcInfo2),
           const SizedBox(height: 10),
           _infoRow(Icons.security_rounded,
-              '5 failed PIN attempts locks the interface for 30 minutes'),
+              S.of(context).wcInfo3),
           const SizedBox(height: 10),
           _infoRow(Icons.lock_outline_rounded,
-              'Use only on trusted private networks — traffic is not encrypted'),
+              S.of(context).wcInfo4),
         ],
       ),
     );

@@ -12,6 +12,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -58,7 +59,7 @@ class _TravelExchangeScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Travel Exchange'),
+        title: Text(S.of(context).travelTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -81,7 +82,7 @@ class _TravelExchangeScreenState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Exchange money for your trip. A temporary travel wallet will be created automatically.',
+                      S.of(context).travelInfo,
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.ts(context),
@@ -95,7 +96,7 @@ class _TravelExchangeScreenState
             const SizedBox(height: 20),
 
             // ── From Account ──
-            _SectionLabel(label: 'FROM'),
+            _SectionLabel(label: S.of(context).travelFrom),
             const SizedBox(height: 6),
             _FormCard(
               child: DropdownButtonHideUnderline(
@@ -106,7 +107,7 @@ class _TravelExchangeScreenState
                     Icon(Icons.account_balance_rounded,
                         size: 16, color: AppColors.th(context)),
                     const SizedBox(width: 10),
-                    Text('Select account',
+                    Text(S.of(context).travelSelectAccount,
                         style: TextStyle(color: AppColors.th(context))),
                   ]),
                   icon: Icon(Icons.expand_more_rounded,
@@ -140,7 +141,7 @@ class _TravelExchangeScreenState
             const SizedBox(height: 16),
 
             // ── Amount to exchange ──
-            _SectionLabel(label: 'AMOUNT TO EXCHANGE'),
+            _SectionLabel(label: S.of(context).travelAmountToExchange),
             const SizedBox(height: 6),
             _FormCard(
               child: Padding(
@@ -173,13 +174,13 @@ class _TravelExchangeScreenState
             const SizedBox(height: 20),
 
             // ── Target Currency ──
-            _SectionLabel(label: 'TRAVEL CURRENCY'),
+            _SectionLabel(label: S.of(context).travelCurrencySection),
             const SizedBox(height: 6),
             _FormCard(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: CurrencyPickerField(
-                  label: 'Currency you receive',
+                  label: S.of(context).travelCurrencyReceive,
                   value: _targetCurrency,
                   onChanged: (v) => setState(() => _targetCurrency = v),
                 ),
@@ -188,7 +189,7 @@ class _TravelExchangeScreenState
             const SizedBox(height: 16),
 
             // ── Amount received ──
-            _SectionLabel(label: 'AMOUNT RECEIVED'),
+            _SectionLabel(label: S.of(context).travelAmountReceived),
             const SizedBox(height: 6),
             _FormCard(
               child: Padding(
@@ -246,7 +247,7 @@ class _TravelExchangeScreenState
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
                   : const Icon(Icons.flight_takeoff_rounded, size: 18),
-              label: const Text('Exchange & Create Travel Wallet',
+              label: Text(S.of(context).travelExchangeButton,
                   style:
                       TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               style: FilledButton.styleFrom(
@@ -358,7 +359,7 @@ class _TravelExchangeScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: const Text('Exchange failed. Please try again.'),
+              content: Text(S.of(context).travelExchangeFailed),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -395,13 +396,13 @@ class _TravelExchangeScreenState
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Existing Travel Wallet'),
+        title: Text(S.of(context).travelExistingWallet),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'You have a previous ${existing.currency} travel wallet:',
+              S.of(context).travelPreviousWallet(existing.currency),
               style: TextStyle(color: tsColor),
             ),
             const SizedBox(height: 12),
@@ -424,7 +425,7 @@ class _TravelExchangeScreenState
                         Text(existing.name,
                             style: const TextStyle(fontWeight: FontWeight.w600)),
                         Text(
-                          'Balance: ${formatAmount(balance, currency: existing.currency)}',
+                          S.of(context).travelBalanceLabel(formatAmount(balance, currency: existing.currency)),
                           style: TextStyle(
                               fontSize: 12, color: tsColor),
                         ),
@@ -439,15 +440,15 @@ class _TravelExchangeScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Create New'),
+            child: Text(S.of(context).travelCreateNew),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Reactivate'),
+            child: Text(S.of(context).travelReactivate),
           ),
         ],
       ),

@@ -30,6 +30,7 @@ import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -55,14 +56,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final s = S.of(context);
       showHintIfNeeded(
         context,
         hintId: 'dashboard_welcome',
         icon: Icons.waving_hand_rounded,
-        title: 'Welcome to PocketPlan!',
-        body:
-            'Start by adding your first expense — tap the + button on the Activity tab. '
-            'Then head to the Budget tab to create envelopes and assign your money.',
+        title: s.dashboardWelcomeTitle,
+        body: s.dashboardWelcomeBody,
+      );
+      showHintIfNeeded(
+        context,
+        hintId: 'dashboard_quick_actions_hint',
+        icon: Icons.lightbulb_outline_rounded,
+        title: s.dashboardQuickActionsHintTitle,
+        body: s.dashboardQuickActionsHintBody,
       );
     });
   }
@@ -106,36 +113,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   child: Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Household',
-                              style: TextStyle(
-                                color: AppColors.ts(context),
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              household?.name ?? 'PocketPlan',
-                              style: TextStyle(
-                                color: AppColors.tp(context),
-                                fontSize: TypographyTokens.screenTitleSize,
-                                fontWeight: TypographyTokens.screenTitleWeight,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          household?.name ?? S.of(context).dashboardDefaultName,
+                          style: TextStyle(
+                            color: AppColors.tp(context),
+                            fontSize: TypographyTokens.screenTitleSize,
+                            fontWeight: TypographyTokens.screenTitleWeight,
+                          ),
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Customize',
+                        tooltip: S.of(context).dashboardCustomizeTooltip,
                         icon: Icon(Icons.tune_rounded,
                             color: AppColors.ts(context), size: 20),
                         onPressed: () => showDashboardCustomizeSheet(context),
                       ),
                       IconButton(
-                        tooltip: 'Search',
+                        tooltip: S.of(context).dashboardSearchTooltip,
                         icon: Icon(Icons.search_rounded,
                             color: AppColors.ts(context)),
                         onPressed: () => _showGlobalSearch(context, ref),
@@ -219,7 +213,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           final catId = e.tx.categoryId;
                           if (catId != null) {
                             final cat = categoryMap[catId];
-                            final name = cat?.name ?? 'Other';
+                            final otherLabel = S.of(context).dashboardOtherCategory;
+                            final name = cat?.name ?? otherLabel;
                             catSpend[name] =
                                 (catSpend[name] ?? 0) + baseAmt;
                             if (cat != null &&
@@ -227,8 +222,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                               catColors[name] = AppColors.fromHex(cat.colorHex);
                             }
                           } else {
-                            catSpend['Other'] =
-                                (catSpend['Other'] ?? 0) + baseAmt;
+                            final otherLabel = S.of(context).dashboardOtherCategory;
+                            catSpend[otherLabel] =
+                                (catSpend[otherLabel] ?? 0) + baseAmt;
                           }
                         }
                       }
@@ -257,7 +253,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 220),
                     error: (e, _) => ErrorRetry(
-                      message: "Couldn't load your data",
+                      message: S.of(context).dashboardError,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(currentMonthTransactionsProvider),
@@ -288,7 +284,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         final increase = ((entry.value - prevAmt) / prevAmt * 100).round();
                         if (increase > topIncrease) {
                           topIncrease = increase.toDouble();
-                          topCat = categoryMap[entry.key]?.name ?? 'a category';
+                          topCat = categoryMap[entry.key]?.name ?? S.of(context).dashboardOtherCategory;
                         }
                       }
                     }
@@ -300,22 +296,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     IconData? icon;
                     Color? color;
 
+                    final sl = S.of(context);
                     if (topCat != null && topIncrease >= 30) {
-                      message = '$topCat spending is ${topIncrease.round()}% higher than last month';
+                      message = sl.dashboardCatSpendingHigher(topCat, topIncrease.round());
                       icon = Icons.trending_up_rounded;
                       color = AppColors.caution;
                     } else if (pctChange <= -15) {
-                      message = 'Spending is ${pctChange.abs()}% lower than last month — nice!';
+                      message = sl.dashboardSpendingLowerNice(pctChange.abs());
                       icon = Icons.trending_down_rounded;
                       color = AppColors.healthy;
                     } else if (pctChange >= 20) {
-                      message = 'Spending is $pctChange% higher than last month';
+                      message = sl.dashboardSpendingHigher(pctChange);
                       icon = Icons.trending_up_rounded;
                       color = AppColors.caution;
                     }
 
                     if (message == null) {
-                      message = 'Spending is on track this month';
+                      message = sl.dashboardSpendingOnTrack;
                       icon = Icons.check_circle_outline_rounded;
                       color = AppColors.healthy;
                     }
@@ -343,11 +340,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.quickActions] = [
-                  Row(
+                  SectionHeader(S.of(context).dashboardSectionQuickLabel),
+                  const SizedBox(height: 8),
+                  Builder(builder: (context) {
+                    final qs = S.of(context);
+                    return Row(
                     children: [
                       _QuickAction(
                         icon: Icons.remove_rounded,
-                        label: 'Expense',
+                        label: qs.dashboardQuickExpense,
                         color: ref.watch(txColorsProvider).expense,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'expense'}),
@@ -355,7 +356,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.add_rounded,
-                        label: 'Income',
+                        label: qs.dashboardQuickIncome,
                         color: ref.watch(txColorsProvider).income,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'income'}),
@@ -363,7 +364,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.swap_horiz_rounded,
-                        label: 'Transfer',
+                        label: qs.dashboardQuickTransfer,
                         color: ref.watch(txColorsProvider).transfer,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'transfer'}),
@@ -371,21 +372,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.savings_rounded,
-                        label: 'Fund',
-                        tooltip: 'Fund envelopes',
+                        label: qs.dashboardQuickFund,
+                        tooltip: qs.dashboardFundEnvelopesTooltip,
                         color: const Color(0xFF7E57C2),
                         onTap: () => context.push('/funding'),
                       ),
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.call_split_rounded,
-                        label: 'Split',
-                        tooltip: 'Split a bill',
+                        label: qs.dashboardQuickSplit,
+                        tooltip: qs.dashboardSplitBillTooltip,
                         color: const Color(0xFFFF8A65),
                         onTap: () => context.push('/bill-splitter'),
                       ),
                     ],
-                  ),
+                  );
+                  }),
                   const SizedBox(height: 20),
     ];
 
@@ -432,7 +434,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                             Icon(Icons.account_balance_rounded,
                                                 size: 13, color: AppColors.ts(context)),
                                             const SizedBox(width: 5),
-                                            Text('Net Worth',
+                                            Text(S.of(context).dashboardNetWorth,
                                                 style: TextStyle(
                                                     fontSize: 11,
                                                     color: AppColors.ts(context))),
@@ -451,7 +453,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                         ),
                                         if (otherNetWorthCount > 0)
                                           Text(
-                                            '+ $otherNetWorthCount other',
+                                            S.of(context).dashboardOtherCount(otherNetWorthCount),
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color: AppColors.th(context)),
@@ -460,56 +462,55 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                     ),
                                   ),
                                 ),
-                                // Divider
-                                Container(
-                                  width: 1,
-                                  height: 40,
-                                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                                  color: AppColors.bd(context),
-                                ),
-                                // Unallocated
-                                Expanded(
-                                  child: Tappable(
-                                    onTap: () => context.push('/funding'),
-                                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.account_balance_wallet_outlined,
-                                                size: 13, color: AppColors.ts(context)),
-                                            const SizedBox(width: 5),
-                                            Text('Unallocated',
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    color: AppColors.ts(context))),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        RollingNumber(
-                                          amount: unallocBase,
-                                          currency: baseCurrency,
-                                          lazyFirstRender: false,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                            color: unallocBase >= 0
-                                                ? AppColors.tp(context)
-                                                : AppColors.overspent,
+                                // Unallocated — only show when positive (actionable)
+                                if (unallocBase >= 0.01) ...[
+                                  Container(
+                                    width: 1,
+                                    height: 40,
+                                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                                    color: AppColors.bd(context),
+                                  ),
+                                  Expanded(
+                                    child: Tappable(
+                                      onTap: () => context.push('/funding'),
+                                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(Icons.account_balance_wallet_outlined,
+                                                  size: 13, color: AppColors.ts(context)),
+                                              const SizedBox(width: 5),
+                                              Text(S.of(context).dashboardUnallocated,
+                                                  style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: AppColors.ts(context))),
+                                            ],
                                           ),
-                                        ),
-                                        if (otherUnallocCount > 0)
-                                          Text(
-                                            '+ $otherUnallocCount other',
+                                          const SizedBox(height: 4),
+                                          RollingNumber(
+                                            amount: unallocBase,
+                                            currency: baseCurrency,
+                                            lazyFirstRender: false,
                                             style: TextStyle(
-                                                fontSize: 10,
-                                                color: AppColors.th(context)),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                              color: AppColors.tp(context),
+                                            ),
                                           ),
-                                      ],
+                                          if (otherUnallocCount > 0)
+                                            Text(
+                                              S.of(context).dashboardOtherCount(otherUnallocCount),
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: AppColors.th(context)),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           );
@@ -520,7 +521,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 60),
                     error: (e, _) => ErrorRetry(
-                      message: "Couldn't load your data",
+                      message: S.of(context).dashboardError,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(accountsWithBalanceProvider),
@@ -530,9 +531,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.activity] = [
-                  const SectionHeader('Activity'),
-                  const SizedBox(height: 8),
-                  // Quick Templates (above recent transactions)
+                  // Quick Templates (only shown when templates exist — handled internally)
                   _QuickTemplatesSection(),
                   const SizedBox(height: 4),
                   recentTxAsync.when(
@@ -550,7 +549,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 Icon(Icons.receipt_long_rounded,
                                     size: 36, color: AppColors.th(context)),
                                 const SizedBox(height: 8),
-                                Text('No transactions yet',
+                                Text(S.of(context).dashboardNoTransactionsYet,
                                     style: TextStyle(
                                         color: AppColors.ts(context))),
                                 const SizedBox(height: 12),
@@ -558,7 +557,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                   onPressed: () => context.push(
                                       '/add-transaction',
                                       extra: {'editType': 'expense'}),
-                                  child: const Text('Add your first expense'),
+                                  child: Text(S.of(context).dashboardAddFirstExpense),
                                 ),
                               ],
                             ),
@@ -592,7 +591,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                         size: 16, color: AppColors.accent),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'No transactions today — tap + to add one',
+                                      S.of(context).dashboardNoTransactionsToday,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.accent,
@@ -619,7 +618,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 200),
                     error: (e, _) => ErrorRetry(
-                      message: "Couldn't load your data",
+                      message: S.of(context).dashboardError,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(recentTransactionsProvider),
@@ -639,7 +638,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
 
   void _showGlobalSearch(BuildContext context, WidgetRef ref) {
-    showSearch(context: context, delegate: _GlobalSearchDelegate(ref));
+    showSearch(context: context, delegate: _GlobalSearchDelegate(ref, S.of(context)));
   }
 
 }
@@ -669,7 +668,7 @@ class _SpendingOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final net = income - expense;
     final periodLabel =
-        showWeekly ? 'Last 7 Days' : DateFormat('MMMM').format(DateTime.now());
+        showWeekly ? S.of(context).dashboardLast7Days : DateFormat('MMMM').format(DateTime.now());
     final sorted = categorySpend.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final topCategories = sorted.take(5).toList();
@@ -712,7 +711,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                   child: Text(
-                    showWeekly ? 'This Month' : 'Last 7 Days',
+                    showWeekly ? S.of(context).dashboardThisMonth : S.of(context).dashboardLast7Days,
                     style: TextStyle(
                       fontSize: TypographyTokens.overlineSize,
                       fontWeight: FontWeight.w600,
@@ -728,8 +727,8 @@ class _SpendingOverviewCard extends StatelessWidget {
             children: [
               Semantics(
                 label: expense > 0
-                    ? 'Spending chart, total ${formatAmount(expense, currency: currency)}, ${topCategories.length} categories'
-                    : 'No spending this period',
+                    ? S.of(context).dashboardChartSemantic(formatAmount(expense, currency: currency), topCategories.length)
+                    : S.of(context).dashboardNoSpendingSemantic,
                 child: SizedBox(
                 width: 120,
                 height: 120,
@@ -770,7 +769,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                                           color: AppColors.tp(context))),
                                 ),
                               ),
-                              Text('spent',
+                              Text(S.of(context).dashboardSpent,
                                   style: TextStyle(
                                       fontSize: 10,
                                       color: AppColors.ts(context))),
@@ -785,7 +784,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                             Icon(Icons.pie_chart_outline_rounded,
                                 size: 32, color: AppColors.th(context)),
                             const SizedBox(height: 4),
-                            Text('No spending',
+                            Text(S.of(context).dashboardNoSpending,
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.ts(context))),
@@ -799,14 +798,14 @@ class _SpendingOverviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _MiniStat(
-                        label: 'Income',
+                        label: S.of(context).dashboardLabelIncome,
                         amount: income,
                         color: AppColors.healthy,
                         currency: currency,
                         prefix: '+'),
                     const SizedBox(height: 8),
                     _MiniStat(
-                        label: 'Expenses',
+                        label: S.of(context).dashboardLabelExpenses,
                         amount: expense,
                         color: AppColors.overspent,
                         currency: currency,
@@ -817,7 +816,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                           height: 1, color: AppColors.bd(context)),
                     ),
                     _MiniStat(
-                        label: 'Net',
+                        label: S.of(context).dashboardLabelNet,
                         amount: net.abs(),
                         color: net >= 0
                             ? AppColors.healthy
@@ -918,10 +917,10 @@ class _QuickAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Semantics(
-        label: tooltip ?? 'Add $label',
+        label: tooltip ?? S.of(context).dashboardAddLabel(label),
         button: true,
         child: Tooltip(
-          message: tooltip ?? 'Add $label',
+          message: tooltip ?? S.of(context).dashboardAddLabel(label),
           child: Tappable(
             onTap: onTap,
             borderRadius: BorderRadius.circular(CardTokens.radius),
@@ -972,10 +971,11 @@ class _RecentTxTile extends ConsumerWidget {
     final cat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
     final catColor =
         cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent;
-    return GestureDetector(
-      onTap: () => context.push('/transactions/${tx.id}'),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Tappable(
+        onTap: () => context.push('/transactions/${tx.id}'),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         child: Container(
           padding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1000,8 +1000,11 @@ class _RecentTxTile extends ConsumerWidget {
                         cat?.name ??
                             (tx.note.isNotEmpty
                                 ? tx.note
-                                : tx.type[0].toUpperCase() +
-                                    tx.type.substring(1)),
+                                : switch (tx.type) {
+                                    'income' => S.of(context).typeIncome,
+                                    'transfer' => S.of(context).typeTransfer,
+                                    _ => S.of(context).typeExpense,
+                                  }),
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -1034,10 +1037,11 @@ class _RecentTxTile extends ConsumerWidget {
 
 class _GlobalSearchDelegate extends SearchDelegate<String?> {
   final WidgetRef ref;
-  _GlobalSearchDelegate(this.ref);
+  final S _s;
+  _GlobalSearchDelegate(this.ref, this._s);
 
   @override
-  String get searchFieldLabel => 'Search transactions, accounts...';
+  String get searchFieldLabel => _s.dashboardSearchPlaceholder;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -1072,7 +1076,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
   Widget _body(BuildContext context) {
     if (query.length < 2) {
       return Center(
-          child: Text('Type at least 2 characters',
+          child: Text(S.of(context).dashboardTypeAtLeast2,
               style: TextStyle(color: AppColors.ts(context))));
     }
     final q = query.toLowerCase();
@@ -1107,14 +1111,14 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         Icon(Icons.search_off_rounded,
             size: 48, color: AppColors.th(context)),
         const SizedBox(height: 12),
-        Text('No results for "$query"',
+        Text(S.of(context).dashboardNoResultsFor(query),
             style: TextStyle(color: AppColors.ts(context))),
       ]));
     }
 
     return ListView(padding: const EdgeInsets.all(16), children: [
       if (matchAcct.isNotEmpty) ...[
-        _sectionHead(context, 'Accounts'),
+        _sectionHead(context, S.of(context).dashboardSearchAccounts),
         ...matchAcct.map((a) => ListTile(
               leading:
                   Icon(Icons.credit_card_rounded, color: AppColors.accent),
@@ -1129,9 +1133,9 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         const SizedBox(height: 8),
       ],
       if (matchCat.isNotEmpty) ...[
-        _sectionHead(context, 'Categories'),
+        _sectionHead(context, S.of(context).dashboardSearchCategories),
         ...matchCat.map((c) {
-          final color = _hex(c.colorHex);
+          final color = AppColors.fromHex(c.colorHex);
           return ListTile(
             leading: CircleAvatar(
                 radius: 16,
@@ -1147,7 +1151,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         const SizedBox(height: 8),
       ],
       if (matchTx.isNotEmpty) ...[
-        _sectionHead(context, 'Transactions'),
+        _sectionHead(context, S.of(context).dashboardSearchTransactions),
         ...matchTx.map((e) {
           final cat = e.tx.categoryId != null
               ? catMap[e.tx.categoryId]
@@ -1188,30 +1192,48 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
               color: AppColors.ts(context),
               letterSpacing: 0.5)));
 
-  Color _hex(String hex) {
-    final h = hex.replaceAll('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
 }
 
 // ─── Quick-use Templates Section ──────────────────────────────────────────
 
-class _QuickTemplatesSection extends ConsumerWidget {
+class _QuickTemplatesSection extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final householdId = ref.watch(currentHouseholdIdProvider);
-    if (householdId == null) return const SizedBox.shrink();
+  ConsumerState<_QuickTemplatesSection> createState() =>
+      _QuickTemplatesSectionState();
+}
 
-    final db = ref.watch(databaseProvider);
+class _QuickTemplatesSectionState
+    extends ConsumerState<_QuickTemplatesSection> {
+  late Future<List<TransactionTemplate>> _templatesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTemplates();
+  }
+
+  void _loadTemplates() {
+    final db = ref.read(databaseProvider);
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) {
+      _templatesFuture = Future.value([]);
+      return;
+    }
+    _templatesFuture = (db.select(db.transactionTemplates)
+          ..where((t) => t.householdId.equals(householdId))
+          ..orderBy([(t) => OrderingTerm.desc(t.useCount)])
+          ..limit(3))
+        .get();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider).value ?? [];
     final catMap = {for (final c in categories) c.id: c};
+    final db = ref.watch(databaseProvider);
 
     return FutureBuilder<List<TransactionTemplate>>(
-      future: (db.select(db.transactionTemplates)
-            ..where((t) => t.householdId.equals(householdId))
-            ..orderBy([(t) => OrderingTerm.desc(t.useCount)])
-            ..limit(3))
-          .get(),
+      future: _templatesFuture,
       builder: (context, snapshot) {
         final templates = snapshot.data;
         if (templates == null || templates.isEmpty) {
@@ -1227,7 +1249,7 @@ class _QuickTemplatesSection extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Quick Templates',
+                    S.of(context).dashboardQuickTemplates,
                     style: TextStyle(
                       fontSize: TypographyTokens.cardTitleSize,
                       fontWeight: TypographyTokens.cardTitleWeight,
@@ -1237,7 +1259,7 @@ class _QuickTemplatesSection extends ConsumerWidget {
                   GestureDetector(
                     onTap: () => context.push('/templates'),
                     child: Text(
-                      'View all',
+                      S.of(context).dashboardViewAll,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

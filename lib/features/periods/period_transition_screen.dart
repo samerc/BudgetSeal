@@ -7,6 +7,7 @@ import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -106,7 +107,7 @@ class _PeriodTransitionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to complete transition. Please try again.'),
+            content: Text(S.of(context).periodTransitionFailed),
             backgroundColor: AppColors.overspent,
           ),
         );
@@ -125,13 +126,13 @@ class _PeriodTransitionScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Period'),
+        title: Text(S.of(context).periodNewTitle),
         automaticallyImplyLeading: true,
       ),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorRetry(
-          message: "Couldn't load envelopes",
+          message: S.of(context).periodError,
           details: '$e',
           onRetry: () => ref.invalidate(allocationsProvider),
         ),
@@ -169,7 +170,7 @@ class _PeriodTransitionScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('New Period',
+                          Text(S.of(context).periodNewTitle,
                               style: TextStyle(
                                 color: AppColors.tp(context),
                                 fontSize: 18,
@@ -197,12 +198,12 @@ class _PeriodTransitionScreenState
               child: Row(
                 children: [
                   Text(
-                    'Resolve leftover balances',
+                    S.of(context).periodResolveLeftovers,
                     style: textTheme.titleMedium,
                   ),
                   const Spacer(),
                   Text(
-                    '${_resolutions.length} items',
+                    S.of(context).periodNItems(_resolutions.length),
                     style: textTheme.bodySmall,
                   ),
                 ],
@@ -225,14 +226,14 @@ class _PeriodTransitionScreenState
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'No leftover balances to resolve',
+                              S.of(context).periodNoLeftovers,
                               style: textTheme.titleMedium?.copyWith(
                                 color: AppColors.ts(context),
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'All periodic allocations have zero or negative balances.',
+                              S.of(context).periodAllZero,
                               style: textTheme.bodySmall,
                               textAlign: TextAlign.center,
                             ),
@@ -291,8 +292,8 @@ class _PeriodTransitionScreenState
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Complete Period Transition',
+                      : Text(
+                          S.of(context).periodCompleteButton,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -360,8 +361,8 @@ class _ResolutionCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         resolution.rolloverDefault
-                            ? 'Rollover allocation'
-                            : 'Periodic allocation',
+                            ? S.of(context).periodRollover
+                            : S.of(context).periodPeriodic,
                         style: textTheme.bodySmall,
                       ),
                     ],
@@ -392,8 +393,8 @@ class _ResolutionCard extends StatelessWidget {
             // Resolution options
             _RadioOption(
               icon: Icons.replay_rounded,
-              label: 'Return to Unallocated',
-              description: 'Balance returns to the pool',
+              label: S.of(context).periodReturnUnallocated,
+              description: S.of(context).periodReturnDesc,
               value: LeftoverResolution.toUnallocated,
               groupValue: resolution.resolution,
               onChanged: (v) {
@@ -404,8 +405,8 @@ class _ResolutionCard extends StatelessWidget {
             ),
             _RadioOption(
               icon: Icons.forward_rounded,
-              label: 'Carry Forward',
-              description: 'Keep balance for next period',
+              label: S.of(context).periodCarryForward,
+              description: S.of(context).periodCarryDesc,
               value: LeftoverResolution.keep,
               groupValue: resolution.resolution,
               onChanged: (v) {
@@ -416,8 +417,8 @@ class _ResolutionCard extends StatelessWidget {
             ),
             _RadioOption(
               icon: Icons.swap_horiz_rounded,
-              label: 'Move to...',
-              description: 'Transfer to another allocation',
+              label: S.of(context).periodMoveTo,
+              description: S.of(context).periodMoveDesc,
               value: LeftoverResolution.toOtherAllocation,
               groupValue: resolution.resolution,
               onChanged: (v) {
@@ -429,7 +430,7 @@ class _ResolutionCard extends StatelessWidget {
             // Target allocation picker
             if (resolution.resolution == LeftoverResolution.toOtherAllocation)
               Padding(
-                padding: const EdgeInsets.only(left: 40, top: 8),
+                padding: const EdgeInsetsDirectional.only(start: 40, top: 8),
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.sfv(context),
@@ -439,7 +440,7 @@ class _ResolutionCard extends StatelessWidget {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       isExpanded: true,
-                      hint: const Text('Select allocation'),
+                      hint: Text(S.of(context).periodSelectAllocation),
                       value: resolution.targetAllocationId,
                       items: allAllocations
                           .map((a) => DropdownMenuItem(

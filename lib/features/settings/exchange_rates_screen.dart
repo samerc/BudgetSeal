@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -86,13 +87,13 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exchange Rates'),
+        title: Text(S.of(context).fxTitle),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Refresh rates',
+            tooltip: S.of(context).fxRefreshTooltip,
             onPressed: _loading ? null : _fetchRates,
           ),
         ],
@@ -111,8 +112,8 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                         const SizedBox(height: 12),
                         Text(
                           _error != null
-                              ? 'Could not fetch rates'
-                              : 'No rates available',
+                              ? S.of(context).fxCouldNotFetch
+                              : S.of(context).fxNoRates,
                           style: TextStyle(
                               color: AppColors.tp(context),
                               fontSize: 15,
@@ -120,7 +121,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Check your internet connection and try again.',
+                          S.of(context).fxCheckInternet,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: AppColors.ts(context), fontSize: 13),
@@ -129,7 +130,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                         FilledButton.icon(
                           onPressed: _fetchRates,
                           icon: const Icon(Icons.refresh_rounded, size: 16),
-                          label: const Text('Retry'),
+                          label: Text(S.of(context).commonRetry),
                         ),
                       ],
                     ),
@@ -173,7 +174,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.',
+                      S.of(context).fxCacheInfo,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.ts(context),

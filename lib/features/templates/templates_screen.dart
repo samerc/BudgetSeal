@@ -14,6 +14,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -35,6 +36,16 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   String? _typeFilter; // null = all, 'expense', 'income'
   _SortMode _sort = _SortMode.mostUsed;
   _GroupMode _group = _GroupMode.none;
+
+  String _localizedType(String type) {
+    final tr = S.of(context);
+    return switch (type) {
+      'expense' => tr.typeExpense,
+      'income' => tr.typeIncome,
+      'transfer' => tr.typeTransfer,
+      _ => type[0].toUpperCase() + type.substring(1),
+    };
+  }
 
   @override
   void initState() {
@@ -131,8 +142,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       debugPrint('[Templates] Error using template: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not apply template'),
+          SnackBar(
+            content: Text(S.of(context).tmplApplyError),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -144,17 +155,17 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Delete template?'),
-        content: const Text('This template will be permanently removed.'),
+        title: Text(S.of(context).tmplDeleteTitle),
+        content: Text(S.of(context).tmplDeleteMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Delete'),
+            child: Text(S.of(context).commonDelete),
           ),
         ],
       ),
@@ -170,8 +181,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         debugPrint('[Templates] Error deleting: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not delete template'),
+            SnackBar(
+              content: Text(S.of(context).tmplDeleteError),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -205,7 +216,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text('Templates',
+                    child: Text(S.of(context).tmplTitle,
                         style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
@@ -215,25 +226,25 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   PopupMenuButton<_SortMode>(
                     icon: Icon(Icons.sort_rounded,
                         color: AppColors.ts(context)),
-                    tooltip: 'Sort',
+                    tooltip: S.of(context).tmplSortTooltip,
                     onSelected: (v) => setState(() => _sort = v),
                     itemBuilder: (_) => [
-                      _sortItem(_SortMode.mostUsed, 'Most used'),
-                      _sortItem(_SortMode.alphabetical, 'A–Z'),
-                      _sortItem(_SortMode.newest, 'Newest first'),
-                      _sortItem(_SortMode.amount, 'Highest amount'),
+                      _sortItem(_SortMode.mostUsed, S.of(context).tmplSortMostUsed),
+                      _sortItem(_SortMode.alphabetical, S.of(context).tmplSortAz),
+                      _sortItem(_SortMode.newest, S.of(context).tmplSortNewest),
+                      _sortItem(_SortMode.amount, S.of(context).tmplSortHighest),
                     ],
                   ),
                   // Group button
                   PopupMenuButton<_GroupMode>(
                     icon: Icon(Icons.workspaces_outlined,
                         color: AppColors.ts(context)),
-                    tooltip: 'Group',
+                    tooltip: S.of(context).tmplGroupTooltip,
                     onSelected: (v) => setState(() => _group = v),
                     itemBuilder: (_) => [
-                      _groupItem(_GroupMode.none, 'No grouping'),
-                      _groupItem(_GroupMode.type, 'By type'),
-                      _groupItem(_GroupMode.category, 'By category'),
+                      _groupItem(_GroupMode.none, S.of(context).tmplGroupNone),
+                      _groupItem(_GroupMode.type, S.of(context).tmplGroupType),
+                      _groupItem(_GroupMode.category, S.of(context).tmplGroupCategory),
                     ],
                   ),
                 ],
@@ -247,7 +258,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 textInputAction: TextInputAction.search,
                 style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
                 decoration: InputDecoration(
-                  hintText: 'Search templates...',
+                  hintText: S.of(context).tmplSearchHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   prefixIcon: Icon(Icons.search_rounded,
                       size: 20, color: AppColors.th(context)),
@@ -267,11 +278,11 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
               child: Row(
                 children: [
-                  _typeChip('All', null, txColors),
+                  _typeChip(S.of(context).typeAll, null, txColors),
                   const SizedBox(width: 8),
-                  _typeChip('Expense', 'expense', txColors),
+                  _typeChip(S.of(context).typeExpense, 'expense', txColors),
                   const SizedBox(width: 8),
-                  _typeChip('Income', 'income', txColors),
+                  _typeChip(S.of(context).typeIncome, 'income', txColors),
                 ],
               ),
             ),
@@ -279,7 +290,9 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Text(
-                '${filtered.length} template${filtered.length == 1 ? '' : 's'}',
+                filtered.length == 1
+                    ? S.of(context).tmplCountOne(filtered.length)
+                    : S.of(context).tmplCountOther(filtered.length),
                 style: TextStyle(
                     fontSize: 12, color: AppColors.ts(context)),
               ),
@@ -289,11 +302,10 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : filtered.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.bolt_rounded,
-                          title: 'No templates found',
-                          subtitle:
-                              'Save frequent transactions for quick re-use',
+                          title: S.of(context).tmplNoTitle,
+                          subtitle: S.of(context).tmplNoSubtitle,
                         )
                       : _group == _GroupMode.none
                           ? _buildFlatList(
@@ -305,7 +317,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add template',
+        tooltip: S.of(context).tmplAddTooltip,
         onPressed: () => _showAddSheet(accounts, categories),
         child: const Icon(Icons.add),
       ),
@@ -335,10 +347,10 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     final groups = <String, List<TransactionTemplate>>{};
     for (final t in list) {
       final key = _group == _GroupMode.type
-          ? t.type[0].toUpperCase() + t.type.substring(1)
+          ? _localizedType(t.type)
           : (t.categoryId != null
-              ? catMap[t.categoryId]?.name ?? 'Uncategorized'
-              : 'Uncategorized');
+              ? catMap[t.categoryId]?.name ?? S.of(context).commonUncategorized
+              : S.of(context).commonUncategorized);
       groups.putIfAbsent(key, () => []).add(t);
     }
 
@@ -435,7 +447,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            t.type[0].toUpperCase() + t.type.substring(1),
+                            _localizedType(t.type),
                             style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
@@ -480,7 +492,9 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       ),
                     ),
                     Text(
-                      '${t.useCount} use${t.useCount == 1 ? '' : 's'}',
+                      t.useCount == 1
+                          ? S.of(context).tmplUseCountOne(t.useCount)
+                          : S.of(context).tmplUseCountOther(t.useCount),
                       style: TextStyle(
                           fontSize: 10, color: AppColors.th(context)),
                     ),
@@ -505,7 +519,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             ListTile(
               leading: Icon(Icons.play_arrow_rounded,
                   color: AppColors.accent),
-              title: const Text('Use template'),
+              title: Text(S.of(context).tmplUse),
               onTap: () {
                 Navigator.pop(ctx);
                 _useTemplate(t);
@@ -514,7 +528,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             ListTile(
               leading: Icon(Icons.delete_outline,
                   color: AppColors.overspent),
-              title: const Text('Delete'),
+              title: Text(S.of(context).commonDelete),
               onTap: () {
                 Navigator.pop(ctx);
                 _delete(t.id);
@@ -596,6 +610,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     String currency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
+    final tr = S.of(context);
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -629,14 +644,14 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('New Template',
+                  Text(tr.tmplNewTitle,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: AppColors.tp(context))),
                   const SizedBox(height: 4),
                   Text(
-                    'Save a transaction you do often for quick re-use.',
+                    tr.tmplNewDesc,
                     style: TextStyle(
                         fontSize: 13, color: AppColors.ts(context)),
                   ),
@@ -645,26 +660,26 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                     controller: titleCtrl,
                     autofocus: true,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: const InputDecoration(labelText: 'Title'),
+                    decoration: InputDecoration(labelText: tr.tmplTitleLabel),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Title is required'
+                        ? tr.tmplTitleRequired
                         : null,
                   ),
                   const SizedBox(height: 14),
                   CalculatorAmountField(
                     value: calcAmount,
-                    label: 'Amount',
+                    label: tr.tmplAmountLabel,
                     fontSize: 20,
                     onChanged: (v) =>
                         setSheetState(() => calcAmount = v),
                   ),
                   const SizedBox(height: 14),
                   SegmentedButton<String>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
-                          value: 'expense', label: Text('Expense')),
+                          value: 'expense', label: Text(tr.typeExpense)),
                       ButtonSegment(
-                          value: 'income', label: Text('Income')),
+                          value: 'income', label: Text(tr.typeIncome)),
                     ],
                     selected: {type},
                     onSelectionChanged: (s) =>
@@ -674,7 +689,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: accountId,
                     decoration:
-                        const InputDecoration(labelText: 'Account'),
+                        InputDecoration(labelText: tr.tmplAccountLabel),
                     items: accounts
                         .map((a) => DropdownMenuItem(
                             value: a.id,
@@ -693,11 +708,11 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
                     initialValue: categoryId,
-                    decoration: const InputDecoration(
-                        labelText: 'Category (optional)'),
+                    decoration: InputDecoration(
+                        labelText: tr.tmplCategoryOptional),
                     items: [
-                      const DropdownMenuItem(
-                          value: null, child: Text('None')),
+                      DropdownMenuItem(
+                          value: null, child: Text(tr.catNone)),
                       ...categories.map((c) => DropdownMenuItem(
                           value: c.id, child: Text(c.name))),
                     ],
@@ -711,8 +726,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       final title = titleCtrl.text.trim();
                       if (calcAmount <= 0) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(
-                            content: Text('Enter an amount'),
+                          SnackBar(
+                            content: Text(tr.tmplEnterAmount),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -744,8 +759,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Save Template',
-                        style: TextStyle(
+                    child: Text(tr.tmplSaveButton,
+                        style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600)),
                   ),

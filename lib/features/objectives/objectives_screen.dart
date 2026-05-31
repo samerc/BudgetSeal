@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -11,6 +12,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class ObjectivesScreen extends ConsumerWidget {
   const ObjectivesScreen({super.key});
@@ -25,14 +27,14 @@ class ObjectivesScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Goals & Loans'),
+        title: Text(S.of(context).objTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: FilledButton.icon(
               onPressed: () => context.push('/objectives/new'),
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Add'),
+              label: Text(S.of(context).commonAdd),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: Size.zero,
@@ -46,16 +48,16 @@ class ObjectivesScreen extends ConsumerWidget {
       body: objectivesAsync.when(
         loading: () => const SkeletonList(),
         error: (e, _) => ErrorRetry(
-          message: 'Failed to load objectives',
+          message: S.of(context).objFailedToLoad,
           details: e.toString(),
           onRetry: () => ref.invalidate(objectivesProvider),
         ),
         data: (items) {
           if (items.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.flag_rounded,
-              title: 'No goals or loans yet',
-              subtitle: 'Create a savings goal or track money you lent or borrowed.',
+              title: S.of(context).objNoTitle,
+              subtitle: S.of(context).objNoSubtitle,
             );
           }
 
@@ -68,13 +70,13 @@ class ObjectivesScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
                 if (goals.isNotEmpty) ...[
-                  _SectionHeader(title: 'GOALS', count: goals.length),
+                  _SectionHeader(title: S.of(context).objGoalsSection, count: goals.length),
                   const SizedBox(height: 8),
                   ...goals.map((o) => _ObjectiveCard(objective: o)),
                   const SizedBox(height: 20),
                 ],
                 if (loans.isNotEmpty) ...[
-                  _SectionHeader(title: 'LOANS', count: loans.length),
+                  _SectionHeader(title: S.of(context).objLoansSection, count: loans.length),
                   const SizedBox(height: 8),
                   ...loans.map((o) => _ObjectiveCard(objective: o)),
                 ],
@@ -101,7 +103,7 @@ class _SectionHeader extends StatelessWidget {
               fontSize: TypographyTokens.sectionHeaderSize,
               fontWeight: TypographyTokens.sectionHeaderWeight,
               letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-              color: AppColors.th(context),
+              color: AppColors.ts(context),
             )),
         const SizedBox(width: 8),
         Container(
@@ -174,7 +176,7 @@ class _ObjectiveCard extends StatelessWidget {
                           )),
                       if (isLoan && o.contactName != null)
                         Text(
-                          isLent ? 'Lent to ${o.contactName}' : 'Borrowed from ${o.contactName}',
+                          isLent ? S.of(context).objLentTo(o.contactName!) : S.of(context).objBorrowedFrom(o.contactName!),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.ts(context),
@@ -241,7 +243,7 @@ class _ObjectiveCard extends StatelessWidget {
                       size: 13, color: AppColors.th(context)),
                   const SizedBox(width: 6),
                   Text(
-                    'Due ${_formatDate(o.endDate!)}',
+                    S.of(context).objDue(formatDate(o.endDate!)),
                     style: TextStyle(
                       fontSize: 12,
                       color: () {
@@ -260,9 +262,4 @@ class _ObjectiveCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
-  }
 }

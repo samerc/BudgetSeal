@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/daily_reminder_service.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -38,7 +39,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(title: Text(S.of(context).notifTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -47,16 +48,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             context,
             icon: Icons.notifications_active_rounded,
             iconColor: const Color(0xFFFF9800),
-            title: 'Daily Reminder',
+            title: S.of(context).notifDailyTitle,
             children: [
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Enable daily reminder',
-                    style: TextStyle(fontSize: 14)),
+                title: Text(S.of(context).notifDailyEnable,
+                    style: const TextStyle(fontSize: 14)),
                 subtitle: Text(
                   _dailyEnabled
                       ? 'Every day at ${_time.format(context)}'
-                      : 'Remind me to log transactions',
+                      : S.of(context).notifDailyDisabled,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context)),
                 ),
@@ -75,7 +76,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     Icon(Icons.schedule_rounded,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
-                    Text('Time',
+                    Text(S.of(context).notifTime,
                         style: TextStyle(
                             fontSize: 13, color: AppColors.ts(context))),
                     const Spacer(),
@@ -106,7 +107,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       fontSize: 13, color: AppColors.tp(context)),
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    hintText: 'Custom message (optional)',
+                    hintText: S.of(context).notifCustomMessage,
                     hintStyle: TextStyle(
                         fontSize: 13, color: AppColors.th(context)),
                     filled: true,
@@ -144,11 +145,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             context,
             icon: Icons.account_balance_wallet_outlined,
             iconColor: AppColors.overspent,
-            title: 'Envelope Alerts',
+            title: S.of(context).notifEnvelopeTitle,
             children: [
               Text(
-                'You\'ll receive a notification when envelopes are overspent. '
-                'These check on app startup, at most once every 6 hours.',
+                S.of(context).notifEnvelopeDesc,
                 style: TextStyle(
                     fontSize: 12, color: AppColors.ts(context), height: 1.4),
               ),
@@ -161,11 +161,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             context,
             icon: Icons.receipt_long_rounded,
             iconColor: AppColors.caution,
-            title: 'Upcoming Bills',
+            title: S.of(context).notifBillsTitle,
             children: [
               Text(
-                'You\'ll receive a notification when recurring transactions '
-                'are due within 2 days. Checks on app startup.',
+                S.of(context).notifBillsDesc,
                 style: TextStyle(
                     fontSize: 12, color: AppColors.ts(context), height: 1.4),
               ),

@@ -20,10 +20,13 @@ Handler listSubscriptionsHandler(Ref ref) {
     if (householdId == null) return forbidden();
 
     try {
-      final engine = ref.read(recurringEngineProvider);
       final db = ref.read(databaseProvider);
-      final allItems = await engine.getAll(householdId);
-      final items = allItems.where((r) => r.isSubscription).toList();
+      final items = await (db.select(db.recurringTransactions)
+            ..where((r) =>
+                r.householdId.equals(householdId) &
+                r.isSubscription.equals(true))
+            ..orderBy([(r) => OrderingTerm.asc(r.nextDueDate)]))
+          .get();
 
       final accounts = await (db.select(db.accounts)
             ..where((a) => a.householdId.equals(householdId)))

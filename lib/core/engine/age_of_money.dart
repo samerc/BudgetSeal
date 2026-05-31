@@ -13,7 +13,7 @@ Future<int?> calculateAgeOfMoney(AppDatabase db, String householdId) async {
   // Get last 10 expense transactions, newest first.
   final expenses = await (db.select(db.transactions)
         ..where((t) =>
-            t.householdId.equals(householdId) & t.deleted.equals(false) & t.type.equals('expense'))
+            t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull() & t.type.equals('expense'))
         ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
         ..limit(10))
       .get();
@@ -23,7 +23,7 @@ Future<int?> calculateAgeOfMoney(AppDatabase db, String householdId) async {
   // Get all income transactions, oldest first (FIFO order).
   final incomes = await (db.select(db.transactions)
         ..where((t) =>
-            t.householdId.equals(householdId) & t.deleted.equals(false) & t.type.equals('income'))
+            t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull() & t.type.equals('income'))
         ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
       .get();
 

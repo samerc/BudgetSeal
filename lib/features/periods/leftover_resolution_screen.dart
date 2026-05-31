@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -86,7 +87,7 @@ class _LeftoverResolutionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to resolve leftovers. Please try again.'),
+            content: Text(S.of(context).leftoverResolveFailed),
             backgroundColor: AppColors.overspent,
           ),
         );
@@ -103,26 +104,26 @@ class _LeftoverResolutionScreenState
 
     if (_args == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Resolve Leftovers')),
-        body: const Center(
-          child: Text('No allocation specified.'),
+        appBar: AppBar(title: Text(S.of(context).leftoverTitle)),
+        body: Center(
+          child: Text(S.of(context).leftoverNoAllocation),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Resolve Leftovers')),
+      appBar: AppBar(title: Text(S.of(context).leftoverTitle)),
       body: allocationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorRetry(
-          message: "Couldn't load data",
+          message: S.of(context).leftoverLoadError,
           details: '$e',
           onRetry: () => ref.invalidate(allocationsProvider),
         ),
         data: (allocations) {
           final allocation = _findAllocation(allocations);
           if (allocation == null) {
-            return const Center(child: Text('Allocation not found.'));
+            return Center(child: Text(S.of(context).leftoverNotFound));
           }
 
           final otherAllocations = allocations
@@ -188,8 +189,8 @@ class _LeftoverResolutionScreenState
                                       const SizedBox(height: 2),
                                       Text(
                                         allocation.data.allocation.rollover
-                                            ? 'Rollover allocation'
-                                            : 'Periodic allocation',
+                                            ? S.of(context).periodRollover
+                                            : S.of(context).periodPeriodic,
                                         style: textTheme.bodySmall,
                                       ),
                                     ],
@@ -203,7 +204,7 @@ class _LeftoverResolutionScreenState
 
                             // Balance breakdown
                             Text(
-                              'Current Balance',
+                              S.of(context).leftoverCurrentBalance,
                               style: textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
@@ -212,7 +213,7 @@ class _LeftoverResolutionScreenState
                             const SizedBox(height: 10),
                             if (allocation.balanceByCurrency.isEmpty)
                               Text(
-                                'No balance',
+                                S.of(context).leftoverNoBalance,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: AppColors.th(context),
                                 ),
@@ -240,7 +241,7 @@ class _LeftoverResolutionScreenState
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'No positive balance to resolve.',
+                                S.of(context).leftoverNoPositive,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: AppColors.ts(context),
                                 ),
@@ -256,7 +257,7 @@ class _LeftoverResolutionScreenState
                         // Currency selector (if multi-currency)
                         if (positiveBalances.length > 1) ...[
                           Text(
-                            'Currency to resolve',
+                            S.of(context).leftoverCurrencyToResolve,
                             style: textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
@@ -272,9 +273,9 @@ class _LeftoverResolutionScreenState
                                 isExpanded: true,
                                 value: _selectedCurrency,
                                 items: [
-                                  const DropdownMenuItem(
+                                  DropdownMenuItem(
                                     value: null,
-                                    child: Text('All currencies'),
+                                    child: Text(S.of(context).leftoverAllCurrencies),
                                   ),
                                   ...positiveBalances.map(
                                     (e) => DropdownMenuItem(
@@ -295,16 +296,16 @@ class _LeftoverResolutionScreenState
 
                         // Resolution choices
                         Text(
-                          'What to do with the leftover',
+                          S.of(context).leftoverWhatToDo,
                           style: textTheme.titleMedium,
                         ),
                         const SizedBox(height: 12),
 
                         _ResolutionOption(
                           icon: Icons.replay_rounded,
-                          title: 'Return to Unallocated',
+                          title: S.of(context).periodReturnUnallocated,
                           subtitle:
-                              'Leftover balance goes back to the pool',
+                              S.of(context).leftoverReturnSubtitle,
                           value: LeftoverResolution.toUnallocated,
                           groupValue: _resolution,
                           onChanged: (v) => setState(() {
@@ -316,8 +317,8 @@ class _LeftoverResolutionScreenState
 
                         _ResolutionOption(
                           icon: Icons.forward_rounded,
-                          title: 'Carry Forward',
-                          subtitle: 'Keep the balance for the next period',
+                          title: S.of(context).periodCarryForward,
+                          subtitle: S.of(context).leftoverKeepSubtitle,
                           value: LeftoverResolution.keep,
                           groupValue: _resolution,
                           onChanged: (v) => setState(() {
@@ -329,9 +330,9 @@ class _LeftoverResolutionScreenState
 
                         _ResolutionOption(
                           icon: Icons.swap_horiz_rounded,
-                          title: 'Move to another allocation',
+                          title: S.of(context).leftoverMoveTitle,
                           subtitle:
-                              'Transfer leftover to a different allocation',
+                              S.of(context).leftoverMoveSubtitle,
                           value: LeftoverResolution.toOtherAllocation,
                           groupValue: _resolution,
                           onChanged: (v) =>
@@ -354,7 +355,7 @@ class _LeftoverResolutionScreenState
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   isExpanded: true,
-                                  hint: const Text('Select allocation'),
+                                  hint: Text(S.of(context).periodSelectAllocation),
                                   value: _targetAllocationId,
                                   items: otherAllocations
                                       .map((a) => DropdownMenuItem(
@@ -415,8 +416,8 @@ class _LeftoverResolutionScreenState
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              'Save',
+                          : Text(
+                              S.of(context).commonSave,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

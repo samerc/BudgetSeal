@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 /// Catches build-phase errors in child widgets and shows a friendly
 /// fallback instead of a red/grey crash screen.
 ///
@@ -45,7 +47,7 @@ class _FallbackScreen extends StatelessWidget {
                   size: 56, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 16),
               Text(
-                'Something went wrong',
+                S.of(context).commonSomethingWentWrong,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -53,7 +55,7 @@ class _FallbackScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'An unexpected error occurred. Try going back or restarting the app.',
+                S.of(context).commonErrorDesc,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context)
                           .colorScheme
@@ -66,7 +68,7 @@ class _FallbackScreen extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Try Again'),
+                label: Text(S.of(context).commonTryAgain),
               ),
               const SizedBox(height: 8),
               TextButton(
@@ -75,7 +77,7 @@ class _FallbackScreen extends StatelessWidget {
                     Navigator.of(context).pop();
                   }
                 },
-                child: const Text('Go Back'),
+                child: Text(S.of(context).commonGoBack),
               ),
             ],
           ),

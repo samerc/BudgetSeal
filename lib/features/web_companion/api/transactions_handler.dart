@@ -45,7 +45,7 @@ Handler listTransactionsHandler(Ref ref) {
       final query = db.select(db.transactions)
         ..where((t) {
           var expr =
-              t.householdId.equals(householdId) & t.deleted.equals(false);
+              t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull();
           if (typeFilter != null) expr = expr & t.type.equals(typeFilter);
           if (accountFilter != null) {
             expr = expr &

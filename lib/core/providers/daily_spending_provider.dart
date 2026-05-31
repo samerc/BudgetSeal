@@ -19,6 +19,7 @@ final dailySpendingProvider =
   final txs = await (db.select(db.transactions)
         ..where((t) => t.householdId.equals(householdId))
         ..where((t) => t.deleted.equals(false))
+        ..where((t) => t.status.isNull())
         ..where((t) => t.createdAt.isBiggerOrEqualValue(start))
         ..where((t) => t.createdAt.isSmallerThanValue(end))
         ..where((t) => t.type.isIn(['income', 'expense'])))

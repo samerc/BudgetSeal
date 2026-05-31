@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 import 'animated_circular_progress.dart';
@@ -28,6 +29,12 @@ class AllocationCard extends StatelessWidget {
   final DateTime? periodStart;
   final DateTime? periodEnd;
 
+  /// Planned expense amount committed to this envelope (not yet posted).
+  final double? plannedAmount;
+
+  /// Currency of the planned amount (defaults to targetCurrency or baseCurrency).
+  final String? plannedCurrency;
+
   const AllocationCard({
     super.key,
     required this.name,
@@ -46,6 +53,8 @@ class AllocationCard extends StatelessWidget {
     this.categoryColorHex,
     this.periodStart,
     this.periodEnd,
+    this.plannedAmount,
+    this.plannedCurrency,
   });
 
   /// Normalize: legacy 'saving' type is treated as 'flexible'
@@ -369,6 +378,19 @@ class AllocationCard extends StatelessWidget {
                             style: TextStyle(fontSize: 9, color: AppColors.caution),
                           ),
                         ],
+                      ),
+                    ),
+                  // Planned amount indicator
+                  if (plannedAmount != null && plannedAmount! > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        '${formatAmount(plannedAmount!, currency: plannedCurrency ?? effectiveTargetCurrency)} ${S.of(context).plannedChipLabel}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.th(context),
+                        ),
                       ),
                     ),
                 ],

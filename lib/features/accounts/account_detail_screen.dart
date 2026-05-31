@@ -9,6 +9,7 @@ import '../../core/database/app_database.dart';
 import '../../core/database/daos/accounts_dao.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -44,12 +45,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
   bool get _isNew => widget.accountId == 'new';
 
-  static const _accountTypes = [
-    ('cash', 'Cash', Icons.wallet),
-    ('bank', 'Bank', Icons.account_balance),
-    ('credit', 'Credit card', Icons.credit_card),
-    ('wallet', 'Digital wallet', Icons.account_balance_wallet),
-  ];
+  List<(String, String, IconData)> _accountTypes(BuildContext context) {
+    final l = S.of(context);
+    return [
+      ('cash', l.acctTypeCash, Icons.wallet),
+      ('bank', l.acctTypeBank, Icons.account_balance),
+      ('credit', l.acctTypeCredit, Icons.credit_card),
+      ('wallet', l.acctTypeDigital, Icons.account_balance_wallet),
+    ];
+  }
 
   @override
   void initState() {
@@ -158,14 +162,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = S.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _isNew
-              ? 'New Account'
+              ? l.acctNewTitle
               : _nameController.text.isNotEmpty
                   ? _nameController.text
-                  : 'Account',
+                  : l.acctFallbackName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -185,24 +190,24 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 }
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'adjust',
                   child: Row(
                     children: [
-                      Icon(Icons.tune_rounded, size: 18),
-                      SizedBox(width: 10),
-                      Text('Adjust Balance'),
+                      const Icon(Icons.tune_rounded, size: 18),
+                      const SizedBox(width: 10),
+                      Text(l.acctAdjustBalance),
                     ],
                   ),
                 ),
                 if (_isTravel && _currentBalance != null && _currentBalance! > 0)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'convert_back',
                     child: Row(
                       children: [
-                        Icon(Icons.currency_exchange_rounded, size: 18),
-                        SizedBox(width: 10),
-                        Text('Convert Back & Close'),
+                        const Icon(Icons.currency_exchange_rounded, size: 18),
+                        const SizedBox(width: 10),
+                        Text(l.acctConvertBackClose),
                       ],
                     ),
                   ),
@@ -213,7 +218,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       Icon(Icons.archive_outlined,
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
-                      Text('Archive Account',
+                      Text(l.acctArchiveTitle,
                           style: TextStyle(color: AppColors.overspent)),
                     ],
                   ),
@@ -225,7 +230,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       Icon(Icons.delete_forever_rounded,
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
-                      Text('Delete Permanently',
+                      Text(l.allocDeletePermanently,
                           style: TextStyle(color: AppColors.overspent)),
                     ],
                   ),
@@ -262,8 +267,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'Current Balance',
+                    Text(
+                      l.acctCurrentBalance,
                       style: TextStyle(
                           color: Colors.white60,
                           fontSize: 13,
@@ -336,7 +341,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         Icon(Icons.flight_land_rounded,
                             size: 18, color: AppColors.accent),
                         const SizedBox(width: 8),
-                        Text('Back from your trip?',
+                        Text(l.acctBackFromTrip,
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -345,7 +350,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Convert your remaining ${_currencyController.text} balance back and close this travel wallet.',
+                      l.acctConvertBackDesc(_currencyController.text),
                       style: TextStyle(
                           fontSize: 13,
                           color: AppColors.ts(context),
@@ -357,7 +362,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       child: OutlinedButton.icon(
                         onPressed: _convertBack,
                         icon: const Icon(Icons.currency_exchange_rounded, size: 16),
-                        label: const Text('Convert Back & Close'),
+                        label: Text(l.acctConvertBackClose),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.accent,
                           side: BorderSide(color: AppColors.accent.withValues(alpha: 0.3)),
@@ -390,8 +395,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       Icon(Icons.settings_outlined,
                           size: 18, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text('Account Settings',
+                      Expanded(
+                        child: Text(l.acctSettings,
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600)),
@@ -415,10 +420,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               _formSection(
                 context,
                 icon: Icons.label_outline_rounded,
-                title: 'NAME',
+                title: l.acctNameSection,
                 child: TextField(
                   controller: _nameController,
-                  decoration: _inputDecoration('Account name'),
+                  decoration: _inputDecoration(l.acctAccountName),
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.done,
                   autofocus: _isNew,
@@ -432,11 +437,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               _formSection(
                 context,
                 icon: Icons.category_outlined,
-                title: 'TYPE',
+                title: l.acctTypeSection,
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: _accountTypes.map((entry) {
+                  children: _accountTypes(context).map((entry) {
                     final (value, label, icon) = entry;
                     final selected = _type == value;
                     return GestureDetector(
@@ -490,9 +495,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               _formSection(
                 context,
                 icon: Icons.attach_money_rounded,
-                title: 'CURRENCY',
+                title: l.acctCurrencySection,
                 child: CurrencyPickerField(
-                  label: 'Select currency',
+                  label: l.acctSelectCurrency,
                   value: _currencyController.text.isEmpty
                       ? 'USD'
                       : _currencyController.text,
@@ -506,7 +511,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               _formSection(
                 context,
                 icon: Icons.pin_rounded,
-                title: 'DECIMAL PLACES',
+                title: l.acctDecimalSection,
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int?>(
                     value: _decimalPlaces,
@@ -515,7 +520,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     items: [
                       DropdownMenuItem<int?>(
                         value: null,
-                        child: Text('Auto (${currencyDecimals(_currencyController.text)})',
+                        child: Text(l.acctDecimalAuto(currencyDecimals(_currencyController.text)),
                             style: TextStyle(fontSize: 14, color: AppColors.tp(context))),
                       ),
                       for (final d in [0, 1, 2, 3])
@@ -535,7 +540,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 _formSection(
                   context,
                   icon: Icons.account_balance_rounded,
-                  title: 'OPENING BALANCE',
+                  title: l.acctOpeningBalance,
                   child: CalculatorAmountField(
                     value: _initialBalance,
                     hintText: '0.00',
@@ -567,7 +572,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                             color: Colors.white, strokeWidth: 2),
                       )
                     : Text(
-                        _isNew ? 'Create account' : 'Save',
+                        _isNew ? l.acctCreateAccount : l.acctSave,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -585,7 +590,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
                   Text(
-                    'RECENT TRANSACTIONS',
+                    l.acctRecentTransactions,
                     style: TextStyle(
                       fontSize: TypographyTokens.sectionHeaderSize,
                       fontWeight: TypographyTokens.sectionHeaderWeight,
@@ -630,7 +635,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text('No transactions yet',
+              child: Text(S.of(context).acctNoTransactions,
                   style: TextStyle(color: AppColors.th(context))),
             ),
           );
@@ -761,7 +766,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Adjust Balance',
+                S.of(context).acctAdjustBalance,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -770,7 +775,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter the actual balance of this account. An adjustment transaction will be created for the difference.',
+                S.of(context).acctAdjustDesc,
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.ts(context),
@@ -779,7 +784,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               if (_currentBalance != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  'Current balance: ${formatAmount(_currentBalance!, currency: currency)}',
+                  S.of(context).acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -788,17 +793,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-              TextField(
-                controller: adjustCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true, signed: true),
-                autofocus: true,
-                decoration: _inputDecoration('Actual balance',
-                    hint: 'Enter the real balance'),
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context)),
+              CalculatorAmountField(
+                value: double.tryParse(adjustCtrl.text) ?? 0,
+                hintText: S.of(context).acctEnterRealBalance,
+                fontSize: 20,
+                onChanged: (v) => adjustCtrl.text = v.toString(),
               ),
               const SizedBox(height: 20),
               FilledButton(
@@ -814,7 +813,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(CardTokens.radius)),
                 ),
-                child: const Text('Apply Adjustment',
+                child: Text(S.of(context).acctApplyAdjustment,
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
@@ -845,7 +844,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             exchangeRateToBase: 1.0,
             createdBy: 'user',
             deviceId: 'local',
-            note: 'Balance adjustment',
+            note: S.of(context).acctBalanceAdjustment,
           );
         } else {
           // Negative adjustment → record as expense (no allocation).
@@ -861,7 +860,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   currency: currency,
                   createdBy: 'user',
                   deviceId: 'local',
-                  note: const Value('Balance adjustment'),
+                  note: Value(S.of(context).acctBalanceAdjustment),
                 ),
               );
         }
@@ -873,7 +872,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Balance adjusted by ${formatSignedAmount(diff, currency: currency, type: diff > 0 ? 'income' : 'expense')}'),
+                  S.of(context).acctBalanceAdjustedBy(formatSignedAmount(diff, currency: currency, type: diff > 0 ? 'income' : 'expense'))),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -900,7 +899,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     if (regularAccounts.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No account to transfer to'),
+          SnackBar(content: Text(S.of(context).acctNoTransferTarget),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -910,6 +909,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     String? destAccountId = regularAccounts.first.id;
     double receivedAmount = 0;
 
+    final tr = S.of(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -922,20 +922,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           padding: EdgeInsets.fromLTRB(
               24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text('Convert Back',
+            Text(tr.acctConvertBack,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
                     color: AppColors.tp(context))),
             const SizedBox(height: 4),
             Text(
-              'Convert ${formatAmount(balance, currency: _currencyController.text)} back to your account',
+              tr.acctConvertBackMsg(formatAmount(balance, currency: _currencyController.text)),
               style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             ),
             const SizedBox(height: 20),
             // Destination account picker
             DropdownButtonFormField<String>(
               value: destAccountId,
-              decoration: const InputDecoration(
-                labelText: 'Transfer to',
+              decoration: InputDecoration(
+                labelText: tr.acctTransferTo,
               ),
               items: regularAccounts.map((a) => DropdownMenuItem(
                 value: a.id,
@@ -947,7 +947,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             // Amount received
             CalculatorAmountField(
               value: receivedAmount,
-              label: 'Amount received',
+              label: tr.acctAmountReceived,
               currency: regularAccounts
                   .where((a) => a.id == destAccountId).firstOrNull?.currency,
               hintText: '0.00',
@@ -961,7 +961,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 onPressed: receivedAmount > 0
                     ? () => Navigator.pop(ctx, true)
                     : null,
-                child: const Text('Convert & Archive'),
+                child: Text(tr.acctConvertArchive),
               ),
             ),
           ]),
@@ -1012,7 +1012,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Converted back ${formatAmount(receivedAmount, currency: destAcc.currency)} and archived'),
+                S.of(context).acctConvertedBack(formatAmount(receivedAmount, currency: destAcc.currency))),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1021,7 +1021,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Something went wrong. Please try again.'),
+          SnackBar(content: Text(S.of(context).acctSomethingWrong),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -1036,22 +1036,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Archive Account'),
-        content: const Text(
-          'This account will be hidden from all lists and dropdowns. '
-          'Your transactions will be preserved.\n\n'
-          'You can unarchive it later from Settings.',
+        title: Text(S.of(context).acctArchiveTitle),
+        content: Text(
+          S.of(context).acctArchiveMsg,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Archive'),
+            child: Text(S.of(context).commonArchive),
           ),
         ],
       ),
@@ -1062,6 +1060,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       await (db.update(db.accounts)
             ..where((a) => a.id.equals(widget.accountId)))
           .write(const AccountsCompanion(archived: Value(true)));
+      ref.invalidate(accountsWithBalanceProvider);
       if (mounted) context.pop();
     }
   }
@@ -1073,23 +1072,23 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   Future<void> _confirmDelete() async {
     final db = ref.read(databaseProvider);
 
-    // Count transactions referencing this account.
-    final txAsSource = await (db.select(db.transactions)
-          ..where((t) => t.accountId.equals(widget.accountId))
-          ..where((t) => t.deleted.equals(false)))
-        .get();
-
-    final txAsDest = await (db.select(db.transactions)
-          ..where((t) => t.destinationAccountId.equals(widget.accountId))
-          ..where((t) => t.deleted.equals(false)))
-        .get();
-
-    final txLineRefs = await (db.select(db.transactionLines)
-          ..where((t) => t.accountId.equals(widget.accountId)))
-        .get();
+    // Count transactions referencing this account (parallel queries).
+    final results = await Future.wait([
+      (db.select(db.transactions)
+            ..where((t) => t.accountId.equals(widget.accountId))
+            ..where((t) => t.deleted.equals(false)))
+          .get(),
+      (db.select(db.transactions)
+            ..where((t) => t.destinationAccountId.equals(widget.accountId))
+            ..where((t) => t.deleted.equals(false)))
+          .get(),
+      (db.select(db.transactionLines)
+            ..where((t) => t.accountId.equals(widget.accountId)))
+          .get(),
+    ]);
 
     final totalRefs =
-        txAsSource.length + txAsDest.length + txLineRefs.length;
+        results[0].length + results[1].length + results[2].length;
 
     if (!mounted) return;
 
@@ -1098,23 +1097,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       final action = await showDialog<String>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Cannot Delete Account'),
+          title: Text(S.of(context).acctCannotDeleteTitle),
           content: Text(
-            'This account has $totalRefs transaction reference${totalRefs == 1 ? '' : 's'}. '
-            'You can\'t delete it while it has transactions.\n\n'
-            'Would you like to archive it instead? Archived accounts '
-            'are hidden from lists but preserve all transaction history.',
+            S.of(context).acctCannotDeleteMsg(totalRefs),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, 'cancel'),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, 'archive'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: const Text('Archive Instead'),
+              child: Text(S.of(context).acctArchiveInstead),
             ),
           ],
         ),
@@ -1133,22 +1129,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Delete Account Permanently'),
-          content: const Text(
-            'This account has no transactions. '
-            'Are you sure you want to permanently delete it? '
-            'This cannot be undone.',
+          title: Text(S.of(context).acctDeleteTitle),
+          content: Text(
+            S.of(context).acctDeleteMsg,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: const Text('Delete Permanently'),
+              child: Text(S.of(context).allocDeletePermanently),
             ),
           ],
         ),
@@ -1171,9 +1165,19 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.of(context).objNameRequired), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
     final currency = _currencyController.text.trim().toUpperCase();
-    if (currency.isEmpty) return;
+    if (currency.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.of(context).acctSelectCurrency), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
     final balance = _initialBalance;
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return;

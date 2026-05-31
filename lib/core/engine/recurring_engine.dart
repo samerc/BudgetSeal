@@ -26,8 +26,19 @@ class RecurringEngine {
               (r) => r.enabled.equals(true) & r.nextDueDate.isSmallerOrEqualValue(today)))
         .get();
 
+    // Pre-fetch base currencies for all households to avoid per-iteration queries.
+    final householdIds = due.map((r) => r.householdId).toSet();
+    final baseCurrencyMap = <String, String>{};
+    for (final hId in householdIds) {
+      final household = await (_db.select(_db.households)
+            ..where((h) => h.id.equals(hId)))
+          .getSingleOrNull();
+      baseCurrencyMap[hId] = household?.baseCurrency ?? 'USD';
+    }
+
     int generated = 0;
     for (final rec in due) {
+      final baseCurrency = baseCurrencyMap[rec.householdId] ?? 'USD';
       // Generate all missed occurrences (e.g. user hasn't opened app in weeks).
       var currentDue = rec.nextDueDate;
       while (!currentDue.isAfter(today)) {
@@ -35,7 +46,7 @@ class RecurringEngine {
         if (rec.endDate != null && currentDue.isAfter(rec.endDate!)) {
           break;
         }
-        await _generateTransaction(rec, currentDue);
+        await _generateTransaction(rec, currentDue, baseCurrency);
         generated++;
         currentDue = _advanceDate(currentDue, rec.frequency, rec.interval);
       }
@@ -75,16 +86,21 @@ class RecurringEngine {
     }
   }
 
-  Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate]) async {
+  Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate, String? baseCurrencyOverride]) async {
     final householdId = rec.householdId;
     final effectiveDate = forDate ?? rec.nextDueDate;
     final amount = _getAmountForDate(rec, effectiveDate);
 
-    // Determine base currency from household.
-    final household = await (_db.select(_db.households)
-          ..where((h) => h.id.equals(householdId)))
-        .getSingleOrNull();
-    final baseCurrency = household?.baseCurrency ?? 'USD';
+    // Use pre-fetched base currency, or fall back to household query.
+    final String baseCurrency;
+    if (baseCurrencyOverride != null) {
+      baseCurrency = baseCurrencyOverride;
+    } else {
+      final household = await (_db.select(_db.households)
+            ..where((h) => h.id.equals(householdId)))
+          .getSingleOrNull();
+      baseCurrency = household?.baseCurrency ?? 'USD';
+    }
 
     if (rec.type == 'transfer' && rec.destinationAccountId != null) {
       await _allocationEngine.recordTransfer(

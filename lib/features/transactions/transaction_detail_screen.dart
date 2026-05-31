@@ -20,6 +20,8 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   final String transactionId;
@@ -45,7 +47,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               elevation: 0,
             ),
             body: Center(
-              child: Text('Transaction not found',
+              child: Text(S.of(context).txDetailNotFound,
                   style: TextStyle(
                       color: AppColors.ts(context), fontSize: 16)),
             ),
@@ -59,8 +61,15 @@ class TransactionDetailScreen extends ConsumerWidget {
             surfaceTintColor: Colors.transparent, elevation: 0),
         body: const Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) =>
-          Scaffold(body: Center(child: Text('Could not load transaction'))),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(
+            surfaceTintColor: Colors.transparent, elevation: 0),
+        body: ErrorRetry(
+          message: S.of(context).txCouldNotLoad,
+          details: '$e',
+          onRetry: () => ref.invalidate(transactionEntriesProvider),
+        ),
+      ),
     );
   }
 }
@@ -94,9 +103,9 @@ class _DetailBody extends ConsumerWidget {
             : Icons.swap_horiz_rounded;
 
     final typeLabel = switch (tx.type) {
-      'income' => 'Income',
-      'expense' => 'Expense',
-      'transfer' => 'Transfer',
+      'income' => S.of(context).typeIncome,
+      'expense' => S.of(context).typeExpense,
+      'transfer' => S.of(context).typeTransfer,
       _ => tx.type,
     };
 
@@ -108,18 +117,18 @@ class _DetailBody extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction Details'),
+        title: Text(S.of(context).txDetailTitle),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit',
+            tooltip: S.of(context).commonEdit,
             onPressed: () => _editTransaction(context, ref),
           ),
           IconButton(
             icon: Icon(Icons.delete_outline, color: AppColors.overspent),
-            tooltip: 'Delete',
+            tooltip: S.of(context).commonDelete,
             onPressed: () => _confirmDelete(context, ref),
           ),
         ],
@@ -199,7 +208,7 @@ class _DetailBody extends ConsumerWidget {
                       Clipboard.setData(ClipboardData(text: amountText));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Copied $amountText'),
+                          content: Text(S.of(context).txDetailCopied(amountText)),
                           behavior: SnackBarBehavior.floating,
                           duration: const Duration(seconds: 2),
                         ),
@@ -251,11 +260,11 @@ class _DetailBody extends ConsumerWidget {
           _card(
             context,
             children: [
-              _detailRow(context, 'Date',
+              _detailRow(context, S.of(context).txDetailDate,
                   DateFormat('EEEE, MMMM d, yyyy').format(tx.createdAt.toLocal()),
                   icon: Icons.calendar_today_rounded),
               _divider(context),
-              _detailRow(context, 'Time',
+              _detailRow(context, S.of(context).txDetailTime,
                   DateFormat('h:mm a').format(tx.createdAt.toLocal()),
                   icon: Icons.access_time_rounded),
               _divider(context),
@@ -263,26 +272,26 @@ class _DetailBody extends ConsumerWidget {
                 final involvedNames = entry.involvedAccountNames;
                 if (involvedNames.length > 1) {
                   // Multi-account: show all account names
-                  return _detailRow(context, 'Accounts',
+                  return _detailRow(context, S.of(context).txDetailAccounts,
                       involvedNames.join(', '),
                       icon: Icons.account_balance_wallet_outlined);
                 }
                 return GestureDetector(
                   onTap: () => context.push('/accounts/${tx.accountId}'),
-                  child: _detailRow(context, 'Account',
-                      '${entry.accountName.isNotEmpty ? entry.accountName : 'Unknown'} ›',
+                  child: _detailRow(context, S.of(context).txDetailAccount,
+                      '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
                       icon: Icons.account_balance_wallet_outlined),
                 );
               }),
               if (tx.note.isNotEmpty) ...[
                 _divider(context),
-                _detailRow(context, 'Note', tx.note,
+                _detailRow(context, S.of(context).txDetailNote, tx.note,
                     icon: Icons.notes_rounded),
               ],
               if (tx.categoryId != null &&
                   categoryMap.containsKey(tx.categoryId)) ...[
                 _divider(context),
-                _detailRow(context, 'Category',
+                _detailRow(context, S.of(context).txDetailCategory,
                     categoryMap[tx.categoryId]!.name,
                     icon: Icons.label_outline_rounded),
               ],
@@ -301,7 +310,7 @@ class _DetailBody extends ConsumerWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8),
-              child: Text('SPLIT ITEMS (${entry.lines.length})',
+              child: Text(S.of(context).txDetailSplitItems(entry.lines.length),
                   style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -324,7 +333,7 @@ class _DetailBody extends ConsumerWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8),
-              child: Text('LINE DETAIL',
+              child: Text(S.of(context).txDetailLineDetail,
                   style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -345,14 +354,14 @@ class _DetailBody extends ConsumerWidget {
       BuildContext context, TransactionLine line, Map<String, Category> catMap) {
     return _card(context, children: [
       if (line.categoryId != null && catMap.containsKey(line.categoryId))
-        _detailRow(context, 'Category', catMap[line.categoryId]!.name,
+        _detailRow(context, S.of(context).txDetailCategory, catMap[line.categoryId]!.name,
             icon: Icons.label_outline_rounded),
       if (line.categoryId != null &&
           catMap.containsKey(line.categoryId) &&
           line.note.isNotEmpty)
         _divider(context),
       if (line.note.isNotEmpty)
-        _detailRow(context, 'Note', line.note, icon: Icons.notes_rounded),
+        _detailRow(context, S.of(context).txDetailNote, line.note, icon: Icons.notes_rounded),
     ]);
   }
 
@@ -412,8 +421,8 @@ class _DetailBody extends ConsumerWidget {
       Map<String, Category> catMap, Map<String, Account> accountMap,
       String baseCurrency) {
     final catName = line.categoryId != null
-        ? catMap[line.categoryId]?.name ?? 'Unknown'
-        : 'Uncategorized';
+        ? catMap[line.categoryId]?.name ?? S.of(context).txDetailUnknownAccount
+        : S.of(context).txDetailUncategorized;
     final lineAccount =
         line.accountId != null ? accountMap[line.accountId] : null;
     final showConversion =
@@ -516,23 +525,18 @@ class _DetailBody extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content: const Text(
-          'Are you sure you want to delete this transaction?\n\n'
-          'This will reverse any envelope deductions and restore '
-          'the balance. Ledger entries will be removed.\n\n'
-          'This cannot be undone.',
-        ),
+        title: Text(S.of(context).txDetailDeleteTitle),
+        content: Text(S.of(context).txDetailDeleteContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: TextButton.styleFrom(
                 foregroundColor: AppColors.overspent),
-            child: const Text('Delete'),
+            child: Text(S.of(context).commonDelete),
           ),
         ],
       ),
@@ -617,7 +621,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                       size: 14, color: AppColors.ts(context)),
                   const SizedBox(width: 6),
                   Text(
-                    'RELATED ${related.length == 1 ? 'TRANSACTION' : 'TRANSACTIONS'}',
+                    related.length == 1 ? S.of(context).txDetailRelatedSingle : S.of(context).txDetailRelatedPlural,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -825,8 +829,8 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                   const SizedBox(width: 8),
                   Text(
                     hasReceipts
-                        ? 'Receipts (${_resolvedPaths.length})'
-                        : 'Receipt',
+                        ? S.of(context).txDetailReceipts(_resolvedPaths.length)
+                        : S.of(context).txDetailReceipt,
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -836,7 +840,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                 GestureDetector(
                   onTap: _addReceipts,
                   child: Text(
-                    'Attach',
+                    S.of(context).txDetailAttach,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -900,7 +904,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
           ] else
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-              child: Text('No receipt attached',
+              child: Text(S.of(context).txDetailNoReceipt,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.th(context))),
             ),

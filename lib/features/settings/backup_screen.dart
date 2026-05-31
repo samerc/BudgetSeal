@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/services/auto_backup_service.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 
@@ -63,7 +64,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (!dbFile.existsSync()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Database file not found')),
+            SnackBar(content: Text(S.of(context).backupDbNotFound)),
           );
         }
         return;
@@ -104,20 +105,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Restore Backup'),
-        content: const Text(
-          'This will replace ALL current data with the backup. '
-          'This cannot be undone. Continue?',
-        ),
+        title: Text(S.of(context).backupRestoreDialogTitle),
+        content: Text(S.of(context).backupRestoreWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Restore'),
+            child: Text(S.of(context).backupRestoreTitle),
           ),
         ],
       ),
@@ -136,8 +134,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       final fileSize = await backupFile.length();
       if (fileSize > 100 * 1024 * 1024) { // 100MB limit
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Backup file too large (max 100MB)'),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(S.of(context).backupTooLarge),
             behavior: SnackBarBehavior.floating,
           ));
         }
@@ -148,8 +146,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       final magic = String.fromCharCodes(header.take(15));
       if (!magic.startsWith('SQLite format 3')) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Invalid backup file — not a valid database'),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(S.of(context).backupInvalid),
             behavior: SnackBarBehavior.floating,
           ));
         }
@@ -164,10 +162,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Backup restored. Please restart the app.'),
+          SnackBar(
+            content: Text(S.of(context).backupRestored),
             behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -182,7 +180,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Restore this backup?'),
+        title: Text(S.of(context).backupRestoreDialogTitle),
         content: Text(
           'From: ${DateFormat.yMMMd().add_jm().format(backup.created)}\n'
           'Size: ${backup.sizeFormatted}\n\n'
@@ -191,12 +189,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: const Text('Restore'),
+            child: Text(S.of(context).backupRestoreTitle),
           ),
         ],
       ),
@@ -207,8 +205,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       await AutoBackupService.restoreFromBackup(backup.path);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Backup restored. Please restart the app.'),
+          SnackBar(
+            content: Text(S.of(context).backupRestored),
             behavior: SnackBarBehavior.floating,
             duration: Duration(seconds: 5),
           ),
@@ -218,7 +216,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Restore failed. The backup may be corrupted.'),
+            content: Text(S.of(context).backupRestoreFailed),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.overspent,
           ),
@@ -237,7 +235,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup & Restore')),
+      appBar: AppBar(title: Text(S.of(context).backupTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -246,16 +244,16 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             context,
             icon: Icons.schedule_rounded,
             iconColor: AppColors.accent,
-            title: 'Automatic Backups',
+            title: S.of(context).backupAutoTitle,
             children: [
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Enable automatic backups',
-                    style: TextStyle(fontSize: 14)),
+                title: Text(S.of(context).backupEnable,
+                    style: const TextStyle(fontSize: 14)),
                 subtitle: Text(
                   _autoEnabled
                       ? 'Backing up every ${_frequencyLabel(_frequencyHours)}'
-                      : 'Disabled',
+                      : S.of(context).backupDisabled,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context)),
                 ),
@@ -274,7 +272,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     Icon(Icons.timer_outlined,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
-                    Text('Frequency',
+                    Text(S.of(context).backupFrequency,
                         style: TextStyle(
                             fontSize: 13, color: AppColors.ts(context))),
                     const Spacer(),
@@ -283,17 +281,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       underline: const SizedBox.shrink(),
                       style: TextStyle(
                           fontSize: 13, color: AppColors.tp(context)),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
-                            value: 6, child: Text('Every 6 hours')),
+                            value: 6, child: Text(S.of(context).backupEvery6h)),
                         DropdownMenuItem(
-                            value: 12, child: Text('Every 12 hours')),
+                            value: 12, child: Text(S.of(context).backupEvery12h)),
                         DropdownMenuItem(
-                            value: 24, child: Text('Daily')),
+                            value: 24, child: Text(S.of(context).backupDaily)),
                         DropdownMenuItem(
-                            value: 72, child: Text('Every 3 days')),
+                            value: 72, child: Text(S.of(context).backupEvery3d)),
                         DropdownMenuItem(
-                            value: 168, child: Text('Weekly')),
+                            value: 168, child: Text(S.of(context).backupWeekly)),
                       ],
                       onChanged: (v) async {
                         if (v == null) return;
@@ -310,7 +308,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     Icon(Icons.folder_outlined,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
-                    Text('Keep last',
+                    Text(S.of(context).backupKeepLast,
                         style: TextStyle(
                             fontSize: 13, color: AppColors.ts(context))),
                     const Spacer(),
@@ -319,17 +317,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       underline: const SizedBox.shrink(),
                       style: TextStyle(
                           fontSize: 13, color: AppColors.tp(context)),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
-                            value: 3, child: Text('3 backups')),
+                            value: 3, child: Text(S.of(context).backupNBackups(3))),
                         DropdownMenuItem(
-                            value: 5, child: Text('5 backups')),
+                            value: 5, child: Text(S.of(context).backupNBackups(5))),
                         DropdownMenuItem(
-                            value: 7, child: Text('7 backups')),
+                            value: 7, child: Text(S.of(context).backupNBackups(7))),
                         DropdownMenuItem(
-                            value: 14, child: Text('14 backups')),
+                            value: 14, child: Text(S.of(context).backupNBackups(14))),
                         DropdownMenuItem(
-                            value: 30, child: Text('30 backups')),
+                            value: 30, child: Text(S.of(context).backupNBackups(30))),
                       ],
                       onChanged: (v) async {
                         if (v == null) return;
@@ -357,10 +355,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             context,
             icon: Icons.backup_rounded,
             iconColor: AppColors.accent,
-            title: 'Manual Backup',
+            title: S.of(context).backupManualTitle,
             children: [
               Text(
-                'Export your database to share or store externally.',
+                S.of(context).backupExportDesc,
                 style:
                     TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
@@ -377,7 +375,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                               color: Colors.white, strokeWidth: 2))
                       : const Icon(Icons.share_rounded, size: 18),
                   label:
-                      Text(_working ? 'Exporting...' : 'Export & Share'),
+                      Text(_working ? S.of(context).backupExporting : S.of(context).backupExportShare),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -395,10 +393,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             context,
             icon: Icons.restore_rounded,
             iconColor: AppColors.caution,
-            title: 'Restore',
+            title: S.of(context).backupRestoreTitle,
             children: [
               Text(
-                'Pick a .db file to restore from.',
+                S.of(context).backupRestoreDesc,
                 style:
                     TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
@@ -408,7 +406,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 child: FilledButton.icon(
                   onPressed: _working ? null : _restoreFromFile,
                   icon: const Icon(Icons.upload_file_rounded, size: 18),
-                  label: const Text('Restore from File'),
+                  label: Text(S.of(context).backupRestoreFromFile),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.caution,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -426,7 +424,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8),
               child: Text(
-                'LOCAL BACKUPS',
+                S.of(context).backupLocalSection,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -474,13 +472,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         IconButton(
                           icon: Icon(Icons.restore_rounded,
                               size: 18, color: AppColors.accent),
-                          tooltip: 'Restore',
+                          tooltip: S.of(context).backupRestoreTitle,
                           onPressed: () => _restoreLocalBackup(b),
                         ),
                         IconButton(
                           icon: Icon(Icons.delete_outline,
                               size: 18, color: AppColors.overspent),
-                          tooltip: 'Delete',
+                          tooltip: S.of(context).commonDelete,
                           onPressed: () => _deleteLocalBackup(b),
                         ),
                       ],

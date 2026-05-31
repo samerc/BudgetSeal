@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 
 // ---------------------------------------------------------------------------
@@ -189,7 +190,7 @@ class _CurrencySheetState extends State<CurrencySheet>
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Text('Currency',
+                  Text(S.of(context).currencySheetTitle,
                       style: Theme.of(context).textTheme.titleMedium),
                 ],
               ),
@@ -229,7 +230,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                       child: Text(
-                        'YOUR ACCOUNTS',
+                        S.of(context).currencyYourAccounts,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -259,7 +260,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                       child: Text(
-                        'RECENTLY USED',
+                        S.of(context).currencyRecentlyUsed,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -286,7 +287,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                       child: Text(
-                        'ALL CURRENCIES',
+                        S.of(context).currencyAll,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

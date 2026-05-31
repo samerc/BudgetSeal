@@ -2,9 +2,9 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -12,6 +12,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../recurring/recurring_screen.dart' show AddRecurringSheet;
+import '../../l10n/generated/app_localizations.dart';
 
 class SubscriptionsScreen extends ConsumerStatefulWidget {
   const SubscriptionsScreen({super.key});
@@ -92,8 +93,8 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
       debugPrint('[Subscriptions] Error toggling: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not update subscription'),
+          SnackBar(
+            content: Text(S.of(context).subCouldNotUpdate),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -112,20 +113,21 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   }
 
   String _frequencySuffix(String frequency, int interval) {
+    final tr = S.of(context);
     if (interval == 1) {
       return switch (frequency) {
-        'daily' => '/day',
-        'weekly' => '/week',
-        'monthly' => '/month',
-        'yearly' => '/year',
+        'daily' => tr.subFreqDay,
+        'weekly' => tr.subFreqWeek,
+        'monthly' => tr.subFreqMonth,
+        'yearly' => tr.subFreqYear,
         _ => '/$frequency',
       };
     }
     return switch (frequency) {
-      'daily' => '/$interval days',
-      'weekly' => '/$interval weeks',
-      'monthly' => '/$interval months',
-      'yearly' => '/$interval years',
+      'daily' => tr.subFreqDays(interval),
+      'weekly' => tr.subFreqWeeks(interval),
+      'monthly' => tr.subFreqMonths(interval),
+      'yearly' => tr.subFreqYears(interval),
       _ => '/$interval $frequency',
     };
   }
@@ -187,7 +189,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add subscription',
+        tooltip: S.of(context).subAddTooltip,
         onPressed: () async {
           final result = await showModalBottomSheet<bool>(
             context: context,
@@ -220,7 +222,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Subscriptions',
+                          S.of(context).subTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
                             fontWeight: FontWeight.w800,
@@ -315,7 +317,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              '$activeCount active',
+                              '$activeCount ${S.of(context).subActive.toLowerCase()}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
@@ -346,14 +348,14 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           _CountChip(
                             icon: Icons.subscriptions_rounded,
                             label: '${_subs.length}',
-                            subtitle: 'Total',
+                            subtitle: S.of(context).subTotal,
                             color: AppColors.accent,
                           ),
                           const SizedBox(width: 16),
                           _CountChip(
                             icon: Icons.play_arrow_rounded,
                             label: '$activeCount',
-                            subtitle: 'Active',
+                            subtitle: S.of(context).subActive,
                             color: AppColors.healthy,
                           ),
                           if (cancelledCount > 0) ...[
@@ -361,7 +363,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                             _CountChip(
                               icon: Icons.cancel_outlined,
                               label: '$cancelledCount',
-                              subtitle: 'Cancelled',
+                              subtitle: S.of(context).subCancelled,
                               color: AppColors.overspent,
                             ),
                           ],
@@ -378,14 +380,14 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                   child: Row(
                     children: [
                       _StatusChip(
-                        label: 'All',
+                        label: S.of(context).typeAll,
                         selected: _statusFilter == null,
                         onTap: () =>
                             setState(() => _statusFilter = null),
                       ),
                       const SizedBox(width: 8),
                       _StatusChip(
-                        label: 'Active',
+                        label: S.of(context).subActive,
                         selected: _statusFilter == 'active',
                         color: AppColors.healthy,
                         onTap: () =>
@@ -394,7 +396,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                       if (cancelledCount > 0) ...[
                         const SizedBox(width: 8),
                         _StatusChip(
-                          label: 'Cancelled',
+                          label: S.of(context).subCancelled,
                           selected: _statusFilter == 'cancelled',
                           color: AppColors.overspent,
                           onTap: () =>
@@ -412,21 +414,18 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                   child: Center(child: CircularProgressIndicator()),
                 )
               else if (_subs.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: EmptyState(
                     icon: Icons.subscriptions_rounded,
-                    title: 'No subscriptions',
-                    subtitle:
-                        'Add a recurring transaction and mark it as a subscription',
+                    title: S.of(context).subNoTitle,
+                    subtitle: S.of(context).subNoSubtitle,
                   ),
                 )
               else if (filtered.isEmpty)
                 SliverFillRemaining(
                   child: Center(
                     child: Text(
-                      _statusFilter != null
-                          ? 'No $_statusFilter subscriptions'
-                          : 'No subscriptions',
+                      S.of(context).subNoTitle,
                       style: TextStyle(color: AppColors.ts(context)),
                     ),
                   ),
@@ -566,7 +565,8 @@ class _SubscriptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = sub['title'] as String? ?? 'Untitled';
+    final tr = S.of(context);
+    final title = sub['title'] as String? ?? tr.subUntitled;
     final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
     final currency = sub['currency'] as String?;
     final nextDue = parseDate(sub['next_due_date']);
@@ -574,7 +574,7 @@ class _SubscriptionTile extends StatelessWidget {
     final isEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
 
     final catColor = categoryColor != null
-        ? Color(int.parse(categoryColor!.replaceFirst('#', '0xFF')))
+        ? AppColors.fromHex(categoryColor!)
         : AppColors.accent;
 
     final statusDotColor = switch (status) {
@@ -614,7 +614,7 @@ class _SubscriptionTile extends StatelessWidget {
         ),
         subtitle: Text(
           nextDue != null
-              ? 'Next: ${DateFormat.yMMMd().format(nextDue)} $frequencySuffix'
+              ? 'Next: ${formatDate(nextDue)} $frequencySuffix'
               : frequencySuffix,
           style: TextStyle(
             fontSize: 12,
@@ -657,9 +657,9 @@ class _SubscriptionTile extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       switch (status) {
-                        'active' => 'Active',
-                        'ending_soon' => 'Ending soon',
-                        'cancelled' => 'Cancelled',
+                        'active' => tr.subActive,
+                        'ending_soon' => tr.subEndingSoon,
+                        'cancelled' => tr.subCancelled,
                         _ => '',
                       },
                       style: TextStyle(
@@ -678,7 +678,7 @@ class _SubscriptionTile extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 iconSize: 20,
-                tooltip: isEnabled ? 'Pause subscription' : 'Resume subscription',
+                tooltip: isEnabled ? '${tr.subPause} subscription' : '${tr.subResume} subscription',
                 icon: Icon(
                   isEnabled
                       ? Icons.pause_circle_rounded

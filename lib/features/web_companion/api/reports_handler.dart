@@ -60,6 +60,7 @@ Handler cashflowReportHandler(Ref ref) {
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
+                t.status.isNull() &
                 t.type.isIn(['income', 'expense']) &
                 t.createdAt.isBiggerOrEqualValue(start) &
                 t.createdAt.isSmallerThanValue(end))
@@ -195,6 +196,7 @@ Handler byCategoryReportHandler(Ref ref) {
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
+                t.status.isNull() &
                 t.type.equals(typeFilter) &
                 t.createdAt.isBiggerOrEqualValue(start) &
                 t.createdAt.isSmallerThanValue(end)))
