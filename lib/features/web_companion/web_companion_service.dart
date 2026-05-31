@@ -107,34 +107,16 @@ class WebCompanionService {
 
   static Future<String?> _getWifiIp() async {
     try {
-      final info = NetworkInfo();
-      final ip = await info.getWifiIP();
+      // NetworkInfo().getWifiIP() queries the WiFi network interface
+      // specifically — it does NOT return cellular IPs. Returns null
+      // when WiFi is disconnected.
+      final ip = await NetworkInfo().getWifiIP();
       if (ip == null || ip.isEmpty || ip == '0.0.0.0') return null;
-
-      // If the IP is a private/local IP, it's almost certainly WiFi.
-      // Cellular connections use carrier IPs (often 100.64.x.x CGNAT or public).
-      // Private IP ranges: 192.168.x.x, 10.x.x.x, 172.16-31.x.x
-      if (_isPrivateIp(ip)) return ip;
-
-      // For non-private IPs, verify WiFi via BSSID/name.
-      // Note: Android 10+ requires location permission for BSSID/name;
-      // without it they return null/<unknown ssid> even on WiFi.
-      final bssid = await info.getWifiBSSID();
-      if (bssid != null && bssid.isNotEmpty && bssid != '02:00:00:00:00:00') {
-        return ip;
-      }
-      final name = await info.getWifiName();
-      if (name != null && name.isNotEmpty && name != '<unknown ssid>') {
-        return ip;
-      }
-
-      return null;
+      return ip;
     } catch (_) {
       return null;
     }
   }
-
-  // _isPrivateIp is defined below (shared with middleware)
 
   static Future<void> _startForegroundService(String ip) async {
     // Request battery optimization exemption — critical on Samsung, Xiaomi,
