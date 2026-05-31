@@ -173,8 +173,16 @@ class _AssistedTransactionScreenState
     }
     final suggestions = previousTitles.toList()..sort();
     var movedForward = false;
-    // Capture S before opening sheet to avoid _dependents.isEmpty crash
+    // Capture S + theme colors before opening sheet to avoid _dependents.isEmpty crash.
+    // Using the outer widget's context inside a StatefulBuilder registers InheritedWidget
+    // dependencies that break when the sheet is dismissed.
     final tr = S.of(context);
+    final surfaceColor = AppColors.sf(context);
+    final textPrimary = AppColors.tp(context);
+    final textHint = AppColors.th(context);
+    final surfaceVariant = AppColors.sfv(context);
+    final borderColor = AppColors.bd(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     showModalBottomSheet(
       context: context,
@@ -191,7 +199,7 @@ class _AssistedTransactionScreenState
             padding: EdgeInsets.fromLTRB(
                 20, 24, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
             decoration: BoxDecoration(
-              color: AppColors.sf(context),
+              color: surfaceColor,
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(24)),
             ),
@@ -203,7 +211,7 @@ class _AssistedTransactionScreenState
                 _buildTypeToggleSheet(localType, (newType) {
                   setSheetState(() => localType = newType);
                   setState(() => _type = newType);
-                }),
+                }, tr: tr, bgColor: surfaceVariant),
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -212,7 +220,7 @@ class _AssistedTransactionScreenState
                           style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.tp(context))),
+                              color: textPrimary)),
                     ),
                     _StepIndicator(current: 1),
                   ],
@@ -231,7 +239,7 @@ class _AssistedTransactionScreenState
                         localType == 'transfer'
                             ? Icons.notes_rounded
                             : Icons.title_rounded,
-                        color: AppColors.th(context)),
+                        color: textHint),
                   ),
                   onChanged: (val) {
                     final q = val.toLowerCase();
@@ -282,23 +290,22 @@ class _AssistedTransactionScreenState
                         },
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.42,
+                            maxWidth: screenWidth * 0.42,
                           ),
                           child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: AppColors.sfv(context),
+                            color: surfaceVariant,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.bd(context)),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Text(s,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   fontSize: 14,
-                                  color: AppColors.tp(context))),
+                                  color: textPrimary)),
                         ),
                         ),
                       );
@@ -2039,23 +2046,25 @@ class _AssistedTransactionScreenState
 
   /// Type toggle used inside bottom sheets (with callback for local state).
   Widget _buildTypeToggleSheet(
-      String currentType, ValueChanged<String> onChanged) {
+      String currentType, ValueChanged<String> onChanged,
+      {S? tr, Color? bgColor}) {
     final txColors = ref.watch(txColorsProvider);
+    final l = tr ?? S.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.sfv(context),
+        color: bgColor ?? AppColors.sfv(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          _buildToggleItemSheet(S.of(context).typeExpense, 'expense',
+          _buildToggleItemSheet(l.typeExpense, 'expense',
               Icons.arrow_upward_rounded, txColors.expense, currentType,
               onChanged),
-          _buildToggleItemSheet(S.of(context).typeIncome, 'income',
+          _buildToggleItemSheet(l.typeIncome, 'income',
               Icons.arrow_downward_rounded, txColors.income, currentType,
               onChanged),
-          _buildToggleItemSheet(S.of(context).typeTransfer, 'transfer',
+          _buildToggleItemSheet(l.typeTransfer, 'transfer',
               Icons.swap_horiz_rounded, txColors.transfer, currentType,
               onChanged),
         ],
