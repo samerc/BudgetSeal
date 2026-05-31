@@ -101,11 +101,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     _restoreFilters();
     _loadPlanned();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final offset = (_selectedMonth - 1) * 80.0;
+      // Start at year (position 0), then animate to current month
+      // +1 for year item at index 0
+      final offset = _selectedMonth * 80.0;
       if (_monthScrollCtrl.hasClients) {
-        _monthScrollCtrl.animateTo(offset - 120,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut);
+        _monthScrollCtrl.jumpTo(0); // Start at the year
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (_monthScrollCtrl.hasClients) {
+            _monthScrollCtrl.animateTo(offset - 120,
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic);
+          }
+        });
       }
       if (!mounted) return;
       showHintIfNeeded(
@@ -690,58 +697,42 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     });
   }
 
-  // ── Month tabs (with year tap) ───────────────────────────────
+  void _showYearPicker(BuildContext context) async {
+    final tr = S.of(context);
+    final picked = await showDialog<int>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(tr.txSelectYear),
+        children: List.generate(DateTime.now().year - (DateTime.now().year - 5) + 1, (i) {
+          final y = DateTime.now().year - 5 + i;
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, y),
+            child: Text('$y',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: y == _selectedYear
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                    color: y == _selectedYear
+                        ? AppColors.accent
+                        : null)),
+          );
+        }),
+      ),
+    );
+    if (picked != null) {
+      _setMonth(picked, _selectedMonth);
+    }
+  }
+
+  // ── Month tabs (year inline as first item) ─────────────────────
   Widget _buildMonthTabs(BuildContext context) {
+    final now = DateTime.now();
+    final monthCount = _selectedYear == now.year ? now.month : 12;
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        children: [
-          // Year selector
-          GestureDetector(
-            onTap: () async {
-              final picked = await showDialog<int>(
-                context: context,
-                builder: (ctx) => SimpleDialog(
-                  title: Text(S.of(context).txSelectYear),
-                  children: List.generate(DateTime.now().year - (DateTime.now().year - 5) + 1, (i) {
-                    final y = DateTime.now().year - 5 + i;
-                    return SimpleDialogOption(
-                      onPressed: () => Navigator.pop(ctx, y),
-                      child: Text('$y',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: y == _selectedYear
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: y == _selectedYear
-                                  ? AppColors.accent
-                                  : null)),
-                    );
-                  }),
-                ),
-              );
-              if (picked != null) {
-                _setMonth(picked, _selectedMonth);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('$_selectedYear',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ts(context))),
-                  Icon(Icons.expand_more_rounded,
-                      size: 16, color: AppColors.ts(context)),
-                ],
-              ),
-            ),
-          ),
-          // Month row with arrow buttons
-          SizedBox(
+      child: SizedBox(
             height: 38,
             child: Row(
               children: [
@@ -754,7 +745,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     } else {
                       _setMonth(_selectedYear, _selectedMonth - 1);
                     }
-                    final offset = (_selectedMonth - 1) * 80.0;
+                    // +1 for year item at index 0
+                    final offset = _selectedMonth * 80.0;
                     if (_monthScrollCtrl.hasClients) {
                       _monthScrollCtrl.animateTo(offset - 120,
                           duration: const Duration(milliseconds: 200),
@@ -767,7 +759,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         size: 22, color: AppColors.ts(context)),
                   ),
                 ),
-                // Month list
+                // Year + Month list (year is the first item)
                 Expanded(
                   child: FadedEdges(
                   startFade: 12,
@@ -776,11 +768,32 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    itemCount: _selectedYear == DateTime.now().year
-                        ? DateTime.now().month
-                        : 12,
+                    itemCount: monthCount + 1, // +1 for year item
                     itemBuilder: (_, i) {
-                      final month = i + 1;
+                      // First item: year selector
+                      if (i == 0) {
+                        return GestureDetector(
+                          onTap: () => _showYearPicker(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('$_selectedYear',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.accent)),
+                                Icon(Icons.expand_more_rounded,
+                                    size: 14, color: AppColors.accent),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      final month = i; // i=1 → month 1 (Jan)
                       final isSelected = month == _selectedMonth;
                       final label =
                           DateFormat('MMMM').format(DateTime(2000, month));
@@ -835,7 +848,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         _setMonth(_selectedYear, _selectedMonth + 1);
                       }
                     }
-                    final offset = (_selectedMonth - 1) * 80.0;
+                    // +1 for year item at index 0
+                    final offset = _selectedMonth * 80.0;
                     if (_monthScrollCtrl.hasClients) {
                       _monthScrollCtrl.animateTo(offset - 120,
                           duration: const Duration(milliseconds: 200),
@@ -850,8 +864,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ),
               ],
             ),
-          ),
-        ],
       ),
     );
   }
