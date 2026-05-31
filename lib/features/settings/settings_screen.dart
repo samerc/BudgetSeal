@@ -933,19 +933,24 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref) async {
     final current = ref.read(localeProvider);
+    // Capture all context-dependent values before the sheet to avoid
+    // _dependents.isEmpty crash when locale change rebuilds MaterialApp.
+    final tr = S.of(context);
+    final titleColor = AppColors.tp(context);
+    final subtitleColor = AppColors.ts(context);
     final options = <(String?, String, String?)>[
-      (null, S.of(context).languageSystem, S.of(context).languageSystemDesc),
-      ('en', S.of(context).languageEnglish, null),
-      ('ar', S.of(context).languageArabic, null),
-      ('fr', S.of(context).languageFrench, null),
+      (null, tr.languageSystem, tr.languageSystemDesc),
+      ('en', tr.languageEnglish, null),
+      ('ar', tr.languageArabic, null),
+      ('fr', tr.languageFrench, null),
     ];
     final picked = await showModalBottomSheet<String?>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).languagePickerTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+              child: Text(tr.languagePickerTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: titleColor))),
           for (final (code, label, subtitle) in options)
             ListTile(
               leading: Icon(
@@ -955,7 +960,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   color: AppColors.accent),
               title: Text(label),
               subtitle: subtitle != null ? Text(subtitle,
-                  style: TextStyle(fontSize: 12, color: AppColors.ts(context))) : null,
+                  style: TextStyle(fontSize: 12, color: subtitleColor)) : null,
               onTap: () => Navigator.pop(ctx, code ?? '__system__'),
             ),
           const SizedBox(height: 8),
