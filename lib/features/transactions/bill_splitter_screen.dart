@@ -47,7 +47,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   // ── Currency ──
   late String _billCurrency;
   double _exchangeRate = 1.0;
-  bool _rateInverted = false;
+  bool _rateInverted = true; // default: show base currency first (1 USD = X LBP)
   final _rateCtrl = TextEditingController();
   bool _currencyExpanded = false;
 
