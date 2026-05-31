@@ -610,9 +610,11 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             const SizedBox(height: 12),
             // Category picker
             Builder(builder: (context) {
-              final categories = ref.watch(categoriesProvider).value ?? [];
+              final categories = (ref.watch(categoriesProvider).value ?? [])
+                  .where((c) => c.transactionType == _type)
+                  .toList();
               return DropdownButtonFormField<String>(
-                value: _categoryId,
+                value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
                 decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
                 items: [
                   DropdownMenuItem<String>(
@@ -896,9 +898,11 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             const SizedBox(height: 12),
             // Category picker
             Builder(builder: (context) {
-              final categories = ref.watch(categoriesProvider).value ?? [];
+              final categories = (ref.watch(categoriesProvider).value ?? [])
+                  .where((c) => c.transactionType == widget.item.type)
+                  .toList();
               return DropdownButtonFormField<String>(
-                value: _categoryId,
+                value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
                 decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
                 items: [
                   DropdownMenuItem<String>(

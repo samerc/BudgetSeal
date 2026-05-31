@@ -128,16 +128,17 @@ class NotificationService {
     final periodStartDay = household.periodStartDay;
     final now = DateTime.now();
 
-    // Compute next period start (= end of current period)
-    DateTime nextPeriodStart;
-    if (now.day >= periodStartDay) {
-      // Current period started this month; next starts next month
-      nextPeriodStart = DateTime(now.year, now.month + 1, periodStartDay);
-    } else {
-      // Current period started last month; next starts this month
-      nextPeriodStart = DateTime(now.year, now.month, periodStartDay);
-    }
+    // Compute next period start (= end of current period).
+    // Clamp day to the actual days in the target month to avoid overflow
+    // (e.g., periodStartDay=31 in February → clamp to 28).
+    int targetYear = now.year;
+    int targetMonth = now.day >= periodStartDay ? now.month + 1 : now.month;
+    if (targetMonth > 12) { targetMonth = 1; targetYear++; }
+    final daysInTarget = DateTime(targetYear, targetMonth + 1, 0).day;
+    final clampedDay = periodStartDay > daysInTarget ? daysInTarget : periodStartDay;
+    final nextPeriodStart = DateTime(targetYear, targetMonth, clampedDay);
     final daysLeft = nextPeriodStart.difference(now).inDays;
+    if (daysLeft <= 0) return; // At or past period boundary — skip
 
     // Batch-fetch all balances
     final allBalances = await ledgerDao.getAllBalances(

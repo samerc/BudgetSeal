@@ -429,9 +429,9 @@ class _ObjectiveDetailScreenState
           TxLine(
             amount: result.amount,
             currency: _currency,
-            exchangeRateToBase: account.currency == _currency
+            exchangeRateToBase: _currency == (ref.read(householdProvider).value?.baseCurrency ?? 'USD')
                 ? 1.0
-                : (await ref.read(fxServiceProvider).getRateWithCache(account.currency, _currency).catchError((_) => 1.0)),
+                : (await ref.read(fxServiceProvider).getRateWithCache(_currency, ref.read(householdProvider).value?.baseCurrency ?? 'USD').catchError((_) => 1.0)),
             categoryId: result.categoryId,
           ),
         ],
@@ -677,7 +677,7 @@ class _ObjectiveDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${tx.createdAt.day}/${tx.createdAt.month}/${tx.createdAt.year}',
+                            formatDate(tx.createdAt),
                             style: TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w600,
                               color: AppColors.tp(context),
@@ -890,7 +890,7 @@ class _ObjectiveDetailScreenState
               const SizedBox(width: 10),
               Text(
                 _endDate != null
-                    ? S.of(context).objDeadlinePrefix('${_endDate!.day}/${_endDate!.month}/${_endDate!.year}')
+                    ? S.of(context).objDeadlinePrefix(formatDate(_endDate!))
                     : S.of(context).objSetDeadline,
                 style: TextStyle(fontSize: 14, color: _endDate != null
                     ? AppColors.tp(context) : AppColors.th(context)),
