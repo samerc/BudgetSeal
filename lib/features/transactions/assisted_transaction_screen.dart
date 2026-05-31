@@ -532,9 +532,33 @@ class _AssistedTransactionScreenState
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: OutlinedButton.icon(
-                              onPressed: () {
+                              onPressed: () async {
+                                // Snapshot existing category IDs before navigating
+                                final before = (ref.read(categoriesProvider).value ?? [])
+                                    .map((c) => c.id).toSet();
                                 Navigator.pop(ctx);
-                                context.push('/categories');
+                                await Future.delayed(const Duration(milliseconds: 200));
+                                if (!mounted) return;
+                                await context.push('/categories');
+                                if (!mounted) return;
+                                // Invalidate + find newly created category
+                                ref.invalidate(categoriesProvider);
+                                await Future.delayed(const Duration(milliseconds: 300));
+                                final after = ref.read(categoriesProvider).value ?? [];
+                                final newCats = after.where((c) => !before.contains(c.id)).toList();
+                                if (newCats.length == 1) {
+                                  // Auto-select the single new category and proceed to amount
+                                  setState(() {
+                                    _activeLine.category = newCats.first;
+                                    if (newCats.first.transactionType != _type) {
+                                      _type = newCats.first.transactionType;
+                                    }
+                                  });
+                                  // The build method will show the amount step since category is set
+                                } else {
+                                  // Multiple new or none — re-open picker
+                                  _showCategoryPopup();
+                                }
                               },
                               icon: const Icon(Icons.add_rounded, size: 18),
                               label: Text(tr.txAfNewCategory),
