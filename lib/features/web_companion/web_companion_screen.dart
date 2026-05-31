@@ -44,11 +44,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       if (!mounted) return;
 
       // Verify actual WiFi — not just cellular with an IP.
-      // BSSID is null or 02:00:00:00:00:00 when only cellular is active.
+      // A private IP (192.168.x.x, 10.x.x.x) is strong evidence of WiFi.
+      // BSSID/name require location permission on Android 10+ and may return
+      // null even on WiFi, so we only use them for non-private IPs.
       final hasIp = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
+      final isPrivate = hasIp && _isPrivateIp(ip);
       final hasWifiAP = bssid != null && bssid.isNotEmpty && bssid != '02:00:00:00:00:00';
       final hasWifiName = name != null && name.isNotEmpty && name != '<unknown ssid>';
-      final connected = hasIp && (hasWifiAP || hasWifiName);
+      final connected = hasIp && (isPrivate || hasWifiAP || hasWifiName);
 
       // Check if the network name suggests a public network
       final lower = (name ?? '').replaceAll('"', '').toLowerCase();
@@ -69,6 +72,17 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     } catch (_) {
       if (mounted) setState(() => _hasWifi = false);
     }
+  }
+
+  static bool _isPrivateIp(String ip) {
+    final parts = ip.split('.');
+    if (parts.length != 4) return false;
+    final a = int.tryParse(parts[0]) ?? 0;
+    final b = int.tryParse(parts[1]) ?? 0;
+    if (a == 10) return true;
+    if (a == 192 && b == 168) return true;
+    if (a == 172 && b >= 16 && b <= 31) return true;
+    return false;
   }
 
   Future<void> _checkPin() async {
