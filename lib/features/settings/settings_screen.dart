@@ -423,6 +423,10 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     Color transferColor = current.transfer;
 
     final tr = S.of(context);
+    final colorSurface = AppColors.sf(context);
+    final colorSurfaceVariant = AppColors.sfv(context);
+    final colorTextPrimary = AppColors.tp(context);
+    final colorTextSecondary = AppColors.ts(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -434,7 +438,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             maxHeight: MediaQuery.of(ctx).size.height * 0.85,
           ),
           decoration: BoxDecoration(
-            color: AppColors.sf(context),
+            color: colorSurface,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -451,7 +455,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
+                        color: colorSurfaceVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -461,13 +465,13 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.tp(context))),
+                          color: colorTextPrimary)),
                   const SizedBox(height: 6),
                   Text(
                     tr.txColorsDesc,
                     style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.ts(context),
+                        color: colorTextSecondary,
                         height: 1.4),
                   ),
                   const SizedBox(height: 20),
@@ -475,18 +479,18 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
+                      color: colorSurfaceVariant,
                       borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _colorPreviewChip(
-                            tr.typeIncome, '+\$500', incomeColor, context),
+                            tr.typeIncome, '+\$500', incomeColor, ctx),
                         _colorPreviewChip(
-                            tr.typeExpense, '-\$120', expenseColor, context),
+                            tr.typeExpense, '-\$120', expenseColor, ctx),
                         _colorPreviewChip(
-                            tr.typeTransfer, '\$200', transferColor, context),
+                            tr.typeTransfer, '\$200', transferColor, ctx),
                       ],
                     ),
                   ),
@@ -494,15 +498,15 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   // Color pickers
                   _colorPickerRow(tr.typeExpense, expenseColor, presets, (c) {
                     setSheetState(() => expenseColor = c);
-                  }, Icons.arrow_upward_rounded, context),
+                  }, Icons.arrow_upward_rounded, ctx),
                   const SizedBox(height: 16),
                   _colorPickerRow(tr.typeIncome, incomeColor, presets, (c) {
                     setSheetState(() => incomeColor = c);
-                  }, Icons.arrow_downward_rounded, context),
+                  }, Icons.arrow_downward_rounded, ctx),
                   const SizedBox(height: 16),
                   _colorPickerRow(tr.typeTransfer, transferColor, presets, (c) {
                     setSheetState(() => transferColor = c);
-                  }, Icons.swap_horiz_rounded, context),
+                  }, Icons.swap_horiz_rounded, ctx),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () {
@@ -534,7 +538,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                     },
                     child: Text(tr.txColorsReset,
                         style: TextStyle(
-                            color: AppColors.ts(context), fontSize: 13)),
+                            color: colorTextSecondary, fontSize: 13)),
                   ),
                 ],
               ),

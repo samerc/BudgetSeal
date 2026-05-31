@@ -910,10 +910,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     double receivedAmount = 0;
 
     final tr = S.of(context);
+    final surfaceColor = AppColors.sf(context);
+    final textPrimaryColor = AppColors.tp(context);
+    final textSecondaryColor = AppColors.ts(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -924,11 +927,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(tr.acctConvertBack,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
+                    color: textPrimaryColor)),
             const SizedBox(height: 4),
             Text(
               tr.acctConvertBackMsg(formatAmount(balance, currency: _currencyController.text)),
-              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              style: TextStyle(fontSize: 13, color: textSecondaryColor),
             ),
             const SizedBox(height: 20),
             // Destination account picker

@@ -915,9 +915,15 @@ class _AllocationDetailScreenState
     }
 
     final tr = S.of(context);
+    final surfaceColor = AppColors.sf(context);
+    final hintColor = AppColors.th(context);
+    final textPrimaryColor = AppColors.tp(context);
+    final textSecondaryColor = AppColors.ts(context);
+    final surfaceVariantColor = AppColors.sfv(context);
+    final borderColor = AppColors.bd(context);
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: surfaceColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -934,7 +940,7 @@ class _AllocationDetailScreenState
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.th(context),
+                    color: hintColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -945,7 +951,7 @@ class _AllocationDetailScreenState
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context),
+                  color: textPrimaryColor,
                 ),
               ),
               const SizedBox(height: 4),
@@ -953,7 +959,7 @@ class _AllocationDetailScreenState
                 tr.allocFromUnallocated,
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.ts(context),
+                  color: textSecondaryColor,
                 ),
               ),
               const SizedBox(height: 16),
@@ -976,12 +982,12 @@ class _AllocationDetailScreenState
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.accent.withValues(alpha: 0.12)
-                                  : AppColors.sfv(context),
+                                  : surfaceVariantColor,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isSelected
                                     ? AppColors.accent
-                                    : AppColors.bd(context),
+                                    : borderColor,
                               ),
                             ),
                             child: Column(
@@ -992,13 +998,13 @@ class _AllocationDetailScreenState
                                       fontWeight: FontWeight.w700,
                                       color: isSelected
                                           ? AppColors.accent
-                                          : AppColors.tp(context),
+                                          : textPrimaryColor,
                                     )),
                                 Text(
                                   formatAmount(bal, currency: c),
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: AppColors.ts(context),
+                                    color: textSecondaryColor,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1017,7 +1023,7 @@ class _AllocationDetailScreenState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
+                      color: surfaceVariantColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -1025,7 +1031,7 @@ class _AllocationDetailScreenState
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ts(context),
+                        color: textSecondaryColor,
                       ),
                     ),
                   ),
@@ -1033,7 +1039,7 @@ class _AllocationDetailScreenState
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
+                        color: surfaceVariantColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: CalculatorAmountField(
@@ -1044,7 +1050,7 @@ class _AllocationDetailScreenState
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context),
+                          color: textPrimaryColor,
                         ),
                       ),
                     ),
@@ -1451,6 +1457,8 @@ class _AllocationDetailScreenState
     final currency = _targetCurrencyController.text;
 
     final tr = S.of(context);
+    final withdrawSurfaceColor = AppColors.sf(context);
+    final withdrawTextSecondary = AppColors.ts(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -1460,7 +1468,7 @@ class _AllocationDetailScreenState
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           decoration: BoxDecoration(
-            color: AppColors.sf(context),
+            color: withdrawSurfaceColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -1474,7 +1482,7 @@ class _AllocationDetailScreenState
               Text(
                 tr.allocWithdrawDesc,
                 style: TextStyle(
-                    fontSize: 13, color: AppColors.ts(context)),
+                    fontSize: 13, color: withdrawTextSecondary),
               ),
               const SizedBox(height: 16),
               CalculatorAmountField(
@@ -1580,6 +1588,11 @@ class _AllocationDetailScreenState
     }
 
     final tr = S.of(context);
+    final linkSurfaceColor = AppColors.sf(context);
+    final linkHintColor = AppColors.th(context);
+    final linkTextPrimary = AppColors.tp(context);
+    final linkTextSecondary = AppColors.ts(context);
+    final linkSurfaceVariant = AppColors.sfv(context);
     final selected = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -1600,7 +1613,7 @@ class _AllocationDetailScreenState
                 maxHeight: MediaQuery.of(ctx).size.height * 0.7,
               ),
               decoration: BoxDecoration(
-                color: AppColors.sf(context),
+                color: linkSurfaceColor,
                 borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20)),
               ),
@@ -1615,7 +1628,7 @@ class _AllocationDetailScreenState
                             width: 36,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: AppColors.th(context),
+                              color: linkHintColor,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -1625,7 +1638,7 @@ class _AllocationDetailScreenState
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.tp(context))),
+                                color: linkTextPrimary)),
                         const SizedBox(height: 10),
                         TextField(
                           onChanged: (v) =>
@@ -1633,16 +1646,16 @@ class _AllocationDetailScreenState
                           textInputAction: TextInputAction.search,
                           style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.tp(context)),
+                              color: linkTextPrimary),
                           decoration: InputDecoration(
                             hintText: tr.allocSearchCategories,
                             hintStyle: TextStyle(
-                                color: AppColors.th(context)),
+                                color: linkHintColor),
                             prefixIcon: Icon(Icons.search_rounded,
                                 size: 18,
-                                color: AppColors.th(context)),
+                                color: linkHintColor),
                             filled: true,
-                            fillColor: AppColors.sfv(context),
+                            fillColor: linkSurfaceVariant,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide.none,
@@ -1660,7 +1673,7 @@ class _AllocationDetailScreenState
                         ? Center(
                             child: Text(tr.allocNoMatchingCategories,
                                 style: TextStyle(
-                                    color: AppColors.ts(context))))
+                                    color: linkTextSecondary)))
                         : ListView.builder(
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
@@ -1707,8 +1720,7 @@ class _AllocationDetailScreenState
                                                     fontWeight:
                                                         FontWeight.w500,
                                                     color:
-                                                        AppColors.tp(
-                                                            context))),
+                                                        linkTextPrimary)),
                                             Text(
                                               cat.transactionType[0]
                                                       .toUpperCase() +
@@ -1716,8 +1728,7 @@ class _AllocationDetailScreenState
                                                       .substring(1),
                                               style: TextStyle(
                                                   fontSize: 11,
-                                                  color: AppColors.ts(
-                                                      context)),
+                                                  color: linkTextSecondary),
                                             ),
                                           ],
                                         ),

@@ -159,10 +159,13 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     String? error;
 
     final tr = S.of(context);
+    final pinSurface = AppColors.sf(context);
+    final pinTextPrimary = AppColors.tp(context);
+    final pinTextSecondary = AppColors.ts(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: pinSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -180,12 +183,12 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       style: TextStyle(
                           fontSize: TypographyTokens.cardTitleSize,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
+                          color: pinTextPrimary)),
                   const SizedBox(height: 6),
                   Text(subtitle,
                       style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.ts(context))),
+                          color: pinTextSecondary)),
                   const SizedBox(height: 20),
                   TextField(
                     controller: controller,

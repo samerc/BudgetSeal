@@ -358,6 +358,10 @@ class _AssistedTransactionScreenState
     // Capture S before opening sheet to avoid _dependents.isEmpty crash
     final tr = S.of(context);
 
+    final catSurface = AppColors.sf(context);
+    final catTextPrimary = AppColors.tp(context);
+    final catHint = AppColors.th(context);
+    final catSurfaceVariant = AppColors.sfv(context);
     final searchFocus = FocusNode();
     showModalBottomSheet(
       context: context,
@@ -418,7 +422,7 @@ class _AssistedTransactionScreenState
                 maxHeight: MediaQuery.of(ctx).size.height * 0.85,
               ),
               decoration: BoxDecoration(
-                color: AppColors.sf(context),
+                color: catSurface,
                 borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24)),
               ),
@@ -477,7 +481,7 @@ class _AssistedTransactionScreenState
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.tp(context))),
+                                      color: catTextPrimary)),
                             ),
                             _StepIndicator(current: 2),
                           ],
@@ -491,19 +495,19 @@ class _AssistedTransactionScreenState
                           onSubmitted: (_) => searchFocus.unfocus(),
                           style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.tp(context)),
+                              color: catTextPrimary),
                           decoration: InputDecoration(
                             hintText: tr.txAfSearchCategories,
                             hintStyle: TextStyle(
-                                color: AppColors.th(context)),
+                                color: catHint),
                             prefixIcon: Icon(Icons.search_rounded,
                                 size: 18,
-                                color: AppColors.th(context)),
+                                color: catHint),
                             suffixIcon: searchQuery.isNotEmpty
                                 ? IconButton(
                                     icon: Icon(Icons.clear_rounded,
                                         size: 16,
-                                        color: AppColors.th(context)),
+                                        color: catHint),
                                     onPressed: () {
                                       setSheetState(
                                           () => searchQuery = '');
@@ -512,7 +516,7 @@ class _AssistedTransactionScreenState
                                   )
                                 : null,
                             filled: true,
-                            fillColor: AppColors.sfv(context),
+                            fillColor: catSurfaceVariant,
                             border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.circular(10),

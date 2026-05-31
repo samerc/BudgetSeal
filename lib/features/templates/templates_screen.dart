@@ -611,6 +611,10 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
     final tr = S.of(context);
+    final tmplSurface = AppColors.sf(context);
+    final tmplSurfaceVariant = AppColors.sfv(context);
+    final tmplTextPrimary = AppColors.tp(context);
+    final tmplTextSecondary = AppColors.ts(context);
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -622,7 +626,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           padding: EdgeInsets.fromLTRB(
               20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           decoration: BoxDecoration(
-            color: AppColors.sf(context),
+            color: tmplSurface,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -638,7 +642,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
+                        color: tmplSurfaceVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -648,12 +652,12 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.tp(context))),
+                          color: tmplTextPrimary)),
                   const SizedBox(height: 4),
                   Text(
                     tr.tmplNewDesc,
                     style: TextStyle(
-                        fontSize: 13, color: AppColors.ts(context)),
+                        fontSize: 13, color: tmplTextSecondary),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
