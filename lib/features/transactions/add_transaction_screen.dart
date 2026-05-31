@@ -280,7 +280,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
 
     if (acc.currency != _baseCurrency) {
-      await _fetchRate(lineIndex, acc.currency);
+      // Don't overwrite a rate that was pre-set (e.g., from bill splitter)
+      final existingRate = _lines[lineIndex].exchangeRateToBase;
+      if (existingRate == 1.0 || existingRate == 0.0) {
+        await _fetchRate(lineIndex, acc.currency);
+      }
     } else {
       setState(() {
         _lines[lineIndex].exchangeRateToBase = 1.0;
