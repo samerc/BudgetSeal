@@ -6933,6 +6933,8 @@
   "txDetailTemplateSaved": "Template saved",
   "@txDetailTemplateSaved": { "description": "Snackbar after saving as template" },
   "txDetailTemplateError": "Could not save template",
-  "@txDetailTemplateError": { "description": "Snackbar when saving template fails" }
+  "@txDetailTemplateError": { "description": "Snackbar when saving template fails" },
+  "tileArabicDigits": "Arabic-Indic Numerals",
+  "@tileArabicDigits": { "description": "Settings toggle for Arabic numeral style" }
 }
 

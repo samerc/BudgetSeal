@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/providers/accent_color_provider.dart';
+import 'core/providers/arabic_digits_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'core/providers/accounts_provider.dart';
@@ -444,8 +445,12 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     // Resolve locale early — needed by splash, lock, and main screens.
     final localeCode = ref.watch(localeProvider);
     final locale = localeCode != null ? Locale(localeCode) : null;
-    Intl.defaultLocale = localeCode ??
+    final resolvedLocale = localeCode ??
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    Intl.defaultLocale = resolvedLocale;
+    // Arabic-Indic digits: only when locale is Arabic AND user opted in
+    final useArabic = ref.watch(arabicDigitsProvider);
+    setUseArabicDigits(resolvedLocale == 'ar' && useArabic);
 
     if (_showSplash) {
       return MaterialApp(

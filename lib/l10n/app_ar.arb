@@ -6142,5 +6142,6 @@
   "recurringFormCategory": "الفئة (اختياري)",
   "txDetailSaveAsTemplate": "حفظ كقالب",
   "txDetailTemplateSaved": "تم حفظ القالب",
-  "txDetailTemplateError": "تعذّر حفظ القالب"
+  "txDetailTemplateError": "تعذّر حفظ القالب",
+  "tileArabicDigits": "الأرقام العربية الهندية"
 }

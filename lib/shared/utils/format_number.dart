@@ -54,9 +54,10 @@ bool _needsSpace(String symbol) {
 }
 
 /// Format the raw number with the user's preferred separators.
+/// When the app locale is Arabic, digits are converted to Arabic-Indic (٠١٢٣٤٥٦٧٨٩).
 String _formatNumber(double absValue, int decimalDigits) {
-  // Always use 'en' locale for digit rendering — Arabic-Indic numerals (١٢٣)
-  // are not standard for finance apps. User separator prefs are applied below.
+  // Use en_US for formatting structure (comma thousands, period decimal)
+  // then apply user separator prefs and locale-specific digit conversion.
   final formatter = NumberFormat.currency(
     locale: 'en_US',
     symbol: '',
@@ -77,7 +78,36 @@ String _formatNumber(double absValue, int decimalDigits) {
         formatted.replaceAll('\x01', wantThousands).replaceAll('\x02', wantDecimal);
   }
 
+  // Convert to Arabic-Indic numerals when locale is Arabic
+  if (_useArabicDigits) {
+    formatted = _toArabicDigits(formatted);
+  }
+
   return formatted;
+}
+
+/// Whether to render Arabic-Indic numerals (٠١٢٣٤٥٦٧٨٩).
+bool _useArabicDigits = false;
+
+/// Call from app.dart when locale changes.
+void setUseArabicDigits(bool value) {
+  _useArabicDigits = value;
+}
+
+/// Convert Western digits 0-9 to Arabic-Indic ٠-٩.
+String _toArabicDigits(String input) {
+  const western = '0123456789';
+  const arabic  = '٠١٢٣٤٥٦٧٨٩';
+  final buf = StringBuffer();
+  for (final ch in input.codeUnits) {
+    final idx = western.codeUnitAt(0);
+    if (ch >= idx && ch <= idx + 9) {
+      buf.writeCharCode(arabic.codeUnitAt(ch - idx));
+    } else {
+      buf.writeCharCode(ch);
+    }
+  }
+  return buf.toString();
 }
 
 /// Format a plain number (no currency symbol) respecting user's separator prefs.

@@ -6142,5 +6142,6 @@
   "recurringFormCategory": "Catégorie (optionnel)",
   "txDetailSaveAsTemplate": "Enregistrer comme modèle",
   "txDetailTemplateSaved": "Modèle enregistré",
-  "txDetailTemplateError": "Impossible d'enregistrer le modèle"
+  "txDetailTemplateError": "Impossible d'enregistrer le modèle",
+  "tileArabicDigits": "Chiffres arabo-indiens"
 }

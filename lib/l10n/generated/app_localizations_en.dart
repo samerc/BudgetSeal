@@ -5830,4 +5830,7 @@ class SEn extends S {
 
   @override
   String get txDetailTemplateError => 'Could not save template';
+
+  @override
+  String get tileArabicDigits => 'Arabic-Indic Numerals';
 }

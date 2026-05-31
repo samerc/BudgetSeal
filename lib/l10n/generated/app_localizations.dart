@@ -10616,6 +10616,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Could not save template'**
   String get txDetailTemplateError;
+
+  /// Settings toggle for Arabic numeral style
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic-Indic Numerals'**
+  String get tileArabicDigits;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

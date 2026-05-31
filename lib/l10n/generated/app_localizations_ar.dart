@@ -5792,4 +5792,7 @@ class SAr extends S {
 
   @override
   String get txDetailTemplateError => 'تعذّر حفظ القالب';
+
+  @override
+  String get tileArabicDigits => 'الأرقام العربية الهندية';
 }

@@ -20,6 +20,7 @@ import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/font_provider.dart';
+import '../../core/providers/arabic_digits_provider.dart';
 import '../../core/providers/locale_provider.dart';
 import '../../core/providers/text_scale_provider.dart';
 import '../../core/providers/theme_provider.dart';
@@ -1210,6 +1211,20 @@ class SettingsDetailScreen extends ConsumerWidget {
             return _SettingsTile(icon: Icons.language_rounded, title: S.of(context).tileLanguage,
                 subtitle: langLabel, iconColor: const Color(0xFF26A69A),
                 onTap: () => _showLanguagePicker(context, ref));
+          }),
+          // Arabic-Indic digits toggle — only visible when Arabic locale
+          Builder(builder: (context) {
+            final localeNow = ref.watch(localeProvider);
+            final resolvedLocale = localeNow ?? WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+            if (resolvedLocale != 'ar') return const SizedBox.shrink();
+            final useArabic = ref.watch(arabicDigitsProvider);
+            return SwitchListTile(
+              secondary: Icon(Icons.format_list_numbered_rounded, color: const Color(0xFF26A69A)),
+              title: Text(S.of(context).tileArabicDigits),
+              subtitle: Text(useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789'),
+              value: useArabic,
+              onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
+            );
           }),
           _SettingsTile(icon: Icons.view_list_rounded, title: l.tileTxList,
               subtitle: l.tileTxListSub,

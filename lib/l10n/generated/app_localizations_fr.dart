@@ -5911,4 +5911,7 @@ class SFr extends S {
 
   @override
   String get txDetailTemplateError => 'Impossible d\'enregistrer le modèle';
+
+  @override
+  String get tileArabicDigits => 'Chiffres arabo-indiens';
 }
