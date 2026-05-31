@@ -67,6 +67,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
   late final ScrollController _monthScrollCtrl;
+  Timer? _initialScrollTimer;
 
   // Advanced filters
   DateTime? _dateFrom;
@@ -106,7 +107,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       final offset = _selectedMonth * 80.0;
       if (_monthScrollCtrl.hasClients) {
         _monthScrollCtrl.jumpTo(0); // Start at the year
-        Future.delayed(const Duration(milliseconds: 400), () {
+        _initialScrollTimer = Timer(const Duration(milliseconds: 400), () {
           if (_monthScrollCtrl.hasClients) {
             _monthScrollCtrl.animateTo(offset - 120,
                 duration: const Duration(milliseconds: 600),
@@ -135,6 +136,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _initialScrollTimer?.cancel();
     _searchCtrl.dispose();
     _monthScrollCtrl.dispose();
     _amountMinCtrl.dispose();
@@ -184,6 +186,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   }
 
   void _setMonth(int year, int month) {
+    _initialScrollTimer?.cancel();
     setState(() {
       _selectedYear = year;
       _selectedMonth = month;
