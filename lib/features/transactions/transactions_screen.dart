@@ -190,18 +190,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
 
-      final monthStart = DateTime(_selectedYear, _selectedMonth, 1);
-      final monthEnd = DateTime(_selectedYear, _selectedMonth + 1, 1);
+      final now = DateTime.now();
+      final isCurrentMonth = _selectedYear == now.year && _selectedMonth == now.month;
 
-      final txs = await (db.select(db.transactions)
+      // When viewing the current month, show ALL planned payments (including future months).
+      // When viewing a specific past/future month, show only that month's planned items.
+      final query = db.select(db.transactions)
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.status.equals('planned') &
-                t.deleted.equals(false) &
-                t.createdAt.isBiggerOrEqualValue(monthStart) &
-                t.createdAt.isSmallerThanValue(monthEnd))
-            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
-          .get();
+                t.deleted.equals(false))
+            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+
+      if (!isCurrentMonth) {
+        final monthStart = DateTime(_selectedYear, _selectedMonth, 1);
+        final monthEnd = DateTime(_selectedYear, _selectedMonth + 1, 1);
+        query.where((t) =>
+            t.createdAt.isBiggerOrEqualValue(monthStart) &
+            t.createdAt.isSmallerThanValue(monthEnd));
+      }
+
+      final txs = await query.get();
 
       if (txs.isEmpty) {
         if (mounted) setState(() { _plannedTxs = []; _plannedLinesByTx = {}; });
