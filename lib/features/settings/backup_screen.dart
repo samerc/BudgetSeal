@@ -182,9 +182,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(S.of(context).backupRestoreDialogTitle),
         content: Text(
-          'From: ${DateFormat.yMMMd().add_jm().format(backup.created)}\n'
-          'Size: ${backup.sizeFormatted}\n\n'
-          'This will replace your current data. The app will need to restart.',
+          S.of(context).backupRestoreDialogBody(
+              DateFormat.yMMMd().add_jm().format(backup.created),
+              backup.sizeFormatted),
         ),
         actions: [
           TextButton(
@@ -252,7 +252,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     style: const TextStyle(fontSize: 14)),
                 subtitle: Text(
                   _autoEnabled
-                      ? 'Backing up every ${_frequencyLabel(_frequencyHours)}'
+                      ? S.of(context).backupAutoEvery(_frequencyLabel(context, _frequencyHours))
                       : S.of(context).backupDisabled,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context)),
@@ -340,7 +340,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 if (_lastAutoBackup != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'Last auto-backup: ${DateFormat.yMMMd().add_jm().format(_lastAutoBackup!)}',
+                    S.of(context).backupLastAutoBackup(DateFormat.yMMMd().add_jm().format(_lastAutoBackup!)),
                     style: TextStyle(
                         fontSize: 11, color: AppColors.th(context)),
                   ),
@@ -527,11 +527,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
-  String _frequencyLabel(int hours) {
-    if (hours <= 6) return '6 hours';
-    if (hours <= 12) return '12 hours';
-    if (hours <= 24) return 'day';
-    if (hours <= 72) return '3 days';
-    return 'week';
+  String _frequencyLabel(BuildContext context, int hours) {
+    final s = S.of(context);
+    if (hours <= 6) return s.backupEvery6h;
+    if (hours <= 12) return s.backupEvery12h;
+    if (hours <= 24) return s.backupDaily;
+    if (hours <= 72) return s.backupEvery3d;
+    return s.backupWeekly;
   }
 }

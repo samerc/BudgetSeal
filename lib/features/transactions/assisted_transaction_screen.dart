@@ -179,8 +179,8 @@ class _AssistedTransactionScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         // Use local state for type so tapping expense/income/transfer works

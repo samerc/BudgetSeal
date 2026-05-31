@@ -84,6 +84,7 @@ Future<void> _startApp() async {
     if (householdId != null) {
       final db = container.read(databaseProvider);
       await NotificationService.checkEnvelopes(db, householdId);
+      await NotificationService.checkBudgetWarnings(db, householdId);
       await NotificationService.checkRecurring(db, householdId);
     }
   } catch (e) {

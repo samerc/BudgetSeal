@@ -5182,6 +5182,19 @@
   "@notifBillsAndMore": {
     "description": "Notification suffix"
   },
+  "notifBudgetWarningTitle": "تنبيه الميزانية",
+  "@notifBudgetWarningTitle": {
+    "description": "Notification title for budget warning"
+  },
+  "notifBudgetWarning": "{name}: تم استخدام {percent}% مع بقاء {days} أيام",
+  "@notifBudgetWarning": {
+    "description": "Notification body for envelope approaching budget limit",
+    "placeholders": {
+      "name": { "type": "String" },
+      "percent": { "type": "String" },
+      "days": { "type": "String" }
+    }
+  },
   "notifReminderTitle": "PocketPlan",
   "@notifReminderTitle": {
     "description": "Notification title"
@@ -5775,6 +5788,10 @@
   "onboardAccountNameError": "أدخل اسم الحساب",
   "onboardMoreOptions": "خيارات إضافية",
   "onboardDayN": "اليوم {day}",
+  "onboardEnvelopeExplainer": "ميزانية الأظرف بسيطة: قسّم دخلك إلى أظرف افتراضية لكل فئة إنفاق. عندما ينفد ظرف ما، تتوقف عن الإنفاق في تلك الفئة.",
+  "onboardHouseholdHint": "مثلاً: ميزانيتي",
+  "onboardPeriodHelp": "اليوم الذي تُعاد فيه ميزانيتك الشهرية (عادةً الأول من الشهر أو يوم الراتب).",
+  "onboardHelpHint": "تحتاج مساعدة؟ تحقق من دليلنا في أي وقت من المزيد > دليل المساعدة.",
   "travelPreviousWallet": "لديك محفظة سفر سابقة بعملة {currency}:",
   "travelExchangeFailed": "فشل التحويل. حاول مجدداً.",
   "travelBalanceLabel": "الرصيد: {amount}",
@@ -6113,5 +6130,17 @@
   "plannedSaveFailed": "تعذّر حفظ الدفعة المخططة",
   "plannedBadge": "مخططة",
   "plannedNPlanned": "{amount} مخططة",
-  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } }
+  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } },
+  "travelExchangeSuccess": "تم التحويل {fromAmount} → {toAmount}. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.",
+  "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
+  "backupRestoreDialogBody": "من: {date}\nالحجم: {size}\n\nسيتم استبدال جميع بياناتك الحالية. يجب إعادة تشغيل التطبيق.",
+  "@backupRestoreDialogBody": { "description": "Restore backup confirmation dialog body", "placeholders": { "date": { "type": "String" }, "size": { "type": "String" } } },
+  "backupAutoEvery": "نسخ احتياطي {frequency}",
+  "@backupAutoEvery": { "description": "Subtitle when auto-backup is enabled", "placeholders": { "frequency": { "type": "String" } } },
+  "backupLastAutoBackup": "آخر نسخ احتياطي تلقائي: {date}",
+  "@backupLastAutoBackup": { "description": "Label showing last auto-backup time", "placeholders": { "date": { "type": "String" } } },
+  "recurringFormCategory": "الفئة (اختياري)",
+  "txDetailSaveAsTemplate": "حفظ كقالب",
+  "txDetailTemplateSaved": "تم حفظ القالب",
+  "txDetailTemplateError": "تعذّر حفظ القالب"
 }

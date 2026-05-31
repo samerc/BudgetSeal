@@ -5182,6 +5182,19 @@
   "@notifBillsAndMore": {
     "description": "Notification suffix"
   },
+  "notifBudgetWarningTitle": "Alerte budget",
+  "@notifBudgetWarningTitle": {
+    "description": "Notification title for budget warning"
+  },
+  "notifBudgetWarning": "{name} : {percent}% utilisé avec {days} jours restants",
+  "@notifBudgetWarning": {
+    "description": "Notification body for envelope approaching budget limit",
+    "placeholders": {
+      "name": { "type": "String" },
+      "percent": { "type": "String" },
+      "days": { "type": "String" }
+    }
+  },
   "notifReminderTitle": "PocketPlan",
   "@notifReminderTitle": {
     "description": "Notification title"
@@ -5775,6 +5788,10 @@
   "onboardAccountNameError": "Entrez un nom de compte",
   "onboardMoreOptions": "Plus d'options",
   "onboardDayN": "Jour {day}",
+  "onboardEnvelopeExplainer": "La budgétisation par enveloppes est simple : répartissez vos revenus dans des enveloppes virtuelles pour chaque catégorie de dépenses. Quand une enveloppe est vide, vous arrêtez de dépenser dans cette catégorie.",
+  "onboardHouseholdHint": "ex. Mon Budget",
+  "onboardPeriodHelp": "Le jour où votre budget mensuel se réinitialise (généralement le 1er ou votre jour de paie).",
+  "onboardHelpHint": "Besoin d'aide ? Consultez notre guide à tout moment depuis Plus > Guide d'aide.",
   "travelPreviousWallet": "Vous avez un précédent portefeuille de voyage en {currency} :",
   "travelExchangeFailed": "Échec du change. Veuillez réessayer.",
   "travelBalanceLabel": "Solde : {amount}",
@@ -6113,5 +6130,17 @@
   "plannedSaveFailed": "Impossible d'enregistrer le paiement planifié",
   "plannedBadge": "Planifié",
   "plannedNPlanned": "{amount} planifiés",
-  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } }
+  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } },
+  "travelExchangeSuccess": "Échangé {fromAmount} → {toAmount}. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.",
+  "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
+  "backupRestoreDialogBody": "Du : {date}\nTaille : {size}\n\nCela remplacera vos données actuelles. L'application devra redémarrer.",
+  "@backupRestoreDialogBody": { "description": "Restore backup confirmation dialog body", "placeholders": { "date": { "type": "String" }, "size": { "type": "String" } } },
+  "backupAutoEvery": "Sauvegarde {frequency}",
+  "@backupAutoEvery": { "description": "Subtitle when auto-backup is enabled", "placeholders": { "frequency": { "type": "String" } } },
+  "backupLastAutoBackup": "Dernière sauvegarde auto : {date}",
+  "@backupLastAutoBackup": { "description": "Label showing last auto-backup time", "placeholders": { "date": { "type": "String" } } },
+  "recurringFormCategory": "Catégorie (optionnel)",
+  "txDetailSaveAsTemplate": "Enregistrer comme modèle",
+  "txDetailTemplateSaved": "Modèle enregistré",
+  "txDetailTemplateError": "Impossible d'enregistrer le modèle"
 }

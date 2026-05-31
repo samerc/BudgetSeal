@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -530,6 +531,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
   String? _accountId;
   String _currency = 'USD';
   DateTime? _endDate;
+  String? _categoryId;
   late bool _isSubscription = widget.forceSubscription;
   bool _saving = false;
   bool _submitted = false;
@@ -603,6 +605,24 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 },
                 validator: (v) =>
                     (_submitted && _accountId == null) ? S.of(context).recurringFormAccountRequired : null,
+              );
+            }),
+            const SizedBox(height: 12),
+            // Category picker
+            Builder(builder: (context) {
+              final categories = ref.watch(categoriesProvider).value ?? [];
+              return DropdownButtonFormField<String>(
+                value: _categoryId,
+                decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
+                items: [
+                  DropdownMenuItem<String>(
+                      value: null, child: Text(S.of(context).catNone)),
+                  ...categories.map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.name),
+                      )),
+                ],
+                onChanged: (v) => setState(() => _categoryId = v),
               );
             }),
             const SizedBox(height: 12),
@@ -742,6 +762,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
         amount: _calcAmount,
         currency: _currency,
         accountId: _accountId!,
+        categoryId: _categoryId,
         frequency: _frequency,
         startDate: _startDate,
         endDate: _endDate,
@@ -784,9 +805,10 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
   late String? _accountId;
   late String _currency;
   late DateTime? _endDate;
+  late String? _categoryId;
   late bool _isSubscription;
   bool _saving = false;
-  final bool _submitted = false;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -799,6 +821,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
     _accountId = item.accountId;
     _currency = item.currency;
     _endDate = item.endDate;
+    _categoryId = item.categoryId;
     _isSubscription = item.isSubscription;
   }
 
@@ -868,6 +891,24 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 },
                 validator: (v) =>
                     (_submitted && _accountId == null) ? S.of(context).recurringFormAccountRequired : null,
+              );
+            }),
+            const SizedBox(height: 12),
+            // Category picker
+            Builder(builder: (context) {
+              final categories = ref.watch(categoriesProvider).value ?? [];
+              return DropdownButtonFormField<String>(
+                value: _categoryId,
+                decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
+                items: [
+                  DropdownMenuItem<String>(
+                      value: null, child: Text(S.of(context).catNone)),
+                  ...categories.map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.name),
+                      )),
+                ],
+                onChanged: (v) => setState(() => _categoryId = v),
               );
             }),
             const SizedBox(height: 12),
@@ -983,6 +1024,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
   }
 
   Future<void> _save() async {
+    setState(() => _submitted = true);
     final title = _titleCtrl.text.trim();
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1016,6 +1058,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         amount: Value(_calcAmount),
         currency: Value(_currency),
         accountId: Value(_accountId!),
+        categoryId: Value(_categoryId),
         frequency: Value(_frequency),
         nextDueDate: Value(_startDate),
         endDate: Value(_endDate),

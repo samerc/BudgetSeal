@@ -348,7 +348,9 @@ class _TravelExchangeScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Exchanged ${formatAmount(_sourceAmount, currency: fromAcc.currency)} → ${formatAmount(_receivedAmount, currency: _targetCurrency)}. When you\'re back, open the travel wallet and use "Convert Back & Close" to return leftover money.'),
+                S.of(context).travelExchangeSuccess(
+                    formatAmount(_sourceAmount, currency: fromAcc.currency),
+                    formatAmount(_receivedAmount, currency: _targetCurrency))),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 6),
           ),

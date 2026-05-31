@@ -8853,6 +8853,18 @@ abstract class S {
   /// **'and more'**
   String get notifBillsAndMore;
 
+  /// Notification title for budget warning
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert'**
+  String get notifBudgetWarningTitle;
+
+  /// Notification body for envelope approaching budget limit
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {percent}% used with {days} days left'**
+  String notifBudgetWarning(String name, String percent, String days);
+
   /// Notification title
   ///
   /// In en, this message translates to:
@@ -9452,6 +9464,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Day {day}'**
   String onboardDayN(int day);
+
+  /// Brief explanation of envelope budgeting on the welcome page
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope budgeting is simple: divide your income into virtual envelopes for each spending category. When an envelope runs out, you stop spending in that category.'**
+  String get onboardEnvelopeExplainer;
+
+  /// Hint text for the household name field during onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. My Budget'**
+  String get onboardHouseholdHint;
+
+  /// Helper text below the period start day field during onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'The day your monthly budget resets (usually the 1st or your payday).'**
+  String get onboardPeriodHelp;
+
+  /// Help guide reference on the onboarding done page
+  ///
+  /// In en, this message translates to:
+  /// **'Need help? Check our guide anytime from More > Help Guide.'**
+  String get onboardHelpHint;
 
   /// Travel exchange reactivate dialog text
   ///
@@ -10532,6 +10568,54 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{amount} planned'**
   String plannedNPlanned(String amount);
+
+  /// SnackBar after successful travel exchange
+  ///
+  /// In en, this message translates to:
+  /// **'Exchanged {fromAmount} → {toAmount}. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.'**
+  String travelExchangeSuccess(String fromAmount, String toAmount);
+
+  /// Restore backup confirmation dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'From: {date}\nSize: {size}\n\nThis will replace your current data. The app will need to restart.'**
+  String backupRestoreDialogBody(String date, String size);
+
+  /// Subtitle when auto-backup is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up {frequency}'**
+  String backupAutoEvery(String frequency);
+
+  /// Label showing last auto-backup time
+  ///
+  /// In en, this message translates to:
+  /// **'Last auto-backup: {date}'**
+  String backupLastAutoBackup(String date);
+
+  /// Category dropdown label in recurring form
+  ///
+  /// In en, this message translates to:
+  /// **'Category (optional)'**
+  String get recurringFormCategory;
+
+  /// Menu item to save transaction as template
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Template'**
+  String get txDetailSaveAsTemplate;
+
+  /// Snackbar after saving as template
+  ///
+  /// In en, this message translates to:
+  /// **'Template saved'**
+  String get txDetailTemplateSaved;
+
+  /// Snackbar when saving template fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save template'**
+  String get txDetailTemplateError;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

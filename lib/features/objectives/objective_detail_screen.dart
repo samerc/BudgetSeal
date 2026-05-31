@@ -11,6 +11,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -428,7 +429,9 @@ class _ObjectiveDetailScreenState
           TxLine(
             amount: result.amount,
             currency: _currency,
-            exchangeRateToBase: account.currency == _currency ? 1.0 : 1.0,
+            exchangeRateToBase: account.currency == _currency
+                ? 1.0
+                : (await ref.read(fxServiceProvider).getRateWithCache(account.currency, _currency).catchError((_) => 1.0)),
             categoryId: result.categoryId,
           ),
         ],
@@ -610,7 +613,7 @@ class _ObjectiveDetailScreenState
                 if (_endDate != null)
                   _SummaryRow(
                     label: S.of(context).objSummaryDeadline,
-                    value: '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
+                    value: formatDate(_endDate!),
                   ),
                 _SummaryRow(
                   label: S.of(context).objSummaryRemaining,

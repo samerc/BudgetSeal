@@ -45,9 +45,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // Categories
   bool _seedCategories = true; // true = full set, false = empty
 
-  // Entry mode
-  String _entryMode = 'assisted';
-
   bool _loading = false;
   String? _nameError;
   String? _acctNameError;
@@ -156,8 +153,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         }
       });
 
-      // 4. Set entry mode
-      ref.read(entryModeProvider.notifier).setMode(_entryMode);
+      // 4. Set entry mode (default: assisted)
+      ref.read(entryModeProvider.notifier).setMode('assisted');
 
       // 5. Go to done page
       if (mounted) _nextPage();
@@ -232,7 +229,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       acctType: _acctType,
                       acctInitialBalance: _acctInitialBalance,
                       seedCategories: _seedCategories,
-                      entryMode: _entryMode,
                       loading: _loading,
                       nameError: _nameError,
                       acctNameError: _acctNameError,
@@ -248,8 +244,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           setState(() => _acctInitialBalance = v),
                       onSeedChanged: (v) =>
                           setState(() => _seedCategories = v),
-                      onEntryModeChanged: (v) =>
-                          setState(() => _entryMode = v),
                       onSubmit: _submit,
                     ),
                     _DonePage(onFinish: () => context.go('/')),
@@ -365,6 +359,23 @@ class _WelcomePageState extends State<_WelcomePage>
           ),
           const SizedBox(height: 32),
 
+          // ── Envelope explainer ──
+          FadeTransition(
+            opacity: _fadeContent,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                S.of(context).onboardEnvelopeExplainer,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ),
+
           // ── How it works (compact) ──
           FadeTransition(
             opacity: _fadeContent,
@@ -458,7 +469,6 @@ class _SetupPage extends StatelessWidget {
   final String acctType;
   final double acctInitialBalance;
   final bool seedCategories;
-  final String entryMode;
   final bool loading;
   final String? nameError;
   final String? acctNameError;
@@ -469,7 +479,6 @@ class _SetupPage extends StatelessWidget {
   final ValueChanged<String> onAcctTypeChanged;
   final ValueChanged<double> onAcctBalanceChanged;
   final ValueChanged<bool> onSeedChanged;
-  final ValueChanged<String> onEntryModeChanged;
   final VoidCallback onSubmit;
 
   const _SetupPage({
@@ -480,7 +489,6 @@ class _SetupPage extends StatelessWidget {
     required this.acctType,
     required this.acctInitialBalance,
     required this.seedCategories,
-    required this.entryMode,
     required this.loading,
     this.nameError,
     this.acctNameError,
@@ -491,7 +499,6 @@ class _SetupPage extends StatelessWidget {
     required this.onAcctTypeChanged,
     required this.onAcctBalanceChanged,
     required this.onSeedChanged,
-    required this.onEntryModeChanged,
     required this.onSubmit,
   });
 
@@ -536,6 +543,8 @@ class _SetupPage extends StatelessWidget {
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     onChanged: nameError != null ? (_) => onNameErrorClear?.call() : null,
                     decoration: _inputDeco(s.onboardHouseholdName).copyWith(
+                      hintText: s.onboardHouseholdHint,
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 15),
                       errorText: nameError,
                       errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
@@ -563,6 +572,14 @@ class _SetupPage extends StatelessWidget {
                             ))
                         .toList(),
                     onChanged: onDayChanged,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    s.onboardPeriodHelp,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.45),
+                    ),
                   ),
                 ],
               ),
@@ -667,9 +684,7 @@ class _SetupPage extends StatelessWidget {
             // ── More Options (collapsed by default) ──
             _ExpandableOptions(
               seedCategories: seedCategories,
-              entryMode: entryMode,
               onSeedChanged: onSeedChanged,
-              onEntryModeChanged: onEntryModeChanged,
             ),
             const SizedBox(height: 24),
 
@@ -852,6 +867,15 @@ class _DonePage extends StatelessWidget {
           _OnboardingButton(
             label: S.of(context).onboardStartUsing,
             onTap: onFinish,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            S.of(context).onboardHelpHint,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
           ),
         ],
       ),
@@ -1322,15 +1346,11 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
 
 class _ExpandableOptions extends StatefulWidget {
   final bool seedCategories;
-  final String entryMode;
   final ValueChanged<bool> onSeedChanged;
-  final ValueChanged<String> onEntryModeChanged;
 
   const _ExpandableOptions({
     required this.seedCategories,
-    required this.entryMode,
     required this.onSeedChanged,
-    required this.onEntryModeChanged,
   });
 
   @override
@@ -1363,7 +1383,7 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
                       color: Colors.white54)),
               const Spacer(),
               Text(
-                '${widget.seedCategories ? S.of(context).onboardFullSet : S.of(context).onboardEmpty} · ${widget.entryMode == "assisted" ? S.of(context).onboardAssisted : S.of(context).onboardClassic}',
+                widget.seedCategories ? S.of(context).onboardFullSet : S.of(context).onboardEmpty,
                 style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
               ),
             ],
@@ -1392,28 +1412,6 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
                       subtitle: S.of(context).onboardEmptySub,
                       isSelected: !widget.seedCategories,
                       onTap: () => widget.onSeedChanged(false),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              _SectionLabel(S.of(context).onboardEntrySection),
-              const SizedBox(height: 8),
-              _FormCard(
-                child: Column(
-                  children: [
-                    _ToggleOption(
-                      title: S.of(context).onboardAssisted,
-                      subtitle: S.of(context).onboardAssistedSub,
-                      isSelected: widget.entryMode == 'assisted',
-                      onTap: () => widget.onEntryModeChanged('assisted'),
-                    ),
-                    const SizedBox(height: 8),
-                    _ToggleOption(
-                      title: S.of(context).onboardClassic,
-                      subtitle: S.of(context).onboardClassicSub,
-                      isSelected: widget.entryMode == 'classic',
-                      onTap: () => widget.onEntryModeChanged('classic'),
                     ),
                   ],
                 ),

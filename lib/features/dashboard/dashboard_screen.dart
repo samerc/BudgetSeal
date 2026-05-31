@@ -229,6 +229,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         }
                       }
 
+                      // Hide spending overview entirely when no activity
+                      if (totalExpense == 0 && totalIncome == 0) {
+                        return const SizedBox.shrink();
+                      }
+
                       return TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: const Duration(milliseconds: 500),
@@ -344,6 +349,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   const SizedBox(height: 8),
                   Builder(builder: (context) {
                     final qs = S.of(context);
+                    final hasEnvelopes = allocationsAsync.value?.isNotEmpty ?? false;
                     return Row(
                     children: [
                       _QuickAction(
@@ -369,14 +375,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'transfer'}),
                       ),
-                      const SizedBox(width: 10),
-                      _QuickAction(
-                        icon: Icons.savings_rounded,
-                        label: qs.dashboardQuickFund,
-                        tooltip: qs.dashboardFundEnvelopesTooltip,
-                        color: const Color(0xFF7E57C2),
-                        onTap: () => context.push('/funding'),
-                      ),
+                      if (hasEnvelopes) ...[
+                        const SizedBox(width: 10),
+                        _QuickAction(
+                          icon: Icons.savings_rounded,
+                          label: qs.dashboardQuickFund,
+                          tooltip: qs.dashboardFundEnvelopesTooltip,
+                          color: const Color(0xFF7E57C2),
+                          onTap: () => context.push('/funding'),
+                        ),
+                      ],
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.call_split_rounded,

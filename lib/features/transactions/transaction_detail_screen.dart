@@ -7,6 +7,7 @@ import '../../shared/utils/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -126,10 +127,39 @@ class _DetailBody extends ConsumerWidget {
             tooltip: S.of(context).commonEdit,
             onPressed: () => _editTransaction(context, ref),
           ),
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: AppColors.overspent),
-            tooltip: S.of(context).commonDelete,
-            onPressed: () => _confirmDelete(context, ref),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: AppColors.ts(context)),
+            onSelected: (action) {
+              switch (action) {
+                case 'save_template':
+                  _saveAsTemplate(context, ref);
+                case 'delete':
+                  _confirmDelete(context, ref);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'save_template',
+                child: Row(
+                  children: [
+                    Icon(Icons.bolt_rounded, size: 20, color: AppColors.ts(context)),
+                    const SizedBox(width: 12),
+                    Text(S.of(context).txDetailSaveAsTemplate),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, size: 20, color: AppColors.overspent),
+                    const SizedBox(width: 12),
+                    Text(S.of(context).commonDelete,
+                        style: TextStyle(color: AppColors.overspent)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -518,6 +548,53 @@ class _DetailBody extends ConsumerWidget {
         'editDestAccountId': tx.destinationAccountId,
       },
     });
+  }
+
+  Future<void> _saveAsTemplate(BuildContext context, WidgetRef ref) async {
+    final tx = entry.tx;
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return;
+
+    // Use the first line's data for currency/amount/category
+    final line = entry.lines.isNotEmpty ? entry.lines.first : null;
+    final amount = line?.amount ?? tx.amount;
+    final currency = line?.currency ?? tx.currency;
+    final categoryId = line?.categoryId ?? tx.categoryId;
+    final title = tx.note.isNotEmpty ? tx.note : (categoryMap[categoryId]?.name ?? '');
+
+    try {
+      final db = ref.read(databaseProvider);
+      await db.into(db.transactionTemplates).insert(
+            TransactionTemplatesCompanion.insert(
+              id: const Uuid().v4(),
+              householdId: householdId,
+              title: title,
+              type: tx.type,
+              amount: amount,
+              currency: currency,
+              accountId: Value(tx.accountId),
+              categoryId: Value(categoryId),
+            ),
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).txDetailTemplateSaved),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[TxDetail] Error saving template: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).txDetailTemplateError),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {

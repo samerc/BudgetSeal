@@ -5561,6 +5561,19 @@
   "@notifBillsAndMore": {
     "description": "Notification suffix"
   },
+  "notifBudgetWarningTitle": "Budget Alert",
+  "@notifBudgetWarningTitle": {
+    "description": "Notification title for budget warning"
+  },
+  "notifBudgetWarning": "{name}: {percent}% used with {days} days left",
+  "@notifBudgetWarning": {
+    "description": "Notification body for envelope approaching budget limit",
+    "placeholders": {
+      "name": { "type": "String" },
+      "percent": { "type": "String" },
+      "days": { "type": "String" }
+    }
+  },
   "notifReminderTitle": "PocketPlan",
   "@notifReminderTitle": {
     "description": "Notification title"
@@ -6166,6 +6179,22 @@
         "type": "int"
       }
     }
+  },
+  "onboardEnvelopeExplainer": "Envelope budgeting is simple: divide your income into virtual envelopes for each spending category. When an envelope runs out, you stop spending in that category.",
+  "@onboardEnvelopeExplainer": {
+    "description": "Brief explanation of envelope budgeting on the welcome page"
+  },
+  "onboardHouseholdHint": "e.g. My Budget",
+  "@onboardHouseholdHint": {
+    "description": "Hint text for the household name field during onboarding"
+  },
+  "onboardPeriodHelp": "The day your monthly budget resets (usually the 1st or your payday).",
+  "@onboardPeriodHelp": {
+    "description": "Helper text below the period start day field during onboarding"
+  },
+  "onboardHelpHint": "Need help? Check our guide anytime from More > Help Guide.",
+  "@onboardHelpHint": {
+    "description": "Help guide reference on the onboarding done page"
   },
 
   "lockSetupReason": "Set up a screen lock to protect Pocket Plan",
@@ -6888,6 +6917,22 @@
   "plannedBadge": "Planned",
   "@plannedBadge": { "description": "Badge label for planned transactions" },
   "plannedNPlanned": "{amount} planned",
-  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } }
+  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } },
+  "travelExchangeSuccess": "Exchanged {fromAmount} → {toAmount}. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.",
+  "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
+  "backupRestoreDialogBody": "From: {date}\nSize: {size}\n\nThis will replace your current data. The app will need to restart.",
+  "@backupRestoreDialogBody": { "description": "Restore backup confirmation dialog body", "placeholders": { "date": { "type": "String" }, "size": { "type": "String" } } },
+  "backupAutoEvery": "Backing up {frequency}",
+  "@backupAutoEvery": { "description": "Subtitle when auto-backup is enabled", "placeholders": { "frequency": { "type": "String" } } },
+  "backupLastAutoBackup": "Last auto-backup: {date}",
+  "@backupLastAutoBackup": { "description": "Label showing last auto-backup time", "placeholders": { "date": { "type": "String" } } },
+  "recurringFormCategory": "Category (optional)",
+  "@recurringFormCategory": { "description": "Category dropdown label in recurring form" },
+  "txDetailSaveAsTemplate": "Save as Template",
+  "@txDetailSaveAsTemplate": { "description": "Menu item to save transaction as template" },
+  "txDetailTemplateSaved": "Template saved",
+  "@txDetailTemplateSaved": { "description": "Snackbar after saving as template" },
+  "txDetailTemplateError": "Could not save template",
+  "@txDetailTemplateError": { "description": "Snackbar when saving template fails" }
 }
 

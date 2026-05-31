@@ -19,10 +19,15 @@ class NotificationService {
 
   static const _envelopeNotifId = 1001;
   static const _billNotifId = 1002;
+  static const _budgetWarningNotifId = 1003;
 
   static const _envelopeCooldownKey = 'notif_last_check_envelopes';
   static const _billCooldownKey = 'notif_last_check_bills';
+  static const _budgetWarningCooldownKey = 'notif_last_check_budget_warning';
   static const _cooldownHours = 24;
+
+  /// Threshold at which a budget warning notification is sent (80%).
+  static const _budgetWarningThreshold = 0.80;
 
   static Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -86,6 +91,98 @@ class NotificationService {
     await _plugin.show(
       id: _envelopeNotifId,
       title: l.notifLowEnvelopesTitle,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDesc,
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  /// Check envelopes approaching their budget limit and warn before overspending.
+  ///
+  /// Fires for spending envelopes at >= 80% of target but not yet overspent.
+  /// Shows days remaining in the current period.
+  static Future<void> checkBudgetWarnings(
+      AppDatabase db, String householdId) async {
+    if (!await _shouldCheck(_budgetWarningCooldownKey)) return;
+
+    final dao = AllocationsDao(db);
+    final ledgerDao = LedgerDao(db);
+
+    final allocations = await dao.watchAll(householdId).first;
+    if (allocations.isEmpty) return;
+
+    // Fetch household to get period start day
+    final household = await (db.select(db.households)
+          ..where((h) => h.id.equals(householdId)))
+        .getSingleOrNull();
+    if (household == null) return;
+
+    final periodStartDay = household.periodStartDay;
+    final now = DateTime.now();
+
+    // Compute next period start (= end of current period)
+    DateTime nextPeriodStart;
+    if (now.day >= periodStartDay) {
+      // Current period started this month; next starts next month
+      nextPeriodStart = DateTime(now.year, now.month + 1, periodStartDay);
+    } else {
+      // Current period started last month; next starts this month
+      nextPeriodStart = DateTime(now.year, now.month, periodStartDay);
+    }
+    final daysLeft = nextPeriodStart.difference(now).inDays;
+
+    // Batch-fetch all balances
+    final allBalances = await ledgerDao.getAllBalances(
+        allocations.map((a) => a.allocation.id).toList());
+
+    final warnings = <String>[];
+    for (final awc in allocations) {
+      final alloc = awc.allocation;
+      // Only spending envelopes with a target
+      if (alloc.type != 'spending' || alloc.archived) continue;
+      final target = alloc.targetAmount;
+      final targetCcy = alloc.targetCurrency;
+      if (target == null || target <= 0 || targetCcy == null) continue;
+
+      final balances = allBalances[alloc.id] ?? {};
+      final balance = balances[targetCcy] ?? 0.0;
+
+      // Skip already overspent (handled by checkEnvelopes)
+      if (balance < -0.01) continue;
+
+      // spent = target - remaining balance
+      final spent = target - balance;
+      if (spent <= 0) continue;
+
+      final pct = spent / target;
+      if (pct >= _budgetWarningThreshold && pct < 1.0) {
+        final percentInt = (pct * 100).round();
+        warnings.add(currentS().notifBudgetWarning(
+          alloc.name,
+          percentInt.toString(),
+          daysLeft.toString(),
+        ));
+      }
+    }
+
+    if (warnings.isEmpty) return;
+
+    final l = currentS();
+    final body = warnings.length <= 2
+        ? warnings.join('\n')
+        : '${warnings.take(2).join('\n')}\n${l.notifAndMore(warnings.length - 2)}';
+
+    await _plugin.show(
+      id: _budgetWarningNotifId,
+      title: l.notifBudgetWarningTitle,
       body: body,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(

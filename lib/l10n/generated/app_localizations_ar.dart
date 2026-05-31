@@ -4766,6 +4766,14 @@ class SAr extends S {
   String get notifBillsAndMore => 'والمزيد';
 
   @override
+  String get notifBudgetWarningTitle => 'تنبيه الميزانية';
+
+  @override
+  String notifBudgetWarning(String name, String percent, String days) {
+    return '$name: تم استخدام $percent% مع بقاء $days أيام';
+  }
+
+  @override
   String get notifReminderTitle => 'PocketPlan';
 
   @override
@@ -5078,6 +5086,21 @@ class SAr extends S {
   String onboardDayN(int day) {
     return 'اليوم $day';
   }
+
+  @override
+  String get onboardEnvelopeExplainer =>
+      'ميزانية الأظرف بسيطة: قسّم دخلك إلى أظرف افتراضية لكل فئة إنفاق. عندما ينفد ظرف ما، تتوقف عن الإنفاق في تلك الفئة.';
+
+  @override
+  String get onboardHouseholdHint => 'مثلاً: ميزانيتي';
+
+  @override
+  String get onboardPeriodHelp =>
+      'اليوم الذي تُعاد فيه ميزانيتك الشهرية (عادةً الأول من الشهر أو يوم الراتب).';
+
+  @override
+  String get onboardHelpHint =>
+      'تحتاج مساعدة؟ تحقق من دليلنا في أي وقت من المزيد > دليل المساعدة.';
 
   @override
   String travelPreviousWallet(String currency) {
@@ -5737,4 +5760,36 @@ class SAr extends S {
   String plannedNPlanned(String amount) {
     return '$amount مخططة';
   }
+
+  @override
+  String travelExchangeSuccess(String fromAmount, String toAmount) {
+    return 'تم التحويل $fromAmount → $toAmount. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.';
+  }
+
+  @override
+  String backupRestoreDialogBody(String date, String size) {
+    return 'من: $date\nالحجم: $size\n\nسيتم استبدال جميع بياناتك الحالية. يجب إعادة تشغيل التطبيق.';
+  }
+
+  @override
+  String backupAutoEvery(String frequency) {
+    return 'نسخ احتياطي $frequency';
+  }
+
+  @override
+  String backupLastAutoBackup(String date) {
+    return 'آخر نسخ احتياطي تلقائي: $date';
+  }
+
+  @override
+  String get recurringFormCategory => 'الفئة (اختياري)';
+
+  @override
+  String get txDetailSaveAsTemplate => 'حفظ كقالب';
+
+  @override
+  String get txDetailTemplateSaved => 'تم حفظ القالب';
+
+  @override
+  String get txDetailTemplateError => 'تعذّر حفظ القالب';
 }

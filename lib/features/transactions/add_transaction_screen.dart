@@ -721,11 +721,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     try {
       final engine = ref.read(allocationEngineProvider);
 
-      // If editing, delete the old transaction first.
-      if (widget.editTransactionId != null) {
-        await engine.deleteTransaction(widget.editTransactionId!);
-      }
-
       final title = _titleCtrl.text.trim();
       final note = _noteCtrl.text.trim();
       final effectiveNote =
@@ -735,6 +730,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? title
                   : note;
 
+      // Create the new transaction FIRST (if this fails, old data is intact)
       late final String txId;
       if (_type == _TxType.transfer) {
         txId = await engine.recordTransfer(
@@ -770,6 +766,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           note: effectiveNote,
           date: _effectiveDateTime,
         );
+      }
+
+      // Only delete the old transaction AFTER successful creation
+      if (widget.editTransactionId != null) {
+        await engine.deleteTransaction(widget.editTransactionId!);
       }
 
       // Save receipt filenames if attached.

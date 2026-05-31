@@ -4801,6 +4801,14 @@ class SEn extends S {
   String get notifBillsAndMore => 'and more';
 
   @override
+  String get notifBudgetWarningTitle => 'Budget Alert';
+
+  @override
+  String notifBudgetWarning(String name, String percent, String days) {
+    return '$name: $percent% used with $days days left';
+  }
+
+  @override
   String get notifReminderTitle => 'PocketPlan';
 
   @override
@@ -5114,6 +5122,21 @@ class SEn extends S {
   String onboardDayN(int day) {
     return 'Day $day';
   }
+
+  @override
+  String get onboardEnvelopeExplainer =>
+      'Envelope budgeting is simple: divide your income into virtual envelopes for each spending category. When an envelope runs out, you stop spending in that category.';
+
+  @override
+  String get onboardHouseholdHint => 'e.g. My Budget';
+
+  @override
+  String get onboardPeriodHelp =>
+      'The day your monthly budget resets (usually the 1st or your payday).';
+
+  @override
+  String get onboardHelpHint =>
+      'Need help? Check our guide anytime from More > Help Guide.';
 
   @override
   String travelPreviousWallet(String currency) {
@@ -5775,4 +5798,36 @@ class SEn extends S {
   String plannedNPlanned(String amount) {
     return '$amount planned';
   }
+
+  @override
+  String travelExchangeSuccess(String fromAmount, String toAmount) {
+    return 'Exchanged $fromAmount → $toAmount. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.';
+  }
+
+  @override
+  String backupRestoreDialogBody(String date, String size) {
+    return 'From: $date\nSize: $size\n\nThis will replace your current data. The app will need to restart.';
+  }
+
+  @override
+  String backupAutoEvery(String frequency) {
+    return 'Backing up $frequency';
+  }
+
+  @override
+  String backupLastAutoBackup(String date) {
+    return 'Last auto-backup: $date';
+  }
+
+  @override
+  String get recurringFormCategory => 'Category (optional)';
+
+  @override
+  String get txDetailSaveAsTemplate => 'Save as Template';
+
+  @override
+  String get txDetailTemplateSaved => 'Template saved';
+
+  @override
+  String get txDetailTemplateError => 'Could not save template';
 }

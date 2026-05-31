@@ -4868,6 +4868,14 @@ class SFr extends S {
   String get notifBillsAndMore => 'et plus';
 
   @override
+  String get notifBudgetWarningTitle => 'Alerte budget';
+
+  @override
+  String notifBudgetWarning(String name, String percent, String days) {
+    return '$name : $percent% utilisé avec $days jours restants';
+  }
+
+  @override
   String get notifReminderTitle => 'PocketPlan';
 
   @override
@@ -5190,6 +5198,21 @@ class SFr extends S {
   String onboardDayN(int day) {
     return 'Jour $day';
   }
+
+  @override
+  String get onboardEnvelopeExplainer =>
+      'La budgétisation par enveloppes est simple : répartissez vos revenus dans des enveloppes virtuelles pour chaque catégorie de dépenses. Quand une enveloppe est vide, vous arrêtez de dépenser dans cette catégorie.';
+
+  @override
+  String get onboardHouseholdHint => 'ex. Mon Budget';
+
+  @override
+  String get onboardPeriodHelp =>
+      'Le jour où votre budget mensuel se réinitialise (généralement le 1er ou votre jour de paie).';
+
+  @override
+  String get onboardHelpHint =>
+      'Besoin d\'aide ? Consultez notre guide à tout moment depuis Plus > Guide d\'aide.';
 
   @override
   String travelPreviousWallet(String currency) {
@@ -5856,4 +5879,36 @@ class SFr extends S {
   String plannedNPlanned(String amount) {
     return '$amount planifiés';
   }
+
+  @override
+  String travelExchangeSuccess(String fromAmount, String toAmount) {
+    return 'Échangé $fromAmount → $toAmount. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.';
+  }
+
+  @override
+  String backupRestoreDialogBody(String date, String size) {
+    return 'Du : $date\nTaille : $size\n\nCela remplacera vos données actuelles. L\'application devra redémarrer.';
+  }
+
+  @override
+  String backupAutoEvery(String frequency) {
+    return 'Sauvegarde $frequency';
+  }
+
+  @override
+  String backupLastAutoBackup(String date) {
+    return 'Dernière sauvegarde auto : $date';
+  }
+
+  @override
+  String get recurringFormCategory => 'Catégorie (optionnel)';
+
+  @override
+  String get txDetailSaveAsTemplate => 'Enregistrer comme modèle';
+
+  @override
+  String get txDetailTemplateSaved => 'Modèle enregistré';
+
+  @override
+  String get txDetailTemplateError => 'Impossible d\'enregistrer le modèle';
 }
