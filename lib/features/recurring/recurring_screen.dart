@@ -578,7 +578,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             const SizedBox(height: 12),
             CalculatorAmountField(
               value: _calcAmount,
-              label: S.of(context).recurringFormAmount,
+              label: S.of(context).commonAmount,
               fontSize: 20,
               onChanged: (v) => setState(() => _calcAmount = v),
             ),
@@ -590,7 +590,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               return DropdownButtonFormField<String>(
                 initialValue: _accountId,
                 decoration:
-                    InputDecoration(labelText: S.of(context).recurringFormAccount),
+                    InputDecoration(labelText: S.of(context).commonAccount),
                 items: accounts
                     .map((a) => DropdownMenuItem(
                           value: a.id,
@@ -869,7 +869,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             const SizedBox(height: 12),
             CalculatorAmountField(
               value: _calcAmount,
-              label: S.of(context).recurringFormAmount,
+              label: S.of(context).commonAmount,
               fontSize: 20,
               onChanged: (v) => setState(() => _calcAmount = v),
             ),
@@ -879,7 +879,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               final accounts = ref.watch(accountsProvider).value ?? [];
               return DropdownButtonFormField<String>(
                 initialValue: _accountId,
-                decoration: InputDecoration(labelText: S.of(context).recurringFormAccount),
+                decoration: InputDecoration(labelText: S.of(context).commonAccount),
                 items: accounts
                     .map((a) => DropdownMenuItem(
                           value: a.id,

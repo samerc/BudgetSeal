@@ -171,7 +171,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               ? l.acctNewTitle
               : _nameController.text.isNotEmpty
                   ? _nameController.text
-                  : l.acctFallbackName,
+                  : l.commonAccount,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -573,7 +573,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                             color: Colors.white, strokeWidth: 2),
                       )
                     : Text(
-                        _isNew ? l.acctCreateAccount : l.acctSave,
+                        _isNew ? l.acctCreateAccount : l.commonSave,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

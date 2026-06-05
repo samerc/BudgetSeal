@@ -190,7 +190,7 @@ class _CurrencySheetState extends State<CurrencySheet>
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Text(S.of(context).currencySheetTitle,
+                  Text(S.of(context).commonCurrency,
                       style: Theme.of(context).textTheme.titleMedium),
                 ],
               ),

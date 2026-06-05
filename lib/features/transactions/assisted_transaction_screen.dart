@@ -234,7 +234,7 @@ class _AssistedTransactionScreenState
                   decoration: InputDecoration(
                     hintText: localType == 'transfer'
                         ? tr.txAfTransferNoteHint
-                        : tr.txAfTitleHint,
+                        : tr.commonTitle,
                     suffixIcon: Icon(
                         localType == 'transfer'
                             ? Icons.notes_rounded
@@ -1611,7 +1611,7 @@ class _AssistedTransactionScreenState
             if (_lineItems.length > 1) _buildLineItemsSummary(typeColor),
             // Account selector (labeled "From Account" for transfers)
             _buildAccountSelector(
-              label: isTransfer ? S.of(context).txAfFromAccount : S.of(context).txAfAccount,
+              label: isTransfer ? S.of(context).txAfFromAccount : S.of(context).commonAccount,
               selectedId: _accountId,
               accounts: accounts,
               color: AppColors.accent,

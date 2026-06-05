@@ -171,7 +171,7 @@ class CategoryPill extends StatelessWidget {
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                name ?? S.of(context).txDetailCategory,
+                name ?? S.of(context).commonCategory,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,

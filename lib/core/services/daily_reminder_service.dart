@@ -26,7 +26,7 @@ class DailyReminderService {
   // Android may silently drop on some devices.
   static const _baseNotificationId = 9900;
   static const _scheduleDays = 14;
-  static const _channelId = 'pocketplan_daily_reminder';
+  static const _channelId = 'budgetseal_daily_reminder';
   static const _channelName = 'Daily Reminder';
   static const _channelDesc = 'Daily reminder to log transactions';
 
@@ -186,7 +186,6 @@ class DailyReminderService {
           iOS: DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.dateAndTime,
       );
     }
     debugPrint('[DailyReminder] Scheduled $_scheduleDays notifications at ${time.hour}:${time.minute.toString().padLeft(2, '0')}');

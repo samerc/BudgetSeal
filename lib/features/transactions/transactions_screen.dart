@@ -368,7 +368,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         _buildContent(entries, categoryMap, context),
                     loading: () => const SkeletonList(),
                     error: (e, _) => ErrorRetry(
-                      message: S.of(context).txCouldntLoad,
+                      message: S.of(context).commonCouldntLoadData,
                       details: '$e',
                       onRetry: () => ref.invalidate(
                           monthlyTransactionsProvider(
@@ -1194,7 +1194,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).txDetailCategory),
+                        S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).commonCategory),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -1214,7 +1214,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ? Icons.search_off_rounded
                 : Icons.receipt_long_rounded,
             title: _categoryFilter != null
-                ? S.of(context).txNoCategoryInMonth(_categoryFilterName ?? S.of(context).txDetailCategory, monthLabel)
+                ? S.of(context).txNoCategoryInMonth(_categoryFilterName ?? S.of(context).commonCategory, monthLabel)
                 : hasFilters
                     ? S.of(context).txNoMatching
                     : S.of(context).txNoYet,
@@ -1387,7 +1387,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).txDetailCategory),
+                          S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).commonCategory),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1973,8 +1973,8 @@ class _DateHeaderTile extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return '${S.of(context).txTodayPrefix}, ${formatDate(date)}';
-    if (diff == 1) return '${S.of(context).txYesterdayPrefix}, ${formatDate(date)}';
+    if (diff == 0) return '${S.of(context).commonToday}, ${formatDate(date)}';
+    if (diff == 1) return '${S.of(context).commonYesterday}, ${formatDate(date)}';
     return formatDate(date);
   }
 }
@@ -2556,7 +2556,7 @@ class _TxTile extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(Icons.delete_rounded, color: AppColors.overspent),
-              title: Text(S.of(context).txContextDelete,
+              title: Text(S.of(context).commonDelete,
                   style: TextStyle(color: AppColors.overspent)),
               onTap: () async {
                 Navigator.pop(ctx);

@@ -308,7 +308,7 @@ class _DetailBody extends ConsumerWidget {
                 }
                 return GestureDetector(
                   onTap: () => context.push('/accounts/${tx.accountId}'),
-                  child: _detailRow(context, S.of(context).txDetailAccount,
+                  child: _detailRow(context, S.of(context).commonAccount,
                       '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
                       icon: Icons.account_balance_wallet_outlined),
                 );
@@ -321,7 +321,7 @@ class _DetailBody extends ConsumerWidget {
               if (tx.categoryId != null &&
                   categoryMap.containsKey(tx.categoryId)) ...[
                 _divider(context),
-                _detailRow(context, S.of(context).txDetailCategory,
+                _detailRow(context, S.of(context).commonCategory,
                     categoryMap[tx.categoryId]!.name,
                     icon: Icons.label_outline_rounded),
               ],
@@ -384,7 +384,7 @@ class _DetailBody extends ConsumerWidget {
       BuildContext context, TransactionLine line, Map<String, Category> catMap) {
     return _card(context, children: [
       if (line.categoryId != null && catMap.containsKey(line.categoryId))
-        _detailRow(context, S.of(context).txDetailCategory, catMap[line.categoryId]!.name,
+        _detailRow(context, S.of(context).commonCategory, catMap[line.categoryId]!.name,
             icon: Icons.label_outline_rounded),
       if (line.categoryId != null &&
           catMap.containsKey(line.categoryId) &&

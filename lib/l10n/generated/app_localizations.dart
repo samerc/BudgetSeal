@@ -285,10 +285,40 @@ abstract class S {
   /// **'Couldn\'t load accounts'**
   String get commonCouldntLoadAccounts;
 
+  /// Label for account field
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get commonAccount;
+
+  /// Label for amount field
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get commonAmount;
+
+  /// Label for category field
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get commonCategory;
+
+  /// Label for currency field
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get commonCurrency;
+
+  /// Label for title field
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get commonTitle;
+
   /// MaterialApp title / splash / lock
   ///
   /// In en, this message translates to:
-  /// **'Pocket Plan'**
+  /// **'BudgetSeal'**
   String get appName;
 
   /// Splash screen tagline
@@ -432,7 +462,7 @@ abstract class S {
   /// First-visit hint banner title
   ///
   /// In en, this message translates to:
-  /// **'Welcome to PocketPlan!'**
+  /// **'Welcome to BudgetSeal!'**
   String get dashboardWelcomeTitle;
 
   /// First-visit hint banner body
@@ -450,7 +480,7 @@ abstract class S {
   /// Fallback household name
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan'**
+  /// **'BudgetSeal'**
   String get dashboardDefaultName;
 
   /// Customize button tooltip
@@ -464,24 +494,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Search'**
   String get dashboardSearchTooltip;
-
-  /// Error retry message
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load your data'**
-  String get dashboardError;
-
-  /// Quick action button
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get dashboardQuickExpense;
-
-  /// Quick action button
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get dashboardQuickIncome;
 
   /// Quick action button
   ///
@@ -560,12 +572,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Total across all accounts'**
   String get dashboardTotalAcrossAccounts;
-
-  /// Mini stat label
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get dashboardLabelIncome;
 
   /// Mini stat label
   ///
@@ -1089,18 +1095,6 @@ abstract class S {
   /// **'Long press for options'**
   String get txLongPressHint;
 
-  /// Date header
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get txTodayPrefix;
-
-  /// Date header
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get txYesterdayPrefix;
-
   /// Multi-line display
   ///
   /// In en, this message translates to:
@@ -1124,12 +1118,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Duplicate'**
   String get txContextDuplicate;
-
-  /// Context menu
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get txContextDelete;
 
   /// Delete dialog title
   ///
@@ -1172,12 +1160,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'New Transaction'**
   String get txFormNewTitle;
-
-  /// Save button
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get txFormSave;
 
   /// Note field hint
   ///
@@ -1395,23 +1377,11 @@ abstract class S {
   /// **'Accounts'**
   String get txDetailAccounts;
 
-  /// Detail label (single)
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get txDetailAccount;
-
   /// Detail label
   ///
   /// In en, this message translates to:
   /// **'Note'**
   String get txDetailNote;
-
-  /// Detail label
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get txDetailCategory;
 
   /// Fallback
   ///
@@ -1521,12 +1491,6 @@ abstract class S {
   /// **'Note (e.g. rent, savings)'**
   String get txAfTransferNoteHint;
 
-  /// Title hint
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get txAfTitleHint;
-
   /// Button
   ///
   /// In en, this message translates to:
@@ -1574,12 +1538,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'To Account'**
   String get txAfToAccount;
-
-  /// Account label
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get txAfAccount;
 
   /// Placeholder
   ///
@@ -1671,12 +1629,6 @@ abstract class S {
   /// **'Add Transaction'**
   String get txAfAddTransaction;
 
-  /// Sheet title
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get catSheetTitle;
-
   /// New button
   ///
   /// In en, this message translates to:
@@ -1713,12 +1665,6 @@ abstract class S {
   /// **'{count} subcategories'**
   String catSheetNSubcategories(int count);
 
-  /// Sheet title
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get currencySheetTitle;
-
   /// Currency sheet section header
   ///
   /// In en, this message translates to:
@@ -1742,12 +1688,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Select account'**
   String get txWidgetSelectAccount;
-
-  /// Category pill label
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get txWidgetCategory;
 
   /// Per-item note hint
   ///
@@ -1905,12 +1845,6 @@ abstract class S {
   /// **'Enter amount'**
   String get billEnterAmount;
 
-  /// Amount label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get billAmount;
-
   /// Dialog button
   ///
   /// In en, this message translates to:
@@ -1976,12 +1910,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Tip amount'**
   String get billTipAmount;
-
-  /// Section title
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get billCurrency;
 
   /// Currency label
   ///
@@ -2138,12 +2066,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'New Transaction'**
   String get txNewTransactionSheet;
-
-  /// Error message
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load your data'**
-  String get txCouldntLoad;
 
   /// Error message
   ///
@@ -2373,12 +2295,6 @@ abstract class S {
   /// **'Archive'**
   String get allocArchiveMenu;
 
-  /// Menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get allocDeleteMenu;
-
   /// Bottom button
   ///
   /// In en, this message translates to:
@@ -2559,12 +2475,6 @@ abstract class S {
   /// **'Budget amount'**
   String get allocBudgetAmount;
 
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get allocCurrencyLabel;
-
   /// Section header
   ///
   /// In en, this message translates to:
@@ -2612,12 +2522,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'From your unallocated balance'**
   String get allocFromUnallocated;
-
-  /// Fund field hint
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get allocAmountHint;
 
   /// Dialog title
   ///
@@ -2943,12 +2847,6 @@ abstract class S {
   /// **'Set a target amount, or leave at zero for open-ended.'**
   String get allocTargetDesc;
 
-  /// No description provided for @allocCurrency.
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get allocCurrency;
-
   /// No description provided for @allocLinkedCategoriesSection.
   ///
   /// In en, this message translates to:
@@ -2996,12 +2894,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Fund {name}'**
   String allocFundEnvelope(String name);
-
-  /// No description provided for @allocAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get allocAmount;
 
   /// No description provided for @allocOverFundingTitle.
   ///
@@ -3182,12 +3074,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Envelope updated'**
   String get allocEnvelopeUpdated;
-
-  /// No description provided for @allocCouldntLoad.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load your data'**
-  String get allocCouldntLoad;
 
   /// No description provided for @allocGotIt.
   ///
@@ -3417,12 +3303,6 @@ abstract class S {
   /// **'New Account'**
   String get acctNewTitle;
 
-  /// Fallback
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get acctFallbackName;
-
   /// Type option
   ///
   /// In en, this message translates to:
@@ -3525,12 +3405,6 @@ abstract class S {
   /// **'{name} unarchived'**
   String acctUnarchived(String name);
 
-  /// No description provided for @acctCouldntLoad.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load your data'**
-  String get acctCouldntLoad;
-
   /// No description provided for @acctCurrentBalance.
   ///
   /// In en, this message translates to:
@@ -3614,12 +3488,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Create account'**
   String get acctCreateAccount;
-
-  /// No description provided for @acctSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get acctSave;
 
   /// No description provided for @acctRecentTransactions.
   ///
@@ -3807,18 +3675,6 @@ abstract class S {
   /// **'All'**
   String get catAll;
 
-  /// No description provided for @catExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get catExpense;
-
-  /// No description provided for @catIncome.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get catIncome;
-
   /// No description provided for @catNoYet.
   ///
   /// In en, this message translates to:
@@ -3879,12 +3735,6 @@ abstract class S {
   /// **'Unarchive'**
   String get catUnarchive;
 
-  /// No description provided for @catDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get catDelete;
-
   /// No description provided for @catRestored.
   ///
   /// In en, this message translates to:
@@ -3939,12 +3789,6 @@ abstract class S {
   /// **'Parent'**
   String get catParent;
 
-  /// No description provided for @catAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get catAccount;
-
   /// No description provided for @catNone.
   ///
   /// In en, this message translates to:
@@ -3956,12 +3800,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Create'**
   String get catCreate;
-
-  /// No description provided for @catSaveButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get catSaveButton;
 
   /// No description provided for @catEnterName.
   ///
@@ -4383,29 +4221,11 @@ abstract class S {
   /// **'Save a transaction you do often for quick re-use.'**
   String get tmplNewDesc;
 
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get tmplTitleLabel;
-
   /// Validation error
   ///
   /// In en, this message translates to:
   /// **'Title is required'**
   String get tmplTitleRequired;
-
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get tmplAmountLabel;
-
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get tmplAccountLabel;
 
   /// Field label
   ///
@@ -4980,7 +4800,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'About PocketPlan'**
+  /// **'About BudgetSeal'**
   String get settingsAbout;
 
   /// Theme option
@@ -5286,7 +5106,7 @@ abstract class S {
   /// Sheet description
   ///
   /// In en, this message translates to:
-  /// **'Share your PocketPlan data with another person. They will be able to sync to the same file on Google Drive.'**
+  /// **'Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.'**
   String get syncShareDesc;
 
   /// Field label
@@ -5850,7 +5670,7 @@ abstract class S {
   /// Share text
   ///
   /// In en, this message translates to:
-  /// **'Check out PocketPlan — envelope budgeting made simple!'**
+  /// **'Check out BudgetSeal — envelope budgeting made simple!'**
   String get aboutShareText;
 
   /// Privacy notice
@@ -5934,7 +5754,7 @@ abstract class S {
   /// Tile subtitle
   ///
   /// In en, this message translates to:
-  /// **'How to use PocketPlan'**
+  /// **'How to use BudgetSeal'**
   String get settingsHelpSub;
 
   /// Tile title
@@ -6450,7 +6270,7 @@ abstract class S {
   /// Share invite text
   ///
   /// In en, this message translates to:
-  /// **'Join my PocketPlan household! Enter this code in the app:\n{code}'**
+  /// **'Join my BudgetSeal household! Enter this code in the app:\n{code}'**
   String syncShareInviteText(String code);
 
   /// AppBar title
@@ -6474,7 +6294,7 @@ abstract class S {
   /// Introduction
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.'**
+  /// **'BudgetSeal is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.'**
   String get privacyIntro;
 
   /// Heading
@@ -6498,7 +6318,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. PocketPlan does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).'**
+  /// **'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).'**
   String get privacyCloudSyncBody;
 
   /// Heading
@@ -6522,7 +6342,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.'**
+  /// **'BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.'**
   String get privacyAnalyticsBody;
 
   /// Heading
@@ -6576,7 +6396,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'By using PocketPlan, you agree to these terms. If you do not agree, please uninstall the app.'**
+  /// **'By using BudgetSeal, you agree to these terms. If you do not agree, please uninstall the app.'**
   String get termsAcceptanceBody;
 
   /// Heading
@@ -6588,7 +6408,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.'**
+  /// **'BudgetSeal is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.'**
   String get termsIntendedUseBody;
 
   /// Heading
@@ -6600,7 +6420,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'You are responsible for the accuracy of the data you enter. PocketPlan calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.'**
+  /// **'You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.'**
   String get termsDataAccuracyBody;
 
   /// Heading
@@ -6612,7 +6432,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.'**
+  /// **'BudgetSeal is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.'**
   String get termsNoWarrantyBody;
 
   /// Heading
@@ -6624,7 +6444,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of PocketPlan, including but not limited to data loss, financial miscalculations, or sync failures.'**
+  /// **'The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.'**
   String get termsLiabilityBody;
 
   /// Heading
@@ -6636,7 +6456,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.'**
+  /// **'BudgetSeal and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.'**
   String get termsIPBody;
 
   /// Heading
@@ -6660,7 +6480,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'For questions or concerns about this privacy policy or terms of use, contact: samer@pocketplan.app'**
+  /// **'For questions or concerns about this privacy policy or terms of use, contact: samer@budgetseal.app'**
   String get termsContactBody;
 
   /// AppBar title
@@ -6846,7 +6666,7 @@ abstract class S {
   /// Onboarding welcome page title
   ///
   /// In en, this message translates to:
-  /// **'Pocket Plan'**
+  /// **'BudgetSeal'**
   String get onboardWelcomeTitle;
 
   /// Onboarding welcome tagline
@@ -7050,7 +6870,7 @@ abstract class S {
   /// Onboarding done page button
   ///
   /// In en, this message translates to:
-  /// **'Start Using Pocket Plan'**
+  /// **'Start Using BudgetSeal'**
   String get onboardStartUsing;
 
   /// Onboarding restore sheet title
@@ -7080,7 +6900,7 @@ abstract class S {
   /// Onboarding join sheet description
   ///
   /// In en, this message translates to:
-  /// **'Enter the invite code shared with you to join an existing PocketPlan household.'**
+  /// **'Enter the invite code shared with you to join an existing BudgetSeal household.'**
   String get onboardJoinDesc;
 
   /// Onboarding join text field label
@@ -7116,13 +6936,13 @@ abstract class S {
   /// Biometric setup prompt
   ///
   /// In en, this message translates to:
-  /// **'Set up a screen lock to protect Pocket Plan'**
+  /// **'Set up a screen lock to protect BudgetSeal'**
   String get lockSetupReason;
 
   /// Biometric unlock prompt
   ///
   /// In en, this message translates to:
-  /// **'Unlock Pocket Plan'**
+  /// **'Unlock BudgetSeal'**
   String get lockUnlockReason;
 
   /// Biometric error snackbar
@@ -7638,7 +7458,7 @@ abstract class S {
   /// Warning banner
   ///
   /// In en, this message translates to:
-  /// **'Keep PocketPlan in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.'**
+  /// **'Keep BudgetSeal in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.'**
   String get wcIosWarning;
 
   /// Banner title
@@ -7710,13 +7530,13 @@ abstract class S {
   /// Notification channel description
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan Web Companion server is running'**
+  /// **'BudgetSeal Web Companion server is running'**
   String get wcForegroundChannelDesc;
 
   /// Browser tab title
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan Web'**
+  /// **'BudgetSeal Web'**
   String get webPageTitle;
 
   /// Auth screen
@@ -8376,7 +8196,7 @@ abstract class S {
   /// Empty subtitle
   ///
   /// In en, this message translates to:
-  /// **'Envelopes are managed in the PocketPlan app.'**
+  /// **'Envelopes are managed in the BudgetSeal app.'**
   String get webEnvEmptySub;
 
   /// Label
@@ -8868,7 +8688,7 @@ abstract class S {
   /// Notification title
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan'**
+  /// **'BudgetSeal'**
   String get notifReminderTitle;
 
   /// Notification body
@@ -9002,18 +8822,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Minus (-\$100)'**
   String get nfNegativeMinus;
-
-  /// Smart date prefix
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get dateToday;
-
-  /// Smart date prefix
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get dateYesterday;
 
   /// Option
   ///
@@ -9210,12 +9018,6 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Income'**
-  String get defcatIncome;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
   /// **'Salary'**
   String get defcatSalary;
 
@@ -9402,7 +9204,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Select PocketPlan Sync File'**
+  /// **'Select BudgetSeal Sync File'**
   String get filePickerTitle;
 
   /// Error
@@ -9759,30 +9561,6 @@ abstract class S {
   /// **'Title is required'**
   String get recurringFormTitleRequired;
 
-  /// Amount field label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get recurringFormAmount;
-
-  /// Account dropdown label
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get recurringFormAccount;
-
-  /// Account validation error
-  ///
-  /// In en, this message translates to:
-  /// **'Account is required'**
-  String get recurringFormAccountRequired;
-
-  /// Start date button
-  ///
-  /// In en, this message translates to:
-  /// **'Starts: {date}'**
-  String recurringFormStarts(String date);
-
   /// End date button
   ///
   /// In en, this message translates to:
@@ -10029,18 +9807,6 @@ abstract class S {
   /// **'Description'**
   String get importColDescription;
 
-  /// Column role label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get importColAmount;
-
-  /// Column role label
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get importColCategory;
-
   /// Snackbar on payment error
   ///
   /// In en, this message translates to:
@@ -10088,18 +9854,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Deadline: {date}'**
   String objDeadlinePrefix(String date);
-
-  /// Summary row label
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get objSummaryCurrency;
-
-  /// Summary row label
-  ///
-  /// In en, this message translates to:
-  /// **'Deadline'**
-  String get objSummaryDeadline;
 
   /// Summary row label
   ///
@@ -10176,7 +9930,7 @@ abstract class S {
   /// Share sheet title for exported report
   ///
   /// In en, this message translates to:
-  /// **'PocketPlan Health Check Report'**
+  /// **'BudgetSeal Health Check Report'**
   String get healthReportTitle;
 
   /// Snackbar after repair
@@ -10214,30 +9968,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No categories yet.\nTap \"New\" above to create one.'**
   String get catSheetNoCategories;
-
-  /// Type filter chip
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get catSheetExpense;
-
-  /// Type filter chip
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get catSheetIncome;
-
-  /// Search field hint
-  ///
-  /// In en, this message translates to:
-  /// **'Search categories...'**
-  String get catSheetSearchHint;
-
-  /// Subtitle showing subcategory count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} subcategories'**
-  String catSheetSubcategories(int count);
 
   /// Snackbar after connecting sync provider
   ///
@@ -10509,30 +10239,6 @@ abstract class S {
   /// **'Exact date: {date}'**
   String plannedExactDateValue(String date);
 
-  /// Dropdown label for account in plan payment form
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get plannedAccount;
-
-  /// Label for category picker in plan payment form
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get plannedCategory;
-
-  /// Hint text for title field in plan payment form
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get plannedTitleHint;
-
-  /// Hint text for note field in plan payment form
-  ///
-  /// In en, this message translates to:
-  /// **'Note (optional)'**
-  String get plannedNoteHint;
-
   /// Validation error when no account selected
   ///
   /// In en, this message translates to:
@@ -10742,6 +10448,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No previous purchase found.'**
   String get upgradeRestoreNone;
+
+  /// Search field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories...'**
+  String get catSheetSearchHint;
+
+  /// Subtitle showing subcategory count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} subcategories'**
+  String catSheetSubcategories(int count);
+
+  /// Summary row label
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline'**
+  String get objSummaryDeadline;
+
+  /// Hint text for note field
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get plannedNoteHint;
+
+  /// Account validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Account is required'**
+  String get recurringFormAccountRequired;
+
+  /// Start date button
+  ///
+  /// In en, this message translates to:
+  /// **'Starts: {date}'**
+  String recurringFormStarts(String date);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

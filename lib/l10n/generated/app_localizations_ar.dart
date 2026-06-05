@@ -102,7 +102,22 @@ class SAr extends S {
   String get commonCouldntLoadAccounts => 'تعذر تحميل الحسابات';
 
   @override
-  String get appName => 'Pocket Plan';
+  String get commonAccount => 'حساب';
+
+  @override
+  String get commonAmount => 'المبلغ';
+
+  @override
+  String get commonCategory => 'فئة';
+
+  @override
+  String get commonCurrency => 'العملة';
+
+  @override
+  String get commonTitle => 'العنوان';
+
+  @override
+  String get appName => 'BudgetSeal';
 
   @override
   String get appTagline => 'ميزانية بهدف';
@@ -174,7 +189,7 @@ class SAr extends S {
   String get typeAll => 'الكل';
 
   @override
-  String get dashboardWelcomeTitle => 'مرحباً بك في PocketPlan!';
+  String get dashboardWelcomeTitle => 'مرحباً بك في BudgetSeal!';
 
   @override
   String get dashboardWelcomeBody =>
@@ -184,22 +199,13 @@ class SAr extends S {
   String get dashboardHouseholdLabel => 'الأسرة';
 
   @override
-  String get dashboardDefaultName => 'PocketPlan';
+  String get dashboardDefaultName => 'BudgetSeal';
 
   @override
   String get dashboardCustomizeTooltip => 'تخصيص';
 
   @override
   String get dashboardSearchTooltip => 'بحث';
-
-  @override
-  String get dashboardError => 'تعذّر تحميل بياناتك';
-
-  @override
-  String get dashboardQuickExpense => 'مصروف';
-
-  @override
-  String get dashboardQuickIncome => 'الدخل';
 
   @override
   String get dashboardQuickTransfer => 'تحويل';
@@ -240,9 +246,6 @@ class SAr extends S {
 
   @override
   String get dashboardTotalAcrossAccounts => 'الإجمالي عبر جميع الحسابات';
-
-  @override
-  String get dashboardLabelIncome => 'الدخل';
 
   @override
   String get dashboardLabelExpenses => 'مصاريف';
@@ -549,12 +552,6 @@ class SAr extends S {
   String get txLongPressHint => 'اضغط مطوّلاً للخيارات';
 
   @override
-  String get txTodayPrefix => 'اليوم';
-
-  @override
-  String get txYesterdayPrefix => 'أمس';
-
-  @override
   String txNItems(int count) {
     return '$count عناصر';
   }
@@ -569,9 +566,6 @@ class SAr extends S {
 
   @override
   String get txContextDuplicate => 'تكرار';
-
-  @override
-  String get txContextDelete => 'حذف';
 
   @override
   String get txDeleteTitle => 'حذف المعاملة؟';
@@ -597,9 +591,6 @@ class SAr extends S {
 
   @override
   String get txFormNewTitle => 'معاملة جديدة';
-
-  @override
-  String get txFormSave => 'حفظ';
 
   @override
   String get txFormNoteHint => 'أضف ملاحظة…';
@@ -724,13 +715,7 @@ class SAr extends S {
   String get txDetailAccounts => 'الحسابات';
 
   @override
-  String get txDetailAccount => 'الحساب';
-
-  @override
   String get txDetailNote => 'ملاحظة';
-
-  @override
-  String get txDetailCategory => 'الفئة';
 
   @override
   String get txDetailUnknownAccount => 'غير معروف';
@@ -792,9 +777,6 @@ class SAr extends S {
   String get txAfTransferNoteHint => 'ملاحظة (مثل: إيجار، ادخار)';
 
   @override
-  String get txAfTitleHint => 'العنوان';
-
-  @override
   String get txAfEnterAmountButton => 'إدخال المبلغ';
 
   @override
@@ -817,9 +799,6 @@ class SAr extends S {
 
   @override
   String get txAfToAccount => 'إلى حساب';
-
-  @override
-  String get txAfAccount => 'الحساب';
 
   @override
   String get txAfTapToSelect => 'اضغط للاختيار';
@@ -875,9 +854,6 @@ class SAr extends S {
   String get txAfAddTransaction => 'إضافة معاملة';
 
   @override
-  String get catSheetTitle => 'الفئة';
-
-  @override
   String get catSheetNew => 'جديد';
 
   @override
@@ -899,9 +875,6 @@ class SAr extends S {
   }
 
   @override
-  String get currencySheetTitle => 'العملة';
-
-  @override
   String get currencyYourAccounts => 'حساباتك';
 
   @override
@@ -912,9 +885,6 @@ class SAr extends S {
 
   @override
   String get txWidgetSelectAccount => 'اختر حساباً';
-
-  @override
-  String get txWidgetCategory => 'الفئة';
 
   @override
   String get txWidgetItemNote => 'ملاحظة العنصر…';
@@ -995,9 +965,6 @@ class SAr extends S {
   String get billEnterAmount => 'أدخل المبلغ';
 
   @override
-  String get billAmount => 'المبلغ';
-
-  @override
   String get billKeepAsOne => 'إبقاء كعنصر واحد';
 
   @override
@@ -1029,9 +996,6 @@ class SAr extends S {
 
   @override
   String get billTipAmount => 'مبلغ البقشيش';
-
-  @override
-  String get billCurrency => 'العملة';
 
   @override
   String get billBillCurrency => 'عملة الفاتورة';
@@ -1126,9 +1090,6 @@ class SAr extends S {
 
   @override
   String get txNewTransactionSheet => 'معاملة جديدة';
-
-  @override
-  String get txCouldntLoad => 'تعذّر تحميل بياناتك';
 
   @override
   String get txCouldNotLoad => 'تعذّر تحميل المعاملة';
@@ -1255,9 +1216,6 @@ class SAr extends S {
   String get allocArchiveMenu => 'أرشفة';
 
   @override
-  String get allocDeleteMenu => 'حذف';
-
-  @override
   String get allocCreateButtonDetail => 'إنشاء ظرف';
 
   @override
@@ -1354,9 +1312,6 @@ class SAr extends S {
   String get allocBudgetAmount => 'مبلغ الميزانية';
 
   @override
-  String get allocCurrencyLabel => 'العملة';
-
-  @override
   String get allocLinkedCategories => 'الفئات المرتبطة';
 
   @override
@@ -1380,9 +1335,6 @@ class SAr extends S {
 
   @override
   String get allocFromUnallocated => 'من رصيدك غير الموزع';
-
-  @override
-  String get allocAmountHint => 'المبلغ';
 
   @override
   String get allocOverfundingTitle => 'تمويل زائد';
@@ -1556,9 +1508,6 @@ class SAr extends S {
       'حدد مبلغاً مستهدفاً، أو اتركه صفراً للادخار المفتوح.';
 
   @override
-  String get allocCurrency => 'العملة';
-
-  @override
   String get allocLinkedCategoriesSection => 'الفئات المرتبطة';
 
   @override
@@ -1589,9 +1538,6 @@ class SAr extends S {
   String allocFundEnvelope(String name) {
     return 'تمويل $name';
   }
-
-  @override
-  String get allocAmount => 'المبلغ';
 
   @override
   String get allocOverFundingTitle => 'تمويل زائد';
@@ -1702,9 +1648,6 @@ class SAr extends S {
 
   @override
   String get allocEnvelopeUpdated => 'تم تحديث الظرف';
-
-  @override
-  String get allocCouldntLoad => 'تعذّر تحميل بياناتك';
 
   @override
   String get allocGotIt => 'فهمت';
@@ -1875,9 +1818,6 @@ class SAr extends S {
   String get acctNewTitle => 'حساب جديد';
 
   @override
-  String get acctFallbackName => 'الحساب';
-
-  @override
   String get acctTypeCash => 'نقدي';
 
   @override
@@ -1935,9 +1875,6 @@ class SAr extends S {
   }
 
   @override
-  String get acctCouldntLoad => 'تعذّر تحميل بياناتك';
-
-  @override
   String get acctCurrentBalance => 'الرصيد الحالي';
 
   @override
@@ -1982,9 +1919,6 @@ class SAr extends S {
 
   @override
   String get acctCreateAccount => 'إنشاء حساب';
-
-  @override
-  String get acctSave => 'حفظ';
 
   @override
   String get acctRecentTransactions => 'المعاملات الأخيرة';
@@ -2105,12 +2039,6 @@ class SAr extends S {
   String get catAll => 'الكل';
 
   @override
-  String get catExpense => 'مصروف';
-
-  @override
-  String get catIncome => 'دخل';
-
-  @override
   String get catNoYet => 'لا فئات بعد';
 
   @override
@@ -2149,9 +2077,6 @@ class SAr extends S {
   String get catUnarchive => 'إلغاء الأرشفة';
 
   @override
-  String get catDelete => 'حذف';
-
-  @override
   String get catRestored => 'تم استعادة الفئة';
 
   @override
@@ -2179,16 +2104,10 @@ class SAr extends S {
   String get catParent => 'الفئة الأم';
 
   @override
-  String get catAccount => 'الحساب';
-
-  @override
   String get catNone => 'لا شيء';
 
   @override
   String get catCreate => 'إنشاء';
-
-  @override
-  String get catSaveButton => 'حفظ';
 
   @override
   String get catEnterName => 'أدخل اسم الفئة';
@@ -2419,16 +2338,7 @@ class SAr extends S {
       'احفظ معاملة تقوم بها كثيراً لإعادة الاستخدام السريع.';
 
   @override
-  String get tmplTitleLabel => 'العنوان';
-
-  @override
   String get tmplTitleRequired => 'العنوان مطلوب';
-
-  @override
-  String get tmplAmountLabel => 'المبلغ';
-
-  @override
-  String get tmplAccountLabel => 'الحساب';
 
   @override
   String get tmplCategoryOptional => 'الفئة (اختياري)';
@@ -2726,7 +2636,7 @@ class SAr extends S {
   String get settingsCustomizationSub => 'المظهر، الخط، البيانات، التفضيلات';
 
   @override
-  String get settingsAbout => 'حول PocketPlan';
+  String get settingsAbout => 'حول BudgetSeal';
 
   @override
   String get themeLight => 'فاتح';
@@ -2885,7 +2795,7 @@ class SAr extends S {
 
   @override
   String get syncShareDesc =>
-      'شارك بيانات PocketPlan مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.';
+      'شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.';
 
   @override
   String get syncTheirEmail => 'عنوان بريدهم الإلكتروني';
@@ -3181,7 +3091,7 @@ class SAr extends S {
   String get aboutContact => 'تواصل';
 
   @override
-  String get aboutShareText => 'جرب PocketPlan — ميزانية الأظرف ببساطة!';
+  String get aboutShareText => 'جرب BudgetSeal — ميزانية الأظرف ببساطة!';
 
   @override
   String get aboutPrivacy => 'بدون تتبع. بياناتك تبقى على جهازك.';
@@ -3225,7 +3135,7 @@ class SAr extends S {
   String get tileHelpGuide => 'دليل المساعدة';
 
   @override
-  String get settingsHelpSub => 'كيفية استخدام PocketPlan';
+  String get settingsHelpSub => 'كيفية استخدام BudgetSeal';
 
   @override
   String get tileTheme => 'المظهر';
@@ -3501,7 +3411,7 @@ class SAr extends S {
 
   @override
   String syncShareInviteText(String code) {
-    return 'انضم إلى أسرتي في PocketPlan! أدخل هذا الرمز في التطبيق:\n$code';
+    return 'انضم إلى أسرتي في BudgetSeal! أدخل هذا الرمز في التطبيق:\n$code';
   }
 
   @override
@@ -3515,7 +3425,7 @@ class SAr extends S {
 
   @override
   String get privacyIntro =>
-      'تم تصميم PocketPlan مع جعل خصوصيتك مبدأ أساسي. بياناتك المالية ملكك — نحن لا نجمع أو نخزن أو ننقلها إلى أي خادم.';
+      'تم تصميم BudgetSeal مع جعل خصوصيتك مبدأ أساسي. بياناتك المالية ملكك — نحن لا نجمع أو نخزن أو ننقلها إلى أي خادم.';
 
   @override
   String get privacyDataStorageTitle => '1. تخزين البيانات';
@@ -3529,7 +3439,7 @@ class SAr extends S {
 
   @override
   String get privacyCloudSyncBody =>
-      'إذا اخترت تفعيل المزامنة السحابية، يتم رفع بياناتك إلى حسابك الشخصي على Google Drive أو مزود تخزين ملفات تختاره. PocketPlan لا يملك وصولاً إلى بيانات اعتماد حسابك على Google — تتم المصادقة عبر نظام OAuth من Google.\n\nيمكنك اختيارياً تشفير ملف المزامنة بتشفير AES-256 باستخدام كلمة مرور تحددها. يتم تخزين كلمة المرور فقط على جهازك في التخزين الآمن.';
+      'إذا اخترت تفعيل المزامنة السحابية، يتم رفع بياناتك إلى حسابك الشخصي على Google Drive أو مزود تخزين ملفات تختاره. BudgetSeal لا يملك وصولاً إلى بيانات اعتماد حسابك على Google — تتم المصادقة عبر نظام OAuth من Google.\n\nيمكنك اختيارياً تشفير ملف المزامنة بتشفير AES-256 باستخدام كلمة مرور تحددها. يتم تخزين كلمة المرور فقط على جهازك في التخزين الآمن.';
 
   @override
   String get privacyWebCompanionTitle => '3. الرفيق الويب';
@@ -3543,7 +3453,7 @@ class SAr extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'PocketPlan لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.';
+      'BudgetSeal لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.';
 
   @override
   String get privacyPermissionsTitle => '5. الأذونات';
@@ -3574,42 +3484,42 @@ class SAr extends S {
 
   @override
   String get termsAcceptanceBody =>
-      'باستخدام PocketPlan، فإنك توافق على هذه الشروط. إذا كنت لا توافق، يرجى إلغاء تثبيت التطبيق.';
+      'باستخدام BudgetSeal، فإنك توافق على هذه الشروط. إذا كنت لا توافق، يرجى إلغاء تثبيت التطبيق.';
 
   @override
   String get termsIntendedUseTitle => '2. الاستخدام المقصود';
 
   @override
   String get termsIntendedUseBody =>
-      'PocketPlan هو أداة لإدارة التمويل الشخصي للميزانية الفردية والأسرية. لا يُقصد منه المحاسبة التجارية أو إعداد الضرائب أو المشورة المالية.';
+      'BudgetSeal هو أداة لإدارة التمويل الشخصي للميزانية الفردية والأسرية. لا يُقصد منه المحاسبة التجارية أو إعداد الضرائب أو المشورة المالية.';
 
   @override
   String get termsDataAccuracyTitle => '3. دقة البيانات';
 
   @override
   String get termsDataAccuracyBody =>
-      'أنت مسؤول عن دقة البيانات التي تدخلها. يحسب PocketPlan الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.';
+      'أنت مسؤول عن دقة البيانات التي تدخلها. يحسب BudgetSeal الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.';
 
   @override
   String get termsNoWarrantyTitle => '4. بدون ضمان';
 
   @override
   String get termsNoWarrantyBody =>
-      'يتم توفير PocketPlan \"كما هو\" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.';
+      'يتم توفير BudgetSeal \"كما هو\" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.';
 
   @override
   String get termsLiabilityTitle => '5. تحديد المسؤولية';
 
   @override
   String get termsLiabilityBody =>
-      'لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام PocketPlan.';
+      'لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام BudgetSeal.';
 
   @override
   String get termsIPTitle => '6. الملكية الفكرية';
 
   @override
   String get termsIPBody =>
-      'PocketPlan ومحتواه الأصلي محمي بحقوق النشر. يستخدم التطبيق مكتبات مفتوحة المصدر مدرجة في قسم التراخيص.';
+      'BudgetSeal ومحتواه الأصلي محمي بحقوق النشر. يستخدم التطبيق مكتبات مفتوحة المصدر مدرجة في قسم التراخيص.';
 
   @override
   String get termsChangesTitle => '7. التغييرات';
@@ -3623,7 +3533,7 @@ class SAr extends S {
 
   @override
   String get termsContactBody =>
-      'للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: samer@pocketplan.app';
+      'للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: samer@budgetseal.app';
 
   @override
   String get healthTitle => 'فحص السلامة';
@@ -3717,7 +3627,7 @@ class SAr extends S {
   String get healthPurgeButton => 'تطهير';
 
   @override
-  String get onboardWelcomeTitle => 'Pocket Plan';
+  String get onboardWelcomeTitle => 'BudgetSeal';
 
   @override
   String get onboardTagline => 'امنح كل دولار غرضاً.';
@@ -3820,7 +3730,7 @@ class SAr extends S {
       'ابدأ تتبع مصاريفك.\\nوضوحك المالي يبدأ الآن.';
 
   @override
-  String get onboardStartUsing => 'ابدأ استخدام Pocket Plan';
+  String get onboardStartUsing => 'ابدأ استخدام BudgetSeal';
 
   @override
   String get onboardRestoreTitle => 'الاستعادة من السحابة';
@@ -3837,7 +3747,7 @@ class SAr extends S {
 
   @override
   String get onboardJoinDesc =>
-      'أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة PocketPlan موجودة.';
+      'أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.';
 
   @override
   String get onboardInviteCode => 'رمز الدعوة';
@@ -3855,10 +3765,10 @@ class SAr extends S {
   String get onboardInvalidCodeError => 'رمز دعوة غير صالح. يجب أن يبدأ بـ PP-';
 
   @override
-  String get lockSetupReason => 'أعدّ قفل الشاشة لحماية Pocket Plan';
+  String get lockSetupReason => 'أعدّ قفل الشاشة لحماية BudgetSeal';
 
   @override
-  String get lockUnlockReason => 'فتح Pocket Plan';
+  String get lockUnlockReason => 'فتح BudgetSeal';
 
   @override
   String lockFailed(String error) {
@@ -4130,7 +4040,7 @@ class SAr extends S {
 
   @override
   String get wcIosWarning =>
-      'أبقِ PocketPlan في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.';
+      'أبقِ BudgetSeal في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.';
 
   @override
   String get wcNoWifiTitle => 'لا اتصال WiFi';
@@ -4170,10 +4080,10 @@ class SAr extends S {
 
   @override
   String get wcForegroundChannelDesc =>
-      'خادم المرافق الإلكتروني PocketPlan يعمل';
+      'خادم المرافق الإلكتروني BudgetSeal يعمل';
 
   @override
-  String get webPageTitle => 'PocketPlan Web';
+  String get webPageTitle => 'BudgetSeal Web';
 
   @override
   String get webAuthSubtitle => 'أدخل رمز PIN للمتابعة';
@@ -4515,7 +4425,7 @@ class SAr extends S {
   String get webEnvEmptyTitle => 'لا أظرف';
 
   @override
-  String get webEnvEmptySub => 'الأظرف تُدار من تطبيق PocketPlan.';
+  String get webEnvEmptySub => 'الأظرف تُدار من تطبيق BudgetSeal.';
 
   @override
   String get webEnvUnallocated => 'غير موزع:';
@@ -4774,7 +4684,7 @@ class SAr extends S {
   }
 
   @override
-  String get notifReminderTitle => 'PocketPlan';
+  String get notifReminderTitle => 'BudgetSeal';
 
   @override
   String get notifReminder1 => 'كيف أنفقت اليوم؟ اضغط للتسجيل.';
@@ -4842,12 +4752,6 @@ class SAr extends S {
 
   @override
   String get nfNegativeMinus => 'سالب (-\$100)';
-
-  @override
-  String get dateToday => 'اليوم';
-
-  @override
-  String get dateYesterday => 'أمس';
 
   @override
   String get textScaleSmall => 'صغير';
@@ -4944,9 +4848,6 @@ class SAr extends S {
 
   @override
   String get defcatPersonalCare => 'عناية شخصية';
-
-  @override
-  String get defcatIncome => 'الدخل';
 
   @override
   String get defcatSalary => 'راتب';
@@ -5047,7 +4948,7 @@ class SAr extends S {
   String get googleNotConnected => 'غير متصل بـ Google Drive';
 
   @override
-  String get filePickerTitle => 'اختر ملف مزامنة PocketPlan';
+  String get filePickerTitle => 'اختر ملف مزامنة BudgetSeal';
 
   @override
   String get filePickerNoPath => 'لم يتم تعيين مسار ملف المزامنة';
@@ -5260,20 +5161,6 @@ class SAr extends S {
   String get recurringFormTitleRequired => 'العنوان مطلوب';
 
   @override
-  String get recurringFormAmount => 'المبلغ';
-
-  @override
-  String get recurringFormAccount => 'الحساب';
-
-  @override
-  String get recurringFormAccountRequired => 'الحساب مطلوب';
-
-  @override
-  String recurringFormStarts(String date) {
-    return 'تبدأ: $date';
-  }
-
-  @override
   String recurringFormEnds(String date) {
     return 'تنتهي: $date';
   }
@@ -5420,12 +5307,6 @@ class SAr extends S {
   String get importColDescription => 'الوصف';
 
   @override
-  String get importColAmount => 'المبلغ';
-
-  @override
-  String get importColCategory => 'الفئة';
-
-  @override
   String get objPaymentFailed => 'فشل الدفع. يرجى المحاولة مرة أخرى.';
 
   @override
@@ -5452,12 +5333,6 @@ class SAr extends S {
   String objDeadlinePrefix(String date) {
     return 'الموعد النهائي: $date';
   }
-
-  @override
-  String get objSummaryCurrency => 'العملة';
-
-  @override
-  String get objSummaryDeadline => 'الموعد النهائي';
 
   @override
   String get objSummaryRemaining => 'المتبقي';
@@ -5506,7 +5381,7 @@ class SAr extends S {
   String get healthAutoAdjustment => 'تعديل تلقائي لفحص السلامة';
 
   @override
-  String get healthReportTitle => 'تقرير فحص سلامة PocketPlan';
+  String get healthReportTitle => 'تقرير فحص سلامة BudgetSeal';
 
   @override
   String healthAdjustmentsCreated(int count) {
@@ -5530,20 +5405,6 @@ class SAr extends S {
   @override
   String get catSheetNoCategories =>
       'لا توجد فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.';
-
-  @override
-  String get catSheetExpense => 'مصروف';
-
-  @override
-  String get catSheetIncome => 'دخل';
-
-  @override
-  String get catSheetSearchHint => 'بحث في الفئات...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count فئات فرعية';
-  }
 
   @override
   String syncConnectedTo(String provider) {
@@ -5730,18 +5591,6 @@ class SAr extends S {
   }
 
   @override
-  String get plannedAccount => 'الحساب';
-
-  @override
-  String get plannedCategory => 'الفئة';
-
-  @override
-  String get plannedTitleHint => 'العنوان';
-
-  @override
-  String get plannedNoteHint => 'ملاحظة (اختياري)';
-
-  @override
   String get plannedSelectAccount => 'اختر حساباً';
 
   @override
@@ -5856,4 +5705,26 @@ class SAr extends S {
 
   @override
   String get upgradeRestoreNone => 'لم يتم العثور على شراء سابق.';
+
+  @override
+  String get catSheetSearchHint => 'بحث في الفئات...';
+
+  @override
+  String catSheetSubcategories(int count) {
+    return '$count فئات فرعية';
+  }
+
+  @override
+  String get objSummaryDeadline => 'الموعد النهائي';
+
+  @override
+  String get plannedNoteHint => 'ملاحظة (اختياري)';
+
+  @override
+  String get recurringFormAccountRequired => 'الحساب مطلوب';
+
+  @override
+  String recurringFormStarts(String date) {
+    return 'تبدأ: $date';
+  }
 }

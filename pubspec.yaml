@@ -1,4 +1,4 @@
-name: pocketplan
+name: budgetseal
 description: Allocation-first household finance manager.
 publish_to: 'none'
 version: 1.0.0+1
@@ -13,16 +13,12 @@ dependencies:
     sdk: flutter
 
   # Database — Drift (type-safe SQLite ORM)
-  # NOTE: drift/drift_dev stuck at 2.31.x — drift_dev 2.32+ needs analyzer 10+
-  # which conflicts with riverpod_generator (needs analyzer <10). Waiting for
-  # riverpod_generator to support analyzer 10+.
   drift: ^2.22.0
-  drift_flutter: ^0.2.0
-  sqlite3_flutter_libs: ^0.5.0
+  drift_flutter: ^0.3.0
+  sqlite3_flutter_libs: ^0.6.0+eol
 
   # State management — Riverpod
   flutter_riverpod: ^3.0.0
-  riverpod_annotation: ^4.0.0
 
   # Material You dynamic theming
   dynamic_color: ^1.7.0
@@ -47,7 +43,6 @@ dependencies:
   path: ^1.9.0
 
   # UI helpers
-  cupertino_icons: ^1.0.0
   google_fonts: ^8.0.0
   shimmer: ^3.0.0
   local_auth: ^3.0.0
@@ -55,7 +50,6 @@ dependencies:
   csv: ^8.0.0
   share_plus: ^12.0.0
   file_picker: ^11.0.0
-  haptic_feedback: ^0.6.0
   flutter_local_notifications: ^21.0.0
 
   # Cloud sync
@@ -88,7 +82,6 @@ dev_dependencies:
   # Code generation
   build_runner: ^2.4.0
   drift_dev: ^2.22.0
-  riverpod_generator: ^4.0.0
 
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3

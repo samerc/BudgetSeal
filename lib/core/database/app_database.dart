@@ -155,7 +155,7 @@ class AppDatabase extends _$AppDatabase {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'pocketplan.db'));
+    final file = File(p.join(dir.path, 'budgetseal.db'));
     return NativeDatabase.createInBackground(file);
   });
 }

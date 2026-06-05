@@ -59,7 +59,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     String? backupPath;
     try {
       final dbDir = await getApplicationDocumentsDirectory();
-      final dbFile = File(p.join(dbDir.path, 'pocketplan.db'));
+      final dbFile = File(p.join(dbDir.path, 'budgetseal.db'));
 
       if (!dbFile.existsSync()) {
         if (mounted) {
@@ -77,12 +77,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .split('.')
           .first;
       backupPath =
-          p.join(tempDir.path, 'pocketplan_backup_$timestamp.db');
+          p.join(tempDir.path, 'budgetseal_backup_$timestamp.db');
       await dbFile.copy(backupPath);
 
       if (mounted) {
         await SharePlus.instance.share(
-          ShareParams(files: [XFile(backupPath)], text: 'Pocket Plan backup'),
+          ShareParams(files: [XFile(backupPath)], text: 'BudgetSeal backup'),
         );
         await recordBackupDate();
         ref.invalidate(daysSinceBackupProvider);
@@ -155,7 +155,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       }
 
       final dbDir = await getApplicationDocumentsDirectory();
-      final dbFile = File(p.join(dbDir.path, 'pocketplan.db'));
+      final dbFile = File(p.join(dbDir.path, 'budgetseal.db'));
       // Auto-backup current DB before overwriting
       await AutoBackupService.backupNow();
       await backupFile.copy(dbFile.path);

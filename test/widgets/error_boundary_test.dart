@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pocketplan/shared/widgets/error_boundary.dart';
+import 'package:budgetseal/shared/widgets/error_boundary.dart';
 
 void main() {
   group('ErrorBoundary', () {

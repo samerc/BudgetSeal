@@ -1375,7 +1375,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           _SettingsTile(
             icon: Icons.home_rounded,
             title: l.householdNameTitle,
-            subtitle: household?.name ?? 'PocketPlan',
+            subtitle: household?.name ?? 'BudgetSeal',
             iconColor: AppColors.accent,
             onTap: () => _editText(context, ref,
                 title: l.householdNameTitle,

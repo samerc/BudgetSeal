@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pocketplan/core/database/app_database.dart';
+import 'package:budgetseal/core/database/app_database.dart';
 
 void main() {
   group('Database migration', () {
@@ -29,9 +29,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 9', () {
+    test('schema version is 17', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 9);
+      expect(db.schemaVersion, 17);
     });
 
     test('tables return empty results on fresh database', () async {

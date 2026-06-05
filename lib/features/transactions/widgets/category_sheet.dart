@@ -156,7 +156,7 @@ class _CategorySheetState extends State<CategorySheet>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(S.of(context).catSheetTitle,
+                        Text(S.of(context).commonCategory,
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -213,9 +213,9 @@ class _CategorySheetState extends State<CategorySheet>
                     // Type toggle
                     Row(
                       children: [
-                        _typeChip(S.of(context).catSheetExpense, 'expense', AppColors.overspent),
+                        _typeChip(S.of(context).typeExpense, 'expense', AppColors.overspent),
                         const SizedBox(width: 8),
-                        _typeChip(S.of(context).catSheetIncome, 'income', AppColors.healthy),
+                        _typeChip(S.of(context).typeIncome, 'income', AppColors.healthy),
                       ],
                     ),
                     const SizedBox(height: 10),

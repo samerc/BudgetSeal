@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pocketplan/shared/widgets/rolling_number.dart';
+import 'package:budgetseal/shared/widgets/rolling_number.dart';
 
 void main() {
   group('RollingNumber', () {

@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 
 import 'cloud_provider.dart';
 
-const _syncFileName = 'PocketPlan_Sync.json';
-const _folderName = 'PocketPlan';
+const _syncFileName = 'BudgetSeal_Sync.json';
+const _folderName = 'BudgetSeal';
 
 /// Escape single quotes for Google Drive query language to prevent injection.
 String _escGdql(String s) => s.replaceAll("'", "\\'");
@@ -144,7 +144,7 @@ class GoogleDriveProvider implements CloudProvider {
 
   // ── Receipt sync ──────────────────────────────────────────────
 
-  /// Upload receipt files to PocketPlan/receipts/ folder on Drive.
+  /// Upload receipt files to BudgetSeal/receipts/ folder on Drive.
   Future<void> uploadReceipts(List<String> filePaths) async {
     final api = await _getDriveApi();
     final parentFolderId = await _getOrCreateFolder(api);
@@ -237,7 +237,7 @@ class GoogleDriveProvider implements CloudProvider {
 
   // ── Household sharing ──────────────────────────────────────────
 
-  /// Share the PocketPlan folder with another user's email.
+  /// Share the BudgetSeal folder with another user's email.
   /// Adds them as a writer so they can sync to the same file.
   Future<void> shareFolder(String email) async {
     final api = await _getDriveApi();

@@ -553,7 +553,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
             error: (e, _) => SliverFillRemaining(
               child: ErrorRetry(
-                message: l.allocCouldntLoad,
+                message: l.commonCouldntLoadData,
                 details: '$e',
                 onRetry: () => ref.invalidate(allocationsProvider),
               ),

@@ -399,7 +399,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                   value: _accountId,
                   decoration: InputDecoration(
                     labelText:
-                        _type == _PlanType.transfer ? S.of(context).txFormFromAccount : S.of(context).plannedAccount,
+                        _type == _PlanType.transfer ? S.of(context).txFormFromAccount : S.of(context).commonAccount,
                     border: InputBorder.none,
                     prefixIcon: Icon(Icons.account_balance_rounded,
                         size: 18, color: AppColors.ts(context)),
@@ -490,14 +490,14 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                                           shape: BoxShape.circle),
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(_categoryName ?? S.of(context).plannedCategory,
+                                    Text(_categoryName ?? S.of(context).commonCategory,
                                         style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                             color: AppColors.tp(context))),
                                   ],
                                 )
-                              : Text(S.of(context).plannedCategory,
+                              : Text(S.of(context).commonCategory,
                                   style: TextStyle(
                                       fontSize: 14,
                                       color: AppColors.th(context))),
@@ -519,7 +519,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 maxLength: InputLimits.nameMaxLength,
                 decoration: InputDecoration(
-                  hintText: S.of(context).plannedTitleHint,
+                  hintText: S.of(context).commonTitle,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   prefixIcon: Icon(Icons.short_text_rounded,
                       size: 18, color: AppColors.ts(context)),

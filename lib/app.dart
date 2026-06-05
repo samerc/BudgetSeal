@@ -71,14 +71,14 @@ import 'shared/theme/app_theme.dart';
 import 'shared/utils/page_transitions.dart';
 import 'shared/widgets/error_boundary.dart';
 
-class PocketPlanApp extends ConsumerStatefulWidget {
-  const PocketPlanApp({super.key});
+class BudgetSealApp extends ConsumerStatefulWidget {
+  const BudgetSealApp({super.key});
 
   @override
-  ConsumerState<PocketPlanApp> createState() => _PocketPlanAppState();
+  ConsumerState<BudgetSealApp> createState() => _BudgetSealAppState();
 }
 
-class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
+class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     with WidgetsBindingObserver {
   late final GoRouter _router;
   bool _showSplash = true;
@@ -505,7 +505,7 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
     final textScale = ref.watch(textScaleProvider);
 
     return MaterialApp.router(
-      title: 'Pocket Plan',
+      title: 'BudgetSeal',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeMode,

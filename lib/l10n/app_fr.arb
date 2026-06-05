@@ -124,7 +124,12 @@
   "@commonCouldntLoadAccounts": {
     "description": "ErrorRetry message"
   },
-  "appName": "Pocket Plan",
+  "commonAccount": "Compte",
+  "commonAmount": "Montant",
+  "commonCategory": "Catégorie",
+  "commonCurrency": "Devise",
+  "commonTitle": "Titre",
+  "appName": "BudgetSeal",
   "@appName": {
     "description": "MaterialApp title / splash / lock"
   },
@@ -220,7 +225,7 @@
   "@typeAll": {
     "description": "Filter chip"
   },
-  "dashboardWelcomeTitle": "Bienvenue sur PocketPlan !",
+  "dashboardWelcomeTitle": "Bienvenue sur BudgetSeal !",
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
@@ -232,7 +237,7 @@
   "@dashboardHouseholdLabel": {
     "description": "Header subtitle"
   },
-  "dashboardDefaultName": "PocketPlan",
+  "dashboardDefaultName": "BudgetSeal",
   "@dashboardDefaultName": {
     "description": "Fallback household name"
   },
@@ -243,18 +248,6 @@
   "dashboardSearchTooltip": "Rechercher",
   "@dashboardSearchTooltip": {
     "description": "Search button tooltip"
-  },
-  "dashboardError": "Impossible de charger vos données",
-  "@dashboardError": {
-    "description": "Error retry message"
-  },
-  "dashboardQuickExpense": "Dépense",
-  "@dashboardQuickExpense": {
-    "description": "Quick action button"
-  },
-  "dashboardQuickIncome": "Revenu",
-  "@dashboardQuickIncome": {
-    "description": "Quick action button"
   },
   "dashboardQuickTransfer": "Virement",
   "@dashboardQuickTransfer": {
@@ -307,10 +300,6 @@
   "dashboardTotalAcrossAccounts": "Total de tous les comptes",
   "@dashboardTotalAcrossAccounts": {
     "description": "Net worth subtitle"
-  },
-  "dashboardLabelIncome": "Revenu",
-  "@dashboardLabelIncome": {
-    "description": "Mini stat label"
   },
   "dashboardLabelExpenses": "Dépenses",
   "@dashboardLabelExpenses": {
@@ -764,14 +753,6 @@
       }
     }
   },
-  "txTodayPrefix": "Aujourd'hui",
-  "@txTodayPrefix": {
-    "description": "Date header"
-  },
-  "txYesterdayPrefix": "Hier",
-  "@txYesterdayPrefix": {
-    "description": "Date header"
-  },
   "txNItems": "{count} éléments",
   "@txNItems": {
     "description": "Multi-line display",
@@ -796,10 +777,6 @@
   },
   "txContextDuplicate": "Dupliquer",
   "@txContextDuplicate": {
-    "description": "Context menu"
-  },
-  "txContextDelete": "Supprimer",
-  "@txContextDelete": {
     "description": "Context menu"
   },
   "txDeleteTitle": "Supprimer la transaction ?",
@@ -839,10 +816,6 @@
   "txFormNewTitle": "Nouvelle transaction",
   "@txFormNewTitle": {
     "description": "AppBar title creating"
-  },
-  "txFormSave": "Enregistrer",
-  "@txFormSave": {
-    "description": "Save button"
   },
   "txFormNoteHint": "Ajouter une note…",
   "@txFormNoteHint": {
@@ -1018,16 +991,8 @@
   "@txDetailAccounts": {
     "description": "Detail label (multi)"
   },
-  "txDetailAccount": "Compte",
-  "@txDetailAccount": {
-    "description": "Detail label (single)"
-  },
   "txDetailNote": "Note",
   "@txDetailNote": {
-    "description": "Detail label"
-  },
-  "txDetailCategory": "Catégorie",
-  "@txDetailCategory": {
     "description": "Detail label"
   },
   "txDetailUnknownAccount": "Inconnu",
@@ -1112,10 +1077,6 @@
   "@txAfTransferNoteHint": {
     "description": "Transfer note hint"
   },
-  "txAfTitleHint": "Titre",
-  "@txAfTitleHint": {
-    "description": "Title hint"
-  },
   "txAfEnterAmountButton": "Saisir le montant",
   "@txAfEnterAmountButton": {
     "description": "Button"
@@ -1147,10 +1108,6 @@
   "txAfToAccount": "Compte destination",
   "@txAfToAccount": {
     "description": "Account label (transfer)"
-  },
-  "txAfAccount": "Compte",
-  "@txAfAccount": {
-    "description": "Account label"
   },
   "txAfTapToSelect": "Appuyez pour sélectionner",
   "@txAfTapToSelect": {
@@ -1235,10 +1192,6 @@
   "@txAfAddTransaction": {
     "description": "Save button"
   },
-  "catSheetTitle": "Catégorie",
-  "@catSheetTitle": {
-    "description": "Sheet title"
-  },
   "catSheetNew": "Nouveau",
   "@catSheetNew": {
     "description": "New button"
@@ -1268,10 +1221,6 @@
       }
     }
   },
-  "currencySheetTitle": "Devise",
-  "@currencySheetTitle": {
-    "description": "Sheet title"
-  },
   "currencyYourAccounts": "VOS COMPTES",
   "@currencyYourAccounts": {
     "description": "Section header"
@@ -1287,10 +1236,6 @@
   "txWidgetSelectAccount": "Sélectionner un compte",
   "@txWidgetSelectAccount": {
     "description": "Dropdown hint"
-  },
-  "txWidgetCategory": "Catégorie",
-  "@txWidgetCategory": {
-    "description": "Category pill label"
   },
   "txWidgetItemNote": "Note de l'élément…",
   "@txWidgetItemNote": {
@@ -1392,10 +1337,6 @@
   "@billEnterAmount": {
     "description": "OCR amount dialog title"
   },
-  "billAmount": "Montant",
-  "@billAmount": {
-    "description": "Amount label"
-  },
   "billKeepAsOne": "Garder en un seul",
   "@billKeepAsOne": {
     "description": "Dialog button"
@@ -1439,10 +1380,6 @@
   "billTipAmount": "Montant du pourboire",
   "@billTipAmount": {
     "description": "Tip field label"
-  },
-  "billCurrency": "Devise",
-  "@billCurrency": {
-    "description": "Section title"
   },
   "billBillCurrency": "Devise de l'addition",
   "@billBillCurrency": {
@@ -1610,10 +1547,6 @@
   "@allocArchiveMenu": {
     "description": "Menu item"
   },
-  "allocDeleteMenu": "Supprimer",
-  "@allocDeleteMenu": {
-    "description": "Menu item"
-  },
   "allocCreateButtonDetail": "Créer une enveloppe",
   "@allocCreateButtonDetail": {
     "description": "Bottom button"
@@ -1734,10 +1667,6 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocCurrencyLabel": "Devise",
-  "@allocCurrencyLabel": {
-    "description": "Field label"
-  },
   "allocLinkedCategories": "CATÉGORIES LIÉES",
   "@allocLinkedCategories": {
     "description": "Section header"
@@ -1769,10 +1698,6 @@
   "allocFromUnallocated": "Depuis votre solde non affecté",
   "@allocFromUnallocated": {
     "description": "Fund sheet subtitle"
-  },
-  "allocAmountHint": "Montant",
-  "@allocAmountHint": {
-    "description": "Fund field hint"
   },
   "allocOverfundingTitle": "Surfinancement",
   "@allocOverfundingTitle": {
@@ -2021,10 +1946,6 @@
   "acctNewTitle": "Nouveau compte",
   "@acctNewTitle": {
     "description": "AppBar title"
-  },
-  "acctFallbackName": "Compte",
-  "@acctFallbackName": {
-    "description": "Fallback"
   },
   "acctTypeCash": "Espèces",
   "@acctTypeCash": {
@@ -2358,21 +2279,9 @@
   "@tmplNewDesc": {
     "description": "Sheet description"
   },
-  "tmplTitleLabel": "Titre",
-  "@tmplTitleLabel": {
-    "description": "Field label"
-  },
   "tmplTitleRequired": "Le titre est requis",
   "@tmplTitleRequired": {
     "description": "Validation error"
-  },
-  "tmplAmountLabel": "Montant",
-  "@tmplAmountLabel": {
-    "description": "Field label"
-  },
-  "tmplAccountLabel": "Compte",
-  "@tmplAccountLabel": {
-    "description": "Field label"
   },
   "tmplCategoryOptional": "Catégorie (optionnel)",
   "@tmplCategoryOptional": {
@@ -2774,7 +2683,7 @@
   "@settingsCustomizationSub": {
     "description": "Tile subtitle"
   },
-  "settingsAbout": "À propos de PocketPlan",
+  "settingsAbout": "À propos de BudgetSeal",
   "@settingsAbout": {
     "description": "Tile title"
   },
@@ -2978,7 +2887,7 @@
   "@syncDisconnectMsg": {
     "description": "Dialog content"
   },
-  "syncShareDesc": "Partagez vos données PocketPlan avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.",
+  "syncShareDesc": "Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.",
   "@syncShareDesc": {
     "description": "Sheet description"
   },
@@ -3359,7 +3268,7 @@
   "@aboutContact": {
     "description": "Action"
   },
-  "aboutShareText": "Découvrez PocketPlan — la budgétisation par enveloppes simplifiée !",
+  "aboutShareText": "Découvrez BudgetSeal — la budgétisation par enveloppes simplifiée !",
   "@aboutShareText": {
     "description": "Share text"
   },
@@ -3393,7 +3302,7 @@
   "@tileBillSplitter": { "description": "Tile title" },
   "tileHelpGuide": "Guide d'aide",
   "@tileHelpGuide": { "description": "Tile title" },
-  "settingsHelpSub": "Comment utiliser PocketPlan",
+  "settingsHelpSub": "Comment utiliser BudgetSeal",
   "@settingsHelpSub": { "description": "Tile subtitle" },
   "tileTheme": "Thème",
   "@tileTheme": { "description": "Tile title" },
@@ -3565,7 +3474,7 @@
   "@backupBannerDaysAgo": { "description": "Banner message", "placeholders": { "days": { "type": "int" } } },
   "backupNowButton": "Sauvegarder maintenant",
   "@backupNowButton": { "description": "Button" },
-  "syncShareInviteText": "Rejoignez mon foyer PocketPlan ! Entrez ce code dans l'application :\n{code}",
+  "syncShareInviteText": "Rejoignez mon foyer BudgetSeal ! Entrez ce code dans l'application :\n{code}",
   "@syncShareInviteText": { "description": "Share invite text", "placeholders": { "code": { "type": "String" } } },
   "privacyTermsTitle": "Confidentialité et conditions",
   "@privacyTermsTitle": { "description": "AppBar title" },
@@ -3573,7 +3482,7 @@
   "@privacyPolicyTitle": { "description": "Section title" },
   "privacyLastUpdated": "Dernière mise à jour : mai 2026",
   "@privacyLastUpdated": { "description": "Date" },
-  "privacyIntro": "PocketPlan est conçu avec votre vie privée comme principe fondamental. Vos données financières vous appartiennent \u2014 nous ne les collectons, stockons ou transmettons jamais à aucun serveur.",
+  "privacyIntro": "BudgetSeal est conçu avec votre vie privée comme principe fondamental. Vos données financières vous appartiennent \u2014 nous ne les collectons, stockons ou transmettons jamais à aucun serveur.",
   "@privacyIntro": { "description": "Introduction" },
   "privacyDataStorageTitle": "1. Stockage des données",
   "@privacyDataStorageTitle": { "description": "Heading" },
@@ -3581,7 +3490,7 @@
   "@privacyDataStorageBody": { "description": "Body" },
   "privacyCloudSyncTitle": "2. Synchronisation cloud (optionnelle)",
   "@privacyCloudSyncTitle": { "description": "Heading" },
-  "privacyCloudSyncBody": "Si vous choisissez d'activer la synchronisation cloud, vos données sont téléchargées sur votre compte Google Drive personnel ou un fournisseur de stockage de votre choix. PocketPlan n'a pas accès à vos identifiants Google \u2014 l'authentification est gérée par le système OAuth de Google.\n\nVous pouvez optionnellement chiffrer votre fichier de synchronisation avec le chiffrement AES-256 en utilisant un mot de passe que vous définissez.",
+  "privacyCloudSyncBody": "Si vous choisissez d'activer la synchronisation cloud, vos données sont téléchargées sur votre compte Google Drive personnel ou un fournisseur de stockage de votre choix. BudgetSeal n'a pas accès à vos identifiants Google \u2014 l'authentification est gérée par le système OAuth de Google.\n\nVous pouvez optionnellement chiffrer votre fichier de synchronisation avec le chiffrement AES-256 en utilisant un mot de passe que vous définissez.",
   "@privacyCloudSyncBody": { "description": "Body" },
   "privacyWebCompanionTitle": "3. Compagnon Web",
   "@privacyWebCompanionTitle": { "description": "Heading" },
@@ -3589,7 +3498,7 @@
   "@privacyWebCompanionBody": { "description": "Body" },
   "privacyAnalyticsTitle": "4. Analyses et suivi",
   "@privacyAnalyticsTitle": { "description": "Heading" },
-  "privacyAnalyticsBody": "PocketPlan n'inclut aucun SDK d'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d'utilisation, identifiant d'appareil ou métrique comportementale n'est collectée.",
+  "privacyAnalyticsBody": "BudgetSeal n'inclut aucun SDK d'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d'utilisation, identifiant d'appareil ou métrique comportementale n'est collectée.",
   "@privacyAnalyticsBody": { "description": "Body" },
   "privacyPermissionsTitle": "5. Autorisations",
   "@privacyPermissionsTitle": { "description": "Heading" },
@@ -3607,27 +3516,27 @@
   "@termsOfUseTitle": { "description": "Section title" },
   "termsAcceptanceTitle": "1. Acceptation",
   "@termsAcceptanceTitle": { "description": "Heading" },
-  "termsAcceptanceBody": "En utilisant PocketPlan, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez désinstaller l'application.",
+  "termsAcceptanceBody": "En utilisant BudgetSeal, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez désinstaller l'application.",
   "@termsAcceptanceBody": { "description": "Body" },
   "termsIntendedUseTitle": "2. Utilisation prévue",
   "@termsIntendedUseTitle": { "description": "Heading" },
-  "termsIntendedUseBody": "PocketPlan est un outil de gestion financière personnelle pour la budgétisation individuelle et familiale. Il n'est pas destiné à la comptabilité commerciale, la préparation fiscale ou les conseils financiers.",
+  "termsIntendedUseBody": "BudgetSeal est un outil de gestion financière personnelle pour la budgétisation individuelle et familiale. Il n'est pas destiné à la comptabilité commerciale, la préparation fiscale ou les conseils financiers.",
   "@termsIntendedUseBody": { "description": "Body" },
   "termsDataAccuracyTitle": "3. Exactitude des données",
   "@termsDataAccuracyTitle": { "description": "Heading" },
-  "termsDataAccuracyBody": "Vous êtes responsable de l'exactitude des données que vous saisissez. PocketPlan calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs.",
+  "termsDataAccuracyBody": "Vous êtes responsable de l'exactitude des données que vous saisissez. BudgetSeal calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs.",
   "@termsDataAccuracyBody": { "description": "Body" },
   "termsNoWarrantyTitle": "4. Sans garantie",
   "@termsNoWarrantyTitle": { "description": "Heading" },
-  "termsNoWarrantyBody": "PocketPlan est fourni \"tel quel\" sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées.",
+  "termsNoWarrantyBody": "BudgetSeal est fourni \"tel quel\" sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées.",
   "@termsNoWarrantyBody": { "description": "Body" },
   "termsLiabilityTitle": "5. Limitation de responsabilité",
   "@termsLiabilityTitle": { "description": "Heading" },
-  "termsLiabilityBody": "Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l'utilisation de PocketPlan.",
+  "termsLiabilityBody": "Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l'utilisation de BudgetSeal.",
   "@termsLiabilityBody": { "description": "Body" },
   "termsIPTitle": "6. Propriété intellectuelle",
   "@termsIPTitle": { "description": "Heading" },
-  "termsIPBody": "PocketPlan et son contenu original sont protégés par le droit d'auteur. L'application utilise des bibliothèques open source listées dans la section Licences.",
+  "termsIPBody": "BudgetSeal et son contenu original sont protégés par le droit d'auteur. L'application utilise des bibliothèques open source listées dans la section Licences.",
   "@termsIPBody": { "description": "Body" },
   "termsChangesTitle": "7. Modifications",
   "@termsChangesTitle": { "description": "Heading" },
@@ -3635,7 +3544,7 @@
   "@termsChangesBody": { "description": "Body" },
   "termsContactTitle": "8. Contact",
   "@termsContactTitle": { "description": "Heading" },
-  "termsContactBody": "Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d'utilisation, contactez : samer@pocketplan.app",
+  "termsContactBody": "Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d'utilisation, contactez : samer@budgetseal.app",
   "@termsContactBody": { "description": "Body" },
   "healthTitle": "Bilan de santé",
   "@healthTitle": {
@@ -3757,7 +3666,7 @@
   "@healthPurgeButton": {
     "description": "Button"
   },
-  "onboardWelcomeTitle": "Pocket Plan",
+  "onboardWelcomeTitle": "BudgetSeal",
   "@onboardWelcomeTitle": {
     "description": "Welcome page title"
   },
@@ -3893,7 +3802,7 @@
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
-  "onboardStartUsing": "Commencer à utiliser Pocket Plan",
+  "onboardStartUsing": "Commencer à utiliser BudgetSeal",
   "@onboardStartUsing": {
     "description": "Button"
   },
@@ -3913,7 +3822,7 @@
   "@onboardPickFile": {
     "description": "Button"
   },
-  "onboardJoinDesc": "Entrez le code d'invitation partagé avec vous pour rejoindre un foyer PocketPlan existant.",
+  "onboardJoinDesc": "Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.",
   "@onboardJoinDesc": {
     "description": "Sheet description"
   },
@@ -3937,11 +3846,11 @@
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
-  "lockSetupReason": "Configurez un verrouillage d'écran pour protéger Pocket Plan",
+  "lockSetupReason": "Configurez un verrouillage d'écran pour protéger BudgetSeal",
   "@lockSetupReason": {
     "description": "Biometric reason"
   },
-  "lockUnlockReason": "Déverrouiller Pocket Plan",
+  "lockUnlockReason": "Déverrouiller BudgetSeal",
   "@lockUnlockReason": {
     "description": "Biometric reason"
   },
@@ -4300,7 +4209,7 @@
   "@wcPinUpdated": {
     "description": "Snackbar"
   },
-  "wcIosWarning": "Gardez PocketPlan au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l'écran l'arrêtera.",
+  "wcIosWarning": "Gardez BudgetSeal au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l'écran l'arrêtera.",
   "@wcIosWarning": {
     "description": "Warning banner"
   },
@@ -4348,11 +4257,11 @@
   "@wcForegroundChannel": {
     "description": "Notification channel name"
   },
-  "wcForegroundChannelDesc": "Le serveur Compagnon Web PocketPlan est en marche",
+  "wcForegroundChannelDesc": "Le serveur Compagnon Web BudgetSeal est en marche",
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
   },
-  "webPageTitle": "PocketPlan Web",
+  "webPageTitle": "BudgetSeal Web",
   "@webPageTitle": {
     "description": "Browser tab title"
   },
@@ -4825,7 +4734,7 @@
   "@webEnvEmptyTitle": {
     "description": "Empty title"
   },
-  "webEnvEmptySub": "Les enveloppes sont gérées dans l'application PocketPlan.",
+  "webEnvEmptySub": "Les enveloppes sont gérées dans l'application BudgetSeal.",
   "@webEnvEmptySub": {
     "description": "Empty subtitle"
   },
@@ -5195,7 +5104,7 @@
       "days": { "type": "String" }
     }
   },
-  "notifReminderTitle": "PocketPlan",
+  "notifReminderTitle": "BudgetSeal",
   "@notifReminderTitle": {
     "description": "Notification title"
   },
@@ -5286,14 +5195,6 @@
   "nfNegativeMinus": "Moins (-100 $)",
   "@nfNegativeMinus": {
     "description": "Option"
-  },
-  "dateToday": "Aujourd'hui",
-  "@dateToday": {
-    "description": "Smart date prefix"
-  },
-  "dateYesterday": "Hier",
-  "@dateYesterday": {
-    "description": "Smart date prefix"
   },
   "textScaleSmall": "Petit",
   "@textScaleSmall": {
@@ -5421,10 +5322,6 @@
   },
   "defcatPersonalCare": "Soins personnels",
   "@defcatPersonalCare": {
-    "description": "Default category"
-  },
-  "defcatIncome": "Revenu",
-  "@defcatIncome": {
     "description": "Default category"
   },
   "defcatSalary": "Salaire",
@@ -5556,7 +5453,7 @@
   "@googleNotConnected": {
     "description": "Error"
   },
-  "filePickerTitle": "Sélectionnez le fichier de synchronisation PocketPlan",
+  "filePickerTitle": "Sélectionnez le fichier de synchronisation BudgetSeal",
   "@filePickerTitle": {
     "description": "Dialog title"
   },
@@ -5632,7 +5529,6 @@
   "allocTargetOptional": "OBJECTIF (OPTIONNEL)",
   "allocMonthlyBudgetDesc": "Combien voulez-vous dépenser dans cette enveloppe chaque mois ?",
   "allocTargetDesc": "Définissez un montant cible, ou laissez à zéro pour un objectif ouvert.",
-  "allocCurrency": "Devise",
   "allocLinkedCategoriesSection": "CATÉGORIES LIÉES",
   "allocLinkedCategoriesDesc": "Les dépenses de ces catégories seront débitées de cette enveloppe.",
   "allocNoCategoriesLinked": "Aucune catégorie liée. Appuyez sur + pour lier des catégories afin que les dépenses soient débitées de cette enveloppe.",
@@ -5641,7 +5537,6 @@
   "allocAmountLeft": "{amount} restant",
   "allocFund": "Financer",
   "allocFundEnvelope": "Financer {name}",
-  "allocAmount": "Montant",
   "allocOverFundingTitle": "Sur-financement",
   "allocOverFundingMsg": "Vous affectez {deficit} de plus que votre solde non alloué disponible ({available}).\n\nVotre solde non alloué deviendra négatif. Continuer ?",
   "allocFundedNote": "Financé depuis le non alloué",
@@ -5672,7 +5567,6 @@
   "allocDeleteError": "Impossible de supprimer. Veuillez réessayer.",
   "allocEnvelopeCreated": "Enveloppe créée",
   "allocEnvelopeUpdated": "Enveloppe mise à jour",
-  "allocCouldntLoad": "Impossible de charger vos données",
   "allocGotIt": "Compris",
   "allocBaseCurrencyOnly": "Enveloppes en {currency} uniquement · {count} dans d'autres devises",
   "allocHideOtherCurrencies": "Masquer les autres devises",
@@ -5709,7 +5603,6 @@
   "acctUnarchiveMsg": "Restaurer « {name} » dans vos comptes actifs ?",
   "acctUnarchive": "Désarchiver",
   "acctUnarchived": "{name} désarchivé",
-  "acctCouldntLoad": "Impossible de charger vos données",
   "acctCurrentBalance": "Solde actuel",
   "acctBackFromTrip": "De retour de voyage ?",
   "acctConvertBackDesc": "Convertir votre solde restant en {currency} et fermer ce portefeuille de voyage.",
@@ -5724,7 +5617,6 @@
   "acctDecimalAuto": "Auto ({count})",
   "acctOpeningBalance": "SOLDE D'OUVERTURE",
   "acctCreateAccount": "Créer un compte",
-  "acctSave": "Enregistrer",
   "acctRecentTransactions": "TRANSACTIONS RÉCENTES",
   "acctNoTransactions": "Aucune transaction pour le moment",
   "acctAdjustDesc": "Entrez le solde réel de ce compte. Une transaction d'ajustement sera créée pour la différence.",
@@ -5754,8 +5646,6 @@
   "catIncomeCount": "{count} revenu(s)",
   "catSearchHint": "Rechercher des catégories...",
   "catAll": "Tout",
-  "catExpense": "Dépense",
-  "catIncome": "Revenu",
   "catNoYet": "Aucune catégorie pour le moment",
   "catTapPlus": "Appuyez sur + pour en créer une",
   "catNoMatch": "Aucune catégorie correspondante",
@@ -5766,7 +5656,6 @@
   "catEdit": "Modifier",
   "catArchive": "Archiver",
   "catUnarchive": "Désarchiver",
-  "catDelete": "Supprimer",
   "catRestored": "Catégorie restaurée",
   "catArchived": "Catégorie archivée",
   "catDeleteTitle": "Supprimer la catégorie",
@@ -5776,10 +5665,8 @@
   "catEditTitle": "Modifier la catégorie",
   "catName": "Nom",
   "catParent": "Catégorie parente",
-  "catAccount": "Compte",
   "catNone": "Aucun",
   "catCreate": "Créer",
-  "catSaveButton": "Enregistrer",
   "catEnterName": "Entrez un nom de catégorie",
   "catCreated": "Catégorie créée",
   "catUpdated": "Catégorie mise à jour",
@@ -5820,7 +5707,6 @@
   "txTransactionDeleted": "Transaction supprimée",
   "txUndoAction": "Annuler",
   "txNewTransactionSheet": "Nouvelle transaction",
-  "txCouldntLoad": "Impossible de charger vos données",
   "txCouldNotLoad": "Impossible de charger la transaction",
   "txAfMixedContent": "Cela créera {count} transactions liées :\n\n{summary}\n\nElles apparaîtront comme des transactions séparées mais liées entre elles.",
   "txAfAnotherWithCount": "Ajouter un autre article ({count} articles · {total})",
@@ -5846,8 +5732,6 @@
   "recurringEditTitle": "Modifier la transaction récurrente",
   "recurringFormTitleHint": "Titre (ex. Loyer, Salaire)",
   "recurringFormTitleRequired": "Le titre est requis",
-  "recurringFormAmount": "Montant",
-  "recurringFormAccount": "Compte",
   "recurringFormAccountRequired": "Le compte est requis",
   "recurringFormStarts": "Début : {date}",
   "recurringFormEnds": "Fin : {date}",
@@ -5940,10 +5824,6 @@
   "@importColDate": { "description": "Column role label" },
   "importColDescription": "Description",
   "@importColDescription": { "description": "Column role label" },
-  "importColAmount": "Montant",
-  "@importColAmount": { "description": "Column role label" },
-  "importColCategory": "Catégorie",
-  "@importColCategory": { "description": "Column role label" },
 
   "objPaymentFailed": "Échec du paiement. Veuillez réessayer.",
   "@objPaymentFailed": { "description": "Snackbar on payment error" },
@@ -5967,10 +5847,6 @@
     "description": "Deadline display with date",
     "placeholders": { "date": { "type": "String" } }
   },
-  "objSummaryCurrency": "Devise",
-  "@objSummaryCurrency": { "description": "Summary row label" },
-  "objSummaryDeadline": "Échéance",
-  "@objSummaryDeadline": { "description": "Summary row label" },
   "objSummaryRemaining": "Restant",
   "@objSummaryRemaining": { "description": "Summary row label" },
   "objPaymentsSection": "PAIEMENTS",
@@ -6011,7 +5887,7 @@
   },
   "healthAutoAdjustment": "Ajustement automatique du bilan de santé",
   "@healthAutoAdjustment": { "description": "Ledger note for repair entries" },
-  "healthReportTitle": "Rapport de santé PocketPlan",
+  "healthReportTitle": "Rapport de santé BudgetSeal",
   "@healthReportTitle": { "description": "Share sheet title for exported report" },
   "healthAdjustmentsCreated": "{count} ajustement(s) créé(s)",
   "@healthAdjustmentsCreated": {
@@ -6033,13 +5909,6 @@
   "@catSheetNoMatch": { "description": "Empty state when search has no results" },
   "catSheetNoCategories": "Aucune catégorie pour le moment.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.",
   "@catSheetNoCategories": { "description": "Empty state when no categories exist" },
-  "catSheetExpense": "Dépense",
-  "@catSheetExpense": { "description": "Type filter chip" },
-  "catSheetIncome": "Revenu",
-  "@catSheetIncome": { "description": "Type filter chip" },
-  "catSheetSearchHint": "Rechercher des catégories...",
-  "@catSheetSearchHint": { "description": "Search field hint" },
-  "catSheetSubcategories": "{count} sous-catégories",
   "@catSheetSubcategories": {
     "description": "Subtitle showing subcategory count",
     "placeholders": { "count": { "type": "int" } }
@@ -6120,9 +5989,6 @@
   "plannedExactDate": "Choisir une date précise (optionnel)",
   "plannedExactDateValue": "Date précise : {date}",
   "@plannedExactDateValue": { "description": "Label for exact date picker when date is selected", "placeholders": { "date": { "type": "String" } } },
-  "plannedAccount": "Compte",
-  "plannedCategory": "Catégorie",
-  "plannedTitleHint": "Titre",
   "plannedNoteHint": "Note (optionnel)",
   "plannedSelectAccount": "Sélectionnez un compte",
   "plannedUpdated": "Paiement planifié mis à jour",
@@ -6163,5 +6029,11 @@
   "upgradeRedeemSuccess": "Code utilisé ! Premium débloqué.",
   "upgradeRestorePurchase": "Restaurer l'achat",
   "upgradeRestoreSuccess": "Achat restauré ! Premium débloqué.",
-  "upgradeRestoreNone": "Aucun achat précédent trouvé."
+  "upgradeRestoreNone": "Aucun achat précédent trouvé.",
+  "catSheetSearchHint": "Rechercher des catégories...",
+  "catSheetSubcategories": "{count} sous-catégories",
+  "objSummaryDeadline": "Échéance",
+  "plannedNoteHint": "Note (optionnel)",
+  "recurringFormAccountRequired": "Le compte est requis",
+  "recurringFormStarts": "Début : {date}"
 }

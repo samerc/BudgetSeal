@@ -43,7 +43,7 @@ Future<void> _startApp() async {
     androidNotificationOptions: AndroidNotificationOptions(
       channelId: 'web_companion',
       channelName: 'Web Companion',
-      channelDescription: 'PocketPlan Web Companion server is running',
+      channelDescription: 'BudgetSeal Web Companion server is running',
       channelImportance: NotificationChannelImportance.LOW,
       priority: NotificationPriority.LOW,
     ),
@@ -94,7 +94,7 @@ Future<void> _startApp() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: const PocketPlanApp(),
+      child: const BudgetSealApp(),
     ),
   );
 }

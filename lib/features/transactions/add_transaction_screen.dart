@@ -883,7 +883,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
                   : const Icon(Icons.check_rounded, size: 18),
-              label: Text(S.of(context).txFormSave,
+              label: Text(S.of(context).commonSave,
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600)),
             ),

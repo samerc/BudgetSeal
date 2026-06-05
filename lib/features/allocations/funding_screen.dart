@@ -869,7 +869,7 @@ class _FundingAllocationTile extends StatelessWidget {
                       child: CalculatorAmountField(
                         value: amount,
                         onChanged: onAmountChanged,
-                        hintText: S.of(context).allocAmount,
+                        hintText: S.of(context).commonAmount,
                         fontSize: 16,
                         style: TextStyle(
                           fontSize: 16,

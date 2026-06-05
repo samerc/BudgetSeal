@@ -603,7 +603,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _statColumn(
                   context,
-                  label: S.of(context).dashboardLabelIncome,
+                  label: S.of(context).typeIncome,
                   amount: income,
                   color: AppColors.healthy,
                 ),

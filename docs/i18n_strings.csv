@@ -34,7 +34,7 @@ common_no_data,Empty state,No data,لا توجد بيانات,Aucune donnée
 # ──────────────────────────────────────────────,,,,
 # APP / BRANDING,,,,
 # ──────────────────────────────────────────────,,,,
-app_name,MaterialApp title / splash / lock,Pocket Plan,Pocket Plan,Pocket Plan
+app_name,MaterialApp title / splash / lock,BudgetSeal,BudgetSeal,BudgetSeal
 app_tagline,Splash screen tagline,Budget with purpose,ميزانية بهدف,Budgétiser avec intention
 app_tagline_about,About screen tagline,"Envelope budgeting, simplified.",ميزانية الأظرف بكل بساطة.,"Budget par enveloppes, simplifié."
 app_brand_abbr,Web sidebar logo abbreviation,PP,PP,PP
@@ -70,10 +70,10 @@ type_all,Filter chip,All,الكل,Tout
 # ──────────────────────────────────────────────,,,,
 # DASHBOARD,,,,
 # ──────────────────────────────────────────────,,,,
-dashboard_welcome_title,First-visit hint banner title,Welcome to PocketPlan!,مرحباً بك في PocketPlan!,Bienvenue sur PocketPlan !
+dashboard_welcome_title,First-visit hint banner title,Welcome to BudgetSeal!,مرحباً بك في BudgetSeal!,Bienvenue sur BudgetSeal !
 dashboard_welcome_body,First-visit hint banner body,This is your financial overview. Tap the quick actions below to start recording transactions.,هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.,Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.
 dashboard_household_label,Header subtitle,Household,الأسرة,Foyer
-dashboard_default_name,Fallback household name,PocketPlan,PocketPlan,PocketPlan
+dashboard_default_name,Fallback household name,BudgetSeal,BudgetSeal,BudgetSeal
 dashboard_customize_tooltip,Customize button tooltip,Customize,تخصيص,Personnaliser
 dashboard_search_tooltip,Search button tooltip,Search,بحث,Rechercher
 dashboard_error,Error retry message,Couldn't load your data,تعذّر تحميل بياناتك,Impossible de charger vos données
@@ -703,7 +703,7 @@ settings_goals_sub,Tile subtitle,Savings goals and debt tracking,أهداف ال
 settings_period_sub,Tile subtitle,End period and resolve leftovers,إنهاء الفترة وحل المتبقيات,Terminer la période et résoudre les restes
 settings_customization,Tile title,Settings & Customization,الإعدادات والتخصيص,Paramètres et personnalisation
 settings_customization_sub,Tile subtitle,"Theme, font, data, preferences",المظهر، الخط، البيانات، التفضيلات,"Thème, police, données, préférences"
-settings_about,Tile title,About PocketPlan,حول PocketPlan,À propos de PocketPlan
+settings_about,Tile title,About BudgetSeal,حول BudgetSeal,À propos de BudgetSeal
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Theme,,,,
 # ──────────────────────────────────────────────,,,,
@@ -775,7 +775,7 @@ sync_provider_info,Info text,"OneDrive and Dropbox open the system file picker, 
 sync_connection_failed,Dialog title,Connection Failed,فشل الاتصال,Échec de la connexion
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
-sync_share_desc,Sheet description,Share your PocketPlan data with another person. They will be able to sync to the same file on Google Drive.,شارك بيانات PocketPlan مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.,Partagez vos données PocketPlan avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.
+sync_share_desc,Sheet description,Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.,شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.,Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.
 sync_their_email,Field label,Their email address,عنوان بريدهم الإلكتروني,Leur adresse e-mail
 sync_email_hint,Field hint,partner@gmail.com,partner@gmail.com,partenaire@gmail.com
 sync_sharing,Button,Sharing...,جارٍ المشاركة...,Partage...
@@ -886,7 +886,7 @@ fx_cache_info,Info text,Rates are fetched from the internet and cached for 1 hou
 about_title,AppBar title,About,حول,À propos
 about_share,Action,Share,مشاركة,Partager
 about_contact,Action,Contact,تواصل,Contact
-about_share_text,Share text,Check out PocketPlan — envelope budgeting made simple!,جرب PocketPlan — ميزانية الأظرف ببساطة!,Découvrez PocketPlan — la budgétisation par enveloppes simplifiée !
+about_share_text,Share text,Check out BudgetSeal — envelope budgeting made simple!,جرب BudgetSeal — ميزانية الأظرف ببساطة!,Découvrez BudgetSeal — la budgétisation par enveloppes simplifiée !
 about_privacy,Privacy notice,No tracking. Your data stays on your device.,بدون تتبع. بياناتك تبقى على جهازك.,Aucun suivi. Vos données restent sur votre appareil.
 about_credit,Credit line,Made by Samer,صنعه سامر,Créé par Samer
 # ──────────────────────────────────────────────,,,,
@@ -924,7 +924,7 @@ health_purge_button,Button,Purge,تطهير,Purger
 # ──────────────────────────────────────────────,,,,
 # ONBOARDING,,,,
 # ──────────────────────────────────────────────,,,,
-onboard_welcome_title,Welcome page title,Pocket Plan,Pocket Plan,Pocket Plan
+onboard_welcome_title,Welcome page title,BudgetSeal,BudgetSeal,BudgetSeal
 onboard_tagline,Welcome tagline,Give every dollar a purpose.,امنح كل دولار غرضاً.,Donnez un but à chaque dollar.
 onboard_step_1,Step text,Add accounts — where your money lives,أضف حسابات — أين يعيش مالك,Ajoutez des comptes — où vit votre argent
 onboard_step_2,Step text,Create envelopes — budget for each category,أنشئ أظرفاً — ميزانية لكل فئة,Créez des enveloppes — un budget par catégorie
@@ -958,12 +958,12 @@ onboard_classic_sub,Toggle subtitle,"All fields at once, for complex entries",ج
 onboard_create_start,Button,Create & Start,إنشاء وبدء,Créer et commencer
 onboard_all_set,Done page title,You're all set!,أنت جاهز!,Vous êtes prêt !
 onboard_done_subtitle,Done page subtitle,Start tracking your expenses.\nYour financial clarity begins now.,ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.,Commencez à suivre vos dépenses.\nVotre clarté financière commence maintenant.
-onboard_start_using,Button,Start Using Pocket Plan,ابدأ استخدام Pocket Plan,Commencer à utiliser Pocket Plan
+onboard_start_using,Button,Start Using BudgetSeal,ابدأ استخدام BudgetSeal,Commencer à utiliser BudgetSeal
 onboard_restore_title,Sheet title,Restore from Cloud,الاستعادة من السحابة,Restaurer depuis le cloud
 onboard_restore_desc,Sheet description,Choose where your backup is stored. This will replace any local data.,اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.,Choisissez où votre sauvegarde est stockée. Cela remplacera les données locales.
 onboard_google_drive,Button,Google Drive,Google Drive,Google Drive
 onboard_pick_file,Button,Pick a File,اختر ملفاً,Choisir un fichier
-onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing PocketPlan household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة PocketPlan موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer PocketPlan existant.
+onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing BudgetSeal household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.
 onboard_invite_code,Field label,Invite code,رمز الدعوة,Code d'invitation
 onboard_invite_hint,Field hint,PP-...,PP-...,PP-...
 onboard_join_button,Button,Join Household,الانضمام للأسرة,Rejoindre le foyer
@@ -972,8 +972,8 @@ onboard_invalid_code_error,Validation,Invalid invite code. It should start with 
 # ──────────────────────────────────────────────,,,,
 # LOCK SCREEN,,,,
 # ──────────────────────────────────────────────,,,,
-lock_setup_reason,Biometric reason,Set up a screen lock to protect Pocket Plan,أعدّ قفل الشاشة لحماية Pocket Plan,Configurez un verrouillage d'écran pour protéger Pocket Plan
-lock_unlock_reason,Biometric reason,Unlock Pocket Plan,فتح Pocket Plan,Déverrouiller Pocket Plan
+lock_setup_reason,Biometric reason,Set up a screen lock to protect BudgetSeal,أعدّ قفل الشاشة لحماية BudgetSeal,Configurez un verrouillage d'écran pour protéger BudgetSeal
+lock_unlock_reason,Biometric reason,Unlock BudgetSeal,فتح BudgetSeal,Déverrouiller BudgetSeal
 lock_failed,Snackbar,Unlock failed: {error},فشل الفتح: {error},Échec du déverrouillage : {error}
 lock_tap_to_unlock,Instruction,Tap to unlock,اضغط للفتح,Appuyez pour déverrouiller
 lock_unlock_button,Button,Unlock,فتح,Déverrouiller
@@ -1065,7 +1065,7 @@ wc_4_digit_pin,Field label,4-digit PIN,PIN من 4 أرقام,PIN à 4 chiffres
 wc_enter_4_digits_error,Validation,Enter exactly 4 digits,أدخل 4 أرقام بالضبط,Entrez exactement 4 chiffres
 wc_update_pin,Button,Update PIN,تحديث الـ PIN,Mettre à jour le PIN
 wc_pin_updated,Snackbar,PIN updated. All active sessions signed out.,تم تحديث الـ PIN. تم تسجيل خروج جميع الجلسات.,PIN mis à jour. Toutes les sessions actives déconnectées.
-wc_ios_warning,Warning banner,Keep PocketPlan in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.,أبقِ PocketPlan في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.,Gardez PocketPlan au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l'écran l'arrêtera.
+wc_ios_warning,Warning banner,Keep BudgetSeal in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.,أبقِ BudgetSeal في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.,Gardez BudgetSeal au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l'écran l'arrêtera.
 wc_no_wifi_title,Banner title,No WiFi Connection,لا اتصال WiFi,Pas de connexion WiFi
 wc_no_wifi_desc,Banner description,Connect your phone to a WiFi network to use Web Companion. The server needs WiFi to let your laptop access the budget.,اربط هاتفك بشبكة WiFi لاستخدام المرافق الإلكتروني. يحتاج الخادم WiFi ليتيح لحاسوبك الوصول.,Connectez votre téléphone au WiFi pour utiliser le Compagnon Web. Le serveur a besoin du WiFi pour que votre ordinateur accède au budget.
 wc_public_network,Banner title,Public Network Detected,شبكة عامة مكتشفة,Réseau public détecté
@@ -1077,11 +1077,11 @@ wc_info_3,Info bullet,5 failed PIN attempts locks the interface for 30 minutes,5
 wc_info_4,Info bullet,Use only on trusted private networks — traffic is not encrypted,استخدم فقط على الشبكات الخاصة الموثوقة — حركة البيانات غير مشفرة,Utilisez uniquement sur des réseaux privés de confiance — le trafic n'est pas chiffré
 wc_notif_permission,Snackbar,Notification permission is needed to keep the server running in the background.,يلزم إذن الإشعارات لإبقاء الخادم يعمل في الخلفية.,L'autorisation de notification est nécessaire pour maintenir le serveur en arrière-plan.
 wc_foreground_channel,Notification channel name,Web Companion,المرافق الإلكتروني,Compagnon Web
-wc_foreground_channel_desc,Notification channel description,PocketPlan Web Companion server is running,خادم المرافق الإلكتروني PocketPlan يعمل,Le serveur Compagnon Web PocketPlan est en marche
+wc_foreground_channel_desc,Notification channel description,BudgetSeal Web Companion server is running,خادم المرافق الإلكتروني BudgetSeal يعمل,Le serveur Compagnon Web BudgetSeal est en marche
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Auth,,,,
 # ──────────────────────────────────────────────,,,,
-web_page_title,Browser tab title,PocketPlan Web,PocketPlan Web,PocketPlan Web
+web_page_title,Browser tab title,BudgetSeal Web,BudgetSeal Web,BudgetSeal Web
 web_auth_subtitle,Auth screen,Enter your PIN to continue,أدخل رمز PIN للمتابعة,Entrez votre PIN pour continuer
 web_auth_lockout,Auth error,Too many attempts. Try again later.,محاولات كثيرة جداً. أعد المحاولة لاحقاً.,Trop de tentatives. Réessayez plus tard.
 web_auth_incorrect,Auth error,Incorrect PIN,رمز PIN غير صحيح,PIN incorrect
@@ -1224,7 +1224,7 @@ web_toast_acct_added,Toast,Account added,تمت إضافة الحساب,Compte a
 # WEB SPA — Envelopes,,,,
 # ──────────────────────────────────────────────,,,,
 web_env_empty_title,Empty title,No envelopes,لا أظرف,Aucune enveloppe
-web_env_empty_sub,Empty subtitle,Envelopes are managed in the PocketPlan app.,الأظرف تُدار من تطبيق PocketPlan.,Les enveloppes sont gérées dans l'application PocketPlan.
+web_env_empty_sub,Empty subtitle,Envelopes are managed in the BudgetSeal app.,الأظرف تُدار من تطبيق BudgetSeal.,Les enveloppes sont gérées dans l'application BudgetSeal.
 web_env_unallocated,Label,Unallocated:,غير موزع:,Non affecté :
 web_env_fund,Button,+ Fund,+ تمويل,+ Financer
 web_modal_fund,Modal title,Fund Envelope,تمويل الظرف,Financer l'enveloppe
@@ -1325,7 +1325,7 @@ notif_bills_and_more,Notification suffix,and more, والمزيد, et plus
 # ──────────────────────────────────────────────,,,,
 # NOTIFICATIONS — Daily reminder,,,,
 # ──────────────────────────────────────────────,,,,
-notif_reminder_title,Notification title,PocketPlan,PocketPlan,PocketPlan
+notif_reminder_title,Notification title,BudgetSeal,BudgetSeal,BudgetSeal
 notif_reminder_1,Notification body,How did you spend today? Tap to record.,كيف أنفقت اليوم؟ اضغط للتسجيل.,Comment avez-vous dépensé aujourd'hui ? Appuyez pour enregistrer.
 notif_reminder_2,Notification body,Don't forget to log today's transactions!,لا تنسَ تسجيل معاملات اليوم!,N'oubliez pas d'enregistrer les transactions du jour !
 notif_reminder_3,Notification body,Stay on track — record today's spending.,ابقَ على المسار — سجّل إنفاق اليوم.,Restez sur la bonne voie — enregistrez vos dépenses du jour.
@@ -1455,7 +1455,7 @@ google_not_configured,Error,Google Sign-In is not configured for this app. A Goo
 google_network_error,Error,Network error. Check your internet connection.,خطأ في الشبكة. تحقق من اتصالك بالإنترنت.,Erreur réseau. Vérifiez votre connexion internet.
 google_connection_failed,Error,Connection failed: {error},فشل الاتصال: {error},Échec de la connexion : {error}
 google_not_connected,Error,Not connected to Google Drive,غير متصل بـ Google Drive,Non connecté à Google Drive
-file_picker_title,Dialog title,Select PocketPlan Sync File,اختر ملف مزامنة PocketPlan,Sélectionnez le fichier de synchronisation PocketPlan
+file_picker_title,Dialog title,Select BudgetSeal Sync File,اختر ملف مزامنة BudgetSeal,Sélectionnez le fichier de synchronisation BudgetSeal
 file_picker_no_path,Error,No sync file path set,لم يتم تعيين مسار ملف المزامنة,Aucun chemin de fichier de synchronisation défini
 # ──────────────────────────────────────────────,,,,
 # SHARED WIDGETS,,,,

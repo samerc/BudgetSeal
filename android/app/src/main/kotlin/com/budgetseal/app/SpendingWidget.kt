@@ -1,4 +1,4 @@
-package com.pocketplan.pocketplan
+package com.budgetseal.app
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -27,7 +27,7 @@ class SpendingWidget : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.spending_widget)
 
-            views.setTextViewText(R.id.widget_title, "PocketPlan")
+            views.setTextViewText(R.id.widget_title, "BudgetSeal")
             views.setTextViewText(R.id.widget_spending, "$0.00 today")
 
             // Tapping the widget opens the main activity

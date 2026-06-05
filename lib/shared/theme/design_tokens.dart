@@ -1,4 +1,4 @@
-/// Design tokens for PocketPlan's visual consistency system.
+/// Design tokens for BudgetSeal's visual consistency system.
 /// All spacing uses a 4-point grid. All cards share one style.
 library;
 

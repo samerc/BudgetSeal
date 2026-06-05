@@ -231,9 +231,9 @@ const _jsonHeaders = {'content-type': 'application/json; charset=utf-8'};
 
 const _placeholderHtml = '''<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>PocketPlan Web</title>
+<head><meta charset="utf-8"><title>BudgetSeal Web</title>
 <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#F1F5F9;}
 .card{background:#fff;border-radius:14px;padding:40px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08);}
 h1{color:#2563EB;margin:0 0 8px;}p{color:#64748B;}</style></head>
-<body><div class="card"><h1>PocketPlan Web</h1><p>Loading web interface...</p></div></body>
+<body><div class="card"><h1>BudgetSeal Web</h1><p>Loading web interface...</p></div></body>
 </html>''';

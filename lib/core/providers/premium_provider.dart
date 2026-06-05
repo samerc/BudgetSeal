@@ -92,7 +92,7 @@ bool isAtFreeLimit(int currentCount, int limit) => currentCount >= limit;
 const _validCodes = <String>{
   'BETA2026',
   'EARLYBIRD',
-  'POCKETPLAN-VIP',
+  'BUDGETSEAL-VIP',
 };
 
 /// Validate a redeem code.

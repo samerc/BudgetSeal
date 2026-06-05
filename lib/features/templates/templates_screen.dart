@@ -664,7 +664,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                     controller: titleCtrl,
                     autofocus: true,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(labelText: tr.tmplTitleLabel),
+                    decoration: InputDecoration(labelText: tr.commonTitle),
                     validator: (v) => (v == null || v.trim().isEmpty)
                         ? tr.tmplTitleRequired
                         : null,
@@ -672,7 +672,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   const SizedBox(height: 14),
                   CalculatorAmountField(
                     value: calcAmount,
-                    label: tr.tmplAmountLabel,
+                    label: tr.commonAmount,
                     fontSize: 20,
                     onChanged: (v) =>
                         setSheetState(() => calcAmount = v),
@@ -693,7 +693,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: accountId,
                     decoration:
-                        InputDecoration(labelText: tr.tmplAccountLabel),
+                        InputDecoration(labelText: tr.commonAccount),
                     items: accounts
                         .map((a) => DropdownMenuItem(
                             value: a.id,

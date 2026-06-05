@@ -260,7 +260,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 220),
                     error: (e, _) => ErrorRetry(
-                      message: S.of(context).dashboardError,
+                      message: S.of(context).commonCouldntLoadData,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(currentMonthTransactionsProvider),
@@ -356,7 +356,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     children: [
                       _QuickAction(
                         icon: Icons.remove_rounded,
-                        label: qs.dashboardQuickExpense,
+                        label: qs.typeExpense,
                         color: ref.watch(txColorsProvider).expense,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'expense'}),
@@ -364,7 +364,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       const SizedBox(width: 10),
                       _QuickAction(
                         icon: Icons.add_rounded,
-                        label: qs.dashboardQuickIncome,
+                        label: qs.typeIncome,
                         color: ref.watch(txColorsProvider).income,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'income'}),
@@ -534,7 +534,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 60),
                     error: (e, _) => ErrorRetry(
-                      message: S.of(context).dashboardError,
+                      message: S.of(context).commonCouldntLoadData,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(accountsWithBalanceProvider),
@@ -631,7 +631,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     },
                     loading: () => const _ShimmerCard(height: 200),
                     error: (e, _) => ErrorRetry(
-                      message: S.of(context).dashboardError,
+                      message: S.of(context).commonCouldntLoadData,
                       details: '$e',
                       onRetry: () =>
                           ref.invalidate(recentTransactionsProvider),
@@ -811,7 +811,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _MiniStat(
-                        label: S.of(context).dashboardLabelIncome,
+                        label: S.of(context).typeIncome,
                         amount: income,
                         color: AppColors.healthy,
                         currency: currency,

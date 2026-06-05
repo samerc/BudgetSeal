@@ -102,7 +102,22 @@ class SEn extends S {
   String get commonCouldntLoadAccounts => 'Couldn\'t load accounts';
 
   @override
-  String get appName => 'Pocket Plan';
+  String get commonAccount => 'Account';
+
+  @override
+  String get commonAmount => 'Amount';
+
+  @override
+  String get commonCategory => 'Category';
+
+  @override
+  String get commonCurrency => 'Currency';
+
+  @override
+  String get commonTitle => 'Title';
+
+  @override
+  String get appName => 'BudgetSeal';
 
   @override
   String get appTagline => 'Budget with purpose';
@@ -174,7 +189,7 @@ class SEn extends S {
   String get typeAll => 'All';
 
   @override
-  String get dashboardWelcomeTitle => 'Welcome to PocketPlan!';
+  String get dashboardWelcomeTitle => 'Welcome to BudgetSeal!';
 
   @override
   String get dashboardWelcomeBody =>
@@ -184,22 +199,13 @@ class SEn extends S {
   String get dashboardHouseholdLabel => 'Household';
 
   @override
-  String get dashboardDefaultName => 'PocketPlan';
+  String get dashboardDefaultName => 'BudgetSeal';
 
   @override
   String get dashboardCustomizeTooltip => 'Customize';
 
   @override
   String get dashboardSearchTooltip => 'Search';
-
-  @override
-  String get dashboardError => 'Couldn\'t load your data';
-
-  @override
-  String get dashboardQuickExpense => 'Expense';
-
-  @override
-  String get dashboardQuickIncome => 'Income';
 
   @override
   String get dashboardQuickTransfer => 'Transfer';
@@ -240,9 +246,6 @@ class SEn extends S {
 
   @override
   String get dashboardTotalAcrossAccounts => 'Total across all accounts';
-
-  @override
-  String get dashboardLabelIncome => 'Income';
 
   @override
   String get dashboardLabelExpenses => 'Expenses';
@@ -552,12 +555,6 @@ class SEn extends S {
   String get txLongPressHint => 'Long press for options';
 
   @override
-  String get txTodayPrefix => 'Today';
-
-  @override
-  String get txYesterdayPrefix => 'Yesterday';
-
-  @override
   String txNItems(int count) {
     return '$count items';
   }
@@ -572,9 +569,6 @@ class SEn extends S {
 
   @override
   String get txContextDuplicate => 'Duplicate';
-
-  @override
-  String get txContextDelete => 'Delete';
 
   @override
   String get txDeleteTitle => 'Delete transaction?';
@@ -600,9 +594,6 @@ class SEn extends S {
 
   @override
   String get txFormNewTitle => 'New Transaction';
-
-  @override
-  String get txFormSave => 'Save';
 
   @override
   String get txFormNoteHint => 'Add a note…';
@@ -727,13 +718,7 @@ class SEn extends S {
   String get txDetailAccounts => 'Accounts';
 
   @override
-  String get txDetailAccount => 'Account';
-
-  @override
   String get txDetailNote => 'Note';
-
-  @override
-  String get txDetailCategory => 'Category';
 
   @override
   String get txDetailUnknownAccount => 'Unknown';
@@ -796,9 +781,6 @@ class SEn extends S {
   String get txAfTransferNoteHint => 'Note (e.g. rent, savings)';
 
   @override
-  String get txAfTitleHint => 'Title';
-
-  @override
   String get txAfEnterAmountButton => 'Enter Amount';
 
   @override
@@ -821,9 +803,6 @@ class SEn extends S {
 
   @override
   String get txAfToAccount => 'To Account';
-
-  @override
-  String get txAfAccount => 'Account';
 
   @override
   String get txAfTapToSelect => 'Tap to select';
@@ -879,9 +858,6 @@ class SEn extends S {
   String get txAfAddTransaction => 'Add Transaction';
 
   @override
-  String get catSheetTitle => 'Category';
-
-  @override
   String get catSheetNew => 'New';
 
   @override
@@ -903,9 +879,6 @@ class SEn extends S {
   }
 
   @override
-  String get currencySheetTitle => 'Currency';
-
-  @override
   String get currencyYourAccounts => 'YOUR ACCOUNTS';
 
   @override
@@ -916,9 +889,6 @@ class SEn extends S {
 
   @override
   String get txWidgetSelectAccount => 'Select account';
-
-  @override
-  String get txWidgetCategory => 'Category';
 
   @override
   String get txWidgetItemNote => 'Item note…';
@@ -1000,9 +970,6 @@ class SEn extends S {
   String get billEnterAmount => 'Enter amount';
 
   @override
-  String get billAmount => 'Amount';
-
-  @override
   String get billKeepAsOne => 'Keep as one';
 
   @override
@@ -1034,9 +1001,6 @@ class SEn extends S {
 
   @override
   String get billTipAmount => 'Tip amount';
-
-  @override
-  String get billCurrency => 'Currency';
 
   @override
   String get billBillCurrency => 'Bill currency';
@@ -1132,9 +1096,6 @@ class SEn extends S {
 
   @override
   String get txNewTransactionSheet => 'New Transaction';
-
-  @override
-  String get txCouldntLoad => 'Couldn\'t load your data';
 
   @override
   String get txCouldNotLoad => 'Could not load transaction';
@@ -1263,9 +1224,6 @@ class SEn extends S {
   String get allocArchiveMenu => 'Archive';
 
   @override
-  String get allocDeleteMenu => 'Delete';
-
-  @override
   String get allocCreateButtonDetail => 'Create Envelope';
 
   @override
@@ -1364,9 +1322,6 @@ class SEn extends S {
   String get allocBudgetAmount => 'Budget amount';
 
   @override
-  String get allocCurrencyLabel => 'Currency';
-
-  @override
   String get allocLinkedCategories => 'LINKED CATEGORIES';
 
   @override
@@ -1391,9 +1346,6 @@ class SEn extends S {
 
   @override
   String get allocFromUnallocated => 'From your unallocated balance';
-
-  @override
-  String get allocAmountHint => 'Amount';
 
   @override
   String get allocOverfundingTitle => 'Over-funding';
@@ -1571,9 +1523,6 @@ class SEn extends S {
       'Set a target amount, or leave at zero for open-ended.';
 
   @override
-  String get allocCurrency => 'Currency';
-
-  @override
   String get allocLinkedCategoriesSection => 'LINKED CATEGORIES';
 
   @override
@@ -1604,9 +1553,6 @@ class SEn extends S {
   String allocFundEnvelope(String name) {
     return 'Fund $name';
   }
-
-  @override
-  String get allocAmount => 'Amount';
 
   @override
   String get allocOverFundingTitle => 'Over-funding';
@@ -1720,9 +1666,6 @@ class SEn extends S {
 
   @override
   String get allocEnvelopeUpdated => 'Envelope updated';
-
-  @override
-  String get allocCouldntLoad => 'Couldn\'t load your data';
 
   @override
   String get allocGotIt => 'Got it';
@@ -1895,9 +1838,6 @@ class SEn extends S {
   String get acctNewTitle => 'New Account';
 
   @override
-  String get acctFallbackName => 'Account';
-
-  @override
   String get acctTypeCash => 'Cash';
 
   @override
@@ -1955,9 +1895,6 @@ class SEn extends S {
   }
 
   @override
-  String get acctCouldntLoad => 'Couldn\'t load your data';
-
-  @override
   String get acctCurrentBalance => 'Current Balance';
 
   @override
@@ -2002,9 +1939,6 @@ class SEn extends S {
 
   @override
   String get acctCreateAccount => 'Create account';
-
-  @override
-  String get acctSave => 'Save';
 
   @override
   String get acctRecentTransactions => 'RECENT TRANSACTIONS';
@@ -2125,12 +2059,6 @@ class SEn extends S {
   String get catAll => 'All';
 
   @override
-  String get catExpense => 'Expense';
-
-  @override
-  String get catIncome => 'Income';
-
-  @override
   String get catNoYet => 'No categories yet';
 
   @override
@@ -2169,9 +2097,6 @@ class SEn extends S {
   String get catUnarchive => 'Unarchive';
 
   @override
-  String get catDelete => 'Delete';
-
-  @override
   String get catRestored => 'Category restored';
 
   @override
@@ -2200,16 +2125,10 @@ class SEn extends S {
   String get catParent => 'Parent';
 
   @override
-  String get catAccount => 'Account';
-
-  @override
   String get catNone => 'None';
 
   @override
   String get catCreate => 'Create';
-
-  @override
-  String get catSaveButton => 'Save';
 
   @override
   String get catEnterName => 'Enter a category name';
@@ -2440,16 +2359,7 @@ class SEn extends S {
   String get tmplNewDesc => 'Save a transaction you do often for quick re-use.';
 
   @override
-  String get tmplTitleLabel => 'Title';
-
-  @override
   String get tmplTitleRequired => 'Title is required';
-
-  @override
-  String get tmplAmountLabel => 'Amount';
-
-  @override
-  String get tmplAccountLabel => 'Account';
 
   @override
   String get tmplCategoryOptional => 'Category (optional)';
@@ -2749,7 +2659,7 @@ class SEn extends S {
   String get settingsCustomizationSub => 'Theme, font, data, preferences';
 
   @override
-  String get settingsAbout => 'About PocketPlan';
+  String get settingsAbout => 'About BudgetSeal';
 
   @override
   String get themeLight => 'Light';
@@ -2910,7 +2820,7 @@ class SEn extends S {
 
   @override
   String get syncShareDesc =>
-      'Share your PocketPlan data with another person. They will be able to sync to the same file on Google Drive.';
+      'Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.';
 
   @override
   String get syncTheirEmail => 'Their email address';
@@ -3207,7 +3117,7 @@ class SEn extends S {
 
   @override
   String get aboutShareText =>
-      'Check out PocketPlan — envelope budgeting made simple!';
+      'Check out BudgetSeal — envelope budgeting made simple!';
 
   @override
   String get aboutPrivacy => 'No tracking. Your data stays on your device.';
@@ -3251,7 +3161,7 @@ class SEn extends S {
   String get tileHelpGuide => 'Help Guide';
 
   @override
-  String get settingsHelpSub => 'How to use PocketPlan';
+  String get settingsHelpSub => 'How to use BudgetSeal';
 
   @override
   String get tileTheme => 'Theme';
@@ -3530,7 +3440,7 @@ class SEn extends S {
 
   @override
   String syncShareInviteText(String code) {
-    return 'Join my PocketPlan household! Enter this code in the app:\n$code';
+    return 'Join my BudgetSeal household! Enter this code in the app:\n$code';
   }
 
   @override
@@ -3544,7 +3454,7 @@ class SEn extends S {
 
   @override
   String get privacyIntro =>
-      'PocketPlan is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.';
+      'BudgetSeal is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.';
 
   @override
   String get privacyDataStorageTitle => '1. Data Storage';
@@ -3558,7 +3468,7 @@ class SEn extends S {
 
   @override
   String get privacyCloudSyncBody =>
-      'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. PocketPlan does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).';
+      'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).';
 
   @override
   String get privacyWebCompanionTitle => '3. Web Companion';
@@ -3572,7 +3482,7 @@ class SEn extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'PocketPlan does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.';
+      'BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.';
 
   @override
   String get privacyPermissionsTitle => '5. Permissions';
@@ -3603,42 +3513,42 @@ class SEn extends S {
 
   @override
   String get termsAcceptanceBody =>
-      'By using PocketPlan, you agree to these terms. If you do not agree, please uninstall the app.';
+      'By using BudgetSeal, you agree to these terms. If you do not agree, please uninstall the app.';
 
   @override
   String get termsIntendedUseTitle => '2. Intended Use';
 
   @override
   String get termsIntendedUseBody =>
-      'PocketPlan is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.';
+      'BudgetSeal is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.';
 
   @override
   String get termsDataAccuracyTitle => '3. Data Accuracy';
 
   @override
   String get termsDataAccuracyBody =>
-      'You are responsible for the accuracy of the data you enter. PocketPlan calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.';
+      'You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.';
 
   @override
   String get termsNoWarrantyTitle => '4. No Warranty';
 
   @override
   String get termsNoWarrantyBody =>
-      'PocketPlan is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.';
+      'BudgetSeal is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.';
 
   @override
   String get termsLiabilityTitle => '5. Limitation of Liability';
 
   @override
   String get termsLiabilityBody =>
-      'The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of PocketPlan, including but not limited to data loss, financial miscalculations, or sync failures.';
+      'The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.';
 
   @override
   String get termsIPTitle => '6. Intellectual Property';
 
   @override
   String get termsIPBody =>
-      'PocketPlan and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.';
+      'BudgetSeal and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.';
 
   @override
   String get termsChangesTitle => '7. Changes';
@@ -3652,7 +3562,7 @@ class SEn extends S {
 
   @override
   String get termsContactBody =>
-      'For questions or concerns about this privacy policy or terms of use, contact: samer@pocketplan.app';
+      'For questions or concerns about this privacy policy or terms of use, contact: samer@budgetseal.app';
 
   @override
   String get healthTitle => 'Health Check';
@@ -3746,7 +3656,7 @@ class SEn extends S {
   String get healthPurgeButton => 'Purge';
 
   @override
-  String get onboardWelcomeTitle => 'Pocket Plan';
+  String get onboardWelcomeTitle => 'BudgetSeal';
 
   @override
   String get onboardTagline => 'Give every dollar a purpose.';
@@ -3850,7 +3760,7 @@ class SEn extends S {
       'Start tracking your expenses.\nYour financial clarity begins now.';
 
   @override
-  String get onboardStartUsing => 'Start Using Pocket Plan';
+  String get onboardStartUsing => 'Start Using BudgetSeal';
 
   @override
   String get onboardRestoreTitle => 'Restore from Cloud';
@@ -3867,7 +3777,7 @@ class SEn extends S {
 
   @override
   String get onboardJoinDesc =>
-      'Enter the invite code shared with you to join an existing PocketPlan household.';
+      'Enter the invite code shared with you to join an existing BudgetSeal household.';
 
   @override
   String get onboardInviteCode => 'Invite code';
@@ -3886,10 +3796,10 @@ class SEn extends S {
       'Invalid invite code. It should start with PP-';
 
   @override
-  String get lockSetupReason => 'Set up a screen lock to protect Pocket Plan';
+  String get lockSetupReason => 'Set up a screen lock to protect BudgetSeal';
 
   @override
-  String get lockUnlockReason => 'Unlock Pocket Plan';
+  String get lockUnlockReason => 'Unlock BudgetSeal';
 
   @override
   String lockFailed(String error) {
@@ -4162,7 +4072,7 @@ class SEn extends S {
 
   @override
   String get wcIosWarning =>
-      'Keep PocketPlan in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.';
+      'Keep BudgetSeal in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.';
 
   @override
   String get wcNoWifiTitle => 'No WiFi Connection';
@@ -4203,10 +4113,10 @@ class SEn extends S {
 
   @override
   String get wcForegroundChannelDesc =>
-      'PocketPlan Web Companion server is running';
+      'BudgetSeal Web Companion server is running';
 
   @override
-  String get webPageTitle => 'PocketPlan Web';
+  String get webPageTitle => 'BudgetSeal Web';
 
   @override
   String get webAuthSubtitle => 'Enter your PIN to continue';
@@ -4548,7 +4458,7 @@ class SEn extends S {
   String get webEnvEmptyTitle => 'No envelopes';
 
   @override
-  String get webEnvEmptySub => 'Envelopes are managed in the PocketPlan app.';
+  String get webEnvEmptySub => 'Envelopes are managed in the BudgetSeal app.';
 
   @override
   String get webEnvUnallocated => 'Unallocated:';
@@ -4809,7 +4719,7 @@ class SEn extends S {
   }
 
   @override
-  String get notifReminderTitle => 'PocketPlan';
+  String get notifReminderTitle => 'BudgetSeal';
 
   @override
   String get notifReminder1 => 'How did you spend today? Tap to record.';
@@ -4877,12 +4787,6 @@ class SEn extends S {
 
   @override
   String get nfNegativeMinus => 'Minus (-\$100)';
-
-  @override
-  String get dateToday => 'Today';
-
-  @override
-  String get dateYesterday => 'Yesterday';
 
   @override
   String get textScaleSmall => 'Small';
@@ -4979,9 +4883,6 @@ class SEn extends S {
 
   @override
   String get defcatPersonalCare => 'Personal Care';
-
-  @override
-  String get defcatIncome => 'Income';
 
   @override
   String get defcatSalary => 'Salary';
@@ -5083,7 +4984,7 @@ class SEn extends S {
   String get googleNotConnected => 'Not connected to Google Drive';
 
   @override
-  String get filePickerTitle => 'Select PocketPlan Sync File';
+  String get filePickerTitle => 'Select BudgetSeal Sync File';
 
   @override
   String get filePickerNoPath => 'No sync file path set';
@@ -5298,20 +5199,6 @@ class SEn extends S {
   String get recurringFormTitleRequired => 'Title is required';
 
   @override
-  String get recurringFormAmount => 'Amount';
-
-  @override
-  String get recurringFormAccount => 'Account';
-
-  @override
-  String get recurringFormAccountRequired => 'Account is required';
-
-  @override
-  String recurringFormStarts(String date) {
-    return 'Starts: $date';
-  }
-
-  @override
   String recurringFormEnds(String date) {
     return 'Ends: $date';
   }
@@ -5458,12 +5345,6 @@ class SEn extends S {
   String get importColDescription => 'Description';
 
   @override
-  String get importColAmount => 'Amount';
-
-  @override
-  String get importColCategory => 'Category';
-
-  @override
   String get objPaymentFailed => 'Payment failed. Please try again.';
 
   @override
@@ -5490,12 +5371,6 @@ class SEn extends S {
   String objDeadlinePrefix(String date) {
     return 'Deadline: $date';
   }
-
-  @override
-  String get objSummaryCurrency => 'Currency';
-
-  @override
-  String get objSummaryDeadline => 'Deadline';
 
   @override
   String get objSummaryRemaining => 'Remaining';
@@ -5544,7 +5419,7 @@ class SEn extends S {
   String get healthAutoAdjustment => 'Health check auto-adjustment';
 
   @override
-  String get healthReportTitle => 'PocketPlan Health Check Report';
+  String get healthReportTitle => 'BudgetSeal Health Check Report';
 
   @override
   String healthAdjustmentsCreated(int count) {
@@ -5568,20 +5443,6 @@ class SEn extends S {
   @override
   String get catSheetNoCategories =>
       'No categories yet.\nTap \"New\" above to create one.';
-
-  @override
-  String get catSheetExpense => 'Expense';
-
-  @override
-  String get catSheetIncome => 'Income';
-
-  @override
-  String get catSheetSearchHint => 'Search categories...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count subcategories';
-  }
 
   @override
   String syncConnectedTo(String provider) {
@@ -5768,18 +5629,6 @@ class SEn extends S {
   }
 
   @override
-  String get plannedAccount => 'Account';
-
-  @override
-  String get plannedCategory => 'Category';
-
-  @override
-  String get plannedTitleHint => 'Title';
-
-  @override
-  String get plannedNoteHint => 'Note (optional)';
-
-  @override
   String get plannedSelectAccount => 'Select an account';
 
   @override
@@ -5894,4 +5743,26 @@ class SEn extends S {
 
   @override
   String get upgradeRestoreNone => 'No previous purchase found.';
+
+  @override
+  String get catSheetSearchHint => 'Search categories...';
+
+  @override
+  String catSheetSubcategories(int count) {
+    return '$count subcategories';
+  }
+
+  @override
+  String get objSummaryDeadline => 'Deadline';
+
+  @override
+  String get plannedNoteHint => 'Note (optional)';
+
+  @override
+  String get recurringFormAccountRequired => 'Account is required';
+
+  @override
+  String recurringFormStarts(String date) {
+    return 'Starts: $date';
+  }
 }

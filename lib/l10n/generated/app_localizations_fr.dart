@@ -102,7 +102,22 @@ class SFr extends S {
   String get commonCouldntLoadAccounts => 'Impossible de charger les comptes';
 
   @override
-  String get appName => 'Pocket Plan';
+  String get commonAccount => 'Compte';
+
+  @override
+  String get commonAmount => 'Montant';
+
+  @override
+  String get commonCategory => 'Catégorie';
+
+  @override
+  String get commonCurrency => 'Devise';
+
+  @override
+  String get commonTitle => 'Titre';
+
+  @override
+  String get appName => 'BudgetSeal';
 
   @override
   String get appTagline => 'Budgétiser avec intention';
@@ -174,7 +189,7 @@ class SFr extends S {
   String get typeAll => 'Tout';
 
   @override
-  String get dashboardWelcomeTitle => 'Bienvenue sur PocketPlan !';
+  String get dashboardWelcomeTitle => 'Bienvenue sur BudgetSeal !';
 
   @override
   String get dashboardWelcomeBody =>
@@ -184,22 +199,13 @@ class SFr extends S {
   String get dashboardHouseholdLabel => 'Foyer';
 
   @override
-  String get dashboardDefaultName => 'PocketPlan';
+  String get dashboardDefaultName => 'BudgetSeal';
 
   @override
   String get dashboardCustomizeTooltip => 'Personnaliser';
 
   @override
   String get dashboardSearchTooltip => 'Rechercher';
-
-  @override
-  String get dashboardError => 'Impossible de charger vos données';
-
-  @override
-  String get dashboardQuickExpense => 'Dépense';
-
-  @override
-  String get dashboardQuickIncome => 'Revenu';
 
   @override
   String get dashboardQuickTransfer => 'Virement';
@@ -241,9 +247,6 @@ class SFr extends S {
 
   @override
   String get dashboardTotalAcrossAccounts => 'Total de tous les comptes';
-
-  @override
-  String get dashboardLabelIncome => 'Revenu';
 
   @override
   String get dashboardLabelExpenses => 'Dépenses';
@@ -557,12 +560,6 @@ class SFr extends S {
   String get txLongPressHint => 'Appui long pour les options';
 
   @override
-  String get txTodayPrefix => 'Aujourd\'hui';
-
-  @override
-  String get txYesterdayPrefix => 'Hier';
-
-  @override
   String txNItems(int count) {
     return '$count éléments';
   }
@@ -577,9 +574,6 @@ class SFr extends S {
 
   @override
   String get txContextDuplicate => 'Dupliquer';
-
-  @override
-  String get txContextDelete => 'Supprimer';
 
   @override
   String get txDeleteTitle => 'Supprimer la transaction ?';
@@ -605,9 +599,6 @@ class SFr extends S {
 
   @override
   String get txFormNewTitle => 'Nouvelle transaction';
-
-  @override
-  String get txFormSave => 'Enregistrer';
 
   @override
   String get txFormNoteHint => 'Ajouter une note…';
@@ -734,13 +725,7 @@ class SFr extends S {
   String get txDetailAccounts => 'Comptes';
 
   @override
-  String get txDetailAccount => 'Compte';
-
-  @override
   String get txDetailNote => 'Note';
-
-  @override
-  String get txDetailCategory => 'Catégorie';
 
   @override
   String get txDetailUnknownAccount => 'Inconnu';
@@ -803,9 +788,6 @@ class SFr extends S {
   String get txAfTransferNoteHint => 'Note (ex. loyer, épargne)';
 
   @override
-  String get txAfTitleHint => 'Titre';
-
-  @override
   String get txAfEnterAmountButton => 'Saisir le montant';
 
   @override
@@ -828,9 +810,6 @@ class SFr extends S {
 
   @override
   String get txAfToAccount => 'Compte destination';
-
-  @override
-  String get txAfAccount => 'Compte';
 
   @override
   String get txAfTapToSelect => 'Appuyez pour sélectionner';
@@ -888,9 +867,6 @@ class SFr extends S {
   String get txAfAddTransaction => 'Ajouter une transaction';
 
   @override
-  String get catSheetTitle => 'Catégorie';
-
-  @override
   String get catSheetNew => 'Nouveau';
 
   @override
@@ -912,9 +888,6 @@ class SFr extends S {
   }
 
   @override
-  String get currencySheetTitle => 'Devise';
-
-  @override
   String get currencyYourAccounts => 'VOS COMPTES';
 
   @override
@@ -925,9 +898,6 @@ class SFr extends S {
 
   @override
   String get txWidgetSelectAccount => 'Sélectionner un compte';
-
-  @override
-  String get txWidgetCategory => 'Catégorie';
 
   @override
   String get txWidgetItemNote => 'Note de l\'élément…';
@@ -1011,9 +981,6 @@ class SFr extends S {
   String get billEnterAmount => 'Saisir le montant';
 
   @override
-  String get billAmount => 'Montant';
-
-  @override
   String get billKeepAsOne => 'Garder en un seul';
 
   @override
@@ -1045,9 +1012,6 @@ class SFr extends S {
 
   @override
   String get billTipAmount => 'Montant du pourboire';
-
-  @override
-  String get billCurrency => 'Devise';
 
   @override
   String get billBillCurrency => 'Devise de l\'addition';
@@ -1144,9 +1108,6 @@ class SFr extends S {
 
   @override
   String get txNewTransactionSheet => 'Nouvelle transaction';
-
-  @override
-  String get txCouldntLoad => 'Impossible de charger vos données';
 
   @override
   String get txCouldNotLoad => 'Impossible de charger la transaction';
@@ -1277,9 +1238,6 @@ class SFr extends S {
   String get allocArchiveMenu => 'Archiver';
 
   @override
-  String get allocDeleteMenu => 'Supprimer';
-
-  @override
   String get allocCreateButtonDetail => 'Créer une enveloppe';
 
   @override
@@ -1379,9 +1337,6 @@ class SFr extends S {
   String get allocBudgetAmount => 'Montant du budget';
 
   @override
-  String get allocCurrencyLabel => 'Devise';
-
-  @override
   String get allocLinkedCategories => 'CATÉGORIES LIÉES';
 
   @override
@@ -1406,9 +1361,6 @@ class SFr extends S {
 
   @override
   String get allocFromUnallocated => 'Depuis votre solde non affecté';
-
-  @override
-  String get allocAmountHint => 'Montant';
 
   @override
   String get allocOverfundingTitle => 'Surfinancement';
@@ -1590,9 +1542,6 @@ class SFr extends S {
       'Définissez un montant cible, ou laissez à zéro pour un objectif ouvert.';
 
   @override
-  String get allocCurrency => 'Devise';
-
-  @override
   String get allocLinkedCategoriesSection => 'CATÉGORIES LIÉES';
 
   @override
@@ -1623,9 +1572,6 @@ class SFr extends S {
   String allocFundEnvelope(String name) {
     return 'Financer $name';
   }
-
-  @override
-  String get allocAmount => 'Montant';
 
   @override
   String get allocOverFundingTitle => 'Sur-financement';
@@ -1740,9 +1686,6 @@ class SFr extends S {
 
   @override
   String get allocEnvelopeUpdated => 'Enveloppe mise à jour';
-
-  @override
-  String get allocCouldntLoad => 'Impossible de charger vos données';
 
   @override
   String get allocGotIt => 'Compris';
@@ -1919,9 +1862,6 @@ class SFr extends S {
   String get acctNewTitle => 'Nouveau compte';
 
   @override
-  String get acctFallbackName => 'Compte';
-
-  @override
   String get acctTypeCash => 'Espèces';
 
   @override
@@ -1979,9 +1919,6 @@ class SFr extends S {
   }
 
   @override
-  String get acctCouldntLoad => 'Impossible de charger vos données';
-
-  @override
   String get acctCurrentBalance => 'Solde actuel';
 
   @override
@@ -2026,9 +1963,6 @@ class SFr extends S {
 
   @override
   String get acctCreateAccount => 'Créer un compte';
-
-  @override
-  String get acctSave => 'Enregistrer';
 
   @override
   String get acctRecentTransactions => 'TRANSACTIONS RÉCENTES';
@@ -2150,12 +2084,6 @@ class SFr extends S {
   String get catAll => 'Tout';
 
   @override
-  String get catExpense => 'Dépense';
-
-  @override
-  String get catIncome => 'Revenu';
-
-  @override
   String get catNoYet => 'Aucune catégorie pour le moment';
 
   @override
@@ -2194,9 +2122,6 @@ class SFr extends S {
   String get catUnarchive => 'Désarchiver';
 
   @override
-  String get catDelete => 'Supprimer';
-
-  @override
   String get catRestored => 'Catégorie restaurée';
 
   @override
@@ -2225,16 +2150,10 @@ class SFr extends S {
   String get catParent => 'Catégorie parente';
 
   @override
-  String get catAccount => 'Compte';
-
-  @override
   String get catNone => 'Aucun';
 
   @override
   String get catCreate => 'Créer';
-
-  @override
-  String get catSaveButton => 'Enregistrer';
 
   @override
   String get catEnterName => 'Entrez un nom de catégorie';
@@ -2467,16 +2386,7 @@ class SFr extends S {
       'Enregistrez une transaction fréquente pour la réutiliser rapidement.';
 
   @override
-  String get tmplTitleLabel => 'Titre';
-
-  @override
   String get tmplTitleRequired => 'Le titre est requis';
-
-  @override
-  String get tmplAmountLabel => 'Montant';
-
-  @override
-  String get tmplAccountLabel => 'Compte';
 
   @override
   String get tmplCategoryOptional => 'Catégorie (optionnel)';
@@ -2781,7 +2691,7 @@ class SFr extends S {
   String get settingsCustomizationSub => 'Thème, police, données, préférences';
 
   @override
-  String get settingsAbout => 'À propos de PocketPlan';
+  String get settingsAbout => 'À propos de BudgetSeal';
 
   @override
   String get themeLight => 'Clair';
@@ -2945,7 +2855,7 @@ class SFr extends S {
 
   @override
   String get syncShareDesc =>
-      'Partagez vos données PocketPlan avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.';
+      'Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.';
 
   @override
   String get syncTheirEmail => 'Leur adresse e-mail';
@@ -3252,7 +3162,7 @@ class SFr extends S {
 
   @override
   String get aboutShareText =>
-      'Découvrez PocketPlan — la budgétisation par enveloppes simplifiée !';
+      'Découvrez BudgetSeal — la budgétisation par enveloppes simplifiée !';
 
   @override
   String get aboutPrivacy =>
@@ -3297,7 +3207,7 @@ class SFr extends S {
   String get tileHelpGuide => 'Guide d\'aide';
 
   @override
-  String get settingsHelpSub => 'Comment utiliser PocketPlan';
+  String get settingsHelpSub => 'Comment utiliser BudgetSeal';
 
   @override
   String get tileTheme => 'Thème';
@@ -3585,7 +3495,7 @@ class SFr extends S {
 
   @override
   String syncShareInviteText(String code) {
-    return 'Rejoignez mon foyer PocketPlan ! Entrez ce code dans l\'application :\n$code';
+    return 'Rejoignez mon foyer BudgetSeal ! Entrez ce code dans l\'application :\n$code';
   }
 
   @override
@@ -3599,7 +3509,7 @@ class SFr extends S {
 
   @override
   String get privacyIntro =>
-      'PocketPlan est conçu avec votre vie privée comme principe fondamental. Vos données financières vous appartiennent — nous ne les collectons, stockons ou transmettons jamais à aucun serveur.';
+      'BudgetSeal est conçu avec votre vie privée comme principe fondamental. Vos données financières vous appartiennent — nous ne les collectons, stockons ou transmettons jamais à aucun serveur.';
 
   @override
   String get privacyDataStorageTitle => '1. Stockage des données';
@@ -3613,7 +3523,7 @@ class SFr extends S {
 
   @override
   String get privacyCloudSyncBody =>
-      'Si vous choisissez d\'activer la synchronisation cloud, vos données sont téléchargées sur votre compte Google Drive personnel ou un fournisseur de stockage de votre choix. PocketPlan n\'a pas accès à vos identifiants Google — l\'authentification est gérée par le système OAuth de Google.\n\nVous pouvez optionnellement chiffrer votre fichier de synchronisation avec le chiffrement AES-256 en utilisant un mot de passe que vous définissez.';
+      'Si vous choisissez d\'activer la synchronisation cloud, vos données sont téléchargées sur votre compte Google Drive personnel ou un fournisseur de stockage de votre choix. BudgetSeal n\'a pas accès à vos identifiants Google — l\'authentification est gérée par le système OAuth de Google.\n\nVous pouvez optionnellement chiffrer votre fichier de synchronisation avec le chiffrement AES-256 en utilisant un mot de passe que vous définissez.';
 
   @override
   String get privacyWebCompanionTitle => '3. Compagnon Web';
@@ -3627,7 +3537,7 @@ class SFr extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'PocketPlan n\'inclut aucun SDK d\'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d\'utilisation, identifiant d\'appareil ou métrique comportementale n\'est collectée.';
+      'BudgetSeal n\'inclut aucun SDK d\'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d\'utilisation, identifiant d\'appareil ou métrique comportementale n\'est collectée.';
 
   @override
   String get privacyPermissionsTitle => '5. Autorisations';
@@ -3658,42 +3568,42 @@ class SFr extends S {
 
   @override
   String get termsAcceptanceBody =>
-      'En utilisant PocketPlan, vous acceptez ces conditions. Si vous n\'êtes pas d\'accord, veuillez désinstaller l\'application.';
+      'En utilisant BudgetSeal, vous acceptez ces conditions. Si vous n\'êtes pas d\'accord, veuillez désinstaller l\'application.';
 
   @override
   String get termsIntendedUseTitle => '2. Utilisation prévue';
 
   @override
   String get termsIntendedUseBody =>
-      'PocketPlan est un outil de gestion financière personnelle pour la budgétisation individuelle et familiale. Il n\'est pas destiné à la comptabilité commerciale, la préparation fiscale ou les conseils financiers.';
+      'BudgetSeal est un outil de gestion financière personnelle pour la budgétisation individuelle et familiale. Il n\'est pas destiné à la comptabilité commerciale, la préparation fiscale ou les conseils financiers.';
 
   @override
   String get termsDataAccuracyTitle => '3. Exactitude des données';
 
   @override
   String get termsDataAccuracyBody =>
-      'Vous êtes responsable de l\'exactitude des données que vous saisissez. PocketPlan calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs.';
+      'Vous êtes responsable de l\'exactitude des données que vous saisissez. BudgetSeal calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs.';
 
   @override
   String get termsNoWarrantyTitle => '4. Sans garantie';
 
   @override
   String get termsNoWarrantyBody =>
-      'PocketPlan est fourni \"tel quel\" sans garantie d\'aucune sorte. Bien que nous nous efforcions d\'assurer la fiabilité, nous ne pouvons pas garantir que l\'application sera exempte d\'erreurs. Des sauvegardes régulières sont fortement recommandées.';
+      'BudgetSeal est fourni \"tel quel\" sans garantie d\'aucune sorte. Bien que nous nous efforcions d\'assurer la fiabilité, nous ne pouvons pas garantir que l\'application sera exempte d\'erreurs. Des sauvegardes régulières sont fortement recommandées.';
 
   @override
   String get termsLiabilityTitle => '5. Limitation de responsabilité';
 
   @override
   String get termsLiabilityBody =>
-      'Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l\'utilisation de PocketPlan.';
+      'Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l\'utilisation de BudgetSeal.';
 
   @override
   String get termsIPTitle => '6. Propriété intellectuelle';
 
   @override
   String get termsIPBody =>
-      'PocketPlan et son contenu original sont protégés par le droit d\'auteur. L\'application utilise des bibliothèques open source listées dans la section Licences.';
+      'BudgetSeal et son contenu original sont protégés par le droit d\'auteur. L\'application utilise des bibliothèques open source listées dans la section Licences.';
 
   @override
   String get termsChangesTitle => '7. Modifications';
@@ -3707,7 +3617,7 @@ class SFr extends S {
 
   @override
   String get termsContactBody =>
-      'Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d\'utilisation, contactez : samer@pocketplan.app';
+      'Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d\'utilisation, contactez : samer@budgetseal.app';
 
   @override
   String get healthTitle => 'Bilan de santé';
@@ -3802,7 +3712,7 @@ class SFr extends S {
   String get healthPurgeButton => 'Purger';
 
   @override
-  String get onboardWelcomeTitle => 'Pocket Plan';
+  String get onboardWelcomeTitle => 'BudgetSeal';
 
   @override
   String get onboardTagline => 'Donnez un but à chaque dollar.';
@@ -3909,7 +3819,7 @@ class SFr extends S {
       'Commencez à suivre vos dépenses.\\nVotre clarté financière commence maintenant.';
 
   @override
-  String get onboardStartUsing => 'Commencer à utiliser Pocket Plan';
+  String get onboardStartUsing => 'Commencer à utiliser BudgetSeal';
 
   @override
   String get onboardRestoreTitle => 'Restaurer depuis le cloud';
@@ -3926,7 +3836,7 @@ class SFr extends S {
 
   @override
   String get onboardJoinDesc =>
-      'Entrez le code d\'invitation partagé avec vous pour rejoindre un foyer PocketPlan existant.';
+      'Entrez le code d\'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.';
 
   @override
   String get onboardInviteCode => 'Code d\'invitation';
@@ -3946,10 +3856,10 @@ class SFr extends S {
 
   @override
   String get lockSetupReason =>
-      'Configurez un verrouillage d\'écran pour protéger Pocket Plan';
+      'Configurez un verrouillage d\'écran pour protéger BudgetSeal';
 
   @override
-  String get lockUnlockReason => 'Déverrouiller Pocket Plan';
+  String get lockUnlockReason => 'Déverrouiller BudgetSeal';
 
   @override
   String lockFailed(String error) {
@@ -4224,7 +4134,7 @@ class SFr extends S {
 
   @override
   String get wcIosWarning =>
-      'Gardez PocketPlan au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l\'écran l\'arrêtera.';
+      'Gardez BudgetSeal au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l\'écran l\'arrêtera.';
 
   @override
   String get wcNoWifiTitle => 'Pas de connexion WiFi';
@@ -4265,10 +4175,10 @@ class SFr extends S {
 
   @override
   String get wcForegroundChannelDesc =>
-      'Le serveur Compagnon Web PocketPlan est en marche';
+      'Le serveur Compagnon Web BudgetSeal est en marche';
 
   @override
-  String get webPageTitle => 'PocketPlan Web';
+  String get webPageTitle => 'BudgetSeal Web';
 
   @override
   String get webAuthSubtitle => 'Entrez votre PIN pour continuer';
@@ -4614,7 +4524,7 @@ class SFr extends S {
 
   @override
   String get webEnvEmptySub =>
-      'Les enveloppes sont gérées dans l\'application PocketPlan.';
+      'Les enveloppes sont gérées dans l\'application BudgetSeal.';
 
   @override
   String get webEnvUnallocated => 'Non affecté :';
@@ -4876,7 +4786,7 @@ class SFr extends S {
   }
 
   @override
-  String get notifReminderTitle => 'PocketPlan';
+  String get notifReminderTitle => 'BudgetSeal';
 
   @override
   String get notifReminder1 =>
@@ -4950,12 +4860,6 @@ class SFr extends S {
 
   @override
   String get nfNegativeMinus => 'Moins (-100 \$)';
-
-  @override
-  String get dateToday => 'Aujourd\'hui';
-
-  @override
-  String get dateYesterday => 'Hier';
 
   @override
   String get textScaleSmall => 'Petit';
@@ -5052,9 +4956,6 @@ class SFr extends S {
 
   @override
   String get defcatPersonalCare => 'Soins personnels';
-
-  @override
-  String get defcatIncome => 'Revenu';
 
   @override
   String get defcatSalary => 'Salaire';
@@ -5158,7 +5059,7 @@ class SFr extends S {
 
   @override
   String get filePickerTitle =>
-      'Sélectionnez le fichier de synchronisation PocketPlan';
+      'Sélectionnez le fichier de synchronisation BudgetSeal';
 
   @override
   String get filePickerNoPath =>
@@ -5374,20 +5275,6 @@ class SFr extends S {
   String get recurringFormTitleRequired => 'Le titre est requis';
 
   @override
-  String get recurringFormAmount => 'Montant';
-
-  @override
-  String get recurringFormAccount => 'Compte';
-
-  @override
-  String get recurringFormAccountRequired => 'Le compte est requis';
-
-  @override
-  String recurringFormStarts(String date) {
-    return 'Début : $date';
-  }
-
-  @override
   String recurringFormEnds(String date) {
     return 'Fin : $date';
   }
@@ -5535,12 +5422,6 @@ class SFr extends S {
   String get importColDescription => 'Description';
 
   @override
-  String get importColAmount => 'Montant';
-
-  @override
-  String get importColCategory => 'Catégorie';
-
-  @override
   String get objPaymentFailed => 'Échec du paiement. Veuillez réessayer.';
 
   @override
@@ -5569,12 +5450,6 @@ class SFr extends S {
   String objDeadlinePrefix(String date) {
     return 'Échéance : $date';
   }
-
-  @override
-  String get objSummaryCurrency => 'Devise';
-
-  @override
-  String get objSummaryDeadline => 'Échéance';
 
   @override
   String get objSummaryRemaining => 'Restant';
@@ -5623,7 +5498,7 @@ class SFr extends S {
   String get healthAutoAdjustment => 'Ajustement automatique du bilan de santé';
 
   @override
-  String get healthReportTitle => 'Rapport de santé PocketPlan';
+  String get healthReportTitle => 'Rapport de santé BudgetSeal';
 
   @override
   String healthAdjustmentsCreated(int count) {
@@ -5648,20 +5523,6 @@ class SFr extends S {
   @override
   String get catSheetNoCategories =>
       'Aucune catégorie pour le moment.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.';
-
-  @override
-  String get catSheetExpense => 'Dépense';
-
-  @override
-  String get catSheetIncome => 'Revenu';
-
-  @override
-  String get catSheetSearchHint => 'Rechercher des catégories...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count sous-catégories';
-  }
 
   @override
   String syncConnectedTo(String provider) {
@@ -5848,18 +5709,6 @@ class SFr extends S {
   }
 
   @override
-  String get plannedAccount => 'Compte';
-
-  @override
-  String get plannedCategory => 'Catégorie';
-
-  @override
-  String get plannedTitleHint => 'Titre';
-
-  @override
-  String get plannedNoteHint => 'Note (optionnel)';
-
-  @override
   String get plannedSelectAccount => 'Sélectionnez un compte';
 
   @override
@@ -5975,4 +5824,26 @@ class SFr extends S {
 
   @override
   String get upgradeRestoreNone => 'Aucun achat précédent trouvé.';
+
+  @override
+  String get catSheetSearchHint => 'Rechercher des catégories...';
+
+  @override
+  String catSheetSubcategories(int count) {
+    return '$count sous-catégories';
+  }
+
+  @override
+  String get objSummaryDeadline => 'Échéance';
+
+  @override
+  String get plannedNoteHint => 'Note (optionnel)';
+
+  @override
+  String get recurringFormAccountRequired => 'Le compte est requis';
+
+  @override
+  String recurringFormStarts(String date) {
+    return 'Début : $date';
+  }
 }

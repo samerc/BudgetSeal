@@ -149,7 +149,7 @@ class WebCompanionService {
     final result = await FlutterForegroundTask.startService(
       serviceId: 7432,
       serviceTypes: [ForegroundServiceTypes.dataSync],
-      notificationTitle: 'PocketPlan Web Companion',
+      notificationTitle: 'BudgetSeal Web Companion',
       notificationText: 'Running at http://$ip:7432',
       callback: startCallback,
     );
@@ -485,7 +485,7 @@ class _NoOpTaskHandler extends TaskHandler {
     // Refresh the notification periodically so Android knows the service
     // is still active and doesn't kill it when the screen is off.
     FlutterForegroundTask.updateService(
-      notificationTitle: 'PocketPlan Web Companion',
+      notificationTitle: 'BudgetSeal Web Companion',
       notificationText: 'Running · ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
     );
   }

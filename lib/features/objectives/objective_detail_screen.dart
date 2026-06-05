@@ -304,7 +304,7 @@ class _ObjectiveDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(tr.txDetailCategory, style: TextStyle(
+                          Text(tr.commonCategory, style: TextStyle(
                               fontSize: 17, fontWeight: FontWeight.w700,
                               color: tpColor)),
                           const SizedBox(height: 12),
@@ -609,7 +609,7 @@ class _ObjectiveDetailScreenState
                         : S.of(context).objBorrowedFrom('').trim(),
                     value: _contactCtrl.text,
                   ),
-                _SummaryRow(label: S.of(context).objSummaryCurrency, value: _currency),
+                _SummaryRow(label: S.of(context).commonCurrency, value: _currency),
                 if (_endDate != null)
                   _SummaryRow(
                     label: S.of(context).objSummaryDeadline,
@@ -873,7 +873,7 @@ class _ObjectiveDetailScreenState
         _FormCard(child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: CurrencyPickerField(
-            label: S.of(context).objSummaryCurrency,
+            label: S.of(context).commonCurrency,
             value: _currency,
             onChanged: (v) => setState(() => _currency = v),
           ),

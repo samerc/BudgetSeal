@@ -28,9 +28,9 @@ extension ColumnRoleLabel on ColumnRole {
       case ColumnRole.description:
         return S.of(context).importColDescription;
       case ColumnRole.amount:
-        return S.of(context).importColAmount;
+        return S.of(context).commonAmount;
       case ColumnRole.category:
-        return S.of(context).importColCategory;
+        return S.of(context).commonCategory;
     }
   }
 
@@ -644,9 +644,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                 if (dateCol != null)
                   _previewHeaderCell(S.of(context).importColDate),
                 _previewHeaderCell(S.of(context).importColDescription),
-                _previewHeaderCell(S.of(context).importColAmount),
+                _previewHeaderCell(S.of(context).commonAmount),
                 if (categoryCol != null)
-                  _previewHeaderCell(S.of(context).importColCategory),
+                  _previewHeaderCell(S.of(context).commonCategory),
               ],
             ),
           ),

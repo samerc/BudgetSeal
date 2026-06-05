@@ -13,9 +13,9 @@ class NotificationService {
   /// Expose the plugin so DailyReminderService can share the same instance.
   static FlutterLocalNotificationsPlugin get plugin => _plugin;
 
-  static const _channelId = 'pocketplan_alerts';
-  static const _channelName = 'PocketPlan Alerts';
-  static const _channelDesc = 'Low envelope and upcoming bill alerts';
+  static const _channelId = 'budgetseal_alerts';
+  static const _channelName = 'BudgetSeal Alerts';
+  static const _channelDesc = 'Low envelope and upcoming bill alerts from BudgetSeal';
 
   static const _envelopeNotifId = 1001;
   static const _billNotifId = 1002;

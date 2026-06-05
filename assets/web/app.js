@@ -610,7 +610,7 @@ function exportCSV() {
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `pocketplan-transactions-${todayISO()}.csv`;
+  a.download = `budgetseal-transactions-${todayISO()}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
   toast(t('web_tx_csv_exported'));

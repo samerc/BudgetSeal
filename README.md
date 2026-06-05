@@ -1,10 +1,10 @@
-# PocketPlan
+# BudgetSeal
 
 A YNAB-style envelope budgeting app for Android and iOS. Offline-first, built with Flutter.
 
-## What is PocketPlan?
+## What is BudgetSeal?
 
-PocketPlan helps you take control of your money using the **envelope budgeting** method. Every dollar gets a job: income flows into your accounts, you allocate funds into envelopes (Groceries, Rent, Savings, etc.), and spending draws from the right envelope. You always know exactly where your money is.
+BudgetSeal helps you take control of your money using the **envelope budgeting** method. Every dollar gets a job: income flows into your accounts, you allocate funds into envelopes (Groceries, Rent, Savings, etc.), and spending draws from the right envelope. You always know exactly where your money is.
 
 ### Key Features
 
@@ -66,8 +66,8 @@ All money writes go through the `AllocationEngine`. Balances are computed dynami
 
 ```bash
 # Clone the repo
-git clone https://github.com/samerc/PocketPlan.git
-cd PocketPlan
+git clone https://github.com/samerc/BudgetSeal.git
+cd BudgetSeal
 
 # Install dependencies
 flutter pub get

@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pocketplan/core/database/app_database.dart';
-import 'package:pocketplan/core/database/daos/ledger_dao.dart';
-import 'package:pocketplan/core/engine/allocation_engine.dart';
+import 'package:budgetseal/core/database/app_database.dart';
+import 'package:budgetseal/core/database/daos/ledger_dao.dart';
+import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -262,16 +262,18 @@ void main() {
       // Delete the transaction.
       await engine.deleteTransaction(txId);
 
-      // Everything should be gone.
+      // Transaction should be soft-deleted (deleted = true).
       tx = await (db.select(db.transactions)
             ..where((t) => t.id.equals(txId)))
           .getSingleOrNull();
-      expect(tx, isNull, reason: 'Transaction should be deleted');
+      expect(tx, isNotNull, reason: 'Transaction row should still exist');
+      expect(tx!.deleted, isTrue, reason: 'Transaction should be soft-deleted');
 
+      // Lines are preserved for sync/audit (only ledger entries are removed).
       lines = await (db.select(db.transactionLines)
             ..where((l) => l.transactionId.equals(txId)))
           .get();
-      expect(lines, isEmpty, reason: 'Transaction lines should be deleted');
+      expect(lines, hasLength(1), reason: 'Transaction lines should be preserved');
 
       ledger = await (db.select(db.allocationLedger)
             ..where((l) => l.sourceTransactionId.equals(txId)))
@@ -538,7 +540,7 @@ void main() {
 
       // Allocation balance should be: 10 (initial fund) + 40 (auto-cover) - 50 (expense) = 0
       final bal = await ledgerDao.getBalanceByCurrency(allocationId);
-      expect(bal['USD'], closeTo(0.0, 0.001));
+      expect(bal['USD'] ?? 0.0, closeTo(0.0, 0.001));
     });
   });
 

@@ -1,4 +1,4 @@
-package com.pocketplan.pocketplan
+package com.budgetseal.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

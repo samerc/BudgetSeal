@@ -162,7 +162,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           },
           loading: () => const SkeletonList(),
           error: (e, _) => ErrorRetry(
-            message: S.of(context).acctCouldntLoad,
+            message: S.of(context).commonCouldntLoadData,
             details: '$e',
             onRetry: () => ref.invalidate(accountsWithBalanceProvider),
           ),

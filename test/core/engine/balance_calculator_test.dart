@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pocketplan/core/database/app_database.dart';
-import 'package:pocketplan/core/engine/allocation_engine.dart';
-import 'package:pocketplan/core/engine/balance_calculator.dart';
+import 'package:budgetseal/core/database/app_database.dart';
+import 'package:budgetseal/core/engine/allocation_engine.dart';
+import 'package:budgetseal/core/engine/balance_calculator.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {

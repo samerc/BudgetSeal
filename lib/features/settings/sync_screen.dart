@@ -477,7 +477,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
     if (_inviteCode == null) return;
     SharePlus.instance.share(
       ShareParams(
-        text: 'Join my PocketPlan household! Enter this code in the app:\n$_inviteCode',
+        text: 'Join my BudgetSeal household! Enter this code in the app:\n$_inviteCode',
       ),
     );
   }

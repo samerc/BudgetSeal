@@ -1,4 +1,4 @@
-# PocketPlan Manual Test Script
+# BudgetSeal Manual Test Script
 
 Run through each section before every release build. Mark pass/fail for each item.
 

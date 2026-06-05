@@ -53,7 +53,7 @@ class AboutScreen extends ConsumerWidget {
 
             // ── Name + tagline ──
             Text(
-              'PocketPlan',
+              'BudgetSeal',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
@@ -110,7 +110,7 @@ class AboutScreen extends ConsumerWidget {
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('samer@pocketplan.app'),
+                          content: Text('samer@budgetseal.app'),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -135,7 +135,7 @@ class AboutScreen extends ConsumerWidget {
                 TextButton(
                   onPressed: () => showLicensePage(
                     context: context,
-                    applicationName: 'PocketPlan',
+                    applicationName: 'BudgetSeal',
                     applicationVersion: 'v$appVersion',
                     applicationLegalese: l.aboutLegalese(DateTime.now().year),
                   ),

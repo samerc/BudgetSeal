@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cloud_provider.dart';
 
-const _syncFileName = 'PocketPlan_Sync.json';
+const _syncFileName = 'BudgetSeal_Sync.json';
 const _prefKeyPath = 'file_sync_path';
 
 /// File-based sync adapter. User picks a file from the system file picker,
@@ -34,7 +34,7 @@ class FilePickerProvider implements CloudProvider {
     // Let user pick or create a file
     final result = await FilePicker.pickFiles(
       type: FileType.any,
-      dialogTitle: 'Select PocketPlan Sync File',
+      dialogTitle: 'Select BudgetSeal Sync File',
     );
 
     if (result != null && result.files.isNotEmpty && result.files.single.path != null) {

@@ -252,7 +252,7 @@ class _AllocationDetailScreenState
                     Icon(Icons.delete_forever_rounded,
                         size: 18, color: AppColors.overspent),
                     const SizedBox(width: 10),
-                    Text(l.allocDeleteMenu,
+                    Text(l.commonDelete,
                         style: TextStyle(color: AppColors.overspent)),
                   ]),
                 ),
@@ -611,7 +611,7 @@ class _AllocationDetailScreenState
                   Expanded(
                     flex: 2,
                     child: CurrencyPickerField(
-                      label: l.allocCurrency,
+                      label: l.commonCurrency,
                       value: _targetCurrencyController.text,
                       onChanged: (v) {
                         setState(() => _targetCurrencyController.text = v);
@@ -1045,7 +1045,7 @@ class _AllocationDetailScreenState
                       child: CalculatorAmountField(
                         value: amount,
                         onChanged: (v) => setSheetState(() => amount = v),
-                        hintText: tr.allocAmount,
+                        hintText: tr.commonAmount,
                         fontSize: 16,
                         style: TextStyle(
                           fontSize: 16,

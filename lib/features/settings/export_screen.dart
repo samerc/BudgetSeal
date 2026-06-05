@@ -99,12 +99,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       final csv = const CsvEncoder().convert(rows);
       final dir = await getTemporaryDirectory();
       final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final file = File('${dir.path}/pocketplan_export_$dateStr.csv');
+      final file = File('${dir.path}/budgetseal_export_$dateStr.csv');
       await file.writeAsString(csv);
 
       if (mounted) {
         await SharePlus.instance.share(
-          ShareParams(files: [XFile(file.path)], text: 'Pocket Plan export'),
+          ShareParams(files: [XFile(file.path)], text: 'BudgetSeal export'),
         );
       }
 

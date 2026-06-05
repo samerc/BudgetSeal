@@ -124,7 +124,12 @@
   "@commonCouldntLoadAccounts": {
     "description": "ErrorRetry message"
   },
-  "appName": "Pocket Plan",
+  "commonAccount": "حساب",
+  "commonAmount": "المبلغ",
+  "commonCategory": "فئة",
+  "commonCurrency": "العملة",
+  "commonTitle": "العنوان",
+  "appName": "BudgetSeal",
   "@appName": {
     "description": "MaterialApp title / splash / lock"
   },
@@ -220,7 +225,7 @@
   "@typeAll": {
     "description": "Filter chip"
   },
-  "dashboardWelcomeTitle": "مرحباً بك في PocketPlan!",
+  "dashboardWelcomeTitle": "مرحباً بك في BudgetSeal!",
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
@@ -232,7 +237,7 @@
   "@dashboardHouseholdLabel": {
     "description": "Header subtitle"
   },
-  "dashboardDefaultName": "PocketPlan",
+  "dashboardDefaultName": "BudgetSeal",
   "@dashboardDefaultName": {
     "description": "Fallback household name"
   },
@@ -243,18 +248,6 @@
   "dashboardSearchTooltip": "بحث",
   "@dashboardSearchTooltip": {
     "description": "Search button tooltip"
-  },
-  "dashboardError": "تعذّر تحميل بياناتك",
-  "@dashboardError": {
-    "description": "Error retry message"
-  },
-  "dashboardQuickExpense": "مصروف",
-  "@dashboardQuickExpense": {
-    "description": "Quick action button"
-  },
-  "dashboardQuickIncome": "الدخل",
-  "@dashboardQuickIncome": {
-    "description": "Quick action button"
   },
   "dashboardQuickTransfer": "تحويل",
   "@dashboardQuickTransfer": {
@@ -307,10 +300,6 @@
   "dashboardTotalAcrossAccounts": "الإجمالي عبر جميع الحسابات",
   "@dashboardTotalAcrossAccounts": {
     "description": "Net worth subtitle"
-  },
-  "dashboardLabelIncome": "الدخل",
-  "@dashboardLabelIncome": {
-    "description": "Mini stat label"
   },
   "dashboardLabelExpenses": "مصاريف",
   "@dashboardLabelExpenses": {
@@ -764,14 +753,6 @@
       }
     }
   },
-  "txTodayPrefix": "اليوم",
-  "@txTodayPrefix": {
-    "description": "Date header"
-  },
-  "txYesterdayPrefix": "أمس",
-  "@txYesterdayPrefix": {
-    "description": "Date header"
-  },
   "txNItems": "{count} عناصر",
   "@txNItems": {
     "description": "Multi-line display",
@@ -796,10 +777,6 @@
   },
   "txContextDuplicate": "تكرار",
   "@txContextDuplicate": {
-    "description": "Context menu"
-  },
-  "txContextDelete": "حذف",
-  "@txContextDelete": {
     "description": "Context menu"
   },
   "txDeleteTitle": "حذف المعاملة؟",
@@ -839,10 +816,6 @@
   "txFormNewTitle": "معاملة جديدة",
   "@txFormNewTitle": {
     "description": "AppBar title creating"
-  },
-  "txFormSave": "حفظ",
-  "@txFormSave": {
-    "description": "Save button"
   },
   "txFormNoteHint": "أضف ملاحظة…",
   "@txFormNoteHint": {
@@ -1018,16 +991,8 @@
   "@txDetailAccounts": {
     "description": "Detail label (multi)"
   },
-  "txDetailAccount": "الحساب",
-  "@txDetailAccount": {
-    "description": "Detail label (single)"
-  },
   "txDetailNote": "ملاحظة",
   "@txDetailNote": {
-    "description": "Detail label"
-  },
-  "txDetailCategory": "الفئة",
-  "@txDetailCategory": {
     "description": "Detail label"
   },
   "txDetailUnknownAccount": "غير معروف",
@@ -1112,10 +1077,6 @@
   "@txAfTransferNoteHint": {
     "description": "Transfer note hint"
   },
-  "txAfTitleHint": "العنوان",
-  "@txAfTitleHint": {
-    "description": "Title hint"
-  },
   "txAfEnterAmountButton": "إدخال المبلغ",
   "@txAfEnterAmountButton": {
     "description": "Button"
@@ -1147,10 +1108,6 @@
   "txAfToAccount": "إلى حساب",
   "@txAfToAccount": {
     "description": "Account label (transfer)"
-  },
-  "txAfAccount": "الحساب",
-  "@txAfAccount": {
-    "description": "Account label"
   },
   "txAfTapToSelect": "اضغط للاختيار",
   "@txAfTapToSelect": {
@@ -1235,10 +1192,6 @@
   "@txAfAddTransaction": {
     "description": "Save button"
   },
-  "catSheetTitle": "الفئة",
-  "@catSheetTitle": {
-    "description": "Sheet title"
-  },
   "catSheetNew": "جديد",
   "@catSheetNew": {
     "description": "New button"
@@ -1268,10 +1221,6 @@
       }
     }
   },
-  "currencySheetTitle": "العملة",
-  "@currencySheetTitle": {
-    "description": "Sheet title"
-  },
   "currencyYourAccounts": "حساباتك",
   "@currencyYourAccounts": {
     "description": "Section header"
@@ -1287,10 +1236,6 @@
   "txWidgetSelectAccount": "اختر حساباً",
   "@txWidgetSelectAccount": {
     "description": "Dropdown hint"
-  },
-  "txWidgetCategory": "الفئة",
-  "@txWidgetCategory": {
-    "description": "Category pill label"
   },
   "txWidgetItemNote": "ملاحظة العنصر…",
   "@txWidgetItemNote": {
@@ -1392,10 +1337,6 @@
   "@billEnterAmount": {
     "description": "OCR amount dialog title"
   },
-  "billAmount": "المبلغ",
-  "@billAmount": {
-    "description": "Amount label"
-  },
   "billKeepAsOne": "إبقاء كعنصر واحد",
   "@billKeepAsOne": {
     "description": "Dialog button"
@@ -1439,10 +1380,6 @@
   "billTipAmount": "مبلغ البقشيش",
   "@billTipAmount": {
     "description": "Tip field label"
-  },
-  "billCurrency": "العملة",
-  "@billCurrency": {
-    "description": "Section title"
   },
   "billBillCurrency": "عملة الفاتورة",
   "@billBillCurrency": {
@@ -1610,10 +1547,6 @@
   "@allocArchiveMenu": {
     "description": "Menu item"
   },
-  "allocDeleteMenu": "حذف",
-  "@allocDeleteMenu": {
-    "description": "Menu item"
-  },
   "allocCreateButtonDetail": "إنشاء ظرف",
   "@allocCreateButtonDetail": {
     "description": "Bottom button"
@@ -1734,10 +1667,6 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocCurrencyLabel": "العملة",
-  "@allocCurrencyLabel": {
-    "description": "Field label"
-  },
   "allocLinkedCategories": "الفئات المرتبطة",
   "@allocLinkedCategories": {
     "description": "Section header"
@@ -1769,10 +1698,6 @@
   "allocFromUnallocated": "من رصيدك غير الموزع",
   "@allocFromUnallocated": {
     "description": "Fund sheet subtitle"
-  },
-  "allocAmountHint": "المبلغ",
-  "@allocAmountHint": {
-    "description": "Fund field hint"
   },
   "allocOverfundingTitle": "تمويل زائد",
   "@allocOverfundingTitle": {
@@ -2021,10 +1946,6 @@
   "acctNewTitle": "حساب جديد",
   "@acctNewTitle": {
     "description": "AppBar title"
-  },
-  "acctFallbackName": "الحساب",
-  "@acctFallbackName": {
-    "description": "Fallback"
   },
   "acctTypeCash": "نقدي",
   "@acctTypeCash": {
@@ -2358,21 +2279,9 @@
   "@tmplNewDesc": {
     "description": "Sheet description"
   },
-  "tmplTitleLabel": "العنوان",
-  "@tmplTitleLabel": {
-    "description": "Field label"
-  },
   "tmplTitleRequired": "العنوان مطلوب",
   "@tmplTitleRequired": {
     "description": "Validation error"
-  },
-  "tmplAmountLabel": "المبلغ",
-  "@tmplAmountLabel": {
-    "description": "Field label"
-  },
-  "tmplAccountLabel": "الحساب",
-  "@tmplAccountLabel": {
-    "description": "Field label"
   },
   "tmplCategoryOptional": "الفئة (اختياري)",
   "@tmplCategoryOptional": {
@@ -2774,7 +2683,7 @@
   "@settingsCustomizationSub": {
     "description": "Tile subtitle"
   },
-  "settingsAbout": "حول PocketPlan",
+  "settingsAbout": "حول BudgetSeal",
   "@settingsAbout": {
     "description": "Tile title"
   },
@@ -2978,7 +2887,7 @@
   "@syncDisconnectMsg": {
     "description": "Dialog content"
   },
-  "syncShareDesc": "شارك بيانات PocketPlan مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.",
+  "syncShareDesc": "شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.",
   "@syncShareDesc": {
     "description": "Sheet description"
   },
@@ -3359,7 +3268,7 @@
   "@aboutContact": {
     "description": "Action"
   },
-  "aboutShareText": "جرب PocketPlan — ميزانية الأظرف ببساطة!",
+  "aboutShareText": "جرب BudgetSeal — ميزانية الأظرف ببساطة!",
   "@aboutShareText": {
     "description": "Share text"
   },
@@ -3393,7 +3302,7 @@
   "@tileBillSplitter": { "description": "Tile title" },
   "tileHelpGuide": "دليل المساعدة",
   "@tileHelpGuide": { "description": "Tile title" },
-  "settingsHelpSub": "كيفية استخدام PocketPlan",
+  "settingsHelpSub": "كيفية استخدام BudgetSeal",
   "@settingsHelpSub": { "description": "Tile subtitle" },
   "tileTheme": "المظهر",
   "@tileTheme": { "description": "Tile title" },
@@ -3565,7 +3474,7 @@
   "@backupBannerDaysAgo": { "description": "Banner message", "placeholders": { "days": { "type": "int" } } },
   "backupNowButton": "نسخ احتياطي الآن",
   "@backupNowButton": { "description": "Button" },
-  "syncShareInviteText": "انضم إلى أسرتي في PocketPlan! أدخل هذا الرمز في التطبيق:\n{code}",
+  "syncShareInviteText": "انضم إلى أسرتي في BudgetSeal! أدخل هذا الرمز في التطبيق:\n{code}",
   "@syncShareInviteText": { "description": "Share invite text", "placeholders": { "code": { "type": "String" } } },
   "privacyTermsTitle": "الخصوصية والشروط",
   "@privacyTermsTitle": { "description": "AppBar title" },
@@ -3573,7 +3482,7 @@
   "@privacyPolicyTitle": { "description": "Section title" },
   "privacyLastUpdated": "آخر تحديث: مايو 2026",
   "@privacyLastUpdated": { "description": "Date" },
-  "privacyIntro": "تم تصميم PocketPlan مع جعل خصوصيتك مبدأ أساسي. بياناتك المالية ملكك — نحن لا نجمع أو نخزن أو ننقلها إلى أي خادم.",
+  "privacyIntro": "تم تصميم BudgetSeal مع جعل خصوصيتك مبدأ أساسي. بياناتك المالية ملكك — نحن لا نجمع أو نخزن أو ننقلها إلى أي خادم.",
   "@privacyIntro": { "description": "Introduction" },
   "privacyDataStorageTitle": "1. تخزين البيانات",
   "@privacyDataStorageTitle": { "description": "Heading" },
@@ -3581,7 +3490,7 @@
   "@privacyDataStorageBody": { "description": "Body" },
   "privacyCloudSyncTitle": "2. المزامنة السحابية (اختيارية)",
   "@privacyCloudSyncTitle": { "description": "Heading" },
-  "privacyCloudSyncBody": "إذا اخترت تفعيل المزامنة السحابية، يتم رفع بياناتك إلى حسابك الشخصي على Google Drive أو مزود تخزين ملفات تختاره. PocketPlan لا يملك وصولاً إلى بيانات اعتماد حسابك على Google — تتم المصادقة عبر نظام OAuth من Google.\n\nيمكنك اختيارياً تشفير ملف المزامنة بتشفير AES-256 باستخدام كلمة مرور تحددها. يتم تخزين كلمة المرور فقط على جهازك في التخزين الآمن.",
+  "privacyCloudSyncBody": "إذا اخترت تفعيل المزامنة السحابية، يتم رفع بياناتك إلى حسابك الشخصي على Google Drive أو مزود تخزين ملفات تختاره. BudgetSeal لا يملك وصولاً إلى بيانات اعتماد حسابك على Google — تتم المصادقة عبر نظام OAuth من Google.\n\nيمكنك اختيارياً تشفير ملف المزامنة بتشفير AES-256 باستخدام كلمة مرور تحددها. يتم تخزين كلمة المرور فقط على جهازك في التخزين الآمن.",
   "@privacyCloudSyncBody": { "description": "Body" },
   "privacyWebCompanionTitle": "3. الرفيق الويب",
   "@privacyWebCompanionTitle": { "description": "Heading" },
@@ -3589,7 +3498,7 @@
   "@privacyWebCompanionBody": { "description": "Body" },
   "privacyAnalyticsTitle": "4. التحليلات والتتبع",
   "@privacyAnalyticsTitle": { "description": "Heading" },
-  "privacyAnalyticsBody": "PocketPlan لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.",
+  "privacyAnalyticsBody": "BudgetSeal لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.",
   "@privacyAnalyticsBody": { "description": "Body" },
   "privacyPermissionsTitle": "5. الأذونات",
   "@privacyPermissionsTitle": { "description": "Heading" },
@@ -3607,27 +3516,27 @@
   "@termsOfUseTitle": { "description": "Section title" },
   "termsAcceptanceTitle": "1. القبول",
   "@termsAcceptanceTitle": { "description": "Heading" },
-  "termsAcceptanceBody": "باستخدام PocketPlan، فإنك توافق على هذه الشروط. إذا كنت لا توافق، يرجى إلغاء تثبيت التطبيق.",
+  "termsAcceptanceBody": "باستخدام BudgetSeal، فإنك توافق على هذه الشروط. إذا كنت لا توافق، يرجى إلغاء تثبيت التطبيق.",
   "@termsAcceptanceBody": { "description": "Body" },
   "termsIntendedUseTitle": "2. الاستخدام المقصود",
   "@termsIntendedUseTitle": { "description": "Heading" },
-  "termsIntendedUseBody": "PocketPlan هو أداة لإدارة التمويل الشخصي للميزانية الفردية والأسرية. لا يُقصد منه المحاسبة التجارية أو إعداد الضرائب أو المشورة المالية.",
+  "termsIntendedUseBody": "BudgetSeal هو أداة لإدارة التمويل الشخصي للميزانية الفردية والأسرية. لا يُقصد منه المحاسبة التجارية أو إعداد الضرائب أو المشورة المالية.",
   "@termsIntendedUseBody": { "description": "Body" },
   "termsDataAccuracyTitle": "3. دقة البيانات",
   "@termsDataAccuracyTitle": { "description": "Heading" },
-  "termsDataAccuracyBody": "أنت مسؤول عن دقة البيانات التي تدخلها. يحسب PocketPlan الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.",
+  "termsDataAccuracyBody": "أنت مسؤول عن دقة البيانات التي تدخلها. يحسب BudgetSeal الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.",
   "@termsDataAccuracyBody": { "description": "Body" },
   "termsNoWarrantyTitle": "4. بدون ضمان",
   "@termsNoWarrantyTitle": { "description": "Heading" },
-  "termsNoWarrantyBody": "يتم توفير PocketPlan \"كما هو\" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.",
+  "termsNoWarrantyBody": "يتم توفير BudgetSeal \"كما هو\" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.",
   "@termsNoWarrantyBody": { "description": "Body" },
   "termsLiabilityTitle": "5. تحديد المسؤولية",
   "@termsLiabilityTitle": { "description": "Heading" },
-  "termsLiabilityBody": "لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام PocketPlan.",
+  "termsLiabilityBody": "لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام BudgetSeal.",
   "@termsLiabilityBody": { "description": "Body" },
   "termsIPTitle": "6. الملكية الفكرية",
   "@termsIPTitle": { "description": "Heading" },
-  "termsIPBody": "PocketPlan ومحتواه الأصلي محمي بحقوق النشر. يستخدم التطبيق مكتبات مفتوحة المصدر مدرجة في قسم التراخيص.",
+  "termsIPBody": "BudgetSeal ومحتواه الأصلي محمي بحقوق النشر. يستخدم التطبيق مكتبات مفتوحة المصدر مدرجة في قسم التراخيص.",
   "@termsIPBody": { "description": "Body" },
   "termsChangesTitle": "7. التغييرات",
   "@termsChangesTitle": { "description": "Heading" },
@@ -3635,7 +3544,7 @@
   "@termsChangesBody": { "description": "Body" },
   "termsContactTitle": "8. الاتصال",
   "@termsContactTitle": { "description": "Heading" },
-  "termsContactBody": "للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: samer@pocketplan.app",
+  "termsContactBody": "للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: samer@budgetseal.app",
   "@termsContactBody": { "description": "Body" },
   "healthTitle": "فحص السلامة",
   "@healthTitle": {
@@ -3757,7 +3666,7 @@
   "@healthPurgeButton": {
     "description": "Button"
   },
-  "onboardWelcomeTitle": "Pocket Plan",
+  "onboardWelcomeTitle": "BudgetSeal",
   "@onboardWelcomeTitle": {
     "description": "Welcome page title"
   },
@@ -3893,7 +3802,7 @@
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
-  "onboardStartUsing": "ابدأ استخدام Pocket Plan",
+  "onboardStartUsing": "ابدأ استخدام BudgetSeal",
   "@onboardStartUsing": {
     "description": "Button"
   },
@@ -3913,7 +3822,7 @@
   "@onboardPickFile": {
     "description": "Button"
   },
-  "onboardJoinDesc": "أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة PocketPlan موجودة.",
+  "onboardJoinDesc": "أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.",
   "@onboardJoinDesc": {
     "description": "Sheet description"
   },
@@ -3937,11 +3846,11 @@
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
-  "lockSetupReason": "أعدّ قفل الشاشة لحماية Pocket Plan",
+  "lockSetupReason": "أعدّ قفل الشاشة لحماية BudgetSeal",
   "@lockSetupReason": {
     "description": "Biometric reason"
   },
-  "lockUnlockReason": "فتح Pocket Plan",
+  "lockUnlockReason": "فتح BudgetSeal",
   "@lockUnlockReason": {
     "description": "Biometric reason"
   },
@@ -4300,7 +4209,7 @@
   "@wcPinUpdated": {
     "description": "Snackbar"
   },
-  "wcIosWarning": "أبقِ PocketPlan في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.",
+  "wcIosWarning": "أبقِ BudgetSeal في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.",
   "@wcIosWarning": {
     "description": "Warning banner"
   },
@@ -4348,11 +4257,11 @@
   "@wcForegroundChannel": {
     "description": "Notification channel name"
   },
-  "wcForegroundChannelDesc": "خادم المرافق الإلكتروني PocketPlan يعمل",
+  "wcForegroundChannelDesc": "خادم المرافق الإلكتروني BudgetSeal يعمل",
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
   },
-  "webPageTitle": "PocketPlan Web",
+  "webPageTitle": "BudgetSeal Web",
   "@webPageTitle": {
     "description": "Browser tab title"
   },
@@ -4825,7 +4734,7 @@
   "@webEnvEmptyTitle": {
     "description": "Empty title"
   },
-  "webEnvEmptySub": "الأظرف تُدار من تطبيق PocketPlan.",
+  "webEnvEmptySub": "الأظرف تُدار من تطبيق BudgetSeal.",
   "@webEnvEmptySub": {
     "description": "Empty subtitle"
   },
@@ -5195,7 +5104,7 @@
       "days": { "type": "String" }
     }
   },
-  "notifReminderTitle": "PocketPlan",
+  "notifReminderTitle": "BudgetSeal",
   "@notifReminderTitle": {
     "description": "Notification title"
   },
@@ -5286,14 +5195,6 @@
   "nfNegativeMinus": "سالب (-$100)",
   "@nfNegativeMinus": {
     "description": "Option"
-  },
-  "dateToday": "اليوم",
-  "@dateToday": {
-    "description": "Smart date prefix"
-  },
-  "dateYesterday": "أمس",
-  "@dateYesterday": {
-    "description": "Smart date prefix"
   },
   "textScaleSmall": "صغير",
   "@textScaleSmall": {
@@ -5421,10 +5322,6 @@
   },
   "defcatPersonalCare": "عناية شخصية",
   "@defcatPersonalCare": {
-    "description": "Default category"
-  },
-  "defcatIncome": "الدخل",
-  "@defcatIncome": {
     "description": "Default category"
   },
   "defcatSalary": "راتب",
@@ -5556,7 +5453,7 @@
   "@googleNotConnected": {
     "description": "Error"
   },
-  "filePickerTitle": "اختر ملف مزامنة PocketPlan",
+  "filePickerTitle": "اختر ملف مزامنة BudgetSeal",
   "@filePickerTitle": {
     "description": "Dialog title"
   },
@@ -5632,7 +5529,6 @@
   "allocTargetOptional": "الهدف (اختياري)",
   "allocMonthlyBudgetDesc": "كم تريد أن تنفق من هذا الظرف كل شهر؟",
   "allocTargetDesc": "حدد مبلغاً مستهدفاً، أو اتركه صفراً للادخار المفتوح.",
-  "allocCurrency": "العملة",
   "allocLinkedCategoriesSection": "الفئات المرتبطة",
   "allocLinkedCategoriesDesc": "المصاريف بهذه الفئات ستُخصم من هذا الظرف.",
   "allocNoCategoriesLinked": "لا فئات مرتبطة. اضغط + لربط الفئات حتى تُخصم المصاريف من هذا الظرف.",
@@ -5641,7 +5537,6 @@
   "allocAmountLeft": "{amount} متبقٍّ",
   "allocFund": "تمويل",
   "allocFundEnvelope": "تمويل {name}",
-  "allocAmount": "المبلغ",
   "allocOverFundingTitle": "تمويل زائد",
   "allocOverFundingMsg": "أنت توزع {deficit} أكثر من رصيدك غير الموزع المتاح ({available}).\n\nسيصبح رصيدك غير الموزع سالباً. المتابعة؟",
   "allocFundedNote": "موّل من غير الموزع",
@@ -5672,7 +5567,6 @@
   "allocDeleteError": "تعذّر الحذف. حاول مجدداً.",
   "allocEnvelopeCreated": "تم إنشاء الظرف",
   "allocEnvelopeUpdated": "تم تحديث الظرف",
-  "allocCouldntLoad": "تعذّر تحميل بياناتك",
   "allocGotIt": "فهمت",
   "allocBaseCurrencyOnly": "أظرف {currency} فقط · {count} بعملات أخرى",
   "allocHideOtherCurrencies": "إخفاء العملات الأخرى",
@@ -5709,7 +5603,6 @@
   "acctUnarchiveMsg": "استعادة \"{name}\" إلى حساباتك النشطة؟",
   "acctUnarchive": "إلغاء الأرشفة",
   "acctUnarchived": "تم إلغاء أرشفة {name}",
-  "acctCouldntLoad": "تعذّر تحميل بياناتك",
   "acctCurrentBalance": "الرصيد الحالي",
   "acctBackFromTrip": "عدت من رحلتك؟",
   "acctConvertBackDesc": "تحويل رصيد {currency} المتبقي وإغلاق محفظة السفر هذه.",
@@ -5724,7 +5617,6 @@
   "acctDecimalAuto": "تلقائي ({count})",
   "acctOpeningBalance": "الرصيد الافتتاحي",
   "acctCreateAccount": "إنشاء حساب",
-  "acctSave": "حفظ",
   "acctRecentTransactions": "المعاملات الأخيرة",
   "acctNoTransactions": "لا معاملات بعد",
   "acctAdjustDesc": "أدخل الرصيد الفعلي لهذا الحساب. سيتم إنشاء معاملة تعديل للفرق.",
@@ -5754,8 +5646,6 @@
   "catIncomeCount": "{count} دخل",
   "catSearchHint": "البحث في الفئات...",
   "catAll": "الكل",
-  "catExpense": "مصروف",
-  "catIncome": "دخل",
   "catNoYet": "لا فئات بعد",
   "catTapPlus": "اضغط + لإنشاء واحدة",
   "catNoMatch": "لا فئات مطابقة",
@@ -5766,7 +5656,6 @@
   "catEdit": "تعديل",
   "catArchive": "أرشفة",
   "catUnarchive": "إلغاء الأرشفة",
-  "catDelete": "حذف",
   "catRestored": "تم استعادة الفئة",
   "catArchived": "تم أرشفة الفئة",
   "catDeleteTitle": "حذف الفئة",
@@ -5776,10 +5665,8 @@
   "catEditTitle": "تعديل الفئة",
   "catName": "الاسم",
   "catParent": "الفئة الأم",
-  "catAccount": "الحساب",
   "catNone": "لا شيء",
   "catCreate": "إنشاء",
-  "catSaveButton": "حفظ",
   "catEnterName": "أدخل اسم الفئة",
   "catCreated": "تم إنشاء الفئة",
   "catUpdated": "تم تحديث الفئة",
@@ -5820,7 +5707,6 @@
   "txTransactionDeleted": "تم حذف المعاملة",
   "txUndoAction": "تراجع",
   "txNewTransactionSheet": "معاملة جديدة",
-  "txCouldntLoad": "تعذّر تحميل بياناتك",
   "txCouldNotLoad": "تعذّر تحميل المعاملة",
   "txAfMixedContent": "سيتم إنشاء {count} معاملات مترابطة:\n\n{summary}\n\nستظهر كمعاملات منفصلة ولكن مرتبطة ببعضها.",
   "txAfAnotherWithCount": "إضافة عنصر آخر ({count} عناصر · {total})",
@@ -5846,8 +5732,6 @@
   "recurringEditTitle": "تعديل المعاملة المتكررة",
   "recurringFormTitleHint": "العنوان (مثلاً: إيجار، راتب)",
   "recurringFormTitleRequired": "العنوان مطلوب",
-  "recurringFormAmount": "المبلغ",
-  "recurringFormAccount": "الحساب",
   "recurringFormAccountRequired": "الحساب مطلوب",
   "recurringFormStarts": "تبدأ: {date}",
   "recurringFormEnds": "تنتهي: {date}",
@@ -5940,10 +5824,6 @@
   "@importColDate": { "description": "Column role label" },
   "importColDescription": "الوصف",
   "@importColDescription": { "description": "Column role label" },
-  "importColAmount": "المبلغ",
-  "@importColAmount": { "description": "Column role label" },
-  "importColCategory": "الفئة",
-  "@importColCategory": { "description": "Column role label" },
 
   "objPaymentFailed": "فشل الدفع. يرجى المحاولة مرة أخرى.",
   "@objPaymentFailed": { "description": "Snackbar on payment error" },
@@ -5967,10 +5847,6 @@
     "description": "Deadline display with date",
     "placeholders": { "date": { "type": "String" } }
   },
-  "objSummaryCurrency": "العملة",
-  "@objSummaryCurrency": { "description": "Summary row label" },
-  "objSummaryDeadline": "الموعد النهائي",
-  "@objSummaryDeadline": { "description": "Summary row label" },
   "objSummaryRemaining": "المتبقي",
   "@objSummaryRemaining": { "description": "Summary row label" },
   "objPaymentsSection": "المدفوعات",
@@ -6011,7 +5887,7 @@
   },
   "healthAutoAdjustment": "تعديل تلقائي لفحص السلامة",
   "@healthAutoAdjustment": { "description": "Ledger note for repair entries" },
-  "healthReportTitle": "تقرير فحص سلامة PocketPlan",
+  "healthReportTitle": "تقرير فحص سلامة BudgetSeal",
   "@healthReportTitle": { "description": "Share sheet title for exported report" },
   "healthAdjustmentsCreated": "تم إنشاء {count} تعديل(ات)",
   "@healthAdjustmentsCreated": {
@@ -6033,13 +5909,6 @@
   "@catSheetNoMatch": { "description": "Empty state when search has no results" },
   "catSheetNoCategories": "لا توجد فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.",
   "@catSheetNoCategories": { "description": "Empty state when no categories exist" },
-  "catSheetExpense": "مصروف",
-  "@catSheetExpense": { "description": "Type filter chip" },
-  "catSheetIncome": "دخل",
-  "@catSheetIncome": { "description": "Type filter chip" },
-  "catSheetSearchHint": "بحث في الفئات...",
-  "@catSheetSearchHint": { "description": "Search field hint" },
-  "catSheetSubcategories": "{count} فئات فرعية",
   "@catSheetSubcategories": {
     "description": "Subtitle showing subcategory count",
     "placeholders": { "count": { "type": "int" } }
@@ -6120,9 +5989,6 @@
   "plannedExactDate": "اختر تاريخاً محدداً (اختياري)",
   "plannedExactDateValue": "التاريخ المحدد: {date}",
   "@plannedExactDateValue": { "description": "Label for exact date picker when date is selected", "placeholders": { "date": { "type": "String" } } },
-  "plannedAccount": "الحساب",
-  "plannedCategory": "الفئة",
-  "plannedTitleHint": "العنوان",
   "plannedNoteHint": "ملاحظة (اختياري)",
   "plannedSelectAccount": "اختر حساباً",
   "plannedUpdated": "تم تحديث الدفعة المخططة",
@@ -6163,5 +6029,11 @@
   "upgradeRedeemSuccess": "تم استخدام الرمز! تم فتح بريميوم.",
   "upgradeRestorePurchase": "استعادة الشراء",
   "upgradeRestoreSuccess": "تمت استعادة الشراء! تم فتح بريميوم.",
-  "upgradeRestoreNone": "لم يتم العثور على شراء سابق."
+  "upgradeRestoreNone": "لم يتم العثور على شراء سابق.",
+  "catSheetSearchHint": "بحث في الفئات...",
+  "catSheetSubcategories": "{count} فئات فرعية",
+  "objSummaryDeadline": "الموعد النهائي",
+  "plannedNoteHint": "ملاحظة (اختياري)",
+  "recurringFormAccountRequired": "الحساب مطلوب",
+  "recurringFormStarts": "تبدأ: {date}"
 }

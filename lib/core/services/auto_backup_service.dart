@@ -91,7 +91,7 @@ class AutoBackupService {
 
   static Future<void> _performBackup() async {
     final appDir = await getApplicationDocumentsDirectory();
-    final dbFile = File(p.join(appDir.path, 'pocketplan.db'));
+    final dbFile = File(p.join(appDir.path, 'budgetseal.db'));
     if (!dbFile.existsSync()) return;
 
     final backupDir = await _backupDirectory();
@@ -170,7 +170,7 @@ class AutoBackupService {
   /// Restore from a local backup.
   static Future<void> restoreFromBackup(String backupPath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final dbFile = File(p.join(appDir.path, 'pocketplan.db'));
+    final dbFile = File(p.join(appDir.path, 'budgetseal.db'));
 
     // Safety: auto-backup current DB before overwriting
     if (dbFile.existsSync()) {

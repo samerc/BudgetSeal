@@ -285,7 +285,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '0.00',
-                labelText: S.of(context).billAmount,
+                labelText: S.of(context).commonAmount,
                 filled: true,
                 fillColor: AppColors.sfv(ctx),
                 border: OutlineInputBorder(
@@ -934,7 +934,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           _segmentButton(S.of(context).billPercentage, !_tipIsAmount,
               () => setState(() => _tipIsAmount = false)),
           const SizedBox(width: 8),
-          _segmentButton(S.of(context).billAmount, _tipIsAmount,
+          _segmentButton(S.of(context).commonAmount, _tipIsAmount,
               () => setState(() => _tipIsAmount = true)),
         ]),
         const SizedBox(height: 12),
@@ -964,7 +964,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget _buildCurrencySection() {
     final isCross = _billCurrency != _baseCurrency;
     return _collapsibleCard(
-      title: S.of(context).billCurrency,
+      title: S.of(context).commonCurrency,
       trailing: _billCurrency,
       expanded: _currencyExpanded,
       onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),

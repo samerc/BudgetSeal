@@ -184,7 +184,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: S.of(context).catExpense,
+                        label: S.of(context).typeExpense,
                         selected: _typeFilter == 'expense',
                         color: AppColors.overspent,
                         onTap: () =>
@@ -192,7 +192,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       ),
                       const SizedBox(width: 8),
                       _TypeChip(
-                        label: S.of(context).catIncome,
+                        label: S.of(context).typeIncome,
                         selected: _typeFilter == 'income',
                         color: AppColors.healthy,
                         onTap: () =>
@@ -359,7 +359,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               onPressed: () => Navigator.pop(ctx, 'delete'),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).catDelete),
+              child: Text(S.of(context).commonDelete),
             ),
           ],
         ),
@@ -379,7 +379,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               onPressed: () => Navigator.pop(ctx, true),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).catDelete),
+              child: Text(S.of(context).commonDelete),
             ),
           ],
         ),
@@ -768,7 +768,7 @@ class _CategoriesSliver extends ConsumerWidget {
               ListTile(
                 leading: Icon(Icons.delete_rounded,
                     color: AppColors.overspent),
-                title: Text(S.of(context).catDelete,
+                title: Text(S.of(context).commonDelete,
                     style: TextStyle(color: AppColors.overspent)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1032,8 +1032,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             // Type toggle
             SegmentedButton<String>(
               segments: [
-                ButtonSegment(value: 'expense', label: Text(S.of(context).catExpense)),
-                ButtonSegment(value: 'income', label: Text(S.of(context).catIncome)),
+                ButtonSegment(value: 'expense', label: Text(S.of(context).typeExpense)),
+                ButtonSegment(value: 'income', label: Text(S.of(context).typeIncome)),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() => _type = s.first),
@@ -1110,7 +1110,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       initialValue: _defaultAccountId,
                       isExpanded: true,
                       decoration: InputDecoration(
-                        labelText: S.of(context).catAccount,
+                        labelText: S.of(context).commonAccount,
                         labelStyle: const TextStyle(fontSize: 13),
                         filled: true,
                         fillColor: AppColors.sfv(context),
@@ -1158,7 +1158,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                           color: Colors.white, strokeWidth: 2),
                     )
                   : Text(
-                      _isNew ? S.of(context).catCreate : S.of(context).catSaveButton,
+                      _isNew ? S.of(context).catCreate : S.of(context).commonSave,
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w600),
                     ),
