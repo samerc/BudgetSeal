@@ -13,6 +13,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/currency_display.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
@@ -170,7 +171,11 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_accounts',
         tooltip: S.of(context).acctAddTooltip,
-        onPressed: () => context.push('/accounts/new'),
+        onPressed: () {
+          final accounts = ref.read(accountsWithBalanceProvider).value ?? [];
+          if (!checkFreeLimit(context, ref, accounts.length, FreeLimits.maxAccounts, 'accounts')) return;
+          context.push('/accounts/new');
+        },
         child: const Icon(Icons.add),
       ),
     );

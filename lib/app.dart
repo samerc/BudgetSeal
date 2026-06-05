@@ -50,6 +50,7 @@ import 'features/settings/privacy_screen.dart';
 import 'features/settings/help_screen.dart';
 import 'features/settings/backup_screen.dart';
 import 'features/settings/health_check_screen.dart';
+import 'features/premium/upgrade_screen.dart';
 import 'features/transactions/bill_splitter_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/transactions/tx_list_settings_screen.dart';
@@ -311,6 +312,13 @@ class _PocketPlanAppState extends ConsumerState<PocketPlanApp>
           path: '/health-check',
           pageBuilder: (_, state) => slideUpPage(
               child: const HealthCheckScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/upgrade',
+          pageBuilder: (_, state) => slideUpPage(
+              child: UpgradeScreen(
+                  featureName: state.extra as String?),
+              state: state),
         ),
         GoRoute(
           path: '/about',

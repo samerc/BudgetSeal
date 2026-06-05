@@ -5914,4 +5914,65 @@ class SFr extends S {
 
   @override
   String get tileArabicDigits => 'Chiffres arabo-indiens';
+
+  @override
+  String get upgradeTitle => 'Passer au Premium';
+
+  @override
+  String get upgradeSubtitle =>
+      'Débloquez toutes les fonctionnalités avec un seul achat. Sans abonnement, sans publicité.';
+
+  @override
+  String get upgradeFeatureSync => 'Synchronisation cloud';
+
+  @override
+  String get upgradeFeatureWebCompanion => 'Compagnon Web';
+
+  @override
+  String get upgradeFeatureBillSplitter => 'Partage de facture';
+
+  @override
+  String get upgradeFeatureTravelExchange => 'Change de voyage';
+
+  @override
+  String get upgradeFeaturePlannedPayments => 'Paiements planifiés';
+
+  @override
+  String get upgradeFeatureUnlimitedItems => 'Comptes et enveloppes illimités';
+
+  @override
+  String get upgradePrice => '4,99 \$';
+
+  @override
+  String get upgradePriceSubtitle => 'Achat unique. À vous pour toujours.';
+
+  @override
+  String get upgradeButton => 'Mettre à niveau';
+
+  @override
+  String get upgradeComingSoon => 'Achats intégrés bientôt disponibles';
+
+  @override
+  String get upgradeRedeemCode => 'Utiliser un code';
+
+  @override
+  String get upgradeRedeemHint => 'Entrez votre code';
+
+  @override
+  String get upgradeRedeemButton => 'Utiliser';
+
+  @override
+  String get upgradeRedeemInvalid => 'Code invalide. Veuillez réessayer.';
+
+  @override
+  String get upgradeRedeemSuccess => 'Code utilisé ! Premium débloqué.';
+
+  @override
+  String get upgradeRestorePurchase => 'Restaurer l\'achat';
+
+  @override
+  String get upgradeRestoreSuccess => 'Achat restauré ! Premium débloqué.';
+
+  @override
+  String get upgradeRestoreNone => 'Aucun achat précédent trouvé.';
 }

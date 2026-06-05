@@ -31,6 +31,7 @@ import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -392,7 +393,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         label: qs.dashboardQuickSplit,
                         tooltip: qs.dashboardSplitBillTooltip,
                         color: const Color(0xFFFF8A65),
-                        onTap: () => context.push('/bill-splitter'),
+                        onTap: () {
+                          if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
+                          context.push('/bill-splitter');
+                        },
                       ),
                     ],
                   );

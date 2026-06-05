@@ -17,6 +17,7 @@ import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
 
 import '../../shared/widgets/currency_display.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
@@ -567,7 +568,11 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_allocations',
         tooltip: l.allocCreateTooltip,
-        onPressed: () => context.push('/allocations/new'),
+        onPressed: () {
+          final allocs = ref.read(allocationsProvider).value ?? [];
+          if (!checkFreeLimit(context, ref, allocs.length, FreeLimits.maxEnvelopes, 'envelopes')) return;
+          context.push('/allocations/new');
+        },
         child: const Icon(Icons.add),
       ),
     );

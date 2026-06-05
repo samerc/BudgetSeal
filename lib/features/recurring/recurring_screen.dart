@@ -15,6 +15,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
 
@@ -83,7 +84,10 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         tooltip: S.of(context).recurringAddTooltip,
-        onPressed: () => _showAddSheet(),
+        onPressed: () {
+          if (!checkFreeLimit(context, ref, _items.length, FreeLimits.maxRecurring, 'recurring')) return;
+          _showAddSheet();
+        },
         child: const Icon(Icons.add),
       ),
       body: SafeArea(

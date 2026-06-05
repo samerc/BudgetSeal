@@ -10622,6 +10622,126 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Arabic-Indic Numerals'**
   String get tileArabicDigits;
+
+  /// Upgrade screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeTitle;
+
+  /// Upgrade screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock every feature with a single purchase. No subscriptions, no ads.'**
+  String get upgradeSubtitle;
+
+  /// Premium feature: cloud sync
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync'**
+  String get upgradeFeatureSync;
+
+  /// Premium feature: web companion
+  ///
+  /// In en, this message translates to:
+  /// **'Web Companion'**
+  String get upgradeFeatureWebCompanion;
+
+  /// Premium feature: bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Splitter'**
+  String get upgradeFeatureBillSplitter;
+
+  /// Premium feature: travel exchange
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Exchange'**
+  String get upgradeFeatureTravelExchange;
+
+  /// Premium feature: planned payments
+  ///
+  /// In en, this message translates to:
+  /// **'Planned Payments'**
+  String get upgradeFeaturePlannedPayments;
+
+  /// Premium feature: no limits
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited accounts & envelopes'**
+  String get upgradeFeatureUnlimitedItems;
+
+  /// Premium price display
+  ///
+  /// In en, this message translates to:
+  /// **'\$4.99'**
+  String get upgradePrice;
+
+  /// Price clarification
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase. Yours forever.'**
+  String get upgradePriceSubtitle;
+
+  /// Upgrade purchase button
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgradeButton;
+
+  /// Toast when upgrade is tapped before IAP is ready
+  ///
+  /// In en, this message translates to:
+  /// **'In-app purchases coming soon'**
+  String get upgradeComingSoon;
+
+  /// Redeem code link/dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem Code'**
+  String get upgradeRedeemCode;
+
+  /// Redeem code text field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your code'**
+  String get upgradeRedeemHint;
+
+  /// Redeem code confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get upgradeRedeemButton;
+
+  /// Error when redeem code is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code. Please try again.'**
+  String get upgradeRedeemInvalid;
+
+  /// Success message after redeeming code
+  ///
+  /// In en, this message translates to:
+  /// **'Code redeemed! Premium unlocked.'**
+  String get upgradeRedeemSuccess;
+
+  /// Restore purchase link
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchase'**
+  String get upgradeRestorePurchase;
+
+  /// Success message after restoring purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase restored! Premium unlocked.'**
+  String get upgradeRestoreSuccess;
+
+  /// Message when no purchase to restore
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchase found.'**
+  String get upgradeRestoreNone;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

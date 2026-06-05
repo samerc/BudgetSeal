@@ -26,6 +26,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
@@ -409,7 +410,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               backgroundColor: const Color(0xFFFF8A65),
               foregroundColor: Colors.white,
               elevation: 2,
-              onPressed: () => context.push('/bill-splitter'),
+              onPressed: () {
+                if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
+                context.push('/bill-splitter');
+              },
               child: const Icon(Icons.call_split_rounded, size: 18),
             ),
             const SizedBox(height: 8),

@@ -5833,4 +5833,65 @@ class SEn extends S {
 
   @override
   String get tileArabicDigits => 'Arabic-Indic Numerals';
+
+  @override
+  String get upgradeTitle => 'Upgrade to Premium';
+
+  @override
+  String get upgradeSubtitle =>
+      'Unlock every feature with a single purchase. No subscriptions, no ads.';
+
+  @override
+  String get upgradeFeatureSync => 'Cloud Sync';
+
+  @override
+  String get upgradeFeatureWebCompanion => 'Web Companion';
+
+  @override
+  String get upgradeFeatureBillSplitter => 'Bill Splitter';
+
+  @override
+  String get upgradeFeatureTravelExchange => 'Travel Exchange';
+
+  @override
+  String get upgradeFeaturePlannedPayments => 'Planned Payments';
+
+  @override
+  String get upgradeFeatureUnlimitedItems => 'Unlimited accounts & envelopes';
+
+  @override
+  String get upgradePrice => '\$4.99';
+
+  @override
+  String get upgradePriceSubtitle => 'One-time purchase. Yours forever.';
+
+  @override
+  String get upgradeButton => 'Upgrade';
+
+  @override
+  String get upgradeComingSoon => 'In-app purchases coming soon';
+
+  @override
+  String get upgradeRedeemCode => 'Redeem Code';
+
+  @override
+  String get upgradeRedeemHint => 'Enter your code';
+
+  @override
+  String get upgradeRedeemButton => 'Redeem';
+
+  @override
+  String get upgradeRedeemInvalid => 'Invalid code. Please try again.';
+
+  @override
+  String get upgradeRedeemSuccess => 'Code redeemed! Premium unlocked.';
+
+  @override
+  String get upgradeRestorePurchase => 'Restore Purchase';
+
+  @override
+  String get upgradeRestoreSuccess => 'Purchase restored! Premium unlocked.';
+
+  @override
+  String get upgradeRestoreNone => 'No previous purchase found.';
 }

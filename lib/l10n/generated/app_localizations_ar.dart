@@ -5795,4 +5795,65 @@ class SAr extends S {
 
   @override
   String get tileArabicDigits => 'الأرقام العربية الهندية';
+
+  @override
+  String get upgradeTitle => 'الترقية إلى بريميوم';
+
+  @override
+  String get upgradeSubtitle =>
+      'افتح جميع الميزات بشراء واحد. بدون اشتراكات، بدون إعلانات.';
+
+  @override
+  String get upgradeFeatureSync => 'المزامنة السحابية';
+
+  @override
+  String get upgradeFeatureWebCompanion => 'الواجهة على الويب';
+
+  @override
+  String get upgradeFeatureBillSplitter => 'تقسيم الفاتورة';
+
+  @override
+  String get upgradeFeatureTravelExchange => 'صرف السفر';
+
+  @override
+  String get upgradeFeaturePlannedPayments => 'المدفوعات المخططة';
+
+  @override
+  String get upgradeFeatureUnlimitedItems => 'حسابات ومغلفات غير محدودة';
+
+  @override
+  String get upgradePrice => '\$4.99';
+
+  @override
+  String get upgradePriceSubtitle => 'شراء لمرة واحدة. ملكك للأبد.';
+
+  @override
+  String get upgradeButton => 'ترقية';
+
+  @override
+  String get upgradeComingSoon => 'الشراء داخل التطبيق قريبًا';
+
+  @override
+  String get upgradeRedeemCode => 'استخدام رمز';
+
+  @override
+  String get upgradeRedeemHint => 'أدخل الرمز';
+
+  @override
+  String get upgradeRedeemButton => 'استخدام';
+
+  @override
+  String get upgradeRedeemInvalid => 'رمز غير صالح. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get upgradeRedeemSuccess => 'تم استخدام الرمز! تم فتح بريميوم.';
+
+  @override
+  String get upgradeRestorePurchase => 'استعادة الشراء';
+
+  @override
+  String get upgradeRestoreSuccess => 'تمت استعادة الشراء! تم فتح بريميوم.';
+
+  @override
+  String get upgradeRestoreNone => 'لم يتم العثور على شراء سابق.';
 }

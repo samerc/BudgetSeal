@@ -27,6 +27,7 @@ import '../../core/providers/theme_provider.dart';
 import '../../core/providers/receipt_sync_provider.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
+import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/services/daily_reminder_service.dart';
 import '../../core/sync/google_drive_provider.dart';
@@ -115,19 +116,31 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.event_note_rounded, title: l.plannedTitle,
                 subtitle: l.plannedSubtitle,
                 iconColor: const Color(0xFF7E57C2),
-                onTap: () => context.push('/planned-payments')),
+                onTap: () {
+                  if (!checkPremiumAccess(context, ref, PremiumFeature.plannedPayments)) return;
+                  context.push('/planned-payments');
+                }),
             _SettingsTile(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
                 subtitle: l.settingsBillSplitterSub,
                 iconColor: const Color(0xFF26A69A),
-                onTap: () => context.push('/bill-splitter')),
+                onTap: () {
+                  if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
+                  context.push('/bill-splitter');
+                }),
             _SettingsTile(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
                 subtitle: l.settingsTravelSub,
                 iconColor: const Color(0xFF42A5F5),
-                onTap: () => context.push('/travel-exchange')),
+                onTap: () {
+                  if (!checkPremiumAccess(context, ref, PremiumFeature.travelExchange)) return;
+                  context.push('/travel-exchange');
+                }),
             _SettingsTile(icon: Icons.computer_rounded, title: l.tileWebCompanion,
                 subtitle: l.settingsWebCompanionSub,
                 iconColor: const Color(0xFF0EA5E9),
-                onTap: () => context.push('/web-companion')),
+                onTap: () {
+                  if (!checkPremiumAccess(context, ref, PremiumFeature.webCompanion)) return;
+                  context.push('/web-companion');
+                }),
             const SizedBox(height: 20),
 
             // ── Settings (navigates to dedicated screen) ──
@@ -1248,7 +1261,10 @@ class SettingsDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           _SettingsTile(icon: Icons.cloud_sync_rounded, title: l.tileCloudSync,
               subtitle: l.tileCloudSyncSub, iconColor: AppColors.accent,
-              onTap: () => context.push('/sync')),
+              onTap: () {
+                if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
+                context.push('/sync');
+              }),
           Builder(builder: (context) {
             final syncState = ref.watch(syncProvider);
             final isConnected = syncState.activeProvider is GoogleDriveProvider;

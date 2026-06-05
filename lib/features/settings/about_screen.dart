@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = S.of(context);
 
     return Scaffold(
@@ -142,7 +144,14 @@ class AboutScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            // ── Redeem code ──
+            TextButton(
+              onPressed: () => _showRedeemDialog(context, ref),
+              child: Text(
+                l.upgradeRedeemCode,
+                style: TextStyle(fontSize: 12, color: AppColors.accent),
+              ),
+            ),
 
             // ── Privacy badge ──
             Row(
@@ -175,6 +184,62 @@ class AboutScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static Future<void> _showRedeemDialog(
+      BuildContext context, WidgetRef ref) async {
+    final l = S.of(context);
+    final controller = TextEditingController();
+    String? errorText;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (sbCtx, setDialogState) => AlertDialog(
+          title: Text(l.upgradeRedeemCode),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              hintText: l.upgradeRedeemHint,
+              errorText: errorText,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text(l.commonCancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final code = controller.text.trim();
+                if (code.isEmpty) return;
+                if (!isValidRedeemCode(code)) {
+                  setDialogState(
+                      () => errorText = l.upgradeRedeemInvalid);
+                  return;
+                }
+                await ref
+                    .read(hasPremiumProvider.notifier)
+                    .redeemCode(code);
+                if (!dialogCtx.mounted) return;
+                Navigator.pop(dialogCtx);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l.upgradeRedeemSuccess),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: Text(l.upgradeRedeemButton),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
   }
 }
 
