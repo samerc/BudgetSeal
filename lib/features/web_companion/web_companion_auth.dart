@@ -29,7 +29,9 @@ class WebCompanionAuth {
   }
 
   static Future<void> setPin(String pin) async {
-    assert(pin.length == 4 && RegExp(r'^\d{4}$').hasMatch(pin));
+    if (pin.length != 4 || !RegExp(r'^\d{4}$').hasMatch(pin)) {
+      throw ArgumentError('PIN must be exactly 4 digits');
+    }
     final hash = sha256.convert(utf8.encode(pin)).toString();
     await _storage.write(key: _pinKey, value: hash);
   }

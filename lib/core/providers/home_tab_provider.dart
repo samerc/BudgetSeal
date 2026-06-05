@@ -14,11 +14,13 @@ class HomeTabNotifier extends Notifier<int> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final idx = prefs.getInt(_key) ?? 0;
-    if (idx != state && idx >= 0 && idx < homeTabLabels.length) {
-      state = idx;
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final idx = prefs.getInt(_key) ?? 0;
+      if (idx != state && idx >= 0 && idx < homeTabLabels.length) {
+        state = idx;
+      }
+    } catch (_) {}
   }
 
   Future<void> set(int index) async {

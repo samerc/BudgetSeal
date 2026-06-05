@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/accounts_dao.dart';
+import '../../core/engine/allocation_engine.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -847,22 +848,21 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             note: S.of(context).acctBalanceAdjustment,
           );
         } else {
-          // Negative adjustment → record as expense (no allocation).
-          final txId = const Uuid().v4();
-          final db = ref.read(databaseProvider);
-          await db.into(db.transactions).insert(
-                TransactionsCompanion.insert(
-                  id: txId,
-                  householdId: householdId,
-                  type: 'expense',
-                  accountId: widget.accountId,
-                  amount: diff.abs(),
-                  currency: currency,
-                  createdBy: 'user',
-                  deviceId: 'local',
-                  note: Value(S.of(context).acctBalanceAdjustment),
-                ),
-              );
+          // Negative adjustment → record as expense via engine (preserves balance invariant).
+          final baseCurrency = ref.read(householdProvider).value?.baseCurrency ?? currency;
+          await engine.recordTransaction(
+            householdId: householdId,
+            accountId: widget.accountId,
+            type: 'expense',
+            baseCurrency: baseCurrency,
+            lines: [
+              TxLine(
+                amount: diff.abs(),
+                currency: currency,
+              ),
+            ],
+            note: S.of(context).acctBalanceAdjustment,
+          );
         }
 
         await _loadAccount(); // Refresh current balance.

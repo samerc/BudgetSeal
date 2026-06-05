@@ -456,7 +456,7 @@ class _BalanceRow extends StatelessWidget {
         ? AppColors.overspentLight
         : isPositive
             ? AppColors.healthyLight
-            : AppColors.surfaceVariant;
+            : AppColors.sfv(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -529,7 +529,7 @@ class _ResolutionOption extends StatelessWidget {
             border: Border.all(
               color: selected
                   ? AppColors.accent.withValues(alpha: 0.4)
-                  : AppColors.surfaceVariant,
+                  : AppColors.bd(context),
               width: selected ? 1.5 : 1,
             ),
             borderRadius: BorderRadius.circular(CardTokens.radius),
@@ -552,7 +552,7 @@ class _ResolutionOption extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: selected
-                            ? AppColors.textPrimary
+                            ? AppColors.tp(context)
                             : AppColors.ts(context),
                       ),
                     ),

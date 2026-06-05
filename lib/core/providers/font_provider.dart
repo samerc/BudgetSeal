@@ -28,11 +28,13 @@ class FontNotifier extends Notifier<String> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final val = prefs.getString(_key);
-    if (val != null && appFonts.containsKey(val)) {
-      state = val;
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final val = prefs.getString(_key);
+      if (val != null && appFonts.containsKey(val)) {
+        state = val;
+      }
+    } catch (_) {}
   }
 
   Future<void> setFont(String font) async {

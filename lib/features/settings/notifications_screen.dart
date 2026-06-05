@@ -16,11 +16,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool _dailyEnabled = false;
   TimeOfDay _time = const TimeOfDay(hour: 19, minute: 0);
   String _message = '';
+  late final TextEditingController _messageCtrl;
 
   @override
   void initState() {
     super.initState();
+    _messageCtrl = TextEditingController();
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    _messageCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
@@ -32,6 +40,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         _dailyEnabled = enabled;
         _time = time;
         _message = message;
+        _messageCtrl.text = message;
       });
     }
   }
@@ -102,7 +111,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 // Custom message
                 const SizedBox(height: 4),
                 TextField(
-                  controller: TextEditingController(text: _message),
+                  controller: _messageCtrl,
                   style: TextStyle(
                       fontSize: 13, color: AppColors.tp(context)),
                   textInputAction: TextInputAction.done,

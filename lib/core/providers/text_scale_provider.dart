@@ -22,9 +22,11 @@ class TextScaleNotifier extends Notifier<double> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final val = prefs.getDouble(_key);
-    if (val != null) state = val;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final val = prefs.getDouble(_key);
+      if (val != null) state = val;
+    } catch (_) {}
   }
 
   Future<void> setScale(double scale) async {
