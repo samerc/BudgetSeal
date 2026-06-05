@@ -28,6 +28,7 @@ import '../../shared/widgets/rolling_number.dart';
 import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
+import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -1238,7 +1239,7 @@ class _QuickTemplatesSectionState
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider).value ?? [];
     final catMap = {for (final c in categories) c.id: c};
-    final db = ref.watch(databaseProvider);
+    final db = ref.read(databaseProvider);
 
     return FutureBuilder<List<TransactionTemplate>>(
       future: _templatesFuture,
@@ -1289,7 +1290,8 @@ class _QuickTemplatesSectionState
                       ? catMap[t.categoryId]
                       : null;
 
-                  return GestureDetector(
+                  return Tappable(
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () async {
                       // Increment use count
                       await (db.update(db.transactionTemplates)
@@ -1371,12 +1373,9 @@ class _ShimmerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SkeletonLoader(
       height: height,
-      decoration: BoxDecoration(
-        color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-      ),
+      borderRadius: CardTokens.radius,
     );
   }
 }

@@ -540,9 +540,11 @@ class _SetupPage extends StatelessWidget {
                 children: [
                   TextField(
                     controller: nameController,
+                    maxLength: 100,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     onChanged: nameError != null ? (_) => onNameErrorClear?.call() : null,
                     decoration: _inputDeco(s.onboardHouseholdName).copyWith(
+                      counterText: '',
                       hintText: s.onboardHouseholdHint,
                       hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 15),
                       errorText: nameError,

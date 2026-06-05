@@ -367,10 +367,12 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             TextField(
               controller: ctrl,
               autofocus: true,
+              maxLength: 100,
               textCapitalization: capitalize
                   ? TextCapitalization.characters
                   : TextCapitalization.words,
               decoration: InputDecoration(
+                counterText: '',
                 hintText: hint,
                 filled: true,
                 fillColor: AppColors.sfv(context),

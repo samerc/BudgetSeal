@@ -19,6 +19,7 @@ import '../../shared/widgets/allocation_card.dart';
 import '../../shared/widgets/currency_display.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/widgets/tappable.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -1007,7 +1008,8 @@ class _GoalsLoansBanner extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: GestureDetector(
+      child: Tappable(
+        borderRadius: BorderRadius.circular(12),
         onTap: () => context.push('/objectives'),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

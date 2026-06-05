@@ -274,6 +274,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             row[amountCol].toString().replaceAll(RegExp(r'[\$,\s]'), '');
         final amount = double.tryParse(amountStr);
         if (amount == null) continue;
+        if (amount.abs() > 1e9) continue;
 
         // Parse date
         DateTime? date;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../core/providers/engine_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -260,12 +261,22 @@ class _SubscriptionDetailScreenState
       [picked.millisecondsSinceEpoch ~/ 1000, widget.subscriptionId],
     );
 
-    // Delete transactions generated AFTER the cancellation date
+    // Delete transactions generated AFTER the cancellation date (with ledger cleanup)
     if (futureCount > 0) {
-      await db.customStatement(
-        'DELETE FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
-        [householdId, '%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%', title, picked.millisecondsSinceEpoch ~/ 1000],
-      );
+      final engine = ref.read(allocationEngineProvider);
+      final futureTxRows = await db.customSelect(
+        'SELECT id FROM transactions WHERE household_id = ? AND deleted = 0 AND (note LIKE ? OR note = ?) AND created_at > ?',
+        variables: [
+          drift.Variable.withString(householdId),
+          drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),
+          drift.Variable.withString(title),
+          drift.Variable.withDateTime(picked),
+        ],
+      ).get();
+      for (final row in futureTxRows) {
+        final txId = row.data['id'] as String?;
+        if (txId != null) await engine.deleteTransaction(txId);
+      }
     }
 
     _load();

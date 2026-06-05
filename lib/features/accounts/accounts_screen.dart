@@ -184,7 +184,7 @@ class _ArchivedSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final db = ref.watch(databaseProvider);
+    final db = ref.read(databaseProvider);
     final householdId = ref.watch(currentHouseholdIdProvider);
     if (householdId == null) return const SizedBox.shrink();
 
