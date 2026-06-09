@@ -225,7 +225,7 @@ class _ArchivedSection extends ConsumerWidget {
           children: [
             const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
               child: Text(S.of(context).acctArchived,
                   style: TextStyle(
                     fontSize: TypographyTokens.sectionHeaderSize,
@@ -265,20 +265,21 @@ class _ArchivedSection extends ConsumerWidget {
 
   Future<void> _unarchive(
       BuildContext context, WidgetRef ref, Account account) async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).acctUnarchiveTitle),
+        title: Text(tr.acctUnarchiveTitle),
         content: Text(
-            S.of(context).acctUnarchiveMsg(account.name)),
+            tr.acctUnarchiveMsg(account.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(S.of(context).acctUnarchive),
+            child: Text(tr.acctUnarchive),
           ),
         ],
       ),

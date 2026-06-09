@@ -331,7 +331,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
         title: Text(_isEditing ? S.of(context).plannedEditTitle : S.of(context).plannedPlanButton),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsetsDirectional.only(end: 12),
             child: FilledButton.icon(
               onPressed: _loading ? null : _save,
               style: FilledButton.styleFrom(

@@ -135,21 +135,22 @@ class _AssistedTransactionScreenState
 
   // ── Back button handling with cancel confirmation ────────────
   Future<bool> _onWillPop() async {
+    final tr = S.of(context);
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: Text(S.of(context).txAfDiscardTitle),
-        content: Text(S.of(context).txAfDiscardContent),
+        title: Text(tr.txAfDiscardTitle),
+        content: Text(tr.txAfDiscardContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(S.of(context).txAfKeepEditing),
+            child: Text(tr.txAfKeepEditing),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).txAfDiscard),
+            child: Text(tr.txAfDiscard),
           ),
         ],
       ),
@@ -1245,27 +1246,28 @@ class _AssistedTransactionScreenState
     // Duplicate detection
     final hasDuplicate = await _checkForDuplicate();
     if (hasDuplicate && mounted) {
+      final tr = S.of(context);
       final proceed = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: Text(S.of(context).txFormDuplicateTitle,
+          title: Text(tr.txFormDuplicateTitle,
               style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: AppColors.tp(context))),
           content: Text(
-            S.of(context).txFormDuplicateContent,
+            tr.txFormDuplicateContent,
             style: TextStyle(color: AppColors.ts(context)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: Text(S.of(context).commonSaveAnyway),
+              child: Text(tr.commonSaveAnyway),
             ),
           ],
         ),
@@ -1298,21 +1300,22 @@ class _AssistedTransactionScreenState
           return '$typeLabel: $amountLabel (${e.value.length} ${e.value.length == 1 ? 'item' : 'items'})';
         }).join('\n');
 
+        final tr = S.of(context);
         final proceed = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text(S.of(context).txAfMixedTitle),
+            title: Text(tr.txAfMixedTitle),
             content: Text(
-              S.of(context).txAfMixedContent(byType.length, summaryLines),
+              tr.txAfMixedContent(byType.length, summaryLines),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text(S.of(context).commonCancel),
+                child: Text(tr.commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text(S.of(context).commonSave),
+                child: Text(tr.commonSave),
               ),
             ],
           ),
@@ -1472,7 +1475,7 @@ class _AssistedTransactionScreenState
           title: Text(S.of(context).txAfEnterAmountTitle),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsetsDirectional.only(end: 12),
               child: _StepIndicator(current: 3),
             ),
           ],
@@ -1958,7 +1961,7 @@ class _AssistedTransactionScreenState
             return GestureDetector(
               onTap: () => setState(() => _activeLineIndex = i),
               child: Container(
-                margin: const EdgeInsets.only(right: 6),
+                margin: const EdgeInsetsDirectional.only(end: 6),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(

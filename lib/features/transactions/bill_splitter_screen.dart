@@ -106,18 +106,19 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final others = _people.where((p) => p != name).toList();
 
     if (soloItems > 0 && others.isNotEmpty && mounted) {
+      final tr = S.of(context);
       final result = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(S.of(context).billRemovePersonTitle),
+          title: Text(tr.billRemovePersonTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(S.of(context).billRemovePersonContent(name, soloItems)),
+              Text(tr.billRemovePersonContent(name, soloItems)),
               if (others.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Text(S.of(context).billReassignTo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text(tr.billReassignTo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                 const SizedBox(height: 8),
                 ...others.map((other) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -135,7 +136,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, '_delete'),
@@ -264,10 +265,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   void _promptAmountForLine(int lineIndex, OcrLine line) {
     final amountCtrl = TextEditingController();
+    final tr = S.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).billEnterAmount),
+        title: Text(tr.billEnterAmount),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +287,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '0.00',
-                labelText: S.of(context).commonAmount,
+                labelText: tr.commonAmount,
                 filled: true,
                 fillColor: AppColors.sfv(ctx),
                 border: OutlineInputBorder(
@@ -345,19 +347,20 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final name = line.parsedName ?? line.text;
 
     if (qty > 1 && _people.length > 1) {
+      final tr = S.of(context);
       final split = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(S.of(context).billSplitQtyTitle(qty, name)),
+          title: Text(tr.billSplitQtyTitle(qty, name)),
           content: Text(
-              S.of(context).billSplitQtyContent(qty, formatAmount(qty > 0 ? amount / qty : 0, currency: _billCurrency))),
+              tr.billSplitQtyContent(qty, formatAmount(qty > 0 ? amount / qty : 0, currency: _billCurrency))),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text(S.of(context).billKeepAsOne)),
+                child: Text(tr.billKeepAsOne)),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text(S.of(context).billSplit)),
+                child: Text(tr.billSplit)),
           ],
         ),
       );
@@ -439,18 +442,19 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final rateNotSet = isCross && (_exchangeRate - 1.0).abs() < 0.001;
 
     if (rateNotSet) {
+      final tr = S.of(context);
       final proceed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(S.of(context).billRateNotSetTitle),
-          content: Text(S.of(context).billRateNotSetContent(_billCurrency)),
+          title: Text(tr.billRateNotSetTitle),
+          content: Text(tr.billRateNotSetContent(_billCurrency)),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text(S.of(context).billGoBackBtn)),
+                child: Text(tr.billGoBackBtn)),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text(S.of(context).billContinueAnyway)),
+                child: Text(tr.billContinueAnyway)),
           ],
         ),
       );
@@ -764,7 +768,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Container(
               width: 8,
               height: 8,
-              margin: const EdgeInsets.only(right: 10),
+              margin: const EdgeInsetsDirectional.only(end: 10),
               decoration: BoxDecoration(
                 color: _personColor(item.assignedTo.first),
                 shape: BoxShape.circle,
@@ -1298,7 +1302,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                         children: [
                           if (_selectedLineIndices.containsKey(i))
                             Padding(
-                              padding: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsetsDirectional.only(end: 6),
                               child: Icon(Icons.check_circle_rounded,
                                   size: 14,
                                   color: _personColor(

@@ -353,7 +353,7 @@ class _WelcomePageState extends State<_WelcomePage>
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 15,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withValues(alpha: 0.85),
               ),
             ),
           ),
@@ -369,7 +369,7 @@ class _WelcomePageState extends State<_WelcomePage>
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withValues(alpha: 0.85),
                   height: 1.5,
                 ),
               ),
@@ -529,7 +529,7 @@ class _SetupPage extends StatelessWidget {
             Text(s.onboardChangeLater,
                 style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.6))),
+                    color: Colors.white.withValues(alpha: 0.8))),
             const SizedBox(height: 20),
 
             // ── Household ──
@@ -546,7 +546,7 @@ class _SetupPage extends StatelessWidget {
                     decoration: _inputDeco(s.onboardHouseholdName).copyWith(
                       counterText: '',
                       hintText: s.onboardHouseholdHint,
-                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 15),
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
                       errorText: nameError,
                       errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
@@ -580,7 +580,7 @@ class _SetupPage extends StatelessWidget {
                     s.onboardPeriodHelp,
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.45),
+                      color: Colors.white.withValues(alpha: 0.65),
                     ),
                   ),
                 ],
@@ -736,7 +736,7 @@ class _SectionLabel extends StatelessWidget {
         style: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: Colors.white.withValues(alpha: 0.5),
+          color: Colors.white.withValues(alpha: 0.75),
           letterSpacing: 1.0,
         ));
   }
@@ -861,7 +861,7 @@ class _DonePage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: Colors.white.withValues(alpha: 0.85),
               height: 1.5,
             ),
           ),
@@ -876,7 +876,7 @@ class _DonePage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],

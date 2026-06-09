@@ -100,7 +100,7 @@ class AllocationCard extends StatelessWidget {
               ? AppColors.healthy
               : _typeColor;
       return Padding(
-        padding: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsetsDirectional.only(end: 10),
         child: AnimatedCircularProgress(
           progress: rawProgress,
           color: ringColor,
@@ -115,7 +115,7 @@ class AllocationCard extends StatelessWidget {
 
     // No target — show icon in a consistent rounded container
     return Padding(
-      padding: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsetsDirectional.only(end: 10),
       child: Container(
         width: 36,
         height: 36,
@@ -284,10 +284,11 @@ class AllocationCard extends StatelessWidget {
                         final daysLeft = periodEnd!.difference(now).inDays;
                         if (daysLeft > 0) {
                           final daily = displayBalance / daysLeft;
+                          final l = S.of(context);
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              '${formatAmount(daily, currency: displayCurrency)}/day for $daysLeft days',
+                              l.allocDailyBudget(formatAmount(daily, currency: displayCurrency), daysLeft),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.ts(context),
@@ -312,7 +313,7 @@ class AllocationCard extends StatelessWidget {
                     children: [
                       if (isTargetOverspent)
                         Padding(
-                          padding: const EdgeInsets.only(right: 4),
+                          padding: const EdgeInsetsDirectional.only(end: 4),
                           child: Icon(Icons.warning_amber_rounded,
                               size: 14, color: AppColors.overspent),
                         ),
@@ -374,7 +375,7 @@ class AllocationCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${crossCurrencyDebt.length} other ${crossCurrencyDebt.length == 1 ? 'currency' : 'currencies'}',
+                            S.of(context).allocOtherCurrencies(crossCurrencyDebt.length),
                             style: TextStyle(fontSize: 9, color: AppColors.caution),
                           ),
                         ],

@@ -1036,23 +1036,24 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   // ---------------------------------------------------------------------------
 
   Future<void> _confirmArchive() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(S.of(context).acctArchiveTitle),
+        title: Text(tr.acctArchiveTitle),
         content: Text(
-          S.of(context).acctArchiveMsg,
+          tr.acctArchiveMsg,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonArchive),
+            child: Text(tr.commonArchive),
           ),
         ],
       ),
@@ -1097,23 +1098,24 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
     if (totalRefs > 0) {
       // Has transactions -- cannot delete, offer archive instead.
+      final tr = S.of(context);
       final action = await showDialog<String>(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).acctCannotDeleteTitle),
+          title: Text(tr.acctCannotDeleteTitle),
           content: Text(
-            S.of(context).acctCannotDeleteMsg(totalRefs),
+            tr.acctCannotDeleteMsg(totalRefs),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, 'cancel'),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, 'archive'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: Text(S.of(context).acctArchiveInstead),
+              child: Text(tr.acctArchiveInstead),
             ),
           ],
         ),
@@ -1129,23 +1131,24 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       }
     } else {
       // No transactions -- allow permanent deletion with confirmation.
+      final tr = S.of(context);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).acctDeleteTitle),
+          title: Text(tr.acctDeleteTitle),
           content: Text(
-            S.of(context).acctDeleteMsg,
+            tr.acctDeleteMsg,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).allocDeletePermanently),
+              child: Text(tr.allocDeletePermanently),
             ),
           ],
         ),

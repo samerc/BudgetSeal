@@ -79,7 +79,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
       if (result == null || result.files.isEmpty) return;
 
-      final path = result.files.single.path;
+      final path = result.files.first.path;
       if (path == null) return;
 
       final content = await File(path).readAsString();
@@ -87,7 +87,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       if (data.isNotEmpty && mounted) {
         setState(() {
           _csvData = data;
-          _fileName = result.files.single.name;
+          _fileName = result.files.first.name;
           _columnRoles = _autoDetectRoles(data);
         });
       }

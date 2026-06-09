@@ -2137,6 +2137,8 @@
   "allocBaseCurrencyOnly": "{currency} envelopes only \u00b7 {count} in other currencies",
   "@allocBaseCurrencyOnly": { "placeholders": { "currency": { "type": "String" }, "count": { "type": "int" } } },
   "allocHideOtherCurrencies": "Hide other currencies",
+  "allocDailyBudget": "{amount}/day for {days} days",
+  "@allocDailyBudget": { "description": "Daily budget remaining", "placeholders": { "amount": { "type": "String" }, "days": { "type": "int" } } },
   "allocOtherCurrencies": "{count,plural, =1{+ 1 other currency} other{+ {count} other currencies}}",
   "@allocOtherCurrencies": { "placeholders": { "count": { "type": "int" } } },
   "allocGoalsLoans": "Goals & Loans",

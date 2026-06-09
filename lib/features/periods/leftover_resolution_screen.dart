@@ -344,7 +344,7 @@ class _LeftoverResolutionScreenState
                             LeftoverResolution.toOtherAllocation) ...[
                           const SizedBox(height: 12),
                           Padding(
-                            padding: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsetsDirectional.only(start: 8),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppColors.sfv(context),

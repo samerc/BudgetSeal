@@ -150,20 +150,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   Future<void> _deleteSelected() async {
     final count = _selectedIds.length;
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(S.of(context).txDeleteSelectedTitle),
-        content: Text(S.of(context).txDeleteSelectedContent(count)),
+        title: Text(tr.txDeleteSelectedTitle),
+        content: Text(tr.txDeleteSelectedContent(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonDelete),
+            child: Text(tr.commonDelete),
           ),
         ],
       ),
@@ -176,7 +177,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(S.of(context).txNDeleted(count)),
+        content: Text(tr.txNDeleted(count)),
         behavior: SnackBarBehavior.floating,
       ));
       setState(() {
@@ -462,9 +463,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   void _showTypePicker(BuildContext context) {
     hapticMedium();
     final txColors = ref.read(txColorsProvider);
+    // Capture context-dependent values BEFORE the sheet opens
+    final bgColor = AppColors.sf(context);
+    final hintColor = AppColors.th(context);
+    final textColor = AppColors.tp(context);
+    final tr = S.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: bgColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -477,21 +483,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               Container(
                 width: 36, height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.th(context),
+                  color: hintColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(S.of(context).txNewTransactionSheet,
+              Text(tr.txNewTransactionSheet,
                   style: TextStyle(
                       fontSize: 17, fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
+                      color: textColor)),
               const SizedBox(height: 16),
               Row(
                 children: [
                   _TypeOption(
                     icon: Icons.remove_rounded,
-                    label: S.of(context).typeExpense,
+                    label: tr.typeExpense,
                     color: txColors.expense,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -503,7 +509,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   const SizedBox(width: 12),
                   _TypeOption(
                     icon: Icons.add_rounded,
-                    label: S.of(context).typeIncome,
+                    label: tr.typeIncome,
                     color: txColors.income,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -515,7 +521,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   const SizedBox(width: 12),
                   _TypeOption(
                     icon: Icons.swap_horiz_rounded,
-                    label: S.of(context).typeTransfer,
+                    label: tr.typeTransfer,
                     color: txColors.transfer,
                     onTap: () async {
                       Navigator.pop(ctx);
@@ -1484,7 +1490,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                   child: Row(
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(left: 4),
+                                        padding: const EdgeInsetsDirectional.only(start: 4),
                                         child: Icon(
                                           isSelected
                                               ? Icons.check_circle_rounded
@@ -1555,24 +1561,25 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                     : null;
                                 final deleteLabel =
                                     '${formatSignedAmount(e.tx.amount, currency: e.tx.currency, type: e.tx.type)} ${catName ?? e.tx.note}';
+                                final tr = S.of(context);
                                 return await showDialog<bool>(
                                       context: context,
                                       builder: (_) => AlertDialog(
-                                        title: Text(S.of(context).txDeleteShort),
+                                        title: Text(tr.txDeleteShort),
                                         content: Text(
-                                            S.of(context).txDeleteWithReversal(deleteLabel)),
+                                            tr.txDeleteWithReversal(deleteLabel)),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context, false),
-                                            child: Text(S.of(context).commonCancel),
+                                            child: Text(tr.commonCancel),
                                           ),
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context, true),
                                             style: TextButton.styleFrom(
                                                 foregroundColor: AppColors.overspent),
-                                            child: Text(S.of(context).commonDelete),
+                                            child: Text(tr.commonDelete),
                                           ),
                                         ],
                                       ),
@@ -2194,7 +2201,7 @@ class _TxTile extends ConsumerWidget {
             // ── Receipt indicator ────────────────────────────────
             if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(right: 6),
+                padding: const EdgeInsetsDirectional.only(end: 6),
                 child: () {
                   final receiptCount = parseReceiptPaths(tx.receiptPath).length;
                   if (receiptCount > 1) {
@@ -2512,10 +2519,14 @@ class _TxTile extends ConsumerWidget {
   void _showContextMenu(BuildContext context, WidgetRef ref) {
     final tx = entry.tx;
     final cat = _resolveCategory();
+    // Capture context-dependent values BEFORE the sheet opens
+    final bgColor = AppColors.sf(context);
+    final textColor = AppColors.tp(context);
+    final tr = S.of(context);
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
+      backgroundColor: bgColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -2524,18 +2535,18 @@ class _TxTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.edit_rounded, color: AppColors.tp(context)),
-              title: Text(S.of(context).txContextEdit,
-                  style: TextStyle(color: AppColors.tp(context))),
+              leading: Icon(Icons.edit_rounded, color: textColor),
+              title: Text(tr.txContextEdit,
+                  style: TextStyle(color: textColor)),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/transactions/${tx.id}');
               },
             ),
             ListTile(
-              leading: Icon(Icons.copy_rounded, color: AppColors.tp(context)),
-              title: Text(S.of(context).txContextDuplicate,
-                  style: TextStyle(color: AppColors.tp(context))),
+              leading: Icon(Icons.copy_rounded, color: textColor),
+              title: Text(tr.txContextDuplicate,
+                  style: TextStyle(color: textColor)),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/add-transaction', extra: {
@@ -2556,23 +2567,23 @@ class _TxTile extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(Icons.delete_rounded, color: AppColors.overspent),
-              title: Text(S.of(context).commonDelete,
+              title: Text(tr.commonDelete,
                   style: TextStyle(color: AppColors.overspent)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (dCtx) => AlertDialog(
-                    title: Text(S.of(context).txDeleteTitle),
-                    content: Text(S.of(context).txDeleteCannotUndo),
+                    title: Text(tr.txDeleteTitle),
+                    content: Text(tr.txDeleteCannotUndo),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(dCtx, false),
-                        child: Text(S.of(context).commonCancel),
+                        child: Text(tr.commonCancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(dCtx, true),
-                        child: Text(S.of(context).commonDelete,
+                        child: Text(tr.commonDelete,
                             style: TextStyle(color: AppColors.overspent)),
                       ),
                     ],
@@ -2594,11 +2605,11 @@ class _TxTile extends ConsumerWidget {
                     ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(S.of(context).txTransactionDeleted),
+                        content: Text(tr.txTransactionDeleted),
                         behavior: SnackBarBehavior.floating,
                         duration: const Duration(seconds: 5),
                         action: SnackBarAction(
-                          label: S.of(context).txUndoAction,
+                          label: tr.txUndoAction,
                           onPressed: () async {
                             undone = true;
                             await (db.update(db.transactions)

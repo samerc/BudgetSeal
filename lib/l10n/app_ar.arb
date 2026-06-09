@@ -5570,6 +5570,7 @@
   "allocGotIt": "فهمت",
   "allocBaseCurrencyOnly": "أظرف {currency} فقط · {count} بعملات أخرى",
   "allocHideOtherCurrencies": "إخفاء العملات الأخرى",
+  "allocDailyBudget": "{amount}/يوم لمدة {days} أيام",
   "allocOtherCurrencies": "{count,plural, =1{+ عملة أخرى واحدة} other{+ {count} عملات أخرى}}",
   "allocGoalsLoans": "أهداف وقروض",
   "allocGoalsCount": "{count,plural, =1{هدف واحد} other{{count} أهداف}}",

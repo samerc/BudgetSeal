@@ -1838,7 +1838,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
               // ── Actionable Tips ──
               if (tips.isNotEmpty) ...[
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
                   child: Text(S.of(context).reportsTipsSection,
                       style: TextStyle(
                         fontSize: 11,

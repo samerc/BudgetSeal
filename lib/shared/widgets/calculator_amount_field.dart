@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 
@@ -343,10 +344,10 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text(
-                    'Done',
+                  child: Text(
+                    S.of(context).commonDone,
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

@@ -338,48 +338,50 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     String? action;
     if (warnings.isNotEmpty) {
       final warningText = warnings.join(', ');
+      final tr = S.of(context);
       action = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(S.of(context).catDeleteTitle),
+          title: Text(tr.catDeleteTitle),
           content: Text(
-            S.of(context).catDeleteWarning(warningText),
+            tr.catDeleteWarning(warningText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'cancel'),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'archive'),
               style: TextButton.styleFrom(foregroundColor: AppColors.accent),
-              child: Text(S.of(context).allocArchiveInstead),
+              child: Text(tr.allocArchiveInstead),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'delete'),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).commonDelete),
+              child: Text(tr.commonDelete),
             ),
           ],
         ),
       );
     } else {
+      final tr = S.of(context);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(S.of(context).catDeleteTitle),
-          content: Text(S.of(context).catDeleteNoTx),
+          title: Text(tr.catDeleteTitle),
+          content: Text(tr.catDeleteNoTx),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               style:
                   TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).commonDelete),
+              child: Text(tr.commonDelete),
             ),
           ],
         ),

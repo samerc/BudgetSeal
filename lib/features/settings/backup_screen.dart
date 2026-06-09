@@ -102,20 +102,21 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   // ── Restore from file ──────────────────────────────────────────
 
   Future<void> _restoreFromFile() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).backupRestoreDialogTitle),
-        content: Text(S.of(context).backupRestoreWarning),
+        title: Text(tr.backupRestoreDialogTitle),
+        content: Text(tr.backupRestoreWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).backupRestoreTitle),
+            child: Text(tr.backupRestoreTitle),
           ),
         ],
       ),
@@ -126,7 +127,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     try {
       final result = await FilePicker.pickFiles(type: FileType.any);
       if (result == null || result.files.isEmpty) return;
-      final path = result.files.single.path;
+      final path = result.files.first.path;
       if (path == null) return;
 
       // Validate the backup file before restoring
@@ -177,24 +178,25 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   // ── Restore from local backup ──────────────────────────────────
 
   Future<void> _restoreLocalBackup(BackupFile backup) async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).backupRestoreDialogTitle),
+        title: Text(tr.backupRestoreDialogTitle),
         content: Text(
-          S.of(context).backupRestoreDialogBody(
+          tr.backupRestoreDialogBody(
               DateFormat.yMMMd().add_jm().format(backup.created),
               backup.sizeFormatted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).backupRestoreTitle),
+            child: Text(tr.backupRestoreTitle),
           ),
         ],
       ),
@@ -206,7 +208,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).backupRestored),
+            content: Text(tr.backupRestored),
             behavior: SnackBarBehavior.floating,
             duration: Duration(seconds: 5),
           ),
@@ -422,7 +424,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           // ── Local backup history ──
           if (_backups.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
               child: Text(
                 S.of(context).backupLocalSection,
                 style: TextStyle(

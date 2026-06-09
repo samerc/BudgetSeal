@@ -37,8 +37,8 @@ class FilePickerProvider implements CloudProvider {
       dialogTitle: 'Select BudgetSeal Sync File',
     );
 
-    if (result != null && result.files.isNotEmpty && result.files.single.path != null) {
-      _filePath = result.files.single.path!;
+    if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
+      _filePath = result.files.first.path!;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKeyPath, _filePath!);
       return true;

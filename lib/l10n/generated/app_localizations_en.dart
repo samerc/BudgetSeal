@@ -1679,6 +1679,11 @@ class SEn extends S {
   String get allocHideOtherCurrencies => 'Hide other currencies';
 
   @override
+  String allocDailyBudget(String amount, int days) {
+    return '$amount/day for $days days';
+  }
+
+  @override
   String allocOtherCurrencies(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

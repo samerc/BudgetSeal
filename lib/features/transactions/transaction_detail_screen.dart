@@ -339,7 +339,7 @@ class _DetailBody extends ConsumerWidget {
           if (entry.lines.length > 1) ...[
             const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
               child: Text(S.of(context).txDetailSplitItems(entry.lines.length),
                   style: TextStyle(
                       fontSize: 11,
@@ -362,7 +362,7 @@ class _DetailBody extends ConsumerWidget {
                   entry.lines.first.categoryId != null)) ...[
             const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
               child: Text(S.of(context).txDetailLineDetail,
                   style: TextStyle(
                       fontSize: 11,
@@ -599,21 +599,22 @@ class _DetailBody extends ConsumerWidget {
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     hapticHeavy();
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: Text(S.of(context).txDetailDeleteTitle),
-        content: Text(S.of(context).txDetailDeleteContent),
+        title: Text(tr.txDetailDeleteTitle),
+        content: Text(tr.txDetailDeleteContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: TextButton.styleFrom(
                 foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonDelete),
+            child: Text(tr.commonDelete),
           ),
         ],
       ),
@@ -691,7 +692,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
           children: [
             const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
               child: Row(
                 children: [
                   Icon(Icons.link_rounded,

@@ -1791,10 +1791,11 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
   void _editSymbol(
       BuildContext context, String code, String currentSymbol) async {
     final ctrl = TextEditingController(text: currentSymbol);
+    final tr = S.of(context);
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).currencySymbolFor(code)),
+        title: Text(tr.currencySymbolFor(code)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -1811,11 +1812,11 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(S.of(context).commonSave),
+            child: Text(tr.commonSave),
           ),
         ],
       ),

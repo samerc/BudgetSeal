@@ -3093,6 +3093,12 @@ abstract class S {
   /// **'Hide other currencies'**
   String get allocHideOtherCurrencies;
 
+  /// Daily budget remaining
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}/day for {days} days'**
+  String allocDailyBudget(String amount, int days);
+
   /// No description provided for @allocOtherCurrencies.
   ///
   /// In en, this message translates to:

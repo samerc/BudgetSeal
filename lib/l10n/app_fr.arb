@@ -5570,6 +5570,7 @@
   "allocGotIt": "Compris",
   "allocBaseCurrencyOnly": "Enveloppes en {currency} uniquement · {count} dans d'autres devises",
   "allocHideOtherCurrencies": "Masquer les autres devises",
+  "allocDailyBudget": "{amount}/jour pendant {days} jours",
   "allocOtherCurrencies": "{count,plural, =1{+ 1 autre devise} other{+ {count} autres devises}}",
   "allocGoalsLoans": "Objectifs et prêts",
   "allocGoalsCount": "{count,plural, =1{1 objectif} other{{count} objectifs}}",

@@ -1699,6 +1699,11 @@ class SFr extends S {
   String get allocHideOtherCurrencies => 'Masquer les autres devises';
 
   @override
+  String allocDailyBudget(String amount, int days) {
+    return '$amount/jour pendant $days jours';
+  }
+
+  @override
   String allocOtherCurrencies(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

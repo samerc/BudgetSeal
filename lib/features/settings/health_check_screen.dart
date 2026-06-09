@@ -176,19 +176,20 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   // ─── Repair ─────────────────────────────────────────────────────────────
 
   Future<void> _repair() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).healthRepairTitle),
-        content: Text(S.of(context).healthRepairMsg),
+        title: Text(tr.healthRepairTitle),
+        content: Text(tr.healthRepairMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(S.of(context).healthRepairDone),
+            child: Text(tr.healthRepairDone),
           ),
         ],
       ),
@@ -328,23 +329,24 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     final report = _report;
     if (report == null || report.softDeletedCount == 0) return;
 
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).healthPurgeTitle),
+        title: Text(tr.healthPurgeTitle),
         content: Text(
-          S.of(context).healthPurgeContent(report.softDeletedCount, S.of(context).healthPurgeSuffix),
+          tr.healthPurgeContent(report.softDeletedCount, tr.healthPurgeSuffix),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: AppColors.overspent),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(S.of(context).healthPurgeButton),
+            child: Text(tr.healthPurgeButton),
           ),
         ],
       ),

@@ -862,7 +862,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                       ),
                       if (hasOtherCurrencies) ...[
                         const SizedBox(height: 4),
-                        GestureDetector(
+                        Tappable(
                           onTap: _toggle,
                           child: Text(
                             _expanded

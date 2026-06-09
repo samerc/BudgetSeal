@@ -241,25 +241,26 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           _load();
                         },
                         onDelete: () async {
+                          final tr = S.of(context);
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (dialogCtx) => AlertDialog(
                               title:
-                                  Text(S.of(context).recurringDeleteTitle),
+                                  Text(tr.recurringDeleteTitle),
                               content: Text(
-                                  S.of(context).recurringDeleteBody),
+                                  tr.recurringDeleteBody),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogCtx, false),
-                                  child: Text(S.of(context).commonCancel),
+                                  child: Text(tr.commonCancel),
                                 ),
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogCtx, true),
                                   style: TextButton.styleFrom(
                                       foregroundColor: AppColors.overspent),
-                                  child: Text(S.of(context).commonDelete),
+                                  child: Text(tr.commonDelete),
                                 ),
                               ],
                             ),
@@ -602,8 +603,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                     _accountId = v;
                     if (v != null) {
                       final acc =
-                          accounts.firstWhere((a) => a.id == v);
-                      _currency = acc.currency;
+                          accounts.where((a) => a.id == v).firstOrNull;
+                      if (acc != null) _currency = acc.currency;
                     }
                   });
                 },
@@ -890,8 +891,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                   setState(() {
                     _accountId = v;
                     if (v != null) {
-                      final acc = accounts.firstWhere((a) => a.id == v);
-                      _currency = acc.currency;
+                      final acc = accounts.where((a) => a.id == v).firstOrNull;
+                      if (acc != null) _currency = acc.currency;
                     }
                   });
                 },

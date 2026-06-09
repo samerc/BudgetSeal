@@ -80,21 +80,22 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     }
 
     if (willExceed && mounted) {
+      final tr = S.of(context);
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).fundOverfundingTitle),
+          title: Text(tr.fundOverfundingTitle),
           content: Text(
-            S.of(context).fundOverfundingMsg(exceedDetails!),
+            tr.fundOverfundingMsg(exceedDetails!),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(S.of(context).fundAnyway),
+              child: Text(tr.fundAnyway),
             ),
           ],
         ),

@@ -740,7 +740,7 @@ class _ObjectiveDetailScreenState
         title: Text(S.of(context).objNewTitle),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsetsDirectional.only(end: 12),
             child: FilledButton.icon(
               onPressed: _loading ? null : _save,
               icon: _loading
@@ -949,17 +949,18 @@ class _ObjectiveDetailScreenState
   }
 
   Future<void> _confirmDelete() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).objDeleteTitle),
-        content: Text(S.of(context).objCannotUndo),
+        title: Text(tr.objDeleteTitle),
+        content: Text(tr.objCannotUndo),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(S.of(context).commonCancel)),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr.commonCancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonDelete),
+            child: Text(tr.commonDelete),
           ),
         ],
       ),

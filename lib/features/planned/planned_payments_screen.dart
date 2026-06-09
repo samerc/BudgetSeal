@@ -694,7 +694,7 @@ class _PlannedCard extends StatelessWidget {
         key: ValueKey(tx.id),
         background: Container(
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 20),
+          padding: const EdgeInsetsDirectional.only(start: 20),
           decoration: BoxDecoration(
             color: AppColors.healthy.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(CardTokens.radius),
@@ -716,7 +716,7 @@ class _PlannedCard extends StatelessWidget {
         ),
         secondaryBackground: Container(
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
+          padding: const EdgeInsetsDirectional.only(end: 20),
           decoration: BoxDecoration(
             color: AppColors.overspent.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(CardTokens.radius),

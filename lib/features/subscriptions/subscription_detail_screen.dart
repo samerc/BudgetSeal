@@ -232,23 +232,24 @@ class _SubscriptionDetailScreenState
     if (!mounted) return;
 
     // Show confirmation dialog
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).subDetailCancelTitle),
+        title: Text(tr.subDetailCancelTitle),
         content: Text(
           futureCount > 0
-              ? S.of(context).subCancelBodyWithTx(futureCount, formatDate(picked))
-              : S.of(context).subCancelBodyNoTx(formatDate(picked)),
+              ? tr.subCancelBodyWithTx(futureCount, formatDate(picked))
+              : tr.subCancelBodyNoTx(formatDate(picked)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(S.of(context).commonBack),
+            child: Text(tr.commonBack),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(S.of(context).commonConfirm),
+            child: Text(tr.commonConfirm),
           ),
         ],
       ),

@@ -1661,6 +1661,11 @@ class SAr extends S {
   String get allocHideOtherCurrencies => 'إخفاء العملات الأخرى';
 
   @override
+  String allocDailyBudget(String amount, int days) {
+    return '$amount/يوم لمدة $days أيام';
+  }
+
+  @override
   String allocOtherCurrencies(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

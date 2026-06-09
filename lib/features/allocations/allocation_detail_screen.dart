@@ -1090,12 +1090,13 @@ class _AllocationDetailScreenState
     final available = unallocBal[fundCurrency] ?? 0.0;
     if (fundAmount > available + 0.01 && mounted) {
       final deficit = fundAmount - available;
+      final tr = S.of(context);
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).allocOverFundingTitle),
+          title: Text(tr.allocOverFundingTitle),
           content: Text(
-            S.of(context).allocOverFundingMsg(
+            tr.allocOverFundingMsg(
               formatAmount(deficit, currency: fundCurrency),
               formatAmount(available, currency: fundCurrency),
             ),
@@ -1103,11 +1104,11 @@ class _AllocationDetailScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(S.of(context).allocFundAnyway),
+              child: Text(tr.allocFundAnyway),
             ),
           ],
         ),
@@ -1870,23 +1871,24 @@ class _AllocationDetailScreenState
   // ---------------------------------------------------------------------------
 
   Future<void> _confirmArchive() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(S.of(context).allocArchiveTitle),
+        title: Text(tr.allocArchiveTitle),
         content: Text(
-          S.of(context).allocArchiveMsg,
+          tr.allocArchiveMsg,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonArchive),
+            child: Text(tr.commonArchive),
           ),
         ],
       ),
@@ -1899,7 +1901,7 @@ class _AllocationDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).allocArchived),
+            content: Text(tr.allocArchived),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1931,30 +1933,31 @@ class _AllocationDetailScreenState
     }
 
     if (warnings.isNotEmpty) {
+      final tr = S.of(context);
       final action = await showDialog<String>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: Text(S.of(context).allocDeleteTitle),
+          title: Text(tr.allocDeleteTitle),
           content: Text(
             '${warnings.join('. ')}.\n\n'
-            '${S.of(context).allocDeleteConsequences}',
+            '${tr.allocDeleteConsequences}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'cancel'),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'archive'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.accent),
-              child: Text(S.of(context).allocArchiveInstead),
+              child: Text(tr.allocArchiveInstead),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, 'delete'),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).allocDeletePermanently),
+              child: Text(tr.allocDeletePermanently),
             ),
           ],
         ),
@@ -1993,23 +1996,24 @@ class _AllocationDetailScreenState
       }
     } else {
       // No linked categories -- simple confirmation.
+      final tr = S.of(context);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: Text(S.of(context).allocDeleteNoLinksTitle),
+          title: Text(tr.allocDeleteNoLinksTitle),
           content: Text(
-            S.of(context).allocDeleteNoLinksMsg,
+            tr.allocDeleteNoLinksMsg,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, false),
-              child: Text(S.of(context).commonCancel),
+              child: Text(tr.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, true),
               style: TextButton.styleFrom(
                   foregroundColor: AppColors.overspent),
-              child: Text(S.of(context).allocDeletePermanently),
+              child: Text(tr.allocDeletePermanently),
             ),
           ],
         ),

@@ -152,20 +152,21 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   }
 
   Future<void> _delete(String id) async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: Text(S.of(context).tmplDeleteTitle),
-        content: Text(S.of(context).tmplDeleteMsg),
+        title: Text(tr.tmplDeleteTitle),
+        content: Text(tr.tmplDeleteMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonDelete),
+            child: Text(tr.commonDelete),
           ),
         ],
       ),

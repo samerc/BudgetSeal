@@ -395,16 +395,17 @@ class _TravelExchangeScreenState
     final sfvColor = AppColors.sfv(context);
     final bdColor = AppColors.bd(context);
 
+    final tr = S.of(context);
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).travelExistingWallet),
+        title: Text(tr.travelExistingWallet),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              S.of(context).travelPreviousWallet(existing.currency),
+              tr.travelPreviousWallet(existing.currency),
               style: TextStyle(color: tsColor),
             ),
             const SizedBox(height: 12),

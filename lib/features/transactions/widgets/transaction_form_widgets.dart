@@ -520,7 +520,7 @@ class LineCard extends StatelessWidget {
               isDense: true,
               contentPadding: EdgeInsets.zero,
               prefixIcon: Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsetsDirectional.only(end: 8),
                 child: Icon(Icons.notes_rounded,
                     size: 14, color: AppColors.th(context)),
               ),

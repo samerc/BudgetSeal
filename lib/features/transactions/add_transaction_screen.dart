@@ -624,6 +624,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     // Warn if any line has a foreign currency with no exchange rate set
+    final tr = S.of(context);
     final missingRateLines = <int>[];
     for (var i = 0; i < _lines.length; i++) {
       final l = _lines[i];
@@ -641,16 +642,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).txFormRateNotSetTitle),
-          content: Text(S.of(context).txFormRateNotSetBody(items, _baseCurrency)),
+          title: Text(tr.txFormRateNotSetTitle),
+          content: Text(tr.txFormRateNotSetBody(items, _baseCurrency)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(S.of(context).commonGoBack),
+              child: Text(tr.commonGoBack),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(S.of(context).commonSaveAnyway),
+              child: Text(tr.commonSaveAnyway),
             ),
           ],
         ),
@@ -663,18 +664,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final duplicateMatch = _checkForDuplicate();
       if (duplicateMatch != null && mounted) {
         final matchTx = duplicateMatch.tx;
-        final matchNote = matchTx.note.isNotEmpty ? matchTx.note : S.of(context).txFormNoTitle;
+        final matchNote = matchTx.note.isNotEmpty ? matchTx.note : tr.txFormNoTitle;
         final matchAmount = formatAmount(matchTx.amount, currency: matchTx.currency);
         final matchDate = formatDate(matchTx.createdAt);
         final proceed = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
-            title: Text(S.of(context).txFormDuplicateTitle),
+            title: Text(tr.txFormDuplicateTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(S.of(context).txFormDuplicateSimilarExists),
+                Text(tr.txFormDuplicateSimilarExists),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -865,7 +866,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             : S.of(context).txFormNewTitle),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsetsDirectional.only(end: 12),
             child: FilledButton.icon(
               onPressed: _loading ? null : _save,
               style: FilledButton.styleFrom(
@@ -1170,7 +1171,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           Container(
               width: 1, height: 24, color: AppColors.bd(context)),
           Padding(
-            padding: const EdgeInsets.only(left: 12),
+            padding: const EdgeInsetsDirectional.only(start: 12),
             child: InkWell(
               onTap: _pickTime,
               borderRadius: BorderRadius.circular(8),

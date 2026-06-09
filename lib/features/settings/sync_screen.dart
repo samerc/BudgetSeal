@@ -137,7 +137,7 @@ class SyncScreen extends ConsumerWidget {
           // ── Provider list ─────────────────────────────────────
           if (!isConnected) ...[
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 12),
+              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 12),
               child: Text(
                 S.of(context).syncConnectSection,
                 style: TextStyle(
@@ -259,15 +259,16 @@ class SyncScreen extends ConsumerWidget {
       if (provider is GoogleDriveProvider && provider.lastConnectError != null) {
         errorMsg = provider.lastConnectError!;
       }
+      final tr = S.of(context);
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text(S.of(context).syncConnectionFailed),
+          title: Text(tr.syncConnectionFailed),
           content: Text(errorMsg),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(S.of(context).commonOk),
+              child: Text(tr.commonOk),
             ),
           ],
         ),
@@ -288,20 +289,21 @@ class SyncScreen extends ConsumerWidget {
 
   Future<void> _confirmDisconnect(
       BuildContext context, SyncNotifier notifier) async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(S.of(context).syncDisconnect),
-        content: Text(S.of(context).syncDisconnectMsg),
+        title: Text(tr.syncDisconnect),
+        content: Text(tr.syncDisconnectMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).syncDisconnect),
+            child: Text(tr.syncDisconnect),
           ),
         ],
       ),
@@ -672,15 +674,16 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
     final ctrl = TextEditingController();
     final confirmCtrl = TextEditingController();
     try {
+    final tr = S.of(context);
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).syncSetPasswordTitle),
+        title: Text(tr.syncSetPasswordTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              S.of(context).syncPasswordDesc,
+              tr.syncPasswordDesc,
               style: const TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 16),
@@ -688,8 +691,8 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
               controller: ctrl,
               obscureText: true,
               decoration: InputDecoration(
-                labelText: S.of(context).syncPasswordLabel,
-                hintText: S.of(context).syncPasswordHint,
+                labelText: tr.syncPasswordLabel,
+                hintText: tr.syncPasswordHint,
               ),
             ),
             const SizedBox(height: 8),
@@ -697,7 +700,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
               controller: confirmCtrl,
               obscureText: true,
               decoration: InputDecoration(
-                labelText: S.of(context).syncConfirmPassword,
+                labelText: tr.syncConfirmPassword,
               ),
             ),
           ],
@@ -742,20 +745,21 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
   }
 
   Future<void> _removePassword() async {
+    final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).syncRemoveEncryptionTitle),
-        content: Text(S.of(context).syncRemoveEncryptionMsg),
+        title: Text(tr.syncRemoveEncryptionTitle),
+        content: Text(tr.syncRemoveEncryptionMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).commonCancel),
+            child: Text(tr.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(S.of(context).commonRemove),
+            child: Text(tr.commonRemove),
           ),
         ],
       ),
@@ -766,7 +770,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       await _checkPassword();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).syncEncryptionRemoved),
+          content: Text(tr.syncEncryptionRemoved),
           behavior: SnackBarBehavior.floating,
         ));
       }

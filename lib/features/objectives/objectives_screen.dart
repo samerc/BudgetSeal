@@ -30,7 +30,7 @@ class ObjectivesScreen extends ConsumerWidget {
         title: Text(S.of(context).objTitle),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsetsDirectional.only(end: 12),
             child: FilledButton.icon(
               onPressed: () => context.push('/objectives/new'),
               icon: const Icon(Icons.add_rounded, size: 18),
