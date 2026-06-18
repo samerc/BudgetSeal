@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Feature identifiers for premium gating.
 abstract class PremiumFeature {
@@ -32,7 +32,6 @@ const _premiumFeatures = <String>{
 
 const _redeemCodeKey = 'premium_redeem_code';
 const _purchaseKey = 'premium_purchased';
-const _storage = FlutterSecureStorage();
 
 /// Whether the user has premium access (purchased or redeemed).
 final hasPremiumProvider =
@@ -47,35 +46,32 @@ class PremiumNotifier extends Notifier<bool> {
 
   Future<void> _load() async {
     try {
-      final purchased = await _storage.read(key: _purchaseKey);
-      if (purchased == 'true') {
-        state = true;
-        return;
-      }
-      final code = await _storage.read(key: _redeemCodeKey);
-      if (code != null && code.isNotEmpty) {
-        state = true;
-        return;
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final purchased = prefs.getBool(_purchaseKey) ?? false;
+      final code = prefs.getString(_redeemCodeKey);
+      state = purchased || (code != null && code.isNotEmpty);
     } catch (_) {}
   }
 
   /// Called when Google Play purchase is confirmed.
   Future<void> setPurchased() async {
     state = true;
-    await _storage.write(key: _purchaseKey, value: 'true');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_purchaseKey, true);
   }
 
   /// Called when a valid redeem code is entered.
   Future<void> redeemCode(String code) async {
     state = true;
-    await _storage.write(key: _redeemCodeKey, value: code);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_redeemCodeKey, code);
   }
 
-  /// Restore purchases (called on app start or from settings).
+  /// Restore premium state from storage (called at app start and from
+  /// settings). Awaiting this before the UI reads the provider avoids the
+  /// race where a gate sees `false` before the async load finishes.
   Future<void> restorePurchases() async {
-    // Phase 1: check secure storage only.
-    // Phase 2: will also query Google Play Billing API.
+    // Phase 1: persisted flag/code. Phase 2 will also query Play Billing.
     await _load();
   }
 }

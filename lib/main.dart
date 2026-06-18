@@ -12,6 +12,7 @@ import 'app.dart';
 import 'core/providers/database_provider.dart';
 import 'core/providers/engine_provider.dart';
 import 'core/providers/household_provider.dart';
+import 'core/providers/premium_provider.dart';
 import 'core/services/daily_reminder_service.dart';
 import 'core/services/notification_service.dart';
 
@@ -69,6 +70,9 @@ Future<void> _startApp() async {
 
   final container = ProviderContainer();
   await container.read(householdServiceProvider).loadSavedHousehold();
+  // Load premium state before the UI builds so feature gates never see a
+  // stale `false` on a cold start (the redeem code must "stick" across restarts).
+  await container.read(hasPremiumProvider.notifier).restorePurchases();
 
   // Process any due recurring transactions.
   try {
