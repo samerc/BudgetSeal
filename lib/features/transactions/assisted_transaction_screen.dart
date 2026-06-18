@@ -108,8 +108,9 @@ class _AssistedTransactionScreenState
       if (mounted) {
         setState(() {
           // Store as "1 accountCurrency = X baseCurrency"
-          // i.e. exchangeRateToBase = 1/rate
-          _expenseExchangeRate = 1.0 / rate;
+          // i.e. exchangeRateToBase = 1/rate. Guard against a 0 rate
+          // (1.0/0 = Infinity would poison balance/report math).
+          _expenseExchangeRate = rate > 0 ? 1.0 / rate : 1.0;
         });
       }
     } catch (e) {
@@ -873,7 +874,7 @@ class _AssistedTransactionScreenState
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.th(context),
+                  color: AppColors.th(ctx),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -882,7 +883,7 @@ class _AssistedTransactionScreenState
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
+                      color: AppColors.tp(ctx))),
               const SizedBox(height: 12),
               ...() {
                 // Pre-fetch balances once for all accounts
@@ -895,7 +896,7 @@ class _AssistedTransactionScreenState
                   decoration: BoxDecoration(
                     color: isSelected
                         ? color.withValues(alpha: 0.1)
-                        : AppColors.sfv(context),
+                        : AppColors.sfv(ctx),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: isSelected
                         ? Border.all(color: color.withValues(alpha: 0.4))
@@ -922,7 +923,7 @@ class _AssistedTransactionScreenState
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context))),
+                            color: AppColors.tp(ctx))),
                     subtitle: () {
                       final bal = balanceMap[a.id];
                       if (bal != null) {
@@ -931,7 +932,7 @@ class _AssistedTransactionScreenState
                           style: TextStyle(
                             fontSize: 12,
                             color: bal >= 0
-                                ? AppColors.ts(context)
+                                ? AppColors.ts(ctx)
                                 : AppColors.overspent,
                           ),
                         );
@@ -939,7 +940,7 @@ class _AssistedTransactionScreenState
                       return Text(a.currency,
                           style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.ts(context)));
+                              color: AppColors.ts(ctx)));
                     }(),
                     trailing: isSelected
                         ? Icon(Icons.check_circle_rounded,
@@ -1025,6 +1026,13 @@ class _AssistedTransactionScreenState
   }
 
   void _calcDigit(String d) {
+    // Block a second decimal point in the same operand — "1.2." can't be
+    // parsed and would silently evaluate to 0, showing the user a wrong total.
+    if (d == '.' &&
+        !_activeLine.startNewOperand &&
+        _activeLine.calcDisplay.contains('.')) {
+      return;
+    }
     HapticFeedback.lightImpact();
     setState(() {
       final line = _activeLine;

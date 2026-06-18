@@ -1125,6 +1125,7 @@ class _AllocationDetailScreenState
         deviceId: 'local',
         note: S.of(context).allocFundedNote,
       );
+      if (!mounted) return;
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
       if (mounted) {
@@ -1539,6 +1540,7 @@ class _AllocationDetailScreenState
           amount: withdrawAmount,
           currency: currency,
         );
+        if (!mounted) return;
         ref.invalidate(allocationsProvider);
         ref.invalidate(unallocatedProvider);
         if (mounted) {

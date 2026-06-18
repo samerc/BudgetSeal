@@ -360,7 +360,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         padding: EdgeInsets.fromLTRB(
             20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
         decoration: BoxDecoration(
-          color: AppColors.sf(context),
+          color: AppColors.sf(ctx),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -374,7 +374,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               const SizedBox(height: 8),
               Text(description,
                   style: TextStyle(
-                      fontSize: 13, color: AppColors.ts(context))),
+                      fontSize: 13, color: AppColors.ts(ctx))),
             ],
             const SizedBox(height: 16),
             TextField(
@@ -388,7 +388,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 counterText: '',
                 hintText: hint,
                 filled: true,
-                fillColor: AppColors.sfv(context),
+                fillColor: AppColors.sfv(ctx),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -404,7 +404,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
-              child: Text(S.of(context).commonSave,
+              child: Text(S.of(ctx).commonSave,
                   style: const
                       TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),

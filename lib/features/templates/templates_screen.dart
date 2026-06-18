@@ -520,7 +520,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             ListTile(
               leading: Icon(Icons.play_arrow_rounded,
                   color: AppColors.accent),
-              title: Text(S.of(context).tmplUse),
+              title: Text(S.of(ctx).tmplUse),
               onTap: () {
                 Navigator.pop(ctx);
                 _useTemplate(t);
@@ -529,7 +529,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             ListTile(
               leading: Icon(Icons.delete_outline,
                   color: AppColors.overspent),
-              title: Text(S.of(context).commonDelete),
+              title: Text(S.of(ctx).commonDelete),
               onTap: () {
                 Navigator.pop(ctx);
                 _delete(t.id);

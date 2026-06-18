@@ -104,6 +104,9 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     }
 
     final engine = ref.read(allocationEngineProvider);
+    // Capture before the await loop — reading S.of(context) after the first
+    // fundAllocation await would use a possibly-disposed context.
+    final fundNote = S.of(context).fundNote;
     setState(() => _isFunding = true);
 
     try {
@@ -116,7 +119,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
           amount: amount,
           currency: currency,
           deviceId: 'local',
-          note: S.of(context).fundNote,
+          note: fundNote,
         );
       }
 

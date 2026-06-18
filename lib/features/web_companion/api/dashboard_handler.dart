@@ -38,6 +38,19 @@ Handler dashboardHandler(Ref ref) {
       final catMap = {for (final c in categories) c.id: c};
       final acctMap = {for (final a in accounts) a.id: a};
 
+      // Batch-fetch first line per recent tx so the dashboard shows the
+      // native currency/amount (tx.amount/currency is always base currency).
+      final txIds = txs.map((t) => t.id).toList();
+      final allLines = txIds.isNotEmpty
+          ? await (db.select(db.transactionLines)
+                ..where((l) => l.transactionId.isIn(txIds)))
+              .get()
+          : [];
+      final firstLineMap = {};
+      for (final l in allLines) {
+        firstLineMap.putIfAbsent(l.transactionId, () => l);
+      }
+
       final allocs = await (db.select(db.allocations)
             ..where((a) =>
                 a.householdId.equals(householdId) & a.archived.equals(false))
@@ -85,8 +98,16 @@ Handler dashboardHandler(Ref ref) {
             .map((a) => allocationToJson(a, allocBalances[a.id] ?? {}))
             .toList(),
         'unallocated': unallocated,
-        'recentTransactions':
-            txs.map((t) => txToJson(t, catMap, acctMap)).toList(),
+        'recentTransactions': txs.map((t) {
+          final json = txToJson(t, catMap, acctMap);
+          final line = firstLineMap[t.id];
+          if (line != null) {
+            json['lineCurrency'] = line.currency;
+            json['lineAmount'] = line.amount;
+            json['lineExchangeRate'] = line.exchangeRateToBase;
+          }
+          return json;
+        }).toList(),
       });
     } catch (e) {
       return serverError(e);

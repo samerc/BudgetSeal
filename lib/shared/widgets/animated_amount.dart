@@ -56,10 +56,15 @@ class _AnimatedAmountState extends State<AnimatedAmount> {
 
   @override
   Widget build(BuildContext context) {
+    // Sanitize: double.round() throws on NaN/Infinity. Never let a bad
+    // upstream value (e.g. a divide-by-zero) crash the dashboard.
+    final amt = widget.amount.isFinite ? widget.amount : 0.0;
+    final prev = _previousAmount.isFinite ? _previousAmount : 0.0;
+
     // On first build with lazyFirstRender, show static text
     if (_firstBuild && widget.lazyFirstRender) {
       return Text(
-        _format(widget.amount),
+        _format(amt),
         style: widget.style ?? Theme.of(context).textTheme.titleLarge,
         textAlign: widget.textAlign,
       );
@@ -67,12 +72,12 @@ class _AnimatedAmountState extends State<AnimatedAmount> {
 
     final decimals = 2;
     final multiplier = pow(10, decimals).toInt();
-    final beginCents = (_previousAmount * multiplier).round();
-    final endCents = (widget.amount * multiplier).round();
+    final beginCents = (prev * multiplier).round();
+    final endCents = (amt * multiplier).round();
 
     return RepaintBoundary(
       child: TweenAnimationBuilder<int>(
-        key: ValueKey('${widget.amount}_${widget.currency}'),
+        key: ValueKey('${amt}_${widget.currency}'),
         tween: IntTween(begin: beginCents, end: endCents),
         duration: widget.duration,
         curve: widget.curve,

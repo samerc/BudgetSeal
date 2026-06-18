@@ -114,7 +114,10 @@ abstract final class AppColors {
   static Color fromHex(String hex) {
     return _hexCache.putIfAbsent(hex, () {
       final h = hex.replaceAll('#', '');
-      return Color(int.parse('FF$h', radix: 16));
+      // tryParse + fallback: a malformed colorHex from a synced/imported file
+      // must not throw FormatException on every render and brick the screen.
+      final v = int.tryParse('FF$h', radix: 16);
+      return Color(v ?? 0xFF607D8B);
     });
   }
 }

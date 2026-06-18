@@ -759,7 +759,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           decoration: BoxDecoration(
-            color: AppColors.sf(context),
+            color: AppColors.sf(ctx),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -767,25 +767,25 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                S.of(context).acctAdjustBalance,
+                S.of(ctx).acctAdjustBalance,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context),
+                  color: AppColors.tp(ctx),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                S.of(context).acctAdjustDesc,
+                S.of(ctx).acctAdjustDesc,
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.ts(context),
+                  color: AppColors.ts(ctx),
                 ),
               ),
               if (_currentBalance != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  S.of(context).acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
+                  S.of(ctx).acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -796,7 +796,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(height: 16),
               CalculatorAmountField(
                 value: double.tryParse(adjustCtrl.text) ?? 0,
-                hintText: S.of(context).acctEnterRealBalance,
+                hintText: S.of(ctx).acctEnterRealBalance,
                 fontSize: 20,
                 onChanged: (v) => adjustCtrl.text = v.toString(),
               ),
@@ -814,7 +814,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(CardTokens.radius)),
                 ),
-                child: Text(S.of(context).acctApplyAdjustment,
+                child: Text(S.of(ctx).acctApplyAdjustment,
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
@@ -866,6 +866,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         }
 
         await _loadAccount(); // Refresh current balance.
+        if (!mounted) return;
         ref.invalidate(accountsProvider);
         ref.invalidate(accountsWithBalanceProvider);
         if (mounted) {

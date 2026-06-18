@@ -738,7 +738,7 @@ class _CategoriesSliver extends ConsumerWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.th(context),
+                  color: AppColors.th(ctx),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -747,11 +747,11 @@ class _CategoriesSliver extends ConsumerWidget {
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
+                      color: AppColors.tp(ctx))),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.edit_rounded),
-                title: Text(S.of(context).catEdit),
+                title: Text(S.of(ctx).catEdit),
                 onTap: () {
                   Navigator.pop(ctx);
                   onEdit(cat);
@@ -761,7 +761,7 @@ class _CategoriesSliver extends ConsumerWidget {
                 leading: Icon(cat.archived
                     ? Icons.unarchive_rounded
                     : Icons.archive_rounded),
-                title: Text(cat.archived ? S.of(context).catUnarchive : S.of(context).catArchive),
+                title: Text(cat.archived ? S.of(ctx).catUnarchive : S.of(ctx).catArchive),
                 onTap: () {
                   Navigator.pop(ctx);
                   onArchive(cat);
@@ -770,7 +770,7 @@ class _CategoriesSliver extends ConsumerWidget {
               ListTile(
                 leading: Icon(Icons.delete_rounded,
                     color: AppColors.overspent),
-                title: Text(S.of(context).commonDelete,
+                title: Text(S.of(ctx).commonDelete,
                     style: TextStyle(color: AppColors.overspent)),
                 onTap: () {
                   Navigator.pop(ctx);

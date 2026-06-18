@@ -247,6 +247,18 @@ class SyncNotifier extends Notifier<SyncState> {
 
       await _engine.restoreFromJson(json);
 
+      // The restored household has its own UUID. Point the app at it —
+      // restoreFromJson only writes DB rows, it does not set the active
+      // household, so without this the app opens with no household and the
+      // restored data is invisible (every screen bails on null householdId).
+      final db = ref.read(databaseProvider);
+      final households = await db.select(db.households).get();
+      if (households.isNotEmpty) {
+        await ref
+            .read(householdServiceProvider)
+            .setCurrentHousehold(households.first.id);
+      }
+
       final key = provider is GoogleDriveProvider ? 'google_drive' : 'file';
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefActiveProvider, key);

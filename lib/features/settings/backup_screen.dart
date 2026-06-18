@@ -85,6 +85,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           ShareParams(files: [XFile(backupPath)], text: 'BudgetSeal backup'),
         );
         await recordBackupDate();
+        // The share sheet can stay open long enough for the screen to be
+        // dismissed; re-check before touching ref.
+        if (!mounted) return;
         ref.invalidate(daysSinceBackupProvider);
         ref.invalidate(showBackupReminderProvider);
       }

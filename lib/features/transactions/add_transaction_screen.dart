@@ -326,7 +326,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (mounted && lineIndex < _lines.length) {
         setState(() {
           _lines[lineIndex].rateCtrl.text = formatRateForInput(rate);
-          _lines[lineIndex].exchangeRateToBase = 1.0 / rate;
+          // Guard against a 0 rate from the FX provider — 1.0/0 = Infinity
+          // would poison all downstream balance/report math.
+          _lines[lineIndex].exchangeRateToBase = rate > 0 ? 1.0 / rate : 1.0;
         });
       }
     } catch (e) {

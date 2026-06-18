@@ -323,7 +323,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               createdAt: Value(date),
             ));
 
-        setState(() => _imported++);
+        if (mounted) setState(() => _imported++);
       }
 
       if (mounted) {
@@ -464,10 +464,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           const SizedBox(height: 12),
           ...List.generate(headers.length, (i) {
             final headerText = headers[i].toString().trim();
-            // Show a sample value from the first data row if available
-            final sampleValue = _csvData!.length > 1
-                ? _csvData![1][i].toString().trim()
-                : '';
+            // Show a sample value from the first data row if available.
+            // Guard the column index: a ragged CSV (second row shorter than
+            // the header row) would otherwise throw RangeError here.
+            final row1 = _csvData!.length > 1 ? _csvData![1] : const [];
+            final sampleValue =
+                i < row1.length ? row1[i].toString().trim() : '';
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),

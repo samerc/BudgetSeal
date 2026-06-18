@@ -222,6 +222,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final image = await picker.pickImage(
         source: source, maxWidth: 2400, maxHeight: 2400, imageQuality: 95);
     if (image == null) return;
+    if (!mounted) return; // user may have left during camera/gallery
 
     setState(() => _scanning = true);
 
@@ -316,7 +317,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(S.of(context).commonCancel)),
+              child: Text(tr.commonCancel)),
           FilledButton(
             onPressed: () {
               final amount =
@@ -334,7 +335,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     _activePersonForSelection ?? _people.first);
               }
             },
-            child: Text(S.of(context).commonOk),
+            child: Text(tr.commonOk),
           ),
         ],
       ),

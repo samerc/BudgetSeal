@@ -156,6 +156,9 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   // ── Calculator logic ──
 
   void _calcDigit(String d) {
+    // Block a second decimal point in the same operand — "1.2." can't be
+    // parsed and would silently evaluate to 0, showing the user a wrong total.
+    if (d == '.' && !_startNewOperand && _calcDisplay.contains('.')) return;
     HapticFeedback.lightImpact();
     setState(() {
       if (_startNewOperand) {

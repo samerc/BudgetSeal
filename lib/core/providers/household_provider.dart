@@ -55,10 +55,17 @@ class HouseholdService {
     // hardcoded English-only set on top of the onboarding set, producing
     // duplicate categories.
 
+    await setCurrentHousehold(id);
+    return id;
+  }
+
+  /// Persist [id] as the active household and update the provider. Used by
+  /// onboarding (after create) and by cloud restore (after the restored
+  /// household is written to the DB) so the app actually points at it.
+  Future<void> setCurrentHousehold(String id) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('current_household_id', id);
     _ref.read(currentHouseholdIdProvider.notifier).set(id);
-    return id;
   }
 
   Future<void> loadSavedHousehold() async {

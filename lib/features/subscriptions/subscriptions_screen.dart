@@ -103,11 +103,12 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   }
 
   double _monthlyEquivalent(double amount, String frequency, int interval) {
+    final iv = interval > 0 ? interval : 1; // guard malformed interval (÷0)
     return switch (frequency) {
-      'daily' => amount * (30.0 / interval),
-      'weekly' => amount * (52.0 / (12.0 * interval)),
-      'monthly' => amount / interval,
-      'yearly' => amount / (12.0 * interval),
+      'daily' => amount * (30.0 / iv),
+      'weekly' => amount * (52.0 / (12.0 * iv)),
+      'monthly' => amount / iv,
+      'yearly' => amount / (12.0 * iv),
       _ => amount,
     };
   }
