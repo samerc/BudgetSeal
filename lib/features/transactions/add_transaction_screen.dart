@@ -271,6 +271,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final accounts = ref.read(accountsProvider).value ?? [];
     final acc = accounts.where((a) => a.id == accountId).firstOrNull;
     if (acc == null) return;
+    if (!mounted || lineIndex >= _lines.length) return;
 
     setState(() {
       _lines[lineIndex].accountId = accountId;
@@ -280,17 +281,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
 
     if (acc.currency != _baseCurrency) {
-      // Don't overwrite a rate that was pre-set (e.g., from bill splitter)
       final existingRate = _lines[lineIndex].exchangeRateToBase;
       if (existingRate == 1.0 || existingRate == 0.0) {
         await _fetchRate(lineIndex, acc.currency);
       }
-    } else {
+    } else if (mounted && lineIndex < _lines.length) {
       setState(() {
         _lines[lineIndex].exchangeRateToBase = 1.0;
         _lines[lineIndex].rateCtrl.text = '';
       });
     }
+
+    if (!mounted || lineIndex >= _lines.length) return;
 
     // Auto-fill category from last transaction with this account
     final afSettings = ref.read(autofillProvider);
@@ -303,7 +305,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (matchesAccount && e.tx.categoryId != null) {
           final categories = ref.read(categoriesProvider).value ?? [];
           final cat = categories.where((c) => c.id == e.tx.categoryId).firstOrNull;
-          if (cat != null && mounted) {
+          if (cat != null && mounted && lineIndex < _lines.length) {
             setState(() {
               _lines[lineIndex].categoryId = cat.id;
               _lines[lineIndex].categoryName = cat.name;
@@ -440,6 +442,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         householdId: householdId,
         envelopeInfo: envelopeInfo,
         onSelected: (id, name, color, txType) {
+          if (!mounted || lineIndex >= _lines.length) return;
           setState(() {
             _lines[lineIndex].categoryId = id;
             _lines[lineIndex].categoryName = name;
@@ -451,6 +454,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           Navigator.of(ctx).pop();
 
           // Auto-fill from last transaction with this category
+          if (!mounted || lineIndex >= _lines.length) return;
           final afSettings = ref.read(autofillProvider);
           final entries = ref.read(transactionEntriesProvider).value ?? [];
           final fill = lookupAutofill(
@@ -459,6 +463,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             settings: afSettings,
           );
           if (fill.hasData) {
+            if (!mounted || lineIndex >= _lines.length) return;
             setState(() {
               final line = _lines[lineIndex];
               final canOverride = afSettings.overrideExisting;
@@ -505,8 +510,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 transactionType: Value(txType),
               ));
           ref.invalidate(categoriesProvider);
-          if (mounted) {
-            // Auto-select the newly created category
+          if (mounted && lineIndex < _lines.length) {
             setState(() {
               _lines[lineIndex].categoryId = newId;
               _lines[lineIndex].categoryName = name;
@@ -534,11 +538,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       },
     );
-    if (result != null && mounted) {
+    if (result != null && mounted && lineIndex < _lines.length) {
       setState(() => _lines[lineIndex].currency = result);
       if (result != _baseCurrency) {
         await _fetchRate(lineIndex, result);
-      } else {
+      } else if (mounted && lineIndex < _lines.length) {
         setState(() {
           _lines[lineIndex].exchangeRateToBase = 1.0;
           _lines[lineIndex].rateCtrl.text = '';
@@ -641,16 +645,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           .join(', ');
       final proceed = await showDialog<bool>(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogCtx) => AlertDialog(
           title: Text(tr.txFormRateNotSetTitle),
           content: Text(tr.txFormRateNotSetBody(items, _baseCurrency)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogCtx, false),
               child: Text(tr.commonGoBack),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogCtx, true),
               child: Text(tr.commonSaveAnyway),
             ),
           ],
@@ -669,7 +673,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         final matchDate = formatDate(matchTx.createdAt);
         final proceed = await showDialog<bool>(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dialogCtx) => AlertDialog(
             title: Text(tr.txFormDuplicateTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -680,7 +684,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(dialogCtx).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -692,22 +696,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       Text('$matchAmount  •  $matchDate',
                           style: TextStyle(
                               fontSize: 13,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                              color: Theme.of(dialogCtx).colorScheme.onSurfaceVariant)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(S.of(context).txFormDuplicateSaveAnyway),
+                Text(tr.txFormDuplicateSaveAnyway),
               ],
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(S.of(context).commonCancel),
+                onPressed: () => Navigator.pop(dialogCtx, false),
+                child: Text(tr.commonCancel),
               ),
               FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(S.of(context).commonSaveAnyway),
+                onPressed: () => Navigator.pop(dialogCtx, true),
+                child: Text(tr.commonSaveAnyway),
               ),
             ],
           ),
