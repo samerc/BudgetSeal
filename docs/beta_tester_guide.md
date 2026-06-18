@@ -31,6 +31,25 @@ The app is 100% offline, no account needed, no data leaves your device.
 
 ---
 
+## Unlock Premium — Free for Beta Testers 🔑
+
+Some features and higher limits are part of **Premium**. As a beta tester you
+get Premium **free** with a redeem code:
+
+1. Tap **More** in the bottom navigation bar
+2. Tap any premium feature (e.g. **Bill Splitter** or **Web Companion**) — the
+   Upgrade screen opens
+3. Tap **Redeem code**
+4. Enter:  **`BETA2026`**
+5. Tap redeem — Premium is unlocked 🎉
+
+This unlocks **Cloud Sync, Web Companion, Travel Exchange, Bill Splitter, and
+Planned Payments**, and removes the free-tier limits (otherwise capped at 3
+accounts / 5 envelopes / 5 recurring). Please redeem the code first so you can
+test everything.
+
+---
+
 ## What to Test
 
 Please try these flows in order. Spend about 15-20 minutes total.
@@ -92,7 +111,7 @@ Even small things matter — "this text feels too small" or "I didn't understand
 
 - The app icon is a placeholder — final design coming soon
 - Performance on first launch may be slightly slow (release build initializing)
-- The "Upgrade to Premium" screen is a placeholder — everything is free during beta
+- Premium is free for you during beta — just redeem code `BETA2026` (see "Unlock Premium" above)
 
 ---
 
