@@ -48,104 +48,17 @@ class HouseholdService {
           createdByDeviceId: deviceId,
         ));
 
-    // Seed default categories
-    await _seedDefaultCategories(db, id);
+    // NOTE: Category seeding is owned entirely by the onboarding flow
+    // (see onboarding_screen.dart, which uses the i18n-aware presets in
+    // category_presets.dart and respects the user's "Full set / Empty"
+    // choice). Do NOT seed categories here — doing so created a second,
+    // hardcoded English-only set on top of the onboarding set, producing
+    // duplicate categories.
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('current_household_id', id);
     _ref.read(currentHouseholdIdProvider.notifier).set(id);
     return id;
-  }
-
-  Future<void> _seedDefaultCategories(AppDatabase db, String householdId) async {
-    const expenseGroups = [
-      ('Food & Dining', '#E57373', [
-        'Groceries',
-        'Restaurants',
-        'Coffee & Snacks',
-      ]),
-      ('Transportation', '#FF8A65', [
-        'Fuel',
-        'Public Transit',
-        'Parking & Tolls',
-      ]),
-      ('Housing', '#64B5F6', [
-        'Rent / Mortgage',
-        'Utilities',
-        'Maintenance',
-      ]),
-      ('Shopping', '#BA68C8', [
-        'Clothing',
-        'Electronics',
-        'Household Items',
-      ]),
-      ('Entertainment', '#FFD54F', [
-        'Subscriptions',
-        'Movies & Events',
-        'Hobbies',
-      ]),
-      ('Health', '#4DB6AC', [
-        'Medical',
-        'Pharmacy',
-        'Fitness',
-      ]),
-      ('Personal', '#90A4AE', [
-        'Education',
-        'Gifts',
-        'Personal Care',
-      ]),
-    ];
-
-    const incomeGroups = [
-      ('Income', '#81C784', [
-        'Salary',
-        'Freelance',
-        'Investments',
-        'Other Income',
-      ]),
-    ];
-
-    for (final (groupName, colorHex, subs) in expenseGroups) {
-      final groupId = _uuid.v4();
-      await db.into(db.categories).insert(CategoriesCompanion.insert(
-            id: groupId,
-            householdId: householdId,
-            name: groupName,
-            colorHex: Value(colorHex),
-            transactionType: const Value('expense'),
-          ));
-      for (final subName in subs) {
-        await db.into(db.categories).insert(CategoriesCompanion.insert(
-              id: _uuid.v4(),
-              householdId: householdId,
-              name: subName,
-              parentId: Value(groupId),
-              colorHex: Value(colorHex),
-              transactionType: const Value('expense'),
-            ));
-      }
-    }
-
-    for (final (groupName, colorHex, subs) in incomeGroups) {
-      final groupId = _uuid.v4();
-      await db.into(db.categories).insert(CategoriesCompanion.insert(
-            id: groupId,
-            householdId: householdId,
-            name: groupName,
-            colorHex: Value(colorHex),
-            transactionType: const Value('income'),
-          ));
-      for (final subName in subs) {
-        await db.into(db.categories).insert(CategoriesCompanion.insert(
-              id: _uuid.v4(),
-              householdId: householdId,
-              name: subName,
-              parentId: Value(groupId),
-              colorHex: Value(colorHex),
-              transactionType: const Value('income'),
-            ));
-      }
-    }
   }
 
   Future<void> loadSavedHousehold() async {

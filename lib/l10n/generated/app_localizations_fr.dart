@@ -5035,6 +5035,18 @@ class SFr extends S {
   String get defcatFlights => 'Vols';
 
   @override
+  String get defcatWater => 'Eau';
+
+  @override
+  String get defcatInsurance => 'Assurance';
+
+  @override
+  String get defcatPets => 'Animaux';
+
+  @override
+  String get defcatOther => 'Autre';
+
+  @override
   String get syncErrEncryptedNoPw =>
       'Le fichier de synchronisation est chiffré mais aucun mot de passe n\'est défini. Entrez votre mot de passe pour déchiffrer.';
 

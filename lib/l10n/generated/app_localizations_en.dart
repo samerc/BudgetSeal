@@ -4962,6 +4962,18 @@ class SEn extends S {
   String get defcatFlights => 'Flights';
 
   @override
+  String get defcatWater => 'Water';
+
+  @override
+  String get defcatInsurance => 'Insurance';
+
+  @override
+  String get defcatPets => 'Pets';
+
+  @override
+  String get defcatOther => 'Other';
+
+  @override
   String get syncErrEncryptedNoPw =>
       'Sync file is encrypted but no password is set. Enter your sync password to decrypt.';
 

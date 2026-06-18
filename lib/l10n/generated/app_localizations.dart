@@ -9165,6 +9165,30 @@ abstract class S {
   /// **'Flights'**
   String get defcatFlights;
 
+  /// Default category preset
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get defcatWater;
+
+  /// Default category preset
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get defcatInsurance;
+
+  /// Default category preset
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get defcatPets;
+
+  /// Default category preset
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get defcatOther;
+
   /// Error
   ///
   /// In en, this message translates to:

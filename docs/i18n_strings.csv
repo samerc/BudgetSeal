@@ -1422,6 +1422,10 @@ defcat_games,Default category preset,Games,ألعاب,Jeux
 defcat_books,Default category preset,Books,كتب,Livres
 defcat_hotels,Default category preset,Hotels,فنادق,Hotels
 defcat_flights,Default category preset,Flights,رحلات طيران,Vols
+defcat_water,Default category preset,Water,مياه,Eau
+defcat_insurance,Default category preset,Insurance,تأمين,Assurance
+defcat_pets,Default category preset,Pets,حيوانات أليفة,Animaux
+defcat_other,Default category preset,Other,أخرى,Autre
 # ──────────────────────────────────────────────,,,,
 # PLANNED PAYMENTS,,,,
 # ──────────────────────────────────────────────,,,,

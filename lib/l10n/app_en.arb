@@ -5802,6 +5802,22 @@
   "@defcatFlights": {
     "description": "Default category preset"
   },
+  "defcatWater": "Water",
+  "@defcatWater": {
+    "description": "Default category preset"
+  },
+  "defcatInsurance": "Insurance",
+  "@defcatInsurance": {
+    "description": "Default category preset"
+  },
+  "defcatPets": "Pets",
+  "@defcatPets": {
+    "description": "Default category preset"
+  },
+  "defcatOther": "Other",
+  "@defcatOther": {
+    "description": "Default category preset"
+  },
   "syncErrEncryptedNoPw": "Sync file is encrypted but no password is set. Enter your sync password to decrypt.",
   "@syncErrEncryptedNoPw": {
     "description": "Error"

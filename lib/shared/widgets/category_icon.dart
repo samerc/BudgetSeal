@@ -79,6 +79,58 @@ const _categoryIconMap = <String, String>{
   'misc': 'box.png',
 };
 
+/// Maps a category's stored emoji directly to a PNG icon. This is
+/// locale-independent (the emoji is the same regardless of the user's
+/// language), so Arabic/French users get the same icons as English users —
+/// unlike [_categoryIconMap], which matches the (translated) category name.
+/// Keys are the emojis used by the onboarding presets (category_presets.dart).
+const _emojiIconMap = <String, String>{
+  '🍕': 'fast-food.png',
+  '🛒': 'groceries.png',
+  '🍽': 'cutlery.png',
+  '☕': 'coffee-cup.png',
+  '🚗': 'car.png',
+  '⛽': 'fuel.png',
+  '🚌': 'tram.png',
+  '🅿': 'parking.png',
+  '🔧': 'gears.png',
+  '🛍': 'shopping.png',
+  '👕': 'tshirt.png',
+  '🖥': 'desktop-computer.png',
+  '🎁': 'gift.png',
+  '💡': 'bills.png',
+  '⚡': 'lightning-bolt.png',
+  '💧': 'water-tap.png',
+  '📶': 'wifi.png',
+  '📱': 'smartphone.png',
+  '📺': 'subscription.png',
+  '🛡': 'padlock.png',
+  '🏥': 'healthcare-and-medical.png',
+  '🏋': 'weight.png',
+  '💊': 'multivitamin.png',
+  '🎬': 'tickets.png',
+  '🍿': 'tickets.png',
+  '🎮': 'gamepad.png',
+  '💰': 'money-bag.png',
+  '💵': 'money-bag.png',
+  '💻': 'laptop.png',
+  '📈': 'investment.png',
+  '🪙': 'increase.png',
+  '🏠': 'house.png',
+  '🔑': 'rent.png',
+  '🛋': 'furniture.png',
+  '👤': 'user.png',
+  '💇': 'haircut.png',
+  '🧴': 'skincare.png',
+  '🎓': 'graduation.png',
+  '📚': 'open-book.png',
+  '✈': 'plane.png',
+  '🏨': 'cottage.png',
+  '🛫': 'plane.png',
+  '🐾': 'pet-bowl.png',
+  '📦': 'box.png',
+};
+
 /// Widget that displays a category icon from the Cashew icon pack.
 /// Falls back to emoji or generic icon.
 class CategoryIcon extends StatelessWidget {
@@ -99,16 +151,26 @@ class CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Try to find a matching PNG icon
-    final lowerName = categoryName.toLowerCase();
-    String? iconFile;
-    for (final entry in _categoryIconMap.entries) {
-      if (lowerName.contains(entry.key)) {
-        iconFile = entry.key;
-        break;
+    String? pngFile;
+
+    // 1. Locale-independent: map the stored emoji straight to a PNG. Strip
+    //    the U+FE0F variation selector so '✈️' and '✈' both match.
+    final em = emoji;
+    if (em != null && em.isNotEmpty) {
+      pngFile = _emojiIconMap[em] ??
+          _emojiIconMap[em.replaceAll('\u{FE0F}', '')];
+    }
+
+    // 2. Fallback: match the (possibly translated) name against English keywords.
+    if (pngFile == null) {
+      final lowerName = categoryName.toLowerCase();
+      for (final entry in _categoryIconMap.entries) {
+        if (lowerName.contains(entry.key)) {
+          pngFile = entry.value;
+          break;
+        }
       }
     }
-    final pngFile = iconFile != null ? _categoryIconMap[iconFile] : null;
 
     return Container(
       width: size,

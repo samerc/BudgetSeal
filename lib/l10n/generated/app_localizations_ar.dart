@@ -4927,6 +4927,18 @@ class SAr extends S {
   String get defcatFlights => 'رحلات طيران';
 
   @override
+  String get defcatWater => 'مياه';
+
+  @override
+  String get defcatInsurance => 'تأمين';
+
+  @override
+  String get defcatPets => 'حيوانات أليفة';
+
+  @override
+  String get defcatOther => 'أخرى';
+
+  @override
   String get syncErrEncryptedNoPw =>
       'ملف المزامنة مشفر ولكن لم يتم تعيين كلمة مرور. أدخل كلمة مرور المزامنة لفك التشفير.';
 

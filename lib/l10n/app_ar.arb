@@ -5420,6 +5420,22 @@
   "@defcatFlights": {
     "description": "Default category preset"
   },
+  "defcatWater": "مياه",
+  "@defcatWater": {
+    "description": "Default category preset"
+  },
+  "defcatInsurance": "تأمين",
+  "@defcatInsurance": {
+    "description": "Default category preset"
+  },
+  "defcatPets": "حيوانات أليفة",
+  "@defcatPets": {
+    "description": "Default category preset"
+  },
+  "defcatOther": "أخرى",
+  "@defcatOther": {
+    "description": "Default category preset"
+  },
   "syncErrEncryptedNoPw": "ملف المزامنة مشفر ولكن لم يتم تعيين كلمة مرور. أدخل كلمة مرور المزامنة لفك التشفير.",
   "@syncErrEncryptedNoPw": {
     "description": "Error"

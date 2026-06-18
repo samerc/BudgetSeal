@@ -5420,6 +5420,22 @@
   "@defcatFlights": {
     "description": "Default category preset"
   },
+  "defcatWater": "Eau",
+  "@defcatWater": {
+    "description": "Default category preset"
+  },
+  "defcatInsurance": "Assurance",
+  "@defcatInsurance": {
+    "description": "Default category preset"
+  },
+  "defcatPets": "Animaux",
+  "@defcatPets": {
+    "description": "Default category preset"
+  },
+  "defcatOther": "Autre",
+  "@defcatOther": {
+    "description": "Default category preset"
+  },
   "syncErrEncryptedNoPw": "Le fichier de synchronisation est chiffré mais aucun mot de passe n'est défini. Entrez votre mot de passe pour déchiffrer.",
   "@syncErrEncryptedNoPw": {
     "description": "Error"
