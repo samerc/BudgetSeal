@@ -15,9 +15,14 @@ import 'core/providers/household_provider.dart';
 import 'core/providers/premium_provider.dart';
 import 'core/services/daily_reminder_service.dart';
 import 'core/services/notification_service.dart';
+import 'shared/utils/app_info.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load the real app version/build so the About & Settings screens never
+  // show a stale hardcoded version.
+  await initAppInfo();
 
   // Global error handler for Flutter framework errors (build, layout, paint)
   FlutterError.onError = (details) {

@@ -79,7 +79,9 @@ class AboutScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'v$appVersion · $appBuildDate',
+                appBuildNumber.isEmpty
+                    ? 'v$appVersion'
+                    : 'v$appVersion ($appBuildNumber)',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
