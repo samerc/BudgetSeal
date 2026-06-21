@@ -1688,7 +1688,7 @@
   "@allocSectionSavings": {
     "description": "Section header"
   },
-  "allocSectionFlexible": "Flexible",
+  "allocSectionFlexible": "Rollover",
   "@allocSectionFlexible": {
     "description": "Section header"
   },
@@ -1801,7 +1801,7 @@
   "@allocSaving": {
     "description": "Chip label"
   },
-  "allocFlexible": "Flexible",
+  "allocFlexible": "Rollover",
   "@allocFlexible": {
     "description": "Chip label"
   },
@@ -2075,8 +2075,8 @@
       }
     }
   },
-  "allocFlexibleTitle": "Flexible",
-  "allocFlexibleDesc": "For anything else \u2014 set an optional target or leave it open. Accumulates over time.",
+  "allocFlexibleTitle": "Rollover",
+  "allocFlexibleDesc": "Unspent money rolls over to the next period. Set an optional target, or leave it open.",
   "allocCycleHelp": "\u2022 Periodic: resets each month (e.g. groceries budget)\n\u2022 Permanent: accumulates over time (e.g. emergency fund)",
   "allocRolloverBalance": "Rollover balance",
   "allocRolloverDesc": "Carry remaining funds to the next period",

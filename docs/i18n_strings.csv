@@ -372,7 +372,7 @@ alloc_unallocated,Banner label,Unallocated,غير موزع,Non affecté
 alloc_fund_envelopes,Button,Fund Envelopes,تمويل الأظرف,Financer les enveloppes
 alloc_section_spending,Section header,Spending,إنفاق,Dépenses
 alloc_section_savings,Section header,Savings,ادخار,Épargne
-alloc_section_flexible,Section header,Flexible,مرن,Flexible
+alloc_section_flexible,Section header,Rollover,مُرحَّل,Cumulatif
 alloc_no_match,Search empty state,"No envelopes match ""{query}""","لا أظرف تطابق """"{query}""""",Aucune enveloppe ne correspond à « {query} »
 alloc_create_tooltip,FAB tooltip,Create envelope,إنشاء ظرف,Créer une enveloppe
 alloc_no_yet,Empty state title,No envelopes yet,لا أظرف بعد,Aucune enveloppe pour le moment
@@ -403,7 +403,7 @@ alloc_saving_open_desc,Type description,For general savings with no specific goa
 alloc_info_banner,Info text,Envelopes don't move money between accounts. They help you plan how to use the money you already have.,الأظرف لا تنقل المال بين الحسابات. إنها تساعدك على تخطيط استخدام أموالك الحالية.,Les enveloppes ne déplacent pas l'argent entre les comptes. Elles vous aident à planifier l'utilisation de votre argent.
 alloc_purpose_section,Section header,PURPOSE,الغرض,OBJECTIF
 alloc_saving,Chip label,Saving,ادخار,Épargne
-alloc_flexible,Chip label,Flexible,مرن,Flexible
+alloc_flexible,Chip label,Rollover,مُرحَّل,Cumulatif
 alloc_cycle_section,Section header,CYCLE,الدورة,CYCLE
 alloc_periodic_desc,Help text,• Periodic: resets each month (e.g. groceries budget)\n• Permanent: accumulates over time (e.g. emergency fund),• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ),• Périodique : se réinitialise chaque mois (ex. budget courses)\n• Permanent : s'accumule dans le temps (ex. fonds d'urgence)
 alloc_periodic,Chip label,Periodic,دوري,Périodique

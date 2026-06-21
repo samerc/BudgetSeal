@@ -1494,7 +1494,7 @@
   "@allocSectionSavings": {
     "description": "Section header"
   },
-  "allocSectionFlexible": "مرن",
+  "allocSectionFlexible": "مُرحَّل",
   "@allocSectionFlexible": {
     "description": "Section header"
   },
@@ -1607,7 +1607,7 @@
   "@allocSaving": {
     "description": "Chip label"
   },
-  "allocFlexible": "مرن",
+  "allocFlexible": "مُرحَّل",
   "@allocFlexible": {
     "description": "Chip label"
   },
@@ -5566,8 +5566,8 @@
   "languageArabic": "العربية",
   "languageFrench": "Français",
   "languagePickerTitle": "اللغة",
-  "allocFlexibleTitle": "مرن",
-  "allocFlexibleDesc": "لأي شيء آخر — حدد هدفاً اختيارياً أو اتركه مفتوحاً. يتراكم مع الوقت.",
+  "allocFlexibleTitle": "مُرحَّل",
+  "allocFlexibleDesc": "تُرحَّل الأموال غير المنفقة إلى الفترة التالية. حدّد هدفاً اختيارياً أو اتركه مفتوحاً.",
   "allocCycleHelp": "• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)",
   "allocRolloverBalance": "ترحيل الرصيد",
   "allocRolloverDesc": "ترحيل الأموال المتبقية للفترة التالية",

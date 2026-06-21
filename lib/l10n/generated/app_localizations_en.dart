@@ -1185,7 +1185,7 @@ class SEn extends S {
   String get allocSectionSavings => 'Savings';
 
   @override
-  String get allocSectionFlexible => 'Flexible';
+  String get allocSectionFlexible => 'Rollover';
 
   @override
   String allocNoMatch(String query) {
@@ -1273,7 +1273,7 @@ class SEn extends S {
   String get allocSaving => 'Saving';
 
   @override
-  String get allocFlexible => 'Flexible';
+  String get allocFlexible => 'Rollover';
 
   @override
   String get allocCycleSection => 'CYCLE';
@@ -1486,11 +1486,11 @@ class SEn extends S {
   }
 
   @override
-  String get allocFlexibleTitle => 'Flexible';
+  String get allocFlexibleTitle => 'Rollover';
 
   @override
   String get allocFlexibleDesc =>
-      'For anything else — set an optional target or leave it open. Accumulates over time.';
+      'Unspent money rolls over to the next period. Set an optional target, or leave it open.';
 
   @override
   String get allocCycleHelp =>

@@ -334,8 +334,10 @@ class _AllocationDetailScreenState
                   Expanded(
                     child: TextField(
                       controller: _nameController,
-                      decoration:
-                          _inputDecoration(l.allocNameHint),
+                      // Hide the maxLength counter so it doesn't add height
+                      // below the field and push the icon out of alignment.
+                      decoration: _inputDecoration(l.allocNameHint)
+                          .copyWith(counterText: ''),
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.done,
                       autofocus: _isNew && !_showEmojiGrid,

@@ -1178,7 +1178,7 @@ class SAr extends S {
   String get allocSectionSavings => 'ادخار';
 
   @override
-  String get allocSectionFlexible => 'مرن';
+  String get allocSectionFlexible => 'مُرحَّل';
 
   @override
   String allocNoMatch(String query) {
@@ -1265,7 +1265,7 @@ class SAr extends S {
   String get allocSaving => 'ادخار';
 
   @override
-  String get allocFlexible => 'مرن';
+  String get allocFlexible => 'مُرحَّل';
 
   @override
   String get allocCycleSection => 'الدورة';
@@ -1472,11 +1472,11 @@ class SAr extends S {
   }
 
   @override
-  String get allocFlexibleTitle => 'مرن';
+  String get allocFlexibleTitle => 'مُرحَّل';
 
   @override
   String get allocFlexibleDesc =>
-      'لأي شيء آخر — حدد هدفاً اختيارياً أو اتركه مفتوحاً. يتراكم مع الوقت.';
+      'تُرحَّل الأموال غير المنفقة إلى الفترة التالية. حدّد هدفاً اختيارياً أو اتركه مفتوحاً.';
 
   @override
   String get allocCycleHelp =>

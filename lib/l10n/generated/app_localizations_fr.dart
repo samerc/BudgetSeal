@@ -1199,7 +1199,7 @@ class SFr extends S {
   String get allocSectionSavings => 'Épargne';
 
   @override
-  String get allocSectionFlexible => 'Flexible';
+  String get allocSectionFlexible => 'Cumulatif';
 
   @override
   String allocNoMatch(String query) {
@@ -1287,7 +1287,7 @@ class SFr extends S {
   String get allocSaving => 'Épargne';
 
   @override
-  String get allocFlexible => 'Flexible';
+  String get allocFlexible => 'Cumulatif';
 
   @override
   String get allocCycleSection => 'CYCLE';
@@ -1503,11 +1503,11 @@ class SFr extends S {
   }
 
   @override
-  String get allocFlexibleTitle => 'Flexible';
+  String get allocFlexibleTitle => 'Cumulatif';
 
   @override
   String get allocFlexibleDesc =>
-      'Pour tout le reste — définissez un objectif optionnel ou laissez ouvert. S\'accumule au fil du temps.';
+      'Le montant non dépensé est reporté à la période suivante. Définissez une cible facultative ou laissez-le ouvert.';
 
   @override
   String get allocCycleHelp =>

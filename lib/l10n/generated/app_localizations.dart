@@ -2226,7 +2226,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'Flexible'**
+  /// **'Rollover'**
   String get allocSectionFlexible;
 
   /// No description provided for @allocNoMatch.
@@ -2388,7 +2388,7 @@ abstract class S {
   /// Chip label
   ///
   /// In en, this message translates to:
-  /// **'Flexible'**
+  /// **'Rollover'**
   String get allocFlexible;
 
   /// Section header
@@ -2784,13 +2784,13 @@ abstract class S {
   /// No description provided for @allocFlexibleTitle.
   ///
   /// In en, this message translates to:
-  /// **'Flexible'**
+  /// **'Rollover'**
   String get allocFlexibleTitle;
 
   /// No description provided for @allocFlexibleDesc.
   ///
   /// In en, this message translates to:
-  /// **'For anything else — set an optional target or leave it open. Accumulates over time.'**
+  /// **'Unspent money rolls over to the next period. Set an optional target, or leave it open.'**
   String get allocFlexibleDesc;
 
   /// No description provided for @allocCycleHelp.
