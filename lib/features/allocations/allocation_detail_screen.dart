@@ -1754,16 +1754,35 @@ class _AllocationDetailScreenState
     );
 
     if (selected != null && mounted) {
+      if (_isNew) {
+        // The envelope doesn't exist yet — stage the link in memory and
+        // persist it in _save() once the real id is generated. (Writing now
+        // would link the category to the literal 'new' id and orphan it.)
+        final cat = (ref.read(categoriesProvider).value ?? [])
+            .where((c) => c.id == selected)
+            .firstOrNull;
+        if (cat != null) {
+          setState(() => _linkedCategories = [..._linkedCategories, cat]);
+        }
+        return;
+      }
       final db = ref.read(databaseProvider);
       await AllocationsDao(db)
           .linkCategory(selected, widget.allocationId);
+      ref.invalidate(categoriesProvider);
       await _loadAllocation();
     }
   }
 
   Future<void> _unlinkCategory(String categoryId) async {
+    if (_isNew) {
+      setState(() => _linkedCategories =
+          _linkedCategories.where((c) => c.id != categoryId).toList());
+      return;
+    }
     final db = ref.read(databaseProvider);
     await AllocationsDao(db).unlinkCategory(categoryId);
+    ref.invalidate(categoriesProvider);
     await _loadAllocation();
   }
 
@@ -2093,6 +2112,15 @@ class _AllocationDetailScreenState
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
         deviceId: 'local',
       ));
+      // Persist the categories the user linked during creation, now that the
+      // real allocation id exists.
+      if (_isNew) {
+        for (final cat in _linkedCategories) {
+          await dao.linkCategory(cat.id, allocId);
+        }
+      }
+      ref.invalidate(categoriesProvider);
+      ref.invalidate(allocationsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
