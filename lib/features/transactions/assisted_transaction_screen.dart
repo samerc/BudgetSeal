@@ -365,6 +365,13 @@ class _AssistedTransactionScreenState
     final catHint = AppColors.th(context);
     final catSurfaceVariant = AppColors.sfv(context);
     final searchFocus = FocusNode();
+    final searchCtrl = TextEditingController();
+    // These live in the method scope (not inside the builder) so they survive
+    // the modal re-running its builder on keyboard inset changes — otherwise
+    // the search query/type reset whenever the keyboard is dismissed.
+    var localType = _type;
+    String? expandedParentId;
+    var searchQuery = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -372,9 +379,6 @@ class _AssistedTransactionScreenState
       enableDrag: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        var localType = _type;
-        String? expandedParentId;
-        var searchQuery = '';
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final allForType = categories
@@ -490,6 +494,7 @@ class _AssistedTransactionScreenState
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                          controller: searchCtrl,
                           focusNode: searchFocus,
                           onChanged: (v) =>
                               setSheetState(() => searchQuery = v),
@@ -511,6 +516,7 @@ class _AssistedTransactionScreenState
                                         size: 16,
                                         color: catHint),
                                     onPressed: () {
+                                      searchCtrl.clear();
                                       setSheetState(
                                           () => searchQuery = '');
                                       searchFocus.unfocus();
@@ -704,6 +710,7 @@ class _AssistedTransactionScreenState
       },
     ).then((_) {
       searchFocus.dispose();
+      searchCtrl.dispose();
       // If the category popup closed without a selection (e.g. user navigated
       // to /categories), remove the incomplete line item.
       if (!mounted) return;
