@@ -500,6 +500,10 @@ acct_type_bank,Type option,Bank,بنك,Banque
 acct_type_credit,Type option,Credit card,بطاقة ائتمان,Carte de crédit
 acct_type_digital,Type option,Digital wallet,محفظة رقمية,Portefeuille numérique
 acct_adjust_balance,Menu item,Adjust Balance,تعديل الرصيد,Ajuster le solde
+acct_has_txns_msg,Account delete,"This account has {count} transaction(s). Archive it to keep everything but hide it, or delete it along with those transactions.",يحتوي هذا الحساب على {count} معاملة. أرشفه للاحتفاظ بكل شيء مع إخفائه، أو احذفه مع تلك المعاملات.,Ce compte comporte {count} transaction(s). Archivez-le pour tout conserver mais le masquer, ou supprimez-le avec ces transactions.
+acct_delete_with_txns,Account delete,Delete with transactions,حذف مع المعاملات,Supprimer avec les transactions
+acct_delete_shared_msg,Account delete,"{count} of these are shared with other accounts (transfers or splits). Deleting will also remove them and change those accounts' balances. Continue?",{count} منها مشتركة مع حسابات أخرى (تحويلات أو تقسيمات). سيؤدي الحذف إلى إزالتها أيضاً وتغيير أرصدة تلك الحسابات. هل تريد المتابعة؟,{count} d'entre elles sont partagées avec d'autres comptes (virements ou ventilations). La suppression les retirera aussi et modifiera le solde de ces comptes. Continuer ?
+acct_delete_count_confirm,Account delete,Permanently delete this account and {count} transaction(s)? This cannot be undone.,حذف هذا الحساب و{count} معاملة نهائياً؟ لا يمكن التراجع عن هذا.,Supprimer définitivement ce compte et {count} transaction(s) ? Cette action est irréversible.
 # ──────────────────────────────────────────────,,,,
 # CATEGORIES,,,,
 # ──────────────────────────────────────────────,,,,

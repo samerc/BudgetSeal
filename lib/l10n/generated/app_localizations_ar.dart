@@ -2017,6 +2017,24 @@ class SAr extends S {
   String get acctArchiveInstead => 'أرشفة بدلاً من ذلك';
 
   @override
+  String acctHasTxnsMsg(int count) {
+    return 'يحتوي هذا الحساب على $count معاملة. أرشفه للاحتفاظ بكل شيء مع إخفائه، أو احذفه مع تلك المعاملات.';
+  }
+
+  @override
+  String get acctDeleteWithTxns => 'حذف مع المعاملات';
+
+  @override
+  String acctDeleteSharedMsg(int count) {
+    return '$count منها مشتركة مع حسابات أخرى (تحويلات أو تقسيمات). سيؤدي الحذف إلى إزالتها أيضاً وتغيير أرصدة تلك الحسابات. هل تريد المتابعة؟';
+  }
+
+  @override
+  String acctDeleteCountConfirm(int count) {
+    return 'حذف هذا الحساب و$count معاملة نهائياً؟ لا يمكن التراجع عن هذا.';
+  }
+
+  @override
   String get catTitle => 'الفئات';
 
   @override

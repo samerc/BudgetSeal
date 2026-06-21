@@ -3639,6 +3639,30 @@ abstract class S {
   /// **'Archive Instead'**
   String get acctArchiveInstead;
 
+  /// No description provided for @acctHasTxnsMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has {count} transaction(s). Archive it to keep everything but hide it, or delete it along with those transactions.'**
+  String acctHasTxnsMsg(int count);
+
+  /// No description provided for @acctDeleteWithTxns.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete with transactions'**
+  String get acctDeleteWithTxns;
+
+  /// No description provided for @acctDeleteSharedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of these are shared with other accounts (transfers or splits). Deleting will also remove them and change those accounts\' balances. Continue?'**
+  String acctDeleteSharedMsg(int count);
+
+  /// No description provided for @acctDeleteCountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete this account and {count} transaction(s)? This cannot be undone.'**
+  String acctDeleteCountConfirm(int count);
+
   /// Screen title
   ///
   /// In en, this message translates to:

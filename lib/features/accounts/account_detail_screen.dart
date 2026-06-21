@@ -1076,92 +1076,171 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
   Future<void> _confirmDelete() async {
     final db = ref.read(databaseProvider);
+    final accId = widget.accountId;
 
-    // Count transactions referencing this account (parallel queries).
-    final results = await Future.wait([
-      (db.select(db.transactions)
-            ..where((t) => t.accountId.equals(widget.accountId))
-            ..where((t) => t.deleted.equals(false)))
-          .get(),
-      (db.select(db.transactions)
-            ..where((t) => t.destinationAccountId.equals(widget.accountId))
-            ..where((t) => t.deleted.equals(false)))
-          .get(),
-      (db.select(db.transactionLines)
-            ..where((t) => t.accountId.equals(widget.accountId)))
-          .get(),
-    ]);
+    // Gather every non-deleted transaction that references this account:
+    // as the header account, a transfer destination, or a split line.
+    final headerTxs = await (db.select(db.transactions)
+          ..where((t) => t.accountId.equals(accId))
+          ..where((t) => t.deleted.equals(false)))
+        .get();
+    final destTxs = await (db.select(db.transactions)
+          ..where((t) => t.destinationAccountId.equals(accId))
+          ..where((t) => t.deleted.equals(false)))
+        .get();
+    final accLines = await (db.select(db.transactionLines)
+          ..where((l) => l.accountId.equals(accId)))
+        .get();
 
-    final totalRefs =
-        results[0].length + results[1].length + results[2].length;
+    final refTxIds = <String>{
+      ...headerTxs.map((t) => t.id),
+      ...destTxs.map((t) => t.id),
+      ...accLines.map((l) => l.transactionId),
+    };
 
     if (!mounted) return;
+    final tr = S.of(context);
 
-    if (totalRefs > 0) {
-      // Has transactions -- cannot delete, offer archive instead.
-      final tr = S.of(context);
-      final action = await showDialog<String>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(tr.acctCannotDeleteTitle),
-          content: Text(
-            tr.acctCannotDeleteMsg(totalRefs),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'cancel'),
-              child: Text(tr.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'archive'),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accent),
-              child: Text(tr.acctArchiveInstead),
-            ),
-          ],
-        ),
-      );
-
-      if (action == 'archive' && mounted) {
-        await (db.update(db.accounts)
-              ..where((a) => a.id.equals(widget.accountId)))
-            .write(const AccountsCompanion(archived: Value(true)));
-        ref.invalidate(accountsProvider);
-        ref.invalidate(accountsWithBalanceProvider);
-        if (mounted) context.pop();
-      }
-    } else {
-      // No transactions -- allow permanent deletion with confirmation.
-      final tr = S.of(context);
+    // ── No transactions: simple permanent delete ──
+    if (refTxIds.isEmpty) {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dctx) => AlertDialog(
           title: Text(tr.acctDeleteTitle),
-          content: Text(
-            tr.acctDeleteMsg,
-          ),
+          content: Text(tr.acctDeleteMsg),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(tr.commonCancel),
-            ),
+                onPressed: () => Navigator.pop(dctx, false),
+                child: Text(tr.commonCancel)),
             TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.overspent),
+              onPressed: () => Navigator.pop(dctx, true),
+              style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
               child: Text(tr.allocDeletePermanently),
             ),
           ],
         ),
       );
-
       if (confirmed == true && mounted) {
-        await (db.delete(db.accounts)
-              ..where((a) => a.id.equals(widget.accountId)))
-            .go();
+        await (db.delete(db.accounts)..where((a) => a.id.equals(accId))).go();
         ref.invalidate(accountsProvider);
         ref.invalidate(accountsWithBalanceProvider);
         if (mounted) context.pop();
+      }
+      return;
+    }
+
+    // ── Has transactions: archive, or delete with transactions ──
+    final action = await showDialog<String>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(tr.acctDeleteTitle),
+        content: Text(tr.acctHasTxnsMsg(refTxIds.length)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, 'cancel'),
+              child: Text(tr.commonCancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, 'archive'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+            child: Text(tr.acctArchiveInstead),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, 'delete'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: Text(tr.acctDeleteWithTxns),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || action == null || action == 'cancel') return;
+
+    if (action == 'archive') {
+      await (db.update(db.accounts)..where((a) => a.id.equals(accId)))
+          .write(const AccountsCompanion(archived: Value(true)));
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountsWithBalanceProvider);
+      if (mounted) context.pop();
+      return;
+    }
+
+    // action == 'delete' → detect transactions shared with OTHER accounts
+    // (transfers or cross-account splits), since deleting those also changes
+    // the other accounts' balances.
+    final allLines = await (db.select(db.transactionLines)
+          ..where((l) => l.transactionId.isIn(refTxIds.toList())))
+        .get();
+    final linesByTx = <String, List<TransactionLine>>{};
+    for (final l in allLines) {
+      linesByTx.putIfAbsent(l.transactionId, () => []).add(l);
+    }
+    final txById = <String, Transaction>{
+      for (final t in [...headerTxs, ...destTxs]) t.id: t,
+    };
+    final missingIds =
+        refTxIds.where((id) => !txById.containsKey(id)).toList();
+    if (missingIds.isNotEmpty) {
+      for (final t in await (db.select(db.transactions)
+            ..where((t) => t.id.isIn(missingIds)))
+          .get()) {
+        txById[t.id] = t;
+      }
+    }
+
+    var sharedCount = 0;
+    for (final t in txById.values) {
+      final accts = <String>{};
+      if (t.accountId.isNotEmpty) accts.add(t.accountId);
+      if (t.destinationAccountId != null) accts.add(t.destinationAccountId!);
+      for (final l in (linesByTx[t.id] ?? const <TransactionLine>[])) {
+        if (l.accountId != null) accts.add(l.accountId!);
+      }
+      accts.remove(accId);
+      if (accts.isNotEmpty) sharedCount++;
+    }
+
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(tr.acctDeleteTitle),
+        content: Text(sharedCount > 0
+            ? tr.acctDeleteSharedMsg(sharedCount)
+            : tr.acctDeleteCountConfirm(refTxIds.length)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, false),
+              child: Text(tr.commonCancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: Text(tr.allocDeletePermanently),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      // Soft-delete each referencing transaction through the engine so ledger
+      // entries are removed and balances/sync stay correct, then drop the account.
+      final engine = ref.read(allocationEngineProvider);
+      for (final id in refTxIds) {
+        await engine.deleteTransaction(id);
+      }
+      await (db.delete(db.accounts)..where((a) => a.id.equals(accId))).go();
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountsWithBalanceProvider);
+      ref.invalidate(allocationsProvider);
+      ref.invalidate(unallocatedProvider);
+      ref.invalidate(transactionEntriesProvider);
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(S.of(context).commonSomethingWentWrong),
+            behavior: SnackBarBehavior.floating));
       }
     }
   }

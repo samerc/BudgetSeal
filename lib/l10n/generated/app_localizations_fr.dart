@@ -2062,6 +2062,24 @@ class SFr extends S {
   String get acctArchiveInstead => 'Archiver à la place';
 
   @override
+  String acctHasTxnsMsg(int count) {
+    return 'Ce compte comporte $count transaction(s). Archivez-le pour tout conserver mais le masquer, ou supprimez-le avec ces transactions.';
+  }
+
+  @override
+  String get acctDeleteWithTxns => 'Supprimer avec les transactions';
+
+  @override
+  String acctDeleteSharedMsg(int count) {
+    return '$count d\'entre elles sont partagées avec d\'autres comptes (virements ou ventilations). La suppression les retirera aussi et modifiera le solde de ces comptes. Continuer ?';
+  }
+
+  @override
+  String acctDeleteCountConfirm(int count) {
+    return 'Supprimer définitivement ce compte et $count transaction(s) ? Cette action est irréversible.';
+  }
+
+  @override
   String get catTitle => 'Catégories';
 
   @override

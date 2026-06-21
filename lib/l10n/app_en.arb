@@ -2316,6 +2316,13 @@
   "acctDeleteTitle": "Delete Account Permanently",
   "acctDeleteMsg": "This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.",
   "acctArchiveInstead": "Archive Instead",
+  "acctHasTxnsMsg": "This account has {count} transaction(s). Archive it to keep everything but hide it, or delete it along with those transactions.",
+  "@acctHasTxnsMsg": {"placeholders": {"count": {"type": "int"}}},
+  "acctDeleteWithTxns": "Delete with transactions",
+  "acctDeleteSharedMsg": "{count} of these are shared with other accounts (transfers or splits). Deleting will also remove them and change those accounts' balances. Continue?",
+  "@acctDeleteSharedMsg": {"placeholders": {"count": {"type": "int"}}},
+  "acctDeleteCountConfirm": "Permanently delete this account and {count} transaction(s)? This cannot be undone.",
+  "@acctDeleteCountConfirm": {"placeholders": {"count": {"type": "int"}}},
   "catTitle": "Categories",
   "@catTitle": {
     "description": "Screen title"

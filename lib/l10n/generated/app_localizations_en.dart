@@ -2037,6 +2037,24 @@ class SEn extends S {
   String get acctArchiveInstead => 'Archive Instead';
 
   @override
+  String acctHasTxnsMsg(int count) {
+    return 'This account has $count transaction(s). Archive it to keep everything but hide it, or delete it along with those transactions.';
+  }
+
+  @override
+  String get acctDeleteWithTxns => 'Delete with transactions';
+
+  @override
+  String acctDeleteSharedMsg(int count) {
+    return '$count of these are shared with other accounts (transfers or splits). Deleting will also remove them and change those accounts\' balances. Continue?';
+  }
+
+  @override
+  String acctDeleteCountConfirm(int count) {
+    return 'Permanently delete this account and $count transaction(s)? This cannot be undone.';
+  }
+
+  @override
   String get catTitle => 'Categories';
 
   @override
