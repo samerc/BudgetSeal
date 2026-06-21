@@ -2461,6 +2461,61 @@ class SAr extends S {
   String get objCannotUndo => 'لا يمكن التراجع عن هذا.';
 
   @override
+  String get objSavedSoFar => 'ما تم توفيره';
+
+  @override
+  String get objRecordedSoFar => 'ما تم تسجيله';
+
+  @override
+  String get objEmptyHintGoal =>
+      'أضِف أموالاً من أحد حساباتك لتنمية هذا الهدف.';
+
+  @override
+  String get objEmptyHintLoanLent => 'سجّل الدفعات التي تستلمها لتتبّع السداد.';
+
+  @override
+  String get objEmptyHintLoanBorrowed =>
+      'سجّل الدفعات التي تدفعها لتتبّع ما تدين به.';
+
+  @override
+  String get objWhatIsGoal =>
+      'ادّخر نحو هدف. كل إيداع يخرج المال من الحساب الذي تختاره ويُسجَّل كمعاملة.';
+
+  @override
+  String get objWhatIsLoan =>
+      'تتبّع الأموال التي أقرضتها أو اقترضتها. كل دفعة مسجَّلة تُدخل المال أو تُخرجه من الحساب الذي تختاره.';
+
+  @override
+  String get objTargetOptional => 'اختياري — اتركه فارغاً لهدف مفتوح';
+
+  @override
+  String get objIcon => 'أيقونة';
+
+  @override
+  String get objChooseIcon => 'اختر أيقونة (اختياري)';
+
+  @override
+  String get objRemoveIcon => 'إزالة الأيقونة';
+
+  @override
+  String get objIntro =>
+      'الأهداف تتبّع الادخار نحو غاية. القروض تتبّع الأموال التي أقرضتها أو اقترضتها.';
+
+  @override
+  String get objCreateFirst => 'أنشئ هدفك الأول';
+
+  @override
+  String objDeleteLinkedPayments(int count) {
+    return '$count دفعة مرتبطة. انتقل المال بالفعل بين حساباتك — هل تُبقيها أم تحذف كل شيء؟';
+  }
+
+  @override
+  String get objDeleteKeep => 'حذف مع الإبقاء على الدفعات';
+
+  @override
+  String get objDeleteAll => 'حذف كل شيء';
+
+  @override
   String get travelTitle => 'صرف السفر';
 
   @override

@@ -45,6 +45,7 @@ class _ObjectiveDetailScreenState
   String? _categoryName;
   bool _loading = false;
   bool _showSettings = false; // toggle for edit form (existing objectives)
+  bool _showEmojiGrid = false; // inline icon picker toggle
 
   // Payment history
   List<Transaction> _payments = [];
@@ -55,6 +56,14 @@ class _ObjectiveDetailScreenState
     '#2563EB', '#6366F1', '#8B5CF6', '#EC4899', '#EF4444',
     '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#06B6D4',
   ];
+
+  static const _emojiGroups = <String, List<String>>{
+    'Goals': [
+      '🎯', '🏆', '💰', '💵', '🐷', '🏦', '📈', '🎓', '🏠', '🚗',
+      '✈️', '🏖️', '💍', '📱', '💻', '🎮', '🚲', '🛋️', '🎁', '❤️',
+    ],
+    'Loans': ['🤝', '💳', '🧾', '👤', '🏛️', '📄', '⏳', '💸'],
+  };
 
   @override
   void initState() {
@@ -547,32 +556,37 @@ class _ObjectiveDetailScreenState
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            // ── Progress hero ──
-            if (_targetAmount > 0)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                  border: Border.all(color: color.withValues(alpha: 0.2)),
+            // ── Hero (adaptive: progress when a target is set, else total) ──
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Column(children: [
-                  Text(
-                    formatAmount(_currentAmount, currency: _currency),
-                    style: TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800,
-                      color: AppColors.tp(context),
-                    ),
+                borderRadius: BorderRadius.circular(CardTokens.radius),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
+              ),
+              child: Column(children: [
+                Text(
+                  formatAmount(_currentAmount, currency: _currency),
+                  style: TextStyle(
+                    fontSize: 28, fontWeight: FontWeight.w800,
+                    color: AppColors.tp(context),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    S.of(context).objOfTarget(formatAmount(_targetAmount, currency: _currency)),
-                    style: TextStyle(fontSize: 14, color: AppColors.ts(context)),
-                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _targetAmount > 0
+                      ? S.of(context).objOfTarget(
+                          formatAmount(_targetAmount, currency: _currency))
+                      : (isLoan
+                          ? S.of(context).objRecordedSoFar
+                          : S.of(context).objSavedSoFar),
+                  style: TextStyle(fontSize: 14, color: AppColors.ts(context)),
+                ),
+                if (_targetAmount > 0) ...[
                   const SizedBox(height: 14),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(99),
@@ -586,17 +600,29 @@ class _ObjectiveDetailScreenState
                   const SizedBox(height: 8),
                   Text('${(progress * 100).toStringAsFixed(1)}%',
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _updateAmount,
-                      icon: const Icon(Icons.add_rounded, size: 18),
-                      label: Text(isLoan ? S.of(context).objRecordPayment : S.of(context).objAddFunds),
-                    ),
-                  ),
-                ]),
+                ],
+              ]),
+            ),
+
+            // ── Primary action (always visible) ──
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _updateAmount,
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(isLoan
+                    ? S.of(context).objRecordPayment
+                    : S.of(context).objAddFunds),
+                style: FilledButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(CardTokens.radius)),
+                ),
               ),
+            ),
 
             // ── Summary info ──
             const SizedBox(height: 16),
@@ -639,11 +665,24 @@ class _ObjectiveDetailScreenState
             const SizedBox(height: 8),
             if (_payments.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: Text(S.of(context).objNoPayments,
-                      style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(children: [
+                  Text(S.of(context).objNoPayments,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w600,
+                          color: AppColors.ts(context))),
+                  const SizedBox(height: 6),
+                  Text(
+                    isLoan
+                        ? (_direction == 'lent'
+                            ? S.of(context).objEmptyHintLoanLent
+                            : S.of(context).objEmptyHintLoanBorrowed)
+                        : S.of(context).objEmptyHintGoal,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: AppColors.th(context)),
+                  ),
+                ]),
               )
             else
               ...List.generate(_payments.length, (i) {
@@ -764,6 +803,18 @@ class _ObjectiveDetailScreenState
           children: [
             // Type toggle
             _buildTypeToggle(),
+            const SizedBox(height: 10),
+            // What this is — sets expectations (money moves on each deposit)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 4, end: 4),
+              child: Text(
+                _type == 'loan'
+                    ? S.of(context).objWhatIsLoan
+                    : S.of(context).objWhatIsGoal,
+                style: TextStyle(
+                    fontSize: 12, height: 1.4, color: AppColors.th(context)),
+              ),
+            ),
             const SizedBox(height: 16),
             _buildSettingsForm(context, color),
           ],
@@ -792,18 +843,121 @@ class _ObjectiveDetailScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Name
-        _FormCard(child: TextField(
-          controller: _nameCtrl,
-          textCapitalization: TextCapitalization.sentences,
-          maxLength: InputLimits.nameMaxLength,
-          decoration: InputDecoration(
-            labelText: _type == 'loan' ? S.of(context).objLoanName : S.of(context).objGoalName,
-            hintText: _type == 'loan' ? S.of(context).objLoanNameHint : S.of(context).objGoalNameHint,
-            border: InputBorder.none,
-            prefixIcon: Icon(Icons.edit_rounded, size: 18, color: AppColors.ts(context)),
-          ),
+        // Name + tappable icon
+        _FormCard(child: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 10, end: 4),
+          child: Row(children: [
+            GestureDetector(
+              onTap: () => setState(() => _showEmojiGrid = !_showEmojiGrid),
+              child: Container(
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: _icon != null && _icon!.isNotEmpty
+                      ? Text(_icon!, style: const TextStyle(fontSize: 20))
+                      : Icon(
+                          _type == 'loan'
+                              ? Icons.handshake_rounded
+                              : Icons.flag_rounded,
+                          color: color, size: 20),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _nameCtrl,
+                textCapitalization: TextCapitalization.sentences,
+                maxLength: InputLimits.nameMaxLength,
+                decoration: InputDecoration(
+                  labelText: _type == 'loan'
+                      ? S.of(context).objLoanName
+                      : S.of(context).objGoalName,
+                  hintText: _type == 'loan'
+                      ? S.of(context).objLoanNameHint
+                      : S.of(context).objGoalNameHint,
+                  border: InputBorder.none,
+                  counterText: '',
+                ),
+                onTap: () {
+                  if (_showEmojiGrid) setState(() => _showEmojiGrid = false);
+                },
+              ),
+            ),
+          ]),
         )),
+        // Inline emoji grid (never an overlay — see Known Crash Patterns)
+        if (_showEmojiGrid) ...[
+          const SizedBox(height: 8),
+          if (_icon != null)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                onPressed: () => setState(() {
+                  _icon = null;
+                  _showEmojiGrid = false;
+                }),
+                child: Text(S.of(context).objRemoveIcon,
+                    style: const TextStyle(fontSize: 12)),
+              ),
+            ),
+          Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: AppColors.sfv(context),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.bd(context)),
+            ),
+            child: ListView(
+              padding: const EdgeInsets.all(10),
+              children: _emojiGroups.entries.map((group) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 6),
+                      child: Text(group.key,
+                          style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w700,
+                            color: AppColors.ts(context), letterSpacing: 0.5,
+                          )),
+                    ),
+                    Wrap(
+                      spacing: 6, runSpacing: 6,
+                      children: group.value.map((e) {
+                        final isSelected = e == _icon;
+                        return GestureDetector(
+                          onTap: () => setState(() {
+                            _icon = e;
+                            _showEmojiGrid = false;
+                          }),
+                          child: Container(
+                            width: 38, height: 38,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.accent.withValues(alpha: 0.15)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: isSelected
+                                  ? Border.all(color: AppColors.accent, width: 2)
+                                  : null,
+                            ),
+                            child: Center(
+                                child: Text(e,
+                                    style: const TextStyle(fontSize: 20))),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
 
         // Loan-specific fields
@@ -867,6 +1021,14 @@ class _ObjectiveDetailScreenState
             onChanged: (v) => setState(() => _targetAmount = v),
           ),
         )),
+        if (_type == 'goal') ...[
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 4, end: 4),
+            child: Text(S.of(context).objTargetOptional,
+                style: TextStyle(fontSize: 11, color: AppColors.th(context))),
+          ),
+        ],
         const SizedBox(height: 10),
 
         // Currency
@@ -950,28 +1112,69 @@ class _ObjectiveDetailScreenState
 
   Future<void> _confirmDelete() async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
+    final hasPayments = _payments.isNotEmpty;
+
+    // null = cancel, 'keep' = delete tracker only, 'all' = also reverse payments
+    final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr.objDeleteTitle),
-        content: Text(tr.objCannotUndo),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr.commonCancel)),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonDelete),
-          ),
-        ],
+        content: Text(hasPayments
+            ? tr.objDeleteLinkedPayments(_payments.length)
+            : tr.objCannotUndo),
+        actions: hasPayments
+            ? [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(tr.commonCancel)),
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, 'keep'),
+                    child: Text(tr.objDeleteKeep)),
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, 'all'),
+                    style: TextButton.styleFrom(
+                        foregroundColor: AppColors.overspent),
+                    child: Text(tr.objDeleteAll)),
+              ]
+            : [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(tr.commonCancel)),
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, 'keep'),
+                    style: TextButton.styleFrom(
+                        foregroundColor: AppColors.overspent),
+                    child: Text(tr.commonDelete)),
+              ],
       ),
     );
-    if (confirmed == true && mounted) {
+
+    if (choice == null || !mounted) return;
+
+    try {
+      // 'all' → soft-delete the linked payments so the money returns to the
+      // affected accounts; 'keep' → leave the transactions untouched.
+      if (choice == 'all') {
+        final engine = ref.read(allocationEngineProvider);
+        for (final tx in _payments) {
+          await engine.deleteTransaction(tx.id);
+        }
+      }
       final db = ref.read(databaseProvider);
       await (db.delete(db.objectives)
             ..where((o) => o.id.equals(widget.objectiveId)))
           .go();
       ref.invalidate(objectivesProvider);
+      ref.invalidate(accountsWithBalanceProvider);
       if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(S.of(context).commonSomethingWentWrong),
+              behavior: SnackBarBehavior.floating),
+        );
+      }
     }
   }
 }

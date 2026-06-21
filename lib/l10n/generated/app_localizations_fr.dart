@@ -2509,6 +2509,63 @@ class SFr extends S {
   String get objCannotUndo => 'Cette action est irréversible.';
 
   @override
+  String get objSavedSoFar => 'Épargné à ce jour';
+
+  @override
+  String get objRecordedSoFar => 'Enregistré à ce jour';
+
+  @override
+  String get objEmptyHintGoal =>
+      'Ajoutez des fonds depuis l\'un de vos comptes pour faire progresser cet objectif.';
+
+  @override
+  String get objEmptyHintLoanLent =>
+      'Enregistrez les paiements reçus pour suivre le remboursement.';
+
+  @override
+  String get objEmptyHintLoanBorrowed =>
+      'Enregistrez les paiements effectués pour suivre ce que vous devez.';
+
+  @override
+  String get objWhatIsGoal =>
+      'Épargnez vers un objectif. Chaque dépôt retire de l\'argent du compte choisi et est enregistré comme transaction.';
+
+  @override
+  String get objWhatIsLoan =>
+      'Suivez l\'argent prêté ou emprunté. Chaque paiement enregistré ajoute ou retire de l\'argent du compte choisi.';
+
+  @override
+  String get objTargetOptional =>
+      'Facultatif — laissez vide pour un objectif ouvert';
+
+  @override
+  String get objIcon => 'Icône';
+
+  @override
+  String get objChooseIcon => 'Choisir une icône (facultatif)';
+
+  @override
+  String get objRemoveIcon => 'Supprimer l\'icône';
+
+  @override
+  String get objIntro =>
+      'Les objectifs suivent l\'épargne vers une cible. Les prêts suivent l\'argent prêté ou emprunté.';
+
+  @override
+  String get objCreateFirst => 'Créez votre premier objectif';
+
+  @override
+  String objDeleteLinkedPayments(int count) {
+    return '$count paiement(s) lié(s). L\'argent a déjà été déplacé entre vos comptes — les garder ou tout supprimer ?';
+  }
+
+  @override
+  String get objDeleteKeep => 'Supprimer, garder les paiements';
+
+  @override
+  String get objDeleteAll => 'Tout supprimer';
+
+  @override
   String get travelTitle => 'Change de voyage';
 
   @override

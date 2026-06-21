@@ -57,7 +57,9 @@ class ObjectivesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.flag_rounded,
               title: S.of(context).objNoTitle,
-              subtitle: S.of(context).objNoSubtitle,
+              subtitle: S.of(context).objIntro,
+              actionLabel: S.of(context).objCreateFirst,
+              onAction: () => context.push('/objectives/new'),
             );
           }
 
@@ -69,6 +71,15 @@ class ObjectivesScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
+                // Short explanation of what this screen tracks
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    S.of(context).objIntro,
+                    style: TextStyle(
+                        fontSize: 12, height: 1.4, color: AppColors.th(context)),
+                  ),
+                ),
                 if (goals.isNotEmpty) ...[
                   _SectionHeader(title: S.of(context).objGoalsSection, count: goals.length),
                   const SizedBox(height: 8),

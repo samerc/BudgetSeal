@@ -2482,6 +2482,63 @@ class SEn extends S {
   String get objCannotUndo => 'This cannot be undone.';
 
   @override
+  String get objSavedSoFar => 'Saved so far';
+
+  @override
+  String get objRecordedSoFar => 'Recorded so far';
+
+  @override
+  String get objEmptyHintGoal =>
+      'Add funds from one of your accounts to grow this goal.';
+
+  @override
+  String get objEmptyHintLoanLent =>
+      'Record payments you receive to track repayment.';
+
+  @override
+  String get objEmptyHintLoanBorrowed =>
+      'Record payments you make to track what you owe.';
+
+  @override
+  String get objWhatIsGoal =>
+      'Save toward a target. Each deposit moves money out of the account you pick and is recorded as a transaction.';
+
+  @override
+  String get objWhatIsLoan =>
+      'Track money you lent or borrowed. Each recorded payment moves money in or out of the account you pick.';
+
+  @override
+  String get objTargetOptional =>
+      'Optional — leave blank for an open-ended goal';
+
+  @override
+  String get objIcon => 'Icon';
+
+  @override
+  String get objChooseIcon => 'Choose an icon (optional)';
+
+  @override
+  String get objRemoveIcon => 'Remove icon';
+
+  @override
+  String get objIntro =>
+      'Goals track savings toward a target. Loans track money you lent or borrowed.';
+
+  @override
+  String get objCreateFirst => 'Create your first goal';
+
+  @override
+  String objDeleteLinkedPayments(int count) {
+    return '$count linked payment(s). The money already moved between your accounts — keep them, or delete everything?';
+  }
+
+  @override
+  String get objDeleteKeep => 'Delete, keep payments';
+
+  @override
+  String get objDeleteAll => 'Delete everything';
+
+  @override
   String get travelTitle => 'Travel Exchange';
 
   @override

@@ -4449,6 +4449,102 @@ abstract class S {
   /// **'This cannot be undone.'**
   String get objCannotUndo;
 
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Saved so far'**
+  String get objSavedSoFar;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded so far'**
+  String get objRecordedSoFar;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Add funds from one of your accounts to grow this goal.'**
+  String get objEmptyHintGoal;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Record payments you receive to track repayment.'**
+  String get objEmptyHintLoanLent;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Record payments you make to track what you owe.'**
+  String get objEmptyHintLoanBorrowed;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Save toward a target. Each deposit moves money out of the account you pick and is recorded as a transaction.'**
+  String get objWhatIsGoal;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Track money you lent or borrowed. Each recorded payment moves money in or out of the account you pick.'**
+  String get objWhatIsLoan;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — leave blank for an open-ended goal'**
+  String get objTargetOptional;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get objIcon;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an icon (optional)'**
+  String get objChooseIcon;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Remove icon'**
+  String get objRemoveIcon;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Goals track savings toward a target. Loans track money you lent or borrowed.'**
+  String get objIntro;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first goal'**
+  String get objCreateFirst;
+
+  /// No description provided for @objDeleteLinkedPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} linked payment(s). The money already moved between your accounts — keep them, or delete everything?'**
+  String objDeleteLinkedPayments(int count);
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Delete, keep payments'**
+  String get objDeleteKeep;
+
+  /// Goals & loans
+  ///
+  /// In en, this message translates to:
+  /// **'Delete everything'**
+  String get objDeleteAll;
+
   /// Travel exchange screen title
   ///
   /// In en, this message translates to:
