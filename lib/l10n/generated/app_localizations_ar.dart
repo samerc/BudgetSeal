@@ -3611,7 +3611,7 @@ class SAr extends S {
 
   @override
   String get termsContactBody =>
-      'للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: samer@budgetseal.app';
+      'للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: fancyshark505@gmail.com';
 
   @override
   String get healthTitle => 'فحص السلامة';

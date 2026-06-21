@@ -3642,7 +3642,7 @@ class SEn extends S {
 
   @override
   String get termsContactBody =>
-      'For questions or concerns about this privacy policy or terms of use, contact: samer@budgetseal.app';
+      'For questions or concerns about this privacy policy or terms of use, contact: fancyshark505@gmail.com';
 
   @override
   String get healthTitle => 'Health Check';

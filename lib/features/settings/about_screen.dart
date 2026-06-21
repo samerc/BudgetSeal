@@ -112,7 +112,7 @@ class AboutScreen extends ConsumerWidget {
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('samer@budgetseal.app'),
+                          content: Text('fancyshark505@gmail.com'),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );

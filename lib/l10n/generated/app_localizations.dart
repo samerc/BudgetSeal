@@ -6606,7 +6606,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'For questions or concerns about this privacy policy or terms of use, contact: samer@budgetseal.app'**
+  /// **'For questions or concerns about this privacy policy or terms of use, contact: fancyshark505@gmail.com'**
   String get termsContactBody;
 
   /// AppBar title

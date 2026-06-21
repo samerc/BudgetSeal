@@ -3697,7 +3697,7 @@ class SFr extends S {
 
   @override
   String get termsContactBody =>
-      'Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d\'utilisation, contactez : samer@budgetseal.app';
+      'Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d\'utilisation, contactez : fancyshark505@gmail.com';
 
   @override
   String get healthTitle => 'Bilan de santé';
