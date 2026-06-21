@@ -37,11 +37,17 @@ class UpgradeScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: Spacing.xl),
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 2),
 
               // ── App icon ──
               Container(
@@ -207,6 +213,10 @@ class UpgradeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: Spacing.lg),
             ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
