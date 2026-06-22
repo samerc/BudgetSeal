@@ -92,5 +92,15 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Required so image_picker can resolve the camera app on Android 11+
+             (the plugin no longer declares this query itself). Without it the
+             camera silently fails to open. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT"/>
+            <data android:mimeType="image/*"/>
+        </intent>
     </queries>
 </manifest>

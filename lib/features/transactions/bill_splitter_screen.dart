@@ -219,8 +219,20 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     );
     if (source == null) return;
 
-    final image = await picker.pickImage(
-        source: source, maxWidth: 2400, maxHeight: 2400, imageQuality: 95);
+    XFile? image;
+    try {
+      image = await picker.pickImage(
+          source: source, maxWidth: 2400, maxHeight: 2400, imageQuality: 95);
+    } catch (e) {
+      debugPrint('[BillSplitter] pickImage failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).commonSomethingWentWrong),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+      return;
+    }
     if (image == null) return;
     if (!mounted) return; // user may have left during camera/gallery
 
