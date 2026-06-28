@@ -436,13 +436,17 @@ async function renderDashboard() {
             ? `${esc(icon)}${esc(tx.categoryName)}`
             : esc(t('web_dash_fallback_tx'));
         const sub = [fmtDate(tx.date), tx.accountName].filter(Boolean).map(esc).join(' · ');
+        // Show the transaction's native currency/amount, not the base header
+        // amount (tx.amount/currency is always base currency).
+        const lineCur = tx.lineCurrency || tx.currency;
+        const lineAmt = tx.lineAmount ?? tx.amount;
         return `<div class="dash-tx-item">
           <div class="dash-tx-dot ${esc(tx.type)}"></div>
           <div class="dash-tx-info">
             <div class="dash-tx-title">${title}</div>
             <div class="dash-tx-sub">${sub}</div>
           </div>
-          <div class="dash-tx-amount ${tx.type === 'income' ? 'amount-income' : tx.type === 'expense' ? 'amount-expense' : ''}">${amtEl(tx.amount, tx.currency, tx.type)}</div>
+          <div class="dash-tx-amount ${tx.type === 'income' ? 'amount-income' : tx.type === 'expense' ? 'amount-expense' : ''}">${amtEl(lineAmt, lineCur, tx.type)}</div>
         </div>`;
       }).join('')
     : empty(t('web_dash_no_tx_title'), t('web_dash_no_tx_sub'));
