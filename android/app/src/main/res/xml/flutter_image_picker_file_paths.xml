@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file shadows the one bundled inside the image_picker plugin (app
+  resources win over library resources during merge). It must therefore cover
+  EVERY storage root the plugin may write the camera temp file to, otherwise
+  FileProvider.getUriForFile throws "Failed to find configured root" and the
+  camera fails to open.
+-->
 <paths>
-    <external-cache-path name="images" path="/" />
+    <files-path name="files" path="." />
+    <cache-path name="cache" path="." />
+    <external-path name="external" path="." />
+    <external-files-path name="external_files" path="." />
+    <external-cache-path name="external_cache" path="." />
 </paths>
