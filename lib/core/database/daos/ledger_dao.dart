@@ -23,10 +23,19 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
   /// Compute balance per currency for a given allocation via SQL SUM.
   /// Returns `Map<currency, netAmount>` where positive = credit.
   Future<Map<String, double>> getBalanceByCurrency(String allocationId) async {
+    // Exclude ledger entries whose source transaction has been (soft-)deleted.
+    // Without this, deleting a transaction leaves its consumption in the
+    // envelope balance — and across devices the balances diverge, because the
+    // soft-deleted transaction propagates but the hard-deleted ledger rows do
+    // not. Entries with no source transaction (manual funding, adjustments) or
+    // an orphaned source are kept.
     final rows = await customSelect(
-      'SELECT currency, SUM(amount) AS total '
-      'FROM allocation_ledger WHERE allocation_id = ? '
-      'GROUP BY currency',
+      'SELECT l.currency AS currency, SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'LEFT JOIN transactions t ON t.id = l.source_transaction_id '
+      'WHERE l.allocation_id = ? '
+      'AND (l.source_transaction_id IS NULL OR t.id IS NULL OR t.deleted = 0) '
+      'GROUP BY l.currency',
       variables: [Variable.withString(allocationId)],
     ).get();
 
@@ -46,11 +55,17 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
       List<String> allocationIds) async {
     if (allocationIds.isEmpty) return {};
 
+    // Same deleted-transaction exclusion as getBalanceByCurrency — keeps
+    // envelope balances correct after a transaction delete and identical
+    // across synced devices.
     final rows = await customSelect(
-      'SELECT allocation_id, currency, SUM(amount) AS total '
-      'FROM allocation_ledger '
-      'WHERE allocation_id IN (${allocationIds.map((_) => '?').join(', ')}) '
-      'GROUP BY allocation_id, currency',
+      'SELECT l.allocation_id AS allocation_id, l.currency AS currency, '
+      'SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'LEFT JOIN transactions t ON t.id = l.source_transaction_id '
+      'WHERE l.allocation_id IN (${allocationIds.map((_) => '?').join(', ')}) '
+      'AND (l.source_transaction_id IS NULL OR t.id IS NULL OR t.deleted = 0) '
+      'GROUP BY l.allocation_id, l.currency',
       variables: allocationIds.map((id) => Variable.withString(id)).toList(),
     ).get();
 
