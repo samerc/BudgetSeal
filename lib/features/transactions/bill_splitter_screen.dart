@@ -226,12 +226,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     } catch (e) {
       debugPrint('[BillSplitter] pickImage failed: $e');
       if (mounted) {
-        // TEMPORARY: show the raw error to diagnose the camera/gallery issue.
-        // Revert to S.of(context).commonSomethingWentWrong once resolved.
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Picker error: $e'),
+          content: Text(S.of(context).commonSomethingWentWrong),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 10),
         ));
       }
       return;
