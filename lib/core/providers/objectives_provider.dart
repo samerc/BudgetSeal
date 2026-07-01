@@ -14,7 +14,9 @@ final objectivesProvider =
 
   return (db.select(db.objectives)
         ..where((o) =>
-            o.householdId.equals(householdId) & o.archived.equals(false))
+            o.householdId.equals(householdId) &
+            o.archived.equals(false) &
+            o.deleted.equals(false))
         ..orderBy([(o) => OrderingTerm.asc(o.name)]))
       .get();
 });

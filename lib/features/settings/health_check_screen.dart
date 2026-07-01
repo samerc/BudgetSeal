@@ -64,7 +64,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     // 1. Account balances per currency
     final accounts = await (db.select(db.accounts)
           ..where((t) => t.householdId.equals(householdId))
-          ..where((t) => t.archived.equals(false)))
+          ..where((t) => t.archived.equals(false))
+          ..where((t) => t.deleted.equals(false)))
         .get();
     final accountBalances = await calc.allAccountBalances(householdId);
 
@@ -86,7 +87,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         await calc.allAllocationBalancesByCurrency(householdId);
     final allocs = await (db.select(db.allocations)
           ..where((t) => t.householdId.equals(householdId))
-          ..where((t) => t.archived.equals(false)))
+          ..where((t) => t.archived.equals(false))
+          ..where((t) => t.deleted.equals(false)))
         .get();
 
     final Map<String, double> allocTotals = {};

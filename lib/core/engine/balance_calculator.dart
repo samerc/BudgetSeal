@@ -22,10 +22,12 @@ class BalanceCalculator {
   /// Compute balances for ALL non-archived accounts in one pass.
   /// Returns `Map<accountId, balance>`.
   Future<Map<String, double>> allAccountBalances(String householdId) async {
-    // 1. All non-archived accounts
+    // 1. All non-archived, non-deleted accounts
     final accounts = await (_db.select(_db.accounts)
           ..where((t) =>
-              t.householdId.equals(householdId) & t.archived.equals(false)))
+              t.householdId.equals(householdId) &
+              t.archived.equals(false) &
+              t.deleted.equals(false)))
         .get();
 
     final balances = <String, double>{
@@ -128,7 +130,9 @@ class BalanceCalculator {
       String householdId) async {
     final allocs = await (_db.select(_db.allocations)
           ..where((t) =>
-              t.householdId.equals(householdId) & t.archived.equals(false)))
+              t.householdId.equals(householdId) &
+              t.archived.equals(false) &
+              t.deleted.equals(false)))
         .get();
     final allocIds = allocs.map((a) => a.id).toList();
     if (allocIds.isEmpty) return {};
@@ -229,7 +233,9 @@ class BalanceCalculator {
     // 1. Batch account balances
     final accounts = await (_db.select(_db.accounts)
           ..where((t) =>
-              t.householdId.equals(householdId) & t.archived.equals(false)))
+              t.householdId.equals(householdId) &
+              t.archived.equals(false) &
+              t.deleted.equals(false)))
         .get();
     final accountBalances = await allAccountBalances(householdId);
 

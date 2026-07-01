@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -147,6 +147,22 @@ class AppDatabase extends _$AppDatabase {
             await m.createIndex(Index('idx_categories_allocation',
                 'CREATE INDEX IF NOT EXISTS idx_categories_allocation '
                 'ON categories (allocation_id)'));
+          }
+          if (from < 18) {
+            // Soft-delete flags so deletions propagate across synced devices,
+            // plus lastModified on recurring/templates so their edits sync.
+            await m.addColumn(accounts, accounts.deleted);
+            await m.addColumn(categories, categories.deleted);
+            await m.addColumn(allocations, allocations.deleted);
+            await m.addColumn(objectives, objectives.deleted);
+            await m.addColumn(
+                recurringTransactions, recurringTransactions.lastModified);
+            await m.addColumn(
+                recurringTransactions, recurringTransactions.deleted);
+            await m.addColumn(
+                transactionTemplates, transactionTemplates.lastModified);
+            await m.addColumn(
+                transactionTemplates, transactionTemplates.deleted);
           }
         },
       );

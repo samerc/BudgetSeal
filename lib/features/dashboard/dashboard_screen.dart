@@ -1234,6 +1234,7 @@ class _QuickTemplatesSectionState
     }
     _templatesFuture = (db.select(db.transactionTemplates)
           ..where((t) => t.householdId.equals(householdId))
+          ..where((t) => t.deleted.equals(false))
           ..orderBy([(t) => OrderingTerm.desc(t.useCount)])
           ..limit(3))
         .get();

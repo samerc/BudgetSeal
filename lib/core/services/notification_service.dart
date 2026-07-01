@@ -209,6 +209,7 @@ class NotificationService {
     final rows = await (db.select(db.recurringTransactions)
           ..where((t) => t.householdId.equals(householdId))
           ..where((t) => t.enabled.equals(true))
+          ..where((t) => t.deleted.equals(false))
           ..where((t) => t.nextDueDate.isSmallerOrEqualValue(cutoff)))
         .get();
 

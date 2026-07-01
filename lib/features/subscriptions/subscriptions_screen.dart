@@ -42,7 +42,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
       final db = ref.read(databaseProvider);
 
       final rows = await db.customSelect(
-        'SELECT * FROM recurring_transactions WHERE household_id = ? AND is_subscription = 1 ORDER BY title ASC',
+        'SELECT * FROM recurring_transactions WHERE household_id = ? AND is_subscription = 1 AND deleted = 0 ORDER BY title ASC',
         variables: [drift.Variable.withString(householdId)],
       ).get();
 

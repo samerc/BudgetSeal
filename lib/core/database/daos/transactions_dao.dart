@@ -84,7 +84,8 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     final db = attachedDatabase;
     // Start with initial balances
     final accounts = await (db.select(db.accounts)
-          ..where((a) => a.householdId.equals(householdId)))
+          ..where((a) => a.householdId.equals(householdId))
+          ..where((a) => a.deleted.equals(false)))
         .get();
     final running = <String, double>{
       for (final a in accounts) a.id: a.initialBalance,

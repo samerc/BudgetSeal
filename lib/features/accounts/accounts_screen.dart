@@ -250,7 +250,9 @@ class _ArchivedSection extends ConsumerWidget {
       AppDatabase db, String householdId) async {
     final accounts = await (db.select(db.accounts)
           ..where((t) =>
-              t.householdId.equals(householdId) & t.archived.equals(true))
+              t.householdId.equals(householdId) &
+              t.archived.equals(true) &
+              t.deleted.equals(false))
           ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .get();
     if (accounts.isEmpty) return [];

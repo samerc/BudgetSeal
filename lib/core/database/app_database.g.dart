@@ -1068,6 +1068,16 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1081,7 +1091,8 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
         archived,
         deviceId,
         createdAt,
-        lastModified
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1160,6 +1171,10 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
           lastModified.isAcceptableOrUnknown(
               data['last_modified']!, _lastModifiedMeta));
     }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -1193,6 +1208,8 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -1221,6 +1238,10 @@ class Account extends DataClass implements Insertable<Account> {
   final String deviceId;
   final DateTime createdAt;
   final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions
+  /// propagate across synced devices. List/aggregate queries filter this.
+  final bool deleted;
   const Account(
       {required this.id,
       required this.householdId,
@@ -1233,7 +1254,8 @@ class Account extends DataClass implements Insertable<Account> {
       required this.archived,
       required this.deviceId,
       required this.createdAt,
-      required this.lastModified});
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1251,6 +1273,7 @@ class Account extends DataClass implements Insertable<Account> {
     map['device_id'] = Variable<String>(deviceId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -1270,6 +1293,7 @@ class Account extends DataClass implements Insertable<Account> {
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -1289,6 +1313,7 @@ class Account extends DataClass implements Insertable<Account> {
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -1307,6 +1332,7 @@ class Account extends DataClass implements Insertable<Account> {
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -1322,7 +1348,8 @@ class Account extends DataClass implements Insertable<Account> {
           bool? archived,
           String? deviceId,
           DateTime? createdAt,
-          DateTime? lastModified}) =>
+          DateTime? lastModified,
+          bool? deleted}) =>
       Account(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -1337,6 +1364,7 @@ class Account extends DataClass implements Insertable<Account> {
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   Account copyWithCompanion(AccountsCompanion data) {
     return Account(
@@ -1359,6 +1387,7 @@ class Account extends DataClass implements Insertable<Account> {
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -1376,7 +1405,8 @@ class Account extends DataClass implements Insertable<Account> {
           ..write('archived: $archived, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastModified: $lastModified')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -1394,7 +1424,8 @@ class Account extends DataClass implements Insertable<Account> {
       archived,
       deviceId,
       createdAt,
-      lastModified);
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1410,7 +1441,8 @@ class Account extends DataClass implements Insertable<Account> {
           other.archived == this.archived &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
-          other.lastModified == this.lastModified);
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class AccountsCompanion extends UpdateCompanion<Account> {
@@ -1426,6 +1458,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const AccountsCompanion({
     this.id = const Value.absent(),
@@ -1440,6 +1473,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AccountsCompanion.insert({
@@ -1455,6 +1489,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     required String deviceId,
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -1475,6 +1510,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1490,6 +1526,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1507,6 +1544,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return AccountsCompanion(
       id: id ?? this.id,
@@ -1521,6 +1559,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1564,6 +1603,9 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1585,6 +1627,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1706,6 +1749,16 @@ class $AllocationsTable extends Allocations
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1722,7 +1775,8 @@ class $AllocationsTable extends Allocations
         archived,
         deviceId,
         createdAt,
-        lastModified
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1815,6 +1869,10 @@ class $AllocationsTable extends Allocations
           lastModified.isAcceptableOrUnknown(
               data['last_modified']!, _lastModifiedMeta));
     }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -1854,6 +1912,8 @@ class $AllocationsTable extends Allocations
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -1884,6 +1944,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   final String deviceId;
   final DateTime createdAt;
   final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions
+  /// propagate across synced devices. List/aggregate queries filter this.
+  final bool deleted;
   const Allocation(
       {required this.id,
       required this.householdId,
@@ -1899,7 +1963,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       required this.archived,
       required this.deviceId,
       required this.createdAt,
-      required this.lastModified});
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1924,6 +1989,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
     map['device_id'] = Variable<String>(deviceId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -1948,6 +2014,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -1970,6 +2037,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -1991,6 +2059,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -2009,7 +2078,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           bool? archived,
           String? deviceId,
           DateTime? createdAt,
-          DateTime? lastModified}) =>
+          DateTime? lastModified,
+          bool? deleted}) =>
       Allocation(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -2028,6 +2098,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   Allocation copyWithCompanion(AllocationsCompanion data) {
     return Allocation(
@@ -2055,6 +2126,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -2075,7 +2147,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           ..write('archived: $archived, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastModified: $lastModified')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -2096,7 +2169,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       archived,
       deviceId,
       createdAt,
-      lastModified);
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2115,7 +2189,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           other.archived == this.archived &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
-          other.lastModified == this.lastModified);
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class AllocationsCompanion extends UpdateCompanion<Allocation> {
@@ -2134,6 +2209,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const AllocationsCompanion({
     this.id = const Value.absent(),
@@ -2151,6 +2227,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AllocationsCompanion.insert({
@@ -2169,6 +2246,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     required String deviceId,
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -2191,6 +2269,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2209,6 +2288,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2229,6 +2309,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return AllocationsCompanion(
       id: id ?? this.id,
@@ -2246,6 +2327,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2298,6 +2380,9 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2322,6 +2407,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2426,6 +2512,16 @@ class $CategoriesTable extends Categories
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2439,7 +2535,8 @@ class $CategoriesTable extends Categories
         colorHex,
         archived,
         createdAt,
-        lastModified
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2514,6 +2611,10 @@ class $CategoriesTable extends Categories
           lastModified.isAcceptableOrUnknown(
               data['last_modified']!, _lastModifiedMeta));
     }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -2547,6 +2648,8 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -2574,6 +2677,10 @@ class Category extends DataClass implements Insertable<Category> {
   final bool archived;
   final DateTime createdAt;
   final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions
+  /// propagate across synced devices. List/aggregate queries filter this.
+  final bool deleted;
   const Category(
       {required this.id,
       required this.householdId,
@@ -2586,7 +2693,8 @@ class Category extends DataClass implements Insertable<Category> {
       required this.colorHex,
       required this.archived,
       required this.createdAt,
-      required this.lastModified});
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2608,6 +2716,7 @@ class Category extends DataClass implements Insertable<Category> {
     map['archived'] = Variable<bool>(archived);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -2631,6 +2740,7 @@ class Category extends DataClass implements Insertable<Category> {
       archived: Value(archived),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -2650,6 +2760,7 @@ class Category extends DataClass implements Insertable<Category> {
       archived: serializer.fromJson<bool>(json['archived']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -2668,6 +2779,7 @@ class Category extends DataClass implements Insertable<Category> {
       'archived': serializer.toJson<bool>(archived),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -2683,7 +2795,8 @@ class Category extends DataClass implements Insertable<Category> {
           String? colorHex,
           bool? archived,
           DateTime? createdAt,
-          DateTime? lastModified}) =>
+          DateTime? lastModified,
+          bool? deleted}) =>
       Category(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -2700,6 +2813,7 @@ class Category extends DataClass implements Insertable<Category> {
         archived: archived ?? this.archived,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   Category copyWithCompanion(CategoriesCompanion data) {
     return Category(
@@ -2724,6 +2838,7 @@ class Category extends DataClass implements Insertable<Category> {
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -2741,7 +2856,8 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('colorHex: $colorHex, ')
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastModified: $lastModified')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -2759,7 +2875,8 @@ class Category extends DataClass implements Insertable<Category> {
       colorHex,
       archived,
       createdAt,
-      lastModified);
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2775,7 +2892,8 @@ class Category extends DataClass implements Insertable<Category> {
           other.colorHex == this.colorHex &&
           other.archived == this.archived &&
           other.createdAt == this.createdAt &&
-          other.lastModified == this.lastModified);
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
@@ -2791,6 +2909,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<bool> archived;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -2805,6 +2924,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.archived = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -2820,6 +2940,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.archived = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -2837,6 +2958,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<bool>? archived,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2852,6 +2974,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (archived != null) 'archived': archived,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2869,6 +2992,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<bool>? archived,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return CategoriesCompanion(
       id: id ?? this.id,
@@ -2883,6 +3007,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       archived: archived ?? this.archived,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2926,6 +3051,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2947,6 +3075,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5366,6 +5495,24 @@ class $RecurringTransactionsTable extends RecurringTransactions
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -5386,7 +5533,9 @@ class $RecurringTransactionsTable extends RecurringTransactions
         enabled,
         isSubscription,
         priceHistory,
-        createdAt
+        createdAt,
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5504,6 +5653,16 @@ class $RecurringTransactionsTable extends RecurringTransactions
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     }
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -5552,6 +5711,10 @@ class $RecurringTransactionsTable extends RecurringTransactions
           .read(DriftSqlType.string, data['${effectivePrefix}price_history']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -5600,6 +5763,13 @@ class RecurringTransaction extends DataClass
   /// When generating transactions, the engine uses the price active on the due date.
   final String? priceHistory;
   final DateTime createdAt;
+
+  /// Bumped on every edit so changes propagate across synced devices
+  /// (merge keys on this).
+  final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions sync.
+  final bool deleted;
   const RecurringTransaction(
       {required this.id,
       required this.householdId,
@@ -5619,7 +5789,9 @@ class RecurringTransaction extends DataClass
       required this.enabled,
       required this.isSubscription,
       this.priceHistory,
-      required this.createdAt});
+      required this.createdAt,
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5652,6 +5824,8 @@ class RecurringTransaction extends DataClass
       map['price_history'] = Variable<String>(priceHistory);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -5686,6 +5860,8 @@ class RecurringTransaction extends DataClass
           ? const Value.absent()
           : Value(priceHistory),
       createdAt: Value(createdAt),
+      lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -5714,6 +5890,8 @@ class RecurringTransaction extends DataClass
       isSubscription: serializer.fromJson<bool>(json['isSubscription']),
       priceHistory: serializer.fromJson<String?>(json['priceHistory']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -5739,6 +5917,8 @@ class RecurringTransaction extends DataClass
       'isSubscription': serializer.toJson<bool>(isSubscription),
       'priceHistory': serializer.toJson<String?>(priceHistory),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -5761,7 +5941,9 @@ class RecurringTransaction extends DataClass
           bool? enabled,
           bool? isSubscription,
           Value<String?> priceHistory = const Value.absent(),
-          DateTime? createdAt}) =>
+          DateTime? createdAt,
+          DateTime? lastModified,
+          bool? deleted}) =>
       RecurringTransaction(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -5787,6 +5969,8 @@ class RecurringTransaction extends DataClass
         priceHistory:
             priceHistory.present ? priceHistory.value : this.priceHistory,
         createdAt: createdAt ?? this.createdAt,
+        lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   RecurringTransaction copyWithCompanion(RecurringTransactionsCompanion data) {
     return RecurringTransaction(
@@ -5820,6 +6004,10 @@ class RecurringTransaction extends DataClass
           ? data.priceHistory.value
           : this.priceHistory,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -5844,32 +6032,37 @@ class RecurringTransaction extends DataClass
           ..write('enabled: $enabled, ')
           ..write('isSubscription: $isSubscription, ')
           ..write('priceHistory: $priceHistory, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      householdId,
-      type,
-      title,
-      amount,
-      currency,
-      accountId,
-      destinationAccountId,
-      categoryId,
-      note,
-      frequency,
-      interval,
-      nextDueDate,
-      lastGeneratedDate,
-      endDate,
-      enabled,
-      isSubscription,
-      priceHistory,
-      createdAt);
+  int get hashCode => Object.hashAll([
+        id,
+        householdId,
+        type,
+        title,
+        amount,
+        currency,
+        accountId,
+        destinationAccountId,
+        categoryId,
+        note,
+        frequency,
+        interval,
+        nextDueDate,
+        lastGeneratedDate,
+        endDate,
+        enabled,
+        isSubscription,
+        priceHistory,
+        createdAt,
+        lastModified,
+        deleted
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5892,7 +6085,9 @@ class RecurringTransaction extends DataClass
           other.enabled == this.enabled &&
           other.isSubscription == this.isSubscription &&
           other.priceHistory == this.priceHistory &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class RecurringTransactionsCompanion
@@ -5916,6 +6111,8 @@ class RecurringTransactionsCompanion
   final Value<bool> isSubscription;
   final Value<String?> priceHistory;
   final Value<DateTime> createdAt;
+  final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const RecurringTransactionsCompanion({
     this.id = const Value.absent(),
@@ -5937,6 +6134,8 @@ class RecurringTransactionsCompanion
     this.isSubscription = const Value.absent(),
     this.priceHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecurringTransactionsCompanion.insert({
@@ -5959,6 +6158,8 @@ class RecurringTransactionsCompanion
     this.isSubscription = const Value.absent(),
     this.priceHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -5988,6 +6189,8 @@ class RecurringTransactionsCompanion
     Expression<bool>? isSubscription,
     Expression<String>? priceHistory,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6011,6 +6214,8 @@ class RecurringTransactionsCompanion
       if (isSubscription != null) 'is_subscription': isSubscription,
       if (priceHistory != null) 'price_history': priceHistory,
       if (createdAt != null) 'created_at': createdAt,
+      if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6035,6 +6240,8 @@ class RecurringTransactionsCompanion
       Value<bool>? isSubscription,
       Value<String?>? priceHistory,
       Value<DateTime>? createdAt,
+      Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return RecurringTransactionsCompanion(
       id: id ?? this.id,
@@ -6056,6 +6263,8 @@ class RecurringTransactionsCompanion
       isSubscription: isSubscription ?? this.isSubscription,
       priceHistory: priceHistory ?? this.priceHistory,
       createdAt: createdAt ?? this.createdAt,
+      lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6121,6 +6330,12 @@ class RecurringTransactionsCompanion
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6149,6 +6364,8 @@ class RecurringTransactionsCompanion
           ..write('isSubscription: $isSubscription, ')
           ..write('priceHistory: $priceHistory, ')
           ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6236,6 +6453,24 @@ class $TransactionTemplatesTable extends TransactionTemplates
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -6248,7 +6483,9 @@ class $TransactionTemplatesTable extends TransactionTemplates
         categoryId,
         useCount,
         lastUsedAt,
-        createdAt
+        createdAt,
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6322,6 +6559,16 @@ class $TransactionTemplatesTable extends TransactionTemplates
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     }
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -6353,6 +6600,10 @@ class $TransactionTemplatesTable extends TransactionTemplates
           .read(DriftSqlType.dateTime, data['${effectivePrefix}last_used_at']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -6375,6 +6626,13 @@ class TransactionTemplate extends DataClass
   final int useCount;
   final DateTime? lastUsedAt;
   final DateTime createdAt;
+
+  /// Bumped on every edit so changes propagate across synced devices
+  /// (merge keys on this).
+  final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions sync.
+  final bool deleted;
   const TransactionTemplate(
       {required this.id,
       required this.householdId,
@@ -6386,7 +6644,9 @@ class TransactionTemplate extends DataClass
       this.categoryId,
       required this.useCount,
       this.lastUsedAt,
-      required this.createdAt});
+      required this.createdAt,
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -6407,6 +6667,8 @@ class TransactionTemplate extends DataClass
       map['last_used_at'] = Variable<DateTime>(lastUsedAt);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -6429,6 +6691,8 @@ class TransactionTemplate extends DataClass
           ? const Value.absent()
           : Value(lastUsedAt),
       createdAt: Value(createdAt),
+      lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -6447,6 +6711,8 @@ class TransactionTemplate extends DataClass
       useCount: serializer.fromJson<int>(json['useCount']),
       lastUsedAt: serializer.fromJson<DateTime?>(json['lastUsedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -6464,6 +6730,8 @@ class TransactionTemplate extends DataClass
       'useCount': serializer.toJson<int>(useCount),
       'lastUsedAt': serializer.toJson<DateTime?>(lastUsedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -6478,7 +6746,9 @@ class TransactionTemplate extends DataClass
           Value<String?> categoryId = const Value.absent(),
           int? useCount,
           Value<DateTime?> lastUsedAt = const Value.absent(),
-          DateTime? createdAt}) =>
+          DateTime? createdAt,
+          DateTime? lastModified,
+          bool? deleted}) =>
       TransactionTemplate(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -6491,6 +6761,8 @@ class TransactionTemplate extends DataClass
         useCount: useCount ?? this.useCount,
         lastUsedAt: lastUsedAt.present ? lastUsedAt.value : this.lastUsedAt,
         createdAt: createdAt ?? this.createdAt,
+        lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   TransactionTemplate copyWithCompanion(TransactionTemplatesCompanion data) {
     return TransactionTemplate(
@@ -6508,6 +6780,10 @@ class TransactionTemplate extends DataClass
       lastUsedAt:
           data.lastUsedAt.present ? data.lastUsedAt.value : this.lastUsedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -6524,14 +6800,28 @@ class TransactionTemplate extends DataClass
           ..write('categoryId: $categoryId, ')
           ..write('useCount: $useCount, ')
           ..write('lastUsedAt: $lastUsedAt, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, householdId, title, type, amount,
-      currency, accountId, categoryId, useCount, lastUsedAt, createdAt);
+  int get hashCode => Object.hash(
+      id,
+      householdId,
+      title,
+      type,
+      amount,
+      currency,
+      accountId,
+      categoryId,
+      useCount,
+      lastUsedAt,
+      createdAt,
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6546,7 +6836,9 @@ class TransactionTemplate extends DataClass
           other.categoryId == this.categoryId &&
           other.useCount == this.useCount &&
           other.lastUsedAt == this.lastUsedAt &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class TransactionTemplatesCompanion
@@ -6562,6 +6854,8 @@ class TransactionTemplatesCompanion
   final Value<int> useCount;
   final Value<DateTime?> lastUsedAt;
   final Value<DateTime> createdAt;
+  final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const TransactionTemplatesCompanion({
     this.id = const Value.absent(),
@@ -6575,6 +6869,8 @@ class TransactionTemplatesCompanion
     this.useCount = const Value.absent(),
     this.lastUsedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionTemplatesCompanion.insert({
@@ -6589,6 +6885,8 @@ class TransactionTemplatesCompanion
     this.useCount = const Value.absent(),
     this.lastUsedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -6608,6 +6906,8 @@ class TransactionTemplatesCompanion
     Expression<int>? useCount,
     Expression<DateTime>? lastUsedAt,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6622,6 +6922,8 @@ class TransactionTemplatesCompanion
       if (useCount != null) 'use_count': useCount,
       if (lastUsedAt != null) 'last_used_at': lastUsedAt,
       if (createdAt != null) 'created_at': createdAt,
+      if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6638,6 +6940,8 @@ class TransactionTemplatesCompanion
       Value<int>? useCount,
       Value<DateTime?>? lastUsedAt,
       Value<DateTime>? createdAt,
+      Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return TransactionTemplatesCompanion(
       id: id ?? this.id,
@@ -6651,6 +6955,8 @@ class TransactionTemplatesCompanion
       useCount: useCount ?? this.useCount,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       createdAt: createdAt ?? this.createdAt,
+      lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6691,6 +6997,12 @@ class TransactionTemplatesCompanion
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6711,6 +7023,8 @@ class TransactionTemplatesCompanion
           ..write('useCount: $useCount, ')
           ..write('lastUsedAt: $lastUsedAt, ')
           ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6832,6 +7146,16 @@ class $ObjectivesTable extends Objectives
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -6849,7 +7173,8 @@ class $ObjectivesTable extends Objectives
         archived,
         deviceId,
         createdAt,
-        lastModified
+        lastModified,
+        deleted
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6948,6 +7273,10 @@ class $ObjectivesTable extends Objectives
           lastModified.isAcceptableOrUnknown(
               data['last_modified']!, _lastModifiedMeta));
     }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
     return context;
   }
 
@@ -6989,6 +7318,8 @@ class $ObjectivesTable extends Objectives
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
     );
   }
 
@@ -7031,6 +7362,10 @@ class Objective extends DataClass implements Insertable<Objective> {
   final String deviceId;
   final DateTime createdAt;
   final DateTime lastModified;
+
+  /// Soft-delete flag — set true instead of removing the row so deletions
+  /// propagate across synced devices. List/aggregate queries filter this.
+  final bool deleted;
   const Objective(
       {required this.id,
       required this.householdId,
@@ -7047,7 +7382,8 @@ class Objective extends DataClass implements Insertable<Objective> {
       required this.archived,
       required this.deviceId,
       required this.createdAt,
-      required this.lastModified});
+      required this.lastModified,
+      required this.deleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -7075,6 +7411,7 @@ class Objective extends DataClass implements Insertable<Objective> {
     map['device_id'] = Variable<String>(deviceId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -7102,6 +7439,7 @@ class Objective extends DataClass implements Insertable<Objective> {
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
+      deleted: Value(deleted),
     );
   }
 
@@ -7125,6 +7463,7 @@ class Objective extends DataClass implements Insertable<Objective> {
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -7147,6 +7486,7 @@ class Objective extends DataClass implements Insertable<Objective> {
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -7166,7 +7506,8 @@ class Objective extends DataClass implements Insertable<Objective> {
           bool? archived,
           String? deviceId,
           DateTime? createdAt,
-          DateTime? lastModified}) =>
+          DateTime? lastModified,
+          bool? deleted}) =>
       Objective(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -7184,6 +7525,7 @@ class Objective extends DataClass implements Insertable<Objective> {
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
       );
   Objective copyWithCompanion(ObjectivesCompanion data) {
     return Objective(
@@ -7213,6 +7555,7 @@ class Objective extends DataClass implements Insertable<Objective> {
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -7234,7 +7577,8 @@ class Objective extends DataClass implements Insertable<Objective> {
           ..write('archived: $archived, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastModified: $lastModified')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -7256,7 +7600,8 @@ class Objective extends DataClass implements Insertable<Objective> {
       archived,
       deviceId,
       createdAt,
-      lastModified);
+      lastModified,
+      deleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7276,7 +7621,8 @@ class Objective extends DataClass implements Insertable<Objective> {
           other.archived == this.archived &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
-          other.lastModified == this.lastModified);
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
 }
 
 class ObjectivesCompanion extends UpdateCompanion<Objective> {
@@ -7296,6 +7642,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
+  final Value<bool> deleted;
   final Value<int> rowid;
   const ObjectivesCompanion({
     this.id = const Value.absent(),
@@ -7314,6 +7661,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ObjectivesCompanion.insert({
@@ -7333,6 +7681,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
     required String deviceId,
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -7357,6 +7706,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7376,6 +7726,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7397,6 +7748,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
+      Value<bool>? deleted,
       Value<int>? rowid}) {
     return ObjectivesCompanion(
       id: id ?? this.id,
@@ -7415,6 +7767,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7470,6 +7823,9 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7495,6 +7851,7 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8898,6 +9255,7 @@ typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
   required String deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
@@ -8913,6 +9271,7 @@ typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
   Value<String> deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -9129,6 +9488,9 @@ class $$AccountsTableFilterComposer
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -9390,6 +9752,9 @@ class $$AccountsTableOrderingComposer
       column: $table.lastModified,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -9452,6 +9817,9 @@ class $$AccountsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -9714,6 +10082,7 @@ class $$AccountsTableTableManager extends RootTableManager<
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AccountsCompanion(
@@ -9729,6 +10098,7 @@ class $$AccountsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -9744,6 +10114,7 @@ class $$AccountsTableTableManager extends RootTableManager<
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AccountsCompanion.insert(
@@ -9759,6 +10130,7 @@ class $$AccountsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -9980,6 +10352,7 @@ typedef $$AllocationsTableCreateCompanionBuilder = AllocationsCompanion
   required String deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
@@ -9999,6 +10372,7 @@ typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
   Value<String> deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -10106,6 +10480,9 @@ class $$AllocationsTableFilterComposer
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -10224,6 +10601,9 @@ class $$AllocationsTableOrderingComposer
       column: $table.lastModified,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -10295,6 +10675,9 @@ class $$AllocationsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -10400,6 +10783,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AllocationsCompanion(
@@ -10418,6 +10802,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -10436,6 +10821,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AllocationsCompanion.insert(
@@ -10454,6 +10840,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -10561,6 +10948,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   Value<bool> archived,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
@@ -10576,6 +10964,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<bool> archived,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -10735,6 +11124,9 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -10922,6 +11314,9 @@ class $$CategoriesTableOrderingComposer
       column: $table.lastModified,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -11018,6 +11413,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -11210,6 +11608,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<bool> archived = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CategoriesCompanion(
@@ -11225,6 +11624,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             archived: archived,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -11240,6 +11640,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<bool> archived = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CategoriesCompanion.insert(
@@ -11255,6 +11656,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             archived: archived,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -13573,6 +13975,8 @@ typedef $$RecurringTransactionsTableCreateCompanionBuilder
   Value<bool> isSubscription,
   Value<String?> priceHistory,
   Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$RecurringTransactionsTableUpdateCompanionBuilder
@@ -13596,6 +14000,8 @@ typedef $$RecurringTransactionsTableUpdateCompanionBuilder
   Value<bool> isSubscription,
   Value<String?> priceHistory,
   Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -13721,6 +14127,12 @@ class $$RecurringTransactionsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -13860,6 +14272,13 @@ class $$RecurringTransactionsTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -13995,6 +14414,12 @@ class $$RecurringTransactionsTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -14126,6 +14551,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<bool> isSubscription = const Value.absent(),
             Value<String?> priceHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecurringTransactionsCompanion(
@@ -14148,6 +14575,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             isSubscription: isSubscription,
             priceHistory: priceHistory,
             createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -14170,6 +14599,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<bool> isSubscription = const Value.absent(),
             Value<String?> priceHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecurringTransactionsCompanion.insert(
@@ -14192,6 +14623,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             isSubscription: isSubscription,
             priceHistory: priceHistory,
             createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -14306,6 +14739,8 @@ typedef $$TransactionTemplatesTableCreateCompanionBuilder
   Value<int> useCount,
   Value<DateTime?> lastUsedAt,
   Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$TransactionTemplatesTableUpdateCompanionBuilder
@@ -14321,6 +14756,8 @@ typedef $$TransactionTemplatesTableUpdateCompanionBuilder
   Value<int> useCount,
   Value<DateTime?> lastUsedAt,
   Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -14407,6 +14844,12 @@ class $$TransactionTemplatesTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -14502,6 +14945,13 @@ class $$TransactionTemplatesTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -14595,6 +15045,12 @@ class $$TransactionTemplatesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -14695,6 +15151,8 @@ class $$TransactionTemplatesTableTableManager extends RootTableManager<
             Value<int> useCount = const Value.absent(),
             Value<DateTime?> lastUsedAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionTemplatesCompanion(
@@ -14709,6 +15167,8 @@ class $$TransactionTemplatesTableTableManager extends RootTableManager<
             useCount: useCount,
             lastUsedAt: lastUsedAt,
             createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -14723,6 +15183,8 @@ class $$TransactionTemplatesTableTableManager extends RootTableManager<
             Value<int> useCount = const Value.absent(),
             Value<DateTime?> lastUsedAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionTemplatesCompanion.insert(
@@ -14737,6 +15199,8 @@ class $$TransactionTemplatesTableTableManager extends RootTableManager<
             useCount: useCount,
             lastUsedAt: lastUsedAt,
             createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -14838,6 +15302,7 @@ typedef $$ObjectivesTableCreateCompanionBuilder = ObjectivesCompanion Function({
   required String deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 typedef $$ObjectivesTableUpdateCompanionBuilder = ObjectivesCompanion Function({
@@ -14857,6 +15322,7 @@ typedef $$ObjectivesTableUpdateCompanionBuilder = ObjectivesCompanion Function({
   Value<String> deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
+  Value<bool> deleted,
   Value<int> rowid,
 });
 
@@ -14934,6 +15400,9 @@ class $$ObjectivesTableFilterComposer
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -15014,6 +15483,9 @@ class $$ObjectivesTableOrderingComposer
       column: $table.lastModified,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -15089,6 +15561,9 @@ class $$ObjectivesTableAnnotationComposer
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
 
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -15149,6 +15624,7 @@ class $$ObjectivesTableTableManager extends RootTableManager<
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ObjectivesCompanion(
@@ -15168,6 +15644,7 @@ class $$ObjectivesTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -15187,6 +15664,7 @@ class $$ObjectivesTableTableManager extends RootTableManager<
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ObjectivesCompanion.insert(
@@ -15206,6 +15684,7 @@ class $$ObjectivesTableTableManager extends RootTableManager<
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
+            deleted: deleted,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

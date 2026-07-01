@@ -11,7 +11,10 @@ class AccountsDao extends DatabaseAccessor<AppDatabase> with _$AccountsDaoMixin 
 
   Stream<List<Account>> watchAll(String householdId) =>
       (select(accounts)
-            ..where((t) => t.householdId.equals(householdId) & t.archived.equals(false))
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.archived.equals(false) &
+                t.deleted.equals(false))
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .watch();
 

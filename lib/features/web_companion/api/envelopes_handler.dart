@@ -21,7 +21,9 @@ Handler listEnvelopesHandler(Ref ref) {
     try {
       final allocs = await (db.select(db.allocations)
             ..where((a) =>
-                a.householdId.equals(householdId) & a.archived.equals(false))
+                a.householdId.equals(householdId) &
+                a.archived.equals(false) &
+                a.deleted.equals(false))
             ..orderBy([(a) => OrderingTerm.asc(a.name)]))
           .get();
 
@@ -34,7 +36,9 @@ Handler listEnvelopesHandler(Ref ref) {
       // calling unallocatedByCurrency() which re-queries both.
       final accounts = await (db.select(db.accounts)
             ..where((a) =>
-                a.householdId.equals(householdId) & a.archived.equals(false)))
+                a.householdId.equals(householdId) &
+                a.archived.equals(false) &
+                a.deleted.equals(false)))
           .get();
       final accountTotals = <String, double>{};
       for (final acc in accounts) {

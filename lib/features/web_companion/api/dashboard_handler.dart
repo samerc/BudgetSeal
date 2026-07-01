@@ -21,7 +21,9 @@ Handler dashboardHandler(Ref ref) {
 
       final accounts = await (db.select(db.accounts)
             ..where((a) =>
-                a.householdId.equals(householdId) & a.archived.equals(false))
+                a.householdId.equals(householdId) &
+                a.archived.equals(false) &
+                a.deleted.equals(false))
             ..orderBy([(a) => OrderingTerm.asc(a.name)]))
           .get();
 
@@ -53,7 +55,9 @@ Handler dashboardHandler(Ref ref) {
 
       final allocs = await (db.select(db.allocations)
             ..where((a) =>
-                a.householdId.equals(householdId) & a.archived.equals(false))
+                a.householdId.equals(householdId) &
+                a.archived.equals(false) &
+                a.deleted.equals(false))
             ..orderBy([(a) => OrderingTerm.asc(a.name)]))
           .get();
 

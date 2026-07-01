@@ -29,9 +29,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 17', () {
+    test('schema version is 18', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 17);
+      expect(db.schemaVersion, 18);
     });
 
     test('tables return empty results on fresh database', () async {

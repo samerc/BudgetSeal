@@ -1161,9 +1161,11 @@ class _ObjectiveDetailScreenState
         }
       }
       final db = ref.read(databaseProvider);
-      await (db.delete(db.objectives)
+      await (db.update(db.objectives)
             ..where((o) => o.id.equals(widget.objectiveId)))
-          .go();
+          .write(ObjectivesCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
       ref.invalidate(objectivesProvider);
       ref.invalidate(accountsWithBalanceProvider);
       if (mounted) context.pop();

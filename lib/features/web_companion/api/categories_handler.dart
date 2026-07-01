@@ -23,7 +23,9 @@ Handler listCategoriesHandler(Ref ref) {
     try {
       final categories = await (db.select(db.categories)
             ..where((c) =>
-                c.householdId.equals(householdId) & c.archived.equals(false))
+                c.householdId.equals(householdId) &
+                c.archived.equals(false) &
+                c.deleted.equals(false))
             ..orderBy([(c) => OrderingTerm.asc(c.name)]))
           .get();
 

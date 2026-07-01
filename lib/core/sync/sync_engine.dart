@@ -205,12 +205,12 @@ class SyncEngine {
       changed += await _mergeTable(_db.recurringTransactions,
           _list(data, 'recurringTransactions'), _recurringFromMap,
           getId: (m) => m['id'] as String,
-          getModified: (m) => _parseDate(m['createdAt']));
+          getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(_db.transactionTemplates,
           _list(data, 'transactionTemplates'), _templateFromMap,
           getId: (m) => m['id'] as String,
-          getModified: (m) => _parseDate(m['lastUsedAt']));
+          getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.fxRates, _list(data, 'fxRates'), _fxRateFromMap,
@@ -338,6 +338,7 @@ class SyncEngine {
         'deviceId': a.deviceId,
         'createdAt': a.createdAt.toIso8601String(),
         'lastModified': a.lastModified.toIso8601String(),
+        'deleted': a.deleted,
       };
 
   Map<String, dynamic> _categoryToMap(Category c) => {
@@ -353,6 +354,7 @@ class SyncEngine {
         'archived': c.archived,
         'createdAt': c.createdAt.toIso8601String(),
         'lastModified': c.lastModified.toIso8601String(),
+        'deleted': c.deleted,
       };
 
   Map<String, dynamic> _allocationToMap(Allocation a) => {
@@ -371,6 +373,7 @@ class SyncEngine {
         'deviceId': a.deviceId,
         'createdAt': a.createdAt.toIso8601String(),
         'lastModified': a.lastModified.toIso8601String(),
+        'deleted': a.deleted,
       };
 
   Map<String, dynamic> _transactionToMap(Transaction t) => {
@@ -438,6 +441,8 @@ class SyncEngine {
         'isSubscription': r.isSubscription,
         'priceHistory': r.priceHistory,
         'createdAt': r.createdAt.toIso8601String(),
+        'lastModified': r.lastModified.toIso8601String(),
+        'deleted': r.deleted,
       };
 
   Map<String, dynamic> _templateToMap(TransactionTemplate t) => {
@@ -452,6 +457,8 @@ class SyncEngine {
         'useCount': t.useCount,
         'lastUsedAt': t.lastUsedAt?.toIso8601String(),
         'createdAt': t.createdAt.toIso8601String(),
+        'lastModified': t.lastModified.toIso8601String(),
+        'deleted': t.deleted,
       };
 
   Map<String, dynamic> _fxRateToMap(FxRate f) => {
@@ -500,6 +507,7 @@ class SyncEngine {
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   CategoriesCompanion _categoryFromMap(Map<String, dynamic> m) =>
@@ -516,6 +524,7 @@ class SyncEngine {
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   AllocationsCompanion _allocationFromMap(Map<String, dynamic> m) =>
@@ -535,6 +544,7 @@ class SyncEngine {
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   TransactionsCompanion _transactionFromMap(Map<String, dynamic> m) =>
@@ -611,6 +621,8 @@ class SyncEngine {
         enabled: Value(m['enabled'] as bool? ?? true),
         isSubscription: Value(m['isSubscription'] as bool? ?? false),
         priceHistory: Value(m['priceHistory'] as String?),
+        lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   TransactionTemplatesCompanion _templateFromMap(Map<String, dynamic> m) =>
@@ -625,6 +637,8 @@ class SyncEngine {
         categoryId: Value(m['categoryId'] as String?),
         useCount: Value(m['useCount'] as int? ?? 0),
         lastUsedAt: Value(_parseDate(m['lastUsedAt'])),
+        lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   FxRatesCompanion _fxRateFromMap(Map<String, dynamic> m) =>
@@ -655,6 +669,7 @@ class SyncEngine {
         'deviceId': o.deviceId,
         'createdAt': o.createdAt.toIso8601String(),
         'lastModified': o.lastModified.toIso8601String(),
+        'deleted': o.deleted,
       };
 
   ObjectivesCompanion _objectiveFromMap(Map<String, dynamic> m) =>
@@ -675,5 +690,6 @@ class SyncEngine {
         archived: Value(m['archived'] as bool? ?? false),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 }

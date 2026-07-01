@@ -50,6 +50,13 @@ class RecurringTransactions extends Table {
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// Bumped on every edit so changes propagate across synced devices
+  /// (merge keys on this).
+  DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();
+
+  /// Soft-delete flag — set true instead of removing the row so deletions sync.
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }

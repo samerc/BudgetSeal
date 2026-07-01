@@ -17,7 +17,8 @@ class TravelAccountService {
       final travelAccounts = await (db.select(db.accounts)
             ..where((a) => a.householdId.equals(householdId))
             ..where((a) => a.isTravel.equals(true))
-            ..where((a) => a.archived.equals(false)))
+            ..where((a) => a.archived.equals(false))
+            ..where((a) => a.deleted.equals(false)))
           .get();
 
       if (travelAccounts.isEmpty) return false;

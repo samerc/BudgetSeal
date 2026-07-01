@@ -23,7 +23,8 @@ class AllocationsDao extends DatabaseAccessor<AppDatabase>
           categories, categories.id.equalsExp(allocations.categoryId)),
     ])
       ..where(allocations.householdId.equals(householdId) &
-          allocations.archived.equals(false))
+          allocations.archived.equals(false) &
+          allocations.deleted.equals(false))
       ..orderBy([OrderingTerm.asc(allocations.name)]);
 
     return query.watch().map((rows) => rows
@@ -40,19 +41,24 @@ class AllocationsDao extends DatabaseAccessor<AppDatabase>
   /// Get all categories linked to this envelope.
   Future<List<Category>> linkedCategories(String allocationId) =>
       (select(categories)
-            ..where((c) => c.allocationId.equals(allocationId))
+            ..where((c) =>
+                c.allocationId.equals(allocationId) & c.deleted.equals(false))
             ..orderBy([(c) => OrderingTerm.asc(c.name)]))
           .get();
 
-  /// Link a category to an envelope.
+  /// Link a category to an envelope. Bumps lastModified so the link syncs.
   Future<void> linkCategory(String categoryId, String allocationId) =>
       (update(categories)..where((c) => c.id.equals(categoryId)))
-          .write(CategoriesCompanion(allocationId: Value(allocationId)));
+          .write(CategoriesCompanion(
+              allocationId: Value(allocationId),
+              lastModified: Value(DateTime.now())));
 
-  /// Unlink a category from its envelope.
+  /// Unlink a category from its envelope. Bumps lastModified so it syncs.
   Future<void> unlinkCategory(String categoryId) =>
       (update(categories)..where((c) => c.id.equals(categoryId)))
-          .write(const CategoriesCompanion(allocationId: Value(null)));
+          .write(CategoriesCompanion(
+              allocationId: const Value(null),
+              lastModified: Value(DateTime.now())));
 
   Future<String> upsert(AllocationsCompanion entry) async {
     await into(allocations).insertOnConflictUpdate(entry);

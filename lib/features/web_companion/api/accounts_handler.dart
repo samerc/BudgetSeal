@@ -23,7 +23,9 @@ Handler listAccountsHandler(Ref ref) {
     try {
       final accounts = await (db.select(db.accounts)
             ..where((a) =>
-                a.householdId.equals(householdId) & a.archived.equals(false))
+                a.householdId.equals(householdId) &
+                a.archived.equals(false) &
+                a.deleted.equals(false))
             ..orderBy([(a) => OrderingTerm.asc(a.name)]))
           .get();
 

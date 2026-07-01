@@ -2117,7 +2117,8 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
       future: (db.select(db.recurringTransactions)
             ..where((r) =>
                 r.householdId.equals(householdId) &
-                r.enabled.equals(true)))
+                r.enabled.equals(true) &
+                r.deleted.equals(false)))
           .get(),
       builder: (context, snap) {
         final recs = snap.data;

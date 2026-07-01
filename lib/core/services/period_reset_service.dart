@@ -43,6 +43,7 @@ class PeriodResetService {
     final allocs = await (db.select(db.allocations)
           ..where((a) => a.householdId.equals(householdId))
           ..where((a) => a.archived.equals(false))
+          ..where((a) => a.deleted.equals(false))
           ..where((a) => a.periodicity.equals('periodic')))
         .get();
 
@@ -96,6 +97,7 @@ class PeriodResetService {
     final allocs = await (db.select(db.allocations)
           ..where((a) => a.householdId.equals(householdId))
           ..where((a) => a.archived.equals(false))
+          ..where((a) => a.deleted.equals(false))
           ..where((a) => a.periodicity.equals('periodic'))
           ..where((a) => a.autoReset.equals(false)))
         .get();
@@ -119,6 +121,7 @@ class PeriodResetService {
     final allocs = await (db.select(db.allocations)
           ..where((a) => a.householdId.equals(householdId))
           ..where((a) => a.archived.equals(false))
+          ..where((a) => a.deleted.equals(false))
           ..where((a) => a.periodicity.equals('periodic'))
           ..where((a) => a.autoReset.equals(false)))
         .get();

@@ -1121,7 +1121,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         ),
       );
       if (confirmed == true && mounted) {
-        await (db.delete(db.accounts)..where((a) => a.id.equals(accId))).go();
+        await (db.update(db.accounts)..where((a) => a.id.equals(accId))).write(
+          AccountsCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
         ref.invalidate(accountsProvider);
         ref.invalidate(accountsWithBalanceProvider);
         if (mounted) context.pop();
@@ -1229,7 +1232,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       for (final id in refTxIds) {
         await engine.deleteTransaction(id);
       }
-      await (db.delete(db.accounts)..where((a) => a.id.equals(accId))).go();
+      await (db.update(db.accounts)..where((a) => a.id.equals(accId))).write(
+          AccountsCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
       ref.invalidate(allocationsProvider);

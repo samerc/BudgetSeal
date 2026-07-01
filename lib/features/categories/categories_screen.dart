@@ -406,8 +406,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         );
       }
     } else if (action == 'delete') {
-      await (db.delete(db.categories)..where((c) => c.id.equals(cat.id)))
-          .go();
+      await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+          .write(CategoriesCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
       ref.invalidate(categoriesProvider);
       ref.invalidate(allocationsProvider);
       if (mounted) {

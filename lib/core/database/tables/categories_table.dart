@@ -28,6 +28,10 @@ class Categories extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();
 
+  /// Soft-delete flag — set true instead of removing the row so deletions
+  /// propagate across synced devices. List/aggregate queries filter this.
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }

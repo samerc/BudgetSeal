@@ -42,6 +42,7 @@ class _UpcomingBillsScreenState
       final items = await (db.select(db.recurringTransactions)
             ..where((r) => r.householdId.equals(householdId))
             ..where((r) => r.enabled.equals(true))
+            ..where((r) => r.deleted.equals(false))
             ..orderBy([(r) => OrderingTerm.asc(r.nextDueDate)]))
           .get();
 

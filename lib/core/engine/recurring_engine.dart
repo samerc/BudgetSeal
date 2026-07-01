@@ -22,8 +22,10 @@ class RecurringEngine {
     final today = DateTime(now.year, now.month, now.day);
 
     final due = await (_db.select(_db.recurringTransactions)
-          ..where(
-              (r) => r.enabled.equals(true) & r.nextDueDate.isSmallerOrEqualValue(today)))
+          ..where((r) =>
+              r.enabled.equals(true) &
+              r.deleted.equals(false) &
+              r.nextDueDate.isSmallerOrEqualValue(today)))
         .get();
 
     // Pre-fetch base currencies for all households to avoid per-iteration queries.
@@ -56,6 +58,9 @@ class RecurringEngine {
           .write(RecurringTransactionsCompanion(
         lastGeneratedDate: Value(today),
         nextDueDate: Value(currentDue),
+        // Bump so the advanced due date syncs; otherwise the other device
+        // still sees the old due date and re-posts the same bill (duplicate).
+        lastModified: Value(DateTime.now()),
       ));
     }
     return generated;
@@ -151,7 +156,8 @@ class RecurringEngine {
       {bool excludeSubscriptions = false}) async {
     return (_db.select(_db.recurringTransactions)
           ..where((r) {
-            final base = r.householdId.equals(householdId);
+            final base =
+                r.householdId.equals(householdId) & r.deleted.equals(false);
             if (excludeSubscriptions) {
               return base & r.isSubscription.equals(false);
             }
@@ -205,15 +211,18 @@ class RecurringEngine {
 
   /// Delete a recurring transaction.
   Future<void> delete(String id) async {
-    await (_db.delete(_db.recurringTransactions)
+    await (_db.update(_db.recurringTransactions)
           ..where((r) => r.id.equals(id)))
-        .go();
+        .write(RecurringTransactionsCompanion(
+            deleted: const Value(true),
+            lastModified: Value(DateTime.now())));
   }
 
   /// Toggle enabled state.
   Future<void> toggleEnabled(String id, bool enabled) async {
     await (_db.update(_db.recurringTransactions)
           ..where((r) => r.id.equals(id)))
-        .write(RecurringTransactionsCompanion(enabled: Value(enabled)));
+        .write(RecurringTransactionsCompanion(
+            enabled: Value(enabled), lastModified: Value(DateTime.now())));
   }
 }

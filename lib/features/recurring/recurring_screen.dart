@@ -1072,6 +1072,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         nextDueDate: Value(_startDate),
         endDate: Value(_endDate),
         isSubscription: Value(_isSubscription),
+        lastModified: Value(DateTime.now()),
       ));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

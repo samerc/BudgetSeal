@@ -1997,13 +1997,11 @@ class _AllocationDetailScreenState
           for (final cat in linked) {
             await dao.unlinkCategory(cat.id);
           }
-          await (db.delete(db.allocationLedger)
-                ..where(
-                    (l) => l.allocationId.equals(widget.allocationId)))
-              .go();
-          await (db.delete(db.allocations)
+          await (db.update(db.allocations)
                 ..where((a) => a.id.equals(widget.allocationId)))
-              .go();
+              .write(AllocationsCompanion(
+                  deleted: const Value(true),
+                  lastModified: Value(DateTime.now())));
           ref.invalidate(allocationsProvider);
           ref.invalidate(categoriesProvider);
           if (mounted) context.pop();
@@ -2044,13 +2042,11 @@ class _AllocationDetailScreenState
 
       if (confirmed == true && mounted) {
         try {
-          await (db.delete(db.allocationLedger)
-                ..where(
-                    (l) => l.allocationId.equals(widget.allocationId)))
-              .go();
-          await (db.delete(db.allocations)
+          await (db.update(db.allocations)
                 ..where((a) => a.id.equals(widget.allocationId)))
-              .go();
+              .write(AllocationsCompanion(
+                  deleted: const Value(true),
+                  lastModified: Value(DateTime.now())));
           ref.invalidate(allocationsProvider);
           if (mounted) context.pop();
         } catch (e) {

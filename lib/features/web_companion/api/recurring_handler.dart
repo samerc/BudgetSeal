@@ -188,6 +188,7 @@ Handler updateRecurringHandler(Ref ref) {
           note: body.containsKey('note')
               ? Value(truncate(optString(body, 'note') ?? existing.note, kMaxNoteLength))
               : const Value.absent(),
+          lastModified: Value(DateTime.now()),
         ));
       }
 

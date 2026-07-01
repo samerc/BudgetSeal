@@ -59,7 +59,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
       final items = await (db.select(db.transactionTemplates)
-            ..where((t) => t.householdId.equals(householdId)))
+            ..where((t) => t.householdId.equals(householdId))
+            ..where((t) => t.deleted.equals(false)))
           .get();
       if (mounted) setState(() { _templates = items; _loading = false; });
     } catch (e) {
@@ -115,6 +116,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           .write(TransactionTemplatesCompanion(
         useCount: Value(t.useCount + 1),
         lastUsedAt: Value(DateTime.now()),
+        lastModified: Value(DateTime.now()),
       ));
 
       final cats = ref.read(categoriesProvider).value ?? [];
@@ -174,9 +176,11 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     if (confirmed == true) {
       try {
         final db = ref.read(databaseProvider);
-        await (db.delete(db.transactionTemplates)
+        await (db.update(db.transactionTemplates)
               ..where((t) => t.id.equals(id)))
-            .go();
+            .write(TransactionTemplatesCompanion(
+                deleted: const Value(true),
+                lastModified: Value(DateTime.now())));
         _load();
       } catch (e) {
         debugPrint('[Templates] Error deleting: $e');

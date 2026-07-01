@@ -11,8 +11,10 @@ final categoriesProvider = StreamProvider<List<Category>>((ref) {
   if (householdId == null) return Stream.value([]);
 
   return (db.select(db.categories)
-        ..where(
-            (c) => c.householdId.equals(householdId) & c.archived.equals(false))
+        ..where((c) =>
+            c.householdId.equals(householdId) &
+            c.archived.equals(false) &
+            c.deleted.equals(false))
         ..orderBy([(c) => OrderingTerm.asc(c.name)]))
       .watch();
 });
