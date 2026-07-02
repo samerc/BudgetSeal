@@ -36,19 +36,23 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final enabled = await AutoBackupService.isEnabled();
-    final freq = await AutoBackupService.getFrequencyHours();
-    final ret = await AutoBackupService.getRetention();
-    final last = await AutoBackupService.getLastBackupTime();
-    final backups = await AutoBackupService.listBackups();
-    if (mounted) {
-      setState(() {
-        _autoEnabled = enabled;
-        _frequencyHours = freq;
-        _retention = ret;
-        _lastAutoBackup = last;
-        _backups = backups;
-      });
+    try {
+      final enabled = await AutoBackupService.isEnabled();
+      final freq = await AutoBackupService.getFrequencyHours();
+      final ret = await AutoBackupService.getRetention();
+      final last = await AutoBackupService.getLastBackupTime();
+      final backups = await AutoBackupService.listBackups();
+      if (mounted) {
+        setState(() {
+          _autoEnabled = enabled;
+          _frequencyHours = freq;
+          _retention = ret;
+          _lastAutoBackup = last;
+          _backups = backups;
+        });
+      }
+    } catch (e) {
+      debugPrint('[BackupScreen] Failed to load backup settings: $e');
     }
   }
 
@@ -64,7 +68,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (!dbFile.existsSync()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.of(context).backupDbNotFound)),
+            SnackBar(
+              content: Text(S.of(context).backupDbNotFound),
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         }
         return;

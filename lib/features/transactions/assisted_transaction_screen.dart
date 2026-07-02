@@ -184,7 +184,7 @@ class _AssistedTransactionScreenState
     final textHint = AppColors.th(context);
     final surfaceVariant = AppColors.sfv(context);
     final borderColor = AppColors.bd(context);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     showModalBottomSheet(
       context: context,
@@ -199,7 +199,7 @@ class _AssistedTransactionScreenState
         return StatefulBuilder(
           builder: (ctx, setSheetState) => Container(
             padding: EdgeInsets.fromLTRB(
-                20, 24, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+                20, 24, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
             decoration: BoxDecoration(
               color: surfaceColor,
               borderRadius:

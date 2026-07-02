@@ -2351,6 +2351,9 @@
     "description": "Validation error"
   },
   "objCreated": "تم إنشاء الهدف",
+  "objNotePaymentReceived": "دفعة مستلمة",
+  "objNotePayment": "دفعة",
+  "objNoteGoalSavings": "ادخار للهدف",
   "@objCreated": {
     "description": "Snackbar"
   },
@@ -5666,6 +5669,9 @@
   "acctDecimalAuto": "تلقائي ({count})",
   "acctOpeningBalance": "الرصيد الافتتاحي",
   "acctCreateAccount": "إنشاء حساب",
+  "acctCreated": "تم إنشاء الحساب",
+  "acctUpdated": "تم تحديث الحساب",
+  "tmplCreated": "تم إنشاء القالب",
   "acctRecentTransactions": "المعاملات الأخيرة",
   "acctNoTransactions": "لا معاملات بعد",
   "acctAdjustDesc": "أدخل الرصيد الفعلي لهذا الحساب. سيتم إنشاء معاملة تعديل للفرق.",
@@ -5751,6 +5757,7 @@
   "billRemovePersonTitle": "إزالة الشخص",
   "billRemovePersonContent": "{name} لديه {count} عنصر(ات) مخصصة له فقط. أعد تعيينها لشخص آخر، أو احذفها؟",
   "billReassignTo": "إعادة تعيين إلى:",
+  "billPersonRemoved": "تمت إزالة الشخص",
   "billDeleteItems": "حذف العناصر",
   "billEachPays": "كل شخص يدفع {amount}",
   "billSplitQtyTitle": "{qty} × {name}",

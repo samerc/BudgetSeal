@@ -18,6 +18,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../transactions/widgets/category_sheet.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 class ObjectiveDetailScreen extends ConsumerStatefulWidget {
@@ -257,7 +258,7 @@ class _ObjectiveDetailScreenState
         return StatefulBuilder(
           builder: (ctx, setModalState) => Padding(
             padding: EdgeInsets.fromLTRB(
-                24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
+                24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Text(sheetTitle,
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
@@ -289,79 +290,55 @@ class _ObjectiveDetailScreenState
               ),
               const SizedBox(height: 12),
 
-              // Category picker (optional)
+              // Category picker (optional) — same rich sheet as the
+              // transaction screen: search, expense/income toggle,
+              // parent/subcategory hierarchy with icons.
               GestureDetector(
                 onTap: () async {
-                  final expenseCategories = categories
-                      .where((c) => c.transactionType == txType)
-                      .toList();
-                  if (expenseCategories.isEmpty) return;
-
-                  await showModalBottomSheet(
+                  final householdId = ref.read(currentHouseholdIdProvider);
+                  final freshCats = ref.read(categoriesProvider).value ?? [];
+                  await showModalBottomSheet<void>(
                     context: ctx,
                     isScrollControlled: true,
-                    backgroundColor: sfColor,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (catCtx) => Container(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(catCtx).size.height * 0.6,
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(tr.commonCategory, style: TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.w700,
-                              color: tpColor)),
-                          const SizedBox(height: 12),
-                          // None option
-                          ListTile(
-                            dense: true,
-                            title: Text(tr.commonNone, style: TextStyle(color: tsColor)),
-                            leading: Icon(Icons.block_rounded, size: 18, color: tsColor),
-                            onTap: () {
-                              setModalState(() {
-                                selectedCategoryId = null;
-                                selectedCategoryName = null;
-                              });
-                              Navigator.pop(catCtx);
-                            },
-                          ),
-                          const Divider(height: 1),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: expenseCategories.length,
-                              itemBuilder: (_, i) {
-                                final cat = expenseCategories[i];
-                                final isParent = cat.parentId == null;
-                                return ListTile(
-                                  dense: true,
-                                  contentPadding: EdgeInsets.only(
-                                    left: isParent ? 16 : 40, right: 16),
-                                  title: Text(cat.name,
-                                      style: TextStyle(
-                                        fontWeight: isParent ? FontWeight.w600 : FontWeight.w400,
-                                        fontSize: 14,
-                                      )),
-                                  trailing: selectedCategoryId == cat.id
-                                      ? Icon(Icons.check_rounded, size: 18, color: AppColors.accent)
-                                      : null,
-                                  onTap: () {
-                                    setModalState(() {
-                                      selectedCategoryId = cat.id;
-                                      selectedCategoryName = cat.name;
-                                    });
-                                    Navigator.pop(catCtx);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                    backgroundColor: Colors.transparent,
+                    builder: (catCtx) => CategorySheet(
+                      categories: freshCats,
+                      selectedId: selectedCategoryId,
+                      householdId: householdId,
+                      onSelected: (id, name, color, _) {
+                        setModalState(() {
+                          selectedCategoryId = id;
+                          selectedCategoryName = name;
+                        });
+                        Navigator.of(catCtx).pop();
+                      },
+                      onCreated: (name) async {
+                        if (householdId == null) return;
+                        final db = ref.read(databaseProvider);
+                        final cats = ref.read(categoriesProvider).value ?? [];
+                        final color = categoryPresetColors[
+                            cats.length % categoryPresetColors.length];
+                        final colorHex =
+                            '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+                        final newId = const Uuid().v4();
+                        await db.into(db.categories).insert(
+                              CategoriesCompanion.insert(
+                                id: newId,
+                                householdId: householdId,
+                                name: name,
+                                colorHex: Value(colorHex),
+                                transactionType: Value(txType),
+                              ),
+                            );
+                        ref.invalidate(categoriesProvider);
+                        setModalState(() {
+                          selectedCategoryId = newId;
+                          selectedCategoryName = name;
+                        });
+                        if (catCtx.mounted && Navigator.of(catCtx).canPop()) {
+                          Navigator.of(catCtx).pop();
+                        }
+                      },
                     ),
                   );
                 },
@@ -445,9 +422,8 @@ class _ObjectiveDetailScreenState
           ),
         ],
         baseCurrency: ref.read(householdProvider).value?.baseCurrency ?? 'USD',
-        note: isLoan
-            ? (isLent ? 'Payment received — $noteName [obj:${widget.objectiveId}]' : 'Payment — $noteName [obj:${widget.objectiveId}]')
-            : 'Goal savings — $noteName [obj:${widget.objectiveId}]',
+        note: '${isLoan ? (isLent ? tr.objNotePaymentReceived : tr.objNotePayment) : tr.objNoteGoalSavings}'
+            ' — $noteName [obj:${widget.objectiveId}]',
         deviceId: 'local',
         date: DateTime.now(),
       );

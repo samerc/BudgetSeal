@@ -356,7 +356,7 @@ class _AllocationDetailScreenState
                 const SizedBox(height: 12),
                 if (_icon != null)
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: TextButton(
                       onPressed: () => setState(() {
                         _icon = null;
@@ -933,7 +933,7 @@ class _AllocationDetailScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Padding(
           padding: EdgeInsets.fromLTRB(
-              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1470,7 +1470,7 @@ class _AllocationDetailScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Container(
           padding: EdgeInsets.fromLTRB(
-              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
             color: withdrawSurfaceColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -2330,7 +2330,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
       ),
       decoration: BoxDecoration(
         color: AppColors.sf(context),

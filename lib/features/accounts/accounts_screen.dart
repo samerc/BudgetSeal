@@ -34,12 +34,31 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).acctTitle),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          PopupMenuButton<String>(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── Header ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => context.pop(),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      S.of(context).acctTitle,
+                      style: TextStyle(
+                        fontSize: TypographyTokens.screenTitleSize,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<String>(
             icon: Icon(Icons.more_vert_rounded,
                 color: AppColors.tp(context)),
             onSelected: (v) {
@@ -105,13 +124,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               ),
             ],
           ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(accountsWithBalanceProvider);
-          await Future.delayed(const Duration(milliseconds: 300));
-        },
+                ],
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(accountsWithBalanceProvider);
+                  await Future.delayed(const Duration(milliseconds: 300));
+                },
         child: accountsAsync.when(
           data: (accounts) {
             if (accounts.isEmpty && !_showArchived) {
@@ -166,6 +187,10 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             details: '$e',
             onRetry: () => ref.invalidate(accountsWithBalanceProvider),
           ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(

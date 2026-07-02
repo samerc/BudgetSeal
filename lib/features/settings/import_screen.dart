@@ -94,7 +94,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).importFailed)),
+          SnackBar(
+            content: Text(S.of(context).importFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -239,7 +242,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
     if (amountCol == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).importAssignAmount)),
+        SnackBar(
+          content: Text(S.of(context).importAssignAmount),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }

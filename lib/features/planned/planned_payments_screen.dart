@@ -78,7 +78,10 @@ class _PlannedPaymentsScreenState
     try {
       final db = ref.read(databaseProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
 
       // Fetch household base currency
       final household = await (db.select(db.households)

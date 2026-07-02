@@ -629,7 +629,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Container(
           padding: EdgeInsets.fromLTRB(
-              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
             color: tmplSurface,
             borderRadius:
@@ -759,7 +759,15 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                               categoryId: Value(categoryId),
                             ),
                           );
-                      if (ctx.mounted) Navigator.pop(ctx, true);
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text(tr.tmplCreated),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        Navigator.pop(ctx, true);
+                      }
                     },
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.accent,

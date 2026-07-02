@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:drift/drift.dart' show Value;
 
@@ -15,6 +16,8 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
+import '../../shared/widgets/category_icon.dart';
+import '../transactions/widgets/category_sheet.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -549,8 +552,10 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom +
+        MediaQuery.of(context).viewPadding.bottom;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -614,24 +619,14 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             }),
             const SizedBox(height: 12),
             // Category picker
-            Builder(builder: (context) {
-              final categories = (ref.watch(categoriesProvider).value ?? [])
-                  .where((c) => c.transactionType == _type)
-                  .toList();
-              return DropdownButtonFormField<String>(
-                value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
-                decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
-                items: [
-                  DropdownMenuItem<String>(
-                      value: null, child: Text(S.of(context).catNone)),
-                  ...categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name),
-                      )),
-                ],
-                onChanged: (v) => setState(() => _categoryId = v),
-              );
-            }),
+            _RecurringCategoryField(
+              categoryId: _categoryId,
+              type: _type,
+              onSelected: (id, txType) => setState(() {
+                _categoryId = id;
+                _type = txType;
+              }),
+            ),
             const SizedBox(height: 12),
             SegmentedButton<String>(
               segments: [
@@ -639,7 +634,15 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 ButtonSegment(value: 'income', label: Text(S.of(context).typeIncome)),
               ],
               selected: {_type},
-              onSelectionChanged: (s) => setState(() => _type = s.first),
+              onSelectionChanged: (s) => setState(() {
+                _type = s.first;
+                // Drop the selected category if it no longer matches the type.
+                final cats = ref.read(categoriesProvider).value ?? [];
+                final cat = cats.where((c) => c.id == _categoryId).firstOrNull;
+                if (cat != null && cat.transactionType != _type) {
+                  _categoryId = null;
+                }
+              }),
             ),
             const SizedBox(height: 12),
             SegmentedButton<String>(
@@ -689,7 +692,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             if (_endDate != null) ...[
               const SizedBox(height: 4),
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
                   child: Text(S.of(context).recurringFormClearEndDate,
@@ -782,7 +785,14 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             behavior: SnackBarBehavior.floating,
           ),
         );
+        // If this is a subscription created from the Recurring screen, jump to
+        // the Subscriptions screen so the user sees what they just added.
+        // (When opened from the Subscriptions screen, forceSubscription is true
+        // and we're already there — just pop back to it.)
+        final goToSubs = _isSubscription && !widget.forceSubscription;
+        final router = GoRouter.of(context);
         Navigator.pop(context, true);
+        if (goToSubs) router.push('/subscriptions');
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -840,8 +850,10 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom +
+        MediaQuery.of(context).viewPadding.bottom;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -902,24 +914,11 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             }),
             const SizedBox(height: 12),
             // Category picker
-            Builder(builder: (context) {
-              final categories = (ref.watch(categoriesProvider).value ?? [])
-                  .where((c) => c.transactionType == widget.item.type)
-                  .toList();
-              return DropdownButtonFormField<String>(
-                value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
-                decoration: InputDecoration(labelText: S.of(context).recurringFormCategory),
-                items: [
-                  DropdownMenuItem<String>(
-                      value: null, child: Text(S.of(context).catNone)),
-                  ...categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name),
-                      )),
-                ],
-                onChanged: (v) => setState(() => _categoryId = v),
-              );
-            }),
+            _RecurringCategoryField(
+              categoryId: _categoryId,
+              type: widget.item.type,
+              onSelected: (id, _) => setState(() => _categoryId = id),
+            ),
             const SizedBox(height: 12),
             SegmentedButton<String>(
               segments: [
@@ -967,7 +966,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             if (_endDate != null) ...[
               const SizedBox(height: 4),
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
                   child: Text(S.of(context).recurringFormClearEndDate,
@@ -1086,5 +1085,113 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+/// Category picker field that opens the same rich [CategorySheet] used on the
+/// transaction screen (search, expense/income toggle, parent/subcategory
+/// hierarchy with icons) instead of a flat dropdown list.
+class _RecurringCategoryField extends ConsumerWidget {
+  final String? categoryId;
+
+  /// Current transaction type ('expense' | 'income') — used when creating a
+  /// new category from the sheet.
+  final String type;
+
+  /// Called with the chosen category id (null = None) and its transaction type.
+  final void Function(String? id, String txType) onSelected;
+
+  const _RecurringCategoryField({
+    required this.categoryId,
+    required this.type,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allCats = ref.watch(categoriesProvider).value ?? [];
+    final selected = allCats.where((c) => c.id == categoryId).firstOrNull;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      onTap: () => _open(context, ref, allCats),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: S.of(context).recurringFormCategory,
+        ),
+        child: Row(
+          children: [
+            if (selected != null) ...[
+              CategoryIcon(
+                categoryName: selected.name,
+                emoji: selected.icon,
+                color: AppColors.fromHex(selected.colorHex),
+                size: 28,
+                circular: true,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  selected.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ] else
+              Expanded(
+                child: Text(
+                  S.of(context).catNone,
+                  style: TextStyle(color: AppColors.th(context)),
+                ),
+              ),
+            Icon(Icons.arrow_drop_down, color: AppColors.ts(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _open(
+      BuildContext context, WidgetRef ref, List<Category> allCats) async {
+    final householdId = ref.read(currentHouseholdIdProvider);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CategorySheet(
+        categories: allCats,
+        selectedId: categoryId,
+        householdId: householdId,
+        onSelected: (id, name, color, txType) {
+          onSelected(id, txType);
+          Navigator.of(ctx).pop();
+        },
+        onCreated: (name) async {
+          if (householdId == null) return;
+          final db = ref.read(databaseProvider);
+          final cats = ref.read(categoriesProvider).value ?? [];
+          final color =
+              categoryPresetColors[cats.length % categoryPresetColors.length];
+          final colorHex =
+              '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+          final newId = const Uuid().v4();
+          await db.into(db.categories).insert(CategoriesCompanion.insert(
+                id: newId,
+                householdId: householdId,
+                name: name,
+                colorHex: Value(colorHex),
+                transactionType: Value(type),
+              ));
+          ref.invalidate(categoriesProvider);
+          onSelected(newId, type);
+          if (ctx.mounted && Navigator.of(ctx).canPop()) {
+            Navigator.of(ctx).pop();
+          }
+        },
+      ),
+    );
   }
 }

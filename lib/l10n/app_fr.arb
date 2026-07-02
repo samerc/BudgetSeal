@@ -2351,6 +2351,9 @@
     "description": "Validation error"
   },
   "objCreated": "Objectif créé",
+  "objNotePaymentReceived": "Paiement reçu",
+  "objNotePayment": "Paiement",
+  "objNoteGoalSavings": "Épargne objectif",
   "@objCreated": {
     "description": "Snackbar"
   },
@@ -5006,7 +5009,7 @@
   "@webShortcutHelp": {
     "description": "Description"
   },
-  "monthJan": "Jan",
+  "monthJan": "Janv",
   "@monthJan": {
     "description": "Month abbreviation"
   },
@@ -5038,7 +5041,7 @@
   "@monthAug": {
     "description": "Month abbreviation"
   },
-  "monthSep": "Sep",
+  "monthSep": "Sept",
   "@monthSep": {
     "description": "Month abbreviation"
   },
@@ -5444,7 +5447,7 @@
   "@defcatBooks": {
     "description": "Default category preset"
   },
-  "defcatHotels": "Hotels",
+  "defcatHotels": "Hôtels",
   "@defcatHotels": {
     "description": "Default category preset"
   },
@@ -5666,6 +5669,9 @@
   "acctDecimalAuto": "Auto ({count})",
   "acctOpeningBalance": "SOLDE D'OUVERTURE",
   "acctCreateAccount": "Créer un compte",
+  "acctCreated": "Compte créé",
+  "acctUpdated": "Compte mis à jour",
+  "tmplCreated": "Modèle créé",
   "acctRecentTransactions": "TRANSACTIONS RÉCENTES",
   "acctNoTransactions": "Aucune transaction pour le moment",
   "acctAdjustDesc": "Entrez le solde réel de ce compte. Une transaction d'ajustement sera créée pour la différence.",
@@ -5751,6 +5757,7 @@
   "billRemovePersonTitle": "Supprimer la personne",
   "billRemovePersonContent": "{name} a {count} article(s) assigné(s) uniquement à lui/elle. Réassigner à quelqu'un d'autre ou supprimer ces articles ?",
   "billReassignTo": "Réassigner à :",
+  "billPersonRemoved": "Personne supprimée",
   "billDeleteItems": "Supprimer les articles",
   "billEachPays": "Chaque personne paie {amount}",
   "billSplitQtyTitle": "{qty} × {name}",

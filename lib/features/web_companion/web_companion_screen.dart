@@ -174,7 +174,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           builder: (ctx, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
+                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

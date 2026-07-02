@@ -1048,6 +1048,9 @@ class SAr extends S {
   String get billReassignTo => 'إعادة تعيين إلى:';
 
   @override
+  String get billPersonRemoved => 'تمت إزالة الشخص';
+
+  @override
   String get billDeleteItems => 'حذف العناصر';
 
   @override
@@ -1926,6 +1929,15 @@ class SAr extends S {
   String get acctCreateAccount => 'إنشاء حساب';
 
   @override
+  String get acctCreated => 'تم إنشاء الحساب';
+
+  @override
+  String get acctUpdated => 'تم تحديث الحساب';
+
+  @override
+  String get tmplCreated => 'تم إنشاء القالب';
+
+  @override
   String get acctRecentTransactions => 'المعاملات الأخيرة';
 
   @override
@@ -2411,6 +2423,15 @@ class SAr extends S {
 
   @override
   String get objCreated => 'تم إنشاء الهدف';
+
+  @override
+  String get objNotePaymentReceived => 'دفعة مستلمة';
+
+  @override
+  String get objNotePayment => 'دفعة';
+
+  @override
+  String get objNoteGoalSavings => 'ادخار للهدف';
 
   @override
   String get objUpdated => 'تم تحديث الهدف';

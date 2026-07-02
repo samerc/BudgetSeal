@@ -358,7 +358,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: EdgeInsets.fromLTRB(
-            20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+            20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
         decoration: BoxDecoration(
           color: AppColors.sf(ctx),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -678,7 +678,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: EdgeInsets.fromLTRB(
-            20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+            20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
         decoration: BoxDecoration(
           color: AppColors.sf(context),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -740,18 +740,22 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showThemePicker(BuildContext context, WidgetRef ref) async {
     final mode = ref.read(themeModeProvider);
+    // Capture localized strings + colors before the sheet (avoids the
+    // _dependents.isEmpty pattern from using the outer context in the builder).
+    final tr = S.of(context);
+    final tpColor = AppColors.tp(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).themeTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+              child: Text(tr.themeTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: tpColor))),
           for (final entry in [
-            ('system', S.of(context).themeSystem, S.of(context).themeFollowDevice),
-            ('light', S.of(context).themeLight, null),
-            ('dark', S.of(context).themeDark, null),
-            ('black', S.of(context).themeBlack, S.of(context).themeAmoled),
+            ('system', tr.themeSystem, tr.themeFollowDevice),
+            ('light', tr.themeLight, null),
+            ('dark', tr.themeDark, null),
+            ('black', tr.themeBlack, tr.themeAmoled),
           ])
             ListTile(
               leading: Icon(mode == entry.$1
@@ -770,20 +774,22 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showAccentColorPicker(BuildContext context, WidgetRef ref) async {
     final current = ref.read(accentColorProvider);
+    final tr = S.of(context);
+    final tpColor = AppColors.tp(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).accentColorTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+              child: Text(tr.accentColorTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: tpColor))),
           // System option
           ListTile(
             leading: Icon(current == 'system'
                 ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: AppColors.accent),
-            title: Text(S.of(context).accentColorSystem),
-            subtitle: Text(S.of(context).accentColorSystemSub),
+            title: Text(tr.accentColorSystem),
+            subtitle: Text(tr.accentColorSystemSub),
             onTap: () => Navigator.pop(ctx, 'system'),
           ),
           // Default
@@ -791,8 +797,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             leading: Icon(current == 'default'
                 ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: const Color(0xFF2563EB)),
-            title: Text(S.of(context).accentColorRoyalBlue),
-            subtitle: Text(S.of(context).accentColorDefault),
+            title: Text(tr.accentColorRoyalBlue),
+            subtitle: Text(tr.accentColorDefault),
             trailing: Container(width: 24, height: 24,
                 decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle)),
             onTap: () => Navigator.pop(ctx, 'default'),
@@ -812,7 +818,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                     width: 40, height: 40,
                     decoration: BoxDecoration(
                       color: color, shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: AppColors.tp(context), width: 3) : null,
+                      border: isSelected ? Border.all(color: tpColor, width: 3) : null,
                       boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)] : null,
                     ),
                     child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
@@ -838,6 +844,11 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showHomeTabPicker(BuildContext context, WidgetRef ref) async {
     final homeTab = ref.read(homeTabProvider);
+    final tr = S.of(context);
+    final tpColor = AppColors.tp(context);
+    final tsColor = AppColors.ts(context);
+    // Localized tab labels (homeTabLabels is English-only, used for storage).
+    final labels = [tr.tabHome, tr.tabActivity, tr.tabBudget, tr.tabReports, tr.tabMore];
     final icons = [Icons.dashboard_rounded, Icons.receipt_long_rounded,
         Icons.account_balance_wallet_rounded, Icons.insights_rounded,
         Icons.more_horiz_rounded];
@@ -846,18 +857,18 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).startScreenTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
-          Text(S.of(context).startScreenDesc,
-              style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              child: Text(tr.startScreenTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: tpColor))),
+          Text(tr.startScreenDesc,
+              style: TextStyle(fontSize: 13, color: tsColor)),
           const SizedBox(height: 8),
-          for (var i = 0; i < homeTabLabels.length; i++)
+          for (var i = 0; i < labels.length; i++)
             ListTile(
               leading: Icon(i == homeTab
                   ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                   color: AppColors.accent),
-              title: Text(homeTabLabels[i]),
-              trailing: Icon(icons[i], size: 20, color: AppColors.ts(context)),
+              title: Text(labels[i]),
+              trailing: Icon(icons[i], size: 20, color: tsColor),
               onTap: () => Navigator.pop(ctx, i),
             ),
           const SizedBox(height: 8),
@@ -889,13 +900,16 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showFontPicker(BuildContext context, WidgetRef ref) async {
     final currentFont = ref.read(fontProvider);
+    final tr = S.of(context);
+    final tpColor = AppColors.tp(context);
+    final tsColor = AppColors.ts(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).chooseFontTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+              child: Text(tr.chooseFontTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: tpColor))),
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -906,9 +920,9 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                             ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                             color: AppColors.accent),
                         title: Text(font, style: fontStyle(font, fontSize: 16)),
-                        subtitle: Text(S.of(context).fontPreview,
+                        subtitle: Text(tr.fontPreview,
                             style: fontStyle(font, fontSize: 12,
-                                color: AppColors.ts(context))),
+                                color: tsColor)),
                         onTap: () => Navigator.pop(ctx, font),
                       )),
                   const SizedBox(height: 8),
@@ -924,23 +938,33 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showTextSizePicker(BuildContext context, WidgetRef ref) async {
     final current = ref.read(textScaleProvider);
+    final tr = S.of(context);
+    final tpColor = AppColors.tp(context);
+    final tsColor = AppColors.ts(context);
+    // Localized labels (textScaleOptions values are English-only fallbacks).
+    final scaleLabels = <double, String>{
+      0.85: tr.textScaleSmall,
+      1.0: tr.textScaleDefault,
+      1.15: tr.textScaleLarge,
+      1.3: tr.textScaleExtraLarge,
+    };
     final picked = await showModalBottomSheet<double>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16),
-              child: Text(S.of(context).textSizeTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
+              child: Text(tr.textSizeTitle, style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w700, color: tpColor))),
           ...textScaleOptions.entries.map((e) => ListTile(
                 leading: Icon(
                     (e.key - current).abs() < 0.01
                         ? Icons.radio_button_checked
                         : Icons.radio_button_unchecked,
                     color: AppColors.accent),
-                title: Text(e.value),
-                subtitle: Text(S.of(context).textSizePreview,
+                title: Text(scaleLabels[e.key] ?? e.value),
+                subtitle: Text(tr.textSizePreview,
                     style: TextStyle(fontSize: 14 * e.key,
-                        color: AppColors.ts(context))),
+                        color: tsColor)),
                 onTap: () => Navigator.pop(ctx, e.key),
               )),
           const SizedBox(height: 8),
@@ -1669,7 +1693,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.7,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
@@ -1868,7 +1892,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.8,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
       ),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
@@ -2092,7 +2116,7 @@ class _DateFormatSheet extends ConsumerWidget {
     return SafeArea(
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(

@@ -1065,6 +1065,9 @@ class SFr extends S {
   String get billReassignTo => 'Réassigner à :';
 
   @override
+  String get billPersonRemoved => 'Personne supprimée';
+
+  @override
   String get billDeleteItems => 'Supprimer les articles';
 
   @override
@@ -1970,6 +1973,15 @@ class SFr extends S {
   String get acctCreateAccount => 'Créer un compte';
 
   @override
+  String get acctCreated => 'Compte créé';
+
+  @override
+  String get acctUpdated => 'Compte mis à jour';
+
+  @override
+  String get tmplCreated => 'Modèle créé';
+
+  @override
   String get acctRecentTransactions => 'TRANSACTIONS RÉCENTES';
 
   @override
@@ -2459,6 +2471,15 @@ class SFr extends S {
 
   @override
   String get objCreated => 'Objectif créé';
+
+  @override
+  String get objNotePaymentReceived => 'Paiement reçu';
+
+  @override
+  String get objNotePayment => 'Paiement';
+
+  @override
+  String get objNoteGoalSavings => 'Épargne objectif';
 
   @override
   String get objUpdated => 'Objectif mis à jour';
@@ -4788,7 +4809,7 @@ class SFr extends S {
   String get webShortcutHelp => 'Afficher cette aide';
 
   @override
-  String get monthJan => 'Jan';
+  String get monthJan => 'Janv';
 
   @override
   String get monthFeb => 'Fév';
@@ -4812,7 +4833,7 @@ class SFr extends S {
   String get monthAug => 'Août';
 
   @override
-  String get monthSep => 'Sep';
+  String get monthSep => 'Sept';
 
   @override
   String get monthOct => 'Oct';
@@ -5104,7 +5125,7 @@ class SFr extends S {
   String get defcatBooks => 'Livres';
 
   @override
-  String get defcatHotels => 'Hotels';
+  String get defcatHotels => 'Hôtels';
 
   @override
   String get defcatFlights => 'Vols';

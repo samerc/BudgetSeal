@@ -1995,6 +1995,12 @@ abstract class S {
   /// **'Reassign to:'**
   String get billReassignTo;
 
+  /// No description provided for @billPersonRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Person removed'**
+  String get billPersonRemoved;
+
   /// Dialog button
   ///
   /// In en, this message translates to:
@@ -3495,6 +3501,24 @@ abstract class S {
   /// **'Create account'**
   String get acctCreateAccount;
 
+  /// No description provided for @acctCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get acctCreated;
+
+  /// No description provided for @acctUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account updated'**
+  String get acctUpdated;
+
+  /// No description provided for @tmplCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Template created'**
+  String get tmplCreated;
+
   /// No description provided for @acctRecentTransactions.
   ///
   /// In en, this message translates to:
@@ -4340,6 +4364,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Objective created'**
   String get objCreated;
+
+  /// No description provided for @objNotePaymentReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get objNotePaymentReceived;
+
+  /// No description provided for @objNotePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get objNotePayment;
+
+  /// No description provided for @objNoteGoalSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal savings'**
+  String get objNoteGoalSavings;
 
   /// Snackbar
   ///

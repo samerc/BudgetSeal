@@ -350,6 +350,7 @@ bill_total,Summary label,Total,الإجمالي,Total
 bill_re_scan,Re-scan button,Re-scan,إعادة المسح,Re-scanner
 bill_n_lines,OCR summary,{detected} lines ({withPrice} with prices),{detected} سطر ({withPrice} بأسعار),{detected} lignes ({withPrice} avec prix)
 bill_me,Default person name,Me,أنا,Moi
+bill_person_removed,Undo snackbar,Person removed,تمت إزالة الشخص,Personne supprimée
 # ──────────────────────────────────────────────,,,,
 # ALLOCATIONS / ENVELOPES — List,,,,
 # ──────────────────────────────────────────────,,,,
@@ -490,6 +491,8 @@ acct_no_yet,Empty state,No accounts yet,لا توجد حسابات بعد,Aucun 
 acct_tap_plus,Empty state subtitle,Tap + to add one,اضغط + لإضافة حساب,Appuyez sur + pour en ajouter
 acct_total_balance,Card header,Total Balance,الرصيد الإجمالي,Solde total
 acct_add_tooltip,FAB tooltip,Add account,إضافة حساب,Ajouter un compte
+acct_created,Save toast,Account created,تم إنشاء الحساب,Compte créé
+acct_updated,Save toast,Account updated,تم تحديث الحساب,Compte mis à jour
 # ──────────────────────────────────────────────,,,,
 # ACCOUNTS — Detail,,,,
 # ──────────────────────────────────────────────,,,,
@@ -599,6 +602,7 @@ tmpl_amount_label,Field label,Amount,المبلغ,Montant
 tmpl_account_label,Field label,Account,الحساب,Compte
 tmpl_category_optional,Field label,Category (optional),الفئة (اختياري),Catégorie (optionnel)
 tmpl_save_button,Button,Save Template,حفظ القالب,Enregistrer le modèle
+tmpl_created,Save toast,Template created,تم إنشاء القالب,Modèle créé
 # ──────────────────────────────────────────────,,,,
 # OBJECTIVES (Goals & Loans),,,,
 # ──────────────────────────────────────────────,,,,
@@ -614,6 +618,9 @@ obj_due,Deadline text,Due {date},مستحق {date},Dû le {date}
 obj_new_title,AppBar title,New Objective,هدف جديد,Nouvel objectif
 obj_name_required,Validation error,Name is required,الاسم مطلوب,Le nom est requis
 obj_created,Snackbar,Objective created,تم إنشاء الهدف,Objectif créé
+obj_note_payment_received,Transaction note prefix,Payment received,دفعة مستلمة,Paiement reçu
+obj_note_payment,Transaction note prefix,Payment,دفعة,Paiement
+obj_note_goal_savings,Transaction note prefix,Goal savings,ادخار للهدف,Épargne objectif
 obj_updated,Snackbar,Objective updated,تم تحديث الهدف,Objectif mis à jour
 obj_no_accounts,Snackbar,No accounts available,لا حسابات متاحة,Aucun compte disponible
 obj_record_payment,Sheet/button,Record Payment,تسجيل دفعة,Enregistrer un paiement
@@ -1319,7 +1326,7 @@ web_shortcut_help,Description,Show this help,إظهار هذه المساعدة,
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Months (abbreviated),,,,
 # ──────────────────────────────────────────────,,,,
-month_jan,Month abbreviation,Jan,يناير,Jan
+month_jan,Month abbreviation,Jan,يناير,Janv
 month_feb,Month abbreviation,Feb,فبراير,Fév
 month_mar,Month abbreviation,Mar,مارس,Mars
 month_apr,Month abbreviation,Apr,أبريل,Avr
@@ -1327,7 +1334,7 @@ month_may,Month abbreviation,May,مايو,Mai
 month_jun,Month abbreviation,Jun,يونيو,Juin
 month_jul,Month abbreviation,Jul,يوليو,Juil
 month_aug,Month abbreviation,Aug,أغسطس,Août
-month_sep,Month abbreviation,Sep,سبتمبر,Sep
+month_sep,Month abbreviation,Sep,سبتمبر,Sept
 month_oct,Month abbreviation,Oct,أكتوبر,Oct
 month_nov,Month abbreviation,Nov,نوفمبر,Nov
 month_dec,Month abbreviation,Dec,ديسمبر,Déc
@@ -1440,7 +1447,7 @@ defcat_gym,Default category preset,Gym,رياضة,Sport
 defcat_movies,Default category preset,Movies,أفلام,Cinema
 defcat_games,Default category preset,Games,ألعاب,Jeux
 defcat_books,Default category preset,Books,كتب,Livres
-defcat_hotels,Default category preset,Hotels,فنادق,Hotels
+defcat_hotels,Default category preset,Hotels,فنادق,Hôtels
 defcat_flights,Default category preset,Flights,رحلات طيران,Vols
 defcat_water,Default category preset,Water,مياه,Eau
 defcat_insurance,Default category preset,Insurance,تأمين,Assurance

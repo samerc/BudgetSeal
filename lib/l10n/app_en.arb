@@ -1481,6 +1481,7 @@
   "@billReassignTo": {
     "description": "Dialog label"
   },
+  "billPersonRemoved": "Person removed",
   "billDeleteItems": "Delete items",
   "@billDeleteItems": {
     "description": "Dialog button"
@@ -2287,6 +2288,9 @@
   "@acctDecimalAuto": { "placeholders": { "count": { "type": "int" } } },
   "acctOpeningBalance": "OPENING BALANCE",
   "acctCreateAccount": "Create account",
+  "acctCreated": "Account created",
+  "acctUpdated": "Account updated",
+  "tmplCreated": "Template created",
   "acctRecentTransactions": "RECENT TRANSACTIONS",
   "acctNoTransactions": "No transactions yet",
   "acctAdjustDesc": "Enter the actual balance of this account. An adjustment transaction will be created for the difference.",
@@ -2740,6 +2744,9 @@
     "description": "Validation error"
   },
   "objCreated": "Objective created",
+  "objNotePaymentReceived": "Payment received",
+  "objNotePayment": "Payment",
+  "objNoteGoalSavings": "Goal savings",
   "@objCreated": {
     "description": "Snackbar"
   },

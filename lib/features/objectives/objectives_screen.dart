@@ -22,30 +22,47 @@ class ObjectivesScreen extends ConsumerWidget {
     final objectivesAsync = ref.watch(objectivesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(S.of(context).objTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 12),
-            child: FilledButton.icon(
-              onPressed: () => context.push('/objectives/new'),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: Text(S.of(context).commonAdd),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                minimumSize: Size.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── Header ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => context.pop(),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      S.of(context).objTitle,
+                      style: TextStyle(
+                        fontSize: TypographyTokens.screenTitleSize,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => context.push('/objectives/new'),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: Text(S.of(context).commonAdd),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-      body: objectivesAsync.when(
+            Expanded(
+              child: objectivesAsync.when(
         loading: () => const SkeletonList(),
         error: (e, _) => ErrorRetry(
           message: S.of(context).objFailedToLoad,
@@ -95,6 +112,10 @@ class ObjectivesScreen extends ConsumerWidget {
             ),
           );
         },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -180,6 +201,8 @@ class _ObjectiveCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(o.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: TypographyTokens.cardTitleSize,
                             fontWeight: TypographyTokens.cardTitleWeight,
@@ -188,6 +211,8 @@ class _ObjectiveCard extends StatelessWidget {
                       if (isLoan && o.contactName != null)
                         Text(
                           isLent ? S.of(context).objLentTo(o.contactName!) : S.of(context).objBorrowedFrom(o.contactName!),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.ts(context),

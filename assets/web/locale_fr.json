@@ -229,7 +229,7 @@
   "web_shortcut_close": "Fermer la modale / défocaliser",
   "web_shortcut_help": "Afficher cette aide",
   "web_env_balance_of_target": "{balance} sur {target}",
-  "month_jan": "Jan",
+  "month_jan": "Janv",
   "month_feb": "Fév",
   "month_mar": "Mars",
   "month_apr": "Avr",
@@ -237,7 +237,7 @@
   "month_jun": "Juin",
   "month_jul": "Juil",
   "month_aug": "Août",
-  "month_sep": "Sep",
+  "month_sep": "Sept",
   "month_oct": "Oct",
   "month_nov": "Nov",
   "month_dec": "Déc"

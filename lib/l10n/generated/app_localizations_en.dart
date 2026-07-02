@@ -1053,6 +1053,9 @@ class SEn extends S {
   String get billReassignTo => 'Reassign to:';
 
   @override
+  String get billPersonRemoved => 'Person removed';
+
+  @override
   String get billDeleteItems => 'Delete items';
 
   @override
@@ -1946,6 +1949,15 @@ class SEn extends S {
   String get acctCreateAccount => 'Create account';
 
   @override
+  String get acctCreated => 'Account created';
+
+  @override
+  String get acctUpdated => 'Account updated';
+
+  @override
+  String get tmplCreated => 'Template created';
+
+  @override
   String get acctRecentTransactions => 'RECENT TRANSACTIONS';
 
   @override
@@ -2432,6 +2444,15 @@ class SEn extends S {
 
   @override
   String get objCreated => 'Objective created';
+
+  @override
+  String get objNotePaymentReceived => 'Payment received';
+
+  @override
+  String get objNotePayment => 'Payment';
+
+  @override
+  String get objNoteGoalSavings => 'Goal savings';
 
   @override
   String get objUpdated => 'Objective updated';

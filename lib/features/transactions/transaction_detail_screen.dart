@@ -13,6 +13,7 @@ import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -291,7 +292,7 @@ class _DetailBody extends ConsumerWidget {
             context,
             children: [
               _detailRow(context, S.of(context).txDetailDate,
-                  DateFormat('EEEE, MMMM d, yyyy').format(tx.createdAt.toLocal()),
+                  formatDate(tx.createdAt.toLocal()),
                   icon: Icons.calendar_today_rounded),
               _divider(context),
               _detailRow(context, S.of(context).txDetailTime,

@@ -757,7 +757,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       builder: (ctx) {
         return Container(
           padding: EdgeInsets.fromLTRB(
-              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
             color: AppColors.sf(ctx),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -924,7 +924,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Padding(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
+              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(tr.acctConvertBack,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
@@ -1292,7 +1292,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
       ref.invalidate(unallocatedProvider);
-      if (mounted) context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                _isNew ? S.of(context).acctCreated : S.of(context).acctUpdated),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.pop();
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

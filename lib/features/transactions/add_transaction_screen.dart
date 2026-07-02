@@ -1599,7 +1599,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   },
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.42,
+                      maxWidth: MediaQuery.sizeOf(context).width * 0.42,
                     ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(

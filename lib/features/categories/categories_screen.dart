@@ -883,7 +883,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+          20, 16, 20, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).viewPadding.bottom + 24),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

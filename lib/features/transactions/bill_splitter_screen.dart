@@ -9,6 +9,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
+import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import '../../l10n/generated/app_localizations.dart';
@@ -140,12 +141,26 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, '_delete'),
-              child: Text(S.of(context).billDeleteItems),
+              child: Text(tr.billDeleteItems),
             ),
           ],
         ),
       );
       if (result == null || !mounted) return;
+
+      // Snapshot state so a "Delete items" removal can be undone (the only
+      // branch that discards data — reassign keeps the items).
+      final peopleBackup = List<String>.from(_people);
+      final itemsBackup = _items
+          .map((it) => _BillItem(
+                name: it.name,
+                amount: it.amount,
+                assignedTo: Set<String>.from(it.assignedTo),
+                ocrLineIndex: it.ocrLineIndex,
+              ))
+          .toList();
+      final selectionBackup = Map<int, String>.from(_selectedLineIndices);
+      final activeBackup = _activePersonForSelection;
 
       setState(() {
         if (result != '_delete') {
@@ -173,6 +188,33 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           _items.removeAt(toRemove[i]);
         }
       });
+
+      // Offer undo only when items were actually discarded.
+      if (result == '_delete' && mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr.billPersonRemoved),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: tr.txUndoAction,
+              onPressed: () => setState(() {
+                _people
+                  ..clear()
+                  ..addAll(peopleBackup);
+                _items
+                  ..clear()
+                  ..addAll(itemsBackup);
+                _selectedLineIndices
+                  ..clear()
+                  ..addAll(selectionBackup);
+                _activePersonForSelection = activeBackup;
+              }),
+            ),
+          ),
+        );
+      }
     } else {
       // No solo items — just remove
       setState(() {
@@ -205,12 +247,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_rounded),
-              title: Text(S.of(context).billTakePhoto),
+              title: Text(S.of(ctx).billTakePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded),
-              title: Text(S.of(context).billFromGallery),
+              title: Text(S.of(ctx).billFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
           ],
@@ -965,14 +1007,19 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     fontWeight: FontWeight.w600, color: AppColors.tp(context)))),
           ])
         else
-          TextField(
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(hintText: '0.00', labelText: S.of(context).billTipAmount,
-              prefixText: '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
-              isDense: true, filled: true, fillColor: AppColors.sfv(context),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none)),
-            onChanged: (v) => setState(() => _tipAmount = double.tryParse(v) ?? 0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.sfv(context),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: CalculatorAmountField(
+              value: _tipAmount,
+              label: S.of(context).billTipAmount,
+              currency: kCurrencySymbols[_billCurrency] ?? _billCurrency,
+              fontSize: 18,
+              onChanged: (v) => setState(() => _tipAmount = v),
+            ),
           ),
       ]),
     );

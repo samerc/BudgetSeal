@@ -463,14 +463,17 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
       await widget.googleDrive.shareFolder(email);
       final folderId = await widget.googleDrive.getFolderId();
       final code = generateInviteCode(folderId);
+      if (!mounted) return;
       setState(() {
         _inviteCode = code;
         _loading = false;
       });
     } catch (e) {
+      debugPrint('[ShareHousehold] Failed to share: $e');
+      if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Failed to share: ${e.toString()}';
+        _error = S.of(context).commonSomethingWentWrong;
       });
     }
   }
