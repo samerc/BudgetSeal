@@ -1,9 +1,40 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:budgetseal/core/database/app_database.dart';
 
 void main() {
+  // Regression: a database that already has the v18 soft-delete columns but is
+  // still marked as v17 (a partially-applied upgrade, or a fresh install created
+  // from table classes that already declared the columns) used to crash every
+  // launch with "duplicate column name: deleted". The v18 migration must add
+  // each column only if missing.
+  test('v18 migration recovers a stuck DB that already has the columns',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test');
+    final file = File(p.join(dir.path, 'stuck.db'));
+    try {
+      // 1. Create a full current-schema DB (all v18 columns present), then
+      //    rewind its recorded version to 17 — the exact "stuck" state.
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.customStatement('PRAGMA user_version = 17');
+      await db.close();
+
+      // 2. Reopening runs the 17->18 migration against a DB that already has
+      //    the columns. It must NOT throw and must finish at v18.
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.select(db.accounts).get(); // forces open + migration
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 18);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
   group('Database migration', () {
     late AppDatabase db;
 

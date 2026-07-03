@@ -151,21 +151,46 @@ class AppDatabase extends _$AppDatabase {
           if (from < 18) {
             // Soft-delete flags so deletions propagate across synced devices,
             // plus lastModified on recurring/templates so their edits sync.
-            await m.addColumn(accounts, accounts.deleted);
-            await m.addColumn(categories, categories.deleted);
-            await m.addColumn(allocations, allocations.deleted);
-            await m.addColumn(objectives, objectives.deleted);
-            await m.addColumn(
-                recurringTransactions, recurringTransactions.lastModified);
-            await m.addColumn(
-                recurringTransactions, recurringTransactions.deleted);
-            await m.addColumn(
-                transactionTemplates, transactionTemplates.lastModified);
-            await m.addColumn(
-                transactionTemplates, transactionTemplates.deleted);
+            // Idempotent: some databases already have these columns (e.g. a
+            // partially-applied v18 upgrade, or a fresh install created from
+            // table classes that already declared them). Re-running ALTER TABLE
+            // ADD COLUMN on an existing column throws "duplicate column name"
+            // and wedges every launch, so add each only if it's missing.
+            await _addColumnIfMissing(m, accounts, 'deleted', accounts.deleted);
+            await _addColumnIfMissing(
+                m, categories, 'deleted', categories.deleted);
+            await _addColumnIfMissing(
+                m, allocations, 'deleted', allocations.deleted);
+            await _addColumnIfMissing(
+                m, objectives, 'deleted', objectives.deleted);
+            await _addColumnIfMissing(m, recurringTransactions, 'last_modified',
+                recurringTransactions.lastModified);
+            await _addColumnIfMissing(m, recurringTransactions, 'deleted',
+                recurringTransactions.deleted);
+            await _addColumnIfMissing(m, transactionTemplates, 'last_modified',
+                transactionTemplates.lastModified);
+            await _addColumnIfMissing(m, transactionTemplates, 'deleted',
+                transactionTemplates.deleted);
           }
         },
       );
+
+  /// Adds [column] to [table] only if the underlying SQLite table does not
+  /// already have a column named [columnName]. Prevents "duplicate column
+  /// name" crashes when a migration is retried or the column pre-exists.
+  Future<void> _addColumnIfMissing(
+    Migrator m,
+    TableInfo table,
+    String columnName,
+    GeneratedColumn column,
+  ) async {
+    final info =
+        await customSelect('PRAGMA table_info(${table.actualTableName})').get();
+    final exists = info.any((row) => row.data['name'] == columnName);
+    if (!exists) {
+      await m.addColumn(table, column);
+    }
+  }
 }
 
 LazyDatabase _openConnection() {
