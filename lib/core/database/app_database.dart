@@ -58,66 +58,75 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
+          // NOTE: every addColumn/createTable below goes through the
+          // *IfMissing helpers. SQLite raises "duplicate column name" /
+          // "table already exists" if a migration re-runs a step whose result
+          // already exists — which happens whenever the on-disk schema is ahead
+          // of the recorded user_version (a partially-applied upgrade, or a
+          // build whose table classes gained columns before schemaVersion was
+          // bumped). Guarding each step makes the whole migration idempotent.
           if (from < 2) {
-            await m.createTable(transactionLines);
+            await _createTableIfMissing(m, transactionLines);
           }
           if (from < 3) {
-            await m.addColumn(categories, categories.parentId);
-            await m.addColumn(categories, categories.transactionType);
+            await _addColumnIfMissing(m, categories, categories.parentId);
+            await _addColumnIfMissing(m, categories, categories.transactionType);
           }
           if (from < 4) {
-            await m.addColumn(
-                transactionLines, transactionLines.accountId);
-            await m.addColumn(
-                transactionLines, transactionLines.exchangeRateToBase);
+            await _addColumnIfMissing(
+                m, transactionLines, transactionLines.accountId);
+            await _addColumnIfMissing(
+                m, transactionLines, transactionLines.exchangeRateToBase);
           }
           if (from < 5) {
-            await m.addColumn(
-                categories, categories.defaultAccountId);
+            await _addColumnIfMissing(
+                m, categories, categories.defaultAccountId);
           }
           if (from < 6) {
-            await m.addColumn(categories, categories.allocationId);
+            await _addColumnIfMissing(m, categories, categories.allocationId);
             await customStatement('''
               UPDATE categories SET allocation_id = (
                 SELECT id FROM allocations
                 WHERE allocations.category_id = categories.id
                 LIMIT 1
               )
+              WHERE allocation_id IS NULL
             ''');
           }
           if (from < 7) {
-            await m.createTable(recurringTransactions);
-            await m.addColumn(transactions, transactions.receiptPath);
+            await _createTableIfMissing(m, recurringTransactions);
+            await _addColumnIfMissing(
+                m, transactions, transactions.receiptPath);
           }
           if (from < 8) {
-            await m.createTable(transactionTemplates);
+            await _createTableIfMissing(m, transactionTemplates);
           }
           if (from < 9) {
-            await m.addColumn(
-                recurringTransactions, recurringTransactions.endDate);
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.endDate);
           }
           if (from < 10) {
-            await m.addColumn(
-                recurringTransactions, recurringTransactions.isSubscription);
-            await m.addColumn(
-                recurringTransactions, recurringTransactions.priceHistory);
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.isSubscription);
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.priceHistory);
           }
           if (from < 11) {
-            await m.addColumn(allocations, allocations.icon);
+            await _addColumnIfMissing(m, allocations, allocations.icon);
           }
           if (from < 12) {
-            await m.addColumn(transactions, transactions.deleted);
+            await _addColumnIfMissing(m, transactions, transactions.deleted);
           }
           if (from < 13) {
-            await m.addColumn(allocations, allocations.autoReset);
+            await _addColumnIfMissing(m, allocations, allocations.autoReset);
           }
           if (from < 14) {
-            await m.addColumn(accounts, accounts.decimalPlaces);
-            await m.addColumn(transactions, transactions.status);
-            await m.createTable(objectives);
+            await _addColumnIfMissing(m, accounts, accounts.decimalPlaces);
+            await _addColumnIfMissing(m, transactions, transactions.status);
+            await _createTableIfMissing(m, objectives);
           }
           if (from < 15) {
-            await m.addColumn(accounts, accounts.isTravel);
+            await _addColumnIfMissing(m, accounts, accounts.isTravel);
           }
           if (from < 16) {
             // Performance indexes for hot query paths
@@ -156,40 +165,70 @@ class AppDatabase extends _$AppDatabase {
             // table classes that already declared them). Re-running ALTER TABLE
             // ADD COLUMN on an existing column throws "duplicate column name"
             // and wedges every launch, so add each only if it's missing.
-            await _addColumnIfMissing(m, accounts, 'deleted', accounts.deleted);
+            await _addColumnIfMissing(m, accounts, accounts.deleted);
+            await _addColumnIfMissing(m, categories, categories.deleted);
+            await _addColumnIfMissing(m, allocations, allocations.deleted);
+            await _addColumnIfMissing(m, objectives, objectives.deleted);
+            // lastModified defaults to currentDateAndTime, a NON-CONSTANT
+            // expression. SQLite rejects `ALTER TABLE ADD COLUMN` with a
+            // non-constant default, so add it with a constant default and
+            // backfill from created_at instead of using m.addColumn.
+            await _addTimestampColumnIfMissing(
+                'recurring_transactions', 'last_modified');
             await _addColumnIfMissing(
-                m, categories, 'deleted', categories.deleted);
+                m, recurringTransactions, recurringTransactions.deleted);
+            await _addTimestampColumnIfMissing(
+                'transaction_templates', 'last_modified');
             await _addColumnIfMissing(
-                m, allocations, 'deleted', allocations.deleted);
-            await _addColumnIfMissing(
-                m, objectives, 'deleted', objectives.deleted);
-            await _addColumnIfMissing(m, recurringTransactions, 'last_modified',
-                recurringTransactions.lastModified);
-            await _addColumnIfMissing(m, recurringTransactions, 'deleted',
-                recurringTransactions.deleted);
-            await _addColumnIfMissing(m, transactionTemplates, 'last_modified',
-                transactionTemplates.lastModified);
-            await _addColumnIfMissing(m, transactionTemplates, 'deleted',
-                transactionTemplates.deleted);
+                m, transactionTemplates, transactionTemplates.deleted);
           }
         },
       );
 
-  /// Adds [column] to [table] only if the underlying SQLite table does not
-  /// already have a column named [columnName]. Prevents "duplicate column
-  /// name" crashes when a migration is retried or the column pre-exists.
+  /// Adds [column] to [table] only if the SQLite table does not already have
+  /// it. Prevents "duplicate column name" when a migration re-runs or the
+  /// column already exists (schema ahead of the recorded user_version).
   Future<void> _addColumnIfMissing(
     Migrator m,
     TableInfo table,
-    String columnName,
     GeneratedColumn column,
   ) async {
     final info =
         await customSelect('PRAGMA table_info(${table.actualTableName})').get();
-    final exists = info.any((row) => row.data['name'] == columnName);
+    final exists = info.any((row) => row.data['name'] == column.name);
     if (!exists) {
       await m.addColumn(table, column);
     }
+  }
+
+  /// Creates [table] only if it does not already exist. Prevents "table already
+  /// exists" when a migration re-runs against a schema that is ahead of the
+  /// recorded user_version.
+  Future<void> _createTableIfMissing(Migrator m, TableInfo table) async {
+    final rows = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='"
+      "${table.actualTableName}'",
+    ).get();
+    if (rows.isEmpty) {
+      await m.createTable(table);
+    }
+  }
+
+  /// Adds a NOT NULL DateTime (INTEGER seconds) column if missing, working
+  /// around SQLite's ban on non-constant defaults in ALTER TABLE ADD COLUMN:
+  /// the column is added with a constant `0` default and then backfilled from
+  /// `created_at` so existing rows carry a sensible sync timestamp. Idempotent.
+  Future<void> _addTimestampColumnIfMissing(
+    String tableName,
+    String columnName,
+  ) async {
+    final info =
+        await customSelect('PRAGMA table_info($tableName)').get();
+    if (info.any((row) => row.data['name'] == columnName)) return;
+    await customStatement(
+        'ALTER TABLE $tableName ADD COLUMN $columnName INTEGER NOT NULL DEFAULT 0');
+    await customStatement(
+        'UPDATE $tableName SET $columnName = created_at WHERE $columnName = 0');
   }
 }
 

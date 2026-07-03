@@ -35,6 +35,68 @@ void main() {
     }
   });
 
+  // Regression: a genuine v17 DB is MISSING the new columns. Adding
+  // last_modified (whose default is the non-constant currentDateAndTime) used
+  // to crash with "cannot add a column with non-constant default". The
+  // migration must add it with a constant default and backfill from created_at.
+  test('v18 migration adds missing columns without a non-constant default',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test2');
+    final file = File(p.join(dir.path, 'v17.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      // Strip the v18 columns to mimic a real v17 database, then rewind version.
+      for (final stmt in const [
+        'ALTER TABLE accounts DROP COLUMN deleted',
+        'ALTER TABLE categories DROP COLUMN deleted',
+        'ALTER TABLE allocations DROP COLUMN deleted',
+        'ALTER TABLE objectives DROP COLUMN deleted',
+        'ALTER TABLE recurring_transactions DROP COLUMN last_modified',
+        'ALTER TABLE recurring_transactions DROP COLUMN deleted',
+        'ALTER TABLE transaction_templates DROP COLUMN last_modified',
+        'ALTER TABLE transaction_templates DROP COLUMN deleted',
+      ]) {
+        await db.customStatement(stmt);
+      }
+      await db.customStatement('PRAGMA user_version = 17');
+      await db.close();
+
+      // Reopen → 17->18 migration adds every column, including last_modified.
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.select(db.recurringTransactions).get(); // forces migration
+      await db.select(db.transactionTemplates).get();
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 18);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  // Regression: rewinding a full current-schema DB all the way to v1 forces
+  // EVERY migration step (createTable + addColumn across all versions) to run
+  // against objects that already exist. With the *IfMissing guards this must be
+  // a no-op that lands on v18 rather than throwing "table already exists" or
+  // "duplicate column name".
+  test('full migration from v1 is idempotent on an up-to-date schema',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test3');
+    final file = File(p.join(dir.path, 'v1.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.customStatement('PRAGMA user_version = 1');
+      await db.close();
+
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.select(db.transactionLines).get(); // forces the full 1->18 run
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 18);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
   group('Database migration', () {
     late AppDatabase db;
 
