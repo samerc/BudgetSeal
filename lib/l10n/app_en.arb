@@ -1482,6 +1482,10 @@
     "description": "Dialog label"
   },
   "billPersonRemoved": "Person removed",
+  "billSplitIntoUnits": "Split into units",
+  "billSplitUnitsPrompt": "How many units?",
+  "billTipLabel": "Tip",
+  "billItemRemoved": "Item removed",
   "billDeleteItems": "Delete items",
   "@billDeleteItems": {
     "description": "Dialog button"

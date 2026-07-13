@@ -1051,6 +1051,18 @@ class SAr extends S {
   String get billPersonRemoved => 'تمت إزالة الشخص';
 
   @override
+  String get billSplitIntoUnits => 'تقسيم إلى وحدات';
+
+  @override
+  String get billSplitUnitsPrompt => 'كم عدد الوحدات؟';
+
+  @override
+  String get billTipLabel => 'بقشيش';
+
+  @override
+  String get billItemRemoved => 'تمت إزالة العنصر';
+
+  @override
   String get billDeleteItems => 'حذف العناصر';
 
   @override

@@ -2001,6 +2001,30 @@ abstract class S {
   /// **'Person removed'**
   String get billPersonRemoved;
 
+  /// No description provided for @billSplitIntoUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into units'**
+  String get billSplitIntoUnits;
+
+  /// No description provided for @billSplitUnitsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'How many units?'**
+  String get billSplitUnitsPrompt;
+
+  /// No description provided for @billTipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get billTipLabel;
+
+  /// No description provided for @billItemRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed'**
+  String get billItemRemoved;
+
   /// Dialog button
   ///
   /// In en, this message translates to:

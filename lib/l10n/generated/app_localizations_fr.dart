@@ -1068,6 +1068,18 @@ class SFr extends S {
   String get billPersonRemoved => 'Personne supprimée';
 
   @override
+  String get billSplitIntoUnits => 'Diviser en unités';
+
+  @override
+  String get billSplitUnitsPrompt => 'Combien d\'unités ?';
+
+  @override
+  String get billTipLabel => 'Pourboire';
+
+  @override
+  String get billItemRemoved => 'Article supprimé';
+
+  @override
   String get billDeleteItems => 'Supprimer les articles';
 
   @override

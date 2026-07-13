@@ -1056,6 +1056,18 @@ class SEn extends S {
   String get billPersonRemoved => 'Person removed';
 
   @override
+  String get billSplitIntoUnits => 'Split into units';
+
+  @override
+  String get billSplitUnitsPrompt => 'How many units?';
+
+  @override
+  String get billTipLabel => 'Tip';
+
+  @override
+  String get billItemRemoved => 'Item removed';
+
+  @override
   String get billDeleteItems => 'Delete items';
 
   @override

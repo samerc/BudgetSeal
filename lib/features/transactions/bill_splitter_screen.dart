@@ -450,38 +450,52 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   // ─── Calculations ─────────────────────────────────────────────────────────
 
-  Map<String, double> _calculateSplits() {
-    final splits = <String, double>{for (final p in _people) p: 0};
+  /// Per-person breakdown: what each person owes for items (subtotal) and the
+  /// tip portion, kept separate so the review screen can show both.
+  Map<String, ({double subtotal, double tip})> _calculateBreakdown() {
+    final sub = <String, double>{for (final p in _people) p: 0};
     final subtotal = _items.fold(0.0, (s, i) => s + i.amount);
 
     if (_splitEvenly && subtotal > 0 && _people.isNotEmpty) {
       final perPerson = subtotal / _people.length;
       for (final p in _people) {
-        splits[p] = perPerson;
+        sub[p] = perPerson;
       }
     } else {
       for (final item in _items) {
         if (item.assignedTo.isEmpty || item.amount <= 0) continue;
         final share = item.amount / item.assignedTo.length;
         for (final person in item.assignedTo) {
-          splits[person] = (splits[person] ?? 0) + share;
+          sub[person] = (sub[person] ?? 0) + share;
         }
       }
     }
 
-    // Apply tip
+    final tip = <String, double>{for (final p in _people) p: 0};
     if (_tipIsAmount && _tipAmount > 0 && _people.isNotEmpty) {
+      // Fixed tip split evenly.
       final tipPerPerson = _tipAmount / _people.length;
-      for (final key in splits.keys) {
-        splits[key] = splits[key]! + tipPerPerson;
+      for (final p in _people) {
+        tip[p] = tipPerPerson;
       }
     } else if (!_tipIsAmount && _tipPercent > 0) {
-      final m = 1 + _tipPercent / 100;
-      for (final key in splits.keys) {
-        splits[key] = splits[key]! * m;
+      // Percentage tip is proportional to each person's item subtotal.
+      for (final p in _people) {
+        tip[p] = (sub[p] ?? 0) * _tipPercent / 100;
       }
     }
-    return splits;
+
+    return {
+      for (final p in _people) p: (subtotal: sub[p] ?? 0, tip: tip[p] ?? 0),
+    };
+  }
+
+  /// Per-person totals (items + tip). Derived from [_calculateBreakdown].
+  Map<String, double> _calculateSplits() {
+    return {
+      for (final e in _calculateBreakdown().entries)
+        e.key: e.value.subtotal + e.value.tip,
+    };
   }
 
   double _toBase(double amount) {
@@ -765,7 +779,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
               ),
             ),
-            _buildSummaryCard(splits, grandTotal),
+            _buildSummaryCard(),
             const SizedBox(height: 10),
             _buildTipSection(),
             const SizedBox(height: 8),
@@ -809,9 +823,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   Widget _buildItemTile(int index) {
     final item = _items[index];
+    // Every item (including scanned ones) is editable. ObjectKey keeps each
+    // field's text bound to its item when the list changes (e.g. after a split).
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(10),
@@ -830,64 +846,142 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               ),
             ),
           Expanded(
-            child: item.ocrLineIndex != null
-                ? Text(item.name,
-                    style: const TextStyle(fontSize: 13),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis)
-                : TextFormField(
-                    initialValue: item.name,
-                    decoration: InputDecoration(
-                      hintText: S.of(context).billItemName,
-                      isDense: true,
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: const TextStyle(fontSize: 13),
-                    onChanged: (v) => item.name = v,
-                  ),
+            child: TextFormField(
+              key: ValueKey('name_${identityHashCode(item)}'),
+              initialValue: item.name,
+              decoration: InputDecoration(
+                hintText: S.of(context).billItemName,
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(fontSize: 13),
+              onChanged: (v) => item.name = v,
+            ),
           ),
           const SizedBox(width: 8),
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 60, maxWidth: 140),
-            child: item.ocrLineIndex != null
-                ? Text(
-                    formatAmount(item.amount, currency: _billCurrency),
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context)),
-                    textAlign: TextAlign.end,
-                  )
-                : IntrinsicWidth(
-                    child: TextFormField(
-                      initialValue: item.amount > 0
-                          ? (item.amount % 1 == 0
-                              ? item.amount.toInt().toString()
-                              : item.amount.toStringAsFixed(2))
-                          : '',
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        prefixText: '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
-                        prefixStyle: TextStyle(fontSize: 12, color: AppColors.th(context)),
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      style: const TextStyle(fontSize: 13),
-                      textAlign: TextAlign.end,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      onChanged: (v) {
-                        item.amount = double.tryParse(v) ?? 0;
-                        setState(() {});
-                      },
-                    ),
-                  ),
+            constraints: const BoxConstraints(minWidth: 56, maxWidth: 120),
+            child: IntrinsicWidth(
+              child: TextFormField(
+                key: ValueKey('amt_${identityHashCode(item)}'),
+                initialValue: item.amount > 0
+                    ? (item.amount % 1 == 0
+                        ? item.amount.toInt().toString()
+                        : item.amount.toStringAsFixed(2))
+                    : '',
+                decoration: InputDecoration(
+                  hintText: '0',
+                  prefixText:
+                      '${kCurrencySymbols[_billCurrency] ?? _billCurrency} ',
+                  prefixStyle:
+                      TextStyle(fontSize: 12, color: AppColors.th(context)),
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                style: const TextStyle(fontSize: 13),
+                textAlign: TextAlign.end,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (v) {
+                  item.amount = double.tryParse(v) ?? 0;
+                  setState(() {});
+                },
+              ),
+            ),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Icon(Icons.call_split_rounded,
+                size: 18, color: AppColors.ts(context)),
+            tooltip: S.of(context).billSplitIntoUnits,
+            onPressed: () => _splitItemIntoUnits(index),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Icon(Icons.close_rounded,
+                size: 18, color: AppColors.ts(context)),
+            tooltip: S.of(context).commonDelete,
+            onPressed: () => _removeItem(index),
           ),
         ],
       ),
     );
+  }
+
+  /// Splits one item into [n] equal unit-items so a shared multi-quantity item
+  /// (e.g. "5× fries" for 3 people) can be assigned per-person in the next step.
+  Future<void> _splitItemIntoUnits(int index) async {
+    if (index < 0 || index >= _items.length) return;
+    final item = _items[index];
+    final tr = S.of(context);
+    final ctrl = TextEditingController(text: '2');
+    final n = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.billSplitIntoUnits),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(labelText: tr.billSplitUnitsPrompt),
+          onSubmitted: (_) => Navigator.pop(ctx, int.tryParse(ctrl.text)),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr.commonCancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
+              child: Text(tr.billSplit)),
+        ],
+      ),
+    );
+    if (n == null || n < 2 || n > 50 || !mounted) return;
+    if (index >= _items.length) return;
+    setState(() {
+      final unit = item.amount / n;
+      // Drop any trailing "×5" / "(1/5)" qualifier before re-numbering.
+      final base = item.name
+          .replaceAll(RegExp(r'\s*[×x]\s*\d+\s*$'), '')
+          .replaceAll(RegExp(r'\s*\(\d+/\d+\)\s*$'), '')
+          .trim();
+      final display = base.isEmpty ? 'Item ${index + 1}' : base;
+      final units = [
+        for (var i = 0; i < n; i++)
+          _BillItem(
+            name: '$display (${i + 1}/$n)',
+            amount: unit,
+            assignedTo: Set<String>.from(item.assignedTo),
+            ocrLineIndex: null,
+          ),
+      ];
+      _items.replaceRange(index, index + 1, units);
+    });
+  }
+
+  void _removeItem(int index) {
+    if (index < 0 || index >= _items.length) return;
+    final removed = _items[index];
+    final at = index;
+    setState(() => _items.removeAt(index));
+    final tr = S.of(context);
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr.billItemRemoved),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 4),
+      action: SnackBarAction(
+        label: tr.txUndoAction,
+        onPressed: () => setState(() =>
+            _items.insert(at <= _items.length ? at : _items.length, removed)),
+      ),
+    ));
   }
 
   // ─── Split helpers (used inline in ListView) ──────────────────────────────
@@ -942,37 +1036,89 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   // ─── Review helpers ───────────────────────────────────────────────────────
 
-  Widget _buildSummaryCard(Map<String, double> splits, double grandTotal) {
+  Widget _buildSummaryCard() {
     final isCross = _billCurrency != _baseCurrency;
+    final hasRate = isCross && (_exchangeRate - 1.0).abs() >= 0.001;
+    final breakdown = _calculateBreakdown();
+    final grandTotal =
+        breakdown.values.fold(0.0, (s, b) => s + b.subtotal + b.tip);
+    final totalTip = breakdown.values.fold(0.0, (s, b) => s + b.tip);
+    final tr = S.of(context);
     return _card(
       child: Column(children: [
-        for (final entry in splits.entries)
-          Padding(padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Row(children: [
-              Container(width: 10, height: 10,
-                decoration: BoxDecoration(color: _personColor(entry.key),
-                    shape: BoxShape.circle)),
-              const SizedBox(width: 10),
-              Expanded(child: Text(entry.key, style: TextStyle(fontSize: 14,
-                  fontWeight: entry.key == _people.first
-                      ? FontWeight.w700 : FontWeight.w500,
-                  color: AppColors.tp(context)))),
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(formatAmount(entry.value, currency: _billCurrency),
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
-                if (isCross && (_exchangeRate - 1.0).abs() >= 0.001)
-                  Text('≈ ${formatAmount(_toBase(entry.value), currency: _baseCurrency)}',
-                      style: TextStyle(fontSize: 11, color: AppColors.ts(context))),
-              ]),
-            ])),
+        for (final entry in breakdown.entries)
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Row(children: [
+                Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                        color: _personColor(entry.key),
+                        shape: BoxShape.circle)),
+                const SizedBox(width: 10),
+                Expanded(
+                    child: Text(entry.key,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: entry.key == _people.first
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: AppColors.tp(context)))),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                  Text(
+                      formatAmount(entry.value.subtotal + entry.value.tip,
+                          currency: _billCurrency),
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context))),
+                  // Show the tip portion so no one has to guess it.
+                  if (entry.value.tip > 0)
+                    Text(
+                        '${tr.billTipLabel} ${formatAmount(entry.value.tip, currency: _billCurrency)}',
+                        style: TextStyle(
+                            fontSize: 11, color: AppColors.ts(context))),
+                  if (hasRate)
+                    Text(
+                        '≈ ${formatAmount(_toBase(entry.value.subtotal + entry.value.tip), currency: _baseCurrency)}',
+                        style: TextStyle(
+                            fontSize: 11, color: AppColors.ts(context))),
+                ]),
+              ])),
         Divider(color: AppColors.bd(context)),
+        if (totalTip > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(children: [
+              Expanded(
+                  child: Text(tr.billTipLabel,
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.ts(context)))),
+              Text(formatAmount(totalTip, currency: _billCurrency),
+                  style:
+                      TextStyle(fontSize: 13, color: AppColors.ts(context))),
+            ]),
+          ),
         Row(children: [
-          Expanded(child: Text(S.of(context).billTotal, style: TextStyle(fontSize: 15,
-              fontWeight: FontWeight.w700, color: AppColors.tp(context)))),
-          Text(formatAmount(grandTotal, currency: _billCurrency),
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
+          Expanded(
+              child: Text(tr.billTotal,
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context)))),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text(formatAmount(grandTotal, currency: _billCurrency),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tp(context))),
+            if (hasRate)
+              Text(
+                  '≈ ${formatAmount(_toBase(grandTotal), currency: _baseCurrency)}',
+                  style:
+                      TextStyle(fontSize: 11, color: AppColors.ts(context))),
+          ]),
         ]),
       ]),
     );
