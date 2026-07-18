@@ -1482,6 +1482,14 @@
     "description": "Dialog label"
   },
   "billPersonRemoved": "Person removed",
+  "billEveryone": "Everyone",
+  "billSharedEach": "Shared {count} ways · {amount} each",
+  "@billSharedEach": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "amount": { "type": "String" }
+    }
+  },
   "billSplitIntoUnits": "Split into units",
   "billSplitUnitsPrompt": "How many units?",
   "billTipLabel": "Tip",

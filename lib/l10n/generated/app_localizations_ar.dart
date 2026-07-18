@@ -1051,6 +1051,14 @@ class SAr extends S {
   String get billPersonRemoved => 'تمت إزالة الشخص';
 
   @override
+  String get billEveryone => 'الجميع';
+
+  @override
+  String billSharedEach(int count, String amount) {
+    return 'مقسّم على $count · $amount لكل شخص';
+  }
+
+  @override
   String get billSplitIntoUnits => 'تقسيم إلى وحدات';
 
   @override

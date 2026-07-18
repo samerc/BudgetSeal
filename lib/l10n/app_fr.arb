@@ -5758,6 +5758,8 @@
   "billRemovePersonContent": "{name} a {count} article(s) assigné(s) uniquement à lui/elle. Réassigner à quelqu'un d'autre ou supprimer ces articles ?",
   "billReassignTo": "Réassigner à :",
   "billPersonRemoved": "Personne supprimée",
+  "billEveryone": "Tout le monde",
+  "billSharedEach": "Partagé en {count} · {amount} chacun",
   "billSplitIntoUnits": "Diviser en unités",
   "billSplitUnitsPrompt": "Combien d'unités ?",
   "billTipLabel": "Pourboire",

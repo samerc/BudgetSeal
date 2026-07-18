@@ -351,6 +351,8 @@ bill_re_scan,Re-scan button,Re-scan,إعادة المسح,Re-scanner
 bill_n_lines,OCR summary,{detected} lines ({withPrice} with prices),{detected} سطر ({withPrice} بأسعار),{detected} lignes ({withPrice} avec prix)
 bill_me,Default person name,Me,أنا,Moi
 bill_person_removed,Undo snackbar,Person removed,تمت إزالة الشخص,Personne supprimée
+bill_everyone,Assign chip,Everyone,الجميع,Tout le monde
+bill_shared_each,Assign hint,Shared {count} ways · {amount} each,مقسّم على {count} · {amount} لكل شخص,Partagé en {count} · {amount} chacun
 bill_split_into_units,Item action,Split into units,تقسيم إلى وحدات,Diviser en unités
 bill_split_units_prompt,Dialog prompt,How many units?,كم عدد الوحدات؟,Combien d'unités ?
 bill_tip_label,Summary label,Tip,بقشيش,Pourboire

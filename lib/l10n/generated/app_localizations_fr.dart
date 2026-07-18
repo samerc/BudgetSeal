@@ -1068,6 +1068,14 @@ class SFr extends S {
   String get billPersonRemoved => 'Personne supprimée';
 
   @override
+  String get billEveryone => 'Tout le monde';
+
+  @override
+  String billSharedEach(int count, String amount) {
+    return 'Partagé en $count · $amount chacun';
+  }
+
+  @override
   String get billSplitIntoUnits => 'Diviser en unités';
 
   @override

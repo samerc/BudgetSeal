@@ -1056,6 +1056,14 @@ class SEn extends S {
   String get billPersonRemoved => 'Person removed';
 
   @override
+  String get billEveryone => 'Everyone';
+
+  @override
+  String billSharedEach(int count, String amount) {
+    return 'Shared $count ways · $amount each';
+  }
+
+  @override
   String get billSplitIntoUnits => 'Split into units';
 
   @override

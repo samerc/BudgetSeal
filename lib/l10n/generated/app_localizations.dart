@@ -2001,6 +2001,18 @@ abstract class S {
   /// **'Person removed'**
   String get billPersonRemoved;
 
+  /// No description provided for @billEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get billEveryone;
+
+  /// No description provided for @billSharedEach.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared {count} ways · {amount} each'**
+  String billSharedEach(int count, String amount);
+
   /// No description provided for @billSplitIntoUnits.
   ///
   /// In en, this message translates to:

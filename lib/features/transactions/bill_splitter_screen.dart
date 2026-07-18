@@ -1274,6 +1274,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   Widget _buildAssignableItem(int index) {
     final item = _items[index];
+    final tr = S.of(context);
+    final sharedBy = item.assignedTo.length;
+    final perPerson = sharedBy > 0 ? item.amount / sharedBy : 0.0;
+    final allSelected =
+        _people.isNotEmpty && item.assignedTo.length == _people.length;
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(10),
@@ -1305,46 +1310,83 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: _people.map((p) {
-              final assigned = item.assignedTo.contains(p);
-              final color = _personColor(p);
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (assigned) {
-                      item.assignedTo.remove(p);
-                    } else {
-                      item.assignedTo.add(p);
-                    }
-                  });
-                  HapticFeedback.selectionClick();
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: assigned
-                        ? color.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: Border.all(
-                      color: assigned
-                          ? color
-                          : AppColors.bd(context),
-                    ),
-                  ),
-                  child: Text(p,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight:
-                            assigned ? FontWeight.w600 : FontWeight.w400,
-                        color: assigned ? color : AppColors.ts(context),
-                      )),
+            children: [
+              // "Everyone" shortcut — for items shared by the whole table.
+              if (_people.length > 1)
+                _assignChip(
+                  label: tr.billEveryone,
+                  selected: allSelected,
+                  color: AppColors.accent,
+                  onTap: () {
+                    setState(() {
+                      if (allSelected) {
+                        item.assignedTo.clear();
+                      } else {
+                        item.assignedTo
+                          ..clear()
+                          ..addAll(_people);
+                      }
+                    });
+                    HapticFeedback.selectionClick();
+                  },
                 ),
-              );
-            }).toList(),
+              for (final p in _people)
+                _assignChip(
+                  label: p,
+                  selected: item.assignedTo.contains(p),
+                  color: _personColor(p),
+                  onTap: () {
+                    setState(() {
+                      if (item.assignedTo.contains(p)) {
+                        item.assignedTo.remove(p);
+                      } else {
+                        item.assignedTo.add(p);
+                      }
+                    });
+                    HapticFeedback.selectionClick();
+                  },
+                ),
+            ],
           ),
+          // When an item is shared, show how the cost divides so it's obvious.
+          if (sharedBy >= 2) ...[
+            const SizedBox(height: 6),
+            Text(
+              tr.billSharedEach(
+                  sharedBy, formatAmount(perPerson, currency: _billCurrency)),
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.accent),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  /// A pill toggle used for assigning an item to a person (or everyone).
+  Widget _assignChip({
+    required String label,
+    required bool selected,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          border: Border.all(color: selected ? color : AppColors.bd(context)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: selected ? color : AppColors.ts(context),
+            )),
       ),
     );
   }
