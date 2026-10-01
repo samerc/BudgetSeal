@@ -215,12 +215,16 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
           borderRadius: BorderRadius.circular(RadiusTokens.md)),
       textStyle: fs(15, FontWeight.w500, textPrimary),
     ),
+    // Cashew openSnackbar: light popup surface, dark text, accent action.
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      elevation: 2,
+      backgroundColor: surfaces.popup,
+      elevation: 6,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.snackbar)),
-      contentTextStyle: fs(15, FontWeight.w500, null),
+      contentTextStyle: fs(15, FontWeight.w600, textPrimary),
+      actionTextColor: accent,
+      closeIconColor: textPrimary,
     ),
     // Cashew bottom nav: tinted bar, soft pastel pill, 13px labels.
     navigationBarTheme: NavigationBarThemeData(

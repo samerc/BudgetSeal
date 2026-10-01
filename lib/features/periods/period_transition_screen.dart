@@ -108,7 +108,6 @@ class _PeriodTransitionScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(S.of(context).periodTransitionFailed),
-            backgroundColor: AppColors.overspent,
           ),
         );
       }

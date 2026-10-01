@@ -651,19 +651,20 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 ## UI Consistency
 
 ### Screen Design Patterns
-- **Tab screens** (Dashboard, Activity, Budget, Reports, More): Custom SafeArea header, 24-28px bold title, no back button
+- **Tab screens** (Dashboard, Activity, Budget, Reports, More): no back button. Home, Budget and More use `LargeTitleHeader` (`lib/shared/widgets/large_title_header.dart`) as the first sliver — Cashew's PageFrame title that shrinks from 28pt into a pinned 56px bar on scroll (actions stay top-end, optional subtitle fades). It pads for the status bar itself — no SafeArea around it.
 - **Sub-screens** (Recurring, Subscriptions, Templates, Categories): Custom SafeArea header, 24px bold title, back IconButton, filter chips, summary banner, pull-to-refresh
 - **Detail/form screens** (Account detail, Allocation detail, etc.): Standard AppBar with auto back
 
 ### Standard Widgets
-- Loading: `SkeletonList` for lists, `CircularProgressIndicator` for detail screens
-- Empty: `EmptyState` widget everywhere
+- Loading: `SkeletonList` (Cashew ghost rows: circle + bars, theme-aware shimmer) for lists, `CircularProgressIndicator` for detail screens
+- Empty: `EmptyState` widget everywhere (icon in a 96px pastel circle, 18/w700 title, pastel action)
 - Error: `ErrorRetry` widget everywhere
 - Cards: Use `AppCard` widget or `CardTokens.radius` (14) + `CardTokens.padding` (16h, 14v) + `AppColors.sf(context)` bg + `AppColors.bd(context)` border
 - Section headers: Use `SectionHeader` widget or `TypographyTokens.sectionHeaderSize/Weight/LetterSpacing`
 - Screen titles: `TypographyTokens.screenTitleSize` (24) + `TypographyTokens.screenTitleWeight` (w800)
 - Chips: Pill-shaped (20px radius), colored border+bg when selected
-- SnackBars: Always `behavior: SnackBarBehavior.floating`
+- SnackBars: Always `behavior: SnackBarBehavior.floating`. The theme makes them Cashew popups (popup surface, dark text, accent action) — don't pass a saturated `backgroundColor` (the theme's dark text would be unreadable on it); errors use the same style.
+- Accent-colored text (section headers, links): `AppColors.accentText(context)` — lifted in dark mode for contrast.
 - All list screens have `RefreshIndicator`
 
 ### Navigation

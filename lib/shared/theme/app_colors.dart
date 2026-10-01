@@ -91,6 +91,13 @@ abstract final class AppColors {
       };
 
   /// Background for popups, dialogs and bottom sheets.
+  /// Accent for text (section headers, links): lifted in dark themes so the
+  /// saturated accent stays readable on near-black surfaces.
+  static Color accentText(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.dark
+          ? lightenPastel(accent, 0.3)
+          : accent;
+
   static Color popup(BuildContext c) => _s(c)?.popup ?? sf(c);
 
   static Color tp(BuildContext c) => switch (_mode(c)) {

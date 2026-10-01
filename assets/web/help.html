@@ -454,14 +454,15 @@
   <tr><td><strong>Activity</strong></td><td>All transactions grouped by date, with search and filters</td></tr>
   <tr><td><strong>Budget</strong></td><td>Your envelopes — see how much you've spent and what's left</td></tr>
   <tr><td><strong>Reports</strong></td><td>Charts, trends, insights, and balance sheet</td></tr>
-  <tr><td><strong>More</strong></td><td>All tools (accounts, categories, recurring, etc.) and settings</td></tr>
+  <tr><td><strong>More</strong></td><td>A grid of tiles for every tool (accounts, categories, recurring, goals, etc.), then Settings, Help, and About</td></tr>
 </table>
 
 <h3>Dashboard</h3>
-<p>The Home tab shows your financial overview at a glance. It's designed to be clean and scannable:</p>
+<p>The Home tab shows your financial overview at a glance. It's designed to be clean and scannable — the large title shrinks into a compact bar as you scroll:</p>
 <ul>
   <li><strong>Quick Actions</strong> — buttons for Expense, Income, Transfer, Fund, and Split (at the top for fast access)</li>
   <li><strong>Spending Overview</strong> — donut chart showing where your money went, with income/expense/net stats (toggle between last 7 days and this month)</li>
+  <li><strong>Upcoming</strong> — total and count of recurring bills due in the next 7 days (an <strong>Overdue</strong> box appears next to it if a bill is late). Tap to open Upcoming Bills.</li>
   <li><strong>Your Money</strong> — compact card showing net worth and unallocated balance side by side. Tap net worth to go to Accounts, tap unallocated to fund envelopes.</li>
   <li><strong>Recent Activity</strong> — quick templates and latest transactions</li>
 </ul>
@@ -732,9 +733,8 @@
 <h3>Upcoming Bills</h3>
 <p>Go to <strong>More</strong> → <strong>Upcoming Bills</strong> to see all bills sorted by due date with urgency indicators:</p>
 <ul>
-  <li><span style="color:var(--expense)"><strong>Red</strong></span> — Overdue</li>
-  <li><span style="color:var(--caution)"><strong>Amber</strong></span> — Due today or tomorrow</li>
-  <li><span style="color:var(--income)"><strong>Green</strong></span> — Due in a few days</li>
+  <li><span style="color:#6577E0"><strong>Indigo</strong></span> — Overdue</li>
+  <li><span style="color:#58A4C2"><strong>Blue</strong></span> — Due today, tomorrow, or in a few days</li>
 </ul>
 
 <div class="screenshot">Screenshot: Upcoming Bills screen showing bills with colored urgency badges</div>
@@ -937,8 +937,9 @@
 
 <h3>Categories</h3>
 <ul>
-  <li><strong>Top Spending</strong> — a donut chart showing your biggest expense categories</li>
-  <li><strong>Top Transactions</strong> — the largest individual transactions this month</li>
+  <li><strong>Donut chart</strong> — the month's spending split by category, with the total in the middle</li>
+  <li><strong>Category list</strong> — each category's amount, its share of the month (bar and %), number of transactions, and the change versus last month</li>
+  <li><strong>Top spending / Top transactions</strong> — sort the list by amount or by number of transactions</li>
   <li>Tap any category to see its transactions</li>
 </ul>
 

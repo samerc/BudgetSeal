@@ -88,7 +88,6 @@ class _LeftoverResolutionScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(S.of(context).leftoverResolveFailed),
-            backgroundColor: AppColors.overspent,
           ),
         );
       }

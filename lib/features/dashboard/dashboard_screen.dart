@@ -17,6 +17,7 @@ import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/section_header.dart';
@@ -108,45 +109,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         },
         child: CustomScrollView(
           slivers: [
-            // ── Zone 1: At-a-glance ─────────────────────────────
-            // Header (Greeting + Search)
-            SliverToBoxAdapter(
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          household?.name ?? S.of(context).dashboardDefaultName,
-                          style: TextStyle(
-                            color: AppColors.tp(context),
-                            fontSize: TypographyTokens.screenTitleSize,
-                            fontWeight: TypographyTokens.screenTitleWeight,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: S.of(context).dashboardCustomizeTooltip,
-                        icon: Icon(Icons.tune_rounded,
-                            color: AppColors.ts(context), size: 20),
-                        onPressed: () => showDashboardCustomizeSheet(context),
-                      ),
-                      IconButton(
-                        tooltip: S.of(context).dashboardSearchTooltip,
-                        icon: Icon(Icons.search_rounded,
-                            color: AppColors.ts(context)),
-                        onPressed: () => _showGlobalSearch(context, ref),
-                      ),
-                    ],
-                  ),
+            // ── Header: Cashew large title that collapses on scroll ──
+            LargeTitleHeader(
+              title: household?.name ?? S.of(context).dashboardDefaultName,
+              actions: [
+                IconButton(
+                  tooltip: S.of(context).dashboardCustomizeTooltip,
+                  icon: Icon(Icons.tune_rounded,
+                      color: AppColors.ts(context), size: 22),
+                  onPressed: () => showDashboardCustomizeSheet(context),
                 ),
-              ),
+                IconButton(
+                  tooltip: S.of(context).dashboardSearchTooltip,
+                  icon: Icon(Icons.search_rounded,
+                      color: AppColors.ts(context)),
+                  onPressed: () => _showGlobalSearch(context, ref),
+                ),
+              ],
             ),
 
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               sliver: SliverList(
                 delegate: SliverChildListDelegate(_buildOrderedSections(
                   layout: layout,

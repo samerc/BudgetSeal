@@ -34,6 +34,7 @@ import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -48,42 +49,18 @@ class SettingsScreen extends ConsumerWidget {
     final l = S.of(context);
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          children: [
-            // ── Title ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 16),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.settingsMoreTitle,
-                          style: TextStyle(
-                              fontSize: TypographyTokens.screenTitleSize,
-                              fontWeight: TypographyTokens.screenTitleWeight,
-                              color: AppColors.tp(context))),
-                      if (household != null)
-                        Text(
-                          '${household.name} · ${household.baseCurrency}',
-                          style: TextStyle(
-                              fontSize: 12, color: AppColors.ts(context)),
-                        ),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => context.push('/about'),
-                    child: Text('v$appVersion',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.th(context))),
-                  ),
-                ],
-              ),
-            ),
-
+      body: CustomScrollView(
+        slivers: [
+          // ── Title: Cashew large title that collapses on scroll ──
+          LargeTitleHeader(
+            title: l.settingsMoreTitle,
+            subtitle: household == null
+                ? null
+                : '${household.name} · ${household.baseCurrency} · v$appVersion',
+          ),
+          SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          sliver: SliverList(delegate: SliverChildListDelegate([
             // ── Backup Reminder Banner ──
             _SettingsBackupBanner(),
 
@@ -143,8 +120,9 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(icon: Icons.info_outline_rounded, title: l.settingsAbout,
                 subtitle: l.settingsVersionN(appVersion), iconColor: AppColors.th(context),
                 onTap: () => context.push('/about')),
-          ],
-        ),
+          ])),
+          ),
+        ],
       ),
     );
   }
@@ -1497,7 +1475,7 @@ class _SectionHeader extends StatelessWidget {
           fontSize: TypographyTokens.sectionHeaderSize,
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.accent,
+          color: AppColors.accentText(context),
         ),
       ),
     );

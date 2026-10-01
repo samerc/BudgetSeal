@@ -229,7 +229,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           SnackBar(
             content: Text(S.of(context).backupRestoreFailed),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.overspent,
           ),
         );
       }

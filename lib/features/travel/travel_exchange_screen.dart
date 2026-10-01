@@ -477,7 +477,7 @@ class _SectionLabel extends StatelessWidget {
           fontSize: TypographyTokens.sectionHeaderSize,
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.accent,
+          color: AppColors.accentText(context),
         ));
   }
 }

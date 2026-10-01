@@ -2,7 +2,6 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/data/category_presets.dart';
@@ -217,7 +216,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Expanded(
                 child: PageView(
                   controller: _pageController,
-                  onPageChanged: (i) => setState(() => _currentPage = i),
+                  onPageChanged: (i) {
+                    // Don't carry the setup page's keyboard onto the next page.
+                    FocusScope.of(context).unfocus();
+                    setState(() => _currentPage = i);
+                  },
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     _WelcomePage(onNext: _nextPage),
@@ -337,7 +340,7 @@ class _WelcomePageState extends State<_WelcomePage>
               child: Text(
                 S.of(context).onboardWelcomeTitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -351,7 +354,7 @@ class _WelcomePageState extends State<_WelcomePage>
             child: Text(
               S.of(context).onboardTagline,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 color: Colors.white.withValues(alpha: 0.85),
               ),
@@ -367,7 +370,7 @@ class _WelcomePageState extends State<_WelcomePage>
               child: Text(
                 S.of(context).onboardEnvelopeExplainer,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   color: Colors.white.withValues(alpha: 0.85),
                   height: 1.5,
@@ -441,7 +444,7 @@ class _CompactStep extends StatelessWidget {
             ),
             child: Center(
               child: Text(number,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
                       fontSize: 14)),
@@ -450,7 +453,7 @@ class _CompactStep extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(text,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     color: Colors.white, fontSize: 13, height: 1.3)),
           ),
         ],
@@ -521,13 +524,13 @@ class _SetupPage extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             Text(s.onboardSetupTitle,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: Colors.white)),
             const SizedBox(height: 4),
             Text(s.onboardChangeLater,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.8))),
             const SizedBox(height: 20),
@@ -733,7 +736,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: Colors.white.withValues(alpha: 0.75),
@@ -798,13 +801,13 @@ class _ToggleOption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 14)),
                   const SizedBox(height: 2),
                   Text(subtitle,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                           color: Colors.white70, fontSize: 12)),
                 ],
               ),
@@ -849,7 +852,7 @@ class _DonePage extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             S.of(context).onboardAllSet,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -859,7 +862,7 @@ class _DonePage extends StatelessWidget {
           Text(
             S.of(context).onboardDoneSubtitle,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 15,
               color: Colors.white.withValues(alpha: 0.85),
               height: 1.5,
@@ -874,7 +877,7 @@ class _DonePage extends StatelessWidget {
           Text(
             S.of(context).onboardHelpHint,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               color: Colors.white.withValues(alpha: 0.7),
             ),
@@ -924,7 +927,7 @@ class _OnboardingButton extends StatelessWidget {
               )
             : Text(
                 label ?? '',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -949,7 +952,7 @@ class _RestoreFromCloudButton extends ConsumerWidget {
         icon: const Icon(Icons.cloud_download_rounded, size: 18),
         label: Text(
           S.of(context).onboardRestoreCloud,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
@@ -1141,7 +1144,7 @@ class _JoinHouseholdButton extends ConsumerWidget {
         icon: const Icon(Icons.people_outline_rounded, size: 18),
         label: Text(
           S.of(context).onboardJoinHousehold,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
@@ -1379,14 +1382,14 @@ class _ExpandableOptionsState extends State<_ExpandableOptions> {
               ),
               const SizedBox(width: 4),
               Text(S.of(context).onboardMoreOptions,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.white54)),
               const Spacer(),
               Text(
                 widget.seedCategories ? S.of(context).onboardFullSet : S.of(context).onboardEmpty,
-                style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
+                style: TextStyle(fontSize: 11, color: Colors.white38),
               ),
             ],
           ),

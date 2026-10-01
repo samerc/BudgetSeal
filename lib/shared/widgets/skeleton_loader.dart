@@ -21,7 +21,10 @@ class SkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.sfv(context),
-      highlightColor: Colors.grey.shade50,
+      // Theme-aware sweep — a fixed near-white flashed in dark mode.
+      highlightColor: AppColors.isDark
+          ? AppColors.lightenPastel(AppColors.sfv(context), 0.08)
+          : AppColors.lightenPastel(AppColors.sfv(context), 0.6),
       child: Container(
         height: height,
         width: width,
@@ -34,15 +37,37 @@ class SkeletonLoader extends StatelessWidget {
   }
 }
 
-/// A card-shaped skeleton for lists.
+/// A row-shaped skeleton (Cashew "ghost transaction"): icon circle plus a
+/// title bar, a shorter subtitle bar and an amount bar.
 class SkeletonCard extends StatelessWidget {
   const SkeletonCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: SkeletonLoader(height: 72),
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          SkeletonLoader(height: 44, width: 44, borderRadius: 22),
+          SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FractionallySizedBox(
+                    widthFactor: 0.6,
+                    child: SkeletonLoader(height: 14, borderRadius: 7)),
+                SizedBox(height: 8),
+                FractionallySizedBox(
+                    widthFactor: 0.35,
+                    child: SkeletonLoader(height: 11, borderRadius: 6)),
+              ],
+            ),
+          ),
+          SizedBox(width: 14),
+          SkeletonLoader(height: 16, width: 64, borderRadius: 8),
+        ],
+      ),
     );
   }
 }
@@ -50,7 +75,7 @@ class SkeletonCard extends StatelessWidget {
 /// Multiple skeleton cards for list loading.
 class SkeletonList extends StatelessWidget {
   final int count;
-  const SkeletonList({super.key, this.count = 5});
+  const SkeletonList({super.key, this.count = 6});
 
   @override
   Widget build(BuildContext context) {

@@ -142,7 +142,6 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(S.of(context).fundErrorMsg('$e')),
-            backgroundColor: AppColors.overspent,
             behavior: SnackBarBehavior.floating,
           ),
         );

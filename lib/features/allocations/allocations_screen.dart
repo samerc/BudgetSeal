@@ -11,6 +11,7 @@ import '../../core/providers/objectives_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
@@ -232,52 +233,35 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         },
         child: CustomScrollView(
         slivers: [
-          // -- Header (dashboard style) --
-          SliverToBoxAdapter(
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.allocTitle,
-                        style: TextStyle(
-                          color: AppColors.tp(context),
-                          fontSize: TypographyTokens.screenTitleSize,
-                          fontWeight: TypographyTokens.screenTitleWeight,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: l.allocSearchTooltip,
-                      icon: Icon(
-                        _showSearch
-                            ? Icons.search_off_rounded
-                            : Icons.search_rounded,
-                        color: AppColors.ts(context),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _showSearch = !_showSearch;
-                          if (!_showSearch) {
-                            _searchQuery = '';
-                            _searchController.clear();
-                          }
-                        });
-                      },
-                    ),
-                    IconButton(
-                      tooltip: l.allocHelpTooltip,
-                      icon: Icon(Icons.help_outline_rounded,
-                          color: AppColors.ts(context)),
-                      onPressed: () => _showEnvelopeHelp(context),
-                    ),
-                  ],
+          // -- Header: Cashew large title that collapses on scroll --
+          LargeTitleHeader(
+            title: l.allocTitle,
+            actions: [
+              IconButton(
+                tooltip: l.allocSearchTooltip,
+                icon: Icon(
+                  _showSearch
+                      ? Icons.search_off_rounded
+                      : Icons.search_rounded,
+                  color: AppColors.ts(context),
                 ),
+                onPressed: () {
+                  setState(() {
+                    _showSearch = !_showSearch;
+                    if (!_showSearch) {
+                      _searchQuery = '';
+                      _searchController.clear();
+                    }
+                  });
+                },
               ),
-            ),
+              IconButton(
+                tooltip: l.allocHelpTooltip,
+                icon: Icon(Icons.help_outline_rounded,
+                    color: AppColors.ts(context)),
+                onPressed: () => _showEnvelopeHelp(context),
+              ),
+            ],
           ),
 
           // -- Search bar --

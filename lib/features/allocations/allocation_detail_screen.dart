@@ -153,7 +153,7 @@ class _AllocationDetailScreenState
             style: TextStyle(
                 fontSize: TypographyTokens.sectionHeaderSize,
                 fontWeight: TypographyTokens.sectionHeaderWeight,
-                color: AppColors.accent,
+                color: AppColors.accentText(context),
                 letterSpacing: TypographyTokens.sectionHeaderLetterSpacing)),
       ]),
     );
@@ -1173,7 +1173,6 @@ class _AllocationDetailScreenState
           SnackBar(
             content: Text(S.of(context).allocFundError),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.overspent,
           ),
         );
       }
@@ -1587,7 +1586,6 @@ class _AllocationDetailScreenState
             SnackBar(
               content: Text('$e'),
               behavior: SnackBarBehavior.floating,
-              backgroundColor: AppColors.overspent,
             ),
           );
         }
@@ -2037,7 +2035,6 @@ class _AllocationDetailScreenState
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(S.of(context).allocDeleteError),
               behavior: SnackBarBehavior.floating,
-              backgroundColor: AppColors.overspent,
             ));
           }
         }
@@ -2081,7 +2078,6 @@ class _AllocationDetailScreenState
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(S.of(context).allocDeleteError),
               behavior: SnackBarBehavior.floating,
-              backgroundColor: AppColors.overspent,
             ));
           }
         }
@@ -2300,7 +2296,6 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           SnackBar(
             content: Text(S.of(context).allocFetchRateError(foreignCurrency)),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.overspent,
           ),
         );
       }
@@ -2342,7 +2337,6 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           SnackBar(
             content: Text(S.of(context).allocRevalError),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.overspent,
           ),
         );
         setState(() => _applying = false);
