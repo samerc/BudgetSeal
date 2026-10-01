@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 /// Maps common category names to their Cashew PNG icon filenames.
 /// Falls back to emoji if no matching icon found.
 const _categoryIconMap = <String, String>{
@@ -176,7 +178,8 @@ class CategoryIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        // Cashew: solid pastel of the category color, not a faint tint.
+        color: AppColors.pastel(context, color, light: 0.55, dark: 0.35),
         borderRadius: circular ? null : BorderRadius.circular(size * 0.28),
         shape: circular ? BoxShape.circle : BoxShape.rectangle,
       ),
@@ -184,11 +187,11 @@ class CategoryIcon extends StatelessWidget {
         child: pngFile != null
             ? Image.asset(
                 'assets/categories/$pngFile',
-                width: size * 0.55,
-                height: size * 0.55,
-                errorBuilder: (_, __, ___) => _fallback(),
+                width: size * 0.57,
+                height: size * 0.57,
+                errorBuilder: (_, __, ___) => _fallback(context),
               )
-            : _fallback(),
+            : _fallback(context),
       ),
     );
   }
@@ -201,14 +204,15 @@ class CategoryIcon extends StatelessWidget {
     return s.length <= 4 && s.codeUnits.any((c) => c > 127);
   }
 
-  Widget _fallback() {
+  Widget _fallback(BuildContext context) {
     if (_isEmoji(emoji)) {
-      return Text(emoji!, style: TextStyle(fontSize: size * 0.45));
+      return Text(emoji!, style: TextStyle(fontSize: size * 0.5));
     }
     return Text(
       categoryName.isNotEmpty ? categoryName[0].toUpperCase() : '?',
       style: TextStyle(
-        color: color,
+        color: AppColors.pastel(context, color,
+            light: 0.6, dark: 0.5, inverse: true),
         fontSize: size * 0.4,
         fontWeight: FontWeight.w700,
       ),

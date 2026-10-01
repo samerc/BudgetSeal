@@ -6,9 +6,10 @@ import 'tappable.dart';
 
 /// Standardized card container used across all screens.
 ///
-/// Uses the design token values: radius 16, padding 16h/14v,
-/// theme-aware background and border. Tappable cards get premium
-/// scale-down physics and platform-aware touch feedback.
+/// Uses the design token values: radius 16, padding 16h/14v, an
+/// accent-tinted surface and a soft shadow in light mode (Cashew style —
+/// no border except a faint edge in the black theme). Tappable cards get a
+/// platform-aware ripple.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -30,7 +31,10 @@ class AppCard extends StatelessWidget {
     final decoration = BoxDecoration(
       color: AppColors.sf(context),
       borderRadius: CardTokens.borderRadius,
-      border: Border.all(color: AppColors.bd(context)),
+      border: AppColors.cardBorder(context) == Colors.transparent
+          ? null
+          : Border.all(color: AppColors.cardBorder(context)),
+      boxShadow: AppColors.cardShadow(context),
     );
 
     final content = Padding(
@@ -40,10 +44,10 @@ class AppCard extends StatelessWidget {
 
     Widget card;
     if (onTap != null || onLongPress != null) {
-      card = ClipRRect(
-        borderRadius: CardTokens.borderRadius,
-        child: DecoratedBox(
-          decoration: decoration,
+      card = DecoratedBox(
+        decoration: decoration,
+        child: ClipRRect(
+          borderRadius: CardTokens.borderRadius,
           child: Tappable(
             onTap: onTap,
             onLongPress: onLongPress,

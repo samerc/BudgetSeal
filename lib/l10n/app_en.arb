@@ -768,7 +768,7 @@
       }
     }
   },
-  "txLongPressHint": "Long press for options",
+  "txLongPressHint": "Long press to select",
   "@txLongPressHint": {
     "description": "Semantics hint"
   },

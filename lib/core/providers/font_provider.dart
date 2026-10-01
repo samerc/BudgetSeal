@@ -5,17 +5,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _key = 'app_font';
 
+/// Default font for new installs — closest free match to Cashew's Avenir.
+const defaultAppFont = 'Nunito Sans';
+
 /// Available font families.
 const appFonts = <String, String>{
+  'Nunito Sans': 'Nunito Sans',
   'Plus Jakarta Sans': 'Plus Jakarta Sans',
   'DM Sans': 'DM Sans',
   'Inter': 'Inter',
-  'Nunito Sans': 'Nunito Sans',
   'Poppins': 'Poppins',
   'Nunito': 'Nunito',
   'Rubik': 'Rubik',
   'Space Grotesk': 'Space Grotesk',
 };
+
+/// Optical size correction per font. Fonts with a small x-height (Nunito
+/// Sans) read smaller than others at the same point size, so their text is
+/// scaled up to match the visual size of Cashew's Avenir. Applied globally in
+/// app.dart on top of the user's Text Size preference.
+double fontOpticalScale(String fontName) => switch (fontName) {
+      'Nunito Sans' || 'Nunito' => 1.1,
+      _ => 1.0,
+    };
 
 final fontProvider =
     NotifierProvider<FontNotifier, String>(FontNotifier.new);
@@ -24,7 +36,7 @@ class FontNotifier extends Notifier<String> {
   @override
   String build() {
     _load();
-    return 'Plus Jakarta Sans';
+    return defaultAppFont;
   }
 
   Future<void> _load() async {
@@ -59,7 +71,7 @@ TextTheme buildTextTheme(String fontName, [Brightness brightness = Brightness.li
     'Rubik' => GoogleFonts.rubikTextTheme(base),
     'DM Sans' => GoogleFonts.dmSansTextTheme(base),
     'Space Grotesk' => GoogleFonts.spaceGroteskTextTheme(base),
-    _ => GoogleFonts.plusJakartaSansTextTheme(base),
+    _ => GoogleFonts.nunitoSansTextTheme(base),
   };
 }
 
@@ -78,6 +90,6 @@ TextStyle fontStyle(String fontName, {
     'Rubik' => GoogleFonts.rubik(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'DM Sans' => GoogleFonts.dmSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
     'Space Grotesk' => GoogleFonts.spaceGrotesk(fontSize: fontSize, fontWeight: fontWeight, color: color),
-    _ => GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
+    _ => GoogleFonts.nunitoSans(fontSize: fontSize, fontWeight: fontWeight, color: color),
   };
 }

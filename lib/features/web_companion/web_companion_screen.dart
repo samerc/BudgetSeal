@@ -13,6 +13,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import 'web_companion_auth.dart';
 import 'web_companion_service.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class WebCompanionScreen extends ConsumerStatefulWidget {
   const WebCompanionScreen({super.key});
@@ -229,7 +230,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           },
         );
       },
-    ).then((_) => controller.dispose());
+    ).then((_) => disposeAfterRouteAnimation(controller));
   }
 
   // ── Build ────────────────────────────────────────────────────────────────────

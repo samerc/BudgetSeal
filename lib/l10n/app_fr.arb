@@ -5747,7 +5747,7 @@
   "periodTransitionFailed": "Échec de la transition. Veuillez réessayer.",
   "leftoverLoadError": "Impossible de charger les données",
   "leftoverResolveFailed": "Échec de la résolution des restes. Veuillez réessayer.",
-  "txLongPressHint": "Appui long pour les options",
+  "txLongPressHint": "Appui long pour sélectionner",
   "txListNone": "Aucun",
   "billStep1Desc": "Étape 1 : Ajoutez les articles de votre reçu — scannez ou entrez manuellement.",
   "billStep2Desc": "Étape 2 : Ajoutez des personnes et assignez les articles. Activez « Diviser également » pour répartir le total équitablement.",

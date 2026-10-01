@@ -19,7 +19,6 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
-import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
@@ -33,6 +32,7 @@ import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../transactions/widgets/tx_tile.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -56,17 +56,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         setState(() => _showWeekly = prefs.getBool('dashboard_show_weekly') ?? false);
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final s = S.of(context);
-      showHintIfNeeded(
+      // Sequential: showing both at once stacks two dialogs.
+      await showHintIfNeeded(
         context,
         hintId: 'dashboard_welcome',
         icon: Icons.waving_hand_rounded,
         title: s.dashboardWelcomeTitle,
         body: s.dashboardWelcomeBody,
       );
-      showHintIfNeeded(
+      if (!mounted) return;
+      await showHintIfNeeded(
         context,
         hintId: 'dashboard_quick_actions_hint',
         icon: Icons.lightbulb_outline_rounded,
@@ -621,9 +623,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                               duration: Duration(milliseconds: 300 + e.key * 80),
                               curve: Curves.easeOut,
                               builder: (_, v, child) => Opacity(opacity: v, child: child),
-                              child: _RecentTxTile(
+                              child: TxTile(
                                 entry: e.value,
                                 categoryMap: categoryMap,
+                                showBalance: false,
+                                showDate: true,
                               ),
                             )),
                         ],
@@ -938,6 +942,7 @@ class _QuickAction extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(CardTokens.radius),
             scaleFactor: 0.93,
+            haptic: true,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
@@ -970,81 +975,6 @@ class _QuickAction extends StatelessWidget {
 }
 
 // ─── Recent Transaction Tile ──────────────────────────────────────────────── ────────────────────────────────────────────────
-
-class _RecentTxTile extends ConsumerWidget {
-  final TransactionEntry entry;
-  final Map<String, Category> categoryMap;
-  const _RecentTxTile({required this.entry, required this.categoryMap});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tx = entry.tx;
-    final txColors = ref.watch(txColorsProvider);
-    final typeColor = txColors.forType(tx.type);
-    final cat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
-    final catColor =
-        cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Tappable(
-        onTap: () => context.push('/transactions/${tx.id}'),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-          ),
-          child: Row(children: [
-            CategoryIcon(
-              categoryName: cat?.name ?? '',
-              emoji: cat?.icon,
-              color: catColor,
-              size: 38,
-              circular: true,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        cat?.name ??
-                            (tx.note.isNotEmpty
-                                ? tx.note
-                                : switch (tx.type) {
-                                    'income' => S.of(context).typeIncome,
-                                    'transfer' => S.of(context).typeTransfer,
-                                    _ => S.of(context).typeExpense,
-                                  }),
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.tp(context)),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                    Text(
-                        formatDate(tx.createdAt.toLocal()),
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.th(context))),
-                  ]),
-            ),
-            const SizedBox(width: 10),
-            Text(formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type),
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: typeColor),
-                textAlign: TextAlign.right),
-          ]),
-        ),
-      ),
-    );
-  }
-
-}
 
 // ─── Global Search ──────────────────────────────────────────────────────────
 
@@ -1297,6 +1227,8 @@ class _QuickTemplatesSectionState
 
                   return Tappable(
                     borderRadius: BorderRadius.circular(12),
+                    scaleFactor: 0.95,
+                    haptic: true,
                     onTap: () async {
                       // Increment use count
                       await (db.update(db.transactionTemplates)

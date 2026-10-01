@@ -6,6 +6,7 @@ import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class UpgradeScreen extends ConsumerWidget {
   final String? featureName;
@@ -297,7 +298,7 @@ class UpgradeScreen extends ConsumerWidget {
         ),
       ),
     );
-    controller.dispose();
+    disposeAfterRouteAnimation(controller);
   }
 }
 

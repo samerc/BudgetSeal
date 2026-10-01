@@ -274,9 +274,10 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 - **Category icons:** 48px circles in lists (`CategoryIconTokens.listSize`), 36px compact, 64px hero.
 - **Screen titles:** 28px w800 (`TypographyTokens.screenTitleSize`) — Cashew-inspired large bold.
 - **Section headers:** visible, secondary text color, bigger weight — not dimmed.
-- **Cards in dark/black mode:** faint white border (5-7% opacity) for edge definition. No visible outlines. Light mode uses subtle `#E8EBF0` border.
+- **Cards (Cashew style, Oct 2026):** accent-tinted surface (`AppColors.sf`), no border; light mode gets a soft shadow (`AppColors.cardShadow`), black mode a faint white edge (`AppColors.cardBorder`). `AppColors.bd` is a hairline (6% black / 7% white) for dividers.
+- **Pastel fills:** use `AppColors.pastel(context, color)` / `lightenPastel` / `darkenPastel` (Cashew's color model) for anything colored by a category/envelope/accent — never `color.withValues(alpha: 0.1)` tints.
 - No glassmorphism. No left-border accent bars on cards (looks like a prototype).
-- Design inspiration: Cashew app (cohesion and feel, not direct copying)
+- Design target: Cashew app — measure real values from its source (github.com/jameskokoska/Cashew, `budget/lib`)
 - "Good morning" greeting removed — user disliked it
 - Colors are always theme-aware — never hardcode on adaptive surfaces (exception: `Colors.white` on explicit accent banners/gradients is fine)
 
@@ -663,7 +664,7 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 - All list screens have `RefreshIndicator`
 
 ### Navigation
-- `PageView` in `MainScreen` uses `NeverScrollableScrollPhysics` — tab switching is via bottom bar only (no swipe conflict with content gestures)
+- `MainScreen` uses a lazy `IndexedStack` (tabs built on first visit, then kept alive) — tab switches are instant like Cashew. Re-tapping the active tab scrolls its `PrimaryScrollController` to the top.
 - `PopScope` checks `GoRouter.canPop()` so pushed routes (funding, accounts, etc.) pop correctly instead of exiting the app
 
 ## Health Check
@@ -680,7 +681,7 @@ Three levels in one screen:
 Transactions use a `deleted` boolean column (schema v12) instead of hard deletion. `AllocationEngine.deleteTransaction()` sets `deleted = true` and removes ledger entries. All transaction queries filter `deleted = false` except sync export (which includes deleted rows so they propagate across devices). The Health Check screen offers a "Purge" action to permanently remove soft-deleted transactions (also cleans up receipt files).
 
 ### Undo Delete
-Single-transaction delete from the context menu shows a 5-second SnackBar with "Undo" action. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
+Deleting from the selection bar (one or many transactions) shows a 5-second SnackBar with "Undo" action. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
 
 ## Animation Widgets
 
@@ -694,7 +695,7 @@ Single-transaction delete from the context menu shows a 5-second SnackBar with "
 `lib/shared/widgets/rolling_number.dart` — odometer-style rolling digit animation. Each digit scrolls independently (rightmost fastest, leftmost slowest). Non-digit characters (currency symbols, separators) crossfade. Wraps around 0↔9 via shortest path. Used on dashboard net worth and unallocated amounts.
 
 ### Tappable
-`lib/shared/widgets/tappable.dart` — premium tactile button widget. iOS: opacity fade + scale-down. Android: InkSparkle shimmer + scale-down. Both: automatic haptic feedback. Drop-in replacement for InkWell/GestureDetector. Used in AppCard (propagates to all cards), dashboard quick actions, and objectives cards.
+`lib/shared/widgets/tappable.dart` — Cashew-style touch wrapper. iOS: opacity fade to 0.5. Android: InkSparkle ripple. Defaults are calm (`scaleFactor: 1.0`, `haptic: false`) for cards and rows; pass a scale < 1 and `haptic: true` only for button-like surfaces (quick actions, templates, keypad). Long-press always fires a heavy haptic.
 
 ### FadedEdges
 `lib/shared/widgets/faded_edges.dart` — ShaderMask-based gradient fade at scroll boundaries. Supports top/bottom/start/end fades. Used on transaction month tabs for smooth horizontal scroll fade.
@@ -733,7 +734,7 @@ Dashboard flow: Quick Actions (top) → Spending Overview (donut + income/expens
 
 ## Transaction Selection
 
-Long-press a transaction to enter selection mode. Tap tiles to select/deselect (with checkboxes). Action bar shows count + bulk delete button. Dismissible swipe gestures are disabled during selection mode. Haptic feedback on selection changes.
+Cashew-style: long-press a transaction to enter selection mode (there is no context menu). Tap rows to select/deselect; adjacent selected rows merge into one highlighted block, with an animated check circle. The selection bar replaces the header and shows count, Edit + Duplicate (exactly one selected) and Delete (with Undo). Swipe gestures are disabled during selection mode. Rows are the shared `TxTile` widget (`lib/features/transactions/widgets/tx_tile.dart`), also used for the dashboard's recent transactions (`showBalance: false, showDate: true`).
 
 ## Activity Tab FAB
 
@@ -765,7 +766,9 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 ## Theme System
 
-`buildLightTheme(fontName, [accentColor])`, `buildDarkTheme(fontName, [accentColor])`, and `buildBlackTheme(fontName, [accentColor])` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Plus Jakarta Sans. Available: DM Sans, Inter, Nunito Sans, Poppins, Nunito, Rubik, Space Grotesk.
+`buildLightTheme(fontName, [accentColor])`, `buildDarkTheme(fontName, [accentColor])`, and `buildBlackTheme(fontName, [accentColor])` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Nunito Sans (`defaultAppFont`, closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+
+All three themes come from one `_buildTheme()`; surfaces are derived from the accent and exposed through the `SurfaceColors` theme extension, which `AppColors.bg/sf/sfv/popup/bd` read. Inputs are borderless filled (radius 15), dialogs radius 25, sheets radius 20 with no drag handle, buttons radius 20 (`RadiusTokens`).
 
 **Theme modes:** `themeModeProvider` stores a String (`'system'`/`'light'`/`'dark'`/`'black'`). `flutterThemeMode` getter maps black → dark for Flutter's ThemeMode. `isBlackMode` getter for AMOLED-specific logic. `app.dart` must `ref.watch(themeModeProvider)` for the state (not `.notifier`) to rebuild on theme change.
 
@@ -940,7 +943,7 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 
 ## Fonts
 
-Default font: Plus Jakarta Sans. Available: DM Sans, Inter, **Nunito Sans** (closest to Avenir), Poppins, Nunito, Rubik, Space Grotesk.
+Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
 
 ## Number & Date Formatting
 

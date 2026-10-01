@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -99,6 +100,10 @@ Future<void> _startApp() async {
   } catch (e) {
     debugPrint('Notification check failed: $e');
   }
+
+  // Draw behind the status/navigation bars on all Android versions
+  // (Android 15+ enforces this anyway).
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(
     UncontrolledProviderScope(

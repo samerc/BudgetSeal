@@ -4,18 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../shared/theme/app_colors.dart';
+
 const _key = 'tx_colors';
 
 class TxColors {
-  final Color income;
-  final Color expense;
-  final Color transfer;
+  /// User-chosen colors; null means "use the theme-adaptive default".
+  final Color? customIncome;
+  final Color? customExpense;
+  final Color? customTransfer;
 
-  const TxColors({
-    this.income = const Color(0xFF10B981),
-    this.expense = const Color(0xFFEF4444),
-    this.transfer = const Color(0xFF6366F1),
-  });
+  const TxColors({Color? income, Color? expense, Color? transfer})
+      : customIncome = income,
+        customExpense = expense,
+        customTransfer = transfer;
+
+  // Cashew's softened amount colors, brighter on dark surfaces.
+  Color get income => customIncome ??
+      (AppColors.isDark ? const Color(0xFF62CA77) : const Color(0xFF59A849));
+  Color get expense => customExpense ??
+      (AppColors.isDark ? const Color(0xFFDA7272) : const Color(0xFFCA5A5A));
+  Color get transfer => customTransfer ??
+      (AppColors.isDark ? const Color(0xFF8395FF) : const Color(0xFF6577E0));
 
   Color forType(String type) => switch (type) {
         'income' => income,
@@ -25,16 +35,29 @@ class TxColors {
       };
 
   Map<String, int> toJson() => {
-        'income': income.toARGB32(),
-        'expense': expense.toARGB32(),
-        'transfer': transfer.toARGB32(),
+        if (customIncome != null) 'income': customIncome!.toARGB32(),
+        if (customExpense != null) 'expense': customExpense!.toARGB32(),
+        if (customTransfer != null) 'transfer': customTransfer!.toARGB32(),
       };
 
-  factory TxColors.fromJson(Map<String, dynamic> json) => TxColors(
-        income: Color(json['income'] as int),
-        expense: Color(json['expense'] as int),
-        transfer: Color(json['transfer'] as int),
-      );
+  factory TxColors.fromJson(Map<String, dynamic> json) {
+    Color? read(String k) {
+      final v = json[k];
+      if (v is! int) return null;
+      // Colors saved before adaptive defaults existed: treat the old fixed
+      // defaults as "not customized" so they pick up the new palette.
+      if (_legacyDefaults.contains(v)) return null;
+      return Color(v);
+    }
+
+    return TxColors(
+      income: read('income'),
+      expense: read('expense'),
+      transfer: read('transfer'),
+    );
+  }
+
+  static const _legacyDefaults = {0xFF10B981, 0xFFEF4444, 0xFF6366F1};
 }
 
 final txColorsProvider =

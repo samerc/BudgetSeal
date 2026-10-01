@@ -552,7 +552,7 @@ class SEn extends S {
   }
 
   @override
-  String get txLongPressHint => 'Long press for options';
+  String get txLongPressHint => 'Long press to select';
 
   @override
   String txNItems(int count) {

@@ -557,7 +557,7 @@ class SFr extends S {
   }
 
   @override
-  String get txLongPressHint => 'Appui long pour les options';
+  String get txLongPressHint => 'Appui long pour sélectionner';
 
   @override
   String txNItems(int count) {

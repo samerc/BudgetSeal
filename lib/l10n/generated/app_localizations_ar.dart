@@ -549,7 +549,7 @@ class SAr extends S {
   }
 
   @override
-  String get txLongPressHint => 'اضغط مطوّلاً للخيارات';
+  String get txLongPressHint => 'اضغط مطوّلاً للتحديد';
 
   @override
   String txNItems(int count) {

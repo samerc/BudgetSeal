@@ -525,10 +525,18 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () {
+                      // Unchanged colors stay null so they keep following
+                      // the theme-adaptive defaults.
                       ref.read(txColorsProvider.notifier).update(TxColors(
-                        income: incomeColor,
-                        expense: expenseColor,
-                        transfer: transferColor,
+                        income: incomeColor == current.income
+                            ? current.customIncome
+                            : incomeColor,
+                        expense: expenseColor == current.expense
+                            ? current.customExpense
+                            : expenseColor,
+                        transfer: transferColor == current.transfer
+                            ? current.customTransfer
+                            : transferColor,
                       ));
                       Navigator.pop(ctx);
                     },

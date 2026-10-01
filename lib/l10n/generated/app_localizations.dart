@@ -1092,7 +1092,7 @@ abstract class S {
   /// Semantics hint
   ///
   /// In en, this message translates to:
-  /// **'Long press for options'**
+  /// **'Long press to select'**
   String get txLongPressHint;
 
   /// Multi-line display

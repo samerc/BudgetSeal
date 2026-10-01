@@ -1,5 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -517,15 +518,30 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       // Dismiss keyboard when tapping outside any text field (globally).
       // Apply user's text scale preference.
       builder: (context, child) {
+        AppColors.isDark = Theme.of(context).brightness == Brightness.dark;
         final mediaQuery = MediaQuery.of(context);
         final baseScale = mediaQuery.textScaler.scale(1.0);
         return MediaQuery(
           data: mediaQuery.copyWith(
-            textScaler: TextScaler.linear(baseScale * textScale),
+            textScaler: TextScaler.linear(
+                baseScale * textScale * fontOpticalScale(selectedFont)),
           ),
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: ErrorBoundary(child: child ?? const SizedBox.shrink()),
+          // Edge-to-edge: transparent system bars whose icons follow the
+          // theme, so the tinted background runs behind them (Cashew style).
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: AppColors.isDark
+                ? SystemUiOverlayStyle.light.copyWith(
+                    statusBarColor: Colors.transparent,
+                    systemNavigationBarColor: Colors.transparent,
+                  )
+                : SystemUiOverlayStyle.dark.copyWith(
+                    statusBarColor: Colors.transparent,
+                    systemNavigationBarColor: Colors.transparent,
+                  ),
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: ErrorBoundary(child: child ?? const SizedBox.shrink()),
+            ),
           ),
         );
       },

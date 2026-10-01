@@ -8,6 +8,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -241,7 +242,7 @@ class AboutScreen extends ConsumerWidget {
         ),
       ),
     );
-    controller.dispose();
+    disposeAfterRouteAnimation(controller);
   }
 }
 

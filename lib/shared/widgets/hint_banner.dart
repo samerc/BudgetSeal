@@ -24,38 +24,21 @@ Future<void> showHintIfNeeded(
   if (prefs.getBool('hint_dismissed_$hintId') ?? false) return;
   if (!context.mounted) return;
 
+  // Cashew openPopup layout: large centered icon, centered title + body.
   await showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          Icon(icon, size: 22, color: AppColors.accent),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
+      icon: Icon(icon, size: 56, color: AppColors.accent),
+      title: Text(title, textAlign: TextAlign.center),
       content: Text(
         body,
-        style: const TextStyle(fontSize: 14, height: 1.5),
+        textAlign: TextAlign.center,
+        style: const TextStyle(height: 1.5),
       ),
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
         FilledButton(
           onPressed: () => Navigator.pop(ctx),
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
           child: Text(S.of(ctx).commonGotIt),
         ),
       ],

@@ -1,12 +1,14 @@
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// A premium tactile button widget inspired by Cashew's touch engine.
+/// Tactile touch wrapper modelled on Cashew's `Tappable`.
 ///
-/// On iOS: uses opacity fade (no ripple) with smooth scale-down.
-/// On Android: uses InkSparkle (Material 3 shimmer) with scale-down.
-/// Both platforms get light haptic feedback on tap.
+/// On iOS: opacity fade (no ripple). On Android: InkSparkle ripple.
+/// Cards and rows use the calm defaults (no scale, no haptic) — Cashew only
+/// scales and vibrates on buttons. Pass [scaleFactor] < 1 and [haptic] for
+/// button-like surfaces (quick actions, keypad, templates).
 ///
 /// Drop-in replacement for InkWell/GestureDetector on interactive surfaces.
 class Tappable extends StatefulWidget {
@@ -17,8 +19,8 @@ class Tappable extends StatefulWidget {
     this.onLongPress,
     this.borderRadius,
     this.color,
-    this.haptic = true,
-    this.scaleFactor = 0.97,
+    this.haptic = false,
+    this.scaleFactor = 1.0,
   });
 
   final Widget child;
@@ -52,18 +54,19 @@ class _TappableState extends State<Tappable>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
-      reverseDuration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 150),
+      reverseDuration: const Duration(milliseconds: 230),
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleFactor)
         .animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOutCubicEmphasized,
     ));
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.6)
-        .animate(CurvedAnimation(
+    _opacityAnimation =
+        Tween<double>(begin: 1.0, end: 0.5).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOut,
+      curve: Curves.easeInOutCubicEmphasized,
+      reverseCurve: Curves.easeOutCubic,
     ));
   }
 
@@ -91,7 +94,8 @@ class _TappableState extends State<Tappable>
   }
 
   void _handleLongPress() {
-    if (widget.haptic) HapticFeedback.mediumImpact();
+    // Long-press always gets a haptic, like Cashew.
+    HapticFeedback.heavyImpact();
     widget.onLongPress?.call();
   }
 
@@ -113,7 +117,7 @@ class _TappableState extends State<Tappable>
         child: AnimatedBuilder(
           animation: _controller,
           builder: (_, child) => Transform.scale(
-            scale: _scaleAnimation.value,
+            scale: widget.scaleFactor == 1.0 ? 1.0 : _scaleAnimation.value,
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: child,
@@ -124,27 +128,29 @@ class _TappableState extends State<Tappable>
       );
     }
 
-    // Android: Material ripple (InkSparkle on M3) + scale
+    // Android: Material ripple (InkSparkle on M3), optional scale
+    final ink = Material(
+      color: widget.color ?? Colors.transparent,
+      borderRadius: widget.borderRadius,
+      child: InkWell(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        onTap: _handleTap,
+        onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+        borderRadius: widget.borderRadius,
+        splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+        child: widget.child,
+      ),
+    );
+    if (widget.scaleFactor == 1.0) return ink;
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, child) => Transform.scale(
         scale: _scaleAnimation.value,
         child: child,
       ),
-      child: Material(
-        color: widget.color ?? Colors.transparent,
-        borderRadius: widget.borderRadius,
-        child: InkWell(
-          onTapDown: _onTapDown,
-          onTapUp: _onTapUp,
-          onTapCancel: _onTapCancel,
-          onTap: _handleTap,
-          onLongPress: widget.onLongPress != null ? _handleLongPress : null,
-          borderRadius: widget.borderRadius,
-          splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
-          child: widget.child,
-        ),
-      ),
+      child: ink,
     );
   }
 }

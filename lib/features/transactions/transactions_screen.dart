@@ -24,8 +24,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
-import '../../shared/utils/receipt_helper.dart';
-import '../../shared/widgets/category_icon.dart';
+import 'widgets/tx_tile.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -103,17 +102,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     _restoreFilters();
     _loadPlanned();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Start at year (position 0), then animate to current month
-      // +1 for year item at index 0
-      final offset = _selectedMonth * 80.0;
+      // Start at the year, then glide to the selected month.
       if (_monthScrollCtrl.hasClients) {
-        _monthScrollCtrl.jumpTo(0); // Start at the year
+        _monthScrollCtrl.jumpTo(0);
         _initialScrollTimer = Timer(const Duration(milliseconds: 400), () {
-          if (_monthScrollCtrl.hasClients) {
-            _monthScrollCtrl.animateTo(offset - 120,
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOutCubic);
-          }
+          _scrollMonthIntoView(const Duration(milliseconds: 600));
         });
       }
       if (!mounted) return;
@@ -171,20 +164,83 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     );
     if (confirmed != true || !mounted) return;
 
+    // Two-phase delete (see CLAUDE.md "Undo Delete"): mark deleted=true now
+    // but keep ledger entries, so Undo can restore. The engine delete that
+    // removes ledger entries runs only once the SnackBar closes un-undone.
+    final ids = _selectedIds.toList();
+    final db = ref.read(databaseProvider);
     final engine = ref.read(allocationEngineProvider);
-    for (final id in _selectedIds) {
-      await engine.deleteTransaction(id);
+    // The SnackBar outlives this screen; use the container, not `ref`.
+    final container = ProviderScope.containerOf(context);
+    Future<void> setDeleted(bool deleted) async {
+      await (db.update(db.transactions)..where((t) => t.id.isIn(ids)))
+          .write(TransactionsCompanion(deleted: Value(deleted)));
+      container.invalidate(transactionEntriesProvider);
+      container.invalidate(monthlyTransactionsProvider);
     }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(tr.txNDeleted(count)),
-        behavior: SnackBarBehavior.floating,
-      ));
-      setState(() {
-        _selectionMode = false;
-        _selectedIds.clear();
-      });
-    }
+
+    await setDeleted(true);
+    if (!mounted) return;
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+    var undone = false;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger
+        .showSnackBar(SnackBar(
+          content: Text(count == 1 ? tr.txTransactionDeleted : tr.txNDeleted(count)),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: tr.txUndoAction,
+            onPressed: () async {
+              undone = true;
+              await setDeleted(false);
+            },
+          ),
+        ))
+        .closed
+        .then((_) async {
+      if (undone) return;
+      for (final id in ids) {
+        await engine.deleteTransaction(id);
+      }
+    });
+  }
+
+  /// Duplicate the single selected transaction into a new add form.
+  void _duplicateSelected() {
+    final id = _selectedIds.first;
+    final entries = ref
+            .read(monthlyTransactionsProvider(
+                (year: _selectedYear, month: _selectedMonth)))
+            .value ??
+        const <TransactionEntry>[];
+    final e = entries.where((x) => x.tx.id == id).firstOrNull;
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+    if (e == null) return;
+    final tx = e.tx;
+    final categories = ref.read(categoriesProvider).value ?? const <Category>[];
+    final cat = categories.where((c) => c.id == tx.categoryId).firstOrNull;
+    context.push('/add-transaction', extra: {
+      'editType': tx.type,
+      'editNote': tx.note,
+      'editLines': [
+        {
+          'amount': tx.amount,
+          'currency': tx.currency,
+          'accountId': tx.accountId,
+          'categoryId': tx.categoryId,
+          'categoryName': cat?.name,
+          'note': tx.note,
+        },
+      ],
+    });
   }
 
   void _setMonth(int year, int month) {
@@ -295,34 +351,67 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Selection action bar ──
-            if (_selectionMode)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: AppColors.accent.withValues(alpha: 0.08),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () => setState(() {
-                        _selectionMode = false;
-                        _selectedIds.clear();
-                      }),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubicEmphasized,
+              child: !_selectionMode
+                  ? const SizedBox(width: double.infinity)
+                  : Container(
+                      margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                      padding: const EdgeInsetsDirectional.fromSTEB(4, 6, 8, 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(RadiusTokens.input),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded),
+                            onPressed: () => setState(() {
+                              _selectionMode = false;
+                              _selectedIds.clear();
+                            }),
+                          ),
+                          Expanded(
+                            child: Text(
+                                S.of(context).txNSelected(_selectedIds.length),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w700)),
+                          ),
+                          if (_selectedIds.length == 1) ...[
+                            IconButton(
+                              icon: const Icon(Icons.edit_rounded),
+                              tooltip: S.of(context).txContextEdit,
+                              onPressed: () {
+                                final id = _selectedIds.first;
+                                setState(() {
+                                  _selectionMode = false;
+                                  _selectedIds.clear();
+                                });
+                                context.push('/transactions/$id');
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.copy_rounded),
+                              tooltip: S.of(context).txContextDuplicate,
+                              onPressed: _duplicateSelected,
+                            ),
+                          ],
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            tooltip: S.of(context).txDeleteSelectedTooltip,
+                            color: AppColors.overspent,
+                            onPressed:
+                                _selectedIds.isEmpty ? null : _deleteSelected,
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(S.of(context).txNSelected(_selectedIds.length),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      tooltip: S.of(context).txDeleteSelectedTooltip,
-                      color: AppColors.overspent,
-                      onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
-                    ),
-                  ],
-                ),
-              ),
-            // ── Header area ──────────────────────────────────────
-            _buildHeader(context),
+            ),
+            // ── Header area (the selection bar takes its place) ──
+            // Keep the slot (placeholder) so the month strip below keeps its
+            // element — and its scroll position — when selection toggles.
+            _selectionMode ? const SizedBox.shrink() : _buildHeader(context),
             // ── Month tabs ───────────────────────────────────────
             _buildMonthTabs(context),
             // ── Filter chips (collapsible) ───────────────────────
@@ -418,16 +507,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               child: const Icon(Icons.call_split_rounded, size: 18),
             ),
             const SizedBox(height: 8),
+            // Cashew FAB: 60px rounded square in the accent color.
             SizedBox(
-              width: 56,
-              height: 56,
+              width: 60,
+              height: 60,
               child: Material(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                shape: const CircleBorder(),
-                elevation: 6,
+                color: AppColors.accent,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(RadiusTokens.fab)),
+                elevation: 3,
                 shadowColor: Theme.of(context).colorScheme.shadow,
                 child: InkWell(
-                  customBorder: const CircleBorder(),
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.fab)),
                   onTap: () async {
                     hapticLight();
                     final txId = await context.push<String?>('/add-transaction',
@@ -439,8 +531,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     _showTypePicker(context);
                   },
                   child: Center(
-                    child: Icon(Icons.add,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer),
+                    child: const Icon(Icons.add_rounded,
+                        size: 28, color: Colors.white),
                   ),
                 ),
               ),
@@ -739,14 +831,30 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   }
 
   // ── Month tabs (year inline as first item) ─────────────────────
+  static const double _kYearSlot = 76;
+  static const double _kMonthSlot = 100;
+
+  /// Center the selected month in the month strip (fixed slot widths make
+  /// this exact).
+  void _scrollMonthIntoView(
+      [Duration duration = const Duration(milliseconds: 350)]) {
+    if (!_monthScrollCtrl.hasClients) return;
+    final pos = _monthScrollCtrl.position;
+    final center = _kYearSlot + (_selectedMonth - 1) * _kMonthSlot + _kMonthSlot / 2;
+    final target = (center - pos.viewportDimension / 2)
+        .clamp(0.0, pos.maxScrollExtent);
+    _monthScrollCtrl.animateTo(target,
+        duration: duration, curve: Curves.easeOutCubic);
+  }
+
   Widget _buildMonthTabs(BuildContext context) {
     final now = DateTime.now();
     final monthCount = _selectedYear == now.year ? now.month : 12;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4),
       child: SizedBox(
-            height: 38,
+            height: 50,
             child: Row(
               children: [
                 // Left arrow
@@ -758,13 +866,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     } else {
                       _setMonth(_selectedYear, _selectedMonth - 1);
                     }
-                    // +1 for year item at index 0
-                    final offset = _selectedMonth * 80.0;
-                    if (_monthScrollCtrl.hasClients) {
-                      _monthScrollCtrl.animateTo(offset - 120,
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeOut);
-                    }
+                    _scrollMonthIntoView();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -780,7 +882,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   child: ListView.builder(
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     itemCount: monthCount + 1, // +1 for year item
                     itemBuilder: (_, i) {
                       // First item: year selector
@@ -788,8 +889,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         return GestureDetector(
                           onTap: () => _showYearPicker(context),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            width: _kYearSlot,
                             alignment: Alignment.center,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -808,38 +908,79 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       }
                       final month = i; // i=1 → month 1 (Jan)
                       final isSelected = month == _selectedMonth;
+                      final isCurrent =
+                          _selectedYear == now.year && month == now.month;
                       final label =
                           DateFormat('MMMM').format(DateTime(2000, month));
-                      return GestureDetector(
-                        onTap: () {
-                          hapticLight();
-                          _setMonth(_selectedYear, month);
-                        },
-                        child: Container(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 14),
-                          margin:
-                              const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            border: isSelected
-                                ? Border(
-                                    bottom: BorderSide(
+                      // Cashew monthSelector: fixed 100px slot, track line,
+                      // animated pill under the selected month.
+                      return SizedBox(
+                        width: _kMonthSlot,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () {
+                            hapticSelection();
+                            _setMonth(_selectedYear, month);
+                            _scrollMonthIntoView();
+                          },
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                    height: 2, color: AppColors.bd(context)),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                child: AnimatedScale(
+                                  scale: isSelected ? 1 : 0.4,
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: isSelected
+                                      ? Curves.decelerate
+                                      : Curves.easeOutQuart,
+                                  child: AnimatedOpacity(
+                                    opacity: isSelected ? 1 : 0,
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Container(
+                                      width: _kMonthSlot - 20,
+                                      height: 4,
+                                      decoration: BoxDecoration(
                                         color: AppColors.tp(context),
-                                        width: 2.5))
-                                : null,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: isSelected
-                                  ? AppColors.tp(context)
-                                  : AppColors.ts(context),
-                            ),
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                                top: Radius.circular(40)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: AnimatedDefaultTextStyle(
+                                    duration: const Duration(milliseconds: 200),
+                                    style: TextStyle(
+                                      fontFamily: DefaultTextStyle.of(context)
+                                          .style
+                                          .fontFamily,
+                                      fontSize: 14.5,
+                                      fontWeight: isSelected || isCurrent
+                                          ? FontWeight.w800
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? AppColors.tp(context)
+                                          : AppColors.ts(context),
+                                    ),
+                                    child: Text(label),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -861,13 +1002,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         _setMonth(_selectedYear, _selectedMonth + 1);
                       }
                     }
-                    // +1 for year item at index 0
-                    final offset = _selectedMonth * 80.0;
-                    if (_monthScrollCtrl.hasClients) {
-                      _monthScrollCtrl.animateTo(offset - 120,
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeOut);
-                    }
+                    _scrollMonthIntoView();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -1415,7 +1550,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           child: CustomScrollView(
             controller: _listScrollCtrl,
             slivers: [
-              // Monthly expense/income/net summary
+              // Filtered expense/income/net summary — only when filters
+              // narrow the list (otherwise it repeats the month strip above).
+              if (hasAnyFilter)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
@@ -1446,7 +1583,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   children: [
                     SliverPinnedHeader(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: _DateHeaderTile(
                           date: group.date,
                           dayTotal: group.dayTotal,
@@ -1456,163 +1593,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       ),
                     ),
                     SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
-                            // Each transaction = 1 row (transfers too)
                             if (i >= group.entries.length) return const SizedBox.shrink();
                             final e = group.entries[i];
-                            final tileKey = e.tx.id;
-                            // Selection mode: show checkboxes instead of dismissible
-                            if (_selectionMode) {
-                              final isSelected = _selectedIds.contains(e.tx.id);
-                              return GestureDetector(
-                                onTap: () {
-                                  hapticLight();
-                                  setState(() {
-                                    if (isSelected) {
-                                      _selectedIds.remove(e.tx.id);
-                                      if (_selectedIds.isEmpty) _selectionMode = false;
-                                    } else {
-                                      _selectedIds.add(e.tx.id);
-                                    }
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? AppColors.accent.withValues(alpha: 0.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.only(start: 4),
-                                        child: Icon(
-                                          isSelected
-                                              ? Icons.check_circle_rounded
-                                              : Icons.circle_outlined,
-                                          size: 20,
-                                          color: isSelected
-                                              ? AppColors.accent
-                                              : AppColors.th(context),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: _TxTile(
-                                          entry: e,
-                                          categoryMap: categoryMap,
-                                          onCategoryTap: null,
-                                          disableTap: true,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            return GestureDetector(
-                              onLongPress: () {
-                                hapticLight();
-                                setState(() {
-                                  _selectionMode = true;
-                                  _selectedIds.add(e.tx.id);
-                                });
-                              },
-                              child: Dismissible(
-                              key: ValueKey(tileKey),
-                              direction: DismissDirection.horizontal,
-                              // Left background (swipe right → edit) (#6)
-                              background: Container(
-                                alignment: AlignmentDirectional.centerStart,
-                                padding: const EdgeInsetsDirectional.only(start: 20),
-                                margin: const EdgeInsets.only(bottom: 2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.accent,
-                                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                                ),
-                                child: const Icon(Icons.edit_rounded,
-                                    color: Colors.white),
-                              ),
-                              // Right background (swipe left → delete)
-                              secondaryBackground: Container(
-                                alignment: AlignmentDirectional.centerEnd,
-                                padding: const EdgeInsetsDirectional.only(end: 20),
-                                margin: const EdgeInsets.only(bottom: 2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.overspent,
-                                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                                ),
-                                child: const Icon(Icons.delete_rounded,
-                                    color: Colors.white),
-                              ),
-                              confirmDismiss: (direction) async {
-                                if (direction == DismissDirection.startToEnd) {
-                                  // Swipe right → edit (#6)
-                                  context.push('/transactions/${e.tx.id}');
-                                  return false; // don't dismiss
-                                }
-                                // Swipe left → delete
-                                final catName = e.tx.categoryId != null
-                                    ? categoryMap[e.tx.categoryId]?.name
-                                    : null;
-                                final deleteLabel =
-                                    '${formatSignedAmount(e.tx.amount, currency: e.tx.currency, type: e.tx.type)} ${catName ?? e.tx.note}';
-                                final tr = S.of(context);
-                                return await showDialog<bool>(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: Text(tr.txDeleteShort),
-                                        content: Text(
-                                            tr.txDeleteWithReversal(deleteLabel)),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, false),
-                                            child: Text(tr.commonCancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, true),
-                                            style: TextButton.styleFrom(
-                                                foregroundColor: AppColors.overspent),
-                                            child: Text(tr.commonDelete),
-                                          ),
-                                        ],
-                                      ),
-                                    ) ??
-                                    false;
-                              },
-                              onDismissed: (_) {
-                                ref
-                                    .read(allocationEngineProvider)
-                                    .deleteTransaction(e.tx.id);
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 1500),
-                                decoration: BoxDecoration(
-                                  color: _highlightedTxId == e.tx.id
-                                      ? AppColors.accent.withValues(alpha: 0.12)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                                ),
-                                child: _TxTile(
-                                  entry: e,
-                                  categoryMap: categoryMap,
-                                  onCategoryTap: (catId, catName) {
-                                    hapticLight();
-                                    setState(() {
-                                      _categoryFilter = catId;
-                                      _categoryFilterName = catName;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                            );
+                            return _buildTxRow(context, e, group.entries, i, categoryMap);
                           },
                           childCount: group.entries.length,
                         ),
@@ -1635,6 +1622,151 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           ),
         ),
       ],
+    );
+  }
+
+  void _toggleSelected(String id) {
+    hapticSelection();
+    setState(() {
+      if (!_selectionMode) {
+        _selectionMode = true;
+        _selectedIds.add(id);
+      } else if (!_selectedIds.remove(id)) {
+        _selectedIds.add(id);
+      } else if (_selectedIds.isEmpty) {
+        _selectionMode = false;
+      }
+    });
+  }
+
+  /// One transaction row: selection highlight (Cashew merges adjacent
+  /// selected rows into one block), animated check, swipe actions.
+  Widget _buildTxRow(BuildContext context, TransactionEntry e,
+      List<TransactionEntry> siblings, int i, Map<String, Category> categoryMap) {
+    final isSelected = _selectedIds.contains(e.tx.id);
+    bool sel(int j) =>
+        j >= 0 && j < siblings.length && _selectedIds.contains(siblings[j].tx.id);
+    const r = Radius.circular(12);
+    final radius = BorderRadius.vertical(
+      top: isSelected && sel(i - 1) ? Radius.zero : r,
+      bottom: isSelected && sel(i + 1) ? Radius.zero : r,
+    );
+
+    final row = AnimatedContainer(
+      // Flash for a just-added transaction (fades over 1.5s).
+      duration: const Duration(milliseconds: 1500),
+      decoration: BoxDecoration(
+        color: _highlightedTxId == e.tx.id
+            ? AppColors.accent.withValues(alpha: 0.12)
+            : Colors.transparent,
+        borderRadius: radius,
+      ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubicEmphasized,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.pastel(context, AppColors.accent,
+                  light: 0.78, dark: 0.7)
+              : Colors.transparent,
+          borderRadius: radius,
+        ),
+        child: Row(
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubicEmphasized,
+              child: _selectionMode
+                  ? Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 8),
+                      child: _SelectCheck(selected: isSelected),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            Expanded(
+              child: TxTile(
+                entry: e,
+                categoryMap: categoryMap,
+                onCategoryTap: _selectionMode
+                    ? null
+                    : (catId, catName) {
+                        hapticLight();
+                        setState(() {
+                          _categoryFilter = catId;
+                          _categoryFilterName = catName;
+                        });
+                      },
+                onTap: _selectionMode ? () => _toggleSelected(e.tx.id) : null,
+                onLongPress: () => _toggleSelected(e.tx.id),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (_selectionMode) return row;
+
+    final swipeRadius = BorderRadius.circular(12);
+    return Dismissible(
+      key: ValueKey(e.tx.id),
+      direction: DismissDirection.horizontal,
+      // Swipe right → edit
+      background: Container(
+        alignment: AlignmentDirectional.centerStart,
+        padding: const EdgeInsetsDirectional.only(start: 20),
+        decoration: BoxDecoration(
+          color: AppColors.accent,
+          borderRadius: swipeRadius,
+        ),
+        child: const Icon(Icons.edit_rounded, color: Colors.white),
+      ),
+      // Swipe left → delete
+      secondaryBackground: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 20),
+        decoration: BoxDecoration(
+          color: AppColors.overspent,
+          borderRadius: swipeRadius,
+        ),
+        child: const Icon(Icons.delete_rounded, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          context.push('/transactions/${e.tx.id}');
+          return false; // don't dismiss
+        }
+        final catName = e.tx.categoryId != null
+            ? categoryMap[e.tx.categoryId]?.name
+            : null;
+        final deleteLabel =
+            '${formatSignedAmount(e.tx.amount, currency: e.tx.currency, type: e.tx.type)} ${catName ?? e.tx.note}';
+        final tr = S.of(context);
+        return await showDialog<bool>(
+              context: context,
+              builder: (dCtx) => AlertDialog(
+                title: Text(tr.txDeleteShort),
+                content: Text(tr.txDeleteWithReversal(deleteLabel)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dCtx, false),
+                    child: Text(tr.commonCancel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(dCtx, true),
+                    style: TextButton.styleFrom(
+                        foregroundColor: AppColors.overspent),
+                    child: Text(tr.commonDelete),
+                  ),
+                ],
+              ),
+            ) ??
+            false;
+      },
+      onDismissed: (_) {
+        ref.read(allocationEngineProvider).deleteTransaction(e.tx.id);
+      },
+      child: row,
     );
   }
 
@@ -1932,6 +2064,42 @@ class _FilterChip extends StatelessWidget {
 // Date header tile — natural case, like "Today, April 11"
 // ---------------------------------------------------------------------------
 
+/// Cashew selection check: outlined circle that fills with a check.
+class _SelectCheck extends StatelessWidget {
+  final bool selected;
+  const _SelectCheck({required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 275),
+      switchInCurve: Curves.easeOutBack,
+      transitionBuilder: (child, anim) => ScaleTransition(
+        scale: Tween(begin: 0.85, end: 1.0).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      ),
+      child: Container(
+        key: ValueKey(selected),
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? AppColors.accent : Colors.transparent,
+          border: Border.all(
+            color: selected
+                ? AppColors.accent
+                : AppColors.accent.withValues(alpha: 0.6),
+            width: 2,
+          ),
+        ),
+        child: selected
+            ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+            : null,
+      ),
+    );
+  }
+}
+
 class _DateHeaderTile extends StatelessWidget {
   final DateTime date;
   final double dayTotal;
@@ -1949,7 +2117,8 @@ class _DateHeaderTile extends StatelessWidget {
     // Clean Cashew-style date header: text-only row, no card wrapper
     return Container(
       color: AppColors.bg(context),
-      padding: const EdgeInsets.fromLTRB(0, 20, 0, 8),
+      // Inset matches the row content (12 gutter + 8 row padding).
+      padding: const EdgeInsetsDirectional.fromSTEB(8, 16, 10, 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1983,660 +2152,6 @@ class _DateHeaderTile extends StatelessWidget {
     if (diff == 0) return '${S.of(context).commonToday}, ${formatDate(date)}';
     if (diff == 1) return '${S.of(context).commonYesterday}, ${formatDate(date)}';
     return formatDate(date);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Transaction tile — flat, circular icon, clean layout
-// ---------------------------------------------------------------------------
-
-class _TxTile extends ConsumerWidget {
-  final TransactionEntry entry;
-  final Map<String, Category> categoryMap;
-  final void Function(String catId, String catName)? onCategoryTap;
-  /// When true, disables navigation on tap (selection mode handles taps).
-  final bool disableTap;
-
-  const _TxTile({
-    required this.entry,
-    required this.categoryMap,
-    this.onCategoryTap,
-    this.disableTap = false,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tx = entry.tx;
-    final txColors = ref.watch(txColorsProvider);
-    final listSettings = ref.watch(txListSettingsProvider);
-    final isTransfer = tx.type == 'transfer';
-    final typeColor = txColors.forType(tx.type);
-
-    // Resolve category
-    final cat = _resolveCategory();
-    final catName = cat?.name;
-    final catColor =
-        cat != null ? _parseColor(cat.colorHex) : AppColors.accent;
-
-    // For transfers, build a Cashew-style 2-line display
-    final String displayName;
-    final String? note;
-    final String? transferFrom;
-    final String? transferTo;
-    final double? transferDestAmt;
-    final String? transferDestCcy;
-    if (isTransfer) {
-      transferFrom = entry.accountName.isNotEmpty ? entry.accountName : 'account';
-      transferTo = entry.destinationAccountName ?? 'account';
-      final arrow = Directionality.of(context) == TextDirection.rtl ? '←' : '→';
-      displayName = '$transferFrom $arrow $transferTo';
-      note = tx.note.isNotEmpty ? tx.note : null;
-      transferDestAmt = tx.amount * tx.exchangeRateToBase;
-      transferDestCcy = entry.destinationAccountCurrency ?? tx.currency;
-    } else {
-      transferFrom = null;
-      transferTo = null;
-      transferDestAmt = null;
-      transferDestCcy = null;
-      displayName = _buildDisplayName(context, catName);
-      note = _buildNote(catName);
-    }
-    final notePreview = _buildNotePreview(catName, displayName);
-
-    return Semantics(
-      label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}, ${tx.type}',
-      hint: S.of(context).txLongPressHint,
-      button: true,
-      child: GestureDetector(
-        onTap: disableTap ? null : () => context.push('/transactions/${tx.id}'),
-        onLongPress: disableTap ? null : () {
-          hapticMedium();
-          _showContextMenu(context, ref);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              // ── Circular category icon (tap to filter #5) ─────
-            if (listSettings.showCategoryIcon) ...[
-              if (isTransfer)
-                Container(
-                  width: CategoryIconTokens.listSize,
-                  height: CategoryIconTokens.listSize,
-                  decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.swap_horiz_rounded,
-                    color: typeColor,
-                    size: 22,
-                  ),
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    final catId = cat?.id;
-                    if (catId != null && onCategoryTap != null) {
-                      onCategoryTap!(catId, catName ?? 'Unknown');
-                    }
-                  },
-                  child: Hero(
-                    tag: 'tx_${tx.id}',
-                    child: CategoryIcon(
-                      categoryName: catName ?? '',
-                      emoji: cat?.icon,
-                      color: catColor,
-                      size: CategoryIconTokens.listSize,
-                      circular: true,
-                    ),
-                  ),
-                ),
-              const SizedBox(width: 14),
-            ],
-            // ── Name + note (or transfer sub-rows) ──────────────
-            Expanded(
-              child: isTransfer
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title: "AccountA → AccountB"
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Source account line
-                        _transferSubRow(
-                          context,
-                          transferFrom!,
-                          tx.amount,
-                          tx.currency,
-                          txColors.expense,
-                        ),
-                        const SizedBox(height: 2),
-                        // Destination account line
-                        _transferSubRow(
-                          context,
-                          transferTo!,
-                          transferDestAmt!,
-                          transferDestCcy!,
-                          txColors.income,
-                        ),
-                        if (note != null) ...[
-                          const SizedBox(height: 2),
-                          Text(note,
-                              style: TextStyle(
-                                  fontSize: 11, color: AppColors.th(context)),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                        ],
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (!listSettings.compact) ...[
-                          if (note != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              note,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.ts(context),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          if (notePreview != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              notePreview,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.th(context),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                        // Account label + time
-                        if (listSettings.showAccount || listSettings.showTime) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            [
-                              if (listSettings.showAccount && entry.accountName.isNotEmpty)
-                                entry.accountName,
-                              if (listSettings.showTime)
-                                '${tx.createdAt.hour.toString().padLeft(2, '0')}:${tx.createdAt.minute.toString().padLeft(2, '0')}',
-                            ].join(' · '),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.th(context),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-            ),
-            // ── Receipt indicator ────────────────────────────────
-            if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 6),
-                child: () {
-                  final receiptCount = parseReceiptPaths(tx.receiptPath).length;
-                  if (receiptCount > 1) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(Icons.receipt_long_rounded,
-                            size: 14, color: AppColors.th(context)),
-                        Positioned(
-                          top: -6,
-                          right: -8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: AppColors.accent,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '$receiptCount',
-                              style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return Icon(Icons.receipt_long_rounded,
-                      size: 14, color: AppColors.th(context));
-                }(),
-              ),
-            // ── Amount (right-aligned #3) — hidden for transfers (shown inline)
-            if (!isTransfer)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildAmountColumn(context, ref, typeColor),
-            ),
-          ],
-        ),
-      ),
-      ),
-    );
-  }
-
-  Category? _resolveCategory() {
-    final tx = entry.tx;
-    final lines = entry.lines;
-    if (lines.isNotEmpty && lines.first.categoryId != null) {
-      return categoryMap[lines.first.categoryId];
-    }
-    if (tx.categoryId != null) {
-      return categoryMap[tx.categoryId];
-    }
-    return null;
-  }
-
-  String _buildDisplayName(BuildContext context, String? catName) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-
-    if (catName != null) return catName;
-
-    // Multi-line: show first category names
-    if (lines.length > 1) {
-      final names = lines
-          .take(2)
-          .map((l) =>
-              l.categoryId != null ? categoryMap[l.categoryId]?.name : null)
-          .whereType<String>()
-          .toList();
-      if (names.isEmpty) return S.of(context).txNItems(lines.length);
-      final extra = lines.length - names.length;
-      return extra > 0
-          ? '${names.join(', ')} ${S.of(context).txNMore(extra)}'
-          : names.join(', ');
-    }
-
-    if (tx.note.isNotEmpty) return tx.note;
-    return _typeLabel(context, tx.type);
-  }
-
-  String? _buildNote(String? catName) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-
-    // If we have a category name, show note as subtitle (if any)
-    if (catName != null && tx.note.isNotEmpty) {
-      return tx.note;
-    }
-
-    // Show account name as subtitle if we have a display name already
-    final involvedAccounts = entry.involvedAccountNames;
-    if (involvedAccounts.length > 1) {
-      return involvedAccounts.join(' · ');
-    }
-
-    // Show single line note if different from display name
-    if (lines.isNotEmpty && lines.first.note.isNotEmpty && catName != null) {
-      return lines.first.note;
-    }
-
-    return null;
-  }
-
-  /// Note preview (#7): show tx note as a third line if it isn't already
-  /// used as the display name or the subtitle from _buildNote.
-  String? _buildNotePreview(String? catName, String displayName) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-    if (tx.note.isEmpty && (lines.isEmpty || lines.first.note.isEmpty)) {
-      return null;
-    }
-    // If note is already the display name, skip
-    if (tx.note == displayName) return null;
-    // If _buildNote already returns the tx.note as subtitle, skip
-    if (catName != null && tx.note.isNotEmpty) return null;
-    // Show line-level note if it exists and differs from display
-    if (lines.isNotEmpty && lines.first.note.isNotEmpty) {
-      final lineNote = lines.first.note;
-      if (lineNote != displayName) return lineNote;
-    }
-    // Show tx note as preview if it exists and not shown elsewhere
-    if (tx.note.isNotEmpty) return tx.note;
-    return null;
-  }
-
-  Widget _transferSubRow(
-    BuildContext context,
-    String accountName,
-    double amount,
-    String currency,
-    Color dotColor,
-  ) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: dotColor.withValues(alpha: 0.7),
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            accountName,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Text(
-          '• ${formatAmount(amount, currency: currency)}',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.tp(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildAmountColumn(BuildContext context, WidgetRef ref, Color typeColor) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-    final isTransfer = tx.type == 'transfer';
-
-    String displayCurrency = tx.currency;
-    double displayAmount = tx.amount;
-
-    if (lines.length == 1) {
-      // Single line: show in the line's native currency
-      displayCurrency = lines.first.currency;
-      displayAmount = lines.first.amount;
-    } else if (lines.length > 1) {
-      // Multi-line: check if all lines share the same currency
-      final currencies = lines.map((l) => l.currency).toSet();
-      if (currencies.length == 1 && currencies.first != tx.currency) {
-        // All lines same foreign currency — show total in that currency
-        displayCurrency = currencies.first;
-        displayAmount = lines.fold(0.0, (s, l) => s + l.amount);
-      } else {
-        // Mixed currencies: compute base total, skipping lines with unset rate
-        double baseTotal = 0;
-        for (final l in lines) {
-          if (l.currency == tx.currency) {
-            baseTotal += l.amount;
-          } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
-            baseTotal += l.amount * l.exchangeRateToBase;
-          }
-        }
-        displayAmount = baseTotal;
-      }
-    }
-
-    // For transfers: show source amount in source currency
-    // with destination amount as conversion badge
-    final destAmount = isTransfer ? tx.amount * tx.exchangeRateToBase : 0.0;
-    final destCurrency = isTransfer
-        ? (entry.destinationAccountCurrency ?? tx.currency)
-        : tx.currency;
-
-    final baseCurrency = tx.currency;
-    final baseAmount = tx.amount;
-    // Only show conversion badge if currencies differ AND at least one line
-    // has a real exchange rate (not the default 1.0).
-    final hasRealConversion = lines.isNotEmpty &&
-        lines.any((l) => (l.exchangeRateToBase - 1.0).abs() > 0.001);
-    final showConversion =
-        !isTransfer && displayCurrency != baseCurrency && hasRealConversion;
-    // For transfers: show destination currency if different
-    final showTransferConversion = isTransfer &&
-        destCurrency != displayCurrency &&
-        (tx.exchangeRateToBase - 1.0).abs() > 0.001;
-
-    final effectiveType = tx.type;
-
-    // Show running balance only when a single account is involved
-    final isSingleAccount = entry.involvedAccountNames.length <= 1;
-
-    return [
-      // Amount right-aligned (#3)
-      Text(
-        formatSignedAmount(displayAmount, currency: displayCurrency, type: effectiveType),
-        textAlign: TextAlign.end,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 15,
-          color: typeColor,
-        ),
-      ),
-      // Multi-currency badge (#8) — show pill instead of full conversion text
-      if (showConversion)
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  displayCurrency,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                formatAmount(baseAmount, currency: baseCurrency),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.th(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      // Transfer: show destination amount if cross-currency
-      if (showTransferConversion)
-        Text(
-          '→ ${formatAmount(destAmount, currency: destCurrency)}',
-          textAlign: TextAlign.end,
-          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-        ),
-      if (isSingleAccount || isTransfer)
-        Text(
-          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
-          textAlign: TextAlign.end,
-          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-        ),
-      if (!isSingleAccount)
-        Text(
-          S.of(context).txNAccounts(entry.involvedAccountNames.length),
-          textAlign: TextAlign.end,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppColors.th(context),
-          ),
-        ),
-    ];
-  }
-
-  Color _parseColor(String hex) {
-    try {
-      return Color(
-          int.parse(hex.replaceFirst('#', ''), radix: 16) | 0xFF000000);
-    } catch (e) {
-      debugPrint('Failed to parse color "$hex": $e');
-      return AppColors.accent;
-    }
-  }
-
-  String _typeLabel(BuildContext context, String type) => switch (type) {
-        'income' => S.of(context).typeIncome,
-        'expense' => S.of(context).typeExpense,
-        'transfer' => S.of(context).typeTransfer,
-        _ => type,
-      };
-
-  void _showContextMenu(BuildContext context, WidgetRef ref) {
-    final tx = entry.tx;
-    final cat = _resolveCategory();
-    // Capture context-dependent values BEFORE the sheet opens
-    final bgColor = AppColors.sf(context);
-    final textColor = AppColors.tp(context);
-    final tr = S.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: bgColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.edit_rounded, color: textColor),
-              title: Text(tr.txContextEdit,
-                  style: TextStyle(color: textColor)),
-              onTap: () {
-                Navigator.pop(ctx);
-                context.push('/transactions/${tx.id}');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.copy_rounded, color: textColor),
-              title: Text(tr.txContextDuplicate,
-                  style: TextStyle(color: textColor)),
-              onTap: () {
-                Navigator.pop(ctx);
-                context.push('/add-transaction', extra: {
-                  'editType': tx.type,
-                  'editNote': tx.note,
-                  'editLines': [
-                    {
-                      'amount': tx.amount,
-                      'currency': tx.currency,
-                      'accountId': tx.accountId,
-                      'categoryId': tx.categoryId,
-                      'categoryName': cat?.name,
-                      'note': tx.note,
-                    },
-                  ],
-                });
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete_rounded, color: AppColors.overspent),
-              title: Text(tr.commonDelete,
-                  style: TextStyle(color: AppColors.overspent)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (dCtx) => AlertDialog(
-                    title: Text(tr.txDeleteTitle),
-                    content: Text(tr.txDeleteCannotUndo),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(dCtx, false),
-                        child: Text(tr.commonCancel),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(dCtx, true),
-                        child: Text(tr.commonDelete,
-                            style: TextStyle(color: AppColors.overspent)),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirmed == true && context.mounted) {
-                  // Mark deleted=true immediately (visual removal)
-                  // but DON'T remove ledger entries yet — allows undo
-                  final db = ref.read(databaseProvider);
-                  await (db.update(db.transactions)
-                        ..where((t) => t.id.equals(tx.id)))
-                      .write(const TransactionsCompanion(
-                          deleted: Value(true)));
-                  ref.invalidate(transactionEntriesProvider);
-                  ref.invalidate(monthlyTransactionsProvider);
-
-                  if (context.mounted) {
-                    var undone = false;
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(tr.txTransactionDeleted),
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 5),
-                        action: SnackBarAction(
-                          label: tr.txUndoAction,
-                          onPressed: () async {
-                            undone = true;
-                            await (db.update(db.transactions)
-                                  ..where((t) => t.id.equals(tx.id)))
-                                .write(const TransactionsCompanion(
-                                    deleted: Value(false)));
-                            ref.invalidate(transactionEntriesProvider);
-                            ref.invalidate(monthlyTransactionsProvider);
-                          },
-                        ),
-                      ),
-                    ).closed.then((_) async {
-                      // After SnackBar closes: if NOT undone, do the full
-                      // engine delete (removes ledger entries permanently)
-                      if (!undone) {
-                        await ref.read(allocationEngineProvider)
-                            .deleteTransaction(tx.id);
-                      }
-                    });
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

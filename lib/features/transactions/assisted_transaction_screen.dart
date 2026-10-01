@@ -22,6 +22,7 @@ import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/utils/dispose_later.dart';
 
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
@@ -345,7 +346,7 @@ class _AssistedTransactionScreenState
         );
       },
     ).then((_) {
-      ctrl.dispose();
+      disposeAfterRouteAnimation(ctrl);
       // Only pop the screen if the user didn't proceed to category selection.
       if (!movedForward && mounted) {
         context.pop();

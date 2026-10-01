@@ -11,6 +11,7 @@ import '../../core/sync/sync_encryption.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class SyncScreen extends ConsumerWidget {
   const SyncScreen({super.key});
@@ -742,8 +743,8 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       }
     }
     } finally {
-      ctrl.dispose();
-      confirmCtrl.dispose();
+      disposeAfterRouteAnimation(ctrl);
+      disposeAfterRouteAnimation(confirmCtrl);
     }
   }
 

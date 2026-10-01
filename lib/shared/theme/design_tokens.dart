@@ -45,8 +45,23 @@ abstract final class RadiusTokens {
   /// Pill-shaped chips and toggle buttons
   static const double pill = 20;
 
-  /// Bottom sheets and modals
-  static const double sheet = 24;
+  /// Bottom sheets (Cashew: 20)
+  static const double sheet = 20;
+
+  /// Text input fields (Cashew TextInput: 15)
+  static const double input = 15;
+
+  /// Filled/outlined/text buttons (Cashew Button: 20)
+  static const double button = 20;
+
+  /// Floating action button (Cashew: 18)
+  static const double fab = 18;
+
+  /// Dialogs / popups (Cashew openPopup: 25)
+  static const double dialog = 25;
+
+  /// Snackbars (Cashew: 13)
+  static const double snackbar = 13;
 }
 
 // ── Animation durations ─────────────────────────────────────────────────────
