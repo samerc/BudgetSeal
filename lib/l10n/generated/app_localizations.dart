@@ -99,6 +99,30 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @reportsTxCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction} other{{count} transactions}}'**
+  String reportsTxCount(int count);
+
+  /// No description provided for @dashUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get dashUpcoming;
+
+  /// No description provided for @dashOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get dashOverdue;
+
+  /// No description provided for @dashBillsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}'**
+  String dashBillsCount(int count);
+
   /// Dialog/button cancel
   ///
   /// In en, this message translates to:
@@ -1398,7 +1422,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'LINE DETAIL'**
+  /// **'Line detail'**
   String get txDetailLineDetail;
 
   /// Fallback
@@ -1410,13 +1434,13 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'RELATED TRANSACTION'**
+  /// **'Related transaction'**
   String get txDetailRelatedSingle;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'RELATED TRANSACTIONS'**
+  /// **'Related transactions'**
   String get txDetailRelatedPlural;
 
   /// Section header
@@ -1668,19 +1692,19 @@ abstract class S {
   /// Currency sheet section header
   ///
   /// In en, this message translates to:
-  /// **'YOUR ACCOUNTS'**
+  /// **'Your accounts'**
   String get currencyYourAccounts;
 
   /// Currency sheet section header
   ///
   /// In en, this message translates to:
-  /// **'RECENTLY USED'**
+  /// **'Recently used'**
   String get currencyRecentlyUsed;
 
   /// Currency sheet section header
   ///
   /// In en, this message translates to:
-  /// **'ALL CURRENCIES'**
+  /// **'All currencies'**
   String get currencyAll;
 
   /// Dropdown hint
@@ -1860,7 +1884,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'WHO\'S SPLITTING?'**
+  /// **'Who\'s splitting?'**
   String get billWhosSplitting;
 
   /// Text field hint
@@ -1878,7 +1902,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'ASSIGN ITEMS'**
+  /// **'Assign items'**
   String get billAssignItems;
 
   /// Text field hint
@@ -2352,7 +2376,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'NAME & ICON'**
+  /// **'Name & icon'**
   String get allocNameIconSection;
 
   /// TextField hint
@@ -2370,7 +2394,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'ENVELOPE TYPE'**
+  /// **'Envelope type'**
   String get allocTypeSection;
 
   /// Type option
@@ -2418,7 +2442,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'PURPOSE'**
+  /// **'Purpose'**
   String get allocPurposeSection;
 
   /// Chip label
@@ -2436,7 +2460,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'CYCLE'**
+  /// **'Cycle'**
   String get allocCycleSection;
 
   /// Help text
@@ -2484,13 +2508,13 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'SAVINGS TARGET'**
+  /// **'Savings target'**
   String get allocSavingsTargetSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'MONTHLY BUDGET'**
+  /// **'Monthly budget'**
   String get allocMonthlyBudgetSection;
 
   /// Help text
@@ -2520,7 +2544,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'LINKED CATEGORIES'**
+  /// **'Linked categories'**
   String get allocLinkedCategories;
 
   /// Help text
@@ -2592,7 +2616,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'RECENT ACTIVITY'**
+  /// **'Recent activity'**
   String get allocRecentActivity;
 
   /// Empty state
@@ -2634,7 +2658,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'SPENDING HISTORY'**
+  /// **'Spending history'**
   String get allocSpendingHistory;
 
   /// Sheet title
@@ -2868,13 +2892,13 @@ abstract class S {
   /// No description provided for @allocMonthlyBudget.
   ///
   /// In en, this message translates to:
-  /// **'MONTHLY BUDGET'**
+  /// **'Monthly budget'**
   String get allocMonthlyBudget;
 
   /// No description provided for @allocTargetOptional.
   ///
   /// In en, this message translates to:
-  /// **'TARGET (OPTIONAL)'**
+  /// **'Target (optional)'**
   String get allocTargetOptional;
 
   /// No description provided for @allocMonthlyBudgetDesc.
@@ -2892,7 +2916,7 @@ abstract class S {
   /// No description provided for @allocLinkedCategoriesSection.
   ///
   /// In en, this message translates to:
-  /// **'LINKED CATEGORIES'**
+  /// **'Linked categories'**
   String get allocLinkedCategoriesSection;
 
   /// No description provided for @allocLinkedCategoriesDesc.
@@ -3432,7 +3456,7 @@ abstract class S {
   /// No description provided for @acctArchived.
   ///
   /// In en, this message translates to:
-  /// **'ARCHIVED'**
+  /// **'Archived'**
   String get acctArchived;
 
   /// No description provided for @acctNoArchived.
@@ -3498,7 +3522,7 @@ abstract class S {
   /// No description provided for @acctNameSection.
   ///
   /// In en, this message translates to:
-  /// **'NAME'**
+  /// **'Name'**
   String get acctNameSection;
 
   /// No description provided for @acctAccountName.
@@ -3510,13 +3534,13 @@ abstract class S {
   /// No description provided for @acctTypeSection.
   ///
   /// In en, this message translates to:
-  /// **'TYPE'**
+  /// **'Type'**
   String get acctTypeSection;
 
   /// No description provided for @acctCurrencySection.
   ///
   /// In en, this message translates to:
-  /// **'CURRENCY'**
+  /// **'Currency'**
   String get acctCurrencySection;
 
   /// No description provided for @acctSelectCurrency.
@@ -3528,7 +3552,7 @@ abstract class S {
   /// No description provided for @acctDecimalSection.
   ///
   /// In en, this message translates to:
-  /// **'DECIMAL PLACES'**
+  /// **'Decimal places'**
   String get acctDecimalSection;
 
   /// No description provided for @acctDecimalAuto.
@@ -3540,7 +3564,7 @@ abstract class S {
   /// No description provided for @acctOpeningBalance.
   ///
   /// In en, this message translates to:
-  /// **'OPENING BALANCE'**
+  /// **'Opening balance'**
   String get acctOpeningBalance;
 
   /// No description provided for @acctCreateAccount.
@@ -3570,7 +3594,7 @@ abstract class S {
   /// No description provided for @acctRecentTransactions.
   ///
   /// In en, this message translates to:
-  /// **'RECENT TRANSACTIONS'**
+  /// **'Recent transactions'**
   String get acctRecentTransactions;
 
   /// No description provided for @acctNoTransactions.
@@ -3810,13 +3834,13 @@ abstract class S {
   /// No description provided for @catSectionExpense.
   ///
   /// In en, this message translates to:
-  /// **'EXPENSE'**
+  /// **'Expense'**
   String get catSectionExpense;
 
   /// No description provided for @catSectionIncome.
   ///
   /// In en, this message translates to:
-  /// **'INCOME'**
+  /// **'Income'**
   String get catSectionIncome;
 
   /// No description provided for @catEdit.
@@ -3996,7 +4020,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'UPCOMING'**
+  /// **'Upcoming'**
   String get billCalUpcoming;
 
   /// Empty state
@@ -4164,7 +4188,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'PRICE HISTORY'**
+  /// **'Price history'**
   String get subDetailPriceHistory;
 
   /// Date suffix
@@ -4188,13 +4212,13 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'PAST TRANSACTIONS'**
+  /// **'Past transactions'**
   String get subDetailPastTx;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'UPCOMING'**
+  /// **'Upcoming'**
   String get subDetailUpcoming;
 
   /// Subtitle
@@ -4368,13 +4392,13 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'GOALS'**
+  /// **'Goals'**
   String get objGoalsSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'LOANS'**
+  /// **'Loans'**
   String get objLoansSection;
 
   /// Subtitle
@@ -4548,7 +4572,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'COLOR'**
+  /// **'Color'**
   String get objColorSection;
 
   /// Dialog title
@@ -4674,7 +4698,7 @@ abstract class S {
   /// Travel exchange section label
   ///
   /// In en, this message translates to:
-  /// **'FROM'**
+  /// **'From'**
   String get travelFrom;
 
   /// Travel exchange dropdown hint
@@ -4686,13 +4710,13 @@ abstract class S {
   /// Travel exchange section label
   ///
   /// In en, this message translates to:
-  /// **'AMOUNT TO EXCHANGE'**
+  /// **'Amount to exchange'**
   String get travelAmountToExchange;
 
   /// Travel exchange section label
   ///
   /// In en, this message translates to:
-  /// **'TRAVEL CURRENCY'**
+  /// **'Travel currency'**
   String get travelCurrencySection;
 
   /// Travel exchange currency picker label
@@ -4704,7 +4728,7 @@ abstract class S {
   /// Travel exchange section label
   ///
   /// In en, this message translates to:
-  /// **'AMOUNT RECEIVED'**
+  /// **'Amount received'**
   String get travelAmountReceived;
 
   /// Travel exchange submit button
@@ -4914,13 +4938,13 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'TOOLS'**
+  /// **'Tools'**
   String get settingsToolsSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'AUTOMATION'**
+  /// **'Automation'**
   String get settingsAutomationSection;
 
   /// Tile subtitle
@@ -5286,7 +5310,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'CONNECT A PROVIDER'**
+  /// **'Connect a provider'**
   String get syncConnectSection;
 
   /// Note
@@ -5628,7 +5652,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'LOCAL BACKUPS'**
+  /// **'Local backups'**
   String get backupLocalSection;
 
   /// Dialog title
@@ -5928,25 +5952,25 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'APPEARANCE'**
+  /// **'Appearance'**
   String get settingsAppearanceSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'DATA'**
+  /// **'Data'**
   String get settingsDataSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'PREFERENCES'**
+  /// **'Preferences'**
   String get settingsPreferencesSection;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'SECURITY'**
+  /// **'Security'**
   String get settingsSecuritySection;
 
   /// Tile title
@@ -6360,7 +6384,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'ALL CURRENCIES'**
+  /// **'All currencies'**
   String get currencySymbolsAllSection;
 
   /// Subtitle for overridden currency
@@ -6948,7 +6972,7 @@ abstract class S {
   /// Onboarding section label
   ///
   /// In en, this message translates to:
-  /// **'HOUSEHOLD'**
+  /// **'Household'**
   String get onboardHouseholdSection;
 
   /// Onboarding text field label
@@ -6972,7 +6996,7 @@ abstract class S {
   /// Onboarding section label
   ///
   /// In en, this message translates to:
-  /// **'FIRST ACCOUNT'**
+  /// **'First account'**
   String get onboardFirstAccountSection;
 
   /// Onboarding text field label
@@ -7008,7 +7032,7 @@ abstract class S {
   /// Onboarding section label
   ///
   /// In en, this message translates to:
-  /// **'CATEGORIES'**
+  /// **'Categories'**
   String get onboardCategoriesSection;
 
   /// Onboarding category option title
@@ -7038,7 +7062,7 @@ abstract class S {
   /// Onboarding section label
   ///
   /// In en, this message translates to:
-  /// **'TRANSACTION ENTRY'**
+  /// **'Transaction entry'**
   String get onboardEntrySection;
 
   /// Onboarding entry mode option title
@@ -7237,13 +7261,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{pct}% less than last month'**
-  String reportsLessThanLast(double pct);
+  String reportsLessThanLast(int pct);
 
   /// Comparison
   ///
   /// In en, this message translates to:
   /// **'{pct}% more than last month'**
-  String reportsMoreThanLast(double pct);
+  String reportsMoreThanLast(int pct);
 
   /// Comparison
   ///
@@ -7290,13 +7314,13 @@ abstract class S {
   /// Toggle
   ///
   /// In en, this message translates to:
-  /// **'TOP SPENDING'**
+  /// **'Top spending'**
   String get reportsTopSpending;
 
   /// Toggle
   ///
   /// In en, this message translates to:
-  /// **'TOP TRANSACTIONS'**
+  /// **'Top transactions'**
   String get reportsTopTransactions;
 
   /// Empty state
@@ -7434,25 +7458,25 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'TIPS'**
+  /// **'Tips'**
   String get reportsTipsSection;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'NET WORTH'**
+  /// **'Net worth'**
   String get reportsNetWorth;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'ASSETS'**
+  /// **'Assets'**
   String get reportsAssets;
 
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'LIABILITIES'**
+  /// **'Liabilities'**
   String get reportsLiabilities;
 
   /// Sheet title
@@ -10104,19 +10128,19 @@ abstract class S {
   /// Section header for payment history
   ///
   /// In en, this message translates to:
-  /// **'PAYMENTS'**
+  /// **'Payments'**
   String get objPaymentsSection;
 
   /// Section header for settings form
   ///
   /// In en, this message translates to:
-  /// **'SETTINGS'**
+  /// **'Settings'**
   String get objSettingsSection;
 
   /// Section header for type toggle
   ///
   /// In en, this message translates to:
-  /// **'TYPE'**
+  /// **'Type'**
   String get objTypeSection;
 
   /// Menu item to hide settings

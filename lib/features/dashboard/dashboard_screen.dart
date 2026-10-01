@@ -33,6 +33,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/tx_tile.dart';
+import 'widgets/bills_boxes.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -407,6 +408,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.money] = [
+                  // Cashew's Upcoming / Overdue bill boxes
+                  BillsBoxes(baseCurrency: baseCurrency),
                   // Compact money overview: Net Worth + Unallocated
                   accountsAsync.when(
                     data: (accounts) {
@@ -697,6 +700,20 @@ class _SpendingOverviewCard extends StatelessWidget {
       const Color(0xFF8B5CF6),
       const Color(0xFF64748B),
     ];
+    // Subcategories inherit their parent's color, so siblings would draw as
+    // one solid ring — shift the shade each time a color repeats.
+    final sliceColors = <Color>[];
+    final seen = <int, int>{};
+    for (var i = 0; i < topCategories.length; i++) {
+      final base = categoryColors[topCategories[i].key] ??
+          defaultColors[i % defaultColors.length];
+      final repeat = seen.update(base.toARGB32(), (n) => n + 1, ifAbsent: () => 0);
+      sliceColors.add(repeat == 0
+          ? base
+          : repeat.isOdd
+              ? AppColors.lightenPastel(base, 0.22 * ((repeat + 1) ~/ 2))
+              : AppColors.darkenPastel(base, 0.2 * (repeat ~/ 2)));
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -758,10 +775,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                             centerSpaceRadius: 36,
                             sections:
                                 topCategories.asMap().entries.map((e) {
-                              final color =
-                                  categoryColors[e.value.key] ??
-                                      defaultColors[
-                                          e.key % defaultColors.length];
+                              final color = sliceColors[e.key];
                               return PieChartSectionData(
                                 value: e.value.value,
                                 color: color,
@@ -852,8 +866,7 @@ class _SpendingOverviewCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 4,
               children: topCategories.asMap().entries.map((e) {
-                final color = categoryColors[e.value.key] ??
-                    defaultColors[e.key % defaultColors.length];
+                final color = sliceColors[e.key];
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -865,7 +878,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(e.value.key,
                         style: TextStyle(
-                            fontSize: 11, color: AppColors.ts(context))),
+                            fontSize: 12.5, color: AppColors.ts(context))),
                   ],
                 );
               }).toList(),
@@ -946,25 +959,28 @@ class _QuickAction extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.08),
+                color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
               ),
               child: Column(children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
+                    color: AppColors.pastel(context, color,
+                        light: 0.6, dark: 0.5),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 18, color: color),
+                  child: Icon(icon, size: 20, color: AppColors.tp(context)),
                 ),
                 const SizedBox(height: 6),
                 Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: color)),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
               ]),
             ),
           ),
@@ -973,8 +989,6 @@ class _QuickAction extends StatelessWidget {
     );
   }
 }
-
-// ─── Recent Transaction Tile ──────────────────────────────────────────────── ────────────────────────────────────────────────
 
 // ─── Global Search ──────────────────────────────────────────────────────────
 

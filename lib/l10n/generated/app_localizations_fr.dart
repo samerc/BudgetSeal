@@ -9,6 +9,35 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String reportsTxCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashUpcoming => 'À venir';
+
+  @override
+  String get dashOverdue => 'En retard';
+
+  @override
+  String dashBillsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count factures',
+      one: '1 facture',
+      zero: 'Aucune facture',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get commonCancel => 'Annuler';
 
   @override
@@ -736,16 +765,16 @@ class SFr extends S {
   }
 
   @override
-  String get txDetailLineDetail => 'DÉTAIL DE LA LIGNE';
+  String get txDetailLineDetail => 'Détail de la ligne';
 
   @override
   String get txDetailUncategorized => 'Non catégorisé';
 
   @override
-  String get txDetailRelatedSingle => 'TRANSACTION LIÉE';
+  String get txDetailRelatedSingle => 'Transaction liée';
 
   @override
-  String get txDetailRelatedPlural => 'TRANSACTIONS LIÉES';
+  String get txDetailRelatedPlural => 'Transactions liées';
 
   @override
   String txDetailReceipts(int count) {
@@ -888,13 +917,13 @@ class SFr extends S {
   }
 
   @override
-  String get currencyYourAccounts => 'VOS COMPTES';
+  String get currencyYourAccounts => 'Vos comptes';
 
   @override
-  String get currencyRecentlyUsed => 'RÉCEMMENT UTILISÉES';
+  String get currencyRecentlyUsed => 'Récemment utilisées';
 
   @override
-  String get currencyAll => 'TOUTES LES DEVISES';
+  String get currencyAll => 'Toutes les devises';
 
   @override
   String get txWidgetSelectAccount => 'Sélectionner un compte';
@@ -987,7 +1016,7 @@ class SFr extends S {
   String get billSplit => 'Diviser';
 
   @override
-  String get billWhosSplitting => 'QUI PARTAGE ?';
+  String get billWhosSplitting => 'Qui partage ?';
 
   @override
   String get billAddPerson => 'Ajouter une personne';
@@ -996,7 +1025,7 @@ class SFr extends S {
   String get billSplitEvenly => 'Partager équitablement';
 
   @override
-  String get billAssignItems => 'ATTRIBUER LES ÉLÉMENTS';
+  String get billAssignItems => 'Attribuer les éléments';
 
   @override
   String get billItemName => 'Nom de l\'élément';
@@ -1267,7 +1296,7 @@ class SFr extends S {
   String get allocSaveChanges => 'Enregistrer les modifications';
 
   @override
-  String get allocNameIconSection => 'NOM ET ICÔNE';
+  String get allocNameIconSection => 'Nom et icône';
 
   @override
   String get allocNameHint => 'Nom de l\'enveloppe (ex. Courses)';
@@ -1276,7 +1305,7 @@ class SFr extends S {
   String get allocRemoveIcon => 'Supprimer l\'icône';
 
   @override
-  String get allocTypeSection => 'TYPE D\'ENVELOPPE';
+  String get allocTypeSection => 'Type d\'enveloppe';
 
   @override
   String get allocSpendingTitle => 'Dépenses';
@@ -1304,7 +1333,7 @@ class SFr extends S {
       'Les enveloppes ne déplacent pas l\'argent entre les comptes. Elles vous aident à planifier l\'utilisation de votre argent.';
 
   @override
-  String get allocPurposeSection => 'OBJECTIF';
+  String get allocPurposeSection => 'Objectif';
 
   @override
   String get allocSaving => 'Épargne';
@@ -1313,7 +1342,7 @@ class SFr extends S {
   String get allocFlexible => 'Cumulatif';
 
   @override
-  String get allocCycleSection => 'CYCLE';
+  String get allocCycleSection => 'Cycle';
 
   @override
   String get allocPeriodicDesc =>
@@ -1340,10 +1369,10 @@ class SFr extends S {
       'Réinitialiser automatiquement au début de la période';
 
   @override
-  String get allocSavingsTargetSection => 'OBJECTIF D\'ÉPARGNE';
+  String get allocSavingsTargetSection => 'Objectif d\'épargne';
 
   @override
-  String get allocMonthlyBudgetSection => 'BUDGET MENSUEL';
+  String get allocMonthlyBudgetSection => 'Budget mensuel';
 
   @override
   String get allocSavingsTargetHelp =>
@@ -1360,7 +1389,7 @@ class SFr extends S {
   String get allocBudgetAmount => 'Montant du budget';
 
   @override
-  String get allocLinkedCategories => 'CATÉGORIES LIÉES';
+  String get allocLinkedCategories => 'Catégories liées';
 
   @override
   String get allocLinkedHelp =>
@@ -1401,7 +1430,7 @@ class SFr extends S {
   }
 
   @override
-  String get allocRecentActivity => 'ACTIVITÉ RÉCENTE';
+  String get allocRecentActivity => 'Activité récente';
 
   @override
   String get allocNoActivity => 'Aucune activité';
@@ -1422,7 +1451,7 @@ class SFr extends S {
   String get allocLedgerCarried => 'Reporté';
 
   @override
-  String get allocSpendingHistory => 'HISTORIQUE DES DÉPENSES';
+  String get allocSpendingHistory => 'Historique des dépenses';
 
   @override
   String get allocWithdrawTitle => 'Retrait de l\'épargne';
@@ -1551,10 +1580,10 @@ class SFr extends S {
       'Réinitialiser automatiquement en début de période';
 
   @override
-  String get allocMonthlyBudget => 'BUDGET MENSUEL';
+  String get allocMonthlyBudget => 'Budget mensuel';
 
   @override
-  String get allocTargetOptional => 'OBJECTIF (OPTIONNEL)';
+  String get allocTargetOptional => 'Objectif (optionnel)';
 
   @override
   String get allocMonthlyBudgetDesc =>
@@ -1565,7 +1594,7 @@ class SFr extends S {
       'Définissez un montant cible, ou laissez à zéro pour un objectif ouvert.';
 
   @override
-  String get allocLinkedCategoriesSection => 'CATÉGORIES LIÉES';
+  String get allocLinkedCategoriesSection => 'Catégories liées';
 
   @override
   String get allocLinkedCategoriesDesc =>
@@ -1935,7 +1964,7 @@ class SFr extends S {
   }
 
   @override
-  String get acctArchived => 'ARCHIVÉS';
+  String get acctArchived => 'Archivés';
 
   @override
   String get acctNoArchived => 'Aucun compte archivé';
@@ -1974,22 +2003,22 @@ class SFr extends S {
   String get acctSettings => 'Paramètres du compte';
 
   @override
-  String get acctNameSection => 'NOM';
+  String get acctNameSection => 'Nom';
 
   @override
   String get acctAccountName => 'Nom du compte';
 
   @override
-  String get acctTypeSection => 'TYPE';
+  String get acctTypeSection => 'Type';
 
   @override
-  String get acctCurrencySection => 'DEVISE';
+  String get acctCurrencySection => 'Devise';
 
   @override
   String get acctSelectCurrency => 'Sélectionner la devise';
 
   @override
-  String get acctDecimalSection => 'DÉCIMALES';
+  String get acctDecimalSection => 'Décimales';
 
   @override
   String acctDecimalAuto(int count) {
@@ -1997,7 +2026,7 @@ class SFr extends S {
   }
 
   @override
-  String get acctOpeningBalance => 'SOLDE D\'OUVERTURE';
+  String get acctOpeningBalance => 'Solde d\'ouverture';
 
   @override
   String get acctCreateAccount => 'Créer un compte';
@@ -2012,7 +2041,7 @@ class SFr extends S {
   String get tmplCreated => 'Modèle créé';
 
   @override
-  String get acctRecentTransactions => 'TRANSACTIONS RÉCENTES';
+  String get acctRecentTransactions => 'Transactions récentes';
 
   @override
   String get acctNoTransactions => 'Aucune transaction pour le moment';
@@ -2172,10 +2201,10 @@ class SFr extends S {
   }
 
   @override
-  String get catSectionExpense => 'DÉPENSE';
+  String get catSectionExpense => 'Dépense';
 
   @override
-  String get catSectionIncome => 'REVENU';
+  String get catSectionIncome => 'Revenu';
 
   @override
   String get catEdit => 'Modifier';
@@ -2276,7 +2305,7 @@ class SFr extends S {
   }
 
   @override
-  String get billCalUpcoming => 'À VENIR';
+  String get billCalUpcoming => 'À venir';
 
   @override
   String get billCalNoUpcoming => 'Aucune facture à venir';
@@ -2368,7 +2397,7 @@ class SFr extends S {
   String get subDetailTotalPaid => 'Total payé (est.)';
 
   @override
-  String get subDetailPriceHistory => 'HISTORIQUE DES PRIX';
+  String get subDetailPriceHistory => 'Historique des prix';
 
   @override
   String get subDetailPresent => 'présent';
@@ -2380,10 +2409,10 @@ class SFr extends S {
   String get subDetailSetCancel => 'Définir la date d\'annulation';
 
   @override
-  String get subDetailPastTx => 'TRANSACTIONS PASSÉES';
+  String get subDetailPastTx => 'Transactions passées';
 
   @override
-  String get subDetailUpcoming => 'À VENIR';
+  String get subDetailUpcoming => 'À venir';
 
   @override
   String get subDetailScheduled => 'prévu';
@@ -2473,10 +2502,10 @@ class SFr extends S {
       'Créez un objectif d\'épargne ou suivez l\'argent prêté ou emprunté.';
 
   @override
-  String get objGoalsSection => 'OBJECTIFS';
+  String get objGoalsSection => 'Objectifs';
 
   @override
-  String get objLoansSection => 'PRÊTS';
+  String get objLoansSection => 'Prêts';
 
   @override
   String objLentTo(String contact) {
@@ -2569,7 +2598,7 @@ class SFr extends S {
   String get objSetDeadline => 'Définir une échéance (optionnel)';
 
   @override
-  String get objColorSection => 'COULEUR';
+  String get objColorSection => 'Couleur';
 
   @override
   String get objDeleteTitle => 'Supprimer l\'objectif';
@@ -2642,22 +2671,22 @@ class SFr extends S {
       'Échangez de l\'argent pour votre voyage. Un portefeuille temporaire sera créé automatiquement.';
 
   @override
-  String get travelFrom => 'DE';
+  String get travelFrom => 'De';
 
   @override
   String get travelSelectAccount => 'Sélectionner un compte';
 
   @override
-  String get travelAmountToExchange => 'MONTANT À ÉCHANGER';
+  String get travelAmountToExchange => 'Montant à échanger';
 
   @override
-  String get travelCurrencySection => 'DEVISE DE VOYAGE';
+  String get travelCurrencySection => 'Devise de voyage';
 
   @override
   String get travelCurrencyReceive => 'Devise que vous recevez';
 
   @override
-  String get travelAmountReceived => 'MONTANT REÇU';
+  String get travelAmountReceived => 'Montant reçu';
 
   @override
   String get travelExchangeButton =>
@@ -2768,10 +2797,10 @@ class SFr extends S {
   String get settingsMoreTitle => 'Plus';
 
   @override
-  String get settingsToolsSection => 'OUTILS';
+  String get settingsToolsSection => 'Outils';
 
   @override
-  String get settingsAutomationSection => 'AUTOMATISATION';
+  String get settingsAutomationSection => 'Automatisation';
 
   @override
   String get settingsAccountsSub => 'Gérez vos comptes et soldes';
@@ -2964,7 +2993,7 @@ class SFr extends S {
   String get syncDisconnect => 'Déconnecter';
 
   @override
-  String get syncConnectSection => 'CONNECTER UN FOURNISSEUR';
+  String get syncConnectSection => 'Connecter un fournisseur';
 
   @override
   String get syncReceiptComingSoon =>
@@ -3151,7 +3180,7 @@ class SFr extends S {
   String get backupRestoreFromFile => 'Restaurer depuis un fichier';
 
   @override
-  String get backupLocalSection => 'SAUVEGARDES LOCALES';
+  String get backupLocalSection => 'Sauvegardes locales';
 
   @override
   String get backupRestoreDialogTitle => 'Restaurer la sauvegarde';
@@ -3317,16 +3346,16 @@ class SFr extends S {
   String get settingsTitle => 'Paramètres';
 
   @override
-  String get settingsAppearanceSection => 'APPARENCE';
+  String get settingsAppearanceSection => 'Apparence';
 
   @override
-  String get settingsDataSection => 'DONNÉES';
+  String get settingsDataSection => 'Données';
 
   @override
-  String get settingsPreferencesSection => 'PRÉFÉRENCES';
+  String get settingsPreferencesSection => 'Préférences';
 
   @override
-  String get settingsSecuritySection => 'SÉCURITÉ';
+  String get settingsSecuritySection => 'Sécurité';
 
   @override
   String get tileRecurringBills => 'Récurrences et factures';
@@ -3547,7 +3576,7 @@ class SFr extends S {
       'Appuyez sur une devise pour changer l\'affichage de son symbole. Par exemple, changez ل.ل en LBP.';
 
   @override
-  String get currencySymbolsAllSection => 'TOUTES LES DEVISES';
+  String get currencySymbolsAllSection => 'Toutes les devises';
 
   @override
   String currencySymbolDefault(String symbol) {
@@ -3878,7 +3907,7 @@ class SFr extends S {
       'Vous pourrez tout modifier plus tard dans les Paramètres.';
 
   @override
-  String get onboardHouseholdSection => 'FOYER';
+  String get onboardHouseholdSection => 'Foyer';
 
   @override
   String get onboardHouseholdName => 'Nom du foyer';
@@ -3890,7 +3919,7 @@ class SFr extends S {
   String get onboardPeriodStart => 'Jour de début de période';
 
   @override
-  String get onboardFirstAccountSection => 'PREMIER COMPTE';
+  String get onboardFirstAccountSection => 'Premier compte';
 
   @override
   String get onboardAccountName => 'Nom du compte';
@@ -3908,7 +3937,7 @@ class SFr extends S {
   String get onboardTypeDigital => 'Numérique';
 
   @override
-  String get onboardCategoriesSection => 'CATÉGORIES';
+  String get onboardCategoriesSection => 'Catégories';
 
   @override
   String get onboardFullSet => 'Jeu complet';
@@ -3923,7 +3952,7 @@ class SFr extends S {
   String get onboardEmptySub => 'Créez les vôtres à partir de zéro';
 
   @override
-  String get onboardEntrySection => 'SAISIE DES TRANSACTIONS';
+  String get onboardEntrySection => 'Saisie des transactions';
 
   @override
   String get onboardAssisted => 'Assisté';
@@ -4032,12 +4061,12 @@ class SFr extends S {
   String get reportsProjectedTotal => 'Total projeté';
 
   @override
-  String reportsLessThanLast(double pct) {
+  String reportsLessThanLast(int pct) {
     return '$pct% de moins que le mois dernier';
   }
 
   @override
-  String reportsMoreThanLast(double pct) {
+  String reportsMoreThanLast(int pct) {
     return '$pct% de plus que le mois dernier';
   }
 
@@ -4064,10 +4093,10 @@ class SFr extends S {
   String get reportsNoSpending => 'Aucune dépense ce mois-ci';
 
   @override
-  String get reportsTopSpending => 'TOP DÉPENSES';
+  String get reportsTopSpending => 'Top dépenses';
 
   @override
-  String get reportsTopTransactions => 'TOP TRANSACTIONS';
+  String get reportsTopTransactions => 'Top transactions';
 
   @override
   String get reportsNoExpenses => 'Aucune dépense pour cette période';
@@ -4140,16 +4169,16 @@ class SFr extends S {
       'L\'Âge de l\'argent mesure combien de jours votre argent reste avant d\'être dépensé. Il retrace chaque dépense jusqu\'au revenu qui l\'a financée (le plus ancien d\'abord).';
 
   @override
-  String get reportsTipsSection => 'CONSEILS';
+  String get reportsTipsSection => 'Conseils';
 
   @override
-  String get reportsNetWorth => 'PATRIMOINE NET';
+  String get reportsNetWorth => 'Patrimoine net';
 
   @override
-  String get reportsAssets => 'ACTIFS';
+  String get reportsAssets => 'Actifs';
 
   @override
-  String get reportsLiabilities => 'PASSIFS';
+  String get reportsLiabilities => 'Passifs';
 
   @override
   String get reportsCompareTo => 'Comparer les soldes à :';
@@ -5598,13 +5627,13 @@ class SFr extends S {
   String get objSummaryRemaining => 'Restant';
 
   @override
-  String get objPaymentsSection => 'PAIEMENTS';
+  String get objPaymentsSection => 'Paiements';
 
   @override
-  String get objSettingsSection => 'PARAMÈTRES';
+  String get objSettingsSection => 'Paramètres';
 
   @override
-  String get objTypeSection => 'TYPE';
+  String get objTypeSection => 'Type';
 
   @override
   String get objHideSettings => 'Masquer les paramètres';

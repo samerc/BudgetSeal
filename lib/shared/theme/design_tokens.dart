@@ -96,9 +96,9 @@ abstract final class TypographyTokens {
   static const FontWeight screenTitleWeight = FontWeight.w800;
 
   // Section header: 13 / w700 / letterSpacing 0.8
-  static const double sectionHeaderSize = 13;
+  static const double sectionHeaderSize = 15;
   static const FontWeight sectionHeaderWeight = FontWeight.w700;
-  static const double sectionHeaderLetterSpacing = 0.8;
+  static const double sectionHeaderLetterSpacing = 0;
 
   // Card title: 15 / w600
   static const double cardTitleSize = 15;

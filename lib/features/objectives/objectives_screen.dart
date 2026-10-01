@@ -135,7 +135,7 @@ class _SectionHeader extends StatelessWidget {
               fontSize: TypographyTokens.sectionHeaderSize,
               fontWeight: TypographyTokens.sectionHeaderWeight,
               letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-              color: AppColors.ts(context),
+              color: AppColors.accent,
             )),
         const SizedBox(width: 8),
         Container(

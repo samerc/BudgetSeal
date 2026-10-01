@@ -87,73 +87,59 @@ class SettingsScreen extends ConsumerWidget {
             // ── Backup Reminder Banner ──
             _SettingsBackupBanner(),
 
-            // ── Essentials (used weekly) ──
-            _SettingsTile(icon: Icons.credit_card_rounded, title: l.navAccounts,
-                subtitle: l.settingsAccountsSub,
-                iconColor: const Color(0xFF1565C0),
-                onTap: () => context.push('/accounts')),
-            _SettingsTile(icon: Icons.label_rounded, title: l.navCategories,
-                subtitle: l.settingsCategoriesSub,
-                iconColor: const Color(0xFFBA68C8),
-                onTap: () => context.push('/categories')),
-            const SizedBox(height: 20),
-
-            // ── Tools ──
-            _SectionHeader(title: l.settingsToolsSection),
-            const SizedBox(height: 8),
-            _SettingsTile(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
-                subtitle: l.settingsRecurringSub,
-                iconColor: const Color(0xFFFF7043),
-                onTap: () => context.push('/recurring')),
-            _SettingsTile(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
-                subtitle: l.settingsSubscriptionsSub,
-                iconColor: AppColors.accent,
-                onTap: () => context.push('/subscriptions')),
-            _SettingsTile(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
-                subtitle: l.settingsGoalsSub,
-                iconColor: const Color(0xFF22C55E),
-                onTap: () => context.push('/objectives')),
-            _SettingsTile(icon: Icons.event_note_rounded, title: l.plannedTitle,
-                subtitle: l.plannedSubtitle,
-                iconColor: const Color(0xFF7E57C2),
-                onTap: () {
-                  if (!checkPremiumAccess(context, ref, PremiumFeature.plannedPayments)) return;
-                  context.push('/planned-payments');
-                }),
-            _SettingsTile(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
-                subtitle: l.settingsBillSplitterSub,
-                iconColor: const Color(0xFF26A69A),
-                onTap: () {
-                  if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
-                  context.push('/bill-splitter');
-                }),
-            _SettingsTile(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
-                subtitle: l.settingsTravelSub,
-                iconColor: const Color(0xFF42A5F5),
-                onTap: () {
-                  if (!checkPremiumAccess(context, ref, PremiumFeature.travelExchange)) return;
-                  context.push('/travel-exchange');
-                }),
-            _SettingsTile(icon: Icons.computer_rounded, title: l.tileWebCompanion,
-                subtitle: l.settingsWebCompanionSub,
-                iconColor: const Color(0xFF0EA5E9),
-                onTap: () {
-                  if (!checkPremiumAccess(context, ref, PremiumFeature.webCompanion)) return;
-                  context.push('/web-companion');
-                }),
-            const SizedBox(height: 20),
+            // ── Features: Cashew-style 2-column tile grid ──
+            _MoreGrid(children: [
+              _MoreTile(icon: Icons.credit_card_rounded, title: l.navAccounts,
+                  color: const Color(0xFF1565C0),
+                  onTap: () => context.push('/accounts')),
+              _MoreTile(icon: Icons.label_rounded, title: l.navCategories,
+                  color: const Color(0xFFBA68C8),
+                  onTap: () => context.push('/categories')),
+              _MoreTile(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
+                  color: const Color(0xFFFF7043),
+                  onTap: () => context.push('/recurring')),
+              _MoreTile(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
+                  color: AppColors.accent,
+                  onTap: () => context.push('/subscriptions')),
+              _MoreTile(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
+                  color: const Color(0xFF22C55E),
+                  onTap: () => context.push('/objectives')),
+              _MoreTile(icon: Icons.event_note_rounded, title: l.plannedTitle,
+                  color: const Color(0xFF7E57C2),
+                  onTap: () {
+                    if (!checkPremiumAccess(context, ref, PremiumFeature.plannedPayments)) return;
+                    context.push('/planned-payments');
+                  }),
+              _MoreTile(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
+                  color: const Color(0xFF26A69A),
+                  onTap: () {
+                    if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
+                    context.push('/bill-splitter');
+                  }),
+              _MoreTile(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
+                  color: const Color(0xFF42A5F5),
+                  onTap: () {
+                    if (!checkPremiumAccess(context, ref, PremiumFeature.travelExchange)) return;
+                    context.push('/travel-exchange');
+                  }),
+              _MoreTile(icon: Icons.computer_rounded, title: l.tileWebCompanion,
+                  color: const Color(0xFF0EA5E9),
+                  onTap: () {
+                    if (!checkPremiumAccess(context, ref, PremiumFeature.webCompanion)) return;
+                    context.push('/web-companion');
+                  }),
+            ]),
+            const SizedBox(height: 16),
 
             // ── Settings (navigates to dedicated screen) ──
             _SettingsTile(icon: Icons.settings_rounded, title: l.settingsCustomization,
                 subtitle: l.settingsCustomizationSub,
                 iconColor: AppColors.ts(context),
                 onTap: () => context.push('/settings')),
-            const SizedBox(height: 8),
             _SettingsTile(icon: Icons.help_outline_rounded, title: l.tileHelpGuide,
                 subtitle: l.settingsHelpSub,
                 iconColor: const Color(0xFF0EA5E9),
                 onTap: () => context.push('/help')),
-            const SizedBox(height: 8),
             _SettingsTile(icon: Icons.info_outline_rounded, title: l.settingsAbout,
                 subtitle: l.settingsVersionN(appVersion), iconColor: AppColors.th(context),
                 onTap: () => context.push('/about')),
@@ -1348,21 +1334,14 @@ class SettingsDetailScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
+                Material(
+                  type: MaterialType.transparency,
                   child: SwitchListTile(
-                    secondary: Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.photo_library_rounded,
-                          size: 18, color: Color(0xFF7E57C2)),
+                    contentPadding:
+                        const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
+                    secondary: const _SettingsIcon(
+                      icon: Icons.photo_library_rounded,
+                      color: Color(0xFF7E57C2),
                     ),
                     title: Text(S.of(context).tileSyncReceipts,
                         style: TextStyle(
@@ -1518,13 +1497,16 @@ class _SectionHeader extends StatelessWidget {
           fontSize: TypographyTokens.sectionHeaderSize,
           fontWeight: TypographyTokens.sectionHeaderWeight,
           letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.ts(context),
+          color: AppColors.accent,
         ),
       ),
     );
   }
 }
 
+/// Cashew SettingsContainer: a flat row on the page background — pastel
+/// icon circle, bold title, secondary description. The transparent Material
+/// keeps the ripple visible (a colored DecoratedBox would hide it).
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1542,34 +1524,128 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-      ),
+    return Material(
+      type: MaterialType.transparency,
       child: ListTile(
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: iconColor, size: 18),
-        ),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(CardTokens.radius)),
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
+        leading: _SettingsIcon(icon: icon, color: iconColor),
         title: Text(title,
             style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w600,
+                fontSize: 16, fontWeight: FontWeight.w700,
                 color: AppColors.tp(context))),
         subtitle: Text(subtitle,
             style: TextStyle(
-                fontSize: 12, color: AppColors.ts(context))),
+                fontSize: 13.5, color: AppColors.ts(context))),
         trailing: onTap != null
             ? Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.th(context))
+                size: 20, color: AppColors.th(context))
             : null,
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _SettingsIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  const _SettingsIcon({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: AppColors.pastel(context, color, light: 0.82, dark: 0.7),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: 21),
+    );
+  }
+}
+
+/// Two tiles per row.
+class _MoreGrid extends StatelessWidget {
+  final List<Widget> children;
+  const _MoreGrid({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < children.length; i += 2)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: children[i]),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: i + 1 < children.length
+                          ? children[i + 1]
+                          : const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Cashew "more actions" tile: pastel block with icon and title.
+class _MoreTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MoreTile({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.pastel(context, color, light: 0.88, dark: 0.8),
+      borderRadius: BorderRadius.circular(CardTokens.radius + 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(CardTokens.radius + 4),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 12, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.pastel(context, color, light: 0.6, dark: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 21, color: AppColors.tp(context)),
+              ),
+              const SizedBox(height: 10),
+              Text(title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 15,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1580,23 +1656,14 @@ class _BiometricTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(biometricLockProvider);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-      ),
+    return Material(
+      type: MaterialType.transparency,
       child: ListTile(
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFF7C4DFF).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(Icons.fingerprint_rounded,
-              color: Color(0xFF7C4DFF), size: 18),
-        ),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(CardTokens.radius)),
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
+        leading: const _SettingsIcon(
+            icon: Icons.fingerprint_rounded, color: Color(0xFF7C4DFF)),
         title: Text(S.of(context).tileBiometricLock,
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         subtitle: Text(S.of(context).tileBiometricSub,
@@ -2341,10 +2408,9 @@ class _SettingsBackupBanner extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.caution.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(CardTokens.radius),
-              border: Border.all(
-                  color: AppColors.caution.withValues(alpha: 0.25)),
+              color: AppColors.pastel(context, AppColors.caution,
+                  light: 0.85, dark: 0.78),
+              borderRadius: BorderRadius.circular(CardTokens.radius + 4),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2358,8 +2424,8 @@ class _SettingsBackupBanner extends ConsumerWidget {
                       child: Text(
                         message,
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.tp(context),
                         ),
                       ),
@@ -2375,18 +2441,19 @@ class _SettingsBackupBanner extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: 34,
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
                   child: FilledButton.icon(
                     onPressed: () => context.push('/backup'),
-                    icon: const Icon(Icons.backup_rounded, size: 16),
-                    label: Text(l.backupNowButton,
-                        style: const TextStyle(fontSize: 12)),
+                    icon: const Icon(Icons.backup_rounded, size: 18),
+                    label: Text(l.backupNowButton),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.caution,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                      backgroundColor: AppColors.pastel(
+                          context, AppColors.caution,
+                          light: 0.55, dark: 0.5),
+                      foregroundColor: AppColors.tp(context),
+                      minimumSize: const Size(0, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
                     ),
                   ),
                 ),

@@ -1,4 +1,8 @@
 {
+  "reportsTxCount": "{count, plural, =1{معاملة واحدة} =2{معاملتان} few{{count} معاملات} other{{count} معاملة}}",
+  "dashUpcoming": "قادمة",
+  "dashOverdue": "متأخرة",
+  "dashBillsCount": "{count, plural, =0{لا فواتير} =1{فاتورة واحدة} =2{فاتورتان} few{{count} فواتير} other{{count} فاتورة}}",
   "@@locale": "ar",
   "commonCancel": "إلغاء",
   "@commonCancel": {
@@ -3947,7 +3951,7 @@
     "description": "Comparison",
     "placeholders": {
       "pct": {
-        "type": "double"
+        "type": "int"
       }
     }
   },
@@ -3956,7 +3960,7 @@
     "description": "Comparison",
     "placeholders": {
       "pct": {
-        "type": "double"
+        "type": "int"
       }
     }
   },

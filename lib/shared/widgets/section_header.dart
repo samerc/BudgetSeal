@@ -5,7 +5,7 @@ import '../theme/design_tokens.dart';
 
 /// Standardized section header used across all screens.
 ///
-/// Renders uppercase-style text with consistent size, weight, and letter spacing.
+/// Cashew SettingsHeader style: sentence case, 15px bold, accent color.
 /// Optionally shows a trailing action widget (e.g. "See all" button).
 class SectionHeader extends StatelessWidget {
   const SectionHeader(
@@ -22,12 +22,12 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final header = Text(
-      title.toUpperCase(),
+      title,
       style: TextStyle(
         fontSize: TypographyTokens.sectionHeaderSize,
         fontWeight: TypographyTokens.sectionHeaderWeight,
         letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-        color: AppColors.ts(context),
+        color: AppColors.accent,
       ),
     );
 

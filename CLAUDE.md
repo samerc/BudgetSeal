@@ -276,7 +276,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 - **Card radius:** 16 (`CardTokens.radius`), **padding:** 16h / 14v — consistent everywhere. All `BorderRadius.circular()` calls use the token, never hardcoded.
 - **Category icons:** 48px circles in lists (`CategoryIconTokens.listSize`), 36px compact, 64px hero.
 - **Screen titles:** 28px w800 (`TypographyTokens.screenTitleSize`) — Cashew-inspired large bold.
-- **Section headers:** visible, secondary text color, bigger weight — not dimmed.
+- **Section headers (Cashew SettingsHeader):** sentence case, 15px w700, accent color, no letter spacing. ARB header strings are stored in sentence case (never ALL CAPS); `SectionHeader` no longer upper-cases.
 - **Cards (Cashew style, Oct 2026):** accent-tinted surface (`AppColors.sf`), no border; light mode gets a soft shadow (`AppColors.cardShadow`), black mode a faint white edge (`AppColors.cardBorder`). `AppColors.bd` is a hairline (6% black / 7% white) for dividers.
 - **Pastel fills:** use `AppColors.pastel(context, color)` / `lightenPastel` / `darkenPastel` (Cashew's color model) for anything colored by a category/envelope/accent — never `color.withValues(alpha: 0.1)` tints.
 - No glassmorphism. No left-border accent bars on cards (looks like a prototype).
@@ -731,7 +731,7 @@ Tip: percentage slider (0-30%) or fixed amount toggle. Cross-currency support wi
 
 `lib/core/providers/dashboard_layout_provider.dart` — `DashboardSection` enum with 4 sections (quickActions, spending, money, activity). Each section has visibility toggle. Order + visibility persisted to SharedPreferences as JSON. `DashboardLayoutNotifier` provides reorder/toggle/reset methods.
 
-Dashboard flow: Quick Actions (top) → Spending Overview (donut + income/expense/net + spending insight) → Your Money (compact net worth | unallocated split card) → Activity (templates + recent transactions). Status card and envelope health were removed — those live in Reports > Insights and Budget tab respectively.
+Dashboard flow: Quick Actions (top) → Spending Overview (donut + income/expense/net + spending insight) → Your Money (Cashew Upcoming/Overdue bill boxes from `widgets/bills_boxes.dart`, then compact net worth | unallocated split card) → Activity (templates + recent transactions). Bill boxes: Upcoming = enabled recurring due within 7 days; the Overdue box only appears when something is past due (the recurring engine normally posts due bills at launch); only base-currency amounts are summed. Donut slices that share a color (subcategories inherit the parent's) get shifted shades. Status card and envelope health were removed — those live in Reports > Insights and Budget tab respectively.
 
 `lib/features/dashboard/dashboard_customize_sheet.dart` — bottom sheet with `ReorderableListView`, drag handles, and visibility switches. Opened via the tune icon in the dashboard header.
 
@@ -793,7 +793,7 @@ All three themes come from one `_buildTheme()`; surfaces are derived from the ac
 - Light bg: `#F5F6FA`, Dark bg: `#0F1219`, Black bg: `#000000`
 
 ### Shared Layout Widgets
-- `SectionHeader` (`lib/shared/widgets/section_header.dart`): uppercase, 13px w700, letter-spacing 0.8, optional trailing action
+- `SectionHeader` (`lib/shared/widgets/section_header.dart`): sentence case, 15px w700, accent color, optional trailing action
 - `AppCard` (`lib/shared/widgets/app_card.dart`): theme-aware bg/border, radius 16, standard padding, optional onTap
 
 ## More Tab Structure
@@ -801,16 +801,15 @@ All three themes come from one `_buildTheme()`; surfaces are derived from the ac
 The More tab is split into two screens:
 
 **More page** (tab) — feature hub:
-- Accounts, Categories (top, no section header — used weekly)
-- **TOOLS**: Recurring & Bills, Subscriptions, Goals & Loans, Bill Splitter, Travel Exchange, Web Companion
-- Settings & Customization → navigates to `/settings`
+- Cashew-style 2-column grid of pastel tiles (`_MoreTile`): Accounts, Categories, Recurring & Bills, Subscriptions, Goals & Loans, Planned Payments, Bill Splitter, Travel Exchange, Web Companion
+- Flat rows below: Settings & Customization → navigates to `/settings`
 - Help Guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
 - About PocketPlan
 - Household name + currency shown as subtitle under "More" header (no separate card)
 
 Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
 
-**Settings screen** (`/settings`) — all configuration:
+**Settings screen** (`/settings`) — all configuration. Rows are flat Cashew `SettingsContainer`s (`_SettingsTile`: transparent Material + ListTile, 42px pastel icon circle, 16/w700 title) — never wrap a ListTile in a colored DecoratedBox (hides the ripple).
 - **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
 - **PREFERENCES**: Household Name, Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
@@ -969,6 +968,10 @@ Accounts screen has a 3-dot menu with "Show Archived" / "Hide Archived" toggle. 
 ## Unallocated Multi-Currency Display
 
 The Unallocated card on the Budget tab shows only the base currency amount by default. If the user has unallocated funds in other currencies, a "+ N other currencies" link and chevron arrow appear. Tapping expands an animated breakdown showing each currency with its amount. This avoids the anti-pattern of converting/summing across currencies with unreliable exchange rates. Single-currency users see no extra UI.
+
+## Reports Categories Tab
+
+Cashew layout: pill toggle (Top spending / Top transactions) → donut (`_CategoryPie`, total in the center) → `_CategoryRow` entries (real `CategoryIcon`, amount with base-currency symbol, thin `BudgetProgress` share bar, "N% · N transactions", month-over-month change). Repeated colors get distinct shades via `_distinctColors()`. The hub's tab bar uses a pastel pill indicator.
 
 ## Reports Month Navigation
 

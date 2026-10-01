@@ -256,7 +256,7 @@ class _ArchivedSection extends ConsumerWidget {
                     fontSize: TypographyTokens.sectionHeaderSize,
                     fontWeight: TypographyTokens.sectionHeaderWeight,
                     letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                    color: AppColors.th(context),
+                    color: AppColors.accent,
                   )),
             ),
             ...archived.map((ab) => _ArchivedAccountTile(

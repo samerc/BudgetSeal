@@ -9,6 +9,39 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String reportsTxCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count معاملة',
+      few: '$count معاملات',
+      two: 'معاملتان',
+      one: 'معاملة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashUpcoming => 'قادمة';
+
+  @override
+  String get dashOverdue => 'متأخرة';
+
+  @override
+  String dashBillsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فاتورة',
+      few: '$count فواتير',
+      two: 'فاتورتان',
+      one: 'فاتورة واحدة',
+      zero: 'لا فواتير',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get commonCancel => 'إلغاء';
 
   @override
@@ -3939,12 +3972,12 @@ class SAr extends S {
   String get reportsProjectedTotal => 'الإجمالي المتوقع';
 
   @override
-  String reportsLessThanLast(double pct) {
+  String reportsLessThanLast(int pct) {
     return '$pct% أقل من الشهر الماضي';
   }
 
   @override
-  String reportsMoreThanLast(double pct) {
+  String reportsMoreThanLast(int pct) {
     return '$pct% أكثر من الشهر الماضي';
   }
 

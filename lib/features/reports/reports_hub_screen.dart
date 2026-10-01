@@ -19,6 +19,7 @@ import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/budget_progress.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
@@ -119,12 +120,20 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
               labelColor: AppColors.tp(context),
               unselectedLabelColor: AppColors.ts(context),
               labelStyle: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w600),
+                  fontSize: 14.5, fontWeight: FontWeight.w700),
               unselectedLabelStyle: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w400),
-              indicatorColor: AppColors.accent,
-              indicatorWeight: 3,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+                  fontSize: 14.5, fontWeight: FontWeight.w500),
+              // Cashew-style pill selector instead of an underline
+              indicator: BoxDecoration(
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.7, dark: 0.6),
+                borderRadius: BorderRadius.circular(RadiusTokens.pill),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorPadding: const EdgeInsets.symmetric(vertical: 6),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 14),
+              splashBorderRadius: BorderRadius.circular(RadiusTokens.pill),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               dividerHeight: 0,
               tabs: [
                 Tab(text: S.of(context).reportsOverviewTab),
@@ -570,10 +579,10 @@ class _MonthlySummaryCard extends StatelessWidget {
     if (lastMonthExpense > 0) {
       final diff = ((expense - lastMonthExpense) / lastMonthExpense * 100).abs();
       if (expense < lastMonthExpense) {
-        comparison = S.of(context).reportsLessThanLast(diff.roundToDouble());
+        comparison = S.of(context).reportsLessThanLast(diff.round());
         comparisonColor = AppColors.healthy;
       } else if (expense > lastMonthExpense) {
-        comparison = S.of(context).reportsMoreThanLast(diff.roundToDouble());
+        comparison = S.of(context).reportsMoreThanLast(diff.round());
         comparisonColor = AppColors.overspent;
       } else {
         comparison = S.of(context).reportsSameAsLast;
@@ -590,13 +599,6 @@ class _MonthlySummaryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
-          Text(DateFormat('MMMM yyyy').format(month),
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ts(context))),
-          const SizedBox(height: 16),
           // Main stats row
           Row(
             children: [
@@ -868,6 +870,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
   void _showCategoryTransactions(
     BuildContext context, {
     required String categoryName,
+    Category? category,
     required Color color,
     required List<TransactionEntry> transactions,
     required Map<String, Category> categoryMap,
@@ -908,25 +911,12 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Row(
                 children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        categoryName.isNotEmpty
-                            ? categoryName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: color,
-                        ),
-                      ),
-                    ),
+                  CategoryIcon(
+                    categoryName: categoryName,
+                    emoji: category?.icon,
+                    color: color,
+                    size: 36,
+                    circular: true,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -940,7 +930,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                     ),
                   ),
                   Text(
-                    '${catTxns.length} transaction${catTxns.length == 1 ? '' : 's'}',
+                    S.of(ctx).reportsTxCount(catTxns.length),
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.ts(ctx),
@@ -998,7 +988,8 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 ),
                               ),
                               Text(
-                                formatAmount(_baseAmount(e)),
+                                formatAmount(_baseAmount(e),
+                                    currency: _reportsBaseCurrency),
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -1036,6 +1027,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         final catSpend = <String, double>{};
         final catCount = <String, int>{};
         final catColors = <String, Color>{};
+        final catObjs = <String, Category>{};
 
         for (final e in filtered) {
           final catId = e.tx.categoryId;
@@ -1045,6 +1037,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           catCount[name] = (catCount[name] ?? 0) + 1;
           if (cat != null && !catColors.containsKey(name)) {
             catColors[name] = AppColors.fromHex(cat.colorHex);
+            catObjs[name] = cat;
           }
         }
 
@@ -1126,53 +1119,53 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                   ? Center(
                       child: Text(S.of(context).reportsNoExpenses,
                           style: TextStyle(color: AppColors.ts(context))))
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-                      itemCount: _showByTransactions
-                          ? sortedByCount.length
-                          : sortedBySpend.length,
-                      itemBuilder: (_, i) {
-                        if (_showByTransactions) {
-                          final entry = sortedByCount[i];
-                          final color = catColors[entry.key] ??
-                              AppColors.accent;
+                  : Builder(builder: (context) {
+                      final rows = _showByTransactions
+                          ? [
+                              for (final e in sortedByCount)
+                                MapEntry(e.key, catSpend[e.key] ?? 0.0)
+                            ]
+                          : sortedBySpend;
+                      final total =
+                          catSpend.values.fold<double>(0, (a, b) => a + b);
+                      final colors = _distinctColors([
+                        for (final r in rows)
+                          catColors[r.key] ?? AppColors.accent
+                      ]);
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                        itemCount: rows.length + 1,
+                        itemBuilder: (_, i) {
+                          if (i == 0) {
+                            return _CategoryPie(
+                              values: [for (final r in rows) r.value],
+                              colors: colors,
+                              total: total,
+                            );
+                          }
+                          final entry = rows[i - 1];
+                          final color = colors[i - 1];
                           return _CategoryRow(
                             name: entry.key,
-                            value:
-                                '${entry.value} transaction${entry.value == 1 ? '' : 's'}',
-                            amount: catSpend[entry.key] ?? 0,
-                            color: color,
-                            lastMonthAmount: lastMonthSpend[entry.key],
-                            onTap: () => _showCategoryTransactions(
-                              context,
-                              categoryName: entry.key,
-                              color: color,
-                              transactions: filtered,
-                              categoryMap: categoryMap,
-                            ),
-                          );
-                        } else {
-                          final entry = sortedBySpend[i];
-                          final color = catColors[entry.key] ??
-                              AppColors.accent;
-                          return _CategoryRow(
-                            name: entry.key,
-                            value:
-                                '${catCount[entry.key] ?? 0} transaction${(catCount[entry.key] ?? 0) == 1 ? '' : 's'}',
+                            category: catObjs[entry.key],
+                            value: S.of(context)
+                                .reportsTxCount(catCount[entry.key] ?? 0),
                             amount: entry.value,
+                            share: total > 0 ? entry.value / total : 0,
                             color: color,
                             lastMonthAmount: lastMonthSpend[entry.key],
                             onTap: () => _showCategoryTransactions(
                               context,
                               categoryName: entry.key,
+                              category: catObjs[entry.key],
                               color: color,
                               transactions: filtered,
                               categoryMap: categoryMap,
                             ),
                           );
-                        }
-                      },
-                    ),
+                        },
+                      );
+                    }),
             ),
           ],
           ),
@@ -1188,18 +1181,105 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
   }
 }
 
+/// Subcategories share their parent's color — shift the shade each time a
+/// color repeats so slices and bars stay distinguishable.
+List<Color> _distinctColors(List<Color> base) {
+  final seen = <int, int>{};
+  return [
+    for (final c in base)
+      () {
+        final n = seen.update(c.toARGB32(), (v) => v + 1, ifAbsent: () => 0);
+        if (n == 0) return c;
+        return n.isOdd
+            ? AppColors.lightenPastel(c, 0.22 * ((n + 1) ~/ 2))
+            : AppColors.darkenPastel(c, 0.2 * (n ~/ 2));
+      }(),
+  ];
+}
+
+/// Cashew-style donut above the category list, total in the middle.
+class _CategoryPie extends StatelessWidget {
+  const _CategoryPie({
+    required this.values,
+    required this.colors,
+    required this.total,
+  });
+
+  final List<double> values;
+  final List<Color> colors;
+  final double total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+      child: SizedBox(
+        height: 210,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            PieChart(PieChartData(
+              sectionsSpace: 2,
+              centerSpaceRadius: 68,
+              startDegreeOffset: -90,
+              sections: [
+                for (var i = 0; i < values.length; i++)
+                  PieChartSectionData(
+                    value: values[i],
+                    color: colors[i],
+                    radius: 34,
+                    showTitle: false,
+                  ),
+              ],
+            )),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 120,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      formatAmount(total, currency: _reportsBaseCurrency),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  S.of(context).dashboardSpent,
+                  style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Cashew CategoryEntry: icon, name + amount, a thin bar for the category's
+/// share of the month, then share + count + month-over-month change.
 class _CategoryRow extends StatelessWidget {
   final String name;
+  final Category? category;
   final String value;
   final double amount;
+  final double share;
   final Color color;
   final VoidCallback? onTap;
   final double? lastMonthAmount;
 
   const _CategoryRow({
     required this.name,
+    this.category,
     required this.value,
     required this.amount,
+    required this.share,
     required this.color,
     this.onTap,
     this.lastMonthAmount,
@@ -1207,106 +1287,108 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Build comparison indicator
+    // Month-over-month comparison
     Widget? comparisonWidget;
     if (lastMonthAmount != null) {
       final last = lastMonthAmount!;
       if (last > 0 && amount > 0) {
         final pctChange = ((amount - last) / last * 100).round();
-        if (pctChange > 0) {
+        if (pctChange != 0) {
+          final up = pctChange > 0;
           comparisonWidget = Text(
-            '\u2191 $pctChange%',
-            style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.overspent),
-          );
-        } else if (pctChange < 0) {
-          comparisonWidget = Text(
-            '\u2193 ${pctChange.abs()}%',
-            style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.healthy),
-          );
-        } else {
-          comparisonWidget = Text(
-            '\u2014',
+            '${up ? '↑' : '↓'} ${pctChange.abs()}%',
             style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.ts(context)),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: up ? AppColors.overspent : AppColors.healthy),
           );
         }
       } else if (last == 0 && amount > 0) {
         comparisonWidget = Text(
           S.of(context).reportsNewBadge,
           style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
               color: AppColors.accent),
         );
       }
     }
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: color),
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 4, 8),
+          child: Row(
+            children: [
+              CategoryIcon(
+                categoryName: name,
+                emoji: category?.icon,
+                color: color,
+                size: 44,
+                circular: true,
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context))),
-                Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(value,
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.ts(context))),
-                    if (comparisonWidget != null) ...[
-                      const SizedBox(width: 8),
-                      comparisonWidget,
-                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.tp(context))),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                            formatAmount(amount,
+                                currency: _reportsBaseCurrency),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.tp(context))),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    BudgetProgress(
+                      progress: share,
+                      color: color,
+                      height: 6,
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text('${(share * 100).round()}%',
+                            style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.ts(context))),
+                        Flexible(
+                          child: Text(' · $value',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: AppColors.ts(context))),
+                        ),
+                        const Spacer(),
+                        if (comparisonWidget != null) comparisonWidget,
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Text(formatAmount(amount),
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          Icon(Icons.chevron_right_rounded,
-              size: 18, color: AppColors.th(context)),
-        ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -2356,22 +2438,20 @@ class _ToggleChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.tp(context)
+              ? AppColors.pastel(context, AppColors.accent,
+                  light: 0.7, dark: 0.6)
               : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(RadiusTokens.pill),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 13.5,
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
-            color: selected
-                ? AppColors.sf(context)
-                : AppColors.ts(context),
+            color: selected ? AppColors.tp(context) : AppColors.ts(context),
           ),
         ),
       ),

@@ -153,7 +153,7 @@ class _AllocationDetailScreenState
             style: TextStyle(
                 fontSize: TypographyTokens.sectionHeaderSize,
                 fontWeight: TypographyTokens.sectionHeaderWeight,
-                color: AppColors.ts(context),
+                color: AppColors.accent,
                 letterSpacing: TypographyTokens.sectionHeaderLetterSpacing)),
       ]),
     );

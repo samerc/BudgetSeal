@@ -1,4 +1,10 @@
 {
+  "reportsTxCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@reportsTxCount": { "placeholders": { "count": { "type": "int" } } },
+  "dashUpcoming": "Upcoming",
+  "dashOverdue": "Overdue",
+  "dashBillsCount": "{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}",
+  "@dashBillsCount": { "placeholders": { "count": { "type": "int" } } },
   "@@locale": "en",
   "commonCancel": "Cancel",
   "@commonCancel": {
@@ -1027,7 +1033,7 @@
       }
     }
   },
-  "txDetailLineDetail": "LINE DETAIL",
+  "txDetailLineDetail": "Line detail",
   "@txDetailLineDetail": {
     "description": "Section header"
   },
@@ -1035,11 +1041,11 @@
   "@txDetailUncategorized": {
     "description": "Fallback"
   },
-  "txDetailRelatedSingle": "RELATED TRANSACTION",
+  "txDetailRelatedSingle": "Related transaction",
   "@txDetailRelatedSingle": {
     "description": "Section header"
   },
-  "txDetailRelatedPlural": "RELATED TRANSACTIONS",
+  "txDetailRelatedPlural": "Related transactions",
   "@txDetailRelatedPlural": {
     "description": "Section header"
   },
@@ -1240,15 +1246,15 @@
       }
     }
   },
-  "currencyYourAccounts": "YOUR ACCOUNTS",
+  "currencyYourAccounts": "Your accounts",
   "@currencyYourAccounts": {
     "description": "Section header"
   },
-  "currencyRecentlyUsed": "RECENTLY USED",
+  "currencyRecentlyUsed": "Recently used",
   "@currencyRecentlyUsed": {
     "description": "Section header"
   },
-  "currencyAll": "ALL CURRENCIES",
+  "currencyAll": "All currencies",
   "@currencyAll": {
     "description": "Section header"
   },
@@ -1368,7 +1374,7 @@
   "@billSplit": {
     "description": "Dialog button"
   },
-  "billWhosSplitting": "WHO'S SPLITTING?",
+  "billWhosSplitting": "Who's splitting?",
   "@billWhosSplitting": {
     "description": "Section header"
   },
@@ -1380,7 +1386,7 @@
   "@billSplitEvenly": {
     "description": "Toggle title"
   },
-  "billAssignItems": "ASSIGN ITEMS",
+  "billAssignItems": "Assign items",
   "@billAssignItems": {
     "description": "Section header"
   },
@@ -1762,7 +1768,7 @@
   "@allocSaveChanges": {
     "description": "Bottom button"
   },
-  "allocNameIconSection": "NAME & ICON",
+  "allocNameIconSection": "Name & icon",
   "@allocNameIconSection": {
     "description": "Section header"
   },
@@ -1774,7 +1780,7 @@
   "@allocRemoveIcon": {
     "description": "Button"
   },
-  "allocTypeSection": "ENVELOPE TYPE",
+  "allocTypeSection": "Envelope type",
   "@allocTypeSection": {
     "description": "Section header"
   },
@@ -1806,7 +1812,7 @@
   "@allocInfoBanner": {
     "description": "Info text"
   },
-  "allocPurposeSection": "PURPOSE",
+  "allocPurposeSection": "Purpose",
   "@allocPurposeSection": {
     "description": "Section header"
   },
@@ -1818,7 +1824,7 @@
   "@allocFlexible": {
     "description": "Chip label"
   },
-  "allocCycleSection": "CYCLE",
+  "allocCycleSection": "Cycle",
   "@allocCycleSection": {
     "description": "Section header"
   },
@@ -1850,11 +1856,11 @@
   "@allocAutoResetSubtitle": {
     "description": "Switch subtitle"
   },
-  "allocSavingsTargetSection": "SAVINGS TARGET",
+  "allocSavingsTargetSection": "Savings target",
   "@allocSavingsTargetSection": {
     "description": "Section header"
   },
-  "allocMonthlyBudgetSection": "MONTHLY BUDGET",
+  "allocMonthlyBudgetSection": "Monthly budget",
   "@allocMonthlyBudgetSection": {
     "description": "Section header"
   },
@@ -1874,7 +1880,7 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocLinkedCategories": "LINKED CATEGORIES",
+  "allocLinkedCategories": "Linked categories",
   "@allocLinkedCategories": {
     "description": "Section header"
   },
@@ -1927,7 +1933,7 @@
       }
     }
   },
-  "allocRecentActivity": "RECENT ACTIVITY",
+  "allocRecentActivity": "Recent activity",
   "@allocRecentActivity": {
     "description": "Section header"
   },
@@ -1955,7 +1961,7 @@
   "@allocLedgerCarried": {
     "description": "Ledger type"
   },
-  "allocSpendingHistory": "SPENDING HISTORY",
+  "allocSpendingHistory": "Spending history",
   "@allocSpendingHistory": {
     "description": "Section header"
   },
@@ -2095,11 +2101,11 @@
   "allocRolloverDesc": "Carry remaining funds to the next period",
   "allocAutoReset": "Auto-reset",
   "allocAutoResetDesc": "Reset automatically at period start",
-  "allocMonthlyBudget": "MONTHLY BUDGET",
-  "allocTargetOptional": "TARGET (OPTIONAL)",
+  "allocMonthlyBudget": "Monthly budget",
+  "allocTargetOptional": "Target (optional)",
   "allocMonthlyBudgetDesc": "How much do you want to spend in this envelope each month?",
   "allocTargetDesc": "Set a target amount, or leave at zero for open-ended.",
-  "allocLinkedCategoriesSection": "LINKED CATEGORIES",
+  "allocLinkedCategoriesSection": "Linked categories",
   "allocLinkedCategoriesDesc": "Expenses with these categories will debit this envelope.",
   "allocNoCategoriesLinked": "No categories linked. Tap + to link categories so expenses debit this envelope.",
   "allocAvailable": "Available",
@@ -2280,7 +2286,7 @@
   "acctSortByType": "Sort by type",
   "acctTravelWallet": "Travel wallet \u00b7 {currency}",
   "@acctTravelWallet": { "placeholders": { "currency": { "type": "String" } } },
-  "acctArchived": "ARCHIVED",
+  "acctArchived": "Archived",
   "acctNoArchived": "No archived accounts",
   "acctUnarchiveTitle": "Unarchive Account",
   "acctUnarchiveMsg": "Restore \"{name}\" to your active accounts?",
@@ -2294,20 +2300,20 @@
   "@acctConvertBackDesc": { "placeholders": { "currency": { "type": "String" } } },
   "acctConvertBackClose": "Convert Back & Close",
   "acctSettings": "Account Settings",
-  "acctNameSection": "NAME",
+  "acctNameSection": "Name",
   "acctAccountName": "Account name",
-  "acctTypeSection": "TYPE",
-  "acctCurrencySection": "CURRENCY",
+  "acctTypeSection": "Type",
+  "acctCurrencySection": "Currency",
   "acctSelectCurrency": "Select currency",
-  "acctDecimalSection": "DECIMAL PLACES",
+  "acctDecimalSection": "Decimal places",
   "acctDecimalAuto": "Auto ({count})",
   "@acctDecimalAuto": { "placeholders": { "count": { "type": "int" } } },
-  "acctOpeningBalance": "OPENING BALANCE",
+  "acctOpeningBalance": "Opening balance",
   "acctCreateAccount": "Create account",
   "acctCreated": "Account created",
   "acctUpdated": "Account updated",
   "tmplCreated": "Template created",
-  "acctRecentTransactions": "RECENT TRANSACTIONS",
+  "acctRecentTransactions": "Recent transactions",
   "acctNoTransactions": "No transactions yet",
   "acctAdjustDesc": "Enter the actual balance of this account. An adjustment transaction will be created for the difference.",
   "acctCurrentBalanceLabel": "Current balance: {amount}",
@@ -2363,8 +2369,8 @@
   "catCouldntLoad": "Couldn't load categories",
   "catSubcategories": "{count,plural, =1{1 subcategory} other{{count} subcategories}}",
   "@catSubcategories": { "placeholders": { "count": { "type": "int" } } },
-  "catSectionExpense": "EXPENSE",
-  "catSectionIncome": "INCOME",
+  "catSectionExpense": "Expense",
+  "catSectionIncome": "Income",
   "catEdit": "Edit",
   "catArchive": "Archive",
   "catUnarchive": "Unarchive",
@@ -2453,7 +2459,7 @@
       }
     }
   },
-  "billCalUpcoming": "UPCOMING",
+  "billCalUpcoming": "Upcoming",
   "@billCalUpcoming": {
     "description": "Section header"
   },
@@ -2580,7 +2586,7 @@
   "@subDetailTotalPaid": {
     "description": "Detail label"
   },
-  "subDetailPriceHistory": "PRICE HISTORY",
+  "subDetailPriceHistory": "Price history",
   "@subDetailPriceHistory": {
     "description": "Section header"
   },
@@ -2596,11 +2602,11 @@
   "@subDetailSetCancel": {
     "description": "Button"
   },
-  "subDetailPastTx": "PAST TRANSACTIONS",
+  "subDetailPastTx": "Past transactions",
   "@subDetailPastTx": {
     "description": "Section header"
   },
-  "subDetailUpcoming": "UPCOMING",
+  "subDetailUpcoming": "Upcoming",
   "@subDetailUpcoming": {
     "description": "Section header"
   },
@@ -2716,11 +2722,11 @@
   "@objNoSubtitle": {
     "description": "Empty state subtitle"
   },
-  "objGoalsSection": "GOALS",
+  "objGoalsSection": "Goals",
   "@objGoalsSection": {
     "description": "Section header"
   },
-  "objLoansSection": "LOANS",
+  "objLoansSection": "Loans",
   "@objLoansSection": {
     "description": "Section header"
   },
@@ -2842,7 +2848,7 @@
   "@objSetDeadline": {
     "description": "InkWell label"
   },
-  "objColorSection": "COLOR",
+  "objColorSection": "Color",
   "@objColorSection": {
     "description": "Section header"
   },
@@ -2894,7 +2900,7 @@
   "@travelInfo": {
     "description": "Info banner"
   },
-  "travelFrom": "FROM",
+  "travelFrom": "From",
   "@travelFrom": {
     "description": "Section label"
   },
@@ -2902,11 +2908,11 @@
   "@travelSelectAccount": {
     "description": "Dropdown hint"
   },
-  "travelAmountToExchange": "AMOUNT TO EXCHANGE",
+  "travelAmountToExchange": "Amount to exchange",
   "@travelAmountToExchange": {
     "description": "Section label"
   },
-  "travelCurrencySection": "TRAVEL CURRENCY",
+  "travelCurrencySection": "Travel currency",
   "@travelCurrencySection": {
     "description": "Section label"
   },
@@ -2914,7 +2920,7 @@
   "@travelCurrencyReceive": {
     "description": "Field label"
   },
-  "travelAmountReceived": "AMOUNT RECEIVED",
+  "travelAmountReceived": "Amount received",
   "@travelAmountReceived": {
     "description": "Section label"
   },
@@ -3059,11 +3065,11 @@
   "@settingsMoreTitle": {
     "description": "Screen title"
   },
-  "settingsToolsSection": "TOOLS",
+  "settingsToolsSection": "Tools",
   "@settingsToolsSection": {
     "description": "Section header"
   },
-  "settingsAutomationSection": "AUTOMATION",
+  "settingsAutomationSection": "Automation",
   "@settingsAutomationSection": {
     "description": "Section header"
   },
@@ -3307,7 +3313,7 @@
   "@syncDisconnect": {
     "description": "Button / dialog title"
   },
-  "syncConnectSection": "CONNECT A PROVIDER",
+  "syncConnectSection": "Connect a provider",
   "@syncConnectSection": {
     "description": "Section header"
   },
@@ -3540,7 +3546,7 @@
   "@backupRestoreFromFile": {
     "description": "Button"
   },
-  "backupLocalSection": "LOCAL BACKUPS",
+  "backupLocalSection": "Local backups",
   "@backupLocalSection": {
     "description": "Section header"
   },
@@ -3732,13 +3738,13 @@
   "@aboutLegalese": { "description": "Copyright line", "placeholders": { "year": { "type": "int" } } },
   "settingsTitle": "Settings",
   "@settingsTitle": { "description": "AppBar title" },
-  "settingsAppearanceSection": "APPEARANCE",
+  "settingsAppearanceSection": "Appearance",
   "@settingsAppearanceSection": { "description": "Section header" },
-  "settingsDataSection": "DATA",
+  "settingsDataSection": "Data",
   "@settingsDataSection": { "description": "Section header" },
-  "settingsPreferencesSection": "PREFERENCES",
+  "settingsPreferencesSection": "Preferences",
   "@settingsPreferencesSection": { "description": "Section header" },
-  "settingsSecuritySection": "SECURITY",
+  "settingsSecuritySection": "Security",
   "@settingsSecuritySection": { "description": "Section header" },
   "tileRecurringBills": "Recurring & Bills",
   "@tileRecurringBills": { "description": "Tile title" },
@@ -3876,7 +3882,7 @@
   "@currencySymbolsTitle": { "description": "Sheet title" },
   "currencySymbolsDesc": "Tap any currency to change how its symbol is displayed. For example, change \u0644.\u0644 to LBP.",
   "@currencySymbolsDesc": { "description": "Sheet description" },
-  "currencySymbolsAllSection": "ALL CURRENCIES",
+  "currencySymbolsAllSection": "All currencies",
   "@currencySymbolsAllSection": { "description": "Section header" },
   "currencySymbolDefault": "Default: {symbol}",
   "@currencySymbolDefault": { "description": "Subtitle for overridden currency", "placeholders": { "symbol": { "type": "String" } } },
@@ -4154,7 +4160,7 @@
   "@onboardChangeLater": {
     "description": "Subtitle"
   },
-  "onboardHouseholdSection": "HOUSEHOLD",
+  "onboardHouseholdSection": "Household",
   "@onboardHouseholdSection": {
     "description": "Section"
   },
@@ -4170,7 +4176,7 @@
   "@onboardPeriodStart": {
     "description": "Field label"
   },
-  "onboardFirstAccountSection": "FIRST ACCOUNT",
+  "onboardFirstAccountSection": "First account",
   "@onboardFirstAccountSection": {
     "description": "Section"
   },
@@ -4194,7 +4200,7 @@
   "@onboardTypeDigital": {
     "description": "Chip"
   },
-  "onboardCategoriesSection": "CATEGORIES",
+  "onboardCategoriesSection": "Categories",
   "@onboardCategoriesSection": {
     "description": "Section"
   },
@@ -4214,7 +4220,7 @@
   "@onboardEmptySub": {
     "description": "Toggle subtitle"
   },
-  "onboardEntrySection": "TRANSACTION ENTRY",
+  "onboardEntrySection": "Transaction entry",
   "@onboardEntrySection": {
     "description": "Section"
   },
@@ -4356,7 +4362,7 @@
     "description": "Comparison",
     "placeholders": {
       "pct": {
-        "type": "double"
+        "type": "int"
       }
     }
   },
@@ -4365,7 +4371,7 @@
     "description": "Comparison",
     "placeholders": {
       "pct": {
-        "type": "double"
+        "type": "int"
       }
     }
   },
@@ -4397,11 +4403,11 @@
   "@reportsNoSpending": {
     "description": "Empty state"
   },
-  "reportsTopSpending": "TOP SPENDING",
+  "reportsTopSpending": "Top spending",
   "@reportsTopSpending": {
     "description": "Toggle"
   },
-  "reportsTopTransactions": "TOP TRANSACTIONS",
+  "reportsTopTransactions": "Top transactions",
   "@reportsTopTransactions": {
     "description": "Toggle"
   },
@@ -4493,19 +4499,19 @@
   "@reportsAgeExplanation": {
     "description": "Explanation"
   },
-  "reportsTipsSection": "TIPS",
+  "reportsTipsSection": "Tips",
   "@reportsTipsSection": {
     "description": "Section header"
   },
-  "reportsNetWorth": "NET WORTH",
+  "reportsNetWorth": "Net worth",
   "@reportsNetWorth": {
     "description": "Section title"
   },
-  "reportsAssets": "ASSETS",
+  "reportsAssets": "Assets",
   "@reportsAssets": {
     "description": "Section header"
   },
-  "reportsLiabilities": "LIABILITIES",
+  "reportsLiabilities": "Liabilities",
   "@reportsLiabilities": {
     "description": "Section header"
   },
@@ -6001,7 +6007,7 @@
   "@onboardChangeLater": {
     "description": "Onboarding setup subtitle"
   },
-  "onboardHouseholdSection": "HOUSEHOLD",
+  "onboardHouseholdSection": "Household",
   "@onboardHouseholdSection": {
     "description": "Onboarding section label"
   },
@@ -6017,7 +6023,7 @@
   "@onboardPeriodStart": {
     "description": "Onboarding dropdown label"
   },
-  "onboardFirstAccountSection": "FIRST ACCOUNT",
+  "onboardFirstAccountSection": "First account",
   "@onboardFirstAccountSection": {
     "description": "Onboarding section label"
   },
@@ -6041,7 +6047,7 @@
   "@onboardTypeDigital": {
     "description": "Onboarding account type chip"
   },
-  "onboardCategoriesSection": "CATEGORIES",
+  "onboardCategoriesSection": "Categories",
   "@onboardCategoriesSection": {
     "description": "Onboarding section label"
   },
@@ -6061,7 +6067,7 @@
   "@onboardEmptySub": {
     "description": "Onboarding category option subtitle"
   },
-  "onboardEntrySection": "TRANSACTION ENTRY",
+  "onboardEntrySection": "Transaction entry",
   "@onboardEntrySection": {
     "description": "Onboarding section label"
   },
@@ -6209,7 +6215,7 @@
   "@travelInfo": {
     "description": "Travel exchange info banner"
   },
-  "travelFrom": "FROM",
+  "travelFrom": "From",
   "@travelFrom": {
     "description": "Travel exchange section label"
   },
@@ -6217,11 +6223,11 @@
   "@travelSelectAccount": {
     "description": "Travel exchange dropdown hint"
   },
-  "travelAmountToExchange": "AMOUNT TO EXCHANGE",
+  "travelAmountToExchange": "Amount to exchange",
   "@travelAmountToExchange": {
     "description": "Travel exchange section label"
   },
-  "travelCurrencySection": "TRAVEL CURRENCY",
+  "travelCurrencySection": "Travel currency",
   "@travelCurrencySection": {
     "description": "Travel exchange section label"
   },
@@ -6229,7 +6235,7 @@
   "@travelCurrencyReceive": {
     "description": "Travel exchange currency picker label"
   },
-  "travelAmountReceived": "AMOUNT RECEIVED",
+  "travelAmountReceived": "Amount received",
   "@travelAmountReceived": {
     "description": "Travel exchange section label"
   },
@@ -6676,11 +6682,11 @@
   },
   "objSummaryRemaining": "Remaining",
   "@objSummaryRemaining": { "description": "Summary row label" },
-  "objPaymentsSection": "PAYMENTS",
+  "objPaymentsSection": "Payments",
   "@objPaymentsSection": { "description": "Section header for payment history" },
-  "objSettingsSection": "SETTINGS",
+  "objSettingsSection": "Settings",
   "@objSettingsSection": { "description": "Section header for settings form" },
-  "objTypeSection": "TYPE",
+  "objTypeSection": "Type",
   "@objTypeSection": { "description": "Section header for type toggle" },
   "objHideSettings": "Hide Settings",
   "@objHideSettings": { "description": "Menu item to hide settings" },
@@ -6741,11 +6747,11 @@
     "placeholders": { "count": { "type": "int" } }
   },
 
-  "currencyYourAccounts": "YOUR ACCOUNTS",
+  "currencyYourAccounts": "Your accounts",
   "@currencyYourAccounts": { "description": "Currency sheet section header" },
-  "currencyRecentlyUsed": "RECENTLY USED",
+  "currencyRecentlyUsed": "Recently used",
   "@currencyRecentlyUsed": { "description": "Currency sheet section header" },
-  "currencyAll": "ALL CURRENCIES",
+  "currencyAll": "All currencies",
   "@currencyAll": { "description": "Currency sheet section header" },
 
   "syncConnectedTo": "Connected to {provider}",
