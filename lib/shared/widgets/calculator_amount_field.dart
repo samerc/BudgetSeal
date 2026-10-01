@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
+import '../theme/design_tokens.dart';
 import '../utils/format_number.dart';
 
 /// A read-only amount field that opens a calculator bottom sheet when tapped.
@@ -106,16 +107,22 @@ class CalculatorAmountField extends StatelessWidget {
   }
 
   Future<void> _openCalculatorSheet(BuildContext context) async {
-    final result = await showModalBottomSheet<double>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _CalculatorSheet(initialValue: value),
-    );
+    final result = await showCalculatorSheet(context, value);
     if (result != null) {
       onChanged(result);
     }
   }
+}
+
+/// Open the calculator bottom sheet directly (e.g. from a header amount).
+/// Returns the confirmed amount, or null if dismissed.
+Future<double?> showCalculatorSheet(BuildContext context, double initialValue) {
+  return showModalBottomSheet<double>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => _CalculatorSheet(initialValue: initialValue),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -159,7 +166,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     // Block a second decimal point in the same operand — "1.2." can't be
     // parsed and would silently evaluate to 0, showing the user a wrong total.
     if (d == '.' && !_startNewOperand && _calcDisplay.contains('.')) return;
-    HapticFeedback.lightImpact();
+    HapticFeedback.selectionClick();
     setState(() {
       if (_startNewOperand) {
         // After an operator: reset display to new number, keep expression building
@@ -242,8 +249,23 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
       }
     }
     if (numBuf.isNotEmpty) {
-      final n = double.tryParse(numBuf.toString());
-      buf.write(n != null && n > 0 ? formatForDisplay(n) : numBuf);
+      final raw = numBuf.toString();
+      final n = double.tryParse(raw);
+      if (n != null && n > 0) {
+        buf.write(formatForDisplay(n));
+        // Keep a just-typed decimal point (and trailing zeros) visible.
+        final dot = raw.indexOf('.');
+        if (dot >= 0) {
+          final frac = raw.substring(dot + 1);
+          if (frac.isEmpty) {
+            buf.write(decimalSeparatorChar);
+          } else if (frac.endsWith('0') && !formatForDisplay(n).contains(decimalSeparatorChar)) {
+            buf.write('$decimalSeparatorChar$frac');
+          }
+        }
+      } else {
+        buf.write(raw.replaceAll('.', decimalSeparatorChar));
+      }
     }
     return buf.toString();
   }
@@ -284,131 +306,135 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Done needs a positive amount — or zero when clearing a value that was
+    // already set.
+    final canSubmit =
+        _amount > 0 || (widget.initialValue > 0 && _amount == 0 && !_hasOperator);
+    final display = _amount > 0 || _hasOperator
+        ? _fmtExprForDisplay(_calcExpression)
+        : _calcDisplay.replaceAll('.', decimalSeparatorChar);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(RadiusTokens.sheet)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Amount display
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                _amount > 0 || _hasOperator
-                    ? _fmtExprForDisplay(_calcExpression)
-                    : _calcDisplay,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1,
-                  color: AppColors.tp(context),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          // Calculator keypad
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-            decoration: BoxDecoration(
-              color: AppColors.sfv(context),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _calcRow(['7', '8', '9', '\u00F7']),
-                const SizedBox(height: 6),
-                _calcRow(['4', '5', '6', '\u00D7']),
-                const SizedBox(height: 6),
-                _calcRow(['1', '2', '3', '-']),
-                const SizedBox(height: 6),
-                _calcRow(['.', '0', '\u232B', '+']),
-              ],
-            ),
-          ),
-          // Done button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(context, _amount),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text(
-                    S.of(context).commonDone,
-                    style:
-                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      // Numbers and operators are laid out left-to-right in every locale.
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Amount display — scales down instead of truncating.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 26, 24, 18),
+                child: SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      display,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 38,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              // Cashew selectAmount: one seamless rounded block, flush keys.
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(RadiusTokens.button),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _calcRow(['7', '8', '9', '÷']),
+                      _calcRow(['4', '5', '6', '×']),
+                      _calcRow(['1', '2', '3', '-']),
+                      _calcRow(['.', '0', '⌫', '+']),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: canSubmit ? 1 : 0.5,
+                    child: FilledButton(
+                      onPressed: canSubmit
+                          ? () => Navigator.pop(context, _amount)
+                          : null,
+                      child: Text(S.of(context).commonDone),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _calcRow(List<String> keys) {
+    final isBlack = Theme.of(context).scaffoldBackgroundColor ==
+        const Color(0xFF000000);
     return Row(
-      children: keys.map((key) {
-        final isOp = '+-\u00D7\u00F7'.contains(key);
-        final isBack = key == '\u232B';
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Material(
-              color: isOp
-                  ? AppColors.accent.withValues(alpha: 0.1)
-                  : AppColors.sf(context),
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  if (isBack) {
-                    _calcBackspace();
-                  } else if (isOp) {
-                    _calcOp(key);
-                  } else {
-                    _calcDigit(key);
-                  }
-                },
-                onLongPress: isBack ? _calcClear : null,
-                child: Container(
-                  height: 54,
-                  alignment: Alignment.center,
-                  child: isBack
-                      ? Icon(Icons.backspace_outlined,
-                          size: 20, color: AppColors.ts(context))
-                      : Text(
-                          key,
-                          style: TextStyle(
-                            fontSize: isOp ? 24 : 22,
-                            fontWeight:
-                                isOp ? FontWeight.w700 : FontWeight.w500,
-                            color: isOp
-                                ? AppColors.accent
-                                : AppColors.tp(context),
-                          ),
-                        ),
+      children: [
+        for (final key in keys)
+          Expanded(
+            child: Container(
+              // Black theme: hairline seams so keys don't merge into one slab.
+              margin: isBlack ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+              child: Material(
+                color: '+-×÷'.contains(key)
+                    ? AppColors.pastel(context, AppColors.accent,
+                        light: 0.75, dark: 0.7)
+                    : AppColors.sfv(context),
+                child: InkWell(
+                  onTap: () {
+                    if (key == '⌫') {
+                      _calcBackspace();
+                    } else if ('+-×÷'.contains(key)) {
+                      _calcOp(key);
+                    } else {
+                      _calcDigit(key);
+                    }
+                  },
+                  onLongPress: key == '⌫' ? _calcClear : null,
+                  child: SizedBox(
+                    height: 60,
+                    child: Center(
+                      child: key == '⌫'
+                          ? Icon(Icons.backspace_rounded,
+                              size: 22, color: AppColors.tp(context))
+                          : Text(
+                              key == '.' ? decimalSeparatorChar : key,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.tp(context),
+                              ),
+                            ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }

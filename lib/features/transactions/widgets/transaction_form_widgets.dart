@@ -21,7 +21,7 @@ class TxCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: child,
     );
@@ -252,9 +252,14 @@ class LineCard extends StatelessWidget {
   final ValueChanged<String?> onAccountChanged;
   final VoidCallback onChanged;
 
+  /// Single-line form: category and amount live in the header band, so the
+  /// card shows only account, currency, rate and note.
+  final bool compact;
+
   const LineCard({
     super.key,
     required this.line,
+    this.compact = false,
     required this.canRemove,
     required this.typeColor,
     required this.baseCurrency,
@@ -281,7 +286,7 @@ class LineCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       padding: CardTokens.padding,
       child: Column(
@@ -338,6 +343,13 @@ class LineCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (compact) ...[
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: onPickCurrency,
+                  child: CurrencyBadge(currency: line.currency),
+                ),
+              ],
               if (canRemove) ...[
                 const SizedBox(width: 8),
                 GestureDetector(
@@ -355,6 +367,7 @@ class LineCard extends StatelessWidget {
               ],
             ],
           ),
+          if (!compact) ...[
           const SizedBox(height: 8),
           // Category pill
           CategoryPill(
@@ -380,6 +393,7 @@ class LineCard extends StatelessWidget {
               ),
             ],
           ),
+          ],
           // Exchange rate row (shown when currency differs from base)
           if (_showRate) ...[
             const SizedBox(height: 8),
@@ -423,6 +437,7 @@ class LineCard extends StatelessWidget {
                         hintStyle:
                             TextStyle(fontSize: 13, color: AppColors.th(context)),
                         border: InputBorder.none,
+        filled: false,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -514,9 +529,10 @@ class LineCard extends StatelessWidget {
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             decoration: InputDecoration(
-              hintText: 'Item note…',
+              hintText: S.of(context).txWidgetItemNote,
               hintStyle: TextStyle(fontSize: 13, color: AppColors.th(context)),
               border: InputBorder.none,
+        filled: false,
               isDense: true,
               contentPadding: EdgeInsets.zero,
               prefixIcon: Padding(

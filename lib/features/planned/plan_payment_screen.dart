@@ -401,6 +401,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     labelText:
                         _type == _PlanType.transfer ? S.of(context).txFormFromAccount : S.of(context).commonAccount,
                     border: InputBorder.none,
+        filled: false,
                     prefixIcon: Icon(Icons.account_balance_rounded,
                         size: 18, color: AppColors.ts(context)),
                   ),
@@ -439,6 +440,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     decoration: InputDecoration(
                       labelText: S.of(context).txFormToAccount,
                       border: InputBorder.none,
+        filled: false,
                       prefixIcon: Icon(Icons.account_balance_rounded,
                           size: 18, color: AppColors.ts(context)),
                     ),
@@ -524,6 +526,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                   prefixIcon: Icon(Icons.short_text_rounded,
                       size: 18, color: AppColors.ts(context)),
                   border: InputBorder.none,
+        filled: false,
                   counterText: '',
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
@@ -544,6 +547,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                   prefixIcon: Icon(Icons.notes_rounded,
                       size: 18, color: AppColors.ts(context)),
                   border: InputBorder.none,
+        filled: false,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                 ),
@@ -786,7 +790,7 @@ class _TxFieldCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: child,
     );

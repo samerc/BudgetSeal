@@ -27,12 +27,12 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/amount_field.dart';
+import '../../shared/widgets/calculator_amount_field.dart';
+import '../../shared/widgets/category_icon.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
 import 'widgets/transaction_form_widgets.dart';
 import '../../l10n/generated/app_localizations.dart';
-
-bool _isEmoji(String s) => s.isNotEmpty && s.runes.first > 255;
 
 enum _TxType { income, expense, transfer }
 
@@ -865,74 +865,36 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final accounts = ref.watch(accountsProvider).value ?? [];
     ref.watch(categoriesProvider);
 
+    final bandColor = _bandColor(context);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: bandColor,
         title: Text(widget.editTransactionId != null
             ? S.of(context).txFormEditTitle
             : S.of(context).txFormNewTitle),
         actions: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 12),
-            child: FilledButton.icon(
-              onPressed: _loading ? null : _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: _typeColor(context),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
-                minimumSize: Size.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              icon: _loading
-                  ? const SizedBox(
-                      height: 14,
-                      width: 14,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.check_rounded, size: 18),
-              label: Text(S.of(context).commonSave,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
+          if (widget.editTransactionId == null)
+            IconButton(
+              tooltip: S.of(context).txFormUseTemplate,
+              onPressed: () => context.push('/templates'),
+              icon: const Icon(Icons.bolt_rounded),
             ),
-          ),
+          const SizedBox(width: 4),
         ],
       ),
+      bottomNavigationBar: _buildSaveBar(context),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Type selector + template
-            Row(
-              children: [
-                Expanded(child: _buildTypeSelector()),
-                if (widget.editTransactionId == null) ...[
-                  const SizedBox(width: 10),
-                  IconButton(
-                    tooltip: S.of(context).txFormUseTemplate,
-                    onPressed: () => context.push('/templates'),
-                    icon: Icon(Icons.bolt_rounded,
-                        color: AppColors.accent, size: 22),
-                    style: IconButton.styleFrom(
-                      backgroundColor:
-                          AppColors.accent.withValues(alpha: 0.1),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Category hero banner — only show when category is selected
-            if (_type != _TxType.transfer &&
-                _lines.isNotEmpty &&
-                _lines.first.categoryId != null) ...[
-              _buildCategoryHero(context),
-              const SizedBox(height: 12),
-            ],
-
+            // Cashew header band: type tabs + category icon + big amount.
+            _buildHeaderBand(context, bandColor),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             // Title
             _TxFieldCard(
               child: _buildTitleField(),
@@ -952,11 +914,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 maxLength: InputLimits.noteMaxLength,
                 decoration: InputDecoration(
+                  counterText: '', // limit still enforced, counter hidden
                   hintText: S.of(context).txFormNoteHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   prefixIcon: Icon(Icons.notes_rounded,
                       size: 18, color: AppColors.ts(context)),
                   border: InputBorder.none,
+        filled: false,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                 ),
@@ -1009,7 +973,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
             // Receipt
             _buildReceiptButton(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
+          ],
+        ),
+            ),
           ],
         ),
       ),
@@ -1020,87 +987,166 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   // Type selector
   // ---------------------------------------------------------------------------
 
-  Widget _buildCategoryHero(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Header band (Cashew addTransactionPage)
+  // ---------------------------------------------------------------------------
+
+  Category? get _firstLineCategory {
+    if (_lines.isEmpty || _lines.first.categoryId == null) return null;
+    return (ref.read(categoriesProvider).value ?? [])
+        .where((c) => c.id == _lines.first.categoryId)
+        .firstOrNull;
+  }
+
+  /// Band color: pastel of the category color (single line), else of the
+  /// transaction type color.
+  Color _bandColor(BuildContext context) {
+    final cat = _type == _TxType.transfer || _hasMultipleLines
+        ? null
+        : _firstLineCategory;
+    final base = cat != null ? AppColors.fromHex(cat.colorHex) : _typeColor(context);
+    // Lighter than the category icon's own pastel (0.55) so the icon reads.
+    return AppColors.pastel(context, base, light: 0.75, dark: 0.7);
+  }
+
+  Future<void> _editHeaderAmount() async {
+    if (_lines.isEmpty) _addLine();
     final line = _lines.first;
-    final cat = line.categoryId != null
-        ? (ref.read(categoriesProvider).value ?? [])
-            .where((c) => c.id == line.categoryId)
-            .firstOrNull
-        : null;
+    final v = await showCalculatorSheet(context, line.amount);
+    if (v == null || !mounted) return;
+    setState(() {
+      setAmountText(line.amountCtrl, v);
+      _validationError = null;
+    });
+  }
 
+  Widget _buildHeaderBand(BuildContext context, Color bandColor) {
+    final isTransfer = _type == _TxType.transfer;
+    final multi = _hasMultipleLines;
+    final cat = isTransfer || multi ? null : _firstLineCategory;
+    final line = _lines.isNotEmpty ? _lines.first : null;
+    final amount = multi ? _totalBaseAmount : (line?.amount ?? 0);
+    final amountCcy = multi ? _baseCurrency : (line?.currency ?? _baseCurrency);
     final typeColor = _typeColor(context);
-    final catColor = cat?.colorHex != null
-        ? AppColors.fromHex(cat!.colorHex)
-        : typeColor;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: catColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: catColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
+    final String subtitle;
+    if (isTransfer) {
+      subtitle = S.of(context).typeTransfer;
+    } else if (multi) {
+      subtitle = S.of(context).txNItems(_lines.length);
+    } else if (cat != null) {
+      subtitle = cat.name;
+    } else {
+      subtitle = S.of(context).txAfSelectCategoryButton;
+    }
+
+    final Widget icon;
+    if (cat != null) {
+      icon = CategoryIcon(
+        key: ValueKey(cat.id),
+        categoryName: cat.name,
+        emoji: cat.icon,
+        color: AppColors.fromHex(cat.colorHex),
+        size: 64,
+        circular: true,
+      );
+    } else {
+      icon = Container(
+        key: ValueKey('type_$_type'),
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: AppColors.pastel(context, typeColor, light: 0.35, dark: 0.3),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isTransfer
+              ? Icons.swap_horiz_rounded
+              : multi
+                  ? Icons.list_alt_rounded
+                  : Icons.category_rounded,
+          size: 30,
+          color: Colors.white,
+        ),
+      );
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      color: bandColor,
+      child: Column(
         children: [
-          // Category icon
-          Container(
-            width: CategoryIconTokens.listSize,
-            height: CategoryIconTokens.listSize,
-            decoration: BoxDecoration(
-              color: catColor.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: cat != null && cat.icon.isNotEmpty && _isEmoji(cat.icon)
-                  ? Text(cat.icon, style: const TextStyle(fontSize: 22))
-                  : Icon(
-                      _type == _TxType.income
-                          ? Icons.arrow_downward_rounded
-                          : Icons.arrow_upward_rounded,
-                      size: 22,
-                      color: catColor,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          // Category name + amount
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          _buildTypeTabs(context),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 18, 20, 22),
+            child: Row(
               children: [
-                Text(
-                  formatAmount(_totalBaseAmount, currency: _baseCurrency),
-                  style: TextStyle(
-                    fontSize: TypographyTokens.amountLargeSize,
-                    fontWeight: TypographyTokens.amountLargeWeight,
-                    color: AppColors.tp(context),
+                GestureDetector(
+                  onTap: isTransfer || multi ? null : () => _pickCategory(0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, anim) =>
+                        ScaleTransition(scale: anim, child: child),
+                    child: icon,
                   ),
                 ),
-                if (cat != null) ...[
-                  Text(
-                    cat.name,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.ts(context),
-                    ),
-                  ),
-                  if (_autoFilled)
-                    Text(
-                      S.of(context).txFormAutoDetected,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.accent.withValues(alpha: 0.7),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: multi ? null : _editHeaderAmount,
+                        child: SizedBox(
+                          height: 46,
+                          width: double.infinity,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: Text(
+                              amount > 0
+                                  ? formatAmount(amount, currency: amountCcy)
+                                  : formatAmount(0, currency: amountCcy),
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                                color: amount > 0
+                                    ? AppColors.tp(context)
+                                    : AppColors.tp(context)
+                                        .withValues(alpha: 0.35),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                ] else
-                  Text(
-                    S.of(context).txFormNoCategory,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.th(context),
-                    ),
+                      const SizedBox(height: 2),
+                      GestureDetector(
+                        onTap: isTransfer || multi ? null : () => _pickCategory(0),
+                        child: Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context).withValues(alpha: 0.75),
+                          ),
+                        ),
+                      ),
+                      if (_autoFilled && cat != null)
+                        Text(
+                          S.of(context).txFormAutoDetected,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context).withValues(alpha: 0.55),
+                          ),
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           ),
@@ -1109,42 +1155,96 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  Widget _buildTypeSelector() {
+  /// Expense / Income / Transfer tabs across the top of the band.
+  Widget _buildTypeTabs(BuildContext context) {
+    Widget tab(_TxType t, String label) {
+      final selected = _type == t;
+      return Expanded(
+        child: InkWell(
+          onTap: () {
+            if (selected) return;
+            hapticSelection();
+            setState(() {
+              _type = t;
+              if (_lines.isEmpty) _addLine();
+            });
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            height: 46,
+            alignment: Alignment.center,
+            color: selected
+                ? Colors.transparent
+                : Colors.black.withValues(alpha: 0.07),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                color: AppColors.tp(context)
+                    .withValues(alpha: selected ? 1 : 0.55),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Row(
       children: [
-        TypeChip(
-          label: S.of(context).typeIncome,
-          icon: Icons.arrow_downward_rounded,
-          selected: _type == _TxType.income,
-          color: AppColors.healthy,
-          onTap: () => setState(() {
-            _type = _TxType.income;
-            if (_lines.isEmpty) _addLine();
-          }),
-        ),
-        const SizedBox(width: 8),
-        TypeChip(
-          label: S.of(context).typeExpense,
-          icon: Icons.arrow_upward_rounded,
-          selected: _type == _TxType.expense,
-          color: AppColors.overspent,
-          onTap: () => setState(() {
-            _type = _TxType.expense;
-            if (_lines.isEmpty) _addLine();
-          }),
-        ),
-        const SizedBox(width: 8),
-        TypeChip(
-          label: S.of(context).typeTransfer,
-          icon: Icons.swap_horiz_rounded,
-          selected: _type == _TxType.transfer,
-          color: AppColors.accent,
-          onTap: () => setState(() {
-            _type = _TxType.transfer;
-            if (_lines.isEmpty) _addLine();
-          }),
-        ),
+        tab(_TxType.expense, S.of(context).typeExpense),
+        tab(_TxType.income, S.of(context).typeIncome),
+        tab(_TxType.transfer, S.of(context).typeTransfer),
       ],
+    );
+  }
+
+  /// Bottom action: "Enter amount" until an amount exists, then Save/Add.
+  Widget _buildSaveBar(BuildContext context) {
+    final needsAmount = !_hasMultipleLines &&
+        (_lines.isEmpty || _lines.first.amount <= 0);
+    final isEdit = widget.editTransactionId != null;
+    final label = needsAmount
+        ? S.of(context).txAfEnterAmountButton
+        : isEdit
+            ? S.of(context).commonSave
+            : S.of(context).txAfAddTransaction;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        // Fade content into the bar instead of a hard edge.
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.bg(context).withValues(alpha: 0),
+            AppColors.bg(context),
+          ],
+          stops: const [0, 0.25],
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+          child: FilledButton(
+            onPressed: _loading
+                ? null
+                : needsAmount
+                    ? _editHeaderAmount
+                    : _save,
+            child: _loading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.5))
+                : AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: Text(label, key: ValueKey(label)),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1313,6 +1413,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               hintStyle: TextStyle(
                                   fontSize: 13, color: AppColors.th(context)),
                               border: InputBorder.none,
+        filled: false,
                               isDense: true,
                               contentPadding: EdgeInsets.zero,
                             ),
@@ -1484,6 +1585,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             padding: const EdgeInsets.only(bottom: 10),
             child: LineCard(
               line: line,
+              compact: _lines.length == 1,
               canRemove: _lines.length > 1,
               typeColor: _typeColor(context),
               baseCurrency: _baseCurrency,
@@ -1572,11 +1674,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           onChanged: _onTitleChanged,
           maxLength: InputLimits.nameMaxLength,
           decoration: InputDecoration(
+            counterText: '', // limit still enforced, counter hidden
             hintText: S.of(context).txFormTitleHint,
             hintStyle: TextStyle(color: AppColors.th(context)),
             prefixIcon: Icon(Icons.edit_rounded,
                 size: 18, color: AppColors.ts(context)),
             border: InputBorder.none,
+        filled: false,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -1745,9 +1849,9 @@ class _TxFieldCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        // Cashew TextInput: filled container, radius 15, no border.
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context).withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(RadiusTokens.input),
       ),
       child: child,
     );

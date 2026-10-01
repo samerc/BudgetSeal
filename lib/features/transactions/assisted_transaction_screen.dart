@@ -1745,7 +1745,7 @@ class _AssistedTransactionScreenState
                         decoration: BoxDecoration(
                           color: AppColors.sf(context),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.bd(context)),
+                          boxShadow: AppColors.cardShadow(context),
                         ),
                         child: Row(
                           children: [

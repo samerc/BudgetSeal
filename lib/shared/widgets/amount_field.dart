@@ -57,15 +57,21 @@ class _AmountFieldState extends State<AmountField> {
       hintText: widget.hintText,
       onChanged: (newValue) {
         setState(() => _value = newValue);
-        if (newValue == 0) {
-          widget.controller.text = '';
-        } else if (newValue == newValue.roundToDouble()) {
-          widget.controller.text = newValue.toInt().toString();
-        } else {
-          widget.controller.text = newValue.toStringAsFixed(2);
-        }
+        setAmountText(widget.controller, newValue);
         widget.onChanged?.call();
       },
     );
+  }
+}
+
+/// Write a calculator result into an amount controller ('' for zero,
+/// no trailing ".00" for whole numbers). Parsing elsewhere expects '.'.
+void setAmountText(TextEditingController controller, double value) {
+  if (value == 0) {
+    controller.text = '';
+  } else if (value == value.roundToDouble()) {
+    controller.text = value.toInt().toString();
+  } else {
+    controller.text = value.toStringAsFixed(2);
   }
 }

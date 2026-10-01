@@ -305,7 +305,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,7 +376,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,7 +485,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,7 +748,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

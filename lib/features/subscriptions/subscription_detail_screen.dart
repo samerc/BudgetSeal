@@ -417,7 +417,7 @@ class _SubscriptionDetailScreenState
             decoration: BoxDecoration(
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(CardTokens.radius),
-              border: Border.all(color: AppColors.bd(context)),
+              boxShadow: AppColors.cardShadow(context),
             ),
             child: Column(
               children: [
@@ -457,7 +457,7 @@ class _SubscriptionDetailScreenState
             decoration: BoxDecoration(
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(CardTokens.radius),
-              border: Border.all(color: AppColors.bd(context)),
+              boxShadow: AppColors.cardShadow(context),
             ),
             child: Column(
               children: [
@@ -525,7 +525,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(color: AppColors.bd(context)),
+                boxShadow: AppColors.cardShadow(context),
               ),
               child: Column(
                 children: [
@@ -632,7 +632,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(color: AppColors.bd(context)),
+                boxShadow: AppColors.cardShadow(context),
               ),
               child: Column(
                 children: [
@@ -662,7 +662,7 @@ class _SubscriptionDetailScreenState
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(color: AppColors.bd(context)),
+                boxShadow: AppColors.cardShadow(context),
               ),
               child: Column(
                 children: [

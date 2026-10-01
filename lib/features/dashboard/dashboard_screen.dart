@@ -432,7 +432,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                             decoration: BoxDecoration(
                               color: AppColors.sf(context),
                               borderRadius: BorderRadius.circular(CardTokens.radius),
-                              border: Border.all(color: AppColors.bd(context)),
+                              boxShadow: AppColors.cardShadow(context),
                             ),
                             child: Row(
                               children: [
@@ -703,7 +703,7 @@ class _SpendingOverviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

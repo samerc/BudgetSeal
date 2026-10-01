@@ -831,7 +831,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Row(
         children: [
@@ -853,6 +853,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 hintText: S.of(context).billItemName,
                 isDense: true,
                 border: InputBorder.none,
+        filled: false,
                 contentPadding: EdgeInsets.zero,
               ),
               style: const TextStyle(fontSize: 13),
@@ -878,6 +879,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       TextStyle(fontSize: 12, color: AppColors.th(context)),
                   isDense: true,
                   border: InputBorder.none,
+        filled: false,
                   contentPadding: EdgeInsets.zero,
                 ),
                 style: const TextStyle(fontSize: 13),
@@ -1285,7 +1287,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1399,7 +1401,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: child,
     );
@@ -1416,7 +1418,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         children: [
@@ -1527,7 +1529,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             decoration: BoxDecoration(
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.bd(context)),
+              boxShadow: AppColors.cardShadow(context),
             ),
             child: Column(
               children: [

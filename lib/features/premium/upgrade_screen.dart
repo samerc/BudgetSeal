@@ -105,7 +105,7 @@ class UpgradeScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.sf(context),
                   borderRadius: CardTokens.borderRadius,
-                  border: Border.all(color: AppColors.bd(context)),
+                  boxShadow: AppColors.cardShadow(context),
                 ),
                 child: Column(
                   children: [

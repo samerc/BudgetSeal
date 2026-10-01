@@ -647,6 +647,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   hintText: S.of(context).txSearchHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   border: InputBorder.none,
+        filled: false,
                   isDense: true,
                 ),
                 onChanged: (v) {

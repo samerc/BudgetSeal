@@ -240,7 +240,10 @@ GoRouter with `context.push()` / `context.pop()` / `context.go()`. Routes define
 All amount fields use the calculator bottom sheet (`CalculatorAmountField`), not the system keyboard. The `AmountField` widget wraps this automatically. Never use `TextField(keyboardType: TextInputType.numberWithOptions)`.
 
 ### Category Selection
-Both the assisted flow and classic form use the same `CategorySheet` with: search field, type toggle (Expense/Income), parent/subcategory hierarchy with `CategoryIcon`, keyboard dismiss on scroll. Never use plain chip grids without search.
+Both the assisted flow and classic form use the same `CategorySheet` (Cashew style): search field, type toggle (Expense/Income), then a 4-column icon grid of parent categories. Tapping a parent that has subcategories opens a subcategory step (back arrow returns); searching shows a flat grid of all matches. Never drop the search field.
+
+### Add/Edit Form & Detail Header
+The classic form opens with a Cashew header band (category-pastel colored): Expense/Income/Transfer tabs, a 64px category icon (tap → CategorySheet) and a 36pt amount (tap → `showCalculatorSheet()`). With a single line, `LineCard(compact: true)` hides its own category/amount. The save action is a bottom bar whose label steps "Enter amount" → "Add transaction"/"Save". `transaction_detail_screen.dart` uses the same band so view and edit match. The calculator is a seamless key grid, LTR in every locale, shows the user's decimal separator, and disables Done at zero (except when clearing an existing value).
 
 ### Exchange Rate Input
 Both forms have a swap button (↕) on the exchange rate field to toggle between "1 USD = X LBP" and "1 LBP = X USD". The `rateInverted` flag tracks direction; `exchangeRateToBase` is stored correctly regardless.

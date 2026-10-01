@@ -117,8 +117,13 @@ class _DetailBody extends ConsumerWidget {
         ? AppColors.fromHex(primaryCat.colorHex)
         : typeColor;
 
+    // Same pastel band as the add/edit form, so view and edit look alike.
+    final bandColor =
+        AppColors.pastel(context, catColor, light: 0.75, dark: 0.7);
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: bandColor,
         title: Text(S.of(context).txDetailTitle),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -165,20 +170,14 @@ class _DetailBody extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: const EdgeInsets.only(bottom: 32),
         children: [
-          // -- Hero amount card --
+          // -- Hero band (Cashew style) --
           Container(
-            padding:
-                const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.bd(context)),
-            ),
-            child: Column(
+            color: bandColor,
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 20, 24),
+            child: Row(
               children: [
-                // Category icon or type icon
                 if (primaryCat != null)
                   Hero(
                     tag: 'tx_${tx.id}',
@@ -189,102 +188,108 @@ class _DetailBody extends ConsumerWidget {
                           ? primaryCat.icon
                           : null,
                       color: catColor,
-                      size: 56,
+                      size: 64,
                       circular: true,
                     ),
                   )
                 else
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
-                      color: typeColor.withValues(alpha: 0.1),
+                      color: AppColors.pastel(context, typeColor,
+                          light: 0.35, dark: 0.3),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: typeColor, size: 28),
+                    child: Icon(icon, color: Colors.white, size: 30),
                   ),
-                const SizedBox(height: 12),
-                // Category name
-                if (primaryCat != null) ...[
-                  Text(primaryCat.name,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context))),
-                  const SizedBox(height: 4),
-                ],
-                // Amount — show total; for single-line foreign currency show
-                // the line amount, for multi-line show base currency total.
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
                 Builder(builder: (_) {
-                  final String amountText;
-                  if (entry.lines.length == 1) {
-                    amountText = formatSignedAmount(entry.lines.first.amount,
-                        currency: entry.lines.first.currency, type: tx.type);
-                  } else {
-                    // Multi-line: compute base total from lines, skipping bogus rates
-                    double baseTotal = 0;
-                    for (final l in entry.lines) {
-                      if (l.currency == baseCurrency) {
-                        baseTotal += l.amount;
-                      } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
-                        baseTotal += l.amount * l.exchangeRateToBase;
-                      }
-                      // else: skip lines with unset rate
-                    }
-                    amountText = formatSignedAmount(baseTotal,
-                        currency: baseCurrency, type: tx.type);
-                  }
-                  return GestureDetector(
-                    onLongPress: () {
-                      Clipboard.setData(ClipboardData(text: amountText));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(S.of(context).txDetailCopied(amountText)),
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
+                        final String amountText;
+                        if (entry.lines.length == 1) {
+                          amountText = formatSignedAmount(entry.lines.first.amount,
+                              currency: entry.lines.first.currency, type: tx.type);
+                        } else {
+                          // Multi-line: compute base total from lines, skipping bogus rates
+                          double baseTotal = 0;
+                          for (final l in entry.lines) {
+                            if (l.currency == baseCurrency) {
+                              baseTotal += l.amount;
+                            } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
+                              baseTotal += l.amount * l.exchangeRateToBase;
+                            }
+                            // else: skip lines with unset rate
+                          }
+                          amountText = formatSignedAmount(baseTotal,
+                              currency: baseCurrency, type: tx.type);
+                        }
+                        return GestureDetector(
+                          onLongPress: () {
+                            Clipboard.setData(ClipboardData(text: amountText));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(S.of(context).txDetailCopied(amountText)),
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: SizedBox(
+                            height: 46,
+                            width: double.infinity,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: Text(
+                                amountText,
+                                style: TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5,
+                                  color: AppColors.tp(context),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                      if (entry.lines.length == 1 &&
+                          entry.lines.first.currency != baseCurrency)
+                        Text(
+                          '= ${formatAmount(tx.amount, currency: baseCurrency)}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.tp(context).withValues(alpha: 0.6),
+                          ),
                         ),
-                      );
-                    },
-                    child: Text(
-                      amountText,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.screenTitleSize,
-                        fontWeight: TypographyTokens.screenTitleWeight,
-                        color: typeColor,
+                      const SizedBox(height: 2),
+                      Text(
+                        primaryCat != null
+                            ? '${primaryCat.name} · $typeLabel'
+                            : typeLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context).withValues(alpha: 0.75),
+                        ),
                       ),
-                    ),
-                  );
-                }),
-                // Show base currency conversion if single line in a different currency
-                if (entry.lines.length == 1 &&
-                    entry.lines.first.currency != baseCurrency) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '= ${formatAmount(tx.amount, currency: baseCurrency)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.ts(context),
-                    ),
+                    ],
                   ),
-                ],
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(typeLabel,
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: typeColor,
-                          letterSpacing: 0.5)),
                 ),
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
           const SizedBox(height: 16),
 
           // -- Details card --
@@ -358,9 +363,11 @@ class _DetailBody extends ConsumerWidget {
           ],
 
           // -- Single line detail --
+          // Only when the line adds something the band doesn't already show.
           if (entry.lines.length == 1 &&
               (entry.lines.first.note.isNotEmpty ||
-                  entry.lines.first.categoryId != null)) ...[
+                  (entry.lines.first.categoryId != null &&
+                      entry.lines.first.categoryId != tx.categoryId))) ...[
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
@@ -376,6 +383,9 @@ class _DetailBody extends ConsumerWidget {
 
           // -- Related transactions (linked mixed-type entries) --
           _RelatedTransactions(tx: tx, categoryMap: categoryMap),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -401,7 +411,7 @@ class _DetailBody extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -727,7 +737,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: Border.all(color: AppColors.bd(context)),
+                    boxShadow: AppColors.cardShadow(context),
                   ),
                   child: Row(
                     children: [
@@ -892,7 +902,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -462,7 +462,7 @@ class _HeatmapSection extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,7 +586,7 @@ class _MonthlySummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         children: [
@@ -748,7 +748,7 @@ class _TrendChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1767,7 +1767,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: Border.all(color: AppColors.bd(context)),
+                    boxShadow: AppColors.cardShadow(context),
                   ),
                   child: Row(
                     children: [
@@ -1918,7 +1918,7 @@ class _VelocityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2048,7 +2048,7 @@ class _BiggestExpenseCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.sf(context),
           borderRadius: BorderRadius.circular(CardTokens.radius),
-          border: Border.all(color: AppColors.bd(context)),
+          boxShadow: AppColors.cardShadow(context),
         ),
         child: Row(
           children: [
@@ -2150,7 +2150,7 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(color: AppColors.bd(context)),
+                boxShadow: AppColors.cardShadow(context),
               ),
               child: Row(
                 children: [
@@ -2227,7 +2227,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         children: [
@@ -2798,7 +2798,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         children: [

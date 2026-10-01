@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../core/database/app_database.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/design_tokens.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/category_icon.dart';
 
 const categoryPresetColors = [
@@ -47,6 +49,9 @@ class _CategorySheetState extends State<CategorySheet>
   String _search = '';
   String _typeFilter = 'expense'; // 'expense' or 'income'
   bool _keyboardVisible = false;
+
+  /// Parent whose subcategories are shown (Cashew's subcategory step).
+  String? _openParentId;
 
   @override
   void initState() {
@@ -123,9 +128,9 @@ class _CategorySheetState extends State<CategorySheet>
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: DraggableScrollableSheet(
         controller: _sheetCtrl,
@@ -221,7 +226,10 @@ class _CategorySheetState extends State<CategorySheet>
                     const SizedBox(height: 10),
                     // Search field
                     TextField(
-                      onChanged: (v) => setState(() => _search = v),
+                      onChanged: (v) => setState(() {
+                        _search = v;
+                        _openParentId = null;
+                      }),
                       textInputAction: TextInputAction.search,
                       style: TextStyle(
                           fontSize: 14, color: AppColors.tp(context)),
@@ -261,15 +269,7 @@ class _CategorySheetState extends State<CategorySheet>
                           ),
                         ),
                       )
-                    : ListView(
-                        controller: scrollCtrl,
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                        children:
-                            _buildCategoryList(parents, subsByParent),
-                      ),
+                    : _buildGrid(scrollCtrl, parents, subsByParent),
               ),
             ],
           ),
@@ -280,7 +280,10 @@ class _CategorySheetState extends State<CategorySheet>
   Widget _typeChip(String label, String value, Color color) {
     final selected = _typeFilter == value;
     return GestureDetector(
-      onTap: () => setState(() => _typeFilter = value),
+      onTap: () => setState(() {
+        _typeFilter = value;
+        _openParentId = null;
+      }),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
@@ -302,117 +305,146 @@ class _CategorySheetState extends State<CategorySheet>
     );
   }
 
-  List<Widget> _buildCategoryList(
+  /// Cashew selectCategory: 4-column icon grid. Parents with subcategories
+  /// open a subcategory step; searching shows a flat grid of matches.
+  Widget _buildGrid(
+    ScrollController scrollCtrl,
     List<Category> parents,
     Map<String, List<Category>> subsByParent,
   ) {
-    final widgets = <Widget>[];
+    final Category? openParent = _openParentId == null
+        ? null
+        : parents.where((p) => p.id == _openParentId).firstOrNull;
 
-    for (final group in parents) {
-      final subs = subsByParent[group.id] ?? [];
-      final groupColor = AppColors.fromHex(group.colorHex);
-      final hasEmoji =
-          group.icon.length <= 4 && group.icon != 'category';
+    final List<Category> items;
+    if (_search.isNotEmpty) {
+      items = [
+        for (final p in parents) ...[
+          if ((subsByParent[p.id] ?? const []).isEmpty) p,
+          ...?subsByParent[p.id],
+        ],
+      ];
+    } else if (openParent != null) {
+      items = subsByParent[openParent.id] ?? const [];
+    } else {
+      items = parents;
+    }
 
-      // Parent tile
-      widgets.add(
-        GestureDetector(
-          onTap: subs.isEmpty
-              ? () => widget.onSelected(
-                  group.id, group.name, groupColor, group.transactionType)
-              : null,
-          child: Container(
-            margin: const EdgeInsets.only(top: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: group.id == widget.selectedId
-                  ? groupColor.withValues(alpha: 0.12)
-                  : null,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                CategoryIcon(
-                  categoryName: group.name,
-                  emoji: hasEmoji ? group.icon : null,
-                  color: groupColor,
-                  size: 32,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(group.name,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          )),
-                      if (subs.isNotEmpty)
-                        Text(S.of(context).catSheetSubcategories(subs.length),
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.ts(context))),
-                    ],
-                  ),
-                ),
-                if (group.id == widget.selectedId)
-                  Icon(Icons.check_circle_rounded,
-                      size: 18, color: groupColor),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Subcategories
-      for (final sub in subs) {
-        final subColor = AppColors.fromHex(sub.colorHex);
-        final subEmoji =
-            sub.icon.length <= 4 && sub.icon != 'category';
-        widgets.add(
-          GestureDetector(
-            onTap: () => widget.onSelected(
-                sub.id, sub.name, subColor, sub.transactionType),
-            child: Container(
-              margin: const EdgeInsetsDirectional.only(start: 28),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: sub.id == widget.selectedId
-                    ? subColor.withValues(alpha: 0.12)
-                    : null,
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return CustomScrollView(
+      controller: scrollCtrl,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        if (openParent != null && _search.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 20, 4),
               child: Row(
                 children: [
-                  CategoryIcon(
-                    categoryName: sub.name,
-                    emoji: subEmoji ? sub.icon : null,
-                    color: subColor,
-                    size: 26,
+                  IconButton(
+                    icon: const BackButtonIcon(),
+                    onPressed: () => setState(() => _openParentId = null),
                   ),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(sub.name,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.tp(context),
-                        )),
+                    child: Text(
+                      openParent.name,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
                   ),
-                  if (sub.id == widget.selectedId)
-                    Icon(Icons.check_circle_rounded,
-                        size: 16, color: subColor),
                 ],
               ),
             ),
           ),
-        );
-      }
-    }
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(14, 4, 14, 28),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 4,
+              childAspectRatio: 0.74,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, i) {
+                final c = items[i];
+                final subCount =
+                    _search.isEmpty && openParent == null
+                        ? (subsByParent[c.id]?.length ?? 0)
+                        : 0;
+                return _gridTile(c, subCount);
+              },
+              childCount: items.length,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-    return widgets;
+  Widget _gridTile(Category c, int subCount) {
+    final color = AppColors.fromHex(c.colorHex);
+    final hasEmoji = c.icon.length <= 4 && c.icon != 'category';
+    final selected = c.id == widget.selectedId ||
+        (subCount > 0 &&
+            widget.categories.any(
+                (s) => s.parentId == c.id && s.id == widget.selectedId));
+    return InkWell(
+      borderRadius: BorderRadius.circular(RadiusTokens.lg),
+      onTap: () {
+        hapticSelection();
+        if (subCount > 0) {
+          setState(() => _openParentId = c.id);
+        } else {
+          widget.onSelected(c.id, c.name, color, c.transactionType);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(21),
+                border: Border.all(
+                  width: 3,
+                  color: selected
+                      ? AppColors.pastel(context, color,
+                          light: 0.2, dark: 0.1, inverse: true)
+                      : Colors.transparent,
+                ),
+              ),
+              child: CategoryIcon(
+                categoryName: c.name,
+                emoji: hasEmoji ? c.icon : null,
+                color: color,
+                size: 54,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // One line; long single words shrink instead of being clipped.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                c.name,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                  color: AppColors.tp(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _submitNew(String name) {

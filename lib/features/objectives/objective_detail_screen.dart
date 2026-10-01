@@ -670,7 +670,7 @@ class _ObjectiveDetailScreenState
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.bd(context)),
+                    boxShadow: AppColors.cardShadow(context),
                   ),
                   child: Row(children: [
                     Container(
@@ -856,6 +856,7 @@ class _ObjectiveDetailScreenState
                       ? S.of(context).objLoanNameHint
                       : S.of(context).objGoalNameHint,
                   border: InputBorder.none,
+        filled: false,
                   counterText: '',
                 ),
                 onTap: () {
@@ -947,6 +948,7 @@ class _ObjectiveDetailScreenState
                 labelText: S.of(context).objPerson,
                 hintText: S.of(context).objPersonHint,
                 border: InputBorder.none,
+        filled: false,
                 prefixIcon: Icon(Icons.person_rounded, size: 18, color: AppColors.ts(context)),
               ),
             ),
@@ -1171,7 +1173,7 @@ class _SummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(children: children),
     );
@@ -1263,7 +1265,7 @@ class _FormCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: child,
     );

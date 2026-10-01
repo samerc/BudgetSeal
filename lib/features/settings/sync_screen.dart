@@ -33,7 +33,7 @@ class SyncScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.sf(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.bd(context)),
+              boxShadow: AppColors.cardShadow(context),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +355,7 @@ class _ProviderOptionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: ListTile(
         leading: Container(
@@ -790,7 +790,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -449,7 +449,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: Border.all(color: AppColors.bd(context)),
+                    boxShadow: AppColors.cardShadow(context),
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
@@ -515,7 +515,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

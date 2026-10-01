@@ -36,6 +36,11 @@ void setNumberFormatPrefs(NumberFormatPrefs prefs) {
   _numberFormat = prefs;
 }
 
+/// The user's preferred decimal separator ('.' or ','), for display only
+/// (e.g. the calculator's decimal key). Parsing always uses '.'.
+String get decimalSeparatorChar =>
+    _numberFormat.decimal == DecimalSeparator.comma ? ',' : '.';
+
 /// Resolved symbols: user overrides take precedence over defaults.
 String? _resolveSymbol(String code) {
   return _userOverrides[code] ?? defaultCurrencySymbols[code];

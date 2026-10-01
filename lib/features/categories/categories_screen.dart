@@ -603,7 +603,7 @@ class _CategoriesSliver extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        boxShadow: AppColors.cardShadow(context),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
