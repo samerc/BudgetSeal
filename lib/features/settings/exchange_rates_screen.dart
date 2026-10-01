@@ -189,31 +189,37 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                           color: AppColors.sf(context),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: ListTile(
-                          leading: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.accent.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                e.key,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.accent,
+                        child: Material(
+                          // Transparent Material so the ripple paints above the card fill.
+                          type: MaterialType.transparency,
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            leading: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.accent.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  e.key,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.accent,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          title: Text(
-                            '1 $baseCurrency = ${_formatRate(e.value)} ${e.key}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                            title: Text(
+                              '1 $baseCurrency = ${_formatRate(e.value)} ${e.key}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),

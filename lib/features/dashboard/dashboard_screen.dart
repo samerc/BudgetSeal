@@ -691,11 +691,7 @@ class _SpendingOverviewCard extends StatelessWidget {
       final base = categoryColors[topCategories[i].key] ??
           defaultColors[i % defaultColors.length];
       final repeat = seen.update(base.toARGB32(), (n) => n + 1, ifAbsent: () => 0);
-      sliceColors.add(repeat == 0
-          ? base
-          : repeat.isOdd
-              ? AppColors.lightenPastel(base, 0.22 * ((repeat + 1) ~/ 2))
-              : AppColors.darkenPastel(base, 0.2 * (repeat ~/ 2)));
+      sliceColors.add(AppColors.repeatShade(base, repeat));
     }
 
     return Container(

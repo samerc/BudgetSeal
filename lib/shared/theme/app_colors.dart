@@ -46,6 +46,20 @@ abstract final class AppColors {
   static Color darkenPastel(Color c, double amount) =>
       Color.alphaBlend(Colors.black.withValues(alpha: amount), c);
 
+  /// The [n]th variant of a repeated chart color (n = 0 is [c] itself):
+  /// alternately lighter and darker for the first four repeats, then a hue
+  /// shift — so any number of repeats stays distinct and never washes out.
+  static Color repeatShade(Color c, int n) {
+    if (n == 0) return c;
+    if (n <= 4) {
+      return n.isOdd
+          ? lightenPastel(c, 0.22 * ((n + 1) ~/ 2))
+          : darkenPastel(c, 0.2 * (n ~/ 2));
+    }
+    final hsl = HSLColor.fromColor(c);
+    return hsl.withHue((hsl.hue + 37.0 * (n - 4)) % 360).toColor();
+  }
+
   /// Theme-aware pastel: lightens [c] in light mode, darkens it in dark/black.
   /// Use for solid fills derived from a category/envelope/accent color.
   /// [inverse] flips the direction (darken in light, lighten in dark) — for

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/engine/period_engine.dart';
 import '../theme/app_colors.dart';
 
 /// Cashew-style budget bar: a thick pill that fills with a pastel of [color],
@@ -44,7 +45,9 @@ class BudgetProgress extends StatelessWidget {
         : AppColors.pastel(context, color, light: 0.15, dark: 0.1);
     final track = trackColor ??
         AppColors.pastel(context, color, light: 0.8, dark: 0.72);
-    final target = isOver ? 1.0 : progress.clamp(0.0, 1.0).toDouble();
+    // A zero target gives NaN/∞ — draw an empty bar instead of crashing.
+    final safe = progress.isFinite ? progress : 0.0;
+    final target = isOver ? 1.0 : safe.clamp(0.0, 1.0).toDouble();
     final radius = BorderRadius.circular(height);
 
     return SizedBox(
@@ -72,9 +75,9 @@ class BudgetProgress extends StatelessWidget {
                     BoxDecoration(color: fillColor, borderRadius: radius),
                 alignment: AlignmentDirectional.centerEnd,
                 padding: const EdgeInsetsDirectional.only(end: 8),
-                child: showPercent && v > 0.18
+                child: showPercent && safe >= 0 && v > 0.18
                     ? Text(
-                        '${(progress * 100).round()}%',
+                        '${(safe * 100).round()}%',
                         maxLines: 1,
                         style: TextStyle(
                           fontSize: height * 0.62,
@@ -111,18 +114,8 @@ class BudgetProgress extends StatelessWidget {
 
   /// The budget period containing today for a household whose periods start
   /// on [startDay] (1–31, clamped to the month's length, e.g. 31 → Feb 28).
-  static ({DateTime start, DateTime end}) currentPeriod(int startDay) {
-    DateTime clampedStart(int year, int month) {
-      final daysInMonth = DateTime(year, month + 1, 0).day;
-      return DateTime(year, month, startDay.clamp(1, daysInMonth));
-    }
-
-    final now = DateTime.now();
-    var start = clampedStart(now.year, now.month);
-    if (now.isBefore(start)) start = clampedStart(now.year, now.month - 1);
-    final end = clampedStart(start.year, start.month + 1);
-    return (start: start, end: end);
-  }
+  static ({DateTime start, DateTime end}) currentPeriod(int startDay) =>
+      budgetPeriodFor(startDay);
 
   /// How far through [start, end) "now" is, or null if outside/unknown.
   static double? fractionOfPeriod(DateTime? start, DateTime? end) {

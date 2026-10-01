@@ -418,100 +418,106 @@ class _RecurringTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
       ),
-      child: ListTile(
-        onTap: onEdit,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+      child: Material(
+        // Transparent Material so the ripple paints above the card fill.
+        type: MaterialType.transparency,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(CardTokens.radius)),
+          onTap: onEdit,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.repeat_rounded, color: color, size: 20),
           ),
-          child: Icon(Icons.repeat_rounded, color: color, size: 20),
-        ),
-        title: Text(
-          item.title.isNotEmpty ? item.title : item.note,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-            color: item.enabled
-                ? AppColors.tp(context)
-                : AppColors.th(context),
+          title: Text(
+            item.title.isNotEmpty ? item.title : item.note,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              color: item.enabled
+                  ? AppColors.tp(context)
+                  : AppColors.th(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          '${S.of(context).recurringTileNext(formatDate(item.nextDueDate))} · $frequencyLabel',
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.ts(context),
+          subtitle: Text(
+            '${S.of(context).recurringTileNext(formatDate(item.nextDueDate))} · $frequencyLabel',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.ts(context),
+            ),
           ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatSignedAmount(item.amount,
-                      currency: item.currency, type: item.type),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: item.enabled ? color : AppColors.th(context),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatSignedAmount(item.amount,
+                        currency: item.currency, type: item.type),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: item.enabled ? color : AppColors.th(context),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: item.enabled
-                            ? AppColors.healthy
-                            : AppColors.th(context),
-                        shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: item.enabled
+                              ? AppColors.healthy
+                              : AppColors.th(context),
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      item.enabled ? S.of(context).recurringStatusActive : S.of(context).recurringStatusPaused,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.ts(context),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.enabled ? S.of(context).recurringStatusActive : S.of(context).recurringStatusPaused,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.ts(context),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 20,
-                tooltip: item.enabled ? S.of(context).recurringPauseTooltip : S.of(context).recurringResumeTooltip,
-                icon: Icon(
-                  item.enabled
-                      ? Icons.pause_circle_rounded
-                      : Icons.play_circle_rounded,
-                  color: item.enabled
-                      ? AppColors.th(context)
-                      : AppColors.healthy,
-                ),
-                onPressed: () => onToggle(!item.enabled),
+                    ],
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  tooltip: item.enabled ? S.of(context).recurringPauseTooltip : S.of(context).recurringResumeTooltip,
+                  icon: Icon(
+                    item.enabled
+                        ? Icons.pause_circle_rounded
+                        : Icons.play_circle_rounded,
+                    color: item.enabled
+                        ? AppColors.th(context)
+                        : AppColors.healthy,
+                  ),
+                  onPressed: () => onToggle(!item.enabled),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

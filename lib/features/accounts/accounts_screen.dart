@@ -430,49 +430,55 @@ class _AccountTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
       ),
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        onTap: onTap,
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(_accountIcon(acc.type), color: color, size: 20),
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                acc.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  color: AppColors.tp(context),
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+      child: Material(
+        // Transparent Material so the ripple paints above the card fill.
+        type: MaterialType.transparency,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(CardTokens.radius)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          onTap: onTap,
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            if (acc.isTravel) ...[
-              const SizedBox(width: 6),
-              Icon(Icons.flight_rounded, size: 14,
-                  color: AppColors.accent),
+            child: Icon(_accountIcon(acc.type), color: color, size: 20),
+          ),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  acc.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AppColors.tp(context),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (acc.isTravel) ...[
+                const SizedBox(width: 6),
+                Icon(Icons.flight_rounded, size: 14,
+                    color: AppColors.accent),
+              ],
             ],
-          ],
-        ),
-        subtitle: Text(
-          acc.isTravel
-              ? S.of(context).acctTravelWallet(acc.currency)
-              : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} \u00b7 ${acc.currency}',
-          style:
-              TextStyle(color: AppColors.ts(context), fontSize: 12),
-        ),
-        trailing: CurrencyDisplay(
-          amount: balance,
-          currency: acc.currency,
+          ),
+          subtitle: Text(
+            acc.isTravel
+                ? S.of(context).acctTravelWallet(acc.currency)
+                : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} \u00b7 ${acc.currency}',
+            style:
+                TextStyle(color: AppColors.ts(context), fontSize: 12),
+          ),
+          trailing: CurrencyDisplay(
+            amount: balance,
+            currency: acc.currency,
+          ),
         ),
       ),
     );
@@ -511,63 +517,69 @@ class _ArchivedAccountTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(CardTokens.radius),
           boxShadow: AppColors.cardShadow(context),
         ),
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          onTap: onTap,
-          leading: Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.ts(context).withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+        child: Material(
+          // Transparent Material so the ripple paints above the card fill.
+          type: MaterialType.transparency,
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(CardTokens.radius)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            onTap: onTap,
+            leading: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.ts(context).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(_accountIcon(acc.type),
+                  color: AppColors.ts(context), size: 20),
             ),
-            child: Icon(_accountIcon(acc.type),
-                color: AppColors.ts(context), size: 20),
-          ),
-          title: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  acc.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AppColors.tp(context),
+            title: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    acc.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: AppColors.tp(context),
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 6),
-              Icon(Icons.archive_rounded, size: 14,
-                  color: AppColors.th(context)),
-              if (acc.isTravel) ...[
-                const SizedBox(width: 4),
-                Icon(Icons.flight_rounded, size: 14,
+                const SizedBox(width: 6),
+                Icon(Icons.archive_rounded, size: 14,
                     color: AppColors.th(context)),
+                if (acc.isTravel) ...[
+                  const SizedBox(width: 4),
+                  Icon(Icons.flight_rounded, size: 14,
+                      color: AppColors.th(context)),
+                ],
               ],
-            ],
-          ),
-          subtitle: Text(
-            '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
-            style: TextStyle(color: AppColors.ts(context), fontSize: 12),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CurrencyDisplay(
-                amount: balance,
-                currency: acc.currency,
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: Icon(Icons.unarchive_rounded,
-                    size: 20, color: AppColors.accent),
-                tooltip: S.of(context).acctUnarchive,
-                onPressed: onUnarchive,
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
+            ),
+            subtitle: Text(
+              '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
+              style: TextStyle(color: AppColors.ts(context), fontSize: 12),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CurrencyDisplay(
+                  amount: balance,
+                  currency: acc.currency,
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: Icon(Icons.unarchive_rounded,
+                      size: 20, color: AppColors.accent),
+                  tooltip: S.of(context).acctUnarchive,
+                  onPressed: onUnarchive,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
           ),
         ),
       ),

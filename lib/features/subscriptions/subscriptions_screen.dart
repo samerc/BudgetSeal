@@ -589,106 +589,112 @@ class _SubscriptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
       ),
-      child: ListTile(
-        onTap: onTap,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        leading: CategoryIcon(
-          categoryName: categoryName ?? title,
-          emoji: categoryIcon,
-          color: catColor,
-          size: 44,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-            color: AppColors.tp(context),
-            decoration: isCancelled ? TextDecoration.lineThrough : null,
+      child: Material(
+        // Transparent Material so the ripple paints above the card fill.
+        type: MaterialType.transparency,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(CardTokens.radius)),
+          onTap: onTap,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          leading: CategoryIcon(
+            categoryName: categoryName ?? title,
+            emoji: categoryIcon,
+            color: catColor,
+            size: 44,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          nextDue != null
-              ? 'Next: ${formatDate(nextDue)} $frequencySuffix'
-              : frequencySuffix,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.ts(context),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              color: AppColors.tp(context),
+              decoration: isCancelled ? TextDecoration.lineThrough : null,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatAmount(amount, currency: currency),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: isCancelled
-                        ? AppColors.th(context)
-                        : AppColors.tp(context),
-                    decoration:
-                        isCancelled ? TextDecoration.lineThrough : null,
+          subtitle: Text(
+            nextDue != null
+                ? 'Next: ${formatDate(nextDue)} $frequencySuffix'
+                : frequencySuffix,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.ts(context),
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatAmount(amount, currency: currency),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isCancelled
+                          ? AppColors.th(context)
+                          : AppColors.tp(context),
+                      decoration:
+                          isCancelled ? TextDecoration.lineThrough : null,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: statusDotColor,
-                        shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: statusDotColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      switch (status) {
-                        'active' => tr.subActive,
-                        'ending_soon' => tr.subEndingSoon,
-                        'cancelled' => tr.subCancelled,
-                        _ => '',
-                      },
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.ts(context),
+                      const SizedBox(width: 4),
+                      Text(
+                        switch (status) {
+                          'active' => tr.subActive,
+                          'ending_soon' => tr.subEndingSoon,
+                          'cancelled' => tr.subCancelled,
+                          _ => '',
+                        },
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.ts(context),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 20,
-                tooltip: isEnabled ? '${tr.subPause} subscription' : '${tr.subResume} subscription',
-                icon: Icon(
-                  isEnabled
-                      ? Icons.pause_circle_rounded
-                      : Icons.play_circle_rounded,
-                  color: isEnabled
-                      ? AppColors.th(context)
-                      : AppColors.healthy,
-                ),
-                onPressed: onToggleEnabled,
+                    ],
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  tooltip: isEnabled ? '${tr.subPause} subscription' : '${tr.subResume} subscription',
+                  icon: Icon(
+                    isEnabled
+                        ? Icons.pause_circle_rounded
+                        : Icons.play_circle_rounded,
+                    color: isEnabled
+                        ? AppColors.th(context)
+                        : AppColors.healthy,
+                  ),
+                  onPressed: onToggleEnabled,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

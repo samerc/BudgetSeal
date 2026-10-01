@@ -81,6 +81,40 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     return result;
   }
 
+  /// Watch how much each envelope spent in [from, to), by transaction date.
+  /// Returns `Map<allocationId, Map<currency, spent>>` with spent > 0
+  /// (consumption net of refunds; funding and resets are not spending).
+  Stream<Map<String, Map<String, double>>> watchSpendingInPeriod(
+      String householdId, DateTime from, DateTime to) {
+    return customSelect(
+      'SELECT l.allocation_id AS allocation_id, l.currency AS currency, '
+      'SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'INNER JOIN allocations a ON a.id = l.allocation_id '
+      'INNER JOIN transactions t ON t.id = l.source_transaction_id '
+      "WHERE a.household_id = ? AND l.entry_type = 'consumption' "
+      'AND t.deleted = 0 AND t.created_at >= ? AND t.created_at < ? '
+      'GROUP BY l.allocation_id, l.currency',
+      variables: [
+        Variable.withString(householdId),
+        Variable.withInt(from.millisecondsSinceEpoch ~/ 1000),
+        Variable.withInt(to.millisecondsSinceEpoch ~/ 1000),
+      ],
+      readsFrom: {allocationLedger, attachedDatabase.allocations,
+          attachedDatabase.transactions},
+    ).watch().map((rows) {
+      final result = <String, Map<String, double>>{};
+      for (final row in rows) {
+        final spent = -((row.data['total'] as num?)?.toDouble() ?? 0.0);
+        if (spent > 0.001) {
+          result.putIfAbsent(row.data['allocation_id'] as String,
+              () => {})[row.data['currency'] as String] = spent;
+        }
+      }
+      return result;
+    });
+  }
+
   /// Get all ledger entries for a household across all allocations.
   /// Use getAllBalances() instead when you only need sums.
   Future<List<AllocationLedgerData>> getAllForHousehold(

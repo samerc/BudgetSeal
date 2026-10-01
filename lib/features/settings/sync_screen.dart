@@ -357,23 +357,29 @@ class _ProviderOptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: AppColors.cardShadow(context),
       ),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+      child: Material(
+        // Transparent Material so the ripple paints above the card fill.
+        type: MaterialType.transparency,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          child: Icon(icon, color: color, size: 20),
+          title: Text(label,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          subtitle: Text(subtitle,
+              style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+          trailing: Icon(Icons.chevron_right_rounded,
+              size: 18, color: AppColors.th(context)),
+          onTap: onTap,
         ),
-        title: Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-        trailing: Icon(Icons.chevron_right_rounded,
-            size: 18, color: AppColors.th(context)),
-        onTap: onTap,
       ),
     );
   }

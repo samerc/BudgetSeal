@@ -417,6 +417,30 @@ class AllocationEngine {
             unlinkedCatIds.add(cat.id);
           }
         }
+        // A subcategory without its own link spends from its parent's
+        // envelope (linking "Transport" covers Fuel, Parking…).
+        final parentOf = {
+          for (final cat in cats)
+            if (cat.allocationId == null && cat.parentId != null)
+              cat.id: cat.parentId!,
+        };
+        if (parentOf.isNotEmpty) {
+          final parents = await (_db.select(_db.categories)
+                ..where((c) => c.id.isIn(parentOf.values.toSet())))
+              .get();
+          final parentAlloc = {
+            for (final p in parents)
+              if (p.allocationId != null) p.id: p.allocationId!,
+          };
+          parentOf.forEach((childId, parentId) {
+            final allocId = parentAlloc[parentId];
+            if (allocId != null) {
+              catAllocMap[childId] = allocId;
+              linkedAllocIds.add(allocId);
+              unlinkedCatIds.remove(childId);
+            }
+          });
+        }
         // Legacy fallback: categories without allocationId
         if (unlinkedCatIds.isNotEmpty) {
           final legacyAllocs = await (_db.select(_db.allocations)

@@ -82,7 +82,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   String? _categoryFilterName;
 
   // Scroll-to-today (#10)
-  final _listScrollCtrl = ScrollController();
+  // The list scrolls with the tab's PrimaryScrollController so re-tapping
+  // Activity in the nav bar scrolls it back to the top.
+  final _ownListScrollCtrl = ScrollController();
+  ScrollController? _attachedListCtrl;
+  ScrollController get _listScrollCtrl =>
+      _attachedListCtrl ?? _ownListScrollCtrl;
   bool _showScrollToTop = false;
 
   // Quick-add bar
@@ -98,7 +103,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   void initState() {
     super.initState();
     _monthScrollCtrl = ScrollController();
-    _listScrollCtrl.addListener(_onListScroll);
     _restoreFilters();
     _loadPlanned();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -120,6 +124,16 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final c = PrimaryScrollController.maybeOf(context) ?? _ownListScrollCtrl;
+    if (!identical(c, _attachedListCtrl)) {
+      _attachedListCtrl?.removeListener(_onListScroll);
+      _attachedListCtrl = c..addListener(_onListScroll);
+    }
+  }
+
   void _onListScroll() {
     final show = _listScrollCtrl.hasClients && _listScrollCtrl.offset > 500;
     if (show != _showScrollToTop) {
@@ -136,8 +150,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     _amountMinCtrl.dispose();
     _amountMaxCtrl.dispose();
     _quickAddCtrl.dispose();
-    _listScrollCtrl.removeListener(_onListScroll);
-    _listScrollCtrl.dispose();
+    _attachedListCtrl?.removeListener(_onListScroll);
+    _ownListScrollCtrl.dispose();
     super.dispose();
   }
 

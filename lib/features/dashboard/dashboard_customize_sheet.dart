@@ -102,26 +102,32 @@ class _CustomizeSheet extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: AppColors.cardShadow(context),
                   ),
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.drag_handle_rounded,
-                      color: AppColors.th(context),
-                    ),
-                    title: Text(config.section.label,
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: config.visible
-                                ? AppColors.tp(context)
-                                : AppColors.th(context))),
-                    subtitle: Text(config.section.description,
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.ts(context))),
-                    trailing: Switch.adaptive(
-                      value: config.visible,
-                      onChanged: (_) =>
-                          notifier.toggleVisibility(config.section),
+                  child: Material(
+                    // Transparent Material so the ripple paints above the card fill.
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      leading: Icon(
+                        Icons.drag_handle_rounded,
+                        color: AppColors.th(context),
+                      ),
+                      title: Text(config.section.label,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: config.visible
+                                  ? AppColors.tp(context)
+                                  : AppColors.th(context))),
+                      subtitle: Text(config.section.description,
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.ts(context))),
+                      trailing: Switch.adaptive(
+                        value: config.visible,
+                        onChanged: (_) =>
+                            notifier.toggleVisibility(config.section),
+                      ),
                     ),
                   ),
                 );

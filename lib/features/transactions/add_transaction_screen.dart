@@ -764,7 +764,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   categoryId: l.categoryId,
                   accountId: l.accountId,
                   exchangeRateToBase: l.exchangeRateToBase,
-                  note: l.noteCtrl.text.trim(),
+                  // A single line is shown compact (its own note is hidden):
+                  // the header note is the note, so don't keep a stale one.
+                  note: _lines.length == 1 ? '' : l.noteCtrl.text.trim(),
                 ))
             .toList();
         final primaryAccountId = txLines.first.accountId ?? '';

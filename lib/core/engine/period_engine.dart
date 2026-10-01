@@ -6,6 +6,22 @@ import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
 
+/// The budget period containing [now]: from day [startDay] of a month to the
+/// same day of the next, clamped to short months (31 → Feb 28/29).
+({DateTime start, DateTime end}) budgetPeriodFor(int startDay,
+    [DateTime? now]) {
+  DateTime clampedStart(int year, int month) {
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    return DateTime(year, month, startDay.clamp(1, daysInMonth));
+  }
+
+  now ??= DateTime.now();
+  var start = clampedStart(now.year, now.month);
+  if (now.isBefore(start)) start = clampedStart(now.year, now.month - 1);
+  final end = clampedStart(start.year, start.month + 1);
+  return (start: start, end: end);
+}
+
 enum LeftoverResolution { toUnallocated, toOtherAllocation, keep }
 
 class FundingSuggestion {

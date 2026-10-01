@@ -264,9 +264,9 @@ class TxTile extends ConsumerWidget {
                       children: [
                         Icon(Icons.receipt_long_rounded,
                             size: 14, color: AppColors.th(context)),
-                        Positioned(
+                        PositionedDirectional(
                           top: -6,
-                          right: -8,
+                          end: -8,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 4, vertical: 1),

@@ -116,9 +116,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               children: [
                 for (var i = 0; i < _tabs.length; i++)
                   _visited.contains(i)
-                      ? PrimaryScrollController(
-                          controller: _scrollControllers[i],
-                          child: _tabs[i],
+                      // Hidden tabs stay mounted, so their Hero tags (e.g. the
+                      // same transaction on Home and Activity) would clash.
+                      ? HeroMode(
+                          enabled: i == _currentIndex,
+                          child: PrimaryScrollController(
+                            controller: _scrollControllers[i],
+                            child: _tabs[i],
+                          ),
                         )
                       : const SizedBox.shrink(),
               ],

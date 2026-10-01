@@ -450,48 +450,54 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                     boxShadow: AppColors.cardShadow(context),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 2),
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(Icons.storage_rounded,
-                          size: 18, color: AppColors.accent),
-                    ),
-                    title: Text(
-                      DateFormat.yMMMd().add_jm().format(b.created),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.tp(context),
-                      ),
-                    ),
-                    subtitle: Text(
-                      b.sizeFormatted,
-                      style: TextStyle(
-                          fontSize: 11, color: AppColors.ts(context)),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.restore_rounded,
-                              size: 18, color: AppColors.accent),
-                          tooltip: S.of(context).backupRestoreTitle,
-                          onPressed: () => _restoreLocalBackup(b),
+                  child: Material(
+                    // Transparent Material so the ripple paints above the card fill.
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(CardTokens.radius)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 2),
+                      leading: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete_outline,
-                              size: 18, color: AppColors.overspent),
-                          tooltip: S.of(context).commonDelete,
-                          onPressed: () => _deleteLocalBackup(b),
+                        child: Icon(Icons.storage_rounded,
+                            size: 18, color: AppColors.accent),
+                      ),
+                      title: Text(
+                        DateFormat.yMMMd().add_jm().format(b.created),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.tp(context),
                         ),
-                      ],
+                      ),
+                      subtitle: Text(
+                        b.sizeFormatted,
+                        style: TextStyle(
+                            fontSize: 11, color: AppColors.ts(context)),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.restore_rounded,
+                                size: 18, color: AppColors.accent),
+                            tooltip: S.of(context).backupRestoreTitle,
+                            onPressed: () => _restoreLocalBackup(b),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete_outline,
+                                size: 18, color: AppColors.overspent),
+                            tooltip: S.of(context).commonDelete,
+                            onPressed: () => _deleteLocalBackup(b),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 )),

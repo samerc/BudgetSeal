@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
 import '../engine/balance_calculator.dart';
+import '../engine/period_engine.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
 
@@ -93,4 +94,19 @@ final unallocatedProvider =
   // Watch allocations so we recompute when funding changes.
   ref.watch(allocationsProvider);
   return BalanceCalculator(db).unallocatedByCurrency(householdId);
+});
+
+/// What each envelope spent in the current budget period, by transaction
+/// date: `Map<allocationId, Map<currency, spent>>`. Re-evaluated when the
+/// period start day changes; reopening the app picks up a new period.
+final periodSpendingProvider =
+    StreamProvider<Map<String, Map<String, double>>>((ref) {
+  final db = ref.watch(databaseProvider);
+  final householdId = ref.watch(currentHouseholdIdProvider);
+  if (householdId == null) return const Stream.empty();
+  final startDay = ref.watch(
+      householdProvider.select((h) => h.value?.periodStartDay ?? 1));
+  final period = budgetPeriodFor(startDay);
+  return LedgerDao(db)
+      .watchSpendingInPeriod(householdId, period.start, period.end);
 });

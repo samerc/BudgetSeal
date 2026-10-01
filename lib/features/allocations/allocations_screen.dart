@@ -101,6 +101,14 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           catToAlloc[c.id] = c.allocationId!;
         }
       }
+      // Unlinked subcategories spend from the parent's envelope (as in
+      // AllocationEngine.recordTransaction).
+      for (final c in categories) {
+        if (c.allocationId == null && c.parentId != null) {
+          final parentAlloc = catToAlloc[c.parentId];
+          if (parentAlloc != null) catToAlloc[c.id] = parentAlloc;
+        }
+      }
 
       // Map lines → allocations and sum amounts
       final amountMap = <String, double>{};
@@ -374,12 +382,14 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   0.0,
                   (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0),
                 );
+                // Spent this period from the ledger (a negative balance
+                // only shows overdrafts, not normal spending).
+                final spending = ref.watch(periodSpendingProvider).value ?? {};
                 final totalSpent = baseAllocs.fold<double>(
                   0.0,
-                  (sum, a) {
-                    final bal = a.balanceByCurrency[baseCurrency] ?? 0;
-                    return bal < 0 ? sum + bal.abs() : sum;
-                  },
+                  (sum, a) =>
+                      sum +
+                      (spending[a.data.allocation.id]?[baseCurrency] ?? 0),
                 );
                 final totalRemaining = baseAllocs.fold<double>(
                   0.0,
@@ -1001,16 +1011,18 @@ class _GoalsLoansBanner extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: Tappable(
+      // Shadow outside, fill on Tappable's Material so the ripple is visible.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: AppColors.cardShadow(context),
+        ),
+        child: Tappable(
         borderRadius: BorderRadius.circular(12),
+        color: AppColors.sf(context),
         onTap: () => context.push('/objectives'),
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: AppColors.cardShadow(context),
-          ),
           child: Row(
             children: [
               Container(
@@ -1045,6 +1057,7 @@ class _GoalsLoansBanner extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -34,15 +34,20 @@ class BillsBoxes extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bills = ref.watch(_enabledRecurringProvider).value ?? const [];
-    if (bills.isEmpty) return const SizedBox.shrink();
+    if (!bills.any((b) => b.type == 'expense')) return const SizedBox.shrink();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final weekEnd = today.add(const Duration(days: 7));
+    // Calendar days, not 7×24h (DST would shift the edge by an hour).
+    final weekEnd = DateTime(today.year, today.month, today.day + 7);
     final upcoming = <RecurringTransaction>[];
     final overdue = <RecurringTransaction>[];
     for (final b in bills) {
+      // Bills are expenses; recurring income and transfers don't count.
+      if (b.type != 'expense') continue;
       final due = b.nextDueDate.toLocal();
+      // A finished series keeps its last nextDueDate — it isn't late.
+      if (b.endDate != null && due.isAfter(b.endDate!.toLocal())) continue;
       if (due.isBefore(today)) {
         overdue.add(b);
       } else if (due.isBefore(weekEnd)) {
@@ -149,25 +154,30 @@ class _Box extends StatelessWidget {
       ),
     );
 
+    // The fill goes on Tappable's Material so the ripple shows on top of it.
     return Tappable(
       onTap: () => context.push('/upcoming-bills'),
       borderRadius: BorderRadius.circular(15),
-      child: Container(
+      color: bg,
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(15),
-        ),
         child: wide
-            ? Row(
-                children: [
-                  Expanded(child: title),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [amount, count],
-                  ),
-                ],
+            // Amount hugs the end; capped so large text scales it down
+            // instead of overflowing.
+            ? LayoutBuilder(
+                builder: (context, c) => Row(
+                  children: [
+                    Expanded(child: title),
+                    const SizedBox(width: 12),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: c.maxWidth * 0.6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [amount, count],
+                      ),
+                    ),
+                  ],
+                ),
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

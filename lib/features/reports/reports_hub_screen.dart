@@ -1189,10 +1189,7 @@ List<Color> _distinctColors(List<Color> base) {
     for (final c in base)
       () {
         final n = seen.update(c.toARGB32(), (v) => v + 1, ifAbsent: () => 0);
-        if (n == 0) return c;
-        return n.isOdd
-            ? AppColors.lightenPastel(c, 0.22 * ((n + 1) ~/ 2))
-            : AppColors.darkenPastel(c, 0.2 * (n ~/ 2));
+        return AppColors.repeatShade(c, n);
       }(),
   ];
 }

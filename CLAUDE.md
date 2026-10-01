@@ -185,6 +185,8 @@ The primary feature. Money flows: Income → Account → Unallocated pool → Fu
 
 Two envelope types: **Spending** (periodic budget, resets each month) and **Flexible** (accumulates, optional target). Legacy `saving` type in DB is treated as `flexible` — no migration needed. Savings goals and debt tracking use the separate **Goals & Loans** feature (`/objectives`), which creates real transactions. Envelopes are virtual budget labels only.
 
+A subcategory with no envelope of its own spends from its parent category's envelope (`recordTransaction` and the Budget tab's planned preview both resolve it). The Budget tab's "Spent" and the envelope hero's "$X spent" come from `periodSpendingProvider` (consumption ledger in the current period, by transaction date — `budgetPeriodFor()` in `period_engine.dart`), never from target − balance.
+
 **Critical rule:** All money writes go through `AllocationEngine`. Screens never write to the database directly for transactions, transfers, or ledger entries.
 
 ### Balance Computation

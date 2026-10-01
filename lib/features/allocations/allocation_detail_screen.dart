@@ -889,12 +889,14 @@ class _AllocationDetailScreenState
                 ),
                 Flexible(
                   child: Text(
-                    // Spending: how much of the budget is gone.
+                    // Spending: what was spent this period (ledger, not
+                    // target − balance, which counts unfunded money).
                     // Flexible: how far from the target.
                     isSpending
                         ? S.of(context).allocAmountSpent(formatAmount(
-                            (_targetAmount - mainBalance)
-                                .clamp(0, double.infinity),
+                            ref.watch(periodSpendingProvider).value?[
+                                    widget.allocationId]?[targetCurrency] ??
+                                0,
                             currency: targetCurrency))
                         : S.of(context).allocAmountToGo(formatAmount(
                             (_targetAmount - mainBalance)
