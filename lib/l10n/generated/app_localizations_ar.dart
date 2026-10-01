@@ -9,6 +9,11 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String acctArchiveNonZero(String amount) {
+    return 'لا يزال هذا الحساب يحتوي على $amount. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.';
+  }
+
+  @override
   String get receiptPickFailed =>
       'تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.';
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/engine/recurring_engine.dart' show advanceRecurringDate;
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -159,24 +160,16 @@ class _SubscriptionDetailScreenState
 
   /// Calculate upcoming billing dates from nextDueDate
   List<DateTime> _upcomingDates(
-      DateTime nextDue, String frequency, int interval, int count) {
+      DateTime nextDue, String frequency, int interval, int count,
+      {int? anchorDay}) {
     final dates = <DateTime>[];
     var current = nextDue;
     for (var i = 0; i < count; i++) {
       dates.add(current);
-      current = _advanceDate(current, frequency, interval);
+      current = advanceRecurringDate(current, frequency, interval,
+          anchorDay: anchorDay);
     }
     return dates;
-  }
-
-  DateTime _advanceDate(DateTime d, String frequency, int interval) {
-    return switch (frequency) {
-      'daily' => d.add(Duration(days: interval)),
-      'weekly' => d.add(Duration(days: 7 * interval)),
-      'monthly' => DateTime(d.year, d.month + interval, d.day),
-      'yearly' => DateTime(d.year + interval, d.month, d.day),
-      _ => d.add(Duration(days: 30 * interval)),
-    };
   }
 
   /// Parse price history JSON
@@ -395,7 +388,8 @@ class _SubscriptionDetailScreenState
 
     // Upcoming dates
     final upcoming = nextDue != null && status != 'cancelled'
-        ? _upcomingDates(nextDue, frequency, interval, 3)
+        ? _upcomingDates(nextDue, frequency, interval, 3,
+            anchorDay: sub['anchor_day'] as int?)
         : <DateTime>[];
 
     return Scaffold(

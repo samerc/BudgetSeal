@@ -124,6 +124,7 @@ class _ObjectiveDetailScreenState
               t.note.like('%$idTag%'))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .get();
+    await _syncCurrentAmount(db, txs);
 
     // Fallback: match by name for pre-existing payments
     if (txs.isEmpty && name.isNotEmpty) {
@@ -142,6 +143,32 @@ class _ObjectiveDetailScreenState
     }
 
     if (mounted) setState(() => _payments = txs);
+  }
+
+  /// Progress is the sum of the tagged payments themselves (their lines in
+  /// the objective's currency). A stored "+= amount" counter lost payments
+  /// when two synced devices both paid, and never went down when a payment
+  /// was deleted. Name-matched legacy payments are shown but not summed — a
+  /// name match can include unrelated transactions.
+  Future<void> _syncCurrentAmount(
+      AppDatabase db, List<Transaction> tagged) async {
+    if (tagged.isEmpty) return;
+    final lines = await (db.select(db.transactionLines)
+          ..where((l) => l.transactionId.isIn(tagged.map((t) => t.id))))
+        .get();
+    final paid = lines
+        .where((l) => l.currency == _currency)
+        .fold<double>(0, (sum, l) => sum + l.amount);
+    if ((paid - _currentAmount).abs() < 0.005) return;
+    await (db.update(db.objectives)
+          ..where((o) => o.id.equals(widget.objectiveId)))
+        .write(ObjectivesCompanion(
+      currentAmount: Value(paid),
+      lastModified: Value(DateTime.now()),
+    ));
+    if (!mounted) return;
+    ref.invalidate(objectivesProvider);
+    setState(() => _currentAmount = paid);
   }
 
   @override
@@ -429,16 +456,6 @@ class _ObjectiveDetailScreenState
         date: DateTime.now(),
       );
 
-      // Update objective's currentAmount
-      final newAmount = _currentAmount + result.amount;
-      final db = ref.read(databaseProvider);
-      await (db.update(db.objectives)
-            ..where((o) => o.id.equals(widget.objectiveId)))
-          .write(ObjectivesCompanion(
-        currentAmount: Value(newAmount),
-        lastModified: Value(DateTime.now()),
-      ));
-
       // Remember category choice for next time
       if (result.categoryId != null) {
         _categoryId = result.categoryId;
@@ -446,9 +463,10 @@ class _ObjectiveDetailScreenState
         _categoryName = cat?.name;
       }
 
-      if (mounted) setState(() => _currentAmount = newAmount);
+      if (!mounted) return;
       ref.invalidate(objectivesProvider);
       ref.invalidate(accountsWithBalanceProvider);
+      // Reloads the history and recomputes progress (_syncCurrentAmount).
       await _loadPayments();
 
       if (mounted) {

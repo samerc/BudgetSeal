@@ -67,5 +67,7 @@ class AllocationsDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> archive(String id) =>
       (update(allocations)..where((t) => t.id.equals(id)))
-          .write(const AllocationsCompanion(archived: Value(true)));
+          .write(AllocationsCompanion(
+              archived: const Value(true),
+              lastModified: Value(DateTime.now())));
 }

@@ -193,6 +193,7 @@ Handler updateSubscriptionHandler(Ref ref) {
           priceHistory: updatedPriceHistory != existing.priceHistory
               ? Value(updatedPriceHistory)
               : const Value.absent(),
+          lastModified: Value(DateTime.now()),
         ));
       }
 

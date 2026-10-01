@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v18)
+│   │   ├── app_database.dart   # Drift database definition (schema v19)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (12 tables)
@@ -288,7 +288,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 18
+### Schema Version: 19
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -299,6 +299,8 @@ v13→v14 added `decimalPlaces` (nullable INT) to `accounts` for per-currency de
 v14→v15 added `isTravel` (BOOLEAN, default false) to `accounts` for travel wallet support.
 v15→v16 added performance indexes: `idx_transactions_household_date`, `idx_transactions_household_deleted`, `idx_transaction_lines_tx`, `idx_ledger_allocation`, `idx_allocations_household`, `idx_categories_household`.
 v16→v17 added indexes: `idx_ledger_source_tx` on `allocation_ledger(source_transaction_id)`, `idx_categories_allocation` on `categories(allocation_id)`.
+v17→v18 added `deleted` to accounts/categories/allocations/objectives/recurring/templates and `lastModified` to recurring/templates.
+v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations
 Defined in `app_database.dart` `migration` getter. After schema changes:
@@ -845,7 +847,7 @@ Envelope and category icon pickers use an **inline expandable emoji grid** withi
 - Envelopes with `autoReset = true` (default): automatically zeroed out via ledger entry on period start
 - Envelopes with `autoReset = false`: flagged as "pending manual reset" — shown with amber glow on the Budget tab and a banner prompting the user to review
 - Toggle per-envelope in the envelope detail screen settings (3-dot menu)
-- `PeriodResetService.checkAndAutoReset()` runs once per app launch, tracked via SharedPreferences timestamp
+- `PeriodResetService.checkAndAutoReset()` runs once per app launch, tracked via SharedPreferences timestamp. The first run on an install only records the period (never empties envelopes mid-period). Reset ledger rows use the deterministic id `reset:<allocId>:<periodStart yyyy-MM-dd>:<currency>` inserted with `insertOrIgnore`, so two synced devices can't reset the same envelope twice. Period bounds come from `budgetPeriodFor()` (clamped start day).
 
 ## Future Months
 
@@ -873,6 +875,7 @@ Accounts are accessed from More > Accounts.
 - **Existing objectives**: summary view by default — progress hero card, summary info card (contact, currency, deadline, remaining), payment history list. Edit form hidden behind 3-dot menu → "Edit Settings".
 - **Payment sheet**: account picker, optional category picker (filtered by tx type), amount calculator. Category choice is remembered per objective for the next payment.
 - **Payments create real transactions** via `AllocationEngine.recordTransaction()` with optional `categoryId` on `TxLine`.
+- **Progress** (`currentAmount`) is recomputed from the tagged payments' lines in the objective's currency each time the detail screen loads or a payment is recorded (`_syncCurrentAmount`) — never `+= amount`, which lost payments across synced devices and ignored deletions.
 - **Payment history**: payments are linked by `[obj:UUID]` tag embedded in the transaction note. Query searches by ID tag first, falls back to name matching for legacy payments. The tag is stripped from display. Renaming an objective does not break payment history.
 - **Loan direction hint**: a text hint below the direction toggle explains what each direction means ("You gave money — payments are incoming" / "You owe money — payments are outgoing").
 
@@ -968,7 +971,7 @@ Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jaka
 
 ## Archived Accounts
 
-Accounts screen has a 3-dot menu with "Show Archived" / "Hide Archived" toggle. Archived accounts appear in a separate "ARCHIVED" section below active ones, dimmed at 60% opacity with an archive badge. Each has an unarchive icon button that opens a confirmation dialog, sets `archived: false` + `lastModified: now`, and refreshes the provider.
+An account can only be archived at a zero balance (`_canArchive()` in account_detail_screen.dart) — archived accounts drop out of every balance, so archiving one with money would silently pull it out of Unallocated. Accounts screen has a 3-dot menu with "Show Archived" / "Hide Archived" toggle. Archived accounts appear in a separate "ARCHIVED" section below active ones, dimmed at 60% opacity with an archive badge. Each has an unarchive icon button that opens a confirmation dialog, sets `archived: false` + `lastModified: now`, and refreshes the provider.
 
 ## Unallocated Multi-Currency Display
 

@@ -33,6 +33,10 @@ class RecurringTransactions extends Table {
   IntColumn get interval => integer().withDefault(const Constant(1))();
   /// Next date this recurring transaction is due.
   DateTimeColumn get nextDueDate => dateTime()();
+  /// Day of month the series was set up on (1–31). Monthly/yearly dates are
+  /// clamped to short months (Jan 31 → Feb 28) and return to this day after
+  /// (→ Mar 31). Null on rows from before v19: the engine fills it in.
+  IntColumn get anchorDay => integer().nullable()();
   /// Last date a transaction was generated from this template.
   DateTimeColumn get lastGeneratedDate => dateTime().nullable()();
   /// End date: stop generating after this date. Null = forever.

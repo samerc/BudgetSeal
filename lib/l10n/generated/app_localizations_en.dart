@@ -9,6 +9,11 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String acctArchiveNonZero(String amount) {
+    return 'This account still holds $amount. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.';
+  }
+
+  @override
   String get receiptPickFailed =>
       'Couldn\'t add the photo. Check camera and photo permissions.';
 

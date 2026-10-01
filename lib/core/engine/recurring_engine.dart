@@ -6,6 +6,33 @@ import 'package:uuid/uuid.dart';
 import '../database/app_database.dart';
 import 'allocation_engine.dart';
 
+/// The next occurrence after [from]. Calendar arithmetic throughout (a
+/// 24-hour Duration drifts across DST changes). Monthly and yearly dates
+/// clamp to the end of short months and return to [anchorDay] (defaults to
+/// [from]'s day) afterwards: Jan 31 → Feb 28 → Mar 31.
+DateTime advanceRecurringDate(DateTime from, String frequency, int interval,
+    {int? anchorDay}) {
+  final n = interval > 0 ? interval : 1;
+  DateTime clamped(int year, int month) {
+    final first = DateTime(year, month); // normalises month overflow
+    final lastDay = DateTime(first.year, first.month + 1, 0).day;
+    final day = (anchorDay ?? from.day).clamp(1, lastDay);
+    return DateTime(first.year, first.month, day, from.hour, from.minute,
+        from.second);
+  }
+
+  return switch (frequency) {
+    'daily' => DateTime(from.year, from.month, from.day + n, from.hour,
+        from.minute, from.second),
+    'weekly' => DateTime(from.year, from.month, from.day + 7 * n, from.hour,
+        from.minute, from.second),
+    'monthly' => clamped(from.year, from.month + n),
+    'yearly' => clamped(from.year + n, from.month),
+    _ => DateTime(from.year, from.month, from.day + 30 * n, from.hour,
+        from.minute, from.second),
+  };
+}
+
 /// Manages recurring transactions: checks for due items on app start
 /// and generates actual transactions.
 class RecurringEngine {
@@ -43,6 +70,8 @@ class RecurringEngine {
       final baseCurrency = baseCurrencyMap[rec.householdId] ?? 'USD';
       // Generate all missed occurrences (e.g. user hasn't opened app in weeks).
       var currentDue = rec.nextDueDate;
+      // Legacy rows have no anchor: the current due day is the best guess.
+      final anchorDay = rec.anchorDay ?? currentDue.day;
       while (!currentDue.isAfter(today)) {
         // Stop if past end date.
         if (rec.endDate != null && currentDue.isAfter(rec.endDate!)) {
@@ -50,7 +79,9 @@ class RecurringEngine {
         }
         await _generateTransaction(rec, currentDue, baseCurrency);
         generated++;
-        currentDue = _advanceDate(currentDue, rec.frequency, rec.interval);
+        currentDue = advanceRecurringDate(
+            currentDue, rec.frequency, rec.interval,
+            anchorDay: anchorDay);
       }
 
       await (_db.update(_db.recurringTransactions)
@@ -58,6 +89,7 @@ class RecurringEngine {
           .write(RecurringTransactionsCompanion(
         lastGeneratedDate: Value(today),
         nextDueDate: Value(currentDue),
+        anchorDay: Value(anchorDay),
         // Bump so the advanced due date syncs; otherwise the other device
         // still sees the old due date and re-posts the same bill (duplicate).
         lastModified: Value(DateTime.now()),
@@ -141,16 +173,6 @@ class RecurringEngine {
     }
   }
 
-  DateTime _advanceDate(DateTime from, String frequency, int interval) {
-    return switch (frequency) {
-      'daily' => from.add(Duration(days: interval)),
-      'weekly' => from.add(Duration(days: 7 * interval)),
-      'monthly' => DateTime(from.year, from.month + interval, from.day),
-      'yearly' => DateTime(from.year + interval, from.month, from.day),
-      _ => from.add(Duration(days: 30 * interval)),
-    };
-  }
-
   /// Get all recurring transactions for a household.
   Future<List<RecurringTransaction>> getAll(String householdId,
       {bool excludeSubscriptions = false}) async {
@@ -201,6 +223,7 @@ class RecurringEngine {
             frequency: frequency,
             interval: Value(interval),
             nextDueDate: startDate,
+            anchorDay: Value(startDate.day),
             endDate: Value(endDate),
             isSubscription: Value(isSubscription),
             priceHistory: Value(priceHistory),

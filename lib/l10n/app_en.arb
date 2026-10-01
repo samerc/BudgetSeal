@@ -1,4 +1,6 @@
 {
+  "acctArchiveNonZero": "This account still holds {amount}. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.",
+  "@acctArchiveNonZero": { "placeholders": { "amount": { "type": "String" } } },
   "receiptPickFailed": "Couldn't add the photo. Check camera and photo permissions.",
   "backupCloseApp": "Close app",
   "importSkippedRows": "{count} rows skipped (unreadable date or amount)",

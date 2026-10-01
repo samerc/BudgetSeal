@@ -378,10 +378,18 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
     // Batch delete DB rows
     final ids = deleted.map((t) => t.id).toList();
-    await (db.delete(db.transactionLines)
-          ..where((l) => l.transactionId.isIn(ids)))
-        .go();
-    await (db.delete(db.transactions)..where((t) => t.id.isIn(ids))).go();
+    await db.transaction(() async {
+      // Ledger rows first: once the transaction row is gone their
+      // source_transaction_id is nulled (FK SET NULL) and they would count
+      // as manual adjustments, changing envelope balances.
+      await (db.delete(db.allocationLedger)
+            ..where((l) => l.sourceTransactionId.isIn(ids)))
+          .go();
+      await (db.delete(db.transactionLines)
+            ..where((l) => l.transactionId.isIn(ids)))
+          .go();
+      await (db.delete(db.transactions)..where((t) => t.id.isIn(ids))).go();
+    });
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -99,6 +99,12 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @acctArchiveNonZero.
+  ///
+  /// In en, this message translates to:
+  /// **'This account still holds {amount}. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.'**
+  String acctArchiveNonZero(String amount);
+
   /// No description provided for @receiptPickFailed.
   ///
   /// In en, this message translates to:

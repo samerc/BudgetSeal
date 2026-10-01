@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,17 +39,20 @@ final allocationsProvider =
   // Controller to merge both allocation and ledger change events
   final controller = StreamController<List<AllocationWithBalance>>();
   List<AllocationWithCategory>? cachedList;
+  var latest = 0;
 
   Future<void> recompute() async {
     final list = cachedList;
     if (list == null) return;
+    final seq = ++latest;
 
     final allocIds = list.map((awc) => awc.allocation.id).toList();
     final balancesByAlloc = allocIds.isNotEmpty
         ? await ledgerDao.getAllBalances(allocIds)
         : <String, Map<String, double>>{};
 
-    if (!controller.isClosed) {
+    // Skip if a newer recompute started meanwhile (it will emit).
+    if (seq == latest && !controller.isClosed) {
       controller.add([
         for (final awc in list)
           AllocationWithBalance(
@@ -66,12 +70,13 @@ final allocationsProvider =
         (e) => debugPrint('[allocationsProvider] recompute error: $e'));
   });
 
-  // Watch ledger table — lightweight change-detection trigger
-  // instead of streaming all rows on every change.
+  // Recompute on every ledger write, and on transaction writes: balances
+  // exclude ledger rows of soft-deleted transactions, and Unallocated (which
+  // re-runs when this emits) depends on account balances. tableUpdates fires
+  // on each write — a watched MAX(rowid) missed deletes and soft-deletes.
   final ledgerSub = db
-      .customSelect('SELECT MAX(rowid) AS r FROM allocation_ledger',
-          readsFrom: {db.allocationLedger})
-      .watch()
+      .tableUpdates(TableUpdateQuery.onAllTables(
+          [db.allocationLedger, db.transactions, db.transactionLines]))
       .listen((_) {
     recompute().catchError(
         (e) => debugPrint('[allocationsProvider] recompute error: $e'));

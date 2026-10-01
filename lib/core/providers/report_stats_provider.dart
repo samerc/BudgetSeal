@@ -66,6 +66,24 @@ double _safeBaseAmount(TransactionEntry e, String baseCurrency) {
   return e.tx.amount * e.tx.exchangeRateToBase;
 }
 
+/// Base-currency amount per category id for one transaction. A split
+/// transaction has no header category, so it spreads over its lines'
+/// categories instead of landing in "Uncategorized". Lines without a real
+/// exchange rate are skipped (see [isRealRate]).
+Map<String?, double> baseAmountByCategory(
+    TransactionEntry e, String baseCurrency) {
+  if (e.lines.isEmpty) {
+    return {e.tx.categoryId: _safeBaseAmount(e, baseCurrency)};
+  }
+  final out = <String?, double>{};
+  for (final l in e.lines) {
+    if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) continue;
+    final id = l.categoryId ?? e.tx.categoryId;
+    out[id] = (out[id] ?? 0) + l.amount * l.exchangeRateToBase;
+  }
+  return out;
+}
+
 /// Single-pass O(N) aggregation of all transactions into monthly buckets.
 final reportStatsProvider = Provider<AsyncValue<ReportStats>>((ref) {
   final baseCurrency =
@@ -88,10 +106,11 @@ final reportStatsProvider = Provider<AsyncValue<ReportStats>>((ref) {
         m.income += amt;
       } else if (e.tx.type == 'expense') {
         m.expense += amt;
-        final catId = e.tx.categoryId;
-        if (catId != null) {
-          m.categorySpend[catId] = (m.categorySpend[catId] ?? 0) + amt;
-        }
+        baseAmountByCategory(e, baseCurrency).forEach((catId, a) {
+          if (catId != null) {
+            m.categorySpend[catId] = (m.categorySpend[catId] ?? 0) + a;
+          }
+        });
       }
     }
 

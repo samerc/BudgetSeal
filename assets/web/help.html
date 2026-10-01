@@ -498,7 +498,7 @@
 <p>Tap any account to see its transactions and manage it. From the 3-dot menu, you can:</p>
 <ul>
   <li><strong>Adjust Balance</strong> — correct the balance without creating a transaction</li>
-  <li><strong>Archive</strong> — hide the account (transactions are preserved)</li>
+  <li><strong>Archive</strong> — hide the account (transactions are preserved). The balance must be zero first: transfer what's left to another account or adjust the balance, since archived accounts no longer count toward your money</li>
   <li><strong>Convert Back &amp; Close</strong> — for travel wallets, return remaining money and archive</li>
 </ul>
 
@@ -847,7 +847,7 @@
   <li>A real transaction is created — it appears in your transaction history</li>
 </ol>
 
-<p>The detail screen shows a <strong>summary card</strong> (currency, deadline, remaining) and a <strong>payment history</strong> listing all recorded transactions. Payments are linked to the goal by an internal ID, so renaming the goal won't break the history. To edit the goal's settings, tap the <strong>3-dot menu</strong> → <strong>Edit Settings</strong>.</p>
+<p>The detail screen shows a <strong>summary card</strong> (currency, deadline, remaining) and a <strong>payment history</strong> listing all recorded transactions. Payments are linked to the goal by an internal ID, so renaming the goal won't break the history. The progress is the total of these payments, so deleting a payment lowers it again. To edit the goal's settings, tap the <strong>3-dot menu</strong> → <strong>Edit Settings</strong>.</p>
 
 <h3>Loans</h3>
 <p>Track money you've lent to someone or borrowed from someone.</p>
@@ -974,7 +974,7 @@
 <!-- ══════════════════════════════════════════ -->
 <h2 id="age-of-money">Age of Money</h2>
 
-<p>Age of Money tells you how many days your money sits in your accounts before you spend it. It traces each expense back to the income that funded it (oldest income first).</p>
+<p>Age of Money tells you how many days your money sits in your accounts before you spend it. It replays all your income and expenses in order: each expense spends the oldest money still left (your accounts' opening balances count as the oldest), and the number shown is the average age of your last 10 expenses.</p>
 
 <div class="card">
   <strong>What the numbers mean:</strong>

@@ -49,6 +49,9 @@ double _baseAmount(TransactionEntry e) {
   return e.tx.amount * e.tx.exchangeRateToBase;
 }
 
+Map<String?, double> _baseAmountByCategory(TransactionEntry e) =>
+    baseAmountByCategory(e, _reportsBaseCurrency);
+
 // ═════════════════════════════════════════════════════════════════════════════
 // Reports Hub Screen
 // ═════════════════════════════════════════════════════════════════════════════
@@ -862,9 +865,10 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     return DateTime(now.year, now.month - _selectedMonthsBack, 1);
   }
 
+  /// Exclusive: the first moment of the next month.
   DateTime get _periodEnd {
     final start = _periodStart;
-    return DateTime(start.year, start.month + 1, 0, 23, 59, 59);
+    return DateTime(start.year, start.month + 1, 1);
   }
 
   void _showCategoryTransactions(
@@ -875,11 +879,12 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     required List<TransactionEntry> transactions,
     required Map<String, Category> categoryMap,
   }) {
+    final uncategorized = S.of(context).commonUncategorized;
     final catTxns = transactions.where((e) {
-      final catId = e.tx.categoryId;
-      final cat = catId != null ? categoryMap[catId] : null;
-      final name = cat?.name ?? 'Uncategorized';
-      return name == categoryName;
+      return _baseAmountByCategory(e).keys.any((catId) {
+        final cat = catId != null ? categoryMap[catId] : null;
+        return (cat?.name ?? uncategorized) == categoryName;
+      });
     }).toList()
       ..sort((a, b) => b.tx.createdAt.compareTo(a.tx.createdAt));
 
@@ -1016,12 +1021,14 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
 
     return txAsync.when(
       data: (entries) {
+        // [start, end): a transaction at 00:00 on the 1st belongs here.
         final filtered = entries
             .where((e) =>
                 e.tx.type == 'expense' &&
-                e.tx.createdAt.isAfter(_periodStart) &&
+                !e.tx.createdAt.isBefore(_periodStart) &&
                 e.tx.createdAt.isBefore(_periodEnd))
             .toList();
+        final uncategorized = S.of(context).commonUncategorized;
 
         // Aggregate by category
         final catSpend = <String, double>{};
@@ -1030,32 +1037,36 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         final catObjs = <String, Category>{};
 
         for (final e in filtered) {
-          final catId = e.tx.categoryId;
-          final cat = catId != null ? categoryMap[catId] : null;
-          final name = cat?.name ?? 'Uncategorized';
-          catSpend[name] = (catSpend[name] ?? 0) + _baseAmount(e);
-          catCount[name] = (catCount[name] ?? 0) + 1;
-          if (cat != null && !catColors.containsKey(name)) {
-            catColors[name] = AppColors.fromHex(cat.colorHex);
-            catObjs[name] = cat;
+          final names = <String>{};
+          _baseAmountByCategory(e).forEach((catId, amount) {
+            final cat = catId != null ? categoryMap[catId] : null;
+            final name = cat?.name ?? uncategorized;
+            catSpend[name] = (catSpend[name] ?? 0) + amount;
+            names.add(name);
+            if (cat != null && !catColors.containsKey(name)) {
+              catColors[name] = AppColors.fromHex(cat.colorHex);
+              catObjs[name] = cat;
+            }
+          });
+          // A transaction counts once per category it touches.
+          for (final name in names) {
+            catCount[name] = (catCount[name] ?? 0) + 1;
           }
         }
 
         // Compute last month's spend per category for comparison
         final prevMonthStart = DateTime(
             _periodStart.year, _periodStart.month - 1, 1);
-        final prevMonthEnd = DateTime(
-            prevMonthStart.year, prevMonthStart.month + 1, 0, 23, 59, 59);
         final lastMonthSpend = <String, double>{};
         for (final e in entries) {
           if (e.tx.type != 'expense') continue;
           final d = e.tx.createdAt;
-          if (d.isAfter(prevMonthStart) && d.isBefore(prevMonthEnd)) {
-            final catId = e.tx.categoryId;
-            final cat = catId != null ? categoryMap[catId] : null;
-            final name = cat?.name ?? 'Uncategorized';
-            lastMonthSpend[name] =
-                (lastMonthSpend[name] ?? 0) + _baseAmount(e);
+          if (!d.isBefore(prevMonthStart) && d.isBefore(_periodStart)) {
+            _baseAmountByCategory(e).forEach((catId, amount) {
+              final cat = catId != null ? categoryMap[catId] : null;
+              final name = cat?.name ?? uncategorized;
+              lastMonthSpend[name] = (lastMonthSpend[name] ?? 0) + amount;
+            });
           }
         }
 
@@ -2605,9 +2616,12 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     historicalBalances[a.account.id] ?? a.balance;
               }
             }
-            final netWorthNow = totalAssetsNow - totalLiabilitiesNow.abs();
+            // Liability balances are signed (owed = negative), so add them:
+            // an overpaid card (positive) raises net worth instead of
+            // lowering it as `- abs()` did.
+            final netWorthNow = totalAssetsNow + totalLiabilitiesNow;
             final netWorthCompare =
-                totalAssetsCompare - totalLiabilitiesCompare.abs();
+                totalAssetsCompare + totalLiabilitiesCompare;
 
             // Per-currency totals for foreign accounts
             final foreignTotals = <String, double>{};

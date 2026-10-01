@@ -27,5 +27,6 @@ class AccountsDao extends DatabaseAccessor<AppDatabase> with _$AccountsDaoMixin 
   }
 
   Future<void> archive(String id) => (update(accounts)..where((t) => t.id.equals(id)))
-      .write(const AccountsCompanion(archived: Value(true)));
+      .write(AccountsCompanion(
+          archived: const Value(true), lastModified: Value(DateTime.now())));
 }

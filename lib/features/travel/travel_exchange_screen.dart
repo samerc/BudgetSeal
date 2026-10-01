@@ -292,7 +292,9 @@ class _TravelExchangeScreenState
                 a.householdId.equals(householdId))
             ..where((a) => a.isTravel.equals(true))
             ..where((a) => a.currency.equals(_targetCurrency))
-            ..where((a) => a.archived.equals(true)))
+            ..where((a) => a.archived.equals(true))
+            // A deleted wallet must not come back via "Reactivate".
+            ..where((a) => a.deleted.equals(false)))
           .getSingleOrNull();
 
       String travelAccountId;

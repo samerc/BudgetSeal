@@ -9,6 +9,11 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String acctArchiveNonZero(String amount) {
+    return 'Ce compte contient encore $amount. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent.';
+  }
+
+  @override
   String get receiptPickFailed =>
       'Impossible d\'ajouter la photo. Vérifiez les autorisations de l\'appareil photo et des photos.';
 

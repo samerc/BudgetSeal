@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:drift/drift.dart' hide Column;
 
+import '../../core/engine/period_engine.dart' show budgetPeriodFor;
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -66,13 +67,19 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
 
-      // Fetch all planned expense transactions
+      // Planned expenses due by the end of this budget period (later months
+      // aren't this period's budget; earlier unposted ones still are).
+      final household = ref.read(householdProvider).value;
+      final periodEnd =
+          budgetPeriodFor(household?.periodStartDay ?? 1).end;
+      final baseCurrency = household?.baseCurrency ?? 'USD';
       final planned = await (db.select(db.transactions)
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.status.equals('planned') &
                 t.deleted.equals(false) &
-                t.type.equals('expense')))
+                t.type.equals('expense') &
+                t.createdAt.isSmallerThanValue(periodEnd)))
           .get();
 
       if (planned.isEmpty) {
@@ -110,6 +117,15 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         }
       }
 
+      // Only amounts in the envelope's own currency are summed — never mix
+      // currencies (the card shows "$X planned" in that currency).
+      final allocs = await (db.select(db.allocations)
+            ..where((a) => a.householdId.equals(householdId)))
+          .get();
+      final allocCurrency = {
+        for (final a in allocs) a.id: a.targetCurrency ?? baseCurrency,
+      };
+
       // Map lines → allocations and sum amounts
       final amountMap = <String, double>{};
       final currencyMap = <String, String>{};
@@ -118,8 +134,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         if (line.categoryId == null) continue;
         final allocId = catToAlloc[line.categoryId];
         if (allocId == null) continue;
+        final currency = allocCurrency[allocId] ?? baseCurrency;
+        if (line.currency != currency) continue;
         amountMap[allocId] = (amountMap[allocId] ?? 0) + line.amount;
-        currencyMap.putIfAbsent(allocId, () => line.currency);
+        currencyMap[allocId] = currency;
       }
 
       // For transactions without lines, use header categoryId
@@ -130,8 +148,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         if (hasLines) continue;
         final allocId = catToAlloc[tx.categoryId];
         if (allocId == null) continue;
+        final currency = allocCurrency[allocId] ?? baseCurrency;
+        if (tx.currency != currency) continue;
         amountMap[allocId] = (amountMap[allocId] ?? 0) + tx.amount;
-        currencyMap.putIfAbsent(allocId, () => tx.currency);
+        currencyMap[allocId] = currency;
       }
 
       if (mounted) {

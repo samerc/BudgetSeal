@@ -198,22 +198,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         if (e.tx.type == 'income') totalIncome += baseAmt;
                         if (e.tx.type == 'expense') {
                           totalExpense += baseAmt;
-                          final catId = e.tx.categoryId;
-                          if (catId != null) {
-                            final cat = categoryMap[catId];
-                            final otherLabel = S.of(context).dashboardOtherCategory;
+                          // Per line, so split transactions show their
+                          // real categories.
+                          final otherLabel =
+                              S.of(context).dashboardOtherCategory;
+                          baseAmountByCategory(e, baseCurrency)
+                              .forEach((catId, amt) {
+                            final cat =
+                                catId != null ? categoryMap[catId] : null;
                             final name = cat?.name ?? otherLabel;
-                            catSpend[name] =
-                                (catSpend[name] ?? 0) + baseAmt;
-                            if (cat != null &&
-                                !catColors.containsKey(name)) {
+                            catSpend[name] = (catSpend[name] ?? 0) + amt;
+                            if (cat != null && !catColors.containsKey(name)) {
                               catColors[name] = AppColors.fromHex(cat.colorHex);
                             }
-                          } else {
-                            final otherLabel = S.of(context).dashboardOtherCategory;
-                            catSpend[otherLabel] =
-                                (catSpend[otherLabel] ?? 0) + baseAmt;
-                          }
+                          });
                         }
                       }
 

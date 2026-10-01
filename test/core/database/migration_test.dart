@@ -28,7 +28,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.accounts).get(); // forces open + migration
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 18);
+      expect(row.data['user_version'], 19);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -55,6 +55,7 @@ void main() {
         'ALTER TABLE recurring_transactions DROP COLUMN deleted',
         'ALTER TABLE transaction_templates DROP COLUMN last_modified',
         'ALTER TABLE transaction_templates DROP COLUMN deleted',
+        'ALTER TABLE recurring_transactions DROP COLUMN anchor_day',
       ]) {
         await db.customStatement(stmt);
       }
@@ -66,7 +67,31 @@ void main() {
       await db.select(db.recurringTransactions).get(); // forces migration
       await db.select(db.transactionTemplates).get();
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 18);
+      expect(row.data['user_version'], 19);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  test('v19 migration adds recurring anchor_day to a v18 database', () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test4');
+    final file = File(p.join(dir.path, 'v18.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.customStatement(
+          'ALTER TABLE recurring_transactions DROP COLUMN anchor_day');
+      await db.customStatement('PRAGMA user_version = 18');
+      await db.close();
+
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.select(db.recurringTransactions).get(); // forces migration
+      final cols = await db
+          .customSelect('PRAGMA table_info(recurring_transactions)')
+          .get();
+      expect(cols.any((c) => c.data['name'] == 'anchor_day'), isTrue);
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 19);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -90,7 +115,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.transactionLines).get(); // forces the full 1->18 run
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 18);
+      expect(row.data['user_version'], 19);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -122,9 +147,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 18', () {
+    test('schema version is 19', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 18);
+      expect(db.schemaVersion, 19);
     });
 
     test('tables return empty results on fresh database', () async {

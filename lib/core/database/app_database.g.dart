@@ -5449,6 +5449,12 @@ class $RecurringTransactionsTable extends RecurringTransactions
   late final GeneratedColumn<DateTime> nextDueDate = GeneratedColumn<DateTime>(
       'next_due_date', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _anchorDayMeta =
+      const VerificationMeta('anchorDay');
+  @override
+  late final GeneratedColumn<int> anchorDay = GeneratedColumn<int>(
+      'anchor_day', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _lastGeneratedDateMeta =
       const VerificationMeta('lastGeneratedDate');
   @override
@@ -5528,6 +5534,7 @@ class $RecurringTransactionsTable extends RecurringTransactions
         frequency,
         interval,
         nextDueDate,
+        anchorDay,
         lastGeneratedDate,
         endDate,
         enabled,
@@ -5623,6 +5630,10 @@ class $RecurringTransactionsTable extends RecurringTransactions
     } else if (isInserting) {
       context.missing(_nextDueDateMeta);
     }
+    if (data.containsKey('anchor_day')) {
+      context.handle(_anchorDayMeta,
+          anchorDay.isAcceptableOrUnknown(data['anchor_day']!, _anchorDayMeta));
+    }
     if (data.containsKey('last_generated_date')) {
       context.handle(
           _lastGeneratedDateMeta,
@@ -5699,6 +5710,8 @@ class $RecurringTransactionsTable extends RecurringTransactions
           .read(DriftSqlType.int, data['${effectivePrefix}interval'])!,
       nextDueDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}next_due_date'])!,
+      anchorDay: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}anchor_day']),
       lastGeneratedDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_generated_date']),
       endDate: attachedDatabase.typeMapping
@@ -5746,6 +5759,11 @@ class RecurringTransaction extends DataClass
   /// Next date this recurring transaction is due.
   final DateTime nextDueDate;
 
+  /// Day of month the series was set up on (1–31). Monthly/yearly dates are
+  /// clamped to short months (Jan 31 → Feb 28) and return to this day after
+  /// (→ Mar 31). Null on rows from before v19: the engine fills it in.
+  final int? anchorDay;
+
   /// Last date a transaction was generated from this template.
   final DateTime? lastGeneratedDate;
 
@@ -5784,6 +5802,7 @@ class RecurringTransaction extends DataClass
       required this.frequency,
       required this.interval,
       required this.nextDueDate,
+      this.anchorDay,
       this.lastGeneratedDate,
       this.endDate,
       required this.enabled,
@@ -5812,6 +5831,9 @@ class RecurringTransaction extends DataClass
     map['frequency'] = Variable<String>(frequency);
     map['interval'] = Variable<int>(interval);
     map['next_due_date'] = Variable<DateTime>(nextDueDate);
+    if (!nullToAbsent || anchorDay != null) {
+      map['anchor_day'] = Variable<int>(anchorDay);
+    }
     if (!nullToAbsent || lastGeneratedDate != null) {
       map['last_generated_date'] = Variable<DateTime>(lastGeneratedDate);
     }
@@ -5848,6 +5870,9 @@ class RecurringTransaction extends DataClass
       frequency: Value(frequency),
       interval: Value(interval),
       nextDueDate: Value(nextDueDate),
+      anchorDay: anchorDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(anchorDay),
       lastGeneratedDate: lastGeneratedDate == null && nullToAbsent
           ? const Value.absent()
           : Value(lastGeneratedDate),
@@ -5883,6 +5908,7 @@ class RecurringTransaction extends DataClass
       frequency: serializer.fromJson<String>(json['frequency']),
       interval: serializer.fromJson<int>(json['interval']),
       nextDueDate: serializer.fromJson<DateTime>(json['nextDueDate']),
+      anchorDay: serializer.fromJson<int?>(json['anchorDay']),
       lastGeneratedDate:
           serializer.fromJson<DateTime?>(json['lastGeneratedDate']),
       endDate: serializer.fromJson<DateTime?>(json['endDate']),
@@ -5911,6 +5937,7 @@ class RecurringTransaction extends DataClass
       'frequency': serializer.toJson<String>(frequency),
       'interval': serializer.toJson<int>(interval),
       'nextDueDate': serializer.toJson<DateTime>(nextDueDate),
+      'anchorDay': serializer.toJson<int?>(anchorDay),
       'lastGeneratedDate': serializer.toJson<DateTime?>(lastGeneratedDate),
       'endDate': serializer.toJson<DateTime?>(endDate),
       'enabled': serializer.toJson<bool>(enabled),
@@ -5936,6 +5963,7 @@ class RecurringTransaction extends DataClass
           String? frequency,
           int? interval,
           DateTime? nextDueDate,
+          Value<int?> anchorDay = const Value.absent(),
           Value<DateTime?> lastGeneratedDate = const Value.absent(),
           Value<DateTime?> endDate = const Value.absent(),
           bool? enabled,
@@ -5960,6 +5988,7 @@ class RecurringTransaction extends DataClass
         frequency: frequency ?? this.frequency,
         interval: interval ?? this.interval,
         nextDueDate: nextDueDate ?? this.nextDueDate,
+        anchorDay: anchorDay.present ? anchorDay.value : this.anchorDay,
         lastGeneratedDate: lastGeneratedDate.present
             ? lastGeneratedDate.value
             : this.lastGeneratedDate,
@@ -5992,6 +6021,7 @@ class RecurringTransaction extends DataClass
       interval: data.interval.present ? data.interval.value : this.interval,
       nextDueDate:
           data.nextDueDate.present ? data.nextDueDate.value : this.nextDueDate,
+      anchorDay: data.anchorDay.present ? data.anchorDay.value : this.anchorDay,
       lastGeneratedDate: data.lastGeneratedDate.present
           ? data.lastGeneratedDate.value
           : this.lastGeneratedDate,
@@ -6027,6 +6057,7 @@ class RecurringTransaction extends DataClass
           ..write('frequency: $frequency, ')
           ..write('interval: $interval, ')
           ..write('nextDueDate: $nextDueDate, ')
+          ..write('anchorDay: $anchorDay, ')
           ..write('lastGeneratedDate: $lastGeneratedDate, ')
           ..write('endDate: $endDate, ')
           ..write('enabled: $enabled, ')
@@ -6054,6 +6085,7 @@ class RecurringTransaction extends DataClass
         frequency,
         interval,
         nextDueDate,
+        anchorDay,
         lastGeneratedDate,
         endDate,
         enabled,
@@ -6080,6 +6112,7 @@ class RecurringTransaction extends DataClass
           other.frequency == this.frequency &&
           other.interval == this.interval &&
           other.nextDueDate == this.nextDueDate &&
+          other.anchorDay == this.anchorDay &&
           other.lastGeneratedDate == this.lastGeneratedDate &&
           other.endDate == this.endDate &&
           other.enabled == this.enabled &&
@@ -6105,6 +6138,7 @@ class RecurringTransactionsCompanion
   final Value<String> frequency;
   final Value<int> interval;
   final Value<DateTime> nextDueDate;
+  final Value<int?> anchorDay;
   final Value<DateTime?> lastGeneratedDate;
   final Value<DateTime?> endDate;
   final Value<bool> enabled;
@@ -6128,6 +6162,7 @@ class RecurringTransactionsCompanion
     this.frequency = const Value.absent(),
     this.interval = const Value.absent(),
     this.nextDueDate = const Value.absent(),
+    this.anchorDay = const Value.absent(),
     this.lastGeneratedDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.enabled = const Value.absent(),
@@ -6152,6 +6187,7 @@ class RecurringTransactionsCompanion
     required String frequency,
     this.interval = const Value.absent(),
     required DateTime nextDueDate,
+    this.anchorDay = const Value.absent(),
     this.lastGeneratedDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.enabled = const Value.absent(),
@@ -6183,6 +6219,7 @@ class RecurringTransactionsCompanion
     Expression<String>? frequency,
     Expression<int>? interval,
     Expression<DateTime>? nextDueDate,
+    Expression<int>? anchorDay,
     Expression<DateTime>? lastGeneratedDate,
     Expression<DateTime>? endDate,
     Expression<bool>? enabled,
@@ -6208,6 +6245,7 @@ class RecurringTransactionsCompanion
       if (frequency != null) 'frequency': frequency,
       if (interval != null) 'interval': interval,
       if (nextDueDate != null) 'next_due_date': nextDueDate,
+      if (anchorDay != null) 'anchor_day': anchorDay,
       if (lastGeneratedDate != null) 'last_generated_date': lastGeneratedDate,
       if (endDate != null) 'end_date': endDate,
       if (enabled != null) 'enabled': enabled,
@@ -6234,6 +6272,7 @@ class RecurringTransactionsCompanion
       Value<String>? frequency,
       Value<int>? interval,
       Value<DateTime>? nextDueDate,
+      Value<int?>? anchorDay,
       Value<DateTime?>? lastGeneratedDate,
       Value<DateTime?>? endDate,
       Value<bool>? enabled,
@@ -6257,6 +6296,7 @@ class RecurringTransactionsCompanion
       frequency: frequency ?? this.frequency,
       interval: interval ?? this.interval,
       nextDueDate: nextDueDate ?? this.nextDueDate,
+      anchorDay: anchorDay ?? this.anchorDay,
       lastGeneratedDate: lastGeneratedDate ?? this.lastGeneratedDate,
       endDate: endDate ?? this.endDate,
       enabled: enabled ?? this.enabled,
@@ -6312,6 +6352,9 @@ class RecurringTransactionsCompanion
     if (nextDueDate.present) {
       map['next_due_date'] = Variable<DateTime>(nextDueDate.value);
     }
+    if (anchorDay.present) {
+      map['anchor_day'] = Variable<int>(anchorDay.value);
+    }
     if (lastGeneratedDate.present) {
       map['last_generated_date'] = Variable<DateTime>(lastGeneratedDate.value);
     }
@@ -6358,6 +6401,7 @@ class RecurringTransactionsCompanion
           ..write('frequency: $frequency, ')
           ..write('interval: $interval, ')
           ..write('nextDueDate: $nextDueDate, ')
+          ..write('anchorDay: $anchorDay, ')
           ..write('lastGeneratedDate: $lastGeneratedDate, ')
           ..write('endDate: $endDate, ')
           ..write('enabled: $enabled, ')
@@ -13942,6 +13986,7 @@ typedef $$RecurringTransactionsTableCreateCompanionBuilder
   required String frequency,
   Value<int> interval,
   required DateTime nextDueDate,
+  Value<int?> anchorDay,
   Value<DateTime?> lastGeneratedDate,
   Value<DateTime?> endDate,
   Value<bool> enabled,
@@ -13967,6 +14012,7 @@ typedef $$RecurringTransactionsTableUpdateCompanionBuilder
   Value<String> frequency,
   Value<int> interval,
   Value<DateTime> nextDueDate,
+  Value<int?> anchorDay,
   Value<DateTime?> lastGeneratedDate,
   Value<DateTime?> endDate,
   Value<bool> enabled,
@@ -14077,6 +14123,9 @@ class $$RecurringTransactionsTableFilterComposer
 
   ColumnFilters<DateTime> get nextDueDate => $composableBuilder(
       column: $table.nextDueDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get anchorDay => $composableBuilder(
+      column: $table.anchorDay, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get lastGeneratedDate => $composableBuilder(
       column: $table.lastGeneratedDate,
@@ -14220,6 +14269,9 @@ class $$RecurringTransactionsTableOrderingComposer
 
   ColumnOrderings<DateTime> get nextDueDate => $composableBuilder(
       column: $table.nextDueDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get anchorDay => $composableBuilder(
+      column: $table.anchorDay, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get lastGeneratedDate => $composableBuilder(
       column: $table.lastGeneratedDate,
@@ -14365,6 +14417,9 @@ class $$RecurringTransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get nextDueDate => $composableBuilder(
       column: $table.nextDueDate, builder: (column) => column);
+
+  GeneratedColumn<int> get anchorDay =>
+      $composableBuilder(column: $table.anchorDay, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastGeneratedDate => $composableBuilder(
       column: $table.lastGeneratedDate, builder: (column) => column);
@@ -14515,6 +14570,7 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<String> frequency = const Value.absent(),
             Value<int> interval = const Value.absent(),
             Value<DateTime> nextDueDate = const Value.absent(),
+            Value<int?> anchorDay = const Value.absent(),
             Value<DateTime?> lastGeneratedDate = const Value.absent(),
             Value<DateTime?> endDate = const Value.absent(),
             Value<bool> enabled = const Value.absent(),
@@ -14539,6 +14595,7 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             frequency: frequency,
             interval: interval,
             nextDueDate: nextDueDate,
+            anchorDay: anchorDay,
             lastGeneratedDate: lastGeneratedDate,
             endDate: endDate,
             enabled: enabled,
@@ -14563,6 +14620,7 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             required String frequency,
             Value<int> interval = const Value.absent(),
             required DateTime nextDueDate,
+            Value<int?> anchorDay = const Value.absent(),
             Value<DateTime?> lastGeneratedDate = const Value.absent(),
             Value<DateTime?> endDate = const Value.absent(),
             Value<bool> enabled = const Value.absent(),
@@ -14587,6 +14645,7 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             frequency: frequency,
             interval: interval,
             nextDueDate: nextDueDate,
+            anchorDay: anchorDay,
             lastGeneratedDate: lastGeneratedDate,
             endDate: endDate,
             enabled: enabled,

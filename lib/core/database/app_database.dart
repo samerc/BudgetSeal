@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -182,6 +182,11 @@ class AppDatabase extends _$AppDatabase {
                 'transaction_templates', 'last_modified');
             await _addColumnIfMissing(
                 m, transactionTemplates, transactionTemplates.deleted);
+          }
+          if (from < 19) {
+            // Day-of-month anchor so monthly recurrences survive short months.
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.anchorDay);
           }
         },
       );

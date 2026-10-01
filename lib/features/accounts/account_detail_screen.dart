@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1021,7 +1023,38 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   // Archive
   // ---------------------------------------------------------------------------
 
+  /// Archived accounts drop out of every balance, so archiving one that still
+  /// holds money would silently pull that money out of Unallocated. Only
+  /// allow it at zero; otherwise explain how to empty it first.
+  Future<bool> _canArchive() async {
+    final db = ref.read(databaseProvider);
+    final acc = await AccountsDao(db).getById(widget.accountId);
+    final balance =
+        await BalanceCalculator(db).accountBalance(widget.accountId);
+    final currency = acc?.currency ?? _currencyController.text;
+    final threshold = 0.5 / math.pow(10, currencyDecimals(currency));
+    if (balance.abs() < threshold) return true;
+    if (!mounted) return false;
+    final tr = S.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(tr.acctArchiveTitle),
+        content: Text(tr.acctArchiveNonZero(
+            formatAmount(balance, currency: currency))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dctx),
+            child: Text(tr.commonOk),
+          ),
+        ],
+      ),
+    );
+    return false;
+  }
+
   Future<void> _confirmArchive() async {
+    if (!await _canArchive() || !mounted) return;
     final tr = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1049,7 +1082,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       final db = ref.read(databaseProvider);
       await (db.update(db.accounts)
             ..where((a) => a.id.equals(widget.accountId)))
-          .write(const AccountsCompanion(archived: Value(true)));
+          .write(AccountsCompanion(
+              archived: const Value(true),
+              lastModified: Value(DateTime.now())));
       ref.invalidate(accountsWithBalanceProvider);
       if (mounted) context.pop();
     }
@@ -1144,8 +1179,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     if (!mounted || action == null || action == 'cancel') return;
 
     if (action == 'archive') {
+      if (!await _canArchive() || !mounted) return;
       await (db.update(db.accounts)..where((a) => a.id.equals(accId)))
-          .write(const AccountsCompanion(archived: Value(true)));
+          .write(AccountsCompanion(
+              archived: const Value(true),
+              lastModified: Value(DateTime.now())));
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
       if (mounted) context.pop();

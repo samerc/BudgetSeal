@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/s_lookup.dart';
-import 'package:uuid/uuid.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show InsertMode, Value;
 
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
+import '../engine/period_engine.dart' show budgetPeriodFor;
 
 const _lastResetKey = 'period_last_reset';
-const _uuid = Uuid();
 
 /// Handles automatic period resets for envelopes.
 ///
@@ -24,18 +23,23 @@ class PeriodResetService {
     final lastResetStr = prefs.getString(_lastResetKey);
     final now = DateTime.now();
 
-    // Determine current period start
-    final currentPeriodStart = now.day >= periodStartDay
-        ? DateTime(now.year, now.month, periodStartDay)
-        : DateTime(now.year, now.month - 1, periodStartDay);
+    // Determine current period start (clamped: day 31 → Feb 28/29)
+    final currentPeriodStart = budgetPeriodFor(periodStartDay, now).start;
+
+    // First run on this install (new user, reinstall, cleared data): there is
+    // no "previous period" here to close — resetting now would empty
+    // envelopes mid-period. Just remember the period.
+    if (lastResetStr == null) {
+      await prefs.setString(
+          _lastResetKey, currentPeriodStart.toIso8601String());
+      return _countPendingManual(db, householdId);
+    }
 
     // Check if we already reset for this period
-    if (lastResetStr != null) {
-      final lastReset = DateTime.tryParse(lastResetStr);
-      if (lastReset != null && !lastReset.isBefore(currentPeriodStart)) {
-        // Already reset for this period — just count pending manual ones
-        return _countPendingManual(db, householdId);
-      }
+    final lastReset = DateTime.tryParse(lastResetStr);
+    if (lastReset != null && !lastReset.isBefore(currentPeriodStart)) {
+      // Already reset for this period — just count pending manual ones
+      return _countPendingManual(db, householdId);
     }
 
     // New period — perform auto-resets
@@ -66,15 +70,20 @@ class PeriodResetService {
         } else {
           // Return leftover to unallocated
           if (balance > 0) {
-            await ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-              id: _uuid.v4(),
+            // Deterministic id: if another synced device (or a re-run)
+            // already reset this envelope for this period, the row exists
+            // and the insert is ignored instead of resetting twice.
+            final day = currentPeriodStart.toIso8601String().substring(0, 10);
+            await db.into(db.allocationLedger).insert(
+                AllocationLedgerCompanion.insert(
+              id: 'reset:${alloc.id}:$day:${entry.key}',
               allocationId: alloc.id,
               entryType: 'period_reset',
               amount: -balance,
               currency: entry.key,
               note: Value(currentS().engineAutoReset),
               deviceId: 'period-reset',
-            ));
+            ), mode: InsertMode.insertOrIgnore);
             debugPrint('[PeriodReset] Reset ${entry.key} balance to unallocated');
           }
         }

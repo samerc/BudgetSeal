@@ -1075,6 +1075,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         categoryId: Value(_categoryId),
         frequency: Value(_frequency),
         nextDueDate: Value(_startDate),
+        anchorDay: Value(_startDate.day),
         endDate: Value(_endDate),
         isSubscription: Value(_isSubscription),
         lastModified: Value(DateTime.now()),
