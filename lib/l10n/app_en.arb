@@ -1,4 +1,6 @@
 {
+  "moreMoneySection": "Money",
+  "moreAppSection": "App",
   "txFormNewExpense": "New expense",
   "txFormNewIncome": "New income",
   "txFormNewTransfer": "New transfer",

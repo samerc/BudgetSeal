@@ -9,6 +9,12 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get moreMoneySection => 'المال';
+
+  @override
+  String get moreAppSection => 'التطبيق';
+
+  @override
   String get txFormNewExpense => 'مصروف جديد';
 
   @override

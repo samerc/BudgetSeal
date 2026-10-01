@@ -9,6 +9,12 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get moreMoneySection => 'Money';
+
+  @override
+  String get moreAppSection => 'App';
+
+  @override
   String get txFormNewExpense => 'New expense';
 
   @override

@@ -9,6 +9,12 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get moreMoneySection => 'Argent';
+
+  @override
+  String get moreAppSection => 'Application';
+
+  @override
   String get txFormNewExpense => 'Nouvelle dépense';
 
   @override

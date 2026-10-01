@@ -1,4 +1,6 @@
 {
+  "moreMoneySection": "Argent",
+  "moreAppSection": "Application",
   "txFormNewExpense": "Nouvelle dépense",
   "txFormNewIncome": "Nouveau revenu",
   "txFormNewTransfer": "Nouveau virement",

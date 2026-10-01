@@ -99,6 +99,18 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @moreMoneySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get moreMoneySection;
+
+  /// No description provided for @moreAppSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get moreAppSection;
+
   /// No description provided for @txFormNewExpense.
   ///
   /// In en, this message translates to:

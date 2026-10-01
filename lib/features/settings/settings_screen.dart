@@ -64,62 +64,61 @@ class SettingsScreen extends ConsumerWidget {
             // ── Backup Reminder Banner ──
             _SettingsBackupBanner(),
 
-            // ── Features: Cashew-style 2-column tile grid ──
-            _MoreGrid(children: [
-              _MoreTile(icon: Icons.credit_card_rounded, title: l.navAccounts,
-                  color: const Color(0xFF1565C0),
+            // ── Grouped list: Money / Tools / App ──
+            _MoreGroup(title: l.moreMoneySection, rows: [
+              _MoreRow(icon: Icons.credit_card_rounded, title: l.navAccounts,
+                  subtitle: l.settingsAccountsSub, hue: 215,
                   onTap: () => context.push('/accounts')),
-              _MoreTile(icon: Icons.label_rounded, title: l.navCategories,
-                  color: const Color(0xFFBA68C8),
+              _MoreRow(icon: Icons.label_rounded, title: l.navCategories,
+                  subtitle: l.settingsCategoriesSub, hue: 285,
                   onTap: () => context.push('/categories')),
-              _MoreTile(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
-                  color: const Color(0xFFFF7043),
+              _MoreRow(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
+                  subtitle: l.settingsRecurringSub, hue: 18,
                   onTap: () => context.push('/recurring')),
-              _MoreTile(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
-                  color: AppColors.accent,
+              _MoreRow(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
+                  subtitle: l.settingsSubscriptionsSub, hue: 340,
                   onTap: () => context.push('/subscriptions')),
-              _MoreTile(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
-                  color: const Color(0xFF22C55E),
-                  onTap: () => context.push('/objectives')),
-              _MoreTile(icon: Icons.event_note_rounded, title: l.plannedTitle,
-                  color: const Color(0xFF7E57C2),
+              _MoreRow(icon: Icons.event_note_rounded, title: l.plannedTitle,
+                  subtitle: l.plannedSubtitle, hue: 255,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.plannedPayments)) return;
                     context.push('/planned-payments');
                   }),
-              _MoreTile(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
-                  color: const Color(0xFF26A69A),
+            ]),
+            _MoreGroup(title: l.settingsToolsSection, rows: [
+              _MoreRow(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
+                  subtitle: l.settingsGoalsSub, hue: 145,
+                  onTap: () => context.push('/objectives')),
+              _MoreRow(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
+                  subtitle: l.settingsBillSplitterSub, hue: 172,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
                     context.push('/bill-splitter');
                   }),
-              _MoreTile(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
-                  color: const Color(0xFF42A5F5),
+              _MoreRow(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
+                  subtitle: l.settingsTravelSub, hue: 198,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.travelExchange)) return;
                     context.push('/travel-exchange');
                   }),
-              _MoreTile(icon: Icons.computer_rounded, title: l.tileWebCompanion,
-                  color: const Color(0xFF0EA5E9),
+              _MoreRow(icon: Icons.computer_rounded, title: l.tileWebCompanion,
+                  subtitle: l.settingsWebCompanionSub, hue: 232,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.webCompanion)) return;
                     context.push('/web-companion');
                   }),
             ]),
-            const SizedBox(height: 16),
-
-            // ── Settings (navigates to dedicated screen) ──
-            _SettingsTile(icon: Icons.settings_rounded, title: l.settingsCustomization,
-                subtitle: l.settingsCustomizationSub,
-                iconColor: AppColors.ts(context),
-                onTap: () => context.push('/settings')),
-            _SettingsTile(icon: Icons.help_outline_rounded, title: l.tileHelpGuide,
-                subtitle: l.settingsHelpSub,
-                iconColor: const Color(0xFF0EA5E9),
-                onTap: () => context.push('/help')),
-            _SettingsTile(icon: Icons.info_outline_rounded, title: l.settingsAbout,
-                subtitle: l.settingsVersionN(appVersion), iconColor: AppColors.th(context),
-                onTap: () => context.push('/about')),
+            _MoreGroup(title: l.moreAppSection, rows: [
+              _MoreRow(icon: Icons.settings_rounded, title: l.settingsCustomization,
+                  subtitle: l.settingsCustomizationSub, hue: 220, neutral: true,
+                  onTap: () => context.push('/settings')),
+              _MoreRow(icon: Icons.help_outline_rounded, title: l.tileHelpGuide,
+                  subtitle: l.settingsHelpSub, hue: 190,
+                  onTap: () => context.push('/help')),
+              _MoreRow(icon: Icons.info_outline_rounded, title: l.settingsAbout,
+                  subtitle: l.settingsVersionN(appVersion), hue: 220, neutral: true,
+                  onTap: () => context.push('/about')),
+            ]),
           ])),
           ),
         ],
@@ -1545,84 +1544,119 @@ class _SettingsIcon extends StatelessWidget {
   }
 }
 
-/// Two tiles per row.
-class _MoreGrid extends StatelessWidget {
-  final List<Widget> children;
-  const _MoreGrid({required this.children});
+/// A titled, rounded card of related More-page rows with thin dividers.
+class _MoreGroup extends StatelessWidget {
+  final String title;
+  final List<_MoreRow> rows;
+  const _MoreGroup({required this.title, required this.rows});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (var i = 0; i < children.length; i += 2)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(child: children[i]),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: i + 1 < children.length
-                          ? children[i + 1]
-                          : const SizedBox.shrink()),
-                ],
+    final radius = BorderRadius.circular(CardTokens.radius + 4);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _SectionHeader(title: title),
+          const SizedBox(height: 4),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.sf(context),
+              borderRadius: radius,
+              boxShadow: AppColors.cardShadow(context),
+              border: Border.all(color: AppColors.cardBorder(context)),
+            ),
+            child: ClipRRect(
+              borderRadius: radius,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Column(
+                  children: [
+                    for (var i = 0; i < rows.length; i++) ...[
+                      if (i > 0)
+                        Divider(
+                            height: 1,
+                            indent: 70,
+                            endIndent: 16,
+                            color: AppColors.bd(context)),
+                      rows[i],
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-/// Cashew "more actions" tile: pastel block with icon and title.
-class _MoreTile extends StatelessWidget {
+/// One More-page row: icon circle, name, one-line description, chevron.
+/// Icon colors come from a hue at a shared saturation/lightness so the set
+/// reads as one family (hand-picked colors drifted muddy as pastels).
+class _MoreRow extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Color color;
+  final String subtitle;
+  final double hue;
+  final bool neutral;
   final VoidCallback onTap;
 
-  const _MoreTile({
+  const _MoreRow({
     required this.icon,
     required this.title,
-    required this.color,
+    required this.subtitle,
+    required this.hue,
+    this.neutral = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.pastel(context, color, light: 0.88, dark: 0.8),
-      borderRadius: BorderRadius.circular(CardTokens.radius + 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(CardTokens.radius + 4),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 12, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, color, light: 0.6, dark: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 21, color: AppColors.tp(context)),
+    final color = HSLColor.fromAHSL(1, hue, neutral ? 0.12 : 0.62,
+            AppColors.isDark ? 0.62 : 0.5)
+        .toColor();
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 10, 12),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.pastel(context, color, light: 0.82, dark: 0.72),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 10),
-              Text(title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 15,
-                      height: 1.2,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
-            ],
-          ),
+              child: Icon(icon, size: 21, color: color),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context))),
+                  const SizedBox(height: 1),
+                  Text(subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 13.5, color: AppColors.ts(context))),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                size: 20, color: AppColors.th(context)),
+          ],
         ),
       ),
     );
@@ -2381,59 +2415,56 @@ class _SettingsBackupBanner extends ConsumerWidget {
             ? l.backupBannerNoBackup
             : l.backupBannerDaysAgo(days);
 
+        // One slim row: warning + "Back up now" + dismiss.
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 6, 4, 6),
             decoration: BoxDecoration(
               color: AppColors.pastel(context, AppColors.caution,
                   light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(CardTokens.radius + 4),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.backup_rounded,
-                        size: 18, color: AppColors.caution),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        message,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        await snoozeBackupReminder();
-                        ref.invalidate(showBackupReminderProvider);
-                      },
-                      child: Icon(Icons.close_rounded,
-                          size: 18, color: AppColors.ts(context)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: FilledButton.icon(
-                    onPressed: () => context.push('/backup'),
-                    icon: const Icon(Icons.backup_rounded, size: 18),
-                    label: Text(l.backupNowButton),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.pastel(
-                          context, AppColors.caution,
-                          light: 0.55, dark: 0.5),
-                      foregroundColor: AppColors.tp(context),
-                      minimumSize: const Size(0, 40),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                Icon(Icons.cloud_upload_rounded,
+                    size: 20, color: AppColors.caution),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    message,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context),
                     ),
                   ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/backup'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.tp(context),
+                    backgroundColor: AppColors.pastel(
+                        context, AppColors.caution,
+                        light: 0.6, dark: 0.55),
+                    minimumSize: const Size(0, 34),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    textStyle: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  child: Text(l.backupNowButton),
+                ),
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(Icons.close_rounded,
+                      size: 18, color: AppColors.ts(context)),
+                  onPressed: () async {
+                    await snoozeBackupReminder();
+                    ref.invalidate(showBackupReminderProvider);
+                  },
                 ),
               ],
             ),

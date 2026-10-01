@@ -802,8 +802,9 @@ All three themes come from one `_buildTheme()`; surfaces are derived from the ac
 The More tab is split into two screens:
 
 **More page** (tab) — feature hub:
-- Cashew-style 2-column grid of pastel tiles (`_MoreTile`): Accounts, Categories, Recurring & Bills, Subscriptions, Goals & Loans, Planned Payments, Bill Splitter, Travel Exchange, Web Companion
-- Flat rows below: Settings & Customization → navigates to `/settings`
+- Grouped list (`_MoreGroup` cards of `_MoreRow`s with dividers): **Money** (Accounts, Categories, Recurring & Bills, Subscriptions, Planned Payments), **Tools** (Goals & Loans, Bill Splitter, Travel Exchange, Web Companion), **App** (Settings, Help, About). Rows: icon circle, name, one-line description, chevron. Icon colors come from `HSLColor` hues at one shared saturation/lightness — don't hand-pick hex colors (they turn muddy as pastels).
+- Backup reminder: one slim amber row (message · Backup Now · dismiss) above the groups
+- App group: Settings & Customization → navigates to `/settings`
 - Help Guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
 - About PocketPlan
 - Household name + currency shown as subtitle under "More" header (no separate card)

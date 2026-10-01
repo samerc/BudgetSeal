@@ -1,4 +1,6 @@
 {
+  "moreMoneySection": "المال",
+  "moreAppSection": "التطبيق",
   "txFormNewExpense": "مصروف جديد",
   "txFormNewIncome": "دخل جديد",
   "txFormNewTransfer": "تحويل جديد",
