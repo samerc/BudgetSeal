@@ -283,10 +283,12 @@ class LineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Same filled surface as the form's field card.
+      // Same card surface as the form's field card.
       decoration: BoxDecoration(
-        color: AppColors.sfv(context),
+        color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(RadiusTokens.input),
+        boxShadow: AppColors.cardShadow(context),
+        border: Border.all(color: AppColors.cardBorder(context)),
       ),
       padding: CardTokens.padding,
       child: Column(
@@ -308,7 +310,7 @@ class LineCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(S.of(context).txWidgetSelectAccount,
                             style: TextStyle(
-                                color: AppColors.th(context), fontSize: 13)),
+                                color: AppColors.ts(context), fontSize: 15)),
                       ],
                     ),
                     icon: Icon(Icons.expand_more_rounded,

@@ -909,7 +909,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     decoration: InputDecoration(
                       counterText: '', // limit still enforced, counter hidden
                       hintText: S.of(context).txFormNoteHint,
-                      hintStyle: TextStyle(color: AppColors.th(context)),
+                      hintStyle: TextStyle(color: AppColors.ts(context).withValues(alpha: 0.75)),
                       prefixIcon: Icon(Icons.notes_rounded,
                           size: 18, color: AppColors.ts(context)),
                       border: InputBorder.none,
@@ -1197,7 +1197,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ? Colors.white.withValues(alpha: 0.08)
         : Colors.black.withValues(alpha: 0.06);
     final pill = dark
-        ? Colors.black.withValues(alpha: 0.35)
+        ? Colors.white.withValues(alpha: 0.18)
         : Colors.white.withValues(alpha: 0.92);
 
     return Padding(
@@ -1397,7 +1397,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final destAmount =
         _lines.isNotEmpty ? _lines.first.amount * rate : 0.0;
 
-    // Same filled surface as the field card above.
+    // Same card surface as the field card above.
     return _TxFieldCard(
       child: Column(
         children: [
@@ -1730,7 +1730,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           decoration: InputDecoration(
             counterText: '', // limit still enforced, counter hidden
             hintText: S.of(context).txFormTitleHint,
-            hintStyle: TextStyle(color: AppColors.th(context)),
+            hintStyle: TextStyle(color: AppColors.ts(context).withValues(alpha: 0.75)),
             prefixIcon: Icon(Icons.edit_rounded,
                 size: 18, color: AppColors.ts(context)),
             border: InputBorder.none,
@@ -1915,7 +1915,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 }
 
 /// Consistent styled field card for the transaction form.
-/// Lighter background than TxCard, subtle border, same radius.
 class _TxFieldCard extends StatelessWidget {
   final Widget child;
   const _TxFieldCard({required this.child});
@@ -1923,11 +1922,7 @@ class _TxFieldCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        // Cashew TextInput: filled container, radius 15, no border.
-        color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(RadiusTokens.input),
-      ),
+      decoration: _inputCardDecoration(context),
       child: child,
     );
   }
@@ -1943,9 +1938,10 @@ class _ActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.sfv(context),
-      borderRadius: BorderRadius.circular(RadiusTokens.input),
+    return DecoratedBox(
+      decoration: _inputCardDecoration(context),
+      child: Material(
+      type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(RadiusTokens.input),
@@ -1967,6 +1963,16 @@ class _ActionChip extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
+
+/// Form cards (fields, items, transfer, action tiles): the regular card
+/// surface with its soft shadow so inputs stand out from the page.
+BoxDecoration _inputCardDecoration(BuildContext context) => BoxDecoration(
+      color: AppColors.sf(context),
+      borderRadius: BorderRadius.circular(RadiusTokens.input),
+      boxShadow: AppColors.cardShadow(context),
+      border: Border.all(color: AppColors.cardBorder(context)),
+    );
