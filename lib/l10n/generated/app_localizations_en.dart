@@ -9,6 +9,24 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get txFormNewExpense => 'New expense';
+
+  @override
+  String get txFormNewIncome => 'New income';
+
+  @override
+  String get txFormNewTransfer => 'New transfer';
+
+  @override
+  String get txFormEditExpense => 'Edit expense';
+
+  @override
+  String get txFormEditIncome => 'Edit income';
+
+  @override
+  String get txFormEditTransfer => 'Edit transfer';
+
+  @override
   String reportsTxCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -175,35 +175,56 @@ class _DetailBody extends ConsumerWidget {
           // -- Hero band (Cashew style) --
           Container(
             color: bandColor,
-            padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 20, 24),
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 20, 20),
             child: Row(
               children: [
-                if (primaryCat != null)
-                  Hero(
-                    tag: 'tx_${tx.id}',
-                    child: CategoryIcon(
-                      categoryName: primaryCat.name,
-                      emoji: primaryCat.icon.length <= 4 &&
-                              primaryCat.icon != 'category'
-                          ? primaryCat.icon
-                          : null,
-                      color: catColor,
-                      size: 64,
-                      circular: true,
-                    ),
-                  )
-                else
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: AppColors.pastel(context, typeColor,
-                          light: 0.35, dark: 0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 30),
+                // Icon with the category name under it (same as the form).
+                SizedBox(
+                  width: 96,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        if (primaryCat != null)
+                          Hero(
+                            tag: 'tx_${tx.id}',
+                            child: CategoryIcon(
+                              categoryName: primaryCat.name,
+                              emoji: primaryCat.icon.length <= 4 &&
+                                      primaryCat.icon != 'category'
+                                  ? primaryCat.icon
+                                  : null,
+                              color: catColor,
+                              size: 64,
+                              circular: true,
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: AppColors.pastel(context, typeColor,
+                                  light: 0.35, dark: 0.3),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 30),
+                          ),
+                      const SizedBox(height: 6),
+                      Text(
+                        primaryCat?.name ?? typeLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tp(context).withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(width: 16),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -268,9 +289,7 @@ class _DetailBody extends ConsumerWidget {
                         ),
                       const SizedBox(height: 2),
                       Text(
-                        primaryCat != null
-                            ? '${primaryCat.name} · $typeLabel'
-                            : typeLabel,
+                        typeLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -365,7 +384,8 @@ class _DetailBody extends ConsumerWidget {
           // -- Single line detail --
           // Only when the line adds something the band doesn't already show.
           if (entry.lines.length == 1 &&
-              (entry.lines.first.note.isNotEmpty ||
+              ((entry.lines.first.note.isNotEmpty &&
+                      entry.lines.first.note.trim() != tx.note.trim()) ||
                   (entry.lines.first.categoryId != null &&
                       entry.lines.first.categoryId != tx.categoryId))) ...[
             const SizedBox(height: 16),

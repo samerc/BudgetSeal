@@ -1,4 +1,10 @@
 {
+  "txFormNewExpense": "Nouvelle dépense",
+  "txFormNewIncome": "Nouveau revenu",
+  "txFormNewTransfer": "Nouveau virement",
+  "txFormEditExpense": "Modifier la dépense",
+  "txFormEditIncome": "Modifier le revenu",
+  "txFormEditTransfer": "Modifier le virement",
   "reportsTxCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
   "dashUpcoming": "À venir",
   "dashOverdue": "En retard",

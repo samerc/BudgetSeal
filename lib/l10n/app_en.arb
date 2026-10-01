@@ -1,4 +1,10 @@
 {
+  "txFormNewExpense": "New expense",
+  "txFormNewIncome": "New income",
+  "txFormNewTransfer": "New transfer",
+  "txFormEditExpense": "Edit expense",
+  "txFormEditIncome": "Edit income",
+  "txFormEditTransfer": "Edit transfer",
   "reportsTxCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
   "@reportsTxCount": { "placeholders": { "count": { "type": "int" } } },
   "dashUpcoming": "Upcoming",

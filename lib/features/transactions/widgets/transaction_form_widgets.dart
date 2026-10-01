@@ -283,10 +283,10 @@ class LineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // Same filled surface as the form's field card.
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(RadiusTokens.input),
       ),
       padding: CardTokens.padding,
       child: Column(
@@ -313,6 +313,26 @@ class LineCard extends StatelessWidget {
                     ),
                     icon: Icon(Icons.expand_more_rounded,
                         size: 16, color: AppColors.th(context)),
+                    // Selected value: name only — the currency badge beside
+                    // it already shows the currency.
+                    selectedItemBuilder: (context) => accounts
+                        .map((a) => Row(
+                              children: [
+                                Icon(_accountIcon(a.type),
+                                    size: 18,
+                                    color: AppColors.ts(context)),
+                                const SizedBox(width: 10),
+                                Flexible(
+                                  child: Text(a.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.tp(context))),
+                                ),
+                              ],
+                            ))
+                        .toList(),
                     items: accounts
                         .map((a) => DropdownMenuItem(
                               value: a.id,
@@ -520,10 +540,11 @@ class LineCard extends StatelessWidget {
               ),
             ),
           ],
+          // Per-item note — single-line forms use the title/note fields above.
+          if (!compact) ...[
           const SizedBox(height: 10),
           Divider(height: 1, color: AppColors.bd(context)),
           const SizedBox(height: 8),
-          // Per-item note
           TextField(
             controller: line.noteCtrl,
             textCapitalization: TextCapitalization.sentences,
@@ -544,6 +565,7 @@ class LineCard extends StatelessWidget {
                   const BoxConstraints(minWidth: 0, minHeight: 0),
             ),
           ),
+          ],
         ],
       ),
     );

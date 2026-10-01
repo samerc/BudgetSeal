@@ -1,4 +1,10 @@
 {
+  "txFormNewExpense": "مصروف جديد",
+  "txFormNewIncome": "دخل جديد",
+  "txFormNewTransfer": "تحويل جديد",
+  "txFormEditExpense": "تعديل المصروف",
+  "txFormEditIncome": "تعديل الدخل",
+  "txFormEditTransfer": "تعديل التحويل",
   "reportsTxCount": "{count, plural, =1{معاملة واحدة} =2{معاملتان} few{{count} معاملات} other{{count} معاملة}}",
   "dashUpcoming": "قادمة",
   "dashOverdue": "متأخرة",

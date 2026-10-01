@@ -9,6 +9,24 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get txFormNewExpense => 'مصروف جديد';
+
+  @override
+  String get txFormNewIncome => 'دخل جديد';
+
+  @override
+  String get txFormNewTransfer => 'تحويل جديد';
+
+  @override
+  String get txFormEditExpense => 'تعديل المصروف';
+
+  @override
+  String get txFormEditIncome => 'تعديل الدخل';
+
+  @override
+  String get txFormEditTransfer => 'تعديل التحويل';
+
+  @override
   String reportsTxCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

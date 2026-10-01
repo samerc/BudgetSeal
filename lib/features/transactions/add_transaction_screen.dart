@@ -869,9 +869,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: bandColor,
-        title: Text(widget.editTransactionId != null
-            ? S.of(context).txFormEditTitle
-            : S.of(context).txFormNewTitle),
+        title: Text(_screenTitle(context)),
         actions: [
           if (widget.editTransactionId == null)
             IconButton(
@@ -895,37 +893,34 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Title
+            // Title, date/time and note grouped in one card (Cashew).
             _TxFieldCard(
-              child: _buildTitleField(),
-            ),
-            const SizedBox(height: 8),
-
-            // Date + Time
-            _TxFieldCard(
-              child: _buildDateRowInline(),
-            ),
-            const SizedBox(height: 8),
-
-            // Note
-            _TxFieldCard(
-              child: TextField(
-                controller: _noteCtrl,
-                textCapitalization: TextCapitalization.sentences,
-                maxLength: InputLimits.noteMaxLength,
-                decoration: InputDecoration(
-                  counterText: '', // limit still enforced, counter hidden
-                  hintText: S.of(context).txFormNoteHint,
-                  hintStyle: TextStyle(color: AppColors.th(context)),
-                  prefixIcon: Icon(Icons.notes_rounded,
-                      size: 18, color: AppColors.ts(context)),
-                  border: InputBorder.none,
-        filled: false,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
-                ),
-                maxLines: 3,
-                minLines: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildTitleField(),
+                  _fieldDivider(context),
+                  _buildDateRowInline(),
+                  _fieldDivider(context),
+                  TextField(
+                    controller: _noteCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLength: InputLimits.noteMaxLength,
+                    decoration: InputDecoration(
+                      counterText: '', // limit still enforced, counter hidden
+                      hintText: S.of(context).txFormNoteHint,
+                      hintStyle: TextStyle(color: AppColors.th(context)),
+                      prefixIcon: Icon(Icons.notes_rounded,
+                          size: 18, color: AppColors.ts(context)),
+                      border: InputBorder.none,
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                    ),
+                    maxLines: 3,
+                    minLines: 1,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -971,7 +966,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               const SizedBox(height: 12),
             ],
 
-            // Receipt
+            // Receipt (when attached) + action chips
             _buildReceiptButton(),
             const SizedBox(height: 24),
           ],
@@ -1079,19 +1074,66 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         children: [
           _buildTypeTabs(context),
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(18, 18, 20, 22),
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 20, 20),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Icon with the category name under it; both open the
+                // category sheet (edit badge hints at that).
                 GestureDetector(
                   onTap: isTransfer || multi ? null : () => _pickCategory(0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, anim) =>
-                        ScaleTransition(scale: anim, child: child),
-                    child: icon,
+                  child: SizedBox(
+                    width: 96,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              transitionBuilder: (child, anim) =>
+                                  ScaleTransition(scale: anim, child: child),
+                              child: icon,
+                            ),
+                            if (!isTransfer && !multi)
+                              PositionedDirectional(
+                                end: -2,
+                                bottom: -2,
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.sf(context),
+                                    shape: BoxShape.circle,
+                                    border:
+                                        Border.all(color: bandColor, width: 2),
+                                  ),
+                                  child: Icon(Icons.edit_rounded,
+                                      size: 12, color: AppColors.ts(context)),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          // "Select category" needs two lines at this width.
+                          maxLines: cat == null ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                AppColors.tp(context).withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -1099,17 +1141,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       GestureDetector(
                         onTap: multi ? null : _editHeaderAmount,
                         child: SizedBox(
-                          height: 46,
+                          height: 50,
                           width: double.infinity,
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: AlignmentDirectional.centerEnd,
                             child: Text(
-                              amount > 0
-                                  ? formatAmount(amount, currency: amountCcy)
-                                  : formatAmount(0, currency: amountCcy),
+                              formatAmount(amount > 0 ? amount : 0,
+                                  currency: amountCcy),
                               style: TextStyle(
-                                fontSize: 36,
+                                fontSize: 40,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.5,
                                 color: amount > 0
@@ -1118,20 +1159,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                         .withValues(alpha: 0.35),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      GestureDetector(
-                        onTap: isTransfer || multi ? null : () => _pickCategory(0),
-                        child: Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context).withValues(alpha: 0.75),
                           ),
                         ),
                       ),
@@ -1155,47 +1182,95 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  /// Expense / Income / Transfer tabs across the top of the band.
+  /// Expense / Income / Transfer as a pill selector inset in the band, with
+  /// a sliding indicator so the current type is unmistakable.
   Widget _buildTypeTabs(BuildContext context) {
-    Widget tab(_TxType t, String label) {
-      final selected = _type == t;
-      return Expanded(
-        child: InkWell(
-          onTap: () {
-            if (selected) return;
-            hapticSelection();
-            setState(() {
-              _type = t;
-              if (_lines.isEmpty) _addLine();
-            });
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            height: 46,
-            alignment: Alignment.center,
-            color: selected
-                ? Colors.transparent
-                : Colors.black.withValues(alpha: 0.07),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-                color: AppColors.tp(context)
-                    .withValues(alpha: selected ? 1 : 0.55),
+    final types = [_TxType.expense, _TxType.income, _TxType.transfer];
+    final labels = [
+      S.of(context).typeExpense,
+      S.of(context).typeIncome,
+      S.of(context).typeTransfer,
+    ];
+    final index = types.indexOf(_type);
+    final dark = AppColors.isDark;
+    final track = dark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.06);
+    final pill = dark
+        ? Colors.black.withValues(alpha: 0.35)
+        : Colors.white.withValues(alpha: 0.92);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      child: Container(
+        height: 46,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: track,
+          borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                alignment: AlignmentDirectional(index - 1.0, 0),
+                child: FractionallySizedBox(
+                  widthFactor: 1 / 3,
+                  heightFactor: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: pill,
+                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                      boxShadow: dark
+                          ? null
+                          : const [
+                              BoxShadow(
+                                  color: Color(0x14000000),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 1)),
+                            ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+            Row(
+              children: [
+                for (var i = 0; i < types.length; i++)
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (_type == types[i]) return;
+                        hapticSelection();
+                        setState(() {
+                          _type = types[i];
+                          if (_lines.isEmpty) _addLine();
+                        });
+                      },
+                      child: Center(
+                        child: Text(
+                          labels[i],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                i == index ? FontWeight.w800 : FontWeight.w600,
+                            color: AppColors.tp(context)
+                                .withValues(alpha: i == index ? 1 : 0.55),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
-      );
-    }
-
-    return Row(
-      children: [
-        tab(_TxType.expense, S.of(context).typeExpense),
-        tab(_TxType.income, S.of(context).typeIncome),
-        tab(_TxType.transfer, S.of(context).typeTransfer),
-      ],
+      ),
     );
   }
 
@@ -1322,7 +1397,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final destAmount =
         _lines.isNotEmpty ? _lines.first.amount * rate : 0.0;
 
-    return TxCard(
+    // Same filled surface as the field card above.
+    return _TxFieldCard(
       child: Column(
         children: [
           // From account
@@ -1359,25 +1435,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               _fetchTransferRate();
             },
           ),
+          // The amount lives in the header band (tap it for the calculator).
           if (_lines.isNotEmpty) ...[
-            const TxDivider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: AmountField(
-                      controller: _lines.first.amountCtrl,
-                      onChanged: () => setState(() {}),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  CurrencyBadge(
-                      currency: _lines.first.currency),
-                ],
-              ),
-            ),
             // Cross-currency rate for transfers
             if (crossCurrency) ...[
               const TxDivider(),
@@ -1598,12 +1657,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
           );
         }),
-        TextButton.icon(
-          icon: Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
-          label: Text(S.of(context).txFormAddItem,
-              style: TextStyle(color: AppColors.accent)),
-          onPressed: _addLine,
-        ),
         if (_hasMultipleLines || _hasMultiCurrency) ...[
           const SizedBox(height: 12),
           Container(
@@ -1661,7 +1714,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final filtered = query.isEmpty
         ? <String>[]
         : allSuggestions
-            .where((s) => s.toLowerCase().contains(query))
+            .where((s) =>
+                s.toLowerCase().contains(query) && s.toLowerCase() != query)
             .take(5)
             .toList();
 
@@ -1737,9 +1791,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 
+  /// Attached receipt (if any) and a single row of action chips: add item,
+  /// scan receipt, pick from gallery.
   Widget _buildReceiptButton() {
-    if (_receiptFilenames.isNotEmpty) {
-      return TxCard(
+    Future<void> addReceipts({required bool camera}) async {
+      final filenames = await pickAndSaveReceipts(context, fromCamera: camera);
+      if (filenames.isNotEmpty && mounted) {
+        _receiptFilenames = [..._receiptFilenames, ...filenames];
+        _resolveReceiptPaths();
+      }
+    }
+
+    final receiptCard = _receiptFilenames.isEmpty
+        ? null
+        : TxCard(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -1773,11 +1838,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     size: 18, color: AppColors.th(context)),
                 tooltip: S.of(context).txFormAddMore,
                 onPressed: () async {
-                  final newFilenames = await pickAndSaveReceipts(context);
-                  if (newFilenames.isNotEmpty && mounted) {
-                    _receiptFilenames = [..._receiptFilenames, ...newFilenames];
-                    _resolveReceiptPaths();
-                  }
+                  await addReceipts(camera: false);
                 },
               ),
               IconButton(
@@ -1792,43 +1853,57 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ),
         ),
       );
-    }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TextButton.icon(
-          onPressed: () async {
-            final filenames = await pickAndSaveReceipts(context, fromCamera: true);
-            if (filenames.isNotEmpty && mounted) {
-              _receiptFilenames = filenames;
-              _resolveReceiptPaths();
-            }
-          },
-          icon: Icon(Icons.camera_alt_rounded,
-              size: 16, color: AppColors.ts(context)),
-          label: Text(S.of(context).txFormScanReceipt,
-              style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
+    final chips = <Widget>[
+      if (_type != _TxType.transfer)
+        _ActionChip(
+          icon: Icons.add_rounded,
+          label: S.of(context).txFormAddItem,
+          onTap: _addLine,
         ),
-        Container(
-            width: 1,
-            height: 20,
-            color: AppColors.bd(context)),
-        TextButton.icon(
-          onPressed: () async {
-            final filenames = await pickAndSaveReceipts(context);
-            if (filenames.isNotEmpty && mounted) {
-              _receiptFilenames = filenames;
-              _resolveReceiptPaths();
-            }
-          },
-          icon: Icon(Icons.image_rounded,
-              size: 16, color: AppColors.ts(context)),
-          label: Text(S.of(context).txFormGallery,
-              style: TextStyle(color: AppColors.ts(context), fontSize: 13)),
+      if (receiptCard == null) ...[
+        _ActionChip(
+          icon: Icons.camera_alt_rounded,
+          label: S.of(context).txFormScanReceipt,
+          onTap: () => addReceipts(camera: true),
+        ),
+        _ActionChip(
+          icon: Icons.image_rounded,
+          label: S.of(context).txFormGallery,
+          onTap: () => addReceipts(camera: false),
         ),
       ],
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (receiptCard != null) ...[receiptCard, const SizedBox(height: 12)],
+        // One row of equal chips; labels shrink rather than wrap.
+        if (chips.isNotEmpty)
+          Row(
+            children: [
+              for (var i = 0; i < chips.length; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(child: chips[i]),
+              ],
+            ],
+          ),
+      ],
     );
+  }
+
+  Widget _fieldDivider(BuildContext context) => Divider(
+      height: 1, indent: 16, endIndent: 16, color: AppColors.bd(context));
+
+  String _screenTitle(BuildContext context) {
+    final l = S.of(context);
+    final edit = widget.editTransactionId != null;
+    return switch (_type) {
+      _TxType.expense => edit ? l.txFormEditExpense : l.txFormNewExpense,
+      _TxType.income => edit ? l.txFormEditIncome : l.txFormNewIncome,
+      _TxType.transfer => edit ? l.txFormEditTransfer : l.txFormNewTransfer,
+    };
   }
 
   IconData _accountIcon(String type) => switch (type) {
@@ -1854,6 +1929,44 @@ class _TxFieldCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(RadiusTokens.input),
       ),
       child: child,
+    );
+  }
+}
+
+/// Small action tile under the form (add item / scan / gallery).
+class _ActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _ActionChip(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.sfv(context),
+      borderRadius: BorderRadius.circular(RadiusTokens.input),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.input),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: AppColors.accentText(context)),
+              const SizedBox(height: 4),
+              Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

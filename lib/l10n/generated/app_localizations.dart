@@ -99,6 +99,42 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @txFormNewExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'New expense'**
+  String get txFormNewExpense;
+
+  /// No description provided for @txFormNewIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'New income'**
+  String get txFormNewIncome;
+
+  /// No description provided for @txFormNewTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'New transfer'**
+  String get txFormNewTransfer;
+
+  /// No description provided for @txFormEditExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get txFormEditExpense;
+
+  /// No description provided for @txFormEditIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit income'**
+  String get txFormEditIncome;
+
+  /// No description provided for @txFormEditTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transfer'**
+  String get txFormEditTransfer;
+
   /// No description provided for @reportsTxCount.
   ///
   /// In en, this message translates to:

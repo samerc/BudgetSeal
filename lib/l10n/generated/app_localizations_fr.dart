@@ -9,6 +9,24 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get txFormNewExpense => 'Nouvelle dépense';
+
+  @override
+  String get txFormNewIncome => 'Nouveau revenu';
+
+  @override
+  String get txFormNewTransfer => 'Nouveau virement';
+
+  @override
+  String get txFormEditExpense => 'Modifier la dépense';
+
+  @override
+  String get txFormEditIncome => 'Modifier le revenu';
+
+  @override
+  String get txFormEditTransfer => 'Modifier le virement';
+
+  @override
   String reportsTxCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
