@@ -16,6 +16,7 @@ import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/budget_progress.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../transactions/widgets/category_sheet.dart';
@@ -533,70 +534,71 @@ class _ObjectiveDetailScreenState
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
             // ── Hero (adaptive: progress when a target is set, else total) ──
+            // Same pastel header as the envelope detail.
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(color: color.withValues(alpha: 0.2)),
+                color: AppColors.pastel(context, color, light: 0.8, dark: 0.75),
+                borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
               ),
-              child: Column(children: [
-                Text(
-                  formatAmount(_currentAmount, currency: _currency),
-                  style: TextStyle(
-                    fontSize: 28, fontWeight: FontWeight.w800,
-                    color: AppColors.tp(context),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _targetAmount > 0
-                      ? S.of(context).objOfTarget(
-                          formatAmount(_targetAmount, currency: _currency))
-                      : (isLoan
-                          ? S.of(context).objRecordedSoFar
-                          : S.of(context).objSavedSoFar),
-                  style: TextStyle(fontSize: 14, color: AppColors.ts(context)),
-                ),
-                if (_targetAmount > 0) ...[
-                  const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(99),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8,
-                      backgroundColor: color.withValues(alpha: 0.15),
-                      valueColor: AlwaysStoppedAnimation(color),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    _targetAmount > 0
+                        ? S.of(context).objOfTarget(
+                            formatAmount(_targetAmount, currency: _currency))
+                        : (isLoan
+                            ? S.of(context).objRecordedSoFar
+                            : S.of(context).objSavedSoFar),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tp(context).withValues(alpha: 0.6),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text('${(progress * 100).toStringAsFixed(1)}%',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+                  const SizedBox(height: 2),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formatAmount(_currentAmount, currency: _currency),
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          color: AppColors.tp(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_targetAmount > 0) ...[
+                    const SizedBox(height: 16),
+                    BudgetProgress(
+                      progress: progress,
+                      color: color,
+                      height: 22,
+                      showPercent: true,
+                      trackColor: AppColors.pastel(context, color,
+                          light: 0.62, dark: 0.6),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _updateAmount,
+                    icon: const Icon(Icons.add_rounded, size: 20),
+                    label: Text(isLoan
+                        ? S.of(context).objRecordPayment
+                        : S.of(context).objAddFunds),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.pastel(context, color,
+                          light: 0.55, dark: 0.5),
+                      foregroundColor: AppColors.tp(context),
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                  ),
                 ],
-              ]),
-            ),
-
-            // ── Primary action (always visible) ──
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _updateAmount,
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: Text(isLoan
-                    ? S.of(context).objRecordPayment
-                    : S.of(context).objAddFunds),
-                style: FilledButton.styleFrom(
-                  backgroundColor: color,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius)),
-                ),
               ),
             ),
 

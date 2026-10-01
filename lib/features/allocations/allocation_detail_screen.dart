@@ -146,7 +146,7 @@ class _AllocationDetailScreenState
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(children: [
         if (icon != null) ...[
-          Icon(icon, size: 18, color: AppColors.accent),
+          Icon(icon, size: 18, color: AppColors.ts(context)),
           const SizedBox(width: 8),
         ],
         Text(label,
@@ -867,6 +867,8 @@ class _AllocationDetailScreenState
               color: envColor,
               height: 22,
               showPercent: true,
+              trackColor: AppColors.pastel(context, envColor,
+                  light: 0.62, dark: 0.6),
               overspent: mainBalance < 0,
               // Bar shows what's left: marker = share that should remain.
               todayFraction: elapsed == null ? null : 1 - elapsed,
@@ -887,9 +889,17 @@ class _AllocationDetailScreenState
                 ),
                 Flexible(
                   child: Text(
-                    S.of(context).allocAmountLeft(formatAmount(
-                        (_targetAmount - mainBalance).clamp(0, double.infinity),
-                        currency: targetCurrency)),
+                    // Spending: how much of the budget is gone.
+                    // Flexible: how far from the target.
+                    isSpending
+                        ? S.of(context).allocAmountSpent(formatAmount(
+                            (_targetAmount - mainBalance)
+                                .clamp(0, double.infinity),
+                            currency: targetCurrency))
+                        : S.of(context).allocAmountToGo(formatAmount(
+                            (_targetAmount - mainBalance)
+                                .clamp(0, double.infinity),
+                            currency: targetCurrency)),
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       color: onHero.withValues(alpha: 0.6),
@@ -1234,8 +1244,9 @@ class _AllocationDetailScreenState
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.pastel(context, color,
+                            light: 0.82, dark: 0.7),
+                        shape: BoxShape.circle,
                       ),
                       child: Icon(icon, size: 18, color: color),
                     ),
@@ -1247,16 +1258,19 @@ class _AllocationDetailScreenState
                           Text(
                             entry.note.isNotEmpty ? entry.note : label,
                             style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${formatDate(entry.createdAt.toLocal())} · $label',
+                            // Only repeat the type when a note took the title.
+                            entry.note.isNotEmpty
+                                ? '${formatDate(entry.createdAt.toLocal())} · $label'
+                                : formatDate(entry.createdAt.toLocal()),
                             style: TextStyle(
-                                fontSize: 10,
-                                color: AppColors.th(context)),
+                                fontSize: 12.5,
+                                color: AppColors.ts(context)),
                           ),
                         ],
                       ),
@@ -1264,8 +1278,8 @@ class _AllocationDetailScreenState
                     Text(
                       '${isPositive ? '+' : ''}${formatAmount(entry.amount, currency: entry.currency)}',
                       style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
                           color: color),
                     ),
                   ],

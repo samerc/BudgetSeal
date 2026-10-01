@@ -2925,6 +2925,18 @@ abstract class S {
   /// **'{amount} left'**
   String allocAmountLeft(String amount);
 
+  /// No description provided for @allocAmountSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} spent'**
+  String allocAmountSpent(String amount);
+
+  /// No description provided for @allocAmountToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go'**
+  String allocAmountToGo(String amount);
+
   /// No description provided for @allocFund.
   ///
   /// In en, this message translates to:

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -94,13 +95,13 @@ class _BillCard extends StatelessWidget {
     final due = bill.nextDueDate;
     final daysUntil = due.difference(DateTime(now.year, now.month, now.day)).inDays;
     final isOverdue = daysUntil < 0;
-    final isDueSoon = daysUntil <= 3 && !isOverdue;
 
+    // Cashew's bill colors: blue for upcoming, indigo for overdue — calm,
+    // not alarming red/amber/green.
+    final dark = AppColors.isDark;
     final urgencyColor = isOverdue
-        ? AppColors.overspent
-        : isDueSoon
-            ? const Color(0xFFD97706)
-            : AppColors.healthy;
+        ? (dark ? const Color(0xFF8395FF) : const Color(0xFF6577E0))
+        : (dark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2));
 
     final tr = S.of(context);
     final urgencyLabel = isOverdue
@@ -128,11 +129,8 @@ class _BillCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(
-          color: isOverdue
-              ? AppColors.overspent.withValues(alpha: 0.3)
-              : AppColors.bd(context),
-        ),
+        boxShadow: AppColors.cardShadow(context),
+        border: Border.all(color: AppColors.cardBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,8 +141,9 @@ class _BillCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.pastel(context, typeColor,
+                      light: 0.8, dark: 0.7),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(typeIcon, size: 18, color: typeColor),
               ),
@@ -186,8 +185,9 @@ class _BillCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: urgencyColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.pastel(context, urgencyColor,
+                  light: 0.85, dark: 0.8),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
@@ -207,7 +207,7 @@ class _BillCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '${due.day}/${due.month}/${due.year}',
+                  formatDate(due),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.ts(context),

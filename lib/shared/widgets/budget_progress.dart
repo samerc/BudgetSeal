@@ -6,8 +6,8 @@ import '../theme/app_colors.dart';
 /// an optional "today" marker showing how far through the period we are, and
 /// an optional percentage label inside the fill.
 ///
-/// [progress] is unclamped — values above 1.0 draw the full bar in the
-/// overspent color.
+/// [progress] is balance ÷ target; values above 1.0 just draw a full bar
+/// (more than the target is never "overspent" — pass [overspent] for that).
 class BudgetProgress extends StatelessWidget {
   const BudgetProgress({
     super.key,
@@ -17,6 +17,7 @@ class BudgetProgress extends StatelessWidget {
     this.todayFraction,
     this.showPercent = false,
     this.overspent = false,
+    this.trackColor,
   });
 
   final double progress;
@@ -29,18 +30,21 @@ class BudgetProgress extends StatelessWidget {
   /// Draw "NN%" inside the fill (only legible from ~16px height).
   final bool showPercent;
 
-  /// Force the overspent styling (e.g. negative balance).
+  /// Overspent styling (negative balance): full red bar.
   final bool overspent;
+
+  /// Override the track when the bar sits on a surface of the same pastel.
+  final Color? trackColor;
 
   @override
   Widget build(BuildContext context) {
-    final isOver = overspent || progress > 1.0;
+    final isOver = overspent;
     final fillColor = isOver
         ? AppColors.overspent
         : AppColors.pastel(context, color, light: 0.15, dark: 0.1);
-    final trackColor =
+    final track = trackColor ??
         AppColors.pastel(context, color, light: 0.8, dark: 0.72);
-    final target = isOver ? 1.0 : progress.clamp(0.0, 1.0);
+    final target = isOver ? 1.0 : progress.clamp(0.0, 1.0).toDouble();
     final radius = BorderRadius.circular(height);
 
     return SizedBox(
@@ -54,7 +58,7 @@ class BudgetProgress extends StatelessWidget {
             // Track
             Container(
               height: height,
-              decoration: BoxDecoration(color: trackColor, borderRadius: radius),
+              decoration: BoxDecoration(color: track, borderRadius: radius),
             ),
             // Fill — grows from 0 on first build, eases between values after.
             TweenAnimationBuilder<double>(

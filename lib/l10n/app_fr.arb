@@ -5586,6 +5586,8 @@
   "allocAvailable": "Disponible",
   "allocPercentOfTarget": "{percent}% de {target}",
   "allocAmountLeft": "{amount} restant",
+  "allocAmountSpent": "{amount} dépensés",
+  "allocAmountToGo": "encore {amount}",
   "allocFund": "Financer",
   "allocFundEnvelope": "Financer {name}",
   "allocOverFundingTitle": "Sur-financement",

@@ -144,14 +144,12 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
 
   static IconData _sectionIcon(String type) => switch (type) {
         'spending' => Icons.shopping_bag_rounded,
-        'flexible' => Icons.tune_rounded,
+        'flexible' => Icons.savings_rounded,
         _ => Icons.category_rounded,
       };
 
-  static Color _sectionColor(String type, BuildContext context) => switch (type) {
-        'flexible' => AppColors.accent,
-        _ => AppColors.tp(context),
-      };
+  static Color _sectionColor(String type, BuildContext context) =>
+      AppColors.tp(context);
 
   @override
   bool get wantKeepAlive => true;

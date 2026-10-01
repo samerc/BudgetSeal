@@ -1589,6 +1589,16 @@ class SFr extends S {
   }
 
   @override
+  String allocAmountSpent(String amount) {
+    return '$amount dépensés';
+  }
+
+  @override
+  String allocAmountToGo(String amount) {
+    return 'encore $amount';
+  }
+
+  @override
   String get allocFund => 'Financer';
 
   @override

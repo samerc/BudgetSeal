@@ -244,11 +244,8 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColors.accent, AppColors.primaryLight],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.8, dark: 0.75),
                         borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                       child: Row(
@@ -258,9 +255,9 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${formatAmount(monthlyTotal, currency: baseCurrency)}/month',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  '${formatAmount(monthlyTotal, currency: baseCurrency)}${S.of(context).subFreqMonth}',
+                                  style: TextStyle(
+                                    color: AppColors.tp(context),
                                     fontSize: TypographyTokens.screenTitleSize,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -276,9 +273,9 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        '${formatAmount(annualTotal, currency: baseCurrency)}/year',
+                                        '${formatAmount(annualTotal, currency: baseCurrency)}${S.of(context).subFreqYear}',
                                         style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.7),
+                                          color: AppColors.tp(context).withValues(alpha: 0.6),
                                           fontSize: 13,
                                         ),
                                       ),
@@ -288,7 +285,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                           turns: _showOtherCurrencies ? 0.5 : 0,
                                           duration: const Duration(milliseconds: 200),
                                           child: Icon(Icons.expand_more_rounded,
-                                              size: 16, color: Colors.white.withValues(alpha: 0.7)),
+                                              size: 16, color: AppColors.tp(context).withValues(alpha: 0.6)),
                                         ),
                                       ],
                                     ],
@@ -300,9 +297,9 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                       .map((e) => Padding(
                                             padding: const EdgeInsets.only(top: 2),
                                             child: Text(
-                                              '${formatAmount(e.value, currency: e.key)}/month',
+                                              '${formatAmount(e.value, currency: e.key)}${S.of(context).subFreqMonth}',
                                               style: TextStyle(
-                                                color: Colors.white.withValues(alpha: 0.6),
+                                                color: AppColors.tp(context).withValues(alpha: 0.55),
                                                 fontSize: 12,
                                               ),
                                             ),
@@ -314,13 +311,13 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: AppColors.pastel(context, AppColors.accent, light: 0.6, dark: 0.55),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '$activeCount ${S.of(context).subActive.toLowerCase()}',
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: AppColors.tp(context),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),

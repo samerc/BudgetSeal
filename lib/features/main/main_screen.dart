@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_colors.dart';
 import '../allocations/allocations_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../reports/reports_hub_screen.dart';
@@ -108,16 +109,31 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         );
       },
       child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
+        body: Stack(
           children: [
-            for (var i = 0; i < _tabs.length; i++)
-              _visited.contains(i)
-                  ? PrimaryScrollController(
-                      controller: _scrollControllers[i],
-                      child: _tabs[i],
-                    )
-                  : const SizedBox.shrink(),
+            IndexedStack(
+              index: _currentIndex,
+              children: [
+                for (var i = 0; i < _tabs.length; i++)
+                  _visited.contains(i)
+                      ? PrimaryScrollController(
+                          controller: _scrollControllers[i],
+                          child: _tabs[i],
+                        )
+                      : const SizedBox.shrink(),
+              ],
+            ),
+            // Edge-to-edge: keep scrolled content from running under the
+            // status bar icons (Cashew pins a background strip there).
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.paddingOf(context).top,
+              child: IgnorePointer(
+                child: ColoredBox(color: AppColors.bg(context)),
+              ),
+            ),
           ],
         ),
         bottomNavigationBar: DecoratedBox(

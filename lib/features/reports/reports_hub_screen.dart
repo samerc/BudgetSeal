@@ -2627,9 +2627,8 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primary, const Color(0xFF2A3F6A)],
-                    ),
+                    color: AppColors.pastel(context, AppColors.accent,
+                        light: 0.8, dark: 0.75),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
                   child: Column(
@@ -2639,7 +2638,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
-                            color: Colors.white.withValues(alpha: 0.6),
+                            color: AppColors.tp(context).withValues(alpha: 0.55),
                           )),
                       const SizedBox(height: 8),
                       Row(
@@ -2651,32 +2650,32 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                                   currency: baseCurrency),
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.7),
+                                color: AppColors.tp(context).withValues(alpha: 0.6),
                               ),
                             ),
                             Text(
                               formatDate(_compareDate),
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.white.withValues(alpha: 0.5),
+                                color: AppColors.tp(context).withValues(alpha: 0.5),
                               ),
                             ),
                           ]),
                           Icon(Icons.arrow_forward_rounded,
                               size: 16,
-                              color: Colors.white.withValues(alpha: 0.4)),
+                              color: AppColors.tp(context).withValues(alpha: 0.4)),
                           Column(children: [
                             Text(
                               formatAmount(netWorthNow, currency: baseCurrency),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: AppColors.tp(context),
                               ),
                             ),
                             Text(S.of(context).commonToday,
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.white60)),
+                                style: TextStyle(
+                                    fontSize: 10, color: AppColors.tp(context).withValues(alpha: 0.5))),
                           ]),
                         ],
                       ),
@@ -2686,7 +2685,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                       if (foreignTotals.isNotEmpty) ...[
                         const SizedBox(height: 10),
                         Divider(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: AppColors.tp(context).withValues(alpha: 0.1),
                             height: 1),
                         const SizedBox(height: 8),
                         Wrap(
@@ -2698,7 +2697,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                  color: AppColors.tp(context).withValues(alpha: 0.6),
                                 ),
                               )).toList(),
                         ),

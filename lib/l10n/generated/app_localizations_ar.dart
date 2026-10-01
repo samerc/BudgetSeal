@@ -1555,6 +1555,16 @@ class SAr extends S {
   }
 
   @override
+  String allocAmountSpent(String amount) {
+    return 'تم إنفاق $amount';
+  }
+
+  @override
+  String allocAmountToGo(String amount) {
+    return '$amount للوصول إلى الهدف';
+  }
+
+  @override
   String get allocFund => 'تمويل';
 
   @override

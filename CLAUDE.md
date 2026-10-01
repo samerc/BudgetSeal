@@ -461,7 +461,7 @@ Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase
 `_buildEntry()` in `transactions_provider.dart` uses the line's `accountId` (not the header's `tx.accountId`) for single-line transactions where the line has a per-line account. This ensures the transaction list and detail screen show the correct account name, currency, and running balance.
 
 ### Envelope Detail Layout
-The envelope detail screen shows: balance hero card (gradient, with progress bar and integrated fund button) → settings form (hidden, via 3-dot menu) → recent transactions → spending history. Settings, withdraw, revalue, archive, and delete are in the 3-dot menu. No duplicate transaction lists.
+The envelope detail screen shows: balance hero card (pastel of the linked category color, `BudgetProgress` bar with percent + pace marker, tonal fund button; label reads "$X spent" for spending envelopes and "$X to go" for flexible ones) → settings form (hidden, via 3-dot menu) → recent transactions → spending history. Settings, withdraw, revalue, archive, and delete are in the 3-dot menu. No duplicate transaction lists.
 
 ### Multi-Currency Envelopes
 Envelopes can hold balances in multiple currencies. The fund sheet offers a currency picker showing all available unallocated currencies. The balance hero card shows the target currency balance prominently, with other currencies as `+ $50`. The allocation card does the same.
@@ -940,7 +940,7 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 
 `lib/features/recurring/upcoming_bills_screen.dart` — shows all enabled recurring transactions sorted by next due date.
 
-- **Urgency indicators**: Red "Overdue by N days", Amber "Due today/tomorrow/in 3 days", Green "Due in N days"
+- **Urgency indicators**: Cashew blues — indigo `#6577E0` "Overdue by N days", blue `#58A4C2` "Due today/tomorrow/in N days" (lighter variants in dark mode). No red/amber/green alarm colors.
 - Displays frequency, amount, type icon per bill
 - Route: `/upcoming-bills`, accessible from More > Upcoming Bills
 

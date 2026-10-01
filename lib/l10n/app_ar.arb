@@ -5586,6 +5586,8 @@
   "allocAvailable": "متاح",
   "allocPercentOfTarget": "{percent}% من {target}",
   "allocAmountLeft": "{amount} متبقٍّ",
+  "allocAmountSpent": "تم إنفاق {amount}",
+  "allocAmountToGo": "{amount} للوصول إلى الهدف",
   "allocFund": "تمويل",
   "allocFundEnvelope": "تمويل {name}",
   "allocOverFundingTitle": "تمويل زائد",

@@ -141,13 +141,10 @@ class AllocationCard extends StatelessWidget {
       borderColor = AppColors.overspent.withValues(alpha: 0.5);
     } else if (hasCrossDebt) {
       borderColor = AppColors.caution.withValues(alpha: 0.5);
-    } else if (_isFlexibleWithGoal && targetCcyBalance >= targetAmount!) {
-      borderColor = AppColors.healthy.withValues(alpha: 0.35);
-    } else if (hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
+    } else if (!_isFlexible && hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
       borderColor = AppColors.caution.withValues(alpha: 0.45);
-    } else if (hasTarget && targetCcyBalance >= targetAmount!) {
-      borderColor = AppColors.healthy.withValues(alpha: 0.35);
     } else {
+      // Healthy/full cards stay borderless — the bar already says it.
       borderColor = AppColors.bd(context);
     }
 
@@ -240,7 +237,7 @@ class AllocationCard extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(subtitle,
-                                    maxLines: 1,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontSize: 12.5,

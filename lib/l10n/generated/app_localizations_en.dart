@@ -1570,6 +1570,16 @@ class SEn extends S {
   }
 
   @override
+  String allocAmountSpent(String amount) {
+    return '$amount spent';
+  }
+
+  @override
+  String allocAmountToGo(String amount) {
+    return '$amount to go';
+  }
+
+  @override
   String get allocFund => 'Fund';
 
   @override
