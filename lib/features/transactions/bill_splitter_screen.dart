@@ -13,6 +13,7 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/utils/dispose_later.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bill Splitter — 3-step guided flow
@@ -393,7 +394,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           ),
         ],
       ),
-    );
+    ).then((_) => disposeAfterRouteAnimation(amountCtrl));
   }
 
   void _assignLine(int lineIndex, OcrLine line, String person) async {
@@ -944,6 +945,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         ],
       ),
     );
+    disposeAfterRouteAnimation(ctrl);
     if (n == null || n < 2 || n > 50 || !mounted) return;
     if (index >= _items.length) return;
     setState(() {

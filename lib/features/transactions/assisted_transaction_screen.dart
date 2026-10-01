@@ -710,8 +710,9 @@ class _AssistedTransactionScreenState
         );
       },
     ).then((_) {
-      searchFocus.dispose();
-      searchCtrl.dispose();
+      // The sheet still rebuilds its search field while animating out.
+      disposeAfterRouteAnimation(searchFocus);
+      disposeAfterRouteAnimation(searchCtrl);
       // If the category popup closed without a selection (e.g. user navigated
       // to /categories), remove the incomplete line item.
       if (!mounted) return;

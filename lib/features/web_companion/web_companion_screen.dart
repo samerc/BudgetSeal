@@ -69,7 +69,15 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Future<void> _checkPin() async {
-    final has = await WebCompanionAuth.hasPin();
+    // Secure storage can throw (e.g. Keystore reset after a backup restore):
+    // treat that as "no PIN" so the user can set a new one.
+    bool has;
+    try {
+      has = await WebCompanionAuth.hasPin();
+    } catch (e) {
+      debugPrint('[WebCompanion] Reading PIN failed: $e');
+      has = false;
+    }
     if (mounted) setState(() => _hasPinSet = has);
   }
 
@@ -158,6 +166,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }) {
     final controller = TextEditingController();
     String? error;
+    // Guards against a double tap saving twice (and popping twice).
+    var busy = false;
 
     final tr = S.of(context);
     final pinSurface = AppColors.sf(context);
@@ -213,14 +223,28 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () async {
-                        final pin = controller.text.trim();
-                        if (pin.length != 4) {
-                          setModalState(() => error = tr.wcEnter4DigitsError);
-                          return;
-                        }
-                        await onConfirm(pin);
-                      },
+                      onPressed: busy
+                          ? null
+                          : () async {
+                              final pin = controller.text.trim();
+                              if (pin.length != 4) {
+                                setModalState(
+                                    () => error = tr.wcEnter4DigitsError);
+                                return;
+                              }
+                              setModalState(() => busy = true);
+                              try {
+                                await onConfirm(pin);
+                              } catch (e) {
+                                debugPrint('[WebCompanion] Saving PIN failed: $e');
+                                if (ctx.mounted) {
+                                  setModalState(() {
+                                    busy = false;
+                                    error = tr.commonSomethingWentWrong;
+                                  });
+                                }
+                              }
+                            },
                       child: Text(confirmLabel),
                     ),
                   ),

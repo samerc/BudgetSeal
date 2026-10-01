@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show min;
+import 'dart:typed_data' show BytesBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -69,7 +71,11 @@ class WebCompanionService {
       notifier.setRunning(ip, 7432);
 
       // Auto-stop after 6 hours
-      _autoStopTimer = Timer(_autoStopDuration, () => stop());
+      _autoStopTimer = Timer(_autoStopDuration, () {
+        stop().catchError((Object e) {
+          debugPrint('[WebCompanion] Auto-stop failed: $e');
+        });
+      });
 
       // Prune expired sessions every 30 minutes
       _sessionPruneTimer = Timer.periodic(_sessionPruneDuration, (_) {
@@ -213,20 +219,30 @@ class WebCompanionService {
     return false;
   }
 
-  /// Rejects requests whose Content-Length exceeds maxBytes (512 KB default).
+  /// Rejects bodies over maxBytes (512 KB default) — by Content-Length when
+  /// sent, and while reading for chunked requests that omit it.
   /// Protects against memory exhaustion from oversized request bodies.
   static Middleware _bodySizeLimitMiddleware({int maxBytes = 512 * 1024}) {
+    Response tooLarge() => Response(
+          413,
+          body: jsonEncode({'error': 'Request body too large'}),
+          headers: {'content-type': 'application/json'},
+        );
     return (Handler inner) {
       return (Request request) async {
         final length = request.contentLength;
-        if (length != null && length > maxBytes) {
-          return Response(
-            413,
-            body: jsonEncode({'error': 'Request body too large'}),
-            headers: {'content-type': 'application/json'},
-          );
+        if (length != null) {
+          if (length > maxBytes) return tooLarge();
+          return inner(request);
         }
-        return inner(request);
+        // No Content-Length (chunked): buffer up to the cap, then hand the
+        // bytes on so later middleware can still read the body.
+        final bytes = BytesBuilder(copy: false);
+        await for (final chunk in request.read()) {
+          bytes.add(chunk);
+          if (bytes.length > maxBytes) return tooLarge();
+        }
+        return inner(request.change(body: bytes.takeBytes()));
       };
     };
   }
@@ -359,7 +375,7 @@ class WebCompanionService {
           if (sqlPattern.hasMatch(bodyStr)) {
             final connInfo = request.context['shelf.io.connection_info']
                 as HttpConnectionInfo?;
-            debugPrint('[Abuse] SQL injection attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, 200)}');
+            debugPrint('[Abuse] SQL injection attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, min(200, bodyStr.length))}');
             return Response(
               400,
               body: jsonEncode({'error': 'Request contains invalid characters'}),
@@ -369,7 +385,7 @@ class WebCompanionService {
           if (xssPattern.hasMatch(bodyStr)) {
             final connInfo = request.context['shelf.io.connection_info']
                 as HttpConnectionInfo?;
-            debugPrint('[Abuse] XSS attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, 200)}');
+            debugPrint('[Abuse] XSS attempt from ${connInfo?.remoteAddress.address}: ${bodyStr.substring(0, min(200, bodyStr.length))}');
             return Response(
               400,
               body: jsonEncode({'error': 'Request contains invalid characters'}),

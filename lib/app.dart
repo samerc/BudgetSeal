@@ -403,6 +403,8 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
   }
 
   void _autoSync() {
+    // A restored backup replaces the DB on next launch — don't sync the old one.
+    if (AutoBackupService.restorePending) return;
     final syncState = ref.read(syncProvider);
     if (syncState.activeProvider != null &&
         syncState.status != SyncStatus.syncing) {

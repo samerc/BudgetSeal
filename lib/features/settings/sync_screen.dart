@@ -676,7 +676,12 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
   }
 
   Future<void> _checkPassword() async {
-    final has = await SyncEncryption.hasPassword();
+    var has = false;
+    try {
+      has = await SyncEncryption.hasPassword();
+    } catch (e) {
+      debugPrint('[SyncEncryption] Reading password failed: $e');
+    }
     if (mounted) setState(() { _hasPassword = has; _loading = false; });
   }
 
@@ -748,6 +753,16 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
         ));
       }
     }
+    } catch (e) {
+      // Secure storage (Keystore/Keychain) can fail; say so instead of
+      // pretending encryption is on.
+      debugPrint('[SyncEncryption] Setting password failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).commonSomethingWentWrong),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       disposeAfterRouteAnimation(ctrl);
       disposeAfterRouteAnimation(confirmCtrl);
@@ -776,7 +791,18 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
     );
 
     if (confirmed == true && mounted) {
-      await SyncEncryption.clearPassword();
+      try {
+        await SyncEncryption.clearPassword();
+      } catch (e) {
+        debugPrint('[SyncEncryption] Clearing password failed: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(tr.commonSomethingWentWrong),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
+        return;
+      }
       await _checkPassword();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

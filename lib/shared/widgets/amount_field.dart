@@ -36,6 +36,18 @@ class _AmountFieldState extends State<AmountField> {
   }
 
   @override
+  void didUpdateWidget(AmountField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Element reused for a different controller (e.g. a line above it was
+    // removed): follow the new one instead of showing the old value.
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller.removeListener(_syncFromController);
+      widget.controller.addListener(_syncFromController);
+      _syncFromController();
+    }
+  }
+
+  @override
   void dispose() {
     widget.controller.removeListener(_syncFromController);
     super.dispose();

@@ -9,6 +9,18 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get receiptPickFailed =>
+      'Impossible d\'ajouter la photo. Vérifiez les autorisations de l\'appareil photo et des photos.';
+
+  @override
+  String get backupCloseApp => 'Fermer l\'application';
+
+  @override
+  String importSkippedRows(int count) {
+    return '$count lignes ignorées (date ou montant illisible)';
+  }
+
+  @override
   String get moreMoneySection => 'Argent';
 
   @override

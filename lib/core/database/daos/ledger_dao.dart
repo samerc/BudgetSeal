@@ -124,6 +124,15 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
         .get();
   }
 
+  /// Delete ledger entries whose source transaction is soft-deleted (balances
+  /// already ignore them; this keeps the ledger and orphan counts clean).
+  Future<int> deleteForDeletedTransactions() => customUpdate(
+        'DELETE FROM allocation_ledger WHERE source_transaction_id IN '
+        '(SELECT id FROM transactions WHERE deleted = 1)',
+        updates: {allocationLedger},
+        updateKind: UpdateKind.delete,
+      );
+
   /// Delete all ledger entries linked to a given transaction.
   Future<int> deleteByTransactionId(String txId) {
     return (delete(allocationLedger)

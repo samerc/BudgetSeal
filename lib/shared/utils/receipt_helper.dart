@@ -58,8 +58,44 @@ Future<Directory> getReceiptsDirectory() async {
 // ── Picking helpers ────────────────────────────────────────────────────────
 
 /// Pick a single receipt photo from camera or gallery and save to app storage.
-/// Returns the saved FILENAME only (not full path), or null if cancelled.
+/// Returns the saved FILENAME only (not full path), or null if cancelled or
+/// it failed (camera permission denied, no camera, storage error) — failures
+/// show a SnackBar instead of throwing.
 Future<String?> pickAndSaveReceipt(BuildContext context) async {
+  try {
+    return await _pickAndSaveReceipt(context);
+  } catch (e) {
+    _reportPickError(context, e);
+    return null;
+  }
+}
+
+/// Pick multiple receipt photos (multi-select from gallery, or one from camera).
+/// Returns a list of saved FILENAMES (not full paths). Empty if cancelled or
+/// failed (a SnackBar explains the failure).
+Future<List<String>> pickAndSaveReceipts(
+  BuildContext context, {
+  bool fromCamera = false,
+}) async {
+  try {
+    return await _pickAndSaveReceipts(context, fromCamera: fromCamera);
+  } catch (e) {
+    _reportPickError(context, e);
+    return [];
+  }
+}
+
+void _reportPickError(BuildContext context, Object e) {
+  debugPrint('[Receipt] Pick failed: $e');
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(S.of(context).receiptPickFailed),
+    behavior: SnackBarBehavior.floating,
+  ));
+}
+
+/// Unguarded implementation of [pickAndSaveReceipt].
+Future<String?> _pickAndSaveReceipt(BuildContext context) async {
   final result = await _showPickerSheet(context);
   if (result == null) return null;
 
@@ -87,9 +123,8 @@ Future<String?> pickAndSaveReceipt(BuildContext context) async {
   }
 }
 
-/// Pick multiple receipt photos (multi-select from gallery, or one from camera).
-/// Returns a list of saved FILENAMES (not full paths). Empty if cancelled.
-Future<List<String>> pickAndSaveReceipts(
+/// Unguarded implementation of [pickAndSaveReceipts].
+Future<List<String>> _pickAndSaveReceipts(
   BuildContext context, {
   bool fromCamera = false,
 }) async {

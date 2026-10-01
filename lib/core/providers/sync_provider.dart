@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/auto_backup_service.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../sync/cloud_provider.dart';
 import '../sync/file_picker_provider.dart';
@@ -150,6 +151,8 @@ class SyncNotifier extends Notifier<SyncState> {
   Future<void> sync() async {
     final provider = state.activeProvider;
     if (provider == null) return;
+    // The open DB is about to be replaced by a restored backup.
+    if (AutoBackupService.restorePending) return;
 
     state = state.copyWith(status: SyncStatus.syncing);
 

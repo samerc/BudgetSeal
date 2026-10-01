@@ -99,6 +99,24 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @receiptPickFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add the photo. Check camera and photo permissions.'**
+  String get receiptPickFailed;
+
+  /// No description provided for @backupCloseApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Close app'**
+  String get backupCloseApp;
+
+  /// No description provided for @importSkippedRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rows skipped (unreadable date or amount)'**
+  String importSkippedRows(int count);
+
   /// No description provided for @moreMoneySection.
   ///
   /// In en, this message translates to:

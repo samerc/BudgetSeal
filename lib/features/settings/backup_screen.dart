@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -164,20 +165,16 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         return;
       }
 
-      final dbDir = await getApplicationDocumentsDirectory();
-      final dbFile = File(p.join(dbDir.path, 'budgetseal.db'));
-      // Auto-backup current DB before overwriting
-      await AutoBackupService.backupNow();
-      await backupFile.copy(dbFile.path);
-
+      // Staged: swapped in on the next launch, before the DB opens.
+      await AutoBackupService.restoreFromBackup(path);
+      if (mounted) await _showRestartDialog();
+    } catch (e) {
+      debugPrint('[Backup] Restore failed: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).backupRestored),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).backupRestoreFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
       }
     } finally {
       if (mounted) setState(() => _working = false);
@@ -214,16 +211,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     try {
       await AutoBackupService.restoreFromBackup(backup.path);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(tr.backupRestored),
-            behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 5),
-          ),
-        );
-      }
+      if (mounted) await _showRestartDialog();
     } catch (e) {
+      debugPrint('[Backup] Local restore failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -233,6 +223,33 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         );
       }
     }
+  }
+
+  /// The restored file replaces the database on the next launch. Android can
+  /// close the app for the user; iOS apps can't quit themselves.
+  Future<void> _showRestartDialog() async {
+    final tr = S.of(context);
+    final canClose = Platform.isAndroid;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.backupRestoreTitle),
+        content: Text(tr.backupRestored),
+        actions: [
+          if (canClose)
+            FilledButton(
+              onPressed: () => SystemNavigator.pop(),
+              child: Text(tr.backupCloseApp),
+            )
+          else
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr.commonOk),
+            ),
+        ],
+      ),
+    );
   }
 
   Future<void> _deleteLocalBackup(BackupFile backup) async {

@@ -188,7 +188,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final container = ProviderScope.containerOf(context);
     Future<void> setDeleted(bool deleted) async {
       await (db.update(db.transactions)..where((t) => t.id.isIn(ids)))
-          .write(TransactionsCompanion(deleted: Value(deleted)));
+          .write(TransactionsCompanion(
+              deleted: Value(deleted), lastModified: Value(DateTime.now())));
       container.invalidate(transactionEntriesProvider);
       container.invalidate(monthlyTransactionsProvider);
     }
@@ -221,6 +222,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       for (final id in ids) {
         await engine.deleteTransaction(id);
       }
+    }).catchError((Object e) {
+      // Rows stay soft-deleted (balances ignore their ledger); the startup
+      // sweep in main.dart removes the leftover ledger entries.
+      debugPrint('[Transactions] Finishing delete failed: $e');
     });
   }
 

@@ -60,7 +60,7 @@ class GoogleDriveProvider implements CloudProvider {
       );
 
       _driveApi = drive.DriveApi(
-          _AuthClient(http.Client(), auth.accessToken));
+          _AuthClient(http.Client(), auth.accessToken, _refreshToken));
       return true;
     } catch (e) {
       final msg = e.toString().toLowerCase();
@@ -268,7 +268,7 @@ class GoogleDriveProvider implements CloudProvider {
         [drive.DriveApi.driveFileScope],
       );
       _driveApi = drive.DriveApi(
-          _AuthClient(http.Client(), auth.accessToken));
+          _AuthClient(http.Client(), auth.accessToken, _refreshToken));
       _folderId = folderId;
 
       // Verify we can access the folder
@@ -297,7 +297,7 @@ class GoogleDriveProvider implements CloudProvider {
         [drive.DriveApi.driveFileScope],
       );
       _driveApi = drive.DriveApi(
-          _AuthClient(http.Client(), auth.accessToken));
+          _AuthClient(http.Client(), auth.accessToken, _refreshToken));
       return true;
     } catch (e) {
       debugPrint('tryReconnectSilently failed: $e');
@@ -320,6 +320,17 @@ class GoogleDriveProvider implements CloudProvider {
     }
   }
 
+  /// A new access token without UI (Google tokens last ~1 hour).
+  Future<String> _refreshToken() async {
+    final account = _account;
+    if (account == null) throw StateError('Not connected to Google Drive');
+    final auth = await account.authorizationClient
+            .authorizationForScopes([drive.DriveApi.driveFileScope]) ??
+        await account.authorizationClient
+            .authorizeScopes([drive.DriveApi.driveFileScope]);
+    return auth.accessToken;
+  }
+
   Future<drive.DriveApi> _getDriveApi() async {
     if (_driveApi != null) return _driveApi!;
     // If no account cached, we're not connected — don't prompt.
@@ -330,7 +341,7 @@ class GoogleDriveProvider implements CloudProvider {
       [drive.DriveApi.driveFileScope],
     );
     _driveApi = drive.DriveApi(
-        _AuthClient(http.Client(), auth.accessToken));
+        _AuthClient(http.Client(), auth.accessToken, _refreshToken));
     return _driveApi!;
   }
 
@@ -365,14 +376,38 @@ class GoogleDriveProvider implements CloudProvider {
   }
 }
 
+/// Adds the bearer token to every request and swaps in a fresh token before
+/// the old one expires — a cached DriveApi otherwise fails with 401 after an
+/// hour and every later sync keeps failing.
 class _AuthClient extends http.BaseClient {
   final http.Client _inner;
-  final String _accessToken;
-  _AuthClient(this._inner, this._accessToken);
+  final Future<String> Function() _refresh;
+  String _accessToken;
+  DateTime _issuedAt = DateTime.now();
+  Future<String>? _pending;
+
+  static const _maxAge = Duration(minutes: 45);
+
+  _AuthClient(this._inner, this._accessToken, this._refresh);
+
+  Future<String> _token() async {
+    if (DateTime.now().difference(_issuedAt) < _maxAge) return _accessToken;
+    // One refresh at a time, shared by concurrent requests.
+    final pending = _pending ??= _refresh();
+    try {
+      _accessToken = await pending;
+      _issuedAt = DateTime.now();
+    } catch (e) {
+      debugPrint('Drive token refresh failed: $e');
+    } finally {
+      _pending = null;
+    }
+    return _accessToken;
+  }
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    request.headers['Authorization'] = 'Bearer $_accessToken';
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    request.headers['Authorization'] = 'Bearer ${await _token()}';
     return _inner.send(request);
   }
 }

@@ -530,7 +530,11 @@ class AllocationEngine {
       // 2. Soft-delete the transaction (keep row for sync).
       await (_db.update(_db.transactions)
             ..where((t) => t.id.equals(txId)))
-          .write(const TransactionsCompanion(deleted: Value(true)));
+          .write(TransactionsCompanion(
+              deleted: const Value(true),
+              // Sync merges by lastModified — without it the delete never
+              // reaches other devices.
+              lastModified: Value(DateTime.now())));
     });
   }
 

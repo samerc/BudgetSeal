@@ -1,4 +1,8 @@
 {
+  "receiptPickFailed": "Couldn't add the photo. Check camera and photo permissions.",
+  "backupCloseApp": "Close app",
+  "importSkippedRows": "{count} rows skipped (unreadable date or amount)",
+  "@importSkippedRows": { "placeholders": { "count": { "type": "int" } } },
   "moreMoneySection": "Money",
   "moreAppSection": "App",
   "txFormNewExpense": "New expense",

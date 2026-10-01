@@ -9,6 +9,18 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get receiptPickFailed =>
+      'Couldn\'t add the photo. Check camera and photo permissions.';
+
+  @override
+  String get backupCloseApp => 'Close app';
+
+  @override
+  String importSkippedRows(int count) {
+    return '$count rows skipped (unreadable date or amount)';
+  }
+
+  @override
   String get moreMoneySection => 'Money';
 
   @override

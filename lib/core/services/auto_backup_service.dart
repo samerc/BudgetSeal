@@ -65,6 +65,7 @@ class AutoBackupService {
   /// Check if a backup is due and perform it if needed.
   /// Call this on app resume.
   static Future<bool> runIfDue() async {
+    if (restorePending) return false;
     try {
       if (!await isEnabled()) return false;
 
@@ -167,7 +168,15 @@ class AutoBackupService {
     if (await file.exists()) await file.delete();
   }
 
-  /// Restore from a local backup.
+  /// True after a restore was staged in this session: the open database is
+  /// about to be replaced, so auto-sync and auto-backup must not run (they
+  /// would push or save the old data).
+  static bool restorePending = false;
+
+  /// Stage a restore from [backupPath]. The file is copied next to the DB as
+  /// `budgetseal.db.restore` and swapped in on the next launch, before the
+  /// database opens — overwriting the live file under an open connection
+  /// corrupts it. The caller must ask the user to restart.
   static Future<void> restoreFromBackup(String backupPath) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dbFile = File(p.join(appDir.path, 'budgetseal.db'));
@@ -185,7 +194,11 @@ class AutoBackupService {
       }
     }
 
-    await File(backupPath).copy(dbFile.path);
+    // Copy to a temp name, then rename: a half-copied file is never staged.
+    final staged = '${dbFile.path}.restore';
+    final tmp = await File(backupPath).copy('$staged.tmp');
+    await tmp.rename(staged);
+    restorePending = true;
   }
 
   // ── Helpers ─────────────────────────────────────────────────────

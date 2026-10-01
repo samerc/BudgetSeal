@@ -4,16 +4,42 @@ import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
-import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
-import '../../core/providers/database_provider.dart';
+import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+
+/// Date cells: `yyyy-MM-dd` or `d/M/yyyy` style, optional time after.
+final importDateRe =
+    RegExp(r'^(\d{1,4})[/\-.](\d{1,2})[/\-.](\d{1,4})(?:[ T].*)?$');
+
+/// yyyy-MM-dd, or d/M/yyyy / M/d/yyyy (2-digit years → 20xx). Returns null
+/// for anything that isn't a real calendar date.
+DateTime? parseImportDate(String s, {required bool dayFirst}) {
+  final m = importDateRe.firstMatch(s);
+  if (m == null) return null;
+  final a = int.parse(m.group(1)!);
+  final b = int.parse(m.group(2)!);
+  final c = int.parse(m.group(3)!);
+  int y, mo, d;
+  if (m.group(1)!.length == 4) {
+    y = a;
+    mo = b;
+    d = c;
+  } else {
+    y = m.group(3)!.length == 2 ? 2000 + c : c;
+    mo = dayFirst ? b : a;
+    d = dayFirst ? a : b;
+  }
+  if (y < 1900 || y > 2100 || mo < 1 || mo > 12) return null;
+  if (d < 1 || d > DateTime(y, mo + 1, 0).day) return null;
+  return DateTime(y, mo, d);
+}
 
 /// The role a CSV column can be assigned to.
 enum ColumnRole { skip, date, description, amount, category }
@@ -253,8 +279,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       _imported = 0;
     });
 
+    var skipped = 0;
     try {
-      final db = ref.read(databaseProvider);
+      final engine = ref.read(allocationEngineProvider);
+      final baseCurrency =
+          ref.read(householdProvider).value?.baseCurrency ?? 'USD';
       final account = (ref.read(accountsProvider).value ?? [])
           .where((a) => a.id == _selectedAccountId).firstOrNull;
       if (account == null) return;
@@ -266,10 +295,24 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         catLookup[cat.name.toLowerCase().trim()] = cat.id;
       }
 
-      final rows = _hasHeader ? _csvData!.skip(1) : _csvData!;
+      final rows = (_hasHeader ? _csvData!.skip(1) : _csvData!).toList();
+
+      // Slash dates are ambiguous (03/04): decide day-first vs month-first
+      // once for the whole file — any first field above 12 means day-first.
+      final dayFirst = dateCol != null &&
+          rows.any((row) {
+            if (row.length <= dateCol) return false;
+            final m = importDateRe.firstMatch(row[dateCol].toString().trim());
+            return m != null &&
+                m.group(1)!.length <= 2 &&
+                int.parse(m.group(1)!) > 12;
+          });
 
       for (final row in rows) {
-        if (row.length <= amountCol) continue;
+        if (row.length <= amountCol) {
+          skipped++;
+          continue;
+        }
 
         final desc = descCol != null && row.length > descCol
             ? row[descCol].toString().trim()
@@ -277,29 +320,22 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         final amountStr =
             row[amountCol].toString().replaceAll(RegExp(r'[\$,\s]'), '');
         final amount = double.tryParse(amountStr);
-        if (amount == null) continue;
-        if (amount.abs() > 1e9) continue;
-
-        // Parse date
-        DateTime? date;
-        if (dateCol != null && row.length > dateCol) {
-          final dateStr = row[dateCol].toString().trim();
-          for (final fmt in [
-            'yyyy-MM-dd',
-            'MM/dd/yyyy',
-            'dd/MM/yyyy',
-            'M/d/yyyy'
-          ]) {
-            try {
-              date = _parseDate(dateStr, fmt);
-              break;
-            } catch (e) {
-              // Expected: trying multiple date formats until one works.
-              debugPrint('Date format $fmt did not match "$dateStr": $e');
-            }
-          }
+        if (amount == null || amount == 0 || amount.abs() > 1e9) {
+          skipped++;
+          continue;
         }
-        date ??= DateTime.now();
+
+        // A row with an unreadable date is skipped, not silently dated today.
+        DateTime date = DateTime.now();
+        if (dateCol != null && row.length > dateCol) {
+          final parsed =
+              parseImportDate(row[dateCol].toString().trim(), dayFirst: dayFirst);
+          if (parsed == null) {
+            skipped++;
+            continue;
+          }
+          date = parsed;
+        }
 
         // Match category by name
         String? matchedCategoryId;
@@ -308,32 +344,45 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           matchedCategoryId = catLookup[catName];
         }
 
-        final isIncome = amount > 0;
-        final txId = const Uuid().v4();
-
-        await db.into(db.transactions).insert(TransactionsCompanion.insert(
-              id: txId,
-              householdId: householdId,
-              type: isIncome ? 'income' : 'expense',
-              accountId: _selectedAccountId!,
-              categoryId: matchedCategoryId != null
-                  ? Value(matchedCategoryId)
-                  : const Value.absent(),
+        // Through the engine like every other write: lines + envelope debit.
+        await engine.recordTransaction(
+          householdId: householdId,
+          accountId: account.id,
+          type: amount > 0 ? 'income' : 'expense',
+          lines: [
+            TxLine(
               amount: amount.abs(),
               currency: account.currency,
-              note: Value(desc),
-              createdBy: 'import',
-              deviceId: 'local',
-              createdAt: Value(date),
-            ));
+              categoryId: matchedCategoryId,
+              accountId: account.id,
+            ),
+          ],
+          baseCurrency: baseCurrency,
+          note: desc,
+          deviceId: 'local',
+          date: date,
+        );
 
         if (mounted) setState(() => _imported++);
       }
 
       if (mounted) {
+        final l = S.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).importSuccess(_imported)),
+            content: Text(skipped > 0
+                ? '${l.importSuccess(_imported)} · ${l.importSkippedRows(skipped)}'
+                : l.importSuccess(_imported)),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[Import] Failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).importFailed),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -341,22 +390,6 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     } finally {
       if (mounted) setState(() => _importing = false);
     }
-  }
-
-  DateTime _parseDate(String s, String fmt) {
-    final parts = s.split(RegExp(r'[/\-]'));
-    if (parts.length != 3) throw const FormatException();
-    if (fmt == 'yyyy-MM-dd') {
-      return DateTime(
-          int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
-    } else if (fmt == 'MM/dd/yyyy' || fmt == 'M/d/yyyy') {
-      return DateTime(
-          int.parse(parts[2]), int.parse(parts[0]), int.parse(parts[1]));
-    } else if (fmt == 'dd/MM/yyyy') {
-      return DateTime(
-          int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-    }
-    throw const FormatException();
   }
 
   // ── Build ────────────────────────────────────────────────────

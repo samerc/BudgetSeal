@@ -1,4 +1,7 @@
 {
+  "receiptPickFailed": "تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.",
+  "backupCloseApp": "إغلاق التطبيق",
+  "importSkippedRows": "تم تخطي {count} صفوف (تاريخ أو مبلغ غير مقروء)",
   "moreMoneySection": "المال",
   "moreAppSection": "التطبيق",
   "txFormNewExpense": "مصروف جديد",

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -236,6 +237,20 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'budgetseal.db'));
+    // A restored backup is staged next to the DB and swapped in here, before
+    // anything opens the file (copying over a live connection corrupts it).
+    final staged = File('${file.path}.restore');
+    if (staged.existsSync()) {
+      try {
+        for (final suffix in const ['-wal', '-shm', '-journal']) {
+          final side = File('${file.path}$suffix');
+          if (side.existsSync()) side.deleteSync();
+        }
+        staged.renameSync(file.path);
+      } catch (e) {
+        debugPrint('[DB] Applying staged restore failed: $e');
+      }
+    }
     return NativeDatabase.createInBackground(file);
   });
 }

@@ -69,11 +69,13 @@ class _AllocationDetailScreenState
   }
 
   Future<void> _loadAllocation() async {
+    try {
     final db = ref.read(databaseProvider);
     final dao = AllocationsDao(db);
     final alloc = await dao.getById(widget.allocationId);
     if (alloc != null && mounted) {
       final linked = await dao.linkedCategories(widget.allocationId);
+      if (!mounted) return;
       setState(() {
         _nameController.text = alloc.name;
         _type = alloc.type;
@@ -89,6 +91,9 @@ class _AllocationDetailScreenState
             'USD';
         _linkedCategories = linked;
       });
+    }
+    } catch (e) {
+      debugPrint('[AllocationDetail] Error loading: $e');
     }
   }
 

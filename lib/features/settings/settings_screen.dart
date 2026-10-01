@@ -39,6 +39,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -375,6 +376,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         ),
       ),
     );
+    disposeAfterRouteAnimation(ctrl);
     if (result != null && result.isNotEmpty && result != currentValue) {
       await onSave(result);
     }
@@ -704,6 +706,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         ),
       ),
     );
+    disposeAfterRouteAnimation(ctrl);
     if (result != null && result != currentValue) {
       await onSave(result);
     }
@@ -1932,6 +1935,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
         ],
       ),
     );
+    disposeAfterRouteAnimation(ctrl);
 
     if (result != null && result.isNotEmpty) {
       ref.read(currencySymbolProvider.notifier).setOverride(code, result);

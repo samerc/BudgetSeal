@@ -1065,6 +1065,7 @@
   <li><strong>From a local backup</strong> — tap the restore icon next to any backup in the list</li>
   <li><strong>From a file</strong> — tap <strong>Restore from File</strong> and pick a .db file</li>
 </ul>
+<p>The restored data takes over the next time the app starts. On Android, tap <strong>Close app</strong> and open it again; on iPhone, close the app from the app switcher and reopen it. Sync and automatic backups pause until then, so your old data is never uploaded over the restored one.</p>
 
 <div class="tip">Always make a backup before restoring — the restore replaces ALL current data and cannot be undone.</div>
 
@@ -1159,7 +1160,7 @@
 <p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Import &amp; Export</strong>.</p>
 
 <h3>Import CSV</h3>
-<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields.</p>
+<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Rows with an unreadable date or amount are skipped and counted, never dated today. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
 
 <h3>Export CSV</h3>
 <p>Export all transactions as a CSV spreadsheet for use in Excel, Google Sheets, etc.</p>

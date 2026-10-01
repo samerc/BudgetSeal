@@ -1,4 +1,7 @@
 {
+  "receiptPickFailed": "Impossible d'ajouter la photo. Vérifiez les autorisations de l'appareil photo et des photos.",
+  "backupCloseApp": "Fermer l'application",
+  "importSkippedRows": "{count} lignes ignorées (date ou montant illisible)",
   "moreMoneySection": "Argent",
   "moreAppSection": "Application",
   "txFormNewExpense": "Nouvelle dépense",

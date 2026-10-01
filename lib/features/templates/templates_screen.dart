@@ -18,6 +18,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/utils/dispose_later.dart';
 
 enum _SortMode { mostUsed, alphabetical, newest, amount }
 enum _GroupMode { none, type, category }
@@ -788,6 +789,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ),
       ),
     );
+    disposeAfterRouteAnimation(titleCtrl);
     if (result == true) _load();
   }
 }

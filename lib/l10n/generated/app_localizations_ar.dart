@@ -9,6 +9,18 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get receiptPickFailed =>
+      'تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.';
+
+  @override
+  String get backupCloseApp => 'إغلاق التطبيق';
+
+  @override
+  String importSkippedRows(int count) {
+    return 'تم تخطي $count صفوف (تاريخ أو مبلغ غير مقروء)';
+  }
+
+  @override
   String get moreMoneySection => 'المال';
 
   @override

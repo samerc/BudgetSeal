@@ -504,24 +504,36 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
           final newId = const Uuid().v4();
           final txType = _type == _TxType.income ? 'income' : 'expense';
-          await db.into(db.categories).insert(CategoriesCompanion.insert(
-                id: newId,
-                householdId: householdId,
-                name: name,
-                colorHex: Value(colorHex),
-                transactionType: Value(txType),
+          try {
+            await db.into(db.categories).insert(CategoriesCompanion.insert(
+                  id: newId,
+                  householdId: householdId,
+                  name: name,
+                  colorHex: Value(colorHex),
+                  transactionType: Value(txType),
+                ));
+          } catch (e) {
+            debugPrint('[AddTransaction] Creating category failed: $e');
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(S.of(context).commonSomethingWentWrong),
+                behavior: SnackBarBehavior.floating,
               ));
+            }
+            return;
+          }
+          if (!mounted) return;
           ref.invalidate(categoriesProvider);
-          if (mounted && lineIndex < _lines.length) {
+          if (lineIndex < _lines.length) {
             setState(() {
               _lines[lineIndex].categoryId = newId;
               _lines[lineIndex].categoryName = name;
               _lines[lineIndex].categoryColor = color;
             });
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
           }
+          // Close the sheet via its own context — the screen's navigator
+          // would pop the form itself if the sheet were already gone.
+          if (ctx.mounted) Navigator.of(ctx).pop();
         },
       ),
     );
@@ -1643,6 +1655,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           final i = entry.key;
           final line = entry.value;
           return Padding(
+            // Keyed by line so removing one doesn't hand its state to the next.
+            key: ObjectKey(line),
             padding: const EdgeInsets.only(bottom: 10),
             child: LineCard(
               line: line,

@@ -867,7 +867,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
 
   Future<void> _addReceipts() async {
     final newFilenames = await pickAndSaveReceipts(context);
-    if (newFilenames.isEmpty) return;
+    if (newFilenames.isEmpty || !mounted) return;
 
     final updated = [..._filenames, ...newFilenames];
     final encoded = encodeReceiptPaths(updated);
@@ -875,7 +875,11 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
     final db = ref.read(databaseProvider);
     await (db.update(db.transactions)
           ..where((t) => t.id.equals(widget.transactionId)))
-        .write(TransactionsCompanion(receiptPath: Value(encoded)));
+        .write(TransactionsCompanion(
+            receiptPath: Value(encoded),
+            // Bump so the receipt change syncs.
+            lastModified: Value(DateTime.now())));
+    if (!mounted) return;
     ref.invalidate(transactionEntriesProvider);
 
     _filenames = updated;
@@ -889,7 +893,11 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
     final db = ref.read(databaseProvider);
     await (db.update(db.transactions)
           ..where((t) => t.id.equals(widget.transactionId)))
-        .write(TransactionsCompanion(receiptPath: Value(encoded)));
+        .write(TransactionsCompanion(
+            receiptPath: Value(encoded),
+            // Bump so the receipt change syncs.
+            lastModified: Value(DateTime.now())));
+    if (!mounted) return;
     ref.invalidate(transactionEntriesProvider);
 
     _filenames = updated;

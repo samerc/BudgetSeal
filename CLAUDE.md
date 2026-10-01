@@ -428,7 +428,7 @@ Backup `.db` and export `.csv` files are written to the system temp directory fo
 The sync file is optionally encrypted with AES-256-CBC. User sets a password in Cloud Sync settings → PBKDF2 derives the key → file is encrypted before upload. Unencrypted files are auto-detected for backward compatibility.
 
 ### Backup Restore Validation
-Backup restore validates: SQLite magic bytes (`SQLite format 3`), file size < 100MB, auto-backup of current DB before overwriting.
+Backup restore validates: SQLite magic bytes (`SQLite format 3`), file size < 100MB, auto-backup of current DB before overwriting. The restore is **staged**, never copied over the open DB: `AutoBackupService.restoreFromBackup()` writes `budgetseal.db.restore`, sets `restorePending` (auto-sync, `SyncNotifier.sync()` and `runIfDue()` all skip while it's set) and the Backup screen asks the user to restart; `_openConnection()` in `app_database.dart` swaps the file in (and drops -wal/-shm) before Drift opens it.
 
 ## Error Handling
 
@@ -688,6 +688,7 @@ Transactions use a `deleted` boolean column (schema v12) instead of hard deletio
 
 ### Undo Delete
 Deleting from the selection bar (one or many transactions) shows a 5-second SnackBar with "Undo" action. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
+Every delete/undo write also bumps `lastModified` (sync merges by it — without the bump a delete never reaches other devices). If the app dies before the SnackBar closes, `main.dart` runs `LedgerDao.deleteForDeletedTransactions()` at startup; balance queries ignore ledger rows of deleted transactions anyway.
 
 ## Animation Widgets
 

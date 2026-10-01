@@ -24,6 +24,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/categories_provider.dart';
+import '../../shared/utils/dispose_later.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
   final String accountId;
@@ -78,6 +79,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       if (acc != null && mounted) {
         final calculator = BalanceCalculator(db);
         final balance = await calculator.accountBalance(acc.id);
+        if (!mounted) return;
         setState(() {
           _nameController.text = acc.name;
           _currencyController.text = acc.currency;
@@ -805,6 +807,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         );
       },
     );
+    disposeAfterRouteAnimation(adjustCtrl);
 
     if (result != null && _currentBalance != null && mounted) {
       final diff = result - _currentBalance!;
