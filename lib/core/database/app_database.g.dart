@@ -8082,8 +8082,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$UsersTable, List<User>> _usersRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.users,
-          aliasName:
-              $_aliasNameGenerator(db.households.id, db.users.householdId));
+          aliasName: 'households__id__users__household_id');
 
   $$UsersTableProcessedTableManager get usersRefs {
     final manager = $$UsersTableTableManager($_db, $_db.users)
@@ -8097,8 +8096,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$AccountsTable, List<Account>> _accountsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.accounts,
-          aliasName:
-              $_aliasNameGenerator(db.households.id, db.accounts.householdId));
+          aliasName: 'households__id__accounts__household_id');
 
   $$AccountsTableProcessedTableManager get accountsRefs {
     final manager = $$AccountsTableTableManager($_db, $_db.accounts)
@@ -8112,8 +8110,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$AllocationsTable, List<Allocation>>
       _allocationsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.allocations,
-              aliasName: $_aliasNameGenerator(
-                  db.households.id, db.allocations.householdId));
+              aliasName: 'households__id__allocations__household_id');
 
   $$AllocationsTableProcessedTableManager get allocationsRefs {
     final manager = $$AllocationsTableTableManager($_db, $_db.allocations)
@@ -8127,8 +8124,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$CategoriesTable, List<Category>>
       _categoriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.categories,
-              aliasName: $_aliasNameGenerator(
-                  db.households.id, db.categories.householdId));
+              aliasName: 'households__id__categories__household_id');
 
   $$CategoriesTableProcessedTableManager get categoriesRefs {
     final manager = $$CategoriesTableTableManager($_db, $_db.categories)
@@ -8142,8 +8138,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _transactionsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: $_aliasNameGenerator(
-                  db.households.id, db.transactions.householdId));
+              aliasName: 'households__id__transactions__household_id');
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -8158,8 +8153,7 @@ final class $$HouseholdsTableReferences
       List<RecurringTransaction>> _recurringTransactionsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.recurringTransactions,
-          aliasName: $_aliasNameGenerator(
-              db.households.id, db.recurringTransactions.householdId));
+          aliasName: 'households__id__recurring_transactions__household_id');
 
   $$RecurringTransactionsTableProcessedTableManager
       get recurringTransactionsRefs {
@@ -8177,8 +8171,7 @@ final class $$HouseholdsTableReferences
       List<TransactionTemplate>> _transactionTemplatesRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.transactionTemplates,
-          aliasName: $_aliasNameGenerator(
-              db.households.id, db.transactionTemplates.householdId));
+          aliasName: 'households__id__transaction_templates__household_id');
 
   $$TransactionTemplatesTableProcessedTableManager
       get transactionTemplatesRefs {
@@ -8195,8 +8188,7 @@ final class $$HouseholdsTableReferences
   static MultiTypedResultKey<$ObjectivesTable, List<Objective>>
       _objectivesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.objectives,
-              aliasName: $_aliasNameGenerator(
-                  db.households.id, db.objectives.householdId));
+              aliasName: 'households__id__objectives__household_id');
 
   $$ObjectivesTableProcessedTableManager get objectivesRefs {
     final manager = $$ObjectivesTableTableManager($_db, $_db.objectives)
@@ -8766,7 +8758,7 @@ class $$HouseholdsTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$HouseholdsTable, Household>(table),
                     $$HouseholdsTableReferences(db, table, e)
                   ))
               .toList(),
@@ -8952,8 +8944,7 @@ final class $$UsersTableReferences
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.users.householdId, db.households.id));
+      db.households.createAlias('users__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -9189,8 +9180,10 @@ class $$UsersTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$UsersTableReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$UsersTable, User>(table),
+                    $$UsersTableReferences(db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: ({householdId = false}) {
             return PrefetchHooks(
@@ -9280,8 +9273,7 @@ final class $$AccountsTableReferences
   $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.accounts.householdId, db.households.id));
+      db.households.createAlias('accounts__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -9297,8 +9289,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$CategoriesTable, List<Category>>
       _categoriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.categories,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.categories.defaultAccountId));
+              aliasName: 'accounts__id__categories__default_account_id');
 
   $$CategoriesTableProcessedTableManager get categoriesRefs {
     final manager = $$CategoriesTableTableManager($_db, $_db.categories).filter(
@@ -9312,8 +9303,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _sourceTransactionsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.transactions.accountId));
+              aliasName: 'accounts__id__transactions__account_id');
 
   $$TransactionsTableProcessedTableManager get sourceTransactions {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -9327,8 +9317,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _destinationTransactionsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.transactions.destinationAccountId));
+              aliasName: 'accounts__id__transactions__destination_account_id');
 
   $$TransactionsTableProcessedTableManager get destinationTransactions {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -9344,8 +9333,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$TransactionLinesTable, List<TransactionLine>>
       _transactionLinesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactionLines,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.transactionLines.accountId));
+              aliasName: 'accounts__id__transaction_lines__account_id');
 
   $$TransactionLinesTableProcessedTableManager get transactionLinesRefs {
     final manager = $$TransactionLinesTableTableManager(
@@ -9361,8 +9349,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$AllocationLedgerTable, List<AllocationLedgerData>>
       _sourceLedgerEntriesTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.allocationLedger,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.allocationLedger.sourceAccountId));
+              aliasName: 'accounts__id__allocation_ledger__source_account_id');
 
   $$AllocationLedgerTableProcessedTableManager get sourceLedgerEntries {
     final manager =
@@ -9378,8 +9365,7 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$AllocationLedgerTable, List<AllocationLedgerData>>
       _destLedgerEntriesTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.allocationLedger,
-              aliasName: $_aliasNameGenerator(
-                  db.accounts.id, db.allocationLedger.destAccountId));
+              aliasName: 'accounts__id__allocation_ledger__dest_account_id');
 
   $$AllocationLedgerTableProcessedTableManager get destLedgerEntries {
     final manager =
@@ -9395,8 +9381,7 @@ final class $$AccountsTableReferences
       List<RecurringTransaction>> _recurringSourceAccountTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.recurringTransactions,
-          aliasName: $_aliasNameGenerator(
-              db.accounts.id, db.recurringTransactions.accountId));
+          aliasName: 'accounts__id__recurring_transactions__account_id');
 
   $$RecurringTransactionsTableProcessedTableManager get recurringSourceAccount {
     final manager = $$RecurringTransactionsTableTableManager(
@@ -9413,8 +9398,8 @@ final class $$AccountsTableReferences
       List<RecurringTransaction>> _recurringDestAccountTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.recurringTransactions,
-          aliasName: $_aliasNameGenerator(
-              db.accounts.id, db.recurringTransactions.destinationAccountId));
+          aliasName:
+              'accounts__id__recurring_transactions__destination_account_id');
 
   $$RecurringTransactionsTableProcessedTableManager get recurringDestAccount {
     final manager = $$RecurringTransactionsTableTableManager(
@@ -9432,8 +9417,7 @@ final class $$AccountsTableReferences
       List<TransactionTemplate>> _templateAccountTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.transactionTemplates,
-          aliasName: $_aliasNameGenerator(
-              db.accounts.id, db.transactionTemplates.accountId));
+          aliasName: 'accounts__id__transaction_templates__account_id');
 
   $$TransactionTemplatesTableProcessedTableManager get templateAccount {
     final manager = $$TransactionTemplatesTableTableManager(
@@ -10134,8 +10118,10 @@ class $$AccountsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$AccountsTableReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$AccountsTable, Account>(table),
+                    $$AccountsTableReferences(db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: (
               {householdId = false,
@@ -10381,8 +10367,7 @@ final class $$AllocationsTableReferences
   $$AllocationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.allocations.householdId, db.households.id));
+      db.households.createAlias('allocations__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -10398,8 +10383,7 @@ final class $$AllocationsTableReferences
   static MultiTypedResultKey<$CategoriesTable, List<Category>>
       _categoryAllocationsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.categories,
-              aliasName: $_aliasNameGenerator(
-                  db.allocations.id, db.categories.allocationId));
+              aliasName: 'allocations__id__categories__allocation_id');
 
   $$CategoriesTableProcessedTableManager get categoryAllocations {
     final manager = $$CategoriesTableTableManager($_db, $_db.categories).filter(
@@ -10414,8 +10398,7 @@ final class $$AllocationsTableReferences
   static MultiTypedResultKey<$AllocationLedgerTable, List<AllocationLedgerData>>
       _allocationLedgerRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.allocationLedger,
-              aliasName: $_aliasNameGenerator(
-                  db.allocations.id, db.allocationLedger.allocationId));
+              aliasName: 'allocations__id__allocation_ledger__allocation_id');
 
   $$AllocationLedgerTableProcessedTableManager get allocationLedgerRefs {
     final manager =
@@ -10845,7 +10828,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$AllocationsTable, Allocation>(table),
                     $$AllocationsTableReferences(db, table, e)
                   ))
               .toList(),
@@ -10973,8 +10956,7 @@ final class $$CategoriesTableReferences
   $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.categories.householdId, db.households.id));
+      db.households.createAlias('categories__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -10988,8 +10970,7 @@ final class $$CategoriesTableReferences
   }
 
   static $AllocationsTable _allocationIdTable(_$AppDatabase db) =>
-      db.allocations.createAlias(
-          $_aliasNameGenerator(db.categories.allocationId, db.allocations.id));
+      db.allocations.createAlias('categories__allocation_id__allocations__id');
 
   $$AllocationsTableProcessedTableManager? get allocationId {
     final $_column = $_itemColumn<String>('allocation_id');
@@ -11003,8 +10984,7 @@ final class $$CategoriesTableReferences
   }
 
   static $AccountsTable _defaultAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias(
-          $_aliasNameGenerator(db.categories.defaultAccountId, db.accounts.id));
+      db.accounts.createAlias('categories__default_account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get defaultAccountId {
     final $_column = $_itemColumn<String>('default_account_id');
@@ -11020,8 +11000,7 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _transactionsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: $_aliasNameGenerator(
-                  db.categories.id, db.transactions.categoryId));
+              aliasName: 'categories__id__transactions__category_id');
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -11035,8 +11014,7 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$TransactionLinesTable, List<TransactionLine>>
       _transactionLinesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactionLines,
-              aliasName: $_aliasNameGenerator(
-                  db.categories.id, db.transactionLines.categoryId));
+              aliasName: 'categories__id__transaction_lines__category_id');
 
   $$TransactionLinesTableProcessedTableManager get transactionLinesRefs {
     final manager = $$TransactionLinesTableTableManager(
@@ -11053,8 +11031,7 @@ final class $$CategoriesTableReferences
       List<RecurringTransaction>> _recurringTransactionsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.recurringTransactions,
-          aliasName: $_aliasNameGenerator(
-              db.categories.id, db.recurringTransactions.categoryId));
+          aliasName: 'categories__id__recurring_transactions__category_id');
 
   $$RecurringTransactionsTableProcessedTableManager
       get recurringTransactionsRefs {
@@ -11072,8 +11049,7 @@ final class $$CategoriesTableReferences
       List<TransactionTemplate>> _transactionTemplatesRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.transactionTemplates,
-          aliasName: $_aliasNameGenerator(
-              db.categories.id, db.transactionTemplates.categoryId));
+          aliasName: 'categories__id__transaction_templates__category_id');
 
   $$TransactionTemplatesTableProcessedTableManager
       get transactionTemplatesRefs {
@@ -11661,7 +11637,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$CategoriesTable, Category>(table),
                     $$CategoriesTableReferences(db, table, e)
                   ))
               .toList(),
@@ -11856,8 +11832,7 @@ final class $$TransactionsTableReferences
   $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.transactions.householdId, db.households.id));
+      db.households.createAlias('transactions__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -11871,8 +11846,7 @@ final class $$TransactionsTableReferences
   }
 
   static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias(
-          $_aliasNameGenerator(db.transactions.accountId, db.accounts.id));
+      db.accounts.createAlias('transactions__account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager get accountId {
     final $_column = $_itemColumn<String>('account_id')!;
@@ -11886,8 +11860,8 @@ final class $$TransactionsTableReferences
   }
 
   static $AccountsTable _destinationAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.transactions.destinationAccountId, db.accounts.id));
+      db.accounts
+          .createAlias('transactions__destination_account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get destinationAccountId {
     final $_column = $_itemColumn<String>('destination_account_id');
@@ -11902,8 +11876,7 @@ final class $$TransactionsTableReferences
   }
 
   static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias(
-          $_aliasNameGenerator(db.transactions.categoryId, db.categories.id));
+      db.categories.createAlias('transactions__category_id__categories__id');
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -11919,8 +11892,7 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$TransactionLinesTable, List<TransactionLine>>
       _transactionLinesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactionLines,
-              aliasName: $_aliasNameGenerator(
-                  db.transactions.id, db.transactionLines.transactionId));
+              aliasName: 'transactions__id__transaction_lines__transaction_id');
 
   $$TransactionLinesTableProcessedTableManager get transactionLinesRefs {
     final manager =
@@ -11936,8 +11908,8 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$AllocationLedgerTable, List<AllocationLedgerData>>
       _allocationLedgerRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.allocationLedger,
-              aliasName: $_aliasNameGenerator(
-                  db.transactions.id, db.allocationLedger.sourceTransactionId));
+              aliasName:
+                  'transactions__id__allocation_ledger__source_transaction_id');
 
   $$AllocationLedgerTableProcessedTableManager get allocationLedgerRefs {
     final manager = $$AllocationLedgerTableTableManager(
@@ -12536,7 +12508,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$TransactionsTable, Transaction>(table),
                     $$TransactionsTableReferences(db, table, e)
                   ))
               .toList(),
@@ -12694,8 +12666,8 @@ final class $$TransactionLinesTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
-      db.transactions.createAlias($_aliasNameGenerator(
-          db.transactionLines.transactionId, db.transactions.id));
+      db.transactions
+          .createAlias('transaction_lines__transaction_id__transactions__id');
 
   $$TransactionsTableProcessedTableManager get transactionId {
     final $_column = $_itemColumn<String>('transaction_id')!;
@@ -12708,9 +12680,8 @@ final class $$TransactionLinesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.transactionLines.categoryId, db.categories.id));
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) => db.categories
+      .createAlias('transaction_lines__category_id__categories__id');
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -12724,8 +12695,7 @@ final class $$TransactionLinesTableReferences extends BaseReferences<
   }
 
   static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias(
-          $_aliasNameGenerator(db.transactionLines.accountId, db.accounts.id));
+      db.accounts.createAlias('transaction_lines__account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get accountId {
     final $_column = $_itemColumn<String>('account_id');
@@ -13066,7 +13036,7 @@ class $$TransactionLinesTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$TransactionLinesTable, TransactionLine>(table),
                     $$TransactionLinesTableReferences(db, table, e)
                   ))
               .toList(),
@@ -13184,8 +13154,8 @@ final class $$AllocationLedgerTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $AllocationsTable _allocationIdTable(_$AppDatabase db) =>
-      db.allocations.createAlias($_aliasNameGenerator(
-          db.allocationLedger.allocationId, db.allocations.id));
+      db.allocations
+          .createAlias('allocation_ledger__allocation_id__allocations__id');
 
   $$AllocationsTableProcessedTableManager get allocationId {
     final $_column = $_itemColumn<String>('allocation_id')!;
@@ -13199,8 +13169,8 @@ final class $$AllocationLedgerTableReferences extends BaseReferences<
   }
 
   static $TransactionsTable _sourceTransactionIdTable(_$AppDatabase db) =>
-      db.transactions.createAlias($_aliasNameGenerator(
-          db.allocationLedger.sourceTransactionId, db.transactions.id));
+      db.transactions.createAlias(
+          'allocation_ledger__source_transaction_id__transactions__id');
 
   $$TransactionsTableProcessedTableManager? get sourceTransactionId {
     final $_column = $_itemColumn<String>('source_transaction_id');
@@ -13213,9 +13183,8 @@ final class $$AllocationLedgerTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $AccountsTable _sourceAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.allocationLedger.sourceAccountId, db.accounts.id));
+  static $AccountsTable _sourceAccountIdTable(_$AppDatabase db) => db.accounts
+      .createAlias('allocation_ledger__source_account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get sourceAccountId {
     final $_column = $_itemColumn<String>('source_account_id');
@@ -13228,9 +13197,8 @@ final class $$AllocationLedgerTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $AccountsTable _destAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.allocationLedger.destAccountId, db.accounts.id));
+  static $AccountsTable _destAccountIdTable(_$AppDatabase db) => db.accounts
+      .createAlias('allocation_ledger__dest_account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get destAccountId {
     final $_column = $_itemColumn<String>('dest_account_id');
@@ -13677,7 +13645,8 @@ class $$AllocationLedgerTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$AllocationLedgerTable, AllocationLedgerData>(
+                        table),
                     $$AllocationLedgerTableReferences(db, table, e)
                   ))
               .toList(),
@@ -13936,7 +13905,11 @@ class $$FxRatesTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$FxRatesTable, FxRate>(table),
+                    BaseReferences<_$AppDatabase, $FxRatesTable, FxRate>(
+                        db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: null,
         ));
@@ -14010,9 +13983,8 @@ final class $$RecurringTransactionsTableReferences extends BaseReferences<
   $$RecurringTransactionsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias($_aliasNameGenerator(
-          db.recurringTransactions.householdId, db.households.id));
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) => db.households
+      .createAlias('recurring_transactions__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -14025,9 +13997,8 @@ final class $$RecurringTransactionsTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.recurringTransactions.accountId, db.accounts.id));
+  static $AccountsTable _accountIdTable(_$AppDatabase db) => db.accounts
+      .createAlias('recurring_transactions__account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager get accountId {
     final $_column = $_itemColumn<String>('account_id')!;
@@ -14041,8 +14012,8 @@ final class $$RecurringTransactionsTableReferences extends BaseReferences<
   }
 
   static $AccountsTable _destinationAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.recurringTransactions.destinationAccountId, db.accounts.id));
+      db.accounts.createAlias(
+          'recurring_transactions__destination_account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get destinationAccountId {
     final $_column = $_itemColumn<String>('destination_account_id');
@@ -14056,9 +14027,8 @@ final class $$RecurringTransactionsTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.recurringTransactions.categoryId, db.categories.id));
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) => db.categories
+      .createAlias('recurring_transactions__category_id__categories__id');
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -14629,7 +14599,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$RecurringTransactionsTable,
+                        RecurringTransaction>(table),
                     $$RecurringTransactionsTableReferences(db, table, e)
                   ))
               .toList(),
@@ -14766,9 +14737,8 @@ final class $$TransactionTemplatesTableReferences extends BaseReferences<
   $$TransactionTemplatesTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias($_aliasNameGenerator(
-          db.transactionTemplates.householdId, db.households.id));
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) => db.households
+      .createAlias('transaction_templates__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -14781,9 +14751,8 @@ final class $$TransactionTemplatesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias($_aliasNameGenerator(
-          db.transactionTemplates.accountId, db.accounts.id));
+  static $AccountsTable _accountIdTable(_$AppDatabase db) => db.accounts
+      .createAlias('transaction_templates__account_id__accounts__id');
 
   $$AccountsTableProcessedTableManager? get accountId {
     final $_column = $_itemColumn<String>('account_id');
@@ -14796,9 +14765,8 @@ final class $$TransactionTemplatesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.transactionTemplates.categoryId, db.categories.id));
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) => db.categories
+      .createAlias('transaction_templates__category_id__categories__id');
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -15205,7 +15173,8 @@ class $$TransactionTemplatesTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$TransactionTemplatesTable,
+                        TransactionTemplate>(table),
                     $$TransactionTemplatesTableReferences(db, table, e)
                   ))
               .toList(),
@@ -15331,8 +15300,7 @@ final class $$ObjectivesTableReferences
   $$ObjectivesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
-      db.households.createAlias(
-          $_aliasNameGenerator(db.objectives.householdId, db.households.id));
+      db.households.createAlias('objectives__household_id__households__id');
 
   $$HouseholdsTableProcessedTableManager get householdId {
     final $_column = $_itemColumn<String>('household_id')!;
@@ -15689,7 +15657,7 @@ class $$ObjectivesTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$ObjectivesTable, Objective>(table),
                     $$ObjectivesTableReferences(db, table, e)
                   ))
               .toList(),

@@ -32,13 +32,13 @@ class FilePickerProvider implements CloudProvider {
   @override
   Future<bool> connect() async {
     // Let user pick or create a file
-    final result = await FilePicker.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.any,
       dialogTitle: 'Select BudgetSeal Sync File',
     );
 
-    if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
-      _filePath = result.files.first.path!;
+    if (file?.path != null) {
+      _filePath = file!.path!;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKeyPath, _filePath!);
       return true;

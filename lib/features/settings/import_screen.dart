@@ -72,14 +72,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
   Future<void> _pickFile() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['csv', 'txt'],
       );
 
-      if (result == null || result.files.isEmpty) return;
-
-      final path = result.files.first.path;
+      final path = file?.path;
       if (path == null) return;
 
       final content = await File(path).readAsString();
@@ -87,7 +85,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       if (data.isNotEmpty && mounted) {
         setState(() {
           _csvData = data;
-          _fileName = result.files.first.name;
+          _fileName = file!.name;
           _columnRoles = _autoDetectRoles(data);
         });
       }

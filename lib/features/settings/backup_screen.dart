@@ -135,9 +135,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     setState(() => _working = true);
     try {
-      final result = await FilePicker.pickFiles(type: FileType.any);
-      if (result == null || result.files.isEmpty) return;
-      final path = result.files.first.path;
+      final file = await FilePicker.pickFile(type: FileType.any);
+      final path = file?.path;
       if (path == null) return;
 
       // Validate the backup file before restoring

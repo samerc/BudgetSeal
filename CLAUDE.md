@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v13)
+│   │   ├── app_database.dart   # Drift database definition (schema v18)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (12 tables)
@@ -282,7 +282,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 17
+### Schema Version: 18
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -310,42 +310,41 @@ Notable additions:
 
 ## Dependencies (key ones)
 
-**Version pinning conflict:** drift/drift_dev 2.32+ requires analyzer 10+, but riverpod_generator requires analyzer <10. Both are pinned at 2.31.x until riverpod_generator supports analyzer 10+. This also blocks sqlite3 3.x, drift_flutter 0.3.x, and sqlite3_flutter_libs 0.6.x. The `win32` 5.x vs 6.x split similarly blocks share_plus 13.x and network_info_plus 8.x (flutter_secure_storage pins win32 ^5.x).
+**Toolchain:** Flutter 3.47.5 / Dart 3.13. iOS deployment target 15.5 (required by ML Kit). **Held-back majors:** go_router 18, google_fonts 9, dynamic_color 2 and shimmer 4 all depend on the standalone `material_ui` package, whose `ColorScheme`/`TextTheme`/`MaterialApp` types are distinct from `package:flutter/material.dart`. Upgrading them requires migrating the whole app (`dart fix --apply --code=migrate_design_widgets`), so they stay on 17.x / 8.x / 1.x / 3.x until that's done. pointycastle stays on 3.x because `encrypt` 5.0.3 (latest, unmaintained) requires `^3.6.2`. file_picker 12+ API: use `FilePicker.pickFile()` (returns `PlatformFile?`), not `pickFiles()`.
 
 | Package | Constraint | Purpose |
 |---------|------------|---------|
-| drift | ^2.22.0 | SQLite ORM |
-| drift_flutter | ^0.2.0 | Drift Flutter integration |
-| flutter_riverpod | ^3.0.0 | State management |
-| riverpod_annotation | ^4.0.0 | Riverpod code generation |
-| go_router | ^17.0.0 | Navigation |
+| drift | ^2.35.0 | SQLite ORM |
+| drift_flutter | ^0.3.1 | Drift Flutter integration |
+| flutter_riverpod | ^3.4.0 | State management |
+| go_router | ^17.5.0 | Navigation |
 | fl_chart | ^1.2.0 | Charts (pie, line, bar) |
 | google_sign_in | ^7.0.0 | Google Drive auth |
-| googleapis | ^16.0.0 | Google Drive API |
-| googleapis_auth | ^2.0.0 | Google API OAuth |
+| googleapis | ^17.0.0 | Google Drive API |
+| googleapis_auth | ^2.3.4 | Google API OAuth |
 | local_auth | ^3.0.0 | Biometric lock |
-| flutter_local_notifications | ^21.0.0 | Bill/envelope alerts |
+| flutter_local_notifications | ^22.3.0 | Bill/envelope alerts |
 | shared_preferences | ^2.5.0 | Simple key-value settings |
 | csv | ^8.0.0 | CSV import/export |
-| share_plus | ^12.0.0 | Share files/data |
-| file_picker | ^11.0.0 | System file picker for sync |
+| share_plus | ^13.3.0 | Share files/data |
+| file_picker | ^13.1.0 | System file picker for sync |
 | haptic_feedback | ^0.6.0 | Haptic feedback |
 | sliver_tools | ^0.2.12 | Advanced sliver widgets |
-| google_fonts | ^8.0.0 | Custom fonts |
-| dynamic_color | ^1.7.0 | Material You system accent color |
+| google_fonts | ^8.2.0 | Custom fonts |
+| dynamic_color | ^1.9.0 | Material You system accent color |
 | confetti | ^0.8.0 | Celebration effects (goal completion) |
-| google_mlkit_text_recognition | ^0.15.1 | Offline receipt OCR (bill splitter) |
+| google_mlkit_text_recognition | ^0.17.1 | Offline receipt OCR (bill splitter) |
 | encrypt | ^5.0.3 | AES-256 encryption for sync files |
-| flutter_secure_storage | ^10.0.0 | Secure credential storage (Keystore/Keychain) |
+| flutter_secure_storage | ^11.2.0 | Secure credential storage (Keystore/Keychain) |
 | pointycastle | ^3.9.1 | PBKDF2 key derivation |
 | shelf | ^1.4.2 | HTTP server (Web Companion) |
 | shelf_router | ^1.1.4 | Route matching (Web Companion) |
-| network_info_plus | ^7.0.0 | WiFi IP detection (Web Companion) |
-| qr_flutter | ^4.1.0 | QR code display (Web Companion) |
-| flutter_foreground_task | ^9.0.0 | Android foreground service (Web Companion) |
-| wakelock_plus | ^1.2.10 | iOS screen-on (Web Companion) |
+| network_info_plus | ^8.2.0 | WiFi IP detection (Web Companion) |
+| qr_widget | ^4.1.0 | QR code display (Web Companion) |
+| flutter_foreground_task | ^11.0.3 | Android foreground service (Web Companion) |
+| wakelock_plus | ^1.8.0 | iOS screen-on (Web Companion) |
 | crypto | ^3.0.0 | SHA-256 PIN hashing (Web Companion) |
-| webview_flutter | ^4.10.0 | In-app help guide WebView |
+| webview_flutter | ^4.14.0 | In-app help guide WebView |
 
 ## Testing
 
