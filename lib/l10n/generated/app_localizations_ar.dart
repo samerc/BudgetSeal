@@ -1490,7 +1490,7 @@ class SAr extends S {
   String get allocSavedPrefix => 'مدّخر:';
 
   @override
-  String allocPercentSaved(double pct) {
+  String allocPercentSaved(int pct) {
     return '$pct% مدّخر';
   }
 

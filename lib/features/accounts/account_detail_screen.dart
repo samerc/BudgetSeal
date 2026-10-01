@@ -250,72 +250,54 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             // Current balance display card (existing accounts only)
             if (!_isNew && _currentBalance != null) ...[
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                // Cashew wallet header: pastel accent, dark text.
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, Color(0xFF2A3F6A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.82, dark: 0.75),
+                  borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
                 ),
                 child: Column(
                   children: [
                     Text(
                       l.acctCurrentBalance,
                       style: TextStyle(
-                          color: Colors.white60,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.5),
+                          color: AppColors.tp(context).withValues(alpha: 0.6),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      formatAmount(_currentBalance!,
-                          currency: _currencyController.text),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w800,
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formatAmount(_currentBalance!,
+                            currency: _currencyController.text),
+                        style: TextStyle(
+                          color: _currentBalance! < 0
+                              ? AppColors.overspent
+                              : AppColors.tp(context),
+                          fontSize: 36,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.6, dark: 0.55),
+                        borderRadius: BorderRadius.circular(RadiusTokens.pill),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _currentBalance! >= 0
-                                ? Icons.trending_up_rounded
-                                : Icons.trending_down_rounded,
-                            size: 14,
-                            color: _currentBalance! >= 0
-                                ? AppColors.healthy
-                                : AppColors.overspent,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _currencyController.text,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        _currencyController.text,
+                        style: TextStyle(
+                          color: AppColors.tp(context),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],

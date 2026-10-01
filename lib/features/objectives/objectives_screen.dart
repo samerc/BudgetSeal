@@ -7,7 +7,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
-import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/budget_progress.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -167,32 +167,45 @@ class _ObjectiveCard extends StatelessWidget {
     final progress = o.targetAmount > 0
         ? (o.currentAmount / o.targetAmount).clamp(0.0, 1.0)
         : 0.0;
-    final pctText = '${(progress * 100).toStringAsFixed(0)}%';
     final isLoan = o.type == 'loan';
     final isLent = o.direction == 'lent';
 
-    return AppCard(
-      onTap: () => context.push('/objectives/${o.id}'),
-      margin: const EdgeInsets.only(bottom: Spacing.sm),
-      child: Column(
+    // Cashew objective card: tinted with the goal's color, big type, thick bar.
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: AppColors.pastel(context, color, light: 0.88, dark: 0.8),
+        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+          onTap: () => context.push('/objectives/${o.id}'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row: icon + name + amount
             Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.pastel(context, color,
+                        light: 0.55, dark: 0.45),
+                    shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: o.icon != null && o.icon!.isNotEmpty
-                        ? Text(o.icon!, style: const TextStyle(fontSize: 20))
+                        ? Text(o.icon!, style: const TextStyle(fontSize: 22))
                         : Icon(
                             isLoan ? Icons.handshake_rounded : Icons.flag_rounded,
-                            color: color, size: 20),
+                            color: AppColors.pastel(context, color,
+                                light: 0.5, dark: 0.5, inverse: true),
+                            size: 22),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -204,8 +217,8 @@ class _ObjectiveCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: TypographyTokens.cardTitleSize,
-                            fontWeight: TypographyTokens.cardTitleWeight,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           )),
                       if (isLoan && o.contactName != null)
@@ -227,17 +240,18 @@ class _ObjectiveCard extends StatelessWidget {
                     Text(
                       formatAmount(o.currentAmount, currency: o.targetCurrency),
                       style: TextStyle(
-                        fontSize: TypographyTokens.amountRegularSize,
-                        fontWeight: TypographyTokens.amountRegularWeight,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.tp(context),
                       ),
                     ),
                     if (o.targetAmount > 0)
                       Text(
-                        'of ${formatAmount(o.targetAmount, currency: o.targetCurrency)}',
+                        S.of(context).objOfTarget(formatAmount(o.targetAmount,
+                            currency: o.targetCurrency)),
                         style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.th(context),
+                          fontSize: 12.5,
+                          color: AppColors.tp(context).withValues(alpha: 0.55),
                         ),
                       ),
                   ],
@@ -246,28 +260,12 @@ class _ObjectiveCard extends StatelessWidget {
             ),
             // Progress bar
             if (o.targetAmount > 0) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 6,
-                        backgroundColor: AppColors.bd(context),
-                        valueColor: AlwaysStoppedAnimation(color),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(pctText,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: color,
-                      )),
-                ],
+              const SizedBox(height: 14),
+              BudgetProgress(
+                progress: progress,
+                color: color,
+                height: 20,
+                showPercent: true,
               ),
             ],
             // Deadline
@@ -295,6 +293,9 @@ class _ObjectiveCard extends StatelessWidget {
             ],
           ],
         ),
+          ),
+        ),
+      ),
     );
   }
 

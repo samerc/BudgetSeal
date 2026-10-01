@@ -51,29 +51,10 @@ class UpgradeScreen extends ConsumerWidget {
                       const Spacer(flex: 2),
 
               // ── App icon ──
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, Color(0xFF2A3F6A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.account_balance_wallet_rounded,
-                  color: Colors.white,
-                  size: 40,
-                ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Image.asset('assets/icon/app_icon.png',
+                    width: 84, height: 84),
               ),
               const SizedBox(height: Spacing.xl),
 

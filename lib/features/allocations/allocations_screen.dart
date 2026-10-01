@@ -15,6 +15,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
+import '../../shared/widgets/budget_progress.dart';
 
 import '../../shared/widgets/currency_display.dart';
 import '../../core/providers/premium_provider.dart';
@@ -584,6 +585,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     String baseCurrency,
   ) {
     final widgets = <Widget>[];
+    final period = BudgetProgress.currentPeriod(
+        ref.read(householdProvider).value?.periodStartDay ?? 1);
 
     for (final entry in grouped.entries) {
       final type = entry.key;
@@ -674,6 +677,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             categoryName: cat?.name,
             categoryIcon: cat?.icon,
             categoryColorHex: cat?.colorHex,
+            // Current budget period → daily allowance + today marker.
+            periodStart: period.start,
+            periodEnd: period.end,
             plannedAmount: _plannedByAllocation[a.data.allocation.id],
             plannedCurrency: _plannedCurrencyByAllocation[a.data.allocation.id],
             onTap: () {

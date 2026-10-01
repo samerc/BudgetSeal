@@ -2821,7 +2821,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{pct}% saved'**
-  String allocPercentSaved(double pct);
+  String allocPercentSaved(int pct);
 
   /// No description provided for @allocFlexibleTitle.
   ///

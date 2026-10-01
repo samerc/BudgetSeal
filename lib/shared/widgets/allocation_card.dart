@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
-import 'animated_circular_progress.dart';
+import '../theme/design_tokens.dart';
+import 'budget_progress.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -68,63 +69,38 @@ class AllocationCard extends StatelessWidget {
   bool get _isFlexible => _effectiveType == 'flexible';
   bool get _isFlexibleWithGoal => _isFlexible && targetAmount != null && targetAmount! > 0;
 
-  Widget _buildIcon(BuildContext context, bool hasTarget, double? rawProgress,
-      bool isOverspent, bool hasCategoryIcon, Color iconColor, IconData savingsIcon) {
-    // Determine the inner content — always render something
-    Widget inner;
+  Widget _buildIcon(BuildContext context, Color color, IconData savingsIcon) {
+    final Widget inner;
     if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
-      inner = Text(envelopeIcon!, style: const TextStyle(fontSize: 18));
-    } else if (hasCategoryIcon && categoryIcon != null &&
-        categoryIcon!.isNotEmpty && categoryIcon != 'category') {
-      // Show the category emoji directly (not wrapped in CategoryIcon)
-      inner = Text(categoryIcon!, style: const TextStyle(fontSize: 18));
+      inner = Text(envelopeIcon!, style: const TextStyle(fontSize: 22));
+    } else if (categoryIcon != null &&
+        categoryIcon!.isNotEmpty &&
+        categoryIcon != 'category') {
+      inner = Text(categoryIcon!, style: const TextStyle(fontSize: 22));
     } else if (_isFlexible) {
-      inner = Icon(savingsIcon, size: 18, color: AppColors.accent);
+      inner = Icon(savingsIcon,
+          size: 22,
+          color: AppColors.pastel(context, color,
+              light: 0.5, dark: 0.5, inverse: true));
     } else {
-      // Fallback: first letter of name
       inner = Text(
         name.isNotEmpty ? name[0].toUpperCase() : '?',
         style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: _typeColor,
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          color: AppColors.pastel(context, color,
+              light: 0.5, dark: 0.5, inverse: true),
         ),
       );
     }
-
-    // Wrap in circular progress ring when there's a target
-    if (hasTarget && rawProgress != null) {
-      final ringColor = isOverspent
-          ? AppColors.overspent
-          : rawProgress >= 1.0
-              ? AppColors.healthy
-              : _typeColor;
-      return Padding(
-        padding: const EdgeInsetsDirectional.only(end: 10),
-        child: AnimatedCircularProgress(
-          progress: rawProgress,
-          color: ringColor,
-          overspendColor: AppColors.overspent,
-          trackColor: AppColors.bd(context),
-          strokeWidth: 3,
-          size: 40,
-          child: inner,
-        ),
-      );
-    }
-
-    // No target — show icon in a consistent rounded container
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(end: 10),
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: _typeColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(child: inner),
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColors.pastel(context, color, light: 0.55, dark: 0.45),
+        shape: BoxShape.circle,
       ),
+      child: Center(child: inner),
     );
   }
 
@@ -153,20 +129,9 @@ class AllocationCard extends StatelessWidget {
     final crossCurrencyDebt = Map.fromEntries(
         otherCurrencyBalances.entries.where((e) => e.value < -0.01));
     final hasCrossDebt = crossCurrencyDebt.isNotEmpty;
-    // Legacy compatibility: either condition counts as "overspent" for border
-    final isOverspent = isTargetOverspent;
-
-    final bool hasCategoryIcon = categoryName != null;
-    Color parsedColor = _typeColor;
-    if (categoryColorHex != null) {
-      try {
-        parsedColor = Color(
-            int.parse('FF${categoryColorHex!.replaceAll('#', '')}', radix: 16));
-      } catch (_) {
-        // Invalid hex string — keep fallback color
-      }
-    }
-    final Color iconColor = parsedColor;
+    final Color iconColor = categoryColorHex != null
+        ? AppColors.fromHex(categoryColorHex!)
+        : _typeColor;
 
     // Determine urgency border color
     final Color borderColor;
@@ -203,219 +168,190 @@ class AllocationCard extends StatelessWidget {
     if (_isFlexible) semanticParts.add('flexible envelope');
     if (needsReview) semanticParts.add('needs review');
 
+    // Cashew budgetContainer: tinted with the envelope's own color.
+    final cardColor =
+        AppColors.pastel(context, iconColor, light: 0.88, dark: 0.8);
+    final showBar = hasTarget && progress != null;
+    // The bar shows what's LEFT, so the pace marker sits at the share that
+    // should still be left today (1 − elapsed). Fill past it = on track.
+    final elapsed = !_isFlexible
+        ? BudgetProgress.fractionOfPeriod(periodStart, periodEnd)
+        : null;
+    final todayFraction = elapsed == null ? null : 1 - elapsed;
+
+    String? subtitle;
+    if (_isFlexibleWithGoal) {
+      subtitle = S.of(context).allocPercentSaved((progress! * 100).round());
+    } else if (hasTarget && !_isFlexible) {
+      final parts = <String>[
+        S.of(context).objOfTarget(
+            formatAmount(targetAmount!, currency: effectiveTargetCurrency)),
+      ];
+      if (displayBalance > 0 && periodStart != null && periodEnd != null) {
+        final daysLeft = periodEnd!.difference(DateTime.now()).inDays;
+        if (daysLeft > 0) {
+          parts.add(S.of(context).allocDailyBudget(
+              formatAmount(displayBalance / daysLeft, currency: displayCurrency),
+              daysLeft));
+        }
+      }
+      subtitle = parts.join(' · ');
+    }
+
     return Semantics(
       label: semanticParts.join(', '),
       button: onTap != null,
       child: Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            children: [
-              // Icon: with circular progress ring when target exists
-              _buildIcon(context, hasTarget, rawProgress, isOverspent,
-                  hasCategoryIcon, iconColor, savingsIcon),
-              // Name + progress
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name,
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context)),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                    // For savings with goal: show progress bar
-                    if (_isFlexibleWithGoal && progress != null) ...[
-                      const SizedBox(height: 6),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: progress),
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOutCubic,
-                        builder: (_, val, __) => ClipRRect(
-                          borderRadius: BorderRadius.circular(3),
-                          child: LinearProgressIndicator(
-                            value: val,
-                            minHeight: 4,
-                            backgroundColor: AppColors.bd(context),
-                            color: progress >= 1.0
-                                ? AppColors.healthy
-                                : AppColors.accent,
-                          ),
-                        ),
-                      ),
-                    ]
-                    // For spending envelopes: show standard progress bar
-                    else if (!_isFlexible && hasTarget && progress != null) ...[
-                      const SizedBox(height: 6),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: progress),
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOutCubic,
-                        builder: (_, val, __) => ClipRRect(
-                          borderRadius: BorderRadius.circular(3),
-                          child: LinearProgressIndicator(
-                            value: val,
-                            minHeight: 4,
-                            backgroundColor: AppColors.bd(context),
-                            color: isTargetOverspent
-                                ? AppColors.overspent
-                                : progress >= 1.0
-                                    ? AppColors.healthy
-                                    : _typeColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                    // Daily allowance (Cashew-style) for spending envelopes
-                    if (!_isFlexible && hasTarget && displayBalance > 0 &&
-                        periodStart != null && periodEnd != null) ...[
-                      () {
-                        final now = DateTime.now();
-                        final daysLeft = periodEnd!.difference(now).inDays;
-                        if (daysLeft > 0) {
-                          final daily = displayBalance / daysLeft;
-                          final l = S.of(context);
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              l.allocDailyBudget(formatAmount(daily, currency: displayCurrency), daysLeft),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.ts(context),
-                              ),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      }(),
-                    ],
-                    // For savings-open: no progress bar at all
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Balance — target currency + cross-currency debt
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+          // Status signals keep a colored edge; healthy cards have none.
+          border: borderColor == AppColors.bd(context)
+              ? null
+              : Border.all(color: borderColor, width: 1.5),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isTargetOverspent)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 4),
-                          child: Icon(Icons.warning_amber_rounded,
-                              size: 14, color: AppColors.overspent),
-                        ),
-                      if (_isFlexible && !isTargetOverspent)
-                        Text(
-                          'Saved: ',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.ts(context),
-                          ),
-                        ),
-                      Text(
-                        formatAmount(displayBalance, currency: displayCurrency),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isTargetOverspent
-                              ? AppColors.overspent
-                              : AppColors.tp(context),
+                      _buildIcon(context, iconColor, savingsIcon),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.tp(context))),
+                            if (subtitle != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 12.5,
+                                        color: AppColors.tp(context)
+                                            .withValues(alpha: 0.6))),
+                              ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  if (_isFlexibleWithGoal) ...[
-                    Text(
-                      '${(progress! * 100).round()}% saved',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: progress >= 1.0
-                              ? AppColors.healthy
-                              : AppColors.accent),
-                    ),
-                    Text(
-                      '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
-                      style: TextStyle(
-                          fontSize: 10, color: AppColors.th(context)),
-                    ),
-                  ] else if (hasTarget && !_isFlexible)
-                    Text(
-                      '/ ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}',
-                      style: TextStyle(
-                          fontSize: 10, color: AppColors.th(context)),
-                    ),
-                  // Cross-currency debt: show amber dot indicator (details on detail screen)
-                  if (hasCrossDebt)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Container(
-                            width: 6, height: 6,
-                            decoration: BoxDecoration(
-                              color: AppColors.caution,
-                              shape: BoxShape.circle,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isTargetOverspent)
+                                const Padding(
+                                  padding:
+                                      EdgeInsetsDirectional.only(end: 4),
+                                  child: Icon(Icons.warning_amber_rounded,
+                                      size: 16, color: AppColors.overspent),
+                                ),
+                              Text(
+                                formatAmount(displayBalance,
+                                    currency: displayCurrency),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: isTargetOverspent
+                                      ? AppColors.overspent
+                                      : AppColors.tp(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (hasCrossDebt)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.caution,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    S.of(context).allocOtherCurrencies(
+                                        crossCurrencyDebt.length),
+                                    style: const TextStyle(
+                                        fontSize: 10.5,
+                                        color: AppColors.caution),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            S.of(context).allocOtherCurrencies(crossCurrencyDebt.length),
-                            style: TextStyle(fontSize: 9, color: AppColors.caution),
-                          ),
+                          if (plannedAmount != null && plannedAmount! > 0)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                '${formatAmount(plannedAmount!, currency: plannedCurrency ?? effectiveTargetCurrency)} ${S.of(context).plannedChipLabel}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.tp(context)
+                                      .withValues(alpha: 0.55),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                    ),
-                  // Planned amount indicator
-                  if (plannedAmount != null && plannedAmount! > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        '${formatAmount(plannedAmount!, currency: plannedCurrency ?? effectiveTargetCurrency)} ${S.of(context).plannedChipLabel}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.th(context),
+                      if (onSpend != null && !_isFlexible) ...[
+                        const SizedBox(width: 8),
+                        Material(
+                          color: AppColors.pastel(context, iconColor,
+                              light: 0.6, dark: 0.55),
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: onSpend,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(Icons.shopping_cart_outlined,
+                                  size: 18, color: AppColors.tp(context)),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
+                    ],
+                  ),
+                  if (showBar) ...[
+                    const SizedBox(height: 12),
+                    BudgetProgress(
+                      progress: rawProgress!,
+                      color: iconColor,
+                      height: 14,
+                      todayFraction: todayFraction,
+                      overspent: isTargetOverspent,
                     ),
+                  ],
                 ],
               ),
-              // Spend button (only for non-savings)
-              if (onSpend != null && !_isFlexible) ...[
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onSpend,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: _typeColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.shopping_cart_outlined,
-                        size: 16, color: _typeColor),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

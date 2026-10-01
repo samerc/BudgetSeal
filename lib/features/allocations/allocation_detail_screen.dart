@@ -22,6 +22,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/budget_progress.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/utils/format_number.dart';
@@ -780,8 +781,6 @@ class _AllocationDetailScreenState
     final mainBalance = balances[targetCurrency] ?? 0;
     final otherBalances = Map.of(balances)..remove(targetCurrency);
     final hasTarget = _targetAmount > 0;
-    final progress =
-        hasTarget ? (mainBalance / _targetAmount).clamp(0.0, 1.0) : null;
 
     // Trigger confetti when savings goal is reached
     if (_type == 'flexible' && hasTarget && mainBalance >= _targetAmount &&
@@ -792,37 +791,56 @@ class _AllocationDetailScreenState
       });
     }
 
-    final progressColor = progress != null
-        ? (progress >= 1.0
-            ? AppColors.healthy
-            : progress > 0.8
-                ? AppColors.caution
-                : AppColors.accent)
+    // Cashew budgetPage header: pastel of the envelope's color, dark text,
+    // thick progress bar with a pace marker for spending envelopes.
+    final envColor = _linkedCategories.isNotEmpty
+        ? AppColors.fromHex(_linkedCategories.first.colorHex)
         : AppColors.accent;
+    final heroColor = AppColors.pastel(context, envColor, light: 0.8, dark: 0.75);
+    final onHero = AppColors.tp(context);
+    final isSpending = _type == 'spending';
+    final period = BudgetProgress.currentPeriod(
+        ref.watch(householdProvider).value?.periodStartDay ?? 1);
+    final elapsed = isSpending
+        ? BudgetProgress.fractionOfPeriod(period.start, period.end)
+        : null;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, const Color(0xFF2A3F6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
+        color: heroColor,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            S.of(context).allocAvailable,
+            style: TextStyle(
+              color: onHero.withValues(alpha: 0.6),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
           // Balance (pulses after funding)
-          AnimatedScale(
-            scale: _fundPulse ? 1.12 : 1.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutBack,
-            child: Text(
-              formatAmount(mainBalance, currency: targetCurrency),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: TypographyTokens.screenTitleSize,
-                fontWeight: TypographyTokens.screenTitleWeight,
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: AnimatedScale(
+              scale: _fundPulse ? 1.08 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  formatAmount(mainBalance, currency: targetCurrency),
+                  style: TextStyle(
+                    color: mainBalance < 0 ? AppColors.overspent : onHero,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
               ),
             ),
           ),
@@ -835,75 +853,70 @@ class _AllocationDetailScreenState
                     : formatAmount(entry.value, currency: entry.key),
                 style: TextStyle(
                   color: entry.value < 0
-                      ? const Color(0xFFFFB74D) // amber warning for debt
-                      : Colors.white.withValues(alpha: 0.7),
-                  fontSize: 13,
+                      ? AppColors.caution
+                      : onHero.withValues(alpha: 0.6),
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-          const SizedBox(height: 4),
-          Text(
-            S.of(context).allocAvailable,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 13,
-            ),
-          ),
           // Progress bar + target
           if (hasTarget) ...[
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
-                color: progressColor,
-              ),
+            const SizedBox(height: 16),
+            BudgetProgress(
+              progress: mainBalance / _targetAmount,
+              color: envColor,
+              height: 22,
+              showPercent: true,
+              overspent: mainBalance < 0,
+              // Bar shows what's left: marker = share that should remain.
+              todayFraction: elapsed == null ? null : 1 - elapsed,
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  S.of(context).allocPercentOfTarget((progress! * 100).round(), formatAmount(_targetAmount, currency: targetCurrency)),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
+                Flexible(
+                  child: Text(
+                    S.of(context).objOfTarget(
+                        formatAmount(_targetAmount, currency: targetCurrency)),
+                    style: TextStyle(
+                      color: onHero.withValues(alpha: 0.6),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-                Text(
-                  S.of(context).allocAmountLeft(formatAmount((_targetAmount - mainBalance).clamp(0, double.infinity), currency: targetCurrency)),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
+                Flexible(
+                  child: Text(
+                    S.of(context).allocAmountLeft(formatAmount(
+                        (_targetAmount - mainBalance).clamp(0, double.infinity),
+                        currency: targetCurrency)),
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: onHero.withValues(alpha: 0.6),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
             ),
           ],
           const SizedBox(height: 16),
-          // Fund button
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => _showFundSheet(targetCurrency),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: Text(S.of(context).allocFund),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
+          // Fund button — tonal on the pastel card
+          FilledButton.icon(
+            onPressed: () => _showFundSheet(targetCurrency),
+            icon: const Icon(Icons.add_rounded, size: 20),
+            label: Text(S.of(context).allocFund),
+            style: FilledButton.styleFrom(
+              backgroundColor:
+                  AppColors.pastel(context, envColor, light: 0.55, dark: 0.5),
+              foregroundColor: onHero,
+              minimumSize: const Size.fromHeight(48),
             ),
           ),
         ],
       ),
     );
   }
-
-
 
   Future<void> _showFundSheet(String defaultCurrency) async {
     double amount = 0;

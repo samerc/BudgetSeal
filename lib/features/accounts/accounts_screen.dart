@@ -341,19 +341,23 @@ class _TotalBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (totals.isEmpty) return const SizedBox.shrink();
 
+    // Cashew transactionsAmountBox: pastel accent card, dark text.
+    final onCard = AppColors.tp(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF2A3F6A)],
-        ),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
+        color: AppColors.pastel(context, AppColors.accent,
+            light: 0.82, dark: 0.75),
+        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(S.of(context).acctTotalBalance,
-              style: TextStyle(color: Colors.white70, fontSize: 13)),
+              style: TextStyle(
+                  color: onCard.withValues(alpha: 0.6),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           ...totals.entries.map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
@@ -362,20 +366,20 @@ class _TotalBalanceCard extends StatelessWidget {
                   children: [
                     Text(
                       e.key,
-                      style: const TextStyle(
-                        color: Colors.white60,
+                      style: TextStyle(
+                        color: onCard.withValues(alpha: 0.55),
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        formatAmount(e.value),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
+                        formatAmount(e.value, currency: e.key),
+                        style: TextStyle(
+                          color: e.value < 0 ? AppColors.overspent : onCard,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

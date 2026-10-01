@@ -1521,7 +1521,7 @@ class SFr extends S {
   String get allocSavedPrefix => 'Épargné :';
 
   @override
-  String allocPercentSaved(double pct) {
+  String allocPercentSaved(int pct) {
     return '$pct% épargné';
   }
 

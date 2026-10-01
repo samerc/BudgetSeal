@@ -1504,7 +1504,7 @@ class SEn extends S {
   String get allocSavedPrefix => 'Saved:';
 
   @override
-  String allocPercentSaved(double pct) {
+  String allocPercentSaved(int pct) {
     return '$pct% saved';
   }
 

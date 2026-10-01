@@ -7,6 +7,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/budget_progress.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
@@ -461,21 +462,12 @@ class _FundingBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
+      // Cashew-style pastel card (red-tinted when over-allocating).
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: exceeds
-              ? [AppColors.overspent, const Color(0xFFD32F2F)]
-              : [AppColors.primary, const Color(0xFF2A3F6A)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: (exceeds ? AppColors.overspent : AppColors.primary)
-                .withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.pastel(
+            context, exceeds ? AppColors.overspent : AppColors.accent,
+            light: 0.82, dark: 0.75),
+        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
       ),
       child: Column(
         children: [
@@ -486,13 +478,13 @@ class _FundingBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(S.of(context).fundAvailableToDistribute,
-                      style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      style: TextStyle(color: AppColors.tp(context).withValues(alpha: 0.65), fontSize: 13.5, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
                   CurrencyDisplay(
                     amount: available,
                     currency: baseCurrency,
-                    amountStyle: const TextStyle(
-                      color: Colors.white,
+                    amountStyle: TextStyle(
+                      color: AppColors.tp(context),
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
                     ),
@@ -506,8 +498,8 @@ class _FundingBanner extends StatelessWidget {
                       .where((e) => e.key != baseCurrency)
                       .map((e) => Text(
                             formatAmount(e.value, currency: e.key),
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 12),
+                            style: TextStyle(
+                                color: AppColors.tp(context).withValues(alpha: 0.65), fontSize: 12),
                           ))
                       .toList(),
                 ),
@@ -528,8 +520,8 @@ class _FundingBanner extends StatelessWidget {
                         formatAmount(baseDistributed, currency: baseCurrency),
                         formatAmount(available, currency: baseCurrency),
                       ),
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: AppColors.tp(context).withValues(alpha: 0.65),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -540,8 +532,8 @@ class _FundingBanner extends StatelessWidget {
                   if (available > 0)
                     Text(
                       '${(progress * 100).toStringAsFixed(0)}%',
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: AppColors.tp(context).withValues(alpha: 0.65),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -549,16 +541,11 @@ class _FundingBanner extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  color: exceeds
-                      ? const Color(0xFFFFCDD2)
-                      : const Color(0xFFA5D6A7),
-                ),
+              BudgetProgress(
+                progress: progress,
+                color: AppColors.accent,
+                height: 12,
+                overspent: exceeds,
               ),
               // Show per-currency distribution for non-base currencies
               for (final entry in otherDistributed)
@@ -570,8 +557,8 @@ class _FundingBanner extends StatelessWidget {
                       Text(
                         '${entry.key}: ${formatAmount(entry.value, currency: entry.key)}'
                         ' of ${formatAmount(unallocated[entry.key] ?? 0, currency: entry.key)}',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: AppColors.tp(context).withValues(alpha: 0.65),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -579,8 +566,8 @@ class _FundingBanner extends StatelessWidget {
                       if ((unallocated[entry.key] ?? 0) > 0)
                         Text(
                           '${((entry.value / (unallocated[entry.key] ?? 1)) * 100).clamp(0, 999).toStringAsFixed(0)}%',
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: AppColors.tp(context).withValues(alpha: 0.65),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -596,12 +583,12 @@ class _FundingBanner extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFFFFCDD2), size: 16),
+                    color: AppColors.overspent, size: 16),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     S.of(context).fundExceedsWarning,
-                    style: const TextStyle(color: Color(0xFFFFCDD2), fontSize: 12),
+                    style: const TextStyle(color: AppColors.overspent, fontSize: 12),
                   ),
                 ),
               ],

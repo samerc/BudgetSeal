@@ -2084,7 +2084,7 @@
     "description": "Progress text",
     "placeholders": {
       "pct": {
-        "type": "double"
+        "type": "int"
       }
     }
   },

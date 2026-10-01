@@ -26,29 +26,10 @@ class AboutScreen extends ConsumerWidget {
             const Spacer(flex: 2),
 
             // ── App icon ──
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, Color(0xFF2A3F6A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.account_balance_wallet_rounded,
-                color: Colors.white,
-                size: 44,
-              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset('assets/icon/app_icon.png',
+                  width: 88, height: 88),
             ),
             const SizedBox(height: 20),
 
