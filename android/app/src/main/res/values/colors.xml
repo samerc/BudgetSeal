@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#2563EB</color>
-    <color name="splash_background">#6366F1</color>
+    <!-- App background (lighten(#2563EB, .91)) so launch → app is seamless -->
+    <color name="splash_background">#EBF1FD</color>
 </resources>
