@@ -1,4 +1,9 @@
 {
+  "syncErrWrongPassword": "Wrong sync password. Use the same password as on your other device.",
+  "syncErrCorrupt": "The sync file couldn't be read. Sync again from your other device.",
+  "syncErrSignedOut": "You were signed out of Google Drive. Connect again to keep syncing.",
+  "syncErrGeneric": "Sync didn't finish. Please try again in a moment.",
+  "syncErrBackupFailed": "Couldn't back up your current data, so nothing was replaced.",
   "wcBrowsersConnected": "{n, plural, =0{No browser connected} =1{1 browser connected} other{{n} browsers connected}}",
   "@wcBrowsersConnected": {"placeholders": {"n": {"type": "int"}}},
   "wcBrowsersHint": "A browser counts while its page is open.",

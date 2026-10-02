@@ -9,6 +9,26 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get syncErrWrongPassword =>
+      'Wrong sync password. Use the same password as on your other device.';
+
+  @override
+  String get syncErrCorrupt =>
+      'The sync file couldn\'t be read. Sync again from your other device.';
+
+  @override
+  String get syncErrSignedOut =>
+      'You were signed out of Google Drive. Connect again to keep syncing.';
+
+  @override
+  String get syncErrGeneric =>
+      'Sync didn\'t finish. Please try again in a moment.';
+
+  @override
+  String get syncErrBackupFailed =>
+      'Couldn\'t back up your current data, so nothing was replaced.';
+
+  @override
   String wcBrowsersConnected(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,

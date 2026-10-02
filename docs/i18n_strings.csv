@@ -2324,3 +2324,11 @@ wc_browsers_connected,,"{n, plural, =0{No browser connected} =1{1 browser connec
 wc_browsers_hint,,A browser counts while its page is open.,يُحتسب المتصفح ما دامت صفحته مفتوحة.,Un navigateur compte tant que sa page est ouverte.
 wc_sign_out_all,,Sign out all,تسجيل خروج الكل,Tout déconnecter
 wc_signed_out_all,,All browsers signed out — they need the PIN again,تم تسجيل خروج كل المتصفحات — سيُطلب الرمز من جديد,Tous les navigateurs sont déconnectés — le code PIN sera redemandé
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+sync_err_wrong_password,,Wrong sync password. Use the same password as on your other device.,كلمة مرور المزامنة غير صحيحة. استخدم نفس كلمة المرور الموجودة على جهازك الآخر.,Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.
+sync_err_corrupt,,The sync file couldn't be read. Sync again from your other device.,تعذّرت قراءة ملف المزامنة. زامن مجددًا من جهازك الآخر.,Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.
+sync_err_signed_out,,You were signed out of Google Drive. Connect again to keep syncing.,تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.,Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.
+sync_err_generic,,Sync didn't finish. Please try again in a moment.,لم تكتمل المزامنة. حاول مرة أخرى بعد قليل.,La synchronisation n'a pas abouti. Réessayez dans un instant.
+sync_err_backup_failed,,"Couldn't back up your current data, so nothing was replaced.",تعذّر نسخ بياناتك الحالية احتياطيًا، لذلك لم يُستبدل أي شيء.,Impossible de sauvegarder vos données actuelles : rien n'a été remplacé.

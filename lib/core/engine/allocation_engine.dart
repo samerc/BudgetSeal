@@ -247,8 +247,10 @@ class AllocationEngine {
     required String deviceId,
     String note = '',
     DateTime? date,
+    String? id,
   }) async {
-    final txId = _uuid.v4();
+    if (id != null && await _txExists(id)) return id;
+    final txId = id ?? _uuid.v4();
     await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
           id: txId,
           householdId: householdId,
@@ -345,6 +347,7 @@ class AllocationEngine {
     String note = '',
     String deviceId = 'local',
     DateTime? date,
+    String? id,
   }) async {
     if (type != 'transfer' && lines.isEmpty) {
       throw ArgumentError('income/expense must have at least one line');
@@ -360,7 +363,12 @@ class AllocationEngine {
     }
     lines = await _toAccountCurrencies(lines, accountId, baseCurrency);
 
-    final txId = _uuid.v4();
+    if (id != null && await _txExists(id)) return id;
+    final txId = id ?? _uuid.v4();
+    // With a fixed id, lines and ledger rows get fixed ids too, so the same
+    // occurrence posted on two devices merges into one.
+    var lineNo = 0;
+    var debitNo = 0;
 
     await _db.transaction(() async {
     // Total in base currency (sum of each line converted via its rate).
@@ -392,7 +400,7 @@ class AllocationEngine {
     for (final line in lines) {
       await _db.into(_db.transactionLines).insert(
             TransactionLinesCompanion.insert(
-              id: _uuid.v4(),
+              id: id != null ? '$id:line${lineNo++}' : _uuid.v4(),
               transactionId: txId,
               categoryId: Value(line.categoryId),
               accountId: Value(line.accountId ?? accountId),
@@ -490,7 +498,7 @@ class AllocationEngine {
 
             final lineAccountId = line.accountId ?? accountId;
             await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-              id: _uuid.v4(),
+              id: id != null ? '$id:debit${debitNo++}' : _uuid.v4(),
               allocationId: allocationId,
               sourceTransactionId: Value(txId),
               sourceAccountId: Value(lineAccountId),
@@ -510,6 +518,14 @@ class AllocationEngine {
 
     return txId;
   }
+
+  /// A fixed [id] (recurring occurrences) that already exists — posted
+  /// here before, or by another device and synced — is not posted again.
+  /// Deleted rows count: a deleted occurrence stays deleted.
+  Future<bool> _txExists(String id) async =>
+      await (_db.select(_db.transactions)..where((t) => t.id.equals(id)))
+          .getSingleOrNull() !=
+      null;
 
   /// Soft-delete a transaction and reverse its allocation ledger entries.
   ///

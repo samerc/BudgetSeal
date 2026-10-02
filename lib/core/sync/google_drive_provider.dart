@@ -323,7 +323,7 @@ class GoogleDriveProvider implements CloudProvider {
   /// A new access token without UI (Google tokens last ~1 hour).
   Future<String> _refreshToken() async {
     final account = _account;
-    if (account == null) throw StateError('Not connected to Google Drive');
+    if (account == null) throw const CloudAuthException();
     final auth = await account.authorizationClient
             .authorizationForScopes([drive.DriveApi.driveFileScope]) ??
         await account.authorizationClient
@@ -334,7 +334,7 @@ class GoogleDriveProvider implements CloudProvider {
   Future<drive.DriveApi> _getDriveApi() async {
     if (_driveApi != null) return _driveApi!;
     // If no account cached, we're not connected — don't prompt.
-    if (_account == null) throw StateError('Not connected to Google Drive');
+    if (_account == null) throw const CloudAuthException();
 
     final authClient = _account!.authorizationClient;
     final auth = await authClient.authorizeScopes(

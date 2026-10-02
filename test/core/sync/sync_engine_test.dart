@@ -1,6 +1,12 @@
 import 'dart:convert';
 
 import 'package:budgetseal/core/database/app_database.dart';
+import 'dart:io';
+
+import 'package:budgetseal/core/engine/recurring_engine.dart';
+import 'package:budgetseal/core/providers/sync_provider.dart';
+import 'package:budgetseal/core/sync/cloud_provider.dart';
+import 'package:budgetseal/core/sync/sync_encryption.dart';
 import 'package:budgetseal/core/sync/sync_engine.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -136,6 +142,74 @@ void main() {
     expect((await b.select(b.accounts).getSingle()).lastModified, when);
   });
 
+  group('recurring bill due on both devices', () {
+    Future<void> seed(AppDatabase db) async {
+      await addAccount(db);
+      await db.into(db.allocations).insert(AllocationsCompanion.insert(
+          id: 'env', householdId: 'hh', name: 'Rent', categoryId: 'cat',
+          deviceId: 'x', lastModified: Value(DateTime(2026, 1, 1))));
+      await db.into(db.categories).insert(CategoriesCompanion.insert(
+          id: 'cat', householdId: 'hh', name: 'Rent',
+          allocationId: const Value('env'),
+          lastModified: Value(DateTime(2026, 1, 1))));
+      final due = DateTime.now().subtract(const Duration(days: 1));
+      await db.into(db.recurringTransactions).insert(
+          RecurringTransactionsCompanion.insert(
+              id: 'rec', householdId: 'hh', type: 'expense', amount: 500,
+              currency: 'USD', accountId: 'acc',
+              categoryId: const Value('cat'), frequency: 'monthly',
+              nextDueDate: DateTime(due.year, due.month, due.day),
+              lastModified: Value(DateTime(2026, 1, 1))));
+    }
+
+    Future<void> expectOnePosting(AppDatabase db) async {
+      final txs = await (db.select(db.transactions)
+            ..where((t) => t.createdBy.equals('user')))
+          .get();
+      expect(txs, hasLength(1));
+      expect(await db.select(db.transactionLines).get(), hasLength(1));
+      expect(await db.select(db.allocationLedger).get(), hasLength(1));
+    }
+
+    test('posted by both before syncing → one transaction', () async {
+      await seed(a);
+      await seed(b);
+      expect(await RecurringEngine(a).processRecurring(), 1);
+      expect(await RecurringEngine(b).processRecurring(), 1);
+
+      await sync(a, b);
+      await sync(b, a);
+      await expectOnePosting(a);
+      await expectOnePosting(b);
+    });
+
+    test('paid early on one, auto-posted on the other', () async {
+      await seed(a);
+      await seed(b);
+      await RecurringEngine(a).postNow('rec');
+      await RecurringEngine(b).processRecurring();
+
+      await sync(b, a);
+      await sync(a, b);
+      await expectOnePosting(a);
+      await expectOnePosting(b);
+    });
+
+    test('already synced → not posted again', () async {
+      await seed(a);
+      await seed(b);
+      await RecurringEngine(a).processRecurring();
+      // B gets the transaction but not (yet) the advanced due date.
+      final file = jsonDecode(await SyncEngine(a).exportToJson())
+          as Map<String, dynamic>;
+      file.remove('recurringTransactions');
+      await SyncEngine(b).mergeFromJson(jsonEncode(file));
+
+      await RecurringEngine(b).processRecurring();
+      await expectOnePosting(b);
+    });
+  });
+
   test('a file without time zones (older app) still merges', () async {
     await addAccount(a, name: 'Old', modified: DateTime(2026, 1, 1));
     final file = jsonDecode(await SyncEngine(b).exportToJson())
@@ -152,5 +226,30 @@ void main() {
     final acc = await a.select(a.accounts).getSingle();
     expect(acc.name, 'Renamed');
     expect(acc.lastModified, DateTime(2026, 2, 1, 10));
+  });
+
+  group('sync errors', () {
+    test('a wrong password says so, not "corrupted"', () async {
+      await SyncEncryption.setPassword('right');
+      final file = await SyncEncryption.encrypt('{}');
+      await expectLater(SyncEncryption.decrypt(file, password: 'wrong'),
+          throwsA(isA<SyncPasswordException>()));
+      await SyncEncryption.clearPassword();
+      await expectLater(SyncEngine(a).mergeFromJson(file),
+          throwsA(isA<SyncPasswordException>()
+              .having((e) => e.missing, 'missing', isTrue)));
+    });
+
+    test('users read a message, never the raw exception', () {
+      expect(syncErrorText(const SyncPasswordException(missing: false)),
+          contains('Wrong sync password'));
+      expect(syncErrorText(const SocketException('Failed host lookup')),
+          contains('Network'));
+      expect(syncErrorText(const CloudAuthException()),
+          contains('signed out'));
+      final raw = syncErrorText(
+          StateError('SqliteException(1): no such column: fetched_at'));
+      expect(raw, isNot(contains('Sqlite')));
+    });
   });
 }

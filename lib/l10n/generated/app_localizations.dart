@@ -99,6 +99,36 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @syncErrWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong sync password. Use the same password as on your other device.'**
+  String get syncErrWrongPassword;
+
+  /// No description provided for @syncErrCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The sync file couldn\'t be read. Sync again from your other device.'**
+  String get syncErrCorrupt;
+
+  /// No description provided for @syncErrSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'You were signed out of Google Drive. Connect again to keep syncing.'**
+  String get syncErrSignedOut;
+
+  /// No description provided for @syncErrGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync didn\'t finish. Please try again in a moment.'**
+  String get syncErrGeneric;
+
+  /// No description provided for @syncErrBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t back up your current data, so nothing was replaced.'**
+  String get syncErrBackupFailed;
+
   /// No description provided for @wcBrowsersConnected.
   ///
   /// In en, this message translates to:

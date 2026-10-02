@@ -106,7 +106,8 @@ class RecurringEngine {
           break;
         }
         try {
-          await _generateTransaction(rec, currentDue, baseCurrency);
+          await _generateTransaction(rec, currentDue, baseCurrency,
+              occurrence: currentDue);
         } catch (e) {
           // Leave this occurrence due (it shows as overdue and retries next
           // launch) and carry on with the other bills.
@@ -144,8 +145,10 @@ class RecurringEngine {
     final rec = await (_db.select(_db.recurringTransactions)
           ..where((r) => r.id.equals(recurringId)))
         .getSingle();
-    final now = DateTime.now();
-    await _generateTransaction(rec, now);
+    // Keyed on the occurrence it pays, so the other device can't post
+    // that occurrence again before it has synced the new due date.
+    await _generateTransaction(rec, DateTime.now(), null,
+        occurrence: rec.nextDueDate);
     await _advance(rec);
   }
 
@@ -173,9 +176,17 @@ class RecurringEngine {
     ));
   }
 
-  Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate, String? baseCurrencyOverride]) async {
+  /// Fixed id for one occurrence of [rec]: two devices that post the same
+  /// bill before syncing write the same rows instead of a duplicate.
+  static String occurrenceId(String recurringId, DateTime due) =>
+      'rec:$recurringId:${due.year}-${due.month.toString().padLeft(2, '0')}'
+      '-${due.day.toString().padLeft(2, '0')}';
+
+  Future<void> _generateTransaction(RecurringTransaction rec, DateTime forDate,
+      String? baseCurrencyOverride, {required DateTime occurrence}) async {
     final householdId = rec.householdId;
-    final effectiveDate = forDate ?? rec.nextDueDate;
+    final id = occurrenceId(rec.id, occurrence);
+    final effectiveDate = forDate;
     final amount = recurringAmountOn(rec, effectiveDate);
 
     // Use pre-fetched base currency, or fall back to household query.
@@ -214,6 +225,7 @@ class RecurringEngine {
         deviceId: 'local',
         note: rec.title.isNotEmpty ? rec.title : rec.note,
         date: effectiveDate,
+        id: id,
       );
     } else {
       final rate = await latestCachedRate(_db, rec.currency, baseCurrency);
@@ -234,6 +246,7 @@ class RecurringEngine {
         baseCurrency: baseCurrency,
         note: rec.title.isNotEmpty ? rec.title : rec.note,
         date: effectiveDate,
+        id: id,
       );
     }
   }

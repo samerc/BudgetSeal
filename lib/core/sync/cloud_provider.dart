@@ -26,3 +26,12 @@ abstract class CloudProvider {
   /// Check if a sync file exists on this provider.
   Future<bool> syncFileExists();
 }
+
+/// The provider has no signed-in account (or lost it); the user has to
+/// connect again.
+class CloudAuthException implements Exception {
+  const CloudAuthException();
+
+  @override
+  String toString() => 'CloudAuthException: not connected';
+}

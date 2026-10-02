@@ -9,6 +9,25 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get syncErrWrongPassword =>
+      'كلمة مرور المزامنة غير صحيحة. استخدم نفس كلمة المرور الموجودة على جهازك الآخر.';
+
+  @override
+  String get syncErrCorrupt =>
+      'تعذّرت قراءة ملف المزامنة. زامن مجددًا من جهازك الآخر.';
+
+  @override
+  String get syncErrSignedOut =>
+      'تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.';
+
+  @override
+  String get syncErrGeneric => 'لم تكتمل المزامنة. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get syncErrBackupFailed =>
+      'تعذّر نسخ بياناتك الحالية احتياطيًا، لذلك لم يُستبدل أي شيء.';
+
+  @override
   String wcBrowsersConnected(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,

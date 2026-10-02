@@ -217,6 +217,8 @@ Recurring transactions can be flagged as subscriptions (`isSubscription` column)
 Single-file sync approach (`PocketPlan_Sync.json`):
 - Exports all 12 tables as JSON
 - Merge by `lastModified` timestamp (newer row wins). `_mergeTable` is told each table's own timestamp column (`column:` — `last_modified`, ledger `created_at`, fx `fetched_at`); transaction lines have none and are insert-only (edits always make a new transaction). Dates are written in UTC (`…Z`); `_parseDate` reads them back as local and still accepts older zone-less files. Two-device tests: `test/core/sync/sync_engine_test.dart`.
+- **Recurring occurrences have fixed ids**: `RecurringEngine.occurrenceId()` = `rec:<recurringId>:<due yyyy-MM-dd>` (Post now keys on the occurrence it pays, not today). `recordTransaction`/`recordTransfer(id:)` then use `<id>:line<n>` / `<id>:debit<n>` and return early if the id already exists (deleted rows included), so a bill due on two devices before they sync posts once.
+- `SyncNotifier`: `sync()`, `restoreFromProvider()` and `initialUpload()` run one at a time (`_exclusive` — a second call waits for the running one). Restore runs `AutoBackupService.backupNow()` first and stops if that fails. `lastError` is always `syncErrorText(e)` (localized: wrong/missing password via `SyncPasswordException`, corrupt file, signed out via `CloudAuthException`/401/403, network, generic) — never `e.toString()`; `copyWith(clearError: true)` on success.
 - Supports Google Drive (OAuth) and system file picker (Dropbox/OneDrive/local)
 - Auto-syncs on app resume and pause via `WidgetsBindingObserver`
 - Restore from sync file during onboarding

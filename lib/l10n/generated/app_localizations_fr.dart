@@ -9,6 +9,26 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get syncErrWrongPassword =>
+      'Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.';
+
+  @override
+  String get syncErrCorrupt =>
+      'Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.';
+
+  @override
+  String get syncErrSignedOut =>
+      'Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.';
+
+  @override
+  String get syncErrGeneric =>
+      'La synchronisation n\'a pas abouti. Réessayez dans un instant.';
+
+  @override
+  String get syncErrBackupFailed =>
+      'Impossible de sauvegarder vos données actuelles : rien n\'a été remplacé.';
+
+  @override
   String wcBrowsersConnected(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,

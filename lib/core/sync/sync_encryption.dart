@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../l10n/s_lookup.dart';
 import 'package:pointycastle/pointycastle.dart' as pc;
 
 const _secureStorage = FlutterSecureStorage();
@@ -77,8 +76,7 @@ class SyncEncryption {
 
     password ??= await getPassword();
     if (password == null || password.isEmpty) {
-      // Shown to the user as the sync error.
-      throw StateError(currentS().syncErrNeedsPassword);
+      throw const SyncPasswordException(missing: true);
     }
 
     final parts = data.split(':');
@@ -96,7 +94,7 @@ class SyncEncryption {
     try {
       return encrypter.decrypt(ciphertext, iv: iv);
     } catch (e) {
-      throw StateError('Wrong sync password. Could not decrypt the sync file.');
+      throw const SyncPasswordException(missing: false);
     }
   }
 
@@ -120,4 +118,16 @@ class SyncEncryption {
     final keyBytes = pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
     return Key(keyBytes);
   }
+}
+
+/// The sync file is encrypted and there is no password ([missing]) or the
+/// password doesn't open it. `syncErrorText()` turns it into a message.
+class SyncPasswordException implements Exception {
+  final bool missing;
+  const SyncPasswordException({required this.missing});
+
+  @override
+  String toString() => missing
+      ? 'SyncPasswordException: no sync password'
+      : 'SyncPasswordException: wrong sync password';
 }

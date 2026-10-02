@@ -1,6 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +15,7 @@ import '../../shared/utils/receipt_helper.dart';
 import '../sync/cloud_provider.dart';
 import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
+import '../sync/sync_encryption.dart';
 import '../sync/sync_engine.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
@@ -43,18 +49,32 @@ class SyncState {
     String? lastError,
     int? lastChanges,
     bool clearProvider = false,
+    bool clearError = false,
   }) =>
       SyncState(
         activeProvider: clearProvider ? null : (activeProvider ?? this.activeProvider),
         status: status ?? this.status,
         lastSyncTime: lastSyncTime ?? this.lastSyncTime,
-        lastError: lastError ?? this.lastError,
+        lastError: clearError ? null : (lastError ?? this.lastError),
         lastChanges: lastChanges ?? this.lastChanges,
       );
 }
 
 class SyncNotifier extends Notifier<SyncState> {
   late final SyncEngine _engine;
+
+  /// The sync, restore or upload in progress. Only one runs at a time:
+  /// Sync now, resume and pause can all start one, and two merges +
+  /// uploads overlapping would upload a file missing the other's changes.
+  Future<void>? _running;
+
+  Future<void> _exclusive(Future<void> Function() job) {
+    final running = _running;
+    if (running != null) return running;
+    final f = job().whenComplete(() => _running = null);
+    _running = f;
+    return f;
+  }
 
   // Available providers
   final googleDrive = GoogleDriveProvider();
@@ -149,7 +169,10 @@ class SyncNotifier extends Notifier<SyncState> {
   }
 
   /// Full sync: download remote → merge → upload local → sync receipts.
-  Future<void> sync() async {
+  /// A call while one is running waits for that one instead.
+  Future<void> sync() => _exclusive(_sync);
+
+  Future<void> _sync() async {
     final provider = state.activeProvider;
     if (provider == null) return;
     // The open DB is about to be replaced by a restored backup.
@@ -187,12 +210,12 @@ class SyncNotifier extends Notifier<SyncState> {
         status: SyncStatus.success,
         lastSyncTime: now,
         lastChanges: totalChanges,
-        lastError: null,
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(
         status: SyncStatus.error,
-        lastError: e.toString(),
+        lastError: syncErrorText(e),
       );
     }
   }
@@ -237,7 +260,10 @@ class SyncNotifier extends Notifier<SyncState> {
   }
 
   /// Full restore from the sync file (replaces all local data).
-  Future<void> restoreFromProvider(CloudProvider provider) async {
+  Future<void> restoreFromProvider(CloudProvider provider) =>
+      _exclusive(() => _restore(provider));
+
+  Future<void> _restore(CloudProvider provider) async {
     state = state.copyWith(status: SyncStatus.syncing);
     try {
       final json = await provider.download();
@@ -249,6 +275,18 @@ class SyncNotifier extends Notifier<SyncState> {
         return;
       }
 
+      // Restoring wipes every table first: keep a copy of what's here
+      // (Backup & Restore lists it). No copy, no restore.
+      try {
+        await AutoBackupService.backupNow();
+      } catch (e) {
+        debugPrint('[Sync] Backup before restore failed: $e');
+        state = state.copyWith(
+          status: SyncStatus.error,
+          lastError: currentS().syncErrBackupFailed,
+        );
+        return;
+      }
       await _engine.restoreFromJson(json);
 
       // The restored household has its own UUID. Point the app at it —
@@ -272,17 +310,20 @@ class SyncNotifier extends Notifier<SyncState> {
         activeProvider: provider,
         status: SyncStatus.success,
         lastSyncTime: DateTime.now(),
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(
         status: SyncStatus.error,
-        lastError: e.toString(),
+        lastError: syncErrorText(e),
       );
     }
   }
 
   /// Export and upload without downloading first (initial sync).
-  Future<void> initialUpload() async {
+  Future<void> initialUpload() => _exclusive(_initialUpload);
+
+  Future<void> _initialUpload() async {
     final provider = state.activeProvider;
     if (provider == null) return;
 
@@ -298,14 +339,33 @@ class SyncNotifier extends Notifier<SyncState> {
       state = state.copyWith(
         status: SyncStatus.success,
         lastSyncTime: now,
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(
         status: SyncStatus.error,
-        lastError: e.toString(),
+        lastError: syncErrorText(e),
       );
     }
   }
+}
+
+/// What the user reads when a sync fails: never the raw exception (it can
+/// hold file paths, SQL or tokens). The details go to the debug log.
+String syncErrorText(Object e) {
+  debugPrint('[Sync] failed: $e');
+  final s = currentS();
+  return switch (e) {
+    SyncPasswordException(missing: true) => s.syncErrNeedsPassword,
+    SyncPasswordException() => s.syncErrWrongPassword,
+    FormatException() => s.syncErrCorrupt,
+    CloudAuthException() || GoogleSignInException() => s.syncErrSignedOut,
+    drive.DetailedApiRequestError(status: 401 || 403) => s.syncErrSignedOut,
+    SocketException() || HttpException() || TimeoutException() ||
+    http.ClientException() =>
+      s.syncErrNetwork,
+    _ => s.syncErrGeneric,
+  };
 }
 
 final syncProvider =
