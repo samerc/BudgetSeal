@@ -1,33 +1,62 @@
 import 'package:flutter/material.dart';
 
+import 'brand_palette.dart';
+
 abstract final class AppColors {
   // ── Brand (same in all themes) ────────────────────────────
-  static const primary = Color(0xFF1A2B4A);
-  static const primaryLight = Color(0xFF2A3F6A);
+  static const primary = Color(0xFF1C1D24); // "night" brand surface
+  static const primaryLight = Color(0xFF2A2B33);
 
-  /// The active accent color. Defaults to Royal Blue (#2563EB).
-  /// Updated at runtime via [setAccentColor] when the user picks a
-  /// custom color or Material You resolves the system accent.
-  static Color accent = const Color(0xFF2563EB);
-  static const defaultAccent = Color(0xFF2563EB);
-  static Color accentLight = const Color(0xFFDBEAFE);
+  /// The active accent for the current theme mode: the selected pair's deep
+  /// tone in light mode, its bright tone in dark/black (see [AccentPair]).
+  /// Set via [setAccent] from app.dart — all references pick it up on rebuild.
+  static Color accent = brandPalette.first.deep;
+  static Color accentLight = brandPalette.first.lightFill;
+
+  /// Text/icon color on an [accent] fill (white on deep tones, dark ink on
+  /// bright ones). Use instead of `Colors.white` on accent backgrounds.
+  static Color onAccent = Colors.white;
+
+  /// The bright brand tone in every mode — for filled brand surfaces (the
+  /// "Ready to assign" banner, the envelope seal). Text on it: [brandInk].
+  static Color accentBright = brandPalette.first.bright;
+
+  /// The selected palette pair (null when following the system color).
+  static AccentPair? accentPair = brandPalette.first;
+  static Color _system = brandPalette.first.deep;
 
   /// Whether the active theme is dark/black. Set from the MaterialApp
   /// builder in app.dart so context-free colors (e.g. default transaction
   /// colors) can adapt to the theme.
   static bool isDark = false;
 
-  /// Call this from app.dart after resolving the accent color
-  /// (from provider + DynamicColorBuilder). All 340+ references to
-  /// AppColors.accent automatically pick up the new value on rebuild.
-  static void setAccentColor(Color color) {
-    accent = color;
-    // Derive a light tint from the accent
-    accentLight = Color.alphaBlend(
-      color.withValues(alpha: 0.12),
-      const Color(0xFFFFFFFF),
-    );
+  /// Select the accent: a palette [pair], or the Material You [system] color
+  /// when [pair] is null. Call [applyMode] afterwards (app.dart does both).
+  static void setAccent(AccentPair? pair, {Color? system}) {
+    accentPair = pair;
+    if (system != null) _system = system;
+    applyMode(isDark);
   }
+
+  /// Resolve [accent] and friends for light or dark mode.
+  static void applyMode(bool dark) {
+    isDark = dark;
+    final pair = accentPair;
+    if (pair != null) {
+      accent = pair.accentFor(dark);
+      accentLight = pair.fillFor(dark);
+      accentBright = pair.bright;
+    } else {
+      accent = dark ? lightenPastel(_system, 0.3) : _system;
+      accentLight = dark ? darkenPastel(_system, 0.7) : lightenPastel(_system, 0.85);
+      accentBright = lightenPastel(_system, 0.25);
+    }
+    onAccent = inkOn(accent);
+  }
+
+  /// Readable text color on [bg]: [brandInk] on light fills, white on dark.
+  static Color inkOn(Color bg) =>
+      bg.computeLuminance() > 0.35 ? brandInk : Colors.white;
 
   // ── Semantic (same in all themes) ─────────────────────────
   static const healthy = Color(0xFF059669);
@@ -86,57 +115,54 @@ abstract final class AppColors {
       _s(c)?.bg ??
       switch (_mode(c)) {
         _ThemeMode.black => const Color(0xFF000000),
-        _ThemeMode.dark => const Color(0xFF0F1219),
-        _ThemeMode.light => const Color(0xFFF5F6FA),
+        _ThemeMode.dark => const Color(0xFF121318),
+        _ThemeMode.light => const Color(0xFFF7F5F1),
       };
   static Color sf(BuildContext c) =>
       _s(c)?.card ??
       switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF121212),
-        _ThemeMode.dark => const Color(0xFF1A1F2E),
+        _ThemeMode.black => const Color(0xFF111216),
+        _ThemeMode.dark => const Color(0xFF1C1D24),
         _ThemeMode.light => const Color(0xFFFFFFFF),
       };
   static Color sfv(BuildContext c) =>
       _s(c)?.container ??
       switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF1E1E1E),
-        _ThemeMode.dark => const Color(0xFF242B3D),
-        _ThemeMode.light => const Color(0xFFF0F1F5),
+        _ThemeMode.black => const Color(0xFF1A1B20),
+        _ThemeMode.dark => const Color(0xFF25262E),
+        _ThemeMode.light => const Color(0xFFEFECE6),
       };
 
-  /// Background for popups, dialogs and bottom sheets.
-  /// Accent for text (section headers, links): lifted in dark themes so the
-  /// saturated accent stays readable on near-black surfaces.
-  static Color accentText(BuildContext c) =>
-      Theme.of(c).brightness == Brightness.dark
-          ? lightenPastel(accent, 0.3)
-          : accent;
+  /// Accent for text (section headers, links). The accent is already tuned
+  /// per mode (bright in dark, deep in light), so this is just [accent].
+  static Color accentText(BuildContext c) => accent;
 
+  /// Background for popups, dialogs and bottom sheets.
   static Color popup(BuildContext c) => _s(c)?.popup ?? sf(c);
 
   static Color tp(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFFF1F5F9),
-        _ThemeMode.dark => const Color(0xFFF1F5F9),
-        _ThemeMode.light => const Color(0xFF0F172A),
+        _ThemeMode.black => darkTextPrimary,
+        _ThemeMode.dark => darkTextPrimary,
+        _ThemeMode.light => textPrimary,
       };
   static Color ts(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF8899B0),
-        _ThemeMode.dark => const Color(0xFF8899B0),
-        _ThemeMode.light => const Color(0xFF64748B),
+        _ThemeMode.black => darkTextSecondary,
+        _ThemeMode.dark => darkTextSecondary,
+        _ThemeMode.light => textSecondary,
       };
   static Color th(BuildContext c) => switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF4A5568),
-        _ThemeMode.dark => const Color(0xFF5A6B82),
-        _ThemeMode.light => const Color(0xFF94A3B8),
+        _ThemeMode.black => darkTextHint,
+        _ThemeMode.dark => darkTextHint,
+        _ThemeMode.light => textHint,
       };
 
   /// Hairline borders and dividers — deliberately faint (Cashew style).
   static Color bd(BuildContext c) =>
       _s(c)?.border ??
       switch (_mode(c)) {
-        _ThemeMode.black => const Color(0xFF2A2A2A),
-        _ThemeMode.dark => const Color(0xFF2A3348),
-        _ThemeMode.light => const Color(0xFFE2E8F0),
+        _ThemeMode.black => const Color(0xFF26272C),
+        _ThemeMode.dark => const Color(0xFF2E3038),
+        _ThemeMode.light => const Color(0xFFE7E3DB),
       };
 
   /// Card border: only the black theme keeps a faint edge; light and dark
@@ -162,25 +188,25 @@ abstract final class AppColors {
 
   // ── Legacy const values (for const contexts / hint styles) ─
   // These return light-mode values. Use the methods above when possible.
-  static const background = Color(0xFFF5F6FA);
+  static const background = Color(0xFFF7F5F1);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceVariant = Color(0xFFF0F1F5);
-  static const textPrimary = Color(0xFF0F172A);
-  static const textSecondary = Color(0xFF64748B);
-  static const textHint = Color(0xFF94A3B8);
+  static const surfaceVariant = Color(0xFFEFECE6);
+  static const textPrimary = Color(0xFF1C1A16);
+  static const textSecondary = Color(0xFF6B655B);
+  static const textHint = Color(0xFFA29C91);
 
   // Dark const values (used by theme definitions)
-  static const darkBackground = Color(0xFF0F1219);
-  static const darkSurface = Color(0xFF1A1F2E);
-  static const darkSurfaceVariant = Color(0xFF242B3D);
-  static const darkTextPrimary = Color(0xFFF1F5F9);
-  static const darkTextSecondary = Color(0xFF8899B0);
-  static const darkTextHint = Color(0xFF5A6B82);
+  static const darkBackground = Color(0xFF121318);
+  static const darkSurface = Color(0xFF1C1D24);
+  static const darkSurfaceVariant = Color(0xFF25262E);
+  static const darkTextPrimary = Color(0xFFF2EEE6);
+  static const darkTextSecondary = Color(0xFFA8A49B);
+  static const darkTextHint = Color(0xFF6E6A63);
 
   // Black (AMOLED) const values
   static const blackBackground = Color(0xFF000000);
-  static const blackSurface = Color(0xFF121212);
-  static const blackSurfaceVariant = Color(0xFF1E1E1E);
+  static const blackSurface = Color(0xFF111216);
+  static const blackSurfaceVariant = Color(0xFF1A1B20);
 
   /// Parse a hex color string (e.g. '#FF5733' or 'FF5733') to a Color.
   /// Results are cached to avoid re-parsing during rebuilds.

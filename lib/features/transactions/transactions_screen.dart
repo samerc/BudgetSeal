@@ -702,6 +702,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             S.of(context).txTitle,
             style: TextStyle(
               fontSize: TypographyTokens.screenTitleSize,
+              fontFamily: TypographyTokens.displayFamily,
               fontWeight: TypographyTokens.screenTitleWeight,
               color: AppColors.tp(context),
             ),
@@ -783,7 +784,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.onAccent,
                 ),
                 icon: const Icon(Icons.arrow_upward_rounded, size: 20),
                 onPressed: () => _submitQuickAdd(context),
@@ -1741,7 +1742,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           color: AppColors.accent,
           borderRadius: swipeRadius,
         ),
-        child: const Icon(Icons.edit_rounded, color: Colors.white),
+        child: Icon(Icons.edit_rounded, color: AppColors.onAccent),
       ),
       // Swipe left → delete
       secondaryBackground: Container(
@@ -2115,7 +2116,7 @@ class _SelectCheck extends StatelessWidget {
           ),
         ),
         child: selected
-            ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+            ? Icon(Icons.check_rounded, size: 16, color: AppColors.onAccent)
             : null,
       ),
     );

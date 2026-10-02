@@ -448,6 +448,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           lazyFirstRender: false,
                                           style: TextStyle(
                                             fontSize: 18,
+                                            fontFamily: TypographyTokens.displayFamily,
                                             fontWeight: FontWeight.w800,
                                             color: AppColors.tp(context),
                                           ),
@@ -496,6 +497,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                             lazyFirstRender: false,
                                             style: TextStyle(
                                               fontSize: 18,
+                                              fontFamily: TypographyTokens.displayFamily,
                                               fontWeight: FontWeight.w800,
                                               color: AppColors.tp(context),
                                             ),

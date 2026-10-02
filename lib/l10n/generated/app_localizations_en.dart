@@ -9,6 +9,40 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get allocReadyToAssign => 'Ready to assign';
+
+  @override
+  String get allocAssign => 'Assign';
+
+  @override
+  String get accentGold => 'Gold';
+
+  @override
+  String get accentWax => 'Wax red';
+
+  @override
+  String get accentCopper => 'Copper';
+
+  @override
+  String get accentSage => 'Sage';
+
+  @override
+  String get accentTeal => 'Teal';
+
+  @override
+  String get accentSapphire => 'Sapphire';
+
+  @override
+  String get accentPlum => 'Plum';
+
+  @override
+  String get accentRose => 'Rose';
+
+  @override
+  String get accentColorPairHint =>
+      'Each color has a bright tone for dark mode and a deeper one for light mode, so text stays readable in both.';
+
+  @override
   String commonPerDay(String amount) {
     return '$amount/day';
   }
@@ -3565,12 +3599,6 @@ class SEn extends S {
 
   @override
   String get accentColorSystemSub => 'Material You (Android 12+)';
-
-  @override
-  String get accentColorRoyalBlue => 'Royal Blue';
-
-  @override
-  String get accentColorDefault => 'Default';
 
   @override
   String get accentColorSystemLabel => 'System (Material You)';

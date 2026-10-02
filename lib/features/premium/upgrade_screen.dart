@@ -63,6 +63,7 @@ class UpgradeScreen extends ConsumerWidget {
                 l.upgradeTitle,
                 style: TextStyle(
                   fontSize: TypographyTokens.screenTitleSize,
+                  fontFamily: TypographyTokens.displayFamily,
                   fontWeight: TypographyTokens.screenTitleWeight,
                   color: AppColors.tp(context),
                 ),
@@ -134,7 +135,7 @@ class UpgradeScreen extends ConsumerWidget {
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),

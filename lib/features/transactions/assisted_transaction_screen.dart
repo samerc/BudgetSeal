@@ -1554,6 +1554,7 @@ class _AssistedTransactionScreenState
                           '$_selectedCurrency ${_fmtCalcForDisplay(_activeLine.calcDisplay)}',
                           style: TextStyle(
                             fontSize: 30,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: FontWeight.w700,
                             color: typeColor,
                           ),

@@ -4,71 +4,79 @@ import '../../core/providers/font_provider.dart';
 import 'app_colors.dart';
 import 'design_tokens.dart';
 
-/// Build the light theme with the given font name and optional accent color.
-ThemeData buildLightTheme(String fontName, [Color? accentColor]) =>
-    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.light);
+/// Build the light theme. [accentColor] is the mode's accent (a pair's deep
+/// tone); [accentFill] its soft fill (nav indicator, tonal buttons).
+ThemeData buildLightTheme(String fontName,
+        [Color? accentColor, Color? accentFill]) =>
+    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.light,
+        accentFill);
 
-/// Build the dark theme with the given font name and optional accent color.
-ThemeData buildDarkTheme(String fontName, [Color? accentColor]) =>
-    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.dark);
+/// Build the dark theme ([accentColor]: a pair's bright tone).
+ThemeData buildDarkTheme(String fontName,
+        [Color? accentColor, Color? accentFill]) =>
+    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.dark,
+        accentFill);
 
 /// Build the black (AMOLED) theme — dark with a pure black background.
-ThemeData buildBlackTheme(String fontName, [Color? accentColor]) =>
-    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.black);
+ThemeData buildBlackTheme(String fontName,
+        [Color? accentColor, Color? accentFill]) =>
+    _buildTheme(fontName, accentColor ?? AppColors.accent, _Variant.black,
+        accentFill);
 
 enum _Variant { light, dark, black }
 
-/// Single theme builder. Surfaces are derived from the accent using Cashew's
-/// pastel model: every surface is the accent blended with white (light) or
-/// black (dark), so the whole UI carries a subtle tint of the accent.
-ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
+/// Single theme builder. BudgetSeal surfaces are warm neutrals (paper in
+/// light, night in dark) — the accent lives in fills, text and the brand
+/// banner, not in a tint over every surface.
+ThemeData _buildTheme(String fontName, Color accent, _Variant v,
+    [Color? accentFill]) {
   final isLight = v == _Variant.light;
   final brightness = isLight ? Brightness.light : Brightness.dark;
   final textTheme = buildTextTheme(fontName, brightness);
   TextStyle fs(double? sz, FontWeight? fw, Color? c) =>
       fontStyle(fontName, fontSize: sz, fontWeight: fw, color: c);
 
-  // Seed scheme first — its secondaryContainer drives several surfaces.
+  // Seed scheme for the secondary/tertiary roles Material widgets use.
   final seed = ColorScheme.fromSeed(seedColor: accent, brightness: brightness);
-  final secCont = seed.secondaryContainer;
 
   final light = AppColors.lightenPastel;
   final dark = AppColors.darkenPastel;
 
   final surfaces = switch (v) {
-    _Variant.light => SurfaceColors(
-        bg: light(accent, 0.91),
-        card: light(accent, 0.95),
-        container: light(secCont, 0.3),
-        popup: light(secCont, 0.6),
-        nav: light(secCont, 0.4),
-        border: const Color(0x0F000000),
+    _Variant.light => const SurfaceColors(
+        bg: AppColors.background,
+        card: AppColors.surface,
+        container: AppColors.surfaceVariant,
+        popup: Color(0xFFFBFAF7),
+        nav: AppColors.surface,
+        border: Color(0x0F000000),
         cardBorder: Colors.transparent,
-        cardShadow: const [
-          BoxShadow(color: Color(0x1E5A5A5A), blurRadius: 20, spreadRadius: 8),
+        cardShadow: [
+          BoxShadow(color: Color(0x143C2D0A), blurRadius: 18, spreadRadius: 2),
         ],
       ),
-    _Variant.dark => SurfaceColors(
-        bg: dark(accent, 0.92),
-        card: dark(accent, 0.8),
-        container: dark(secCont, 0.6),
-        popup: dark(secCont, 0.3),
-        nav: dark(secCont, 0.45),
-        border: const Color(0x13FFFFFF),
+    _Variant.dark => const SurfaceColors(
+        bg: AppColors.darkBackground,
+        card: AppColors.darkSurface,
+        container: AppColors.darkSurfaceVariant,
+        popup: Color(0xFF22232B),
+        nav: Color(0xFF18191F),
+        border: Color(0x13FFFFFF),
         cardBorder: Colors.transparent,
-        cardShadow: const [],
+        cardShadow: [],
       ),
     _Variant.black => SurfaceColors(
-        bg: const Color(0xFF000000),
-        card: dark(accent, 0.88),
-        container: dark(secCont, 0.75),
-        popup: dark(secCont, 0.55),
-        nav: dark(accent, 0.92),
+        bg: AppColors.blackBackground,
+        card: AppColors.blackSurface,
+        container: AppColors.blackSurfaceVariant,
+        popup: const Color(0xFF17181D),
+        nav: const Color(0xFF0A0A0C),
         border: const Color(0x13FFFFFF),
         cardBorder: Colors.white.withValues(alpha: 0.08),
         cardShadow: const [],
       ),
   };
+  final onAccent = AppColors.inkOn(accent);
 
   final textPrimary =
       isLight ? AppColors.textPrimary : AppColors.darkTextPrimary;
@@ -77,13 +85,15 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
   final textHint = isLight ? AppColors.textHint : AppColors.darkTextHint;
 
   // Tonal button fill and nav indicator: soft versions of the accent.
-  final indicator = isLight ? light(accent, 0.6) : dark(accent, 0.6);
+  final indicator =
+      accentFill ?? (isLight ? light(accent, 0.6) : dark(accent, 0.6));
   final splash = isLight
       ? dark(light(accent, 0.8), 0.2).withValues(alpha: 0.5)
       : dark(light(accent, 0.86), 0.1).withValues(alpha: 0.2);
 
   final colorScheme = seed.copyWith(
     primary: accent,
+    onPrimary: onAccent,
     surface: surfaces.card,
     error: AppColors.overspent,
   );
@@ -145,7 +155,7 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: accent,
-        foregroundColor: Colors.white,
+        foregroundColor: onAccent,
         minimumSize: const Size.fromHeight(52),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         shape: RoundedRectangleBorder(
@@ -175,7 +185,7 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: accent,
-      foregroundColor: Colors.white,
+      foregroundColor: onAccent,
       elevation: 2,
       highlightElevation: 4,
       shape: RoundedRectangleBorder(
@@ -258,7 +268,8 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v) {
     ),
     textTheme: textTheme.copyWith(
       displaySmall: fs(TypographyTokens.screenTitleSize,
-          TypographyTokens.screenTitleWeight, textPrimary),
+              TypographyTokens.screenTitleWeight, textPrimary)
+          .copyWith(fontFamily: TypographyTokens.displayFamily),
       titleLarge: fs(20, FontWeight.w700, textPrimary),
       titleMedium: fs(TypographyTokens.cardTitleSize,
           TypographyTokens.cardTitleWeight, textPrimary),

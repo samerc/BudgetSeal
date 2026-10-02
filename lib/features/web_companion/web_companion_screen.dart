@@ -421,15 +421,10 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF1E3A5F)
-                        : const Color(0xFFDBEAFE),
+                    color: AppColors.accentLight,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2563EB).withValues(alpha: 0.4)
-                          : const Color(0xFF93C5FD),
-                    ),
+                        color: AppColors.accent.withValues(alpha: 0.35)),
                   ),
                   child: Text(
                     url,
@@ -437,9 +432,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       fontFamily: 'monospace',
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF93C5FD)
-                          : const Color(0xFF1D4ED8),
+                      color: AppColors.accentText(context),
                     ),
                   ),
                 ),
@@ -468,14 +461,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       ? Icons.qr_code_2_rounded
                       : Icons.qr_code_rounded,
                   size: 18,
-                  color: const Color(0xFF2563EB),
+                  color: AppColors.accentText(context),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   _showQr ? S.of(context).wcHideQr : S.of(context).wcShowQr,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF2563EB),
+                      color: AppColors.accentText(context),
                       fontWeight: FontWeight.w500),
                 ),
               ],
@@ -656,7 +649,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Widget _buildNetworkNotice() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPublic = _wifiWarning;
 
     return Container(
@@ -664,16 +656,12 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: isPublic
             ? const Color(0xFFFEF3C7)
-            : isDark
-                ? const Color(0xFF172554)
-                : const Color(0xFFEFF6FF),
+            : AppColors.accentLight,
         borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(
           color: isPublic
               ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
-              : isDark
-                  ? const Color(0xFF1E40AF).withValues(alpha: 0.4)
-                  : const Color(0xFF93C5FD).withValues(alpha: 0.5),
+              : AppColors.accent.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -683,7 +671,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             children: [
               Icon(
                 isPublic ? Icons.warning_amber_rounded : Icons.shield_outlined,
-                color: isPublic ? const Color(0xFF92400E) : const Color(0xFF2563EB),
+                color: isPublic ? const Color(0xFF92400E) : AppColors.accentText(context),
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -694,9 +682,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   fontWeight: FontWeight.w700,
                   color: isPublic
                       ? const Color(0xFF92400E)
-                      : isDark
-                          ? const Color(0xFF93C5FD)
-                          : const Color(0xFF1E40AF),
+                      : AppColors.accentText(context),
                 ),
               ),
             ],
@@ -713,9 +699,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               height: 1.5,
               color: isPublic
                   ? const Color(0xFF92400E)
-                  : isDark
-                      ? const Color(0xFF93C5FD).withValues(alpha: 0.8)
-                      : const Color(0xFF1E40AF).withValues(alpha: 0.75),
+                  : AppColors.tp(context),
             ),
           ),
         ],

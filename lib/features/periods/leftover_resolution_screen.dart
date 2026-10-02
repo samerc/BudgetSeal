@@ -408,11 +408,11 @@ class _LeftoverResolutionScreenState
                         ),
                       ),
                       child: _saving
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                                 strokeWidth: 2,
                               ),
                             )

@@ -115,6 +115,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           S.of(context).recurringTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           ),
@@ -730,11 +731,11 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                     borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
               child: _saving
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                          color: AppColors.onAccent, strokeWidth: 2))
                   : Text(S.of(context).recurringFormCreate,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
@@ -1019,11 +1020,11 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                           borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
+                                color: AppColors.onAccent, strokeWidth: 2))
                         : Text(S.of(context).commonSave,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w600)),

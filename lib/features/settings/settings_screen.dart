@@ -40,6 +40,8 @@ import '../../shared/utils/app_info.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/brand_palette.dart';
+import '../../shared/widgets/tappable.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -752,59 +754,60 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     final current = ref.read(accentColorProvider);
     final tr = S.of(context);
     final tpColor = AppColors.tp(context);
+    final tsColor = AppColors.ts(context);
+    final ringBg = AppColors.popup(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.accentColorTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: tpColor))),
-          // System option
-          ListTile(
-            leading: Icon(current == 'system'
-                ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: AppColors.accent),
-            title: Text(tr.accentColorSystem),
-            subtitle: Text(tr.accentColorSystemSub),
-            onTap: () => Navigator.pop(ctx, 'system'),
-          ),
-          // Default
-          ListTile(
-            leading: Icon(current == 'default'
-                ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: const Color(0xFF2563EB)),
-            title: Text(tr.accentColorRoyalBlue),
-            subtitle: Text(tr.accentColorDefault),
-            trailing: Container(width: 24, height: 24,
-                decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle)),
-            onTap: () => Navigator.pop(ctx, 'default'),
-          ),
-          // Color grid
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Wrap(spacing: 12, runSpacing: 12,
-              children: accentColorOptions.entries
-                  .where((e) => e.key != 'default')
-                  .map((e) {
-                final color = AppColors.fromHex(e.value);
-                final isSelected = current == e.key;
-                return GestureDetector(
-                  onTap: () => Navigator.pop(ctx, e.key),
-                  child: Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(
-                      color: color, shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: tpColor, width: 3) : null,
-                      boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)] : null,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr.accentColorTitle,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: tpColor)),
+              const SizedBox(height: 6),
+              Text(tr.accentColorPairHint,
+                  style: TextStyle(fontSize: 14, color: tsColor)),
+              const SizedBox(height: 20),
+              GridView.count(
+                crossAxisCount: 4,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 8,
+                childAspectRatio: 0.85,
+                children: [
+                  for (final p in brandPalette)
+                    _AccentSwatch(
+                      pair: p,
+                      label: accentPairName(tr, p.id),
+                      selected: current == p.id,
+                      ringBg: ringBg,
+                      ringColor: tpColor,
+                      onTap: () => Navigator.pop(ctx, p.id),
                     ),
-                    child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
-                  ),
-                );
-              }).toList(),
-            ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                    current == 'system'
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: AppColors.accent),
+                title: Text(tr.accentColorSystem),
+                subtitle: Text(tr.accentColorSystemSub),
+                onTap: () => Navigator.pop(ctx, 'system'),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-        ]),
+        ),
       ),
     );
     if (picked != null) ref.read(accentColorProvider.notifier).setColor(picked);
@@ -1177,10 +1180,11 @@ class SettingsDetailScreen extends ConsumerWidget {
               onTap: () => _showThemePicker(context, ref)),
           Builder(builder: (context) {
             final accentVal = ref.watch(accentColorProvider);
-            final accentLabel = accentVal == 'system' ? S.of(context).accentColorSystemLabel
-                : accentVal == 'default' ? S.of(context).accentColorRoyalBlue : accentVal;
+            final accentLabel = accentVal == 'system'
+                ? S.of(context).accentColorSystemLabel
+                : accentPairName(S.of(context), accentVal);
             return _SettingsTile(icon: Icons.colorize_rounded, title: S.of(context).tileAccentColor,
-                subtitle: accentLabel, iconColor: ref.read(accentColorProvider.notifier).resolve() ?? AppColors.accent,
+                subtitle: accentLabel, iconColor: AppColors.accent,
                 onTap: () => _showAccentColorPicker(context, ref));
           }),
           _SettingsTile(icon: Icons.color_lens_outlined, title: l.tileColors,
@@ -2707,6 +2711,83 @@ class _ShareHouseholdSettingsSheetState
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Translated name of a palette color id (see brandPalette).
+String accentPairName(S l, String id) => switch (id) {
+      'wax' => l.accentWax,
+      'copper' => l.accentCopper,
+      'sage' => l.accentSage,
+      'teal' => l.accentTeal,
+      'sapphire' => l.accentSapphire,
+      'plum' => l.accentPlum,
+      'rose' => l.accentRose,
+      _ => l.accentGold,
+    };
+
+/// A palette color: a circle split into its bright (dark mode) and deep
+/// (light mode) tones, ringed when selected.
+class _AccentSwatch extends StatelessWidget {
+  const _AccentSwatch({
+    required this.pair,
+    required this.label,
+    required this.selected,
+    required this.ringBg,
+    required this.ringColor,
+    required this.onTap,
+  });
+
+  final AccentPair pair;
+  final String label;
+  final bool selected;
+  final Color ringBg;
+  final Color ringColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Tappable(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 56,
+              height: 56,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ringBg,
+                border: Border.all(
+                    color: selected ? ringColor : Colors.transparent,
+                    width: 2.5),
+              ),
+              child: ClipOval(
+                child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Expanded(child: ColoredBox(color: pair.bright)),
+                  Expanded(child: ColoredBox(color: pair.deep)),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    color: AppColors.tp(context))),
           ],
         ),
       ),

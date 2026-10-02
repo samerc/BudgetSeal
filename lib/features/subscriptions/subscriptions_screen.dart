@@ -226,6 +226,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           S.of(context).subTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           ),
@@ -259,6 +260,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                   style: TextStyle(
                                     color: AppColors.tp(context),
                                     fontSize: TypographyTokens.screenTitleSize,
+                                    fontFamily: TypographyTokens.displayFamily,
                                     fontWeight: FontWeight.w800,
                                   ),
                                   maxLines: 1,

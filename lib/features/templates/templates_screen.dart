@@ -225,6 +225,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                     child: Text(S.of(context).tmplTitle,
                         style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context))),
                   ),

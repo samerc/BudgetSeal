@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/brand_palette.dart';
 
 const _key = 'accent_color';
 
-/// Accent color options: 'system' for Material You dynamic color,
-/// or a hex string like '#2563EB' for a fixed color.
+/// Accent color setting: an [AccentPair] id from [brandPalette] (default
+/// 'gold'), or 'system' for the Material You wallpaper color.
 final accentColorProvider =
     NotifierProvider<AccentColorNotifier, String>(AccentColorNotifier.new);
 
@@ -15,14 +16,24 @@ class AccentColorNotifier extends Notifier<String> {
   @override
   String build() {
     _load();
-    return 'default'; // Royal Blue (#2563EB)
+    return defaultAccentId;
   }
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final val = prefs.getString(_key);
-      if (val != null) state = val;
+      if (val == null) return;
+      if (val == 'system' || accentPairById(val) != null) {
+        state = val;
+        return;
+      }
+      // Older versions stored 'default' (Royal Blue) or a hex color: move
+      // to the closest palette pair.
+      final legacy =
+          val == 'default' ? const Color(0xFF2563EB) : AppColors.fromHex(val);
+      state = nearestAccentPair(legacy).id;
+      await prefs.setString(_key, state);
     } catch (_) {}
   }
 
@@ -35,26 +46,7 @@ class AccentColorNotifier extends Notifier<String> {
   /// Whether this is the Material You dynamic system color.
   bool get isSystem => state == 'system';
 
-  /// Resolve the accent color. If 'system', returns null (caller uses dynamic).
-  /// If 'default', returns the built-in Royal Blue.
-  /// Otherwise, parses the hex string.
-  Color? resolve() {
-    if (state == 'system') return null;
-    if (state == 'default') return AppColors.accent;
-    return AppColors.fromHex(state);
-  }
+  /// The selected pair, or null for 'system'.
+  AccentPair? get pair =>
+      isSystem ? null : (accentPairById(state) ?? brandPalette.first);
 }
-
-/// Predefined accent color options for the picker.
-const accentColorOptions = <String, String>{
-  'default': '#2563EB', // Royal Blue
-  '#6366F1': '#6366F1', // Indigo
-  '#8B5CF6': '#8B5CF6', // Violet
-  '#EC4899': '#EC4899', // Pink
-  '#EF4444': '#EF4444', // Red
-  '#F97316': '#F97316', // Orange
-  '#EAB308': '#EAB308', // Yellow
-  '#22C55E': '#22C55E', // Green
-  '#14B8A6': '#14B8A6', // Teal
-  '#06B6D4': '#06B6D4', // Cyan
-};

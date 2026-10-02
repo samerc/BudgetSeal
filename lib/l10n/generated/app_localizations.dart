@@ -99,6 +99,72 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @allocReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign'**
+  String get allocReadyToAssign;
+
+  /// No description provided for @allocAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign'**
+  String get allocAssign;
+
+  /// No description provided for @accentGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get accentGold;
+
+  /// No description provided for @accentWax.
+  ///
+  /// In en, this message translates to:
+  /// **'Wax red'**
+  String get accentWax;
+
+  /// No description provided for @accentCopper.
+  ///
+  /// In en, this message translates to:
+  /// **'Copper'**
+  String get accentCopper;
+
+  /// No description provided for @accentSage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sage'**
+  String get accentSage;
+
+  /// No description provided for @accentTeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Teal'**
+  String get accentTeal;
+
+  /// No description provided for @accentSapphire.
+  ///
+  /// In en, this message translates to:
+  /// **'Sapphire'**
+  String get accentSapphire;
+
+  /// No description provided for @accentPlum.
+  ///
+  /// In en, this message translates to:
+  /// **'Plum'**
+  String get accentPlum;
+
+  /// No description provided for @accentRose.
+  ///
+  /// In en, this message translates to:
+  /// **'Rose'**
+  String get accentRose;
+
+  /// No description provided for @accentColorPairHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each color has a bright tone for dark mode and a deeper one for light mode, so text stays readable in both.'**
+  String get accentColorPairHint;
+
   /// No description provided for @commonPerDay.
   ///
   /// In en, this message translates to:
@@ -6357,18 +6423,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Material You (Android 12+)'**
   String get accentColorSystemSub;
-
-  /// Color name
-  ///
-  /// In en, this message translates to:
-  /// **'Royal Blue'**
-  String get accentColorRoyalBlue;
-
-  /// Subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Default'**
-  String get accentColorDefault;
 
   /// Setting value label
   ///

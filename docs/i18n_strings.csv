@@ -1812,8 +1812,6 @@ theme_amoled,,AMOLED pure black,أسود AMOLED نقي,Noir AMOLED pur
 accent_color_title,,Accent Color,لون التمييز,Couleur d'accentuation
 accent_color_system,,System,النظام,Système
 accent_color_system_sub,,Material You (Android 12+),Material You (أندرويد 12+),Material You (Android 12+)
-accent_color_royal_blue,,Royal Blue,أزرق ملكي,Bleu royal
-accent_color_default,,Default,الافتراضي,Par défaut
 accent_color_system_label,,System (Material You),النظام (Material You),Système (Material You)
 start_screen_title,,Start Screen,شاشة البداية,Écran de démarrage
 start_screen_desc,,Opens when you launch the app.,تفتح عند تشغيل التطبيق.,S'ouvre au lancement de l'application.
@@ -2074,3 +2072,17 @@ travel_exchange_note,,Travel exchange → {currency},صرف سفر ← {currency
 travel_convert_back_note,,Travel convert back → {currency},إعادة تحويل السفر ← {currency},Reconversion de voyage → {currency}
 health_unalloc_short,,Unallocated: {amount},غير مخصص: {amount},Non alloué : {amount}
 reports_recurring_summary,,{count} active · {amount}/month,{count} نشطة · {amount}/شهريًا,{count} actives · {amount}/mois
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+alloc_ready_to_assign,,Ready to assign,جاهز للتوزيع,Prêt à répartir
+alloc_assign,,Assign,وزّع,Répartir
+accent_gold,,Gold,ذهبي,Or
+accent_wax,,Wax red,أحمر الختم,Rouge cire
+accent_copper,,Copper,نحاسي,Cuivre
+accent_sage,,Sage,أخضر مريمي,Sauge
+accent_teal,,Teal,أزرق مخضر,Sarcelle
+accent_sapphire,,Sapphire,ياقوتي,Saphir
+accent_plum,,Plum,برقوقي,Prune
+accent_rose,,Rose,وردي,Rose
+accent_color_pair_hint,,"Each color has a bright tone for dark mode and a deeper one for light mode, so text stays readable in both.",لكل لون درجة زاهية للوضع الداكن وأخرى أعمق للوضع الفاتح، ليبقى النص مقروءًا في الوضعين.,"Chaque couleur a un ton vif pour le mode sombre et un ton plus profond pour le mode clair, pour un texte lisible dans les deux."

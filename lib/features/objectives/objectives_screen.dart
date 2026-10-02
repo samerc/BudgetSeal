@@ -41,6 +41,7 @@ class ObjectivesScreen extends ConsumerWidget {
                       S.of(context).objTitle,
                       style: TextStyle(
                         fontSize: TypographyTokens.screenTitleSize,
+                        fontFamily: TypographyTokens.displayFamily,
                         fontWeight: FontWeight.w800,
                         color: AppColors.tp(context),
                       ),

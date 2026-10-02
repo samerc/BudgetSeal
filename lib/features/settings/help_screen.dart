@@ -55,7 +55,7 @@ class _HelpScreenState extends State<HelpScreen> {
       final themed = isDark
           ? html.replaceFirst(
               '<style>',
-              '<style>:root{--bg:#0F1219;--surface:#1A1D27;--text:#E8EBF0;--text-secondary:#94A3B8;--border:#2A2D3A;--accent-light:#1E3A5F;}',
+              '<style>:root{--accent:#E3AD45;--bg:#121318;--surface:#1C1D24;--text:#F2EEE6;--text-secondary:#A8A49B;--border:#2E3038;--accent-light:#2F2A1E;}',
             )
           : html;
       await _controller.loadHtmlString(themed);

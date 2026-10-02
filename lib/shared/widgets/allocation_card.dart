@@ -267,7 +267,8 @@ class AllocationCard extends StatelessWidget {
                                     currency: displayCurrency),
                                 style: TextStyle(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.w800,
+                                  fontFamily: TypographyTokens.displayFamily,
+                                  fontWeight: FontWeight.w700,
                                   color: isTargetOverspent
                                       ? AppColors.overspent
                                       : AppColors.tp(context),

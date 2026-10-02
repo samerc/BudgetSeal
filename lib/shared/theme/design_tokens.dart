@@ -91,6 +91,10 @@ abstract final class CategoryIconTokens {
 // ── Typography roles ────────────────────────────────────────────────────────
 /// Use these with fontStyle() from font_provider.dart for consistent text.
 abstract final class TypographyTokens {
+  /// Brand display face for screen titles and hero amounts (bundled in
+  /// assets/fonts, so it works offline). Body text keeps the user's font.
+  static const String displayFamily = 'BricolageGrotesque';
+
   // Screen title: 28 / w800 (Cashew-inspired: large bold)
   static const double screenTitleSize = 28;
   static const FontWeight screenTitleWeight = FontWeight.w800;

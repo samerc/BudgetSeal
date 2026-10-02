@@ -53,6 +53,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       S.of(context).acctTitle,
                       style: TextStyle(
                         fontSize: TypographyTokens.screenTitleSize,
+                        fontFamily: TypographyTokens.displayFamily,
                         fontWeight: FontWeight.w800,
                         color: AppColors.tp(context),
                       ),
@@ -379,6 +380,7 @@ class _TotalBalanceCard extends StatelessWidget {
                         style: TextStyle(
                           color: e.value < 0 ? AppColors.overspent : onCard,
                           fontSize: 24,
+                          fontFamily: TypographyTokens.displayFamily,
                           fontWeight: FontWeight.w800,
                         ),
                         maxLines: 1,

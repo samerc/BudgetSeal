@@ -111,6 +111,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                 S.of(context).reportsTitle,
                 style: TextStyle(
                   fontSize: TypographyTokens.screenTitleSize,
+                  fontFamily: TypographyTokens.displayFamily,
                   fontWeight: TypographyTokens.screenTitleWeight,
                   color: AppColors.tp(context),
                 ),
@@ -1253,6 +1254,7 @@ class _CategoryPie extends StatelessWidget {
                       formatAmount(total, currency: _reportsBaseCurrency),
                       style: TextStyle(
                         fontSize: 22,
+                        fontFamily: TypographyTokens.displayFamily,
                         fontWeight: FontWeight.w800,
                         color: AppColors.tp(context),
                       ),

@@ -278,10 +278,10 @@ class TxTile extends ConsumerWidget {
                             ),
                             child: Text(
                               '$receiptCount',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white),
+                                  color: AppColors.onAccent),
                             ),
                           ),
                         ),

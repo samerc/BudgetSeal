@@ -9,6 +9,40 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get allocReadyToAssign => 'جاهز للتوزيع';
+
+  @override
+  String get allocAssign => 'وزّع';
+
+  @override
+  String get accentGold => 'ذهبي';
+
+  @override
+  String get accentWax => 'أحمر الختم';
+
+  @override
+  String get accentCopper => 'نحاسي';
+
+  @override
+  String get accentSage => 'أخضر مريمي';
+
+  @override
+  String get accentTeal => 'أزرق مخضر';
+
+  @override
+  String get accentSapphire => 'ياقوتي';
+
+  @override
+  String get accentPlum => 'برقوقي';
+
+  @override
+  String get accentRose => 'وردي';
+
+  @override
+  String get accentColorPairHint =>
+      'لكل لون درجة زاهية للوضع الداكن وأخرى أعمق للوضع الفاتح، ليبقى النص مقروءًا في الوضعين.';
+
+  @override
   String commonPerDay(String amount) {
     return '$amount/يوم';
   }
@@ -3548,12 +3582,6 @@ class SAr extends S {
 
   @override
   String get accentColorSystemSub => 'Material You (أندرويد 12+)';
-
-  @override
-  String get accentColorRoyalBlue => 'أزرق ملكي';
-
-  @override
-  String get accentColorDefault => 'الافتراضي';
 
   @override
   String get accentColorSystemLabel => 'النظام (Material You)';

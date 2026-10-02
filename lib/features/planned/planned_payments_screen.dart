@@ -456,6 +456,7 @@ class _PlannedPaymentsScreenState
                           S.of(context).plannedTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: FontWeight.w800,
                             color: AppColors.tp(context),
                           ),

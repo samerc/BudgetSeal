@@ -279,11 +279,11 @@ class _AllocationDetailScreenState
                         borderRadius: BorderRadius.circular(CardTokens.radius)),
                   ),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
+                              color: AppColors.onAccent, strokeWidth: 2))
                       : Text(_isNew ? l.allocCreateButtonDetail : l.allocSaveChanges,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600)),
@@ -843,6 +843,7 @@ class _AllocationDetailScreenState
                   style: TextStyle(
                     color: mainBalance < 0 ? AppColors.overspent : onHero,
                     fontSize: 34,
+                    fontFamily: TypographyTokens.displayFamily,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
@@ -2460,11 +2461,11 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                         borderRadius: BorderRadius.circular(CardTokens.radius)),
                   ),
                   child: _applying
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
+                              color: AppColors.onAccent, strokeWidth: 2))
                       : Text(S.of(context).allocApplyRevaluation,
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600)),

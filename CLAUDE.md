@@ -30,7 +30,7 @@ dart analyze lib/
 # Run tests
 flutter test
 
-# Regenerate app icons
+# Regenerate app icons (artwork: assets/icon/source/app_icon.svg — see its README)
 dart run flutter_launcher_icons
 ```
 
@@ -79,7 +79,7 @@ lib/
 │   │   ├── receipt_sync_provider.dart
 │   │   ├── report_stats_provider.dart  # Pre-aggregated monthly stats (O(N) single pass)
 │   │   ├── tx_colors_provider.dart  # Transaction type color coding
-│   │   ├── accent_color_provider.dart    # Material You dynamic accent color
+│   │   ├── accent_color_provider.dart    # Brand accent pair (or Material You)
 │   │   ├── objectives_provider.dart     # Goals & loans data
 │   │   └── web_companion_provider.dart  # Server state (running/stopped/ip/port)
 │   ├── sync/
@@ -138,6 +138,7 @@ lib/
     ├── theme/
     │   ├── app_colors.dart     # Theme-aware color system (light + dark)
     │   ├── app_theme.dart      # Material theme definitions
+    │   ├── brand_palette.dart  # 8 accent pairs (bright/deep/fills), Gold default
     │   └── design_tokens.dart  # Spacing, card, and typography constants
     ├── utils/
     │   ├── format_number.dart  # Amount formatting with currency symbols
@@ -225,7 +226,8 @@ Always use `AppColors.tp(context)`, `AppColors.ts(context)`, `AppColors.sf(conte
 Never use hardcoded `AppColors.surfaceVariant`, `AppColors.textSecondary`, `AppColors.textPrimary`, or `AppColors.textHint` in widget build methods. Use the context-aware methods: `AppColors.sfv(context)`, `AppColors.ts(context)`, `AppColors.tp(context)`, `AppColors.th(context)`. The const versions exist only for const contexts (e.g., default parameter values).
 
 - `AppColors.th(context)` as card background = too low-contrast in dark mode — use `sf()` + `bd()` border instead.
-- Accent-tinted containers: use explicit variants — dark `Color(0xFF1E3A5F)`, light `Color(0xFFDBEAFE)`.
+- Accent-tinted containers: `AppColors.accentLight` (the selected pair's soft fill for the current mode). Never hardcode blues.
+- **Text/icons on an accent fill: `AppColors.onAccent`, never `Colors.white`** — in dark mode the accent is a bright tone (gold) and white on it is unreadable. On `AppColors.accentBright` fills use `brandInk`.
 
 ### Hex Color Parsing
 Always use `AppColors.fromHex(hex)` — cached, single implementation. Never define local `_hexToColor()` functions.
@@ -279,12 +281,13 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 - **Category icons:** 48px circles in lists (`CategoryIconTokens.listSize`), 36px compact, 64px hero.
 - **Screen titles:** 28px w800 (`TypographyTokens.screenTitleSize`) — Cashew-inspired large bold.
 - **Section headers (Cashew SettingsHeader):** sentence case, 15px w700, accent color, no letter spacing. ARB header strings are stored in sentence case (never ALL CAPS); `SectionHeader` no longer upper-cases.
-- **Cards (Cashew style, Oct 2026):** accent-tinted surface (`AppColors.sf`), no border; light mode gets a soft shadow (`AppColors.cardShadow`), black mode a faint white edge (`AppColors.cardBorder`). `AppColors.bd` is a hairline (6% black / 7% white) for dividers.
+- **Cards (Cashew style, Oct 2026):** warm neutral surface (`AppColors.sf` — white on paper in light, night `#1C1D24` in dark), no border; light mode gets a soft shadow (`AppColors.cardShadow`), black mode a faint white edge (`AppColors.cardBorder`). `AppColors.bd` is a hairline (6% black / 7% white) for dividers.
 - **Pastel fills:** use `AppColors.pastel(context, color)` / `lightenPastel` / `darkenPastel` (Cashew's color model) for anything colored by a category/envelope/accent — never `color.withValues(alpha: 0.1)` tints.
 - No glassmorphism. No left-border accent bars on cards (looks like a prototype).
-- Design target: Cashew app — measure real values from its source (github.com/jameskokoska/Cashew, `budget/lib`)
+- Design target: Cashew's layout grammar (measure real values from github.com/jameskokoska/Cashew, `budget/lib`), with BudgetSeal's own brand on top: gold accent pairs, warm paper/night surfaces, Bricolage Grotesque for titles and hero amounts, the gold "Ready to assign" banner. Measure, never copy Cashew code or assets (GPL-3.0).
+- **Display font:** `TypographyTokens.displayFamily` ('BricolageGrotesque', bundled in `assets/fonts/`, SIL OFL) for screen titles (`LargeTitleHeader`, `screenTitleSize` styles, `displaySmall`) and hero amounts (form/detail bands, envelope hero and cards, account/goal balances, dashboard net worth/unallocated, Ready to assign). Body text keeps the user's font.
 - "Good morning" greeting removed — user disliked it
-- Colors are always theme-aware — never hardcode on adaptive surfaces (exception: `Colors.white` on explicit accent banners/gradients is fine)
+- Colors are always theme-aware — never hardcode on adaptive surfaces. On accent fills use `AppColors.onAccent` (not `Colors.white`).
 
 ## Database
 
@@ -780,7 +783,7 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 `buildLightTheme(fontName, [accentColor])`, `buildDarkTheme(fontName, [accentColor])`, and `buildBlackTheme(fontName, [accentColor])` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Nunito Sans (`defaultAppFont`, closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
 
-All three themes come from one `_buildTheme()`; surfaces are derived from the accent and exposed through the `SurfaceColors` theme extension, which `AppColors.bg/sf/sfv/popup/bd` read. Inputs are borderless filled (radius 15), dialogs radius 25, sheets radius 20 with no drag handle, buttons radius 20 (`RadiusTokens`).
+All three themes come from one `_buildTheme()`; surfaces are fixed warm neutrals (paper `#F7F5F1`/white in light, night `#121318`/`#1C1D24` in dark, pure black in black) — not accent-tinted — exposed through the `SurfaceColors` theme extension, which `AppColors.bg/sf/sfv/popup/bd` read. The accent lives in fills, text, buttons and the brand banner. Inputs are borderless filled (radius 15), dialogs radius 25, sheets radius 20 with no drag handle, buttons radius 20 (`RadiusTokens`).
 
 **Theme modes:** `themeModeProvider` stores a String (`'system'`/`'light'`/`'dark'`/`'black'`). `flutterThemeMode` getter maps black → dark for Flutter's ThemeMode. `isBlackMode` getter for AMOLED-specific logic. `app.dart` must `ref.watch(themeModeProvider)` for the state (not `.notifier`) to rebuild on theme change.
 
@@ -795,11 +798,12 @@ All three themes come from one `_buildTheme()`; surfaces are derived from the ac
 - **InputLimits**: nameMaxLength(100), noteMaxLength(500), maxAmount(1e9)
 
 ### Color Palette
-- Accent: `#2563EB` (Royal Blue)
+- Accent: user-selectable pair from `brandPalette` (`lib/shared/theme/brand_palette.dart`), default **Gold** (bright `#E3AD45` / deep `#8A5E0F`)
 - Expense/Overspent: `#DC2626` (Deep Red)
 - Income/Healthy: `#059669` (Deep Emerald)
 - Caution: `#D97706` (Deep Amber)
-- Light bg: `#F5F6FA`, Dark bg: `#0F1219`, Black bg: `#000000`
+- Light bg: `#F7F5F1` (paper), Dark bg: `#121318` (night), Black bg: `#000000`
+- Text: light `#1C1A16` / `#6B655B`, dark `#F2EEE6` / `#A8A49B` (warm neutrals)
 
 ### Shared Layout Widgets
 - `SectionHeader` (`lib/shared/widgets/section_header.dart`): sentence case, 15px w700, accent color, optional trailing action
@@ -903,16 +907,16 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 - Same-currency exchange is blocked (no point creating a travel wallet in your own currency)
 - Regular account creation never suggests archived travel wallets
 
-## Material You / Accent Color
+## Accent Color (brand palette)
 
-`lib/core/providers/accent_color_provider.dart` — supports system dynamic color (Android 12+ Material You) and 10 preset accent colors.
+`lib/shared/theme/brand_palette.dart` + `lib/core/providers/accent_color_provider.dart`.
 
-- **Options**: 'system' (device wallpaper accent), 'default' (Royal Blue #2563EB), or any preset hex color
-- **Presets**: Indigo, Violet, Pink, Red, Orange, Yellow, Green, Teal, Cyan
-- `DynamicColorBuilder` wraps the app in `app.dart` — resolves system accent on Android 12+
-- Theme builders (`buildLightTheme`, `buildDarkTheme`, `buildBlackTheme`) accept optional `accentColor` parameter
-- **`AppColors.accent` is mutable** — updated via `AppColors.setAccentColor()` in `app.dart` after `DynamicColorBuilder` resolves. All 340+ references to `AppColors.accent` automatically pick up the new color. Also derives `accentLight` dynamically.
-- Settings: Appearance > Accent Color — circle grid picker with checkmark selection
+- **8 tuned pairs** (`AccentPair`): Gold (default), Wax red, Copper, Sage, Teal, Sapphire, Plum, Rose. Each has a `bright` tone (dark/black mode, and filled brand surfaces in every mode), a `deep` tone (light-mode text/icons/buttons — bright tones fail contrast on white), and a `lightFill`/`darkFill`. Plus `'system'` (Material You via `DynamicColorBuilder`; falls back to Gold when unavailable).
+- The provider stores the pair id (`accent_color` pref). Old values ('default' Royal Blue or a hex) migrate to the nearest pair by hue on load.
+- **`AppColors.accent` is mutable and mode-dependent**: `AppColors.setAccent(pair, system:)` + `applyMode(isDark)` (called in app.dart's build and again in the MaterialApp builder once the real brightness is known) set `accent` (deep/bright), `accentLight` (fill), `accentBright`, `onAccent`. `accentText(context)` is just `accent` for pairs.
+- Light and dark `ThemeData` are built with different accents (`buildLightTheme(font, pair.deep, pair.lightFill)`, `buildDarkTheme(font, pair.bright, pair.darkFill)`); `colorScheme.onPrimary`, FilledButton and FAB foregrounds use `AppColors.inkOn(accent)`.
+- **Ready to assign banner** (Budget tab, `_UnallocatedBanner`): `accentBright` fill with `brandInk` text in every mode, ink pill "Assign" button → `/funding`. It's the signature brand element — don't make it dark in light mode (user rejected that).
+- Settings > Appearance > Accent Color: 4-column grid of split swatches (bright | deep halves) + System row.
 
 ## Per-Account Decimal Precision
 
@@ -956,7 +960,7 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 
 ## Fonts
 
-Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
+Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk. These are body fonts; titles and hero amounts always use the bundled display face **Bricolage Grotesque** (`TypographyTokens.displayFamily`).
 
 ## Number & Date Formatting
 
@@ -978,7 +982,7 @@ An account can only be archived at a zero balance (`_canArchive()` in account_de
 
 ## Unallocated Multi-Currency Display
 
-The Unallocated card on the Budget tab shows only the base currency amount by default. If the user has unallocated funds in other currencies, a "+ N other currencies" link and chevron arrow appear. Tapping expands an animated breakdown showing each currency with its amount. This avoids the anti-pattern of converting/summing across currencies with unreliable exchange rates. Single-currency users see no extra UI.
+The Ready to assign banner (unallocated money) on the Budget tab shows only the base currency amount by default. If the user has unallocated funds in other currencies, a "+ N other currencies" link and chevron arrow appear. Tapping expands an animated breakdown showing each currency with its amount. This avoids the anti-pattern of converting/summing across currencies with unreliable exchange rates. Single-currency users see no extra UI.
 
 ## Reports Categories Tab
 

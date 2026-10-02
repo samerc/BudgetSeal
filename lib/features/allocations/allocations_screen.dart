@@ -24,6 +24,7 @@ import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
+import '../../shared/theme/brand_palette.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -841,81 +842,98 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
     final l = S.of(context);
     final baseAmount = widget.unallocated[widget.baseCurrency] ?? 0.0;
     final hasOtherCurrencies = widget.unallocated.length > 1;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // The brand banner: the bright accent in every theme, dark ink on it.
+    const ink = brandInk;
+    final fill = AppColors.accentBright;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
+        color: fill,
+        borderRadius: BorderRadius.circular(RadiusTokens.dialog - 5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -- Main section --
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(18, 18, 14, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 16, 16),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l.allocUnallocated,
+                        l.allocReadyToAssign,
                         style: TextStyle(
-                          color: AppColors.ts(context),
+                          color: ink.withValues(alpha: 0.75),
                           fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      CurrencyDisplay(
-                        amount: baseAmount,
-                        currency: widget.baseCurrency,
-                        amountStyle: TextStyle(
-                          color: AppColors.tp(context),
-                          fontSize: 24,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (hasOtherCurrencies) ...[
-                        const SizedBox(height: 4),
+                      const SizedBox(height: 2),
+                      CurrencyDisplay(
+                        amount: baseAmount,
+                        currency: widget.baseCurrency,
+                        amountStyle: const TextStyle(
+                          color: ink,
+                          fontSize: 30,
+                          fontFamily: TypographyTokens.displayFamily,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (hasOtherCurrencies)
                         Tappable(
                           onTap: _toggle,
-                          child: Text(
-                            _expanded
-                                ? l.allocHideOtherCurrencies
-                                : l.allocOtherCurrencies(widget.unallocated.length - 1),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.accent,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _expanded
+                                      ? l.allocHideOtherCurrencies
+                                      : l.allocOtherCurrencies(
+                                          widget.unallocated.length - 1),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: ink,
+                                  ),
+                                ),
+                                AnimatedRotation(
+                                  turns: _expanded ? 0.5 : 0,
+                                  duration: const Duration(milliseconds: 250),
+                                  child: const Icon(Icons.expand_more_rounded,
+                                      color: ink, size: 18),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
-                if (hasOtherCurrencies)
-                  IconButton(
-                    onPressed: _toggle,
-                    icon: AnimatedRotation(
-                      turns: _expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 250),
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: AppColors.ts(context),
-                        size: 22,
-                      ),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    splashRadius: 18,
-                    padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(),
+                const SizedBox(width: 12),
+                FilledButton(
+                  onPressed: widget.hasAllocations
+                      ? () => context.push('/funding')
+                      : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ink,
+                    foregroundColor: fill,
+                    disabledBackgroundColor: ink.withValues(alpha: 0.15),
+                    disabledForegroundColor: ink.withValues(alpha: 0.45),
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    shape: const StadiumBorder(),
                   ),
+                  child: Text(
+                    l.allocAssign,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
+                ),
               ],
             ),
           ),
@@ -925,42 +943,25 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
             sizeFactor: _expandAnim,
             axisAlignment: -1,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : Colors.black.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.lightenPastel(fill, 0.35),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Column(
                   children: widget.unallocated.entries.map((e) {
-                    final isBase = e.key == widget.baseCurrency;
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 3),
                       child: Row(
                         children: [
-                          Container(
-                            width: 42,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isBase
-                                  ? AppColors.accent.withValues(alpha: 0.1)
-                                  : AppColors.th(context).withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              e.key,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: isBase
-                                    ? AppColors.accent
-                                    : AppColors.ts(context),
-                              ),
+                          Text(
+                            e.key,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: ink.withValues(alpha: 0.7),
                             ),
                           ),
                           const Spacer(),
@@ -968,41 +969,17 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                             formatAmount(e.value, currency: e.key),
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                               color: e.value < 0
-                                  ? AppColors.overspent
-                                  : AppColors.tp(context),
+                                  ? AppColors.darkenPastel(
+                                      AppColors.overspent, 0.2)
+                                  : ink,
                             ),
                           ),
                         ],
                       ),
                     );
                   }).toList(),
-                ),
-              ),
-            ),
-          ),
-
-          // -- Fund button --
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: widget.hasAllocations
-                    ? () => context.push('/funding')
-                    : null,
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                icon: const Icon(
-                    Icons.account_balance_wallet_outlined, size: 18),
-                label: Text(
-                  l.allocFundEnvelopes,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ),
             ),

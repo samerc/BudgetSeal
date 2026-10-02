@@ -606,6 +606,7 @@ class _ObjectiveDetailScreenState
                         formatAmount(_currentAmount, currency: _currency),
                         style: TextStyle(
                           fontSize: 34,
+                          fontFamily: TypographyTokens.displayFamily,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
                           color: AppColors.tp(context),
@@ -778,8 +779,8 @@ class _ObjectiveDetailScreenState
                 child: FilledButton(
                   onPressed: _loading ? null : _save,
                   child: _loading
-                      ? const SizedBox(height: 16, width: 16,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      ? SizedBox(height: 16, width: 16,
+                          child: CircularProgressIndicator(color: AppColors.onAccent, strokeWidth: 2))
                       : Text(S.of(context).allocSaveChanges),
                 ),
               ),

@@ -123,6 +123,7 @@ class _Delegate extends SliverPersistentHeaderDelegate {
                       style: TextStyle(
                         color: AppColors.tp(context),
                         fontSize: fontSize,
+                        fontFamily: TypographyTokens.displayFamily,
                         fontWeight: TypographyTokens.screenTitleWeight,
                       ),
                     ),

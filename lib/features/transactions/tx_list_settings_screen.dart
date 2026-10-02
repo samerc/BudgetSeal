@@ -23,6 +23,7 @@ class TxListSettingsScreen extends ConsumerWidget {
           Text(S.of(context).txListSelectLayout,
               style: TextStyle(
                 fontSize: TypographyTokens.screenTitleSize,
+                fontFamily: TypographyTokens.displayFamily,
                 fontWeight: TypographyTokens.screenTitleWeight,
                 color: AppColors.tp(context),
               )),

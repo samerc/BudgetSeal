@@ -426,6 +426,7 @@ class _SubscriptionDetailScreenState
                   '${formatAmount(amount, currency: currency)}${_frequencySuffix(frequency, interval)}',
                   style: TextStyle(
                     fontSize: 24,
+                    fontFamily: TypographyTokens.displayFamily,
                     fontWeight: FontWeight.w800,
                     color: AppColors.tp(context),
                   ),

@@ -91,8 +91,10 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#2563EB"
-  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#1C1D24"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  # Keeps the envelope inside the 66dp safe zone of every launcher mask.
+  adaptive_icon_foreground_inset: 22
   remove_alpha_ios: true
 
 flutter:
@@ -103,3 +105,17 @@ flutter:
     - assets/icon/
     - assets/categories/
     - assets/web/
+
+  # Brand display face for amounts and screen titles (SIL OFL 1.1, see
+  # assets/fonts/OFL-BricolageGrotesque.txt). Bundled so it works offline.
+  fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/BricolageGrotesque-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BricolageGrotesque-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BricolageGrotesque-ExtraBold.ttf
+          weight: 800

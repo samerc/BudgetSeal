@@ -341,6 +341,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                       maxLines: 1,
                       style: TextStyle(
                         fontSize: 38,
+                        fontFamily: TypographyTokens.displayFamily,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
                         color: AppColors.tp(context),

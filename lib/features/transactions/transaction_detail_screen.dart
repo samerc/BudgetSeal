@@ -270,6 +270,7 @@ class _DetailBody extends ConsumerWidget {
                                 amountText,
                                 style: TextStyle(
                                   fontSize: 36,
+                                  fontFamily: TypographyTokens.displayFamily,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.5,
                                   color: AppColors.tp(context),

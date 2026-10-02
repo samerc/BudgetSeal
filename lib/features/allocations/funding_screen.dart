@@ -486,6 +486,7 @@ class _FundingBanner extends StatelessWidget {
                     amountStyle: TextStyle(
                       color: AppColors.tp(context),
                       fontSize: 26,
+                      fontFamily: TypographyTokens.displayFamily,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -984,12 +985,12 @@ class _BottomFundBar extends StatelessWidget {
               shadowColor: AppColors.accent.withValues(alpha: 0.4),
             ),
             child: isFunding
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: Colors.white,
+                      color: AppColors.onAccent,
                     ),
                   )
                 : Row(

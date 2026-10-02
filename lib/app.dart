@@ -69,6 +69,7 @@ import 'features/transactions/transaction_detail_screen.dart';
 import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_colors.dart';
 import 'shared/theme/app_theme.dart';
+import 'shared/theme/brand_palette.dart';
 import 'shared/utils/page_transitions.dart';
 import 'shared/widgets/error_boundary.dart';
 
@@ -420,10 +421,10 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     final themeMode = themeNotifier.flutterThemeMode;
     final selectedFont = ref.watch(fontProvider);
 
-    // Watch accent color state for Material You support
-    final accentValue = ref.watch(accentColorProvider);
-    final useSystemAccent = accentValue == 'system';
-    final fixedAccent = ref.read(accentColorProvider.notifier).resolve();
+    // Accent: a palette pair (deep tone in light, bright in dark) or the
+    // Material You color.
+    ref.watch(accentColorProvider);
+    final accentPair = ref.read(accentColorProvider.notifier).pair;
 
     // Apply currency symbol overrides and number format whenever they change.
     final symbolOverrides = ref.watch(currencySymbolProvider);
@@ -434,24 +435,35 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     setDateFormatPattern(dateFormat);
 
     // Helper to build themes with resolved accent color
-    ThemeData buildLight(Color? accent) =>
-        buildLightTheme(selectedFont, accent);
-    ThemeData buildDark(Color? accent) => themeNotifier.isBlackMode
-        ? buildBlackTheme(selectedFont, accent)
-        : buildDarkTheme(selectedFont, accent);
+    ThemeData buildLight(Color accent) =>
+        buildLightTheme(selectedFont, accent, accentPair?.lightFill);
+    ThemeData buildDark(Color accent) => themeNotifier.isBlackMode
+        ? buildBlackTheme(selectedFont, accent, accentPair?.darkFill)
+        : buildDarkTheme(selectedFont, accent, accentPair?.darkFill);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-    // Resolve accent: system dynamic → fixed → default
-    final Color? resolvedAccent = useSystemAccent && lightDynamic != null
-        ? lightDynamic.primary
-        : fixedAccent;
+    // System accent without Material You support falls back to Gold.
+    final systemColor = lightDynamic?.primary;
+    final pair = accentPair ??
+        (systemColor == null ? brandPalette.first : null);
+    // Global AppColors.accent: resolved per mode here for the splash/lock
+    // apps, and again in the MaterialApp builder below once the actual
+    // theme brightness is known.
+    AppColors.setAccent(pair, system: systemColor);
+    final platformDark =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    AppColors.applyMode(themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && platformDark));
 
-    // Update the global AppColors.accent so all widgets pick it up
-    AppColors.setAccentColor(resolvedAccent ?? AppColors.defaultAccent);
-
-    final lightTheme = buildLight(resolvedAccent);
-    final darkTheme = buildDark(resolvedAccent);
+    final lightTheme = pair != null
+        ? buildLightTheme(selectedFont, pair.deep, pair.lightFill)
+        : buildLight(systemColor!);
+    final darkTheme = pair != null
+        ? (themeNotifier.isBlackMode
+            ? buildBlackTheme(selectedFont, pair.bright, pair.darkFill)
+            : buildDarkTheme(selectedFont, pair.bright, pair.darkFill))
+        : buildDark(AppColors.lightenPastel(systemColor!, 0.3));
 
     // Resolve locale early — needed by splash, lock, and main screens.
     final localeCode = ref.watch(localeProvider);
@@ -520,7 +532,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       // Dismiss keyboard when tapping outside any text field (globally).
       // Apply user's text scale preference.
       builder: (context, child) {
-        AppColors.isDark = Theme.of(context).brightness == Brightness.dark;
+        AppColors.applyMode(Theme.of(context).brightness == Brightness.dark);
         final mediaQuery = MediaQuery.of(context);
         final baseScale = mediaQuery.textScaler.scale(1.0);
         return MediaQuery(

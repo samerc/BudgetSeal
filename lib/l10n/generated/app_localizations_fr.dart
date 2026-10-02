@@ -9,6 +9,40 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get allocReadyToAssign => 'Prêt à répartir';
+
+  @override
+  String get allocAssign => 'Répartir';
+
+  @override
+  String get accentGold => 'Or';
+
+  @override
+  String get accentWax => 'Rouge cire';
+
+  @override
+  String get accentCopper => 'Cuivre';
+
+  @override
+  String get accentSage => 'Sauge';
+
+  @override
+  String get accentTeal => 'Sarcelle';
+
+  @override
+  String get accentSapphire => 'Saphir';
+
+  @override
+  String get accentPlum => 'Prune';
+
+  @override
+  String get accentRose => 'Rose';
+
+  @override
+  String get accentColorPairHint =>
+      'Chaque couleur a un ton vif pour le mode sombre et un ton plus profond pour le mode clair, pour un texte lisible dans les deux.';
+
+  @override
   String commonPerDay(String amount) {
     return '$amount/jour';
   }
@@ -3620,12 +3654,6 @@ class SFr extends S {
 
   @override
   String get accentColorSystemSub => 'Material You (Android 12+)';
-
-  @override
-  String get accentColorRoyalBlue => 'Bleu royal';
-
-  @override
-  String get accentColorDefault => 'Par défaut';
 
   @override
   String get accentColorSystemLabel => 'Système (Material You)';

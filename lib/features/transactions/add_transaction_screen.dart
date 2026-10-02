@@ -1167,6 +1167,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   currency: amountCcy),
                               style: TextStyle(
                                 fontSize: 40,
+                                fontFamily: TypographyTokens.displayFamily,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.5,
                                 color: amount > 0

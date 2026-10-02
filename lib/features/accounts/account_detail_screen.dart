@@ -281,6 +281,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                               ? AppColors.overspent
                               : AppColors.tp(context),
                           fontSize: 36,
+                          fontFamily: TypographyTokens.displayFamily,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
                         ),
@@ -553,11 +554,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                 ),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2),
+                            color: AppColors.onAccent, strokeWidth: 2),
                       )
                     : Text(
                         _isNew ? l.acctCreateAccount : l.commonSave,

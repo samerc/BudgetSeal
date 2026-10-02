@@ -97,6 +97,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           S.of(context).catTitle,
                           style: TextStyle(
                             fontSize: TypographyTokens.screenTitleSize,
+                            fontFamily: TypographyTokens.displayFamily,
                             fontWeight: TypographyTokens.screenTitleWeight,
                             color: AppColors.tp(context),
                           ),
@@ -1158,11 +1159,11 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 ),
               ),
               child: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                          color: AppColors.onAccent, strokeWidth: 2),
                     )
                   : Text(
                       _isNew ? S.of(context).catCreate : S.of(context).commonSave,
