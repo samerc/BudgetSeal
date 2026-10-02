@@ -9,6 +9,144 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webNavUpcoming => 'À venir';
+
+  @override
+  String get webUpSub =>
+      'Les factures à venir et les paiements prévus. Rien ici ne touche vos soldes avant d’être enregistré.';
+
+  @override
+  String get webUpBills => 'Factures';
+
+  @override
+  String webUpDays(int n) {
+    return '$n jours';
+  }
+
+  @override
+  String webUpTotalOut(int n) {
+    return 'Factures, $n prochains jours';
+  }
+
+  @override
+  String webUpTotalIn(String amount) {
+    return '+ $amount à recevoir';
+  }
+
+  @override
+  String get webUpSubTag => 'Abonnement';
+
+  @override
+  String webUpOverdue(int n) {
+    return 'En retard de $n jours';
+  }
+
+  @override
+  String get webUpToday => 'Aujourd\'hui';
+
+  @override
+  String get webUpTomorrow => 'Demain';
+
+  @override
+  String webUpInDays(int n) {
+    return 'Dans $n jours';
+  }
+
+  @override
+  String webUpNone(int n) {
+    return 'Rien à payer dans les $n prochains jours';
+  }
+
+  @override
+  String get webUpNoneSub =>
+      'Les récurrences et abonnements apparaissent ici avant d’être enregistrés.';
+
+  @override
+  String get webUpPostNow => 'Enregistrer maintenant';
+
+  @override
+  String get webUpSkip => 'Passer celle-ci';
+
+  @override
+  String get webUpPostHelp =>
+      'Enregistrer maintenant la note aujourd’hui. Passer n’enregistre rien. Dans les deux cas, la date suivante avance.';
+
+  @override
+  String get webUpPosted => 'Enregistré';
+
+  @override
+  String get webUpSkipped => 'Passé';
+
+  @override
+  String get webPlanSection => 'Paiements prévus';
+
+  @override
+  String get webPlanAdd => 'Prévoir un paiement';
+
+  @override
+  String get webPlanEdit => 'Modifier le paiement prévu';
+
+  @override
+  String get webPlanSave => 'Prévoir';
+
+  @override
+  String get webPlanDate => 'Prévu le';
+
+  @override
+  String get webPlanNeedDate => 'Choisissez une date.';
+
+  @override
+  String get webPlanEmpty => 'Aucun paiement prévu';
+
+  @override
+  String get webPlanEmptySub =>
+      'Prévoyez un paiement ponctuel — il ne touche pas vos soldes avant d’être enregistré.';
+
+  @override
+  String get webPlanPost => 'Enregistrer';
+
+  @override
+  String get webPlanPostHelp =>
+      'L’enregistrer en fait une vraie transaction à sa date prévue.';
+
+  @override
+  String get webPlanPostAll => 'Tout enregistrer';
+
+  @override
+  String get webPlanPostAllTitle => 'Enregistrer ces paiements ?';
+
+  @override
+  String webPlanPostAllMsg(int n) {
+    return 'Paiements à enregistrer : $n. Chacun devient une vraie transaction à sa date prévue.';
+  }
+
+  @override
+  String webPlanPosted(int n) {
+    return 'Enregistrés : $n';
+  }
+
+  @override
+  String webPlanPostPartial(int n, String failed) {
+    return 'Enregistrés : $n · non enregistrés : $failed (pas de taux)';
+  }
+
+  @override
+  String get webPlanAdded => 'Paiement prévu';
+
+  @override
+  String get webPlanUpdated => 'Enregistré';
+
+  @override
+  String get webPlanDeleted => 'Paiement prévu supprimé';
+
+  @override
+  String get webPlanDeleteTitle => 'Supprimer ce paiement prévu ?';
+
+  @override
+  String get webPlanDeleteMsg =>
+      'Il n’a jamais été enregistré : aucun solde ne change.';
+
+  @override
   String get webNavGoals => 'Objectifs et prêts';
 
   @override

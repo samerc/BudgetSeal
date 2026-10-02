@@ -251,6 +251,7 @@ img { display: block; }
 .nav-link:hover, .nav-btn:hover { background: var(--container); color: var(--text); }
 .nav-link.active { background: var(--accent-fill); color: var(--accent); font-weight: 800; }
 
+@media (min-width: 821px) and (max-height: 780px) { .nav-link, .nav-btn { padding-block: 7px; } }
 .nav-bottom { display: flex; flex-direction: column; gap: 2px; padding-top: 12px; border-top: 1px solid var(--line); }
 .nav-status { cursor: default; }
 .nav-status:hover { background: none; color: var(--text-2); }
@@ -790,6 +791,11 @@ kbd {
   .chip-icon { --size: 40px; }
   .row-actions { display: none; }
 }
+
+/* Upcoming */
+.row-sub.overdue { color: color-mix(in srgb, #6577E0 82%, var(--text)); font-weight: 700; }
+.day-head .btn-sm { margin-block: -6px; }
+.stats.fit { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 
 /* Goals & loans */
 .goal-hero { display: flex; align-items: center; gap: 14px; }

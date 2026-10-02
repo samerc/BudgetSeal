@@ -9,6 +9,143 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webNavUpcoming => 'القادمة';
+
+  @override
+  String get webUpSub =>
+      'الفواتير القادمة والمدفوعات المخطّطة. لا شيء هنا يؤثر في أرصدتك قبل تسجيله.';
+
+  @override
+  String get webUpBills => 'الفواتير';
+
+  @override
+  String webUpDays(int n) {
+    return 'أيام: $n';
+  }
+
+  @override
+  String webUpTotalOut(int n) {
+    return 'الفواتير خلال الأيام القادمة: $n';
+  }
+
+  @override
+  String webUpTotalIn(String amount) {
+    return '+ $amount واردة';
+  }
+
+  @override
+  String get webUpSubTag => 'اشتراك';
+
+  @override
+  String webUpOverdue(int n) {
+    return 'متأخرة، أيام: $n';
+  }
+
+  @override
+  String get webUpToday => 'مستحقة اليوم';
+
+  @override
+  String get webUpTomorrow => 'مستحقة غدًا';
+
+  @override
+  String webUpInDays(int n) {
+    return 'مستحقة بعد أيام: $n';
+  }
+
+  @override
+  String webUpNone(int n) {
+    return 'لا شيء مستحق خلال الأيام القادمة: $n';
+  }
+
+  @override
+  String get webUpNoneSub =>
+      'تظهر العناصر المتكررة والاشتراكات هنا قبل تسجيلها.';
+
+  @override
+  String get webUpPostNow => 'سجّل الآن';
+
+  @override
+  String get webUpSkip => 'تخطَّ هذه';
+
+  @override
+  String get webUpPostHelp =>
+      '«سجّل الآن» يسجّلها اليوم، و«تخطَّ» لا يسجّل شيئًا. في الحالتين ينتقل الموعد التالي.';
+
+  @override
+  String get webUpPosted => 'تم التسجيل';
+
+  @override
+  String get webUpSkipped => 'تم التخطي';
+
+  @override
+  String get webPlanSection => 'المدفوعات المخطّطة';
+
+  @override
+  String get webPlanAdd => 'خطّط لدفعة';
+
+  @override
+  String get webPlanEdit => 'تعديل الدفعة المخطّطة';
+
+  @override
+  String get webPlanSave => 'خطّط';
+
+  @override
+  String get webPlanDate => 'مخطّط في';
+
+  @override
+  String get webPlanNeedDate => 'اختر تاريخًا.';
+
+  @override
+  String get webPlanEmpty => 'لا توجد مدفوعات مخطّطة';
+
+  @override
+  String get webPlanEmptySub =>
+      'خطّط لدفعة لمرة واحدة مسبقًا — لن تؤثر في أرصدتك حتى تسجّلها.';
+
+  @override
+  String get webPlanPost => 'تسجيل';
+
+  @override
+  String get webPlanPostHelp =>
+      'التسجيل يحوّلها إلى معاملة فعلية في تاريخها المخطّط.';
+
+  @override
+  String get webPlanPostAll => 'تسجيل الكل';
+
+  @override
+  String get webPlanPostAllTitle => 'تسجيل هذه المدفوعات؟';
+
+  @override
+  String webPlanPostAllMsg(int n) {
+    return 'المدفوعات المراد تسجيلها: $n. تصبح كل منها معاملة فعلية في تاريخها المخطّط.';
+  }
+
+  @override
+  String webPlanPosted(int n) {
+    return 'تم التسجيل: $n';
+  }
+
+  @override
+  String webPlanPostPartial(int n, String failed) {
+    return 'تم التسجيل: $n · لم يُسجَّل: $failed (لا يوجد سعر صرف)';
+  }
+
+  @override
+  String get webPlanAdded => 'تم التخطيط للدفعة';
+
+  @override
+  String get webPlanUpdated => 'تم الحفظ';
+
+  @override
+  String get webPlanDeleted => 'تم حذف الدفعة المخطّطة';
+
+  @override
+  String get webPlanDeleteTitle => 'حذف هذه الدفعة المخطّطة؟';
+
+  @override
+  String get webPlanDeleteMsg => 'لم تُسجَّل أبدًا، لذا لن يتغير أي رصيد.';
+
+  @override
   String get webNavGoals => 'الأهداف والقروض';
 
   @override

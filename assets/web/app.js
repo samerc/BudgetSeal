@@ -262,6 +262,7 @@ const IC = {
   repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
   grid: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
+  calendar: svg('<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   target: svg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
   chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
 };
@@ -605,6 +606,7 @@ const routes = {
   '#/reports': renderReports,
   '#/bulk': renderBulk,
   '#/goals': renderGoals,
+  '#/upcoming': renderUpcoming,
 };
 
 function navigate(hash, quiet = false) {
@@ -2059,6 +2061,214 @@ function deleteGoal(o) {
   });
 }
 
+// ── Upcoming: bills + planned payments ────────────────────────────────────────
+
+let upDays = Number(lsGet('bs_up_days')) || 30;
+
+function dueLabel(n) {
+  if (n < 0) return t('web_up_overdue', { n: -n });
+  if (n === 0) return t('web_up_today');
+  if (n === 1) return t('web_up_tomorrow');
+  return t('web_up_in_days', { n });
+}
+
+async function renderUpcoming(quiet) {
+  const plan = `<button class="btn btn-primary" data-action="add-plan">${IC.plus}${esc(t('web_plan_add'))}</button>`;
+  if (!quiet) setContent(pageHead(t('web_nav_upcoming'), '') + skeleton(6));
+  const [bills, planned] = await Promise.all([api(`/api/upcoming?days=${upDays}`), api('/api/planned'), refs()]);
+  if (!bills || !planned || state.route !== '#/upcoming') return;
+  cache.bills = bills.items || [];
+  cache.planned = planned.items || [];
+  const base = planned.baseCurrency || state.baseCurrency;
+
+  // What goes out / comes in over the window, per currency (transfers left out).
+  const totals = {};
+  for (const b of cache.bills) {
+    if (b.type === 'transfer') continue;
+    const c = totals[b.currency] ||= { out: 0, in: 0 };
+    c[b.type === 'income' ? 'in' : 'out'] += b.amount;
+  }
+  const totalCards = Object.entries(totals).sort(([a], [b]) => (a === base ? -1 : b === base ? 1 : a.localeCompare(b))).map(([c, v]) => `
+    <div class="card stat"><div class="label">${esc(t('web_up_total_out', { n: upDays }))}</div><div class="value num">${esc(fmt(v.out, c))}</div>
+      ${v.in > 0 ? `<div class="help">${esc(t('web_up_total_in', { amount: fmt(v.in, c) }))}</div>` : ''}</div>`).join('');
+
+  const billRow = b => {
+    const isT = b.type === 'transfer';
+    const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
+    const sub = [dueLabel(b.daysUntil), freqLabel(b.frequency, b.interval), isT ? `${b.accountName || ''} ${arrow} ${b.destinationAccountName || ''}` : b.accountName].filter(Boolean).join(' · ');
+    const cls = b.type === 'income' ? 'income' : b.type === 'expense' ? 'expense' : '';
+    const first = b.occurrence === 0;
+    return `<div class="row${first ? ' clickable' : ' dim'}"${first ? ` data-action="bill" data-id="${esc(b.id)}" tabindex="0"` : ''}>
+      ${isT ? transferChip() : catChip(b)}
+      <div class="row-main"><div class="row-title">${esc(b.title || b.categoryName || t(`type_${b.type}`))}${b.isSubscription ? ` <span class="tag accent">${esc(t('web_up_sub_tag'))}</span>` : ''}</div>
+        <div class="row-sub${b.daysUntil < 0 ? ' overdue' : ''}">${esc(sub)}</div></div>
+      <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div></div>
+    </div>`;
+  };
+  const groups = [];
+  for (const b of cache.bills) {
+    const k = dayKey(b.dueDate);
+    if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, date: b.dueDate, items: [] });
+    groups[groups.length - 1].items.push(b);
+  }
+  const billsHtml = cache.bills.length
+    ? `<div class="card card-flush list">${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.date))}</span></div>${g.items.map(billRow).join('')}`).join('')}</div>`
+    : `<div class="card">${emptyState(IC.repeat, t('web_up_none', { n: upDays }), t('web_up_none_sub'))}</div>`;
+
+  const planRow = p => {
+    const isT = p.type === 'transfer';
+    const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
+    const cls = p.type === 'income' ? 'income' : p.type === 'expense' ? 'expense' : '';
+    const sub = [fmtDate(p.date, true), isT ? `${p.accountName || ''} ${arrow} ${p.destinationAccountName || ''}` : p.accountName].filter(Boolean).join(' · ');
+    return `<div class="row clickable" data-action="plan" data-id="${esc(p.id)}" tabindex="0">
+      ${isT ? transferChip() : catChip(p)}
+      <div class="row-main"><div class="row-title">${esc(p.note || p.categoryName || t(`type_${p.type}`))}</div><div class="row-sub">${esc(sub)}</div></div>
+      <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div></div>
+    </div>`;
+  };
+  const months = [];
+  for (const p of cache.planned) {
+    const d = toDate(p.date), k = `${d.getFullYear()}-${d.getMonth()}`;
+    if (!months.length || months[months.length - 1].k !== k) months.push({ k, y: d.getFullYear(), m: d.getMonth(), items: [] });
+    months[months.length - 1].items.push(p);
+  }
+  const plannedHtml = cache.planned.length
+    ? `<div class="card card-flush list">${months.map(g => `<div class="day-head"><span>${esc(monthLabel(g.y, g.m))}</span>
+        <button class="btn btn-sm btn-ghost" data-action="post-plans" data-ids="${esc(g.items.map(p => p.id).join(','))}">${IC.check}${esc(t('web_plan_post_all'))}</button></div>${g.items.map(planRow).join('')}`).join('')}</div>`
+    : `<div class="card">${emptyState(IC.calendar, t('web_plan_empty'), t('web_plan_empty_sub'), { action: 'add-plan', label: t('web_plan_add') })}</div>`;
+
+  setContent(`
+    ${pageHead(t('web_nav_upcoming'), esc(t('web_up_sub')), plan)}
+    ${totalCards ? `<div class="stats fit">${totalCards}</div>` : ''}
+    <div class="section-head"><span class="section-title">${esc(t('web_up_bills'))}</span>
+      <div class="seg" id="up-days">${[7, 30, 90].map(n => `<button type="button" data-days="${n}" class="${n === upDays ? 'active' : ''}">${esc(t('web_up_days', { n }))}</button>`).join('')}</div></div>
+    ${billsHtml}
+    <div class="section-head"><span class="section-title">${esc(t('web_plan_section'))}</span></div>
+    ${plannedHtml}`);
+  document.getElementById('up-days').addEventListener('click', e => {
+    const b = e.target.closest('[data-days]'); if (!b) return;
+    upDays = Number(b.dataset.days); lsSet('bs_up_days', String(upDays));
+    renderUpcoming(true);
+  });
+}
+
+/** A bill's next occurrence: post it today or skip it (both move the date on). */
+function openBill(id) {
+  const b = (cache.bills || []).find(x => x.id === id && x.occurrence === 0);
+  if (!b) return;
+  const act = async post => {
+    const r = await api(`/api/recurring/${encodeURIComponent(id)}/${post ? 'post-now' : 'skip'}`, { method: 'POST', body: {} });
+    if (!r) return false;
+    toast(post ? t('web_up_posted') : t('web_up_skipped'));
+    closeModal();
+    refresh(true);
+    return true;
+  };
+  openModal({
+    title: b.title || b.categoryName || t(`type_${b.type}`), narrow: true,
+    submit: t('web_up_post_now'),
+    extra: { label: t('web_up_skip'), run: () => act(false) },
+    body: `<div class="goal-hero">${b.type === 'transfer' ? transferChip('lg') : catChip(b, 'lg')}
+        <div><div class="env-amount num">${esc(fmtSigned(b.amount, b.currency, b.type))}</div><div class="env-kind">${esc(dueLabel(b.daysUntil))} · ${esc(fmtDate(b.dueDate, true))}</div></div></div>
+      <p class="help" style="margin-top:14px">${esc(t('web_up_post_help'))}</p>`,
+    onSubmit: () => act(true),
+  });
+}
+
+function openPlan(id) {
+  const p = (cache.planned || []).find(x => x.id === id);
+  if (!p) return;
+  openModal({
+    title: p.note || p.categoryName || t(`type_${p.type}`), narrow: true,
+    submit: t('web_plan_post'),
+    extra: { label: t('web_goal_edit'), run: () => openPlanForm(p) },
+    body: `<div class="goal-hero">${p.type === 'transfer' ? transferChip('lg') : catChip(p, 'lg')}
+        <div><div class="env-amount num">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div><div class="env-kind">${esc(fmtDate(p.date, true))} · ${esc(p.accountName || '')}</div></div></div>
+      <p class="help" style="margin-top:14px">${esc(t('web_plan_post_help'))}</p>`,
+    onSubmit: () => postPlans([id]),
+  });
+}
+
+async function postPlans(ids) {
+  const r = await api('/api/planned/post', { method: 'POST', body: { ids } });
+  if (!r) return false;
+  if (r.failed?.length) toast(t('web_plan_post_partial', { n: r.posted, failed: r.failed.length }), true);
+  else toast(t('web_plan_posted', { n: r.posted }));
+  invalidate();
+  closeModal();
+  refresh(true);
+  return true;
+}
+
+async function openPlanForm(p = null) {
+  const { accounts, categories } = await refs();
+  if (!accounts.length) { toast(t('web_need_account'), true); return; }
+  let type = p?.type || 'expense';
+  const lastAcct = lsGet('bs_last_account');
+  const acctId = p?.accountId || (accounts.some(a => a.id === lastAcct) ? lastAcct : accounts[0].id);
+  const destId = p?.destinationAccountId || accounts.find(a => a.id !== acctId)?.id || '';
+  const now = new Date();
+  const date = p ? dayKey(p.date) : dayKey(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+  openModal({
+    title: p ? t('web_plan_edit') : t('web_plan_add'),
+    submit: p ? t('common_save') : t('web_plan_save'),
+    extra: p ? { label: t('common_delete'), run: async () => {
+      if (!(await confirmDialog(t('web_plan_delete_title'), t('web_plan_delete_msg')))) return;
+      const r = await api(`/api/planned/${encodeURIComponent(p.id)}`, { method: 'DELETE' });
+      if (r) { toast(t('web_plan_deleted')); refresh(true); }
+    } } : null,
+    body: `
+      <div class="field"><div class="seg full" id="p-type">
+        ${['expense', 'income', 'transfer'].map(k => `<button type="button" data-type="${k}" class="${type === k ? 'active' : ''}">${esc(t(`type_${k}`))}</button>`).join('')}
+      </div></div>
+      <div class="field"><label class="label" for="p-amount">${esc(t('web_form_amount'))}</label>
+        <div class="input-cur"><input id="p-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" autofocus value="${p ? esc(amountInputValue(p.lineAmount ?? p.amount, p.lineCurrency || p.currency)) : ''}"><span class="cur" id="p-cur"></span></div></div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="p-account" id="p-account-label"></label><select id="p-account" class="input">${accountOptions(accounts, acctId)}</select></div>
+        <div class="field" id="pg-dest"><label class="label" for="p-dest">${esc(t('web_form_to_account'))}</label><select id="p-dest" class="input">${accountOptions(accounts, destId)}</select></div>
+        <div class="field" id="pg-cat"><label class="label" for="p-cat">${esc(t('web_form_category'))}</label><select id="p-cat" class="input"></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="p-date">${esc(t('web_plan_date'))}</label><input id="p-date" type="date" class="input" value="${esc(date)}"></div>
+        <div class="field"><label class="label" for="p-note">${esc(t('web_form_title'))}</label><input id="p-note" class="input" maxlength="500" value="${esc(p?.note || '')}" placeholder="${esc(t('web_form_optional'))}"></div>
+      </div>`,
+    onOpen: f => {
+      const $ = s => f.querySelector(s);
+      const sync = () => {
+        const isT = type === 'transfer';
+        f.querySelectorAll('#p-type button').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+        $('#pg-dest').classList.toggle('hidden', !isT);
+        $('#pg-cat').classList.toggle('hidden', isT);
+        $('#p-account-label').textContent = isT ? t('web_form_from_account') : t('web_form_account');
+        if (!isT) $('#p-cat').innerHTML = categoryOptions(categories, type, $('#p-cat').value || p?.categoryId || '');
+        $('#p-cur').textContent = accounts.find(a => a.id === $('#p-account').value)?.currency || '';
+      };
+      $('#p-type').addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) { type = b.dataset.type; sync(); } });
+      $('#p-account').addEventListener('change', sync);
+      sync();
+    },
+    onSubmit: async f => {
+      const $ = s => f.querySelector(s);
+      const amount = parseAmount($('#p-amount').value);
+      if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      const body = { type, amount, accountId: $('#p-account').value, date: $('#p-date').value, note: $('#p-note').value.trim() };
+      if (!body.date) { toast(t('web_plan_need_date'), true); return false; }
+      if (type === 'transfer') {
+        body.destinationAccountId = $('#p-dest').value;
+        if (body.destinationAccountId === body.accountId) { toast(t('web_val_accounts_differ'), true); return false; }
+      } else body.categoryId = $('#p-cat').value || null;
+      const r = p
+        ? await api(`/api/planned/${encodeURIComponent(p.id)}`, { method: 'PUT', body })
+        : await api('/api/planned', { method: 'POST', body });
+      if (!r) return false;
+      toast(p ? t('web_plan_updated') : t('web_plan_added'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
 // ── Recurring & subscriptions ─────────────────────────────────────────────────
 
 async function renderRecurring(subs, quiet) {
@@ -2443,6 +2653,13 @@ const actions = {
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
   'add-goal': () => openGoalForm(),
+  'add-plan': () => openPlanForm(),
+  'plan': el => openPlan(el.dataset.id),
+  'bill': el => openBill(el.dataset.id),
+  'post-plans': async el => {
+    const ids = el.dataset.ids.split(',').filter(Boolean);
+    if (await confirmDialog(t('web_plan_post_all_title'), t('web_plan_post_all_msg', { n: ids.length }), t('web_plan_post_all'), false)) postPlans(ids);
+  },
   'open-goal': el => openGoal(el.dataset.id),
   'pay-goal': el => { const o = (cache.goals || []).find(x => x.id === el.dataset.id); if (o) openPayGoal(o); },
   'bulk-save': () => saveBulk(),

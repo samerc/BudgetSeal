@@ -11,6 +11,7 @@ import 'api/categories_handler.dart';
 import 'api/dashboard_handler.dart';
 import 'api/envelopes_handler.dart';
 import 'api/objectives_handler.dart';
+import 'api/upcoming_handler.dart';
 import 'api/recurring_handler.dart';
 import 'api/reports_handler.dart';
 import 'api/subscriptions_handler.dart';
@@ -62,6 +63,14 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   api.get('/envelopes', listEnvelopesHandler(ref));
   api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));
+  api.get('/upcoming', upcomingBillsHandler(ref));
+  api.post('/recurring/<id>/post-now', recurringActionHandler(ref, post: true));
+  api.post('/recurring/<id>/skip', recurringActionHandler(ref, post: false));
+  api.get('/planned', listPlannedHandler(ref));
+  api.post('/planned', createPlannedHandler(ref));
+  api.post('/planned/post', postPlannedHandler(ref));
+  api.put('/planned/<id>', updatePlannedHandler(ref));
+  api.delete('/planned/<id>', deletePlannedHandler(ref));
   api.get('/objectives', listObjectivesHandler(ref));
   api.post('/objectives', createObjectiveHandler(ref));
   api.get('/objectives/<id>', getObjectiveHandler(ref));

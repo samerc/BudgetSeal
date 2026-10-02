@@ -2213,3 +2213,44 @@ web_toast_goal_paid,,Payment recorded,تم تسجيل الدفعة,Paiement enre
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
 web_goal_lent_choice,,I lent,أقرضت,J'ai prêté
 web_goal_borrowed_choice,,I borrowed,اقترضت,J'ai emprunté
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_nav_upcoming,,Upcoming,القادمة,À venir
+web_up_sub,,Bills coming up and payments you’ve planned. Nothing here touches your balances until it’s posted.,الفواتير القادمة والمدفوعات المخطّطة. لا شيء هنا يؤثر في أرصدتك قبل تسجيله.,Les factures à venir et les paiements prévus. Rien ici ne touche vos soldes avant d’être enregistré.
+web_up_bills,,Bills,الفواتير,Factures
+web_up_days,,{n} days,أيام: {n},{n} jours
+web_up_total_out,,"Bills, next {n} days",الفواتير خلال الأيام القادمة: {n},"Factures, {n} prochains jours"
+web_up_total_in,,+ {amount} coming in,+ {amount} واردة,+ {amount} à recevoir
+web_up_sub_tag,,Subscription,اشتراك,Abonnement
+web_up_overdue,,Overdue by {n} days,متأخرة، أيام: {n},En retard de {n} jours
+web_up_today,,Due today,مستحقة اليوم,Aujourd'hui
+web_up_tomorrow,,Due tomorrow,مستحقة غدًا,Demain
+web_up_in_days,,Due in {n} days,مستحقة بعد أيام: {n},Dans {n} jours
+web_up_none,,Nothing due in the next {n} days,لا شيء مستحق خلال الأيام القادمة: {n},Rien à payer dans les {n} prochains jours
+web_up_none_sub,,Recurring items and subscriptions show up here before they post.,تظهر العناصر المتكررة والاشتراكات هنا قبل تسجيلها.,Les récurrences et abonnements apparaissent ici avant d’être enregistrés.
+web_up_post_now,,Post now,سجّل الآن,Enregistrer maintenant
+web_up_skip,,Skip this one,تخطَّ هذه,Passer celle-ci
+web_up_post_help,,Post now records it today. Skip records nothing. Either way the next date moves on.,«سجّل الآن» يسجّلها اليوم، و«تخطَّ» لا يسجّل شيئًا. في الحالتين ينتقل الموعد التالي.,"Enregistrer maintenant la note aujourd’hui. Passer n’enregistre rien. Dans les deux cas, la date suivante avance."
+web_up_posted,,Posted,تم التسجيل,Enregistré
+web_up_skipped,,Skipped,تم التخطي,Passé
+web_plan_section,,Planned payments,المدفوعات المخطّطة,Paiements prévus
+web_plan_add,,Plan a payment,خطّط لدفعة,Prévoir un paiement
+web_plan_edit,,Edit planned payment,تعديل الدفعة المخطّطة,Modifier le paiement prévu
+web_plan_save,,Plan it,خطّط,Prévoir
+web_plan_date,,Planned for,مخطّط في,Prévu le
+web_plan_need_date,,Pick a date.,اختر تاريخًا.,Choisissez une date.
+web_plan_empty,,No planned payments,لا توجد مدفوعات مخطّطة,Aucun paiement prévu
+web_plan_empty_sub,,Plan a one-time payment ahead — it won’t touch your balances until you post it.,خطّط لدفعة لمرة واحدة مسبقًا — لن تؤثر في أرصدتك حتى تسجّلها.,Prévoyez un paiement ponctuel — il ne touche pas vos soldes avant d’être enregistré.
+web_plan_post,,Post,تسجيل,Enregistrer
+web_plan_post_help,,Posting records it as a real transaction on its planned date.,التسجيل يحوّلها إلى معاملة فعلية في تاريخها المخطّط.,L’enregistrer en fait une vraie transaction à sa date prévue.
+web_plan_post_all,,Post all,تسجيل الكل,Tout enregistrer
+web_plan_post_all_title,,Post these payments?,تسجيل هذه المدفوعات؟,Enregistrer ces paiements ?
+web_plan_post_all_msg,,Payments to post: {n}. Each becomes a real transaction on its planned date.,المدفوعات المراد تسجيلها: {n}. تصبح كل منها معاملة فعلية في تاريخها المخطّط.,Paiements à enregistrer : {n}. Chacun devient une vraie transaction à sa date prévue.
+web_plan_posted,,Posted: {n},تم التسجيل: {n},Enregistrés : {n}
+web_plan_post_partial,,Posted: {n} · not posted: {failed} (no exchange rate),تم التسجيل: {n} · لم يُسجَّل: {failed} (لا يوجد سعر صرف),Enregistrés : {n} · non enregistrés : {failed} (pas de taux)
+web_plan_added,,Payment planned,تم التخطيط للدفعة,Paiement prévu
+web_plan_updated,,Saved,تم الحفظ,Enregistré
+web_plan_deleted,,Planned payment deleted,تم حذف الدفعة المخطّطة,Paiement prévu supprimé
+web_plan_delete_title,,Delete this planned payment?,حذف هذه الدفعة المخطّطة؟,Supprimer ce paiement prévu ?
+web_plan_delete_msg,,"It was never recorded, so no balance changes.",لم تُسجَّل أبدًا، لذا لن يتغير أي رصيد.,Il n’a jamais été enregistré : aucun solde ne change.

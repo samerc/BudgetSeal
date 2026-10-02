@@ -9,6 +9,144 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webNavUpcoming => 'Upcoming';
+
+  @override
+  String get webUpSub =>
+      'Bills coming up and payments you’ve planned. Nothing here touches your balances until it’s posted.';
+
+  @override
+  String get webUpBills => 'Bills';
+
+  @override
+  String webUpDays(int n) {
+    return '$n days';
+  }
+
+  @override
+  String webUpTotalOut(int n) {
+    return 'Bills, next $n days';
+  }
+
+  @override
+  String webUpTotalIn(String amount) {
+    return '+ $amount coming in';
+  }
+
+  @override
+  String get webUpSubTag => 'Subscription';
+
+  @override
+  String webUpOverdue(int n) {
+    return 'Overdue by $n days';
+  }
+
+  @override
+  String get webUpToday => 'Due today';
+
+  @override
+  String get webUpTomorrow => 'Due tomorrow';
+
+  @override
+  String webUpInDays(int n) {
+    return 'Due in $n days';
+  }
+
+  @override
+  String webUpNone(int n) {
+    return 'Nothing due in the next $n days';
+  }
+
+  @override
+  String get webUpNoneSub =>
+      'Recurring items and subscriptions show up here before they post.';
+
+  @override
+  String get webUpPostNow => 'Post now';
+
+  @override
+  String get webUpSkip => 'Skip this one';
+
+  @override
+  String get webUpPostHelp =>
+      'Post now records it today. Skip records nothing. Either way the next date moves on.';
+
+  @override
+  String get webUpPosted => 'Posted';
+
+  @override
+  String get webUpSkipped => 'Skipped';
+
+  @override
+  String get webPlanSection => 'Planned payments';
+
+  @override
+  String get webPlanAdd => 'Plan a payment';
+
+  @override
+  String get webPlanEdit => 'Edit planned payment';
+
+  @override
+  String get webPlanSave => 'Plan it';
+
+  @override
+  String get webPlanDate => 'Planned for';
+
+  @override
+  String get webPlanNeedDate => 'Pick a date.';
+
+  @override
+  String get webPlanEmpty => 'No planned payments';
+
+  @override
+  String get webPlanEmptySub =>
+      'Plan a one-time payment ahead — it won’t touch your balances until you post it.';
+
+  @override
+  String get webPlanPost => 'Post';
+
+  @override
+  String get webPlanPostHelp =>
+      'Posting records it as a real transaction on its planned date.';
+
+  @override
+  String get webPlanPostAll => 'Post all';
+
+  @override
+  String get webPlanPostAllTitle => 'Post these payments?';
+
+  @override
+  String webPlanPostAllMsg(int n) {
+    return 'Payments to post: $n. Each becomes a real transaction on its planned date.';
+  }
+
+  @override
+  String webPlanPosted(int n) {
+    return 'Posted: $n';
+  }
+
+  @override
+  String webPlanPostPartial(int n, String failed) {
+    return 'Posted: $n · not posted: $failed (no exchange rate)';
+  }
+
+  @override
+  String get webPlanAdded => 'Payment planned';
+
+  @override
+  String get webPlanUpdated => 'Saved';
+
+  @override
+  String get webPlanDeleted => 'Planned payment deleted';
+
+  @override
+  String get webPlanDeleteTitle => 'Delete this planned payment?';
+
+  @override
+  String get webPlanDeleteMsg =>
+      'It was never recorded, so no balance changes.';
+
+  @override
   String get webNavGoals => 'Goals & loans';
 
   @override

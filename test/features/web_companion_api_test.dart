@@ -11,6 +11,7 @@ import 'package:budgetseal/features/web_companion/api/objectives_handler.dart';
 import 'package:budgetseal/features/web_companion/api/recurring_handler.dart';
 import 'package:budgetseal/features/web_companion/api/subscriptions_handler.dart';
 import 'package:budgetseal/features/web_companion/api/transactions_handler.dart';
+import 'package:budgetseal/features/web_companion/api/upcoming_handler.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -345,6 +346,84 @@ void main() {
     expect((await balances())['usd'], 100);
     final after = await call(listObjectivesHandler(ref), 'GET');
     expect((after['items'] as List).map((o) => o['id']), [lid]);
+  });
+
+  test('upcoming bills list every occurrence; post now and skip advance',
+      () async {
+    String day(int d) {
+      final x = DateTime.now().add(Duration(days: d));
+      return '${x.year}-${x.month.toString().padLeft(2, '0')}-${x.day.toString().padLeft(2, '0')}';
+    }
+
+    final weekly = await call(createRecurringHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'title': 'Cleaner',
+      'accountId': 'usd',
+      'amount': 30,
+      'frequency': 'weekly',
+      'startDate': day(2),
+    });
+    final rid = weekly['id'] as String;
+    final up = await call(upcomingBillsHandler(ref), 'GET', query: '?days=30');
+    final items = (up['items'] as List).where((i) => i['id'] == rid).toList();
+    expect(items.length, greaterThanOrEqualTo(4));
+    expect(items.first['occurrence'], 0);
+    expect(items.first['daysUntil'], 2);
+
+    expect((await call(recurringActionHandler(ref, post: true), 'POST', id: rid))['status'], 200);
+    expect((await balances())['usd'], -30);
+    expect((await call(recurringActionHandler(ref, post: false), 'POST', id: rid))['status'], 200);
+    final after = await call(upcomingBillsHandler(ref), 'GET', query: '?days=30');
+    final first = (after['items'] as List).firstWhere((i) => i['id'] == rid);
+    expect(first['daysUntil'], 16); // posted one, skipped one
+    expect((await balances())['usd'], -30);
+  });
+
+  test('planned payments: create, edit, post, delete; no effect until posted',
+      () async {
+    final a = await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'accountId': 'usd',
+      'amount': 80,
+      'categoryId': 'food',
+      'note': 'Party',
+      'date': '2026-12-01',
+    });
+    expect(a['status'], 201);
+    final b = await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'transfer',
+      'accountId': 'usd',
+      'destinationAccountId': 'usd2',
+      'amount': 50,
+      'date': '2026-11-15',
+    });
+    expect((await balances())['usd'] ?? 0, 0);
+
+    final edited = await call(updatePlannedHandler(ref), 'PUT',
+        id: a['id'] as String,
+        body: {'type': 'expense', 'accountId': 'usd', 'amount': 90, 'date': '2026-12-02'});
+    expect(edited['status'], 200);
+    final list = await call(listPlannedHandler(ref), 'GET');
+    final items = list['items'] as List;
+    expect(items.map((i) => i['amount']), [50, 90]); // ordered by date
+    expect(items.last['status'], 'planned');
+
+    final posted = await call(postPlannedHandler(ref), 'POST', body: {
+      'ids': [b['id'], edited['id']]
+    });
+    expect(posted['posted'], 2);
+    expect((await balances())['usd'], -140);
+    expect((await balances())['usd2'], 50);
+    expect((await call(listPlannedHandler(ref), 'GET'))['items'], isEmpty);
+
+    final c = await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'income', 'accountId': 'usd', 'amount': 10, 'date': '2026-12-05',
+    });
+    expect((await call(deletePlannedHandler(ref), 'DELETE', id: c['id'] as String))['status'], 200);
+    expect((await call(listPlannedHandler(ref), 'GET'))['items'], isEmpty);
+    expect((await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'transfer', 'accountId': 'usd', 'amount': 10, 'date': '2026-12-05',
+    }))['status'], 400);
   });
 
   test('money moves between envelopes and Ready to assign', () async {

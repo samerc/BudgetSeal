@@ -99,6 +99,234 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webNavUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get webNavUpcoming;
+
+  /// No description provided for @webUpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills coming up and payments you’ve planned. Nothing here touches your balances until it’s posted.'**
+  String get webUpSub;
+
+  /// No description provided for @webUpBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills'**
+  String get webUpBills;
+
+  /// No description provided for @webUpDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days'**
+  String webUpDays(int n);
+
+  /// No description provided for @webUpTotalOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills, next {n} days'**
+  String webUpTotalOut(int n);
+
+  /// No description provided for @webUpTotalIn.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {amount} coming in'**
+  String webUpTotalIn(String amount);
+
+  /// No description provided for @webUpSubTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get webUpSubTag;
+
+  /// No description provided for @webUpOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue by {n} days'**
+  String webUpOverdue(int n);
+
+  /// No description provided for @webUpToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get webUpToday;
+
+  /// No description provided for @webUpTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Due tomorrow'**
+  String get webUpTomorrow;
+
+  /// No description provided for @webUpInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Due in {n} days'**
+  String webUpInDays(int n);
+
+  /// No description provided for @webUpNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due in the next {n} days'**
+  String webUpNone(int n);
+
+  /// No description provided for @webUpNoneSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring items and subscriptions show up here before they post.'**
+  String get webUpNoneSub;
+
+  /// No description provided for @webUpPostNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Post now'**
+  String get webUpPostNow;
+
+  /// No description provided for @webUpSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this one'**
+  String get webUpSkip;
+
+  /// No description provided for @webUpPostHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Post now records it today. Skip records nothing. Either way the next date moves on.'**
+  String get webUpPostHelp;
+
+  /// No description provided for @webUpPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get webUpPosted;
+
+  /// No description provided for @webUpSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get webUpSkipped;
+
+  /// No description provided for @webPlanSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned payments'**
+  String get webPlanSection;
+
+  /// No description provided for @webPlanAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a payment'**
+  String get webPlanAdd;
+
+  /// No description provided for @webPlanEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit planned payment'**
+  String get webPlanEdit;
+
+  /// No description provided for @webPlanSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan it'**
+  String get webPlanSave;
+
+  /// No description provided for @webPlanDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned for'**
+  String get webPlanDate;
+
+  /// No description provided for @webPlanNeedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date.'**
+  String get webPlanNeedDate;
+
+  /// No description provided for @webPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No planned payments'**
+  String get webPlanEmpty;
+
+  /// No description provided for @webPlanEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a one-time payment ahead — it won’t touch your balances until you post it.'**
+  String get webPlanEmptySub;
+
+  /// No description provided for @webPlanPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get webPlanPost;
+
+  /// No description provided for @webPlanPostHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Posting records it as a real transaction on its planned date.'**
+  String get webPlanPostHelp;
+
+  /// No description provided for @webPlanPostAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Post all'**
+  String get webPlanPostAll;
+
+  /// No description provided for @webPlanPostAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post these payments?'**
+  String get webPlanPostAllTitle;
+
+  /// No description provided for @webPlanPostAllMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments to post: {n}. Each becomes a real transaction on its planned date.'**
+  String webPlanPostAllMsg(int n);
+
+  /// No description provided for @webPlanPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted: {n}'**
+  String webPlanPosted(int n);
+
+  /// No description provided for @webPlanPostPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted: {n} · not posted: {failed} (no exchange rate)'**
+  String webPlanPostPartial(int n, String failed);
+
+  /// No description provided for @webPlanAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment planned'**
+  String get webPlanAdded;
+
+  /// No description provided for @webPlanUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get webPlanUpdated;
+
+  /// No description provided for @webPlanDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned payment deleted'**
+  String get webPlanDeleted;
+
+  /// No description provided for @webPlanDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this planned payment?'**
+  String get webPlanDeleteTitle;
+
+  /// No description provided for @webPlanDeleteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'It was never recorded, so no balance changes.'**
+  String get webPlanDeleteMsg;
+
   /// No description provided for @webNavGoals.
   ///
   /// In en, this message translates to:
