@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark app background (darken(#2563EB, .92)) -->
-    <color name="splash_background">#030813</color>
+    <!-- Dark app background (night, AppColors.darkBackground) -->
+    <color name="splash_background">#121318</color>
 </resources>

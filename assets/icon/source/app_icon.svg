@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="1024" height="1024">
+  <!-- BudgetSeal app icon: an envelope holding two gold notes, closed with the
+       gold "funded" wax seal, on the night background. Master source for
+       assets/icon/*.png (see assets/icon/source/README.md). -->
+  <defs>
+    <path id="seal" d="M82.20 50.00 L81.27 52.05 L79.18 53.84 L77.43 55.46 L77.14 57.27 L78.14 59.55 L79.15 62.08 L78.86 64.23 L76.93 65.55 L74.24 66.20 L72.11 66.97 L71.24 68.63 L71.21 71.21 L70.93 73.87 L69.56 75.49 L67.13 75.64 L64.45 75.03 L62.30 74.95 L60.89 76.28 L59.74 78.68 L58.26 80.82 L56.25 81.42 L53.99 80.31 L51.87 78.60 L50.00 77.80 L48.13 78.60 L46.01 80.31 L43.75 81.42 L41.74 80.82 L40.26 78.68 L39.11 76.28 L37.70 74.95 L35.55 75.03 L32.87 75.64 L30.44 75.49 L29.07 73.87 L28.79 71.21 L28.76 68.63 L27.89 66.97 L25.76 66.20 L23.07 65.55 L21.14 64.23 L20.85 62.08 L21.86 59.55 L22.86 57.27 L22.57 55.46 L20.82 53.84 L18.73 52.05 L17.80 50.00 L18.73 47.95 L20.82 46.16 L22.57 44.54 L22.86 42.73 L21.86 40.45 L20.85 37.92 L21.14 35.77 L23.07 34.45 L25.76 33.80 L27.89 33.03 L28.76 31.37 L28.79 28.79 L29.07 26.13 L30.44 24.51 L32.87 24.36 L35.55 24.97 L37.70 25.05 L39.11 23.72 L40.26 21.32 L41.74 19.18 L43.75 18.58 L46.01 19.69 L48.13 21.40 L50.00 22.20 L51.87 21.40 L53.99 19.69 L56.25 18.58 L58.26 19.18 L59.74 21.32 L60.89 23.72 L62.30 25.05 L64.45 24.97 L67.13 24.36 L69.56 24.51 L70.93 26.13 L71.21 28.79 L71.24 31.37 L72.11 33.03 L74.24 33.80 L76.93 34.45 L78.86 35.77 L79.15 37.92 L78.14 40.45 L77.14 42.73 L77.43 44.54 L79.18 46.16 L81.27 47.95 Z"/>
+    <clipPath id="tile"><rect width="100" height="100" rx="CORNER"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect id="bg" width="100" height="100" fill="#1C1D24"/>
+    <!-- back of the envelope -->
+    <rect x="12" y="34" width="76" height="46" rx="7" fill="#CFC7B8"/>
+    <!-- pale note behind -->
+    <g transform="translate(24 13) rotate(9 28 19) scale(0.9333 0.95)">
+      <rect width="60" height="40" rx="4" fill="#F1D594"/>
+      <rect x="4" y="4" width="52" height="32" rx="2.5" fill="none" stroke="#1A1508" stroke-opacity="0.15" stroke-width="1.6"/>
+    </g>
+    <!-- gold note -->
+    <g transform="translate(20 16) rotate(-5 29 20) scale(0.9667 1)">
+      <rect width="60" height="40" rx="4" fill="#E3AD45"/>
+      <rect x="4" y="4" width="52" height="32" rx="2.5" fill="none" stroke="#1A1508" stroke-opacity="0.22" stroke-width="1.6"/>
+      <circle cx="30" cy="20" r="7" fill="none" stroke="#1A1508" stroke-opacity="0.3" stroke-width="1.8"/>
+    </g>
+    <!-- front pocket -->
+    <path d="M12 43 L50 66 L88 43 L88 73 Q88 80 81 80 L19 80 Q12 80 12 73 Z" fill="#F2EEE6"/>
+    <!-- wax seal with the funded tick -->
+    <g transform="translate(33 49) scale(0.34)">
+      <use xlink:href="#seal" href="#seal" fill="none" stroke="#F2EEE6" stroke-width="9" stroke-linejoin="round"/>
+      <use xlink:href="#seal" href="#seal" fill="#E3AD45"/>
+      <circle cx="50" cy="50" r="21" fill="none" stroke="#1A1508" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M39.5 50.5 L46.5 57.5 L61 43" fill="none" stroke="#1A1508" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>
