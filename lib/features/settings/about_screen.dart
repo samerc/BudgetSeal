@@ -38,6 +38,7 @@ class AboutScreen extends ConsumerWidget {
               'BudgetSeal',
               style: TextStyle(
                 fontSize: 26,
+                fontFamily: TypographyTokens.displayFamily,
                 fontWeight: FontWeight.w800,
                 color: AppColors.tp(context),
               ),
@@ -141,7 +142,7 @@ class AboutScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shield_outlined,
+                Icon(Icons.shield_rounded,
                     size: 14, color: AppColors.healthy),
                 const SizedBox(width: 6),
                 Text(

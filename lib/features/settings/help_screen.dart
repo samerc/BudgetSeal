@@ -47,17 +47,25 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Future<void> _loadHtml() async {
     if (!mounted) return;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Theme vars from the app, so the guide follows the chosen accent pair
+    // and light/dark/black mode. Appended at the end of the first <style>
+    // block so they win over the page's own :root and media-query rules.
+    String hex(Color c) =>
+        '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+    final surface = AppColors.sf(context);
+    final vars = ':root{'
+        '--accent:${hex(AppColors.accent)};'
+        '--accent-light:${hex(AppColors.accentLight)};'
+        '--bg:${hex(AppColors.bg(context))};'
+        '--surface:${hex(surface)};'
+        '--text:${hex(AppColors.tp(context))};'
+        '--text-secondary:${hex(AppColors.ts(context))};'
+        '--border:${hex(Color.alphaBlend(AppColors.bd(context), surface))};'
+        '}';
     try {
       final html = await rootBundle.loadString('assets/web/help.html');
       if (!mounted) return;
-      // Inject theme CSS override based on current app theme
-      final themed = isDark
-          ? html.replaceFirst(
-              '<style>',
-              '<style>:root{--accent:#E3AD45;--bg:#121318;--surface:#1C1D24;--text:#F2EEE6;--text-secondary:#A8A49B;--border:#2E3038;--accent-light:#2F2A1E;}',
-            )
-          : html;
+      final themed = html.replaceFirst('</style>', '$vars</style>');
       await _controller.loadHtmlString(themed);
     } catch (e) {
       debugPrint('[HelpScreen] Error loading help: $e');

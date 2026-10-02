@@ -30,6 +30,7 @@ import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/section_header.dart';
 
 class AllocationDetailScreen extends ConsumerStatefulWidget {
   final String allocationId;
@@ -146,12 +147,7 @@ class _AllocationDetailScreenState
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: _sectionRadius,
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
-        ],
+        boxShadow: AppColors.cardShadow(context),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -159,23 +155,8 @@ class _AllocationDetailScreenState
     );
   }
 
-  Widget _sectionHeader(String label, {IconData? icon}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(children: [
-        if (icon != null) ...[
-          Icon(icon, size: 18, color: AppColors.ts(context)),
-          const SizedBox(width: 8),
-        ],
-        Text(label,
-            style: TextStyle(
-                fontSize: TypographyTokens.sectionHeaderSize,
-                fontWeight: TypographyTokens.sectionHeaderWeight,
-                color: AppColors.accentText(context),
-                letterSpacing: TypographyTokens.sectionHeaderLetterSpacing)),
-      ]),
-    );
-  }
+  Widget _sectionHeader(String label) => SectionHeader(label,
+      padding: const EdgeInsets.only(bottom: 12));
 
   Widget _buildSegmentedSelector<T>({
     required List<(T, String, IconData)> options,
@@ -232,7 +213,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'settings',
                   child: Row(children: [
-                    Icon(Icons.settings_outlined,
+                    Icon(Icons.settings_rounded,
                         size: 18, color: AppColors.ts(context)),
                     const SizedBox(width: 10),
                     Text(l.allocEditSettings),
@@ -268,7 +249,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'archive',
                   child: Row(children: [
-                    Icon(Icons.archive_outlined,
+                    Icon(Icons.archive_rounded,
                         size: 18, color: AppColors.caution),
                     const SizedBox(width: 10),
                     Text(l.allocArchiveMenu,
@@ -330,7 +311,7 @@ class _AllocationDetailScreenState
             if (_isNew || _showSettings) ...[
             // Icon + Name
             _sectionContainer(children: [
-              _sectionHeader(l.allocNameIconSection, icon: Icons.label_outline_rounded),
+              _sectionHeader(l.allocNameIconSection),
               Row(
                 children: [
                   GestureDetector(
@@ -355,7 +336,7 @@ class _AllocationDetailScreenState
                       child: Center(
                         child: _icon != null
                             ? Text(_icon!, style: const TextStyle(fontSize: 24))
-                            : Icon(Icons.add_reaction_outlined,
+                            : Icon(Icons.add_reaction_rounded,
                                 size: 22, color: AppColors.accent),
                       ),
                     ),
@@ -434,7 +415,7 @@ class _AllocationDetailScreenState
                                   height: 38,
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.accent.withValues(alpha: 0.15)
+                                        ? AppColors.accentLight
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                     border: isSelected
@@ -462,7 +443,7 @@ class _AllocationDetailScreenState
             // Envelope Type Selection
             if (_isNew) ...[
               _sectionContainer(children: [
-                _sectionHeader(l.allocTypeSection, icon: Icons.category_outlined),
+                _sectionHeader(l.allocTypeSection),
                 _buildTypeOptionCard(
                   icon: Icons.shopping_bag_rounded,
                   title: l.allocSpendingTitle,
@@ -512,10 +493,10 @@ class _AllocationDetailScreenState
             ] else ...[
               // For existing envelopes: show type selector (remap 'saving' → 'flexible')
               _sectionContainer(children: [
-                _sectionHeader(l.allocPurposeSection, icon: Icons.category_outlined),
+                _sectionHeader(l.allocPurposeSection),
                 _buildSegmentedSelector<String>(
                   options: [
-                    ('spending', l.allocSpendingTitle, Icons.shopping_bag_outlined),
+                    ('spending', l.allocSpendingTitle, Icons.shopping_bag_rounded),
                     ('flexible', l.allocFlexibleTitle, Icons.tune_rounded),
                   ],
                   selected: _type == 'saving' ? 'flexible' : _type,
@@ -530,7 +511,7 @@ class _AllocationDetailScreenState
             // Cycle (all envelope types)
             ...[
               _sectionContainer(children: [
-                _sectionHeader(l.allocCycleSection, icon: Icons.autorenew_rounded),
+                _sectionHeader(l.allocCycleSection),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
@@ -618,9 +599,7 @@ class _AllocationDetailScreenState
             // Budget / Target Amount
             _sectionContainer(children: [
               _sectionHeader(
-                _type == 'spending' ? l.allocMonthlyBudget : l.allocTargetOptional,
-                icon: Icons.track_changes_rounded,
-              ),
+                _type == 'spending' ? l.allocMonthlyBudget : l.allocTargetOptional),
               Text(
                 _type == 'spending'
                     ? l.allocMonthlyBudgetDesc
@@ -656,8 +635,7 @@ class _AllocationDetailScreenState
 
             // Linked Categories
             _sectionContainer(children: [
-                _sectionHeader(l.allocLinkedCategoriesSection,
-                    icon: Icons.label_outline_rounded),
+                _sectionHeader(l.allocLinkedCategoriesSection),
                 Text(
                   l.allocLinkedCategoriesDesc,
                   style: TextStyle(
@@ -668,7 +646,8 @@ class _AllocationDetailScreenState
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.cautionLight,
+                      color: AppColors.pastel(context, AppColors.caution,
+                          light: 0.85, dark: 0.75),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                           color: AppColors.caution.withValues(alpha: 0.3)),
@@ -1051,7 +1030,7 @@ class _AllocationDetailScreenState
                                 horizontal: 8, vertical: 8),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.accent.withValues(alpha: 0.12)
+                                  ? AppColors.accentLight
                                   : surfaceVariantColor,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
@@ -1259,8 +1238,7 @@ class _AllocationDetailScreenState
     return _sectionContainer(children: [
       Row(children: [
         Expanded(
-          child: _sectionHeader(S.of(context).allocRecentActivity,
-              icon: Icons.receipt_outlined),
+          child: _sectionHeader(S.of(context).allocRecentActivity),
         ),
         Builder(builder: (_) {
           // Its linked category (top level first) — the Activity tab filter
@@ -1336,7 +1314,7 @@ class _AllocationDetailScreenState
                 'withdrawal' => Icons.outbox_rounded,
                 'revaluation' => Icons.currency_exchange_rounded,
                 'transfer' => Icons.swap_horiz_rounded,
-                _ => Icons.circle_outlined,
+                _ => Icons.radio_button_unchecked_rounded,
               };
 
               // A spending row opens its transaction.
@@ -1459,7 +1437,7 @@ class _AllocationDetailScreenState
         if (maxVal == 0) return const SizedBox.shrink();
 
         return _sectionContainer(children: [
-          _sectionHeader(S.of(context).allocSpendingHistory, icon: Icons.bar_chart_rounded),
+          _sectionHeader(S.of(context).allocSpendingHistory),
           const SizedBox(height: 4),
           SizedBox(
             height: 105,
@@ -1533,7 +1511,7 @@ class _AllocationDetailScreenState
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.08)
+              ? AppColors.accentLight
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -1549,7 +1527,7 @@ class _AllocationDetailScreenState
               height: 40,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.accent.withValues(alpha: 0.15)
+                    ? AppColors.accentLight
                     : AppColors.bd(context).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -2311,7 +2289,7 @@ class _SegmentChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.12)
+              ? AppColors.accentLight
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -2717,8 +2695,10 @@ class _RevalueSheetState extends State<_RevalueSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: gain >= 0
-                  ? AppColors.healthy.withValues(alpha: 0.08)
-                  : AppColors.overspent.withValues(alpha: 0.08),
+                  ? AppColors.pastel(context, AppColors.healthy,
+                      light: 0.88, dark: 0.78)
+                  : AppColors.pastel(context, AppColors.overspent,
+                      light: 0.88, dark: 0.78),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(

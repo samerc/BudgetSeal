@@ -152,7 +152,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // ── Envelope Alerts ──
           _card(
             context,
-            icon: Icons.account_balance_wallet_outlined,
+            icon: Icons.account_balance_wallet_rounded,
             iconColor: AppColors.overspent,
             title: S.of(context).notifEnvelopeTitle,
             children: [

@@ -303,7 +303,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                           margin: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: isToday
-                                ? AppColors.accent.withValues(alpha: 0.1)
+                                ? AppColors.accentLight
                                 : dayItems.isNotEmpty
                                     ? AppColors.sf(context)
                                     : null,
@@ -334,10 +334,10 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                                         horizontal: 2),
                                     decoration: BoxDecoration(
                                       color: r.type == 'income'
-                                          ? AppColors.healthy
-                                              .withValues(alpha: 0.15)
-                                          : AppColors.overspent
-                                              .withValues(alpha: 0.15),
+                                          ? AppColors.pastel(context, AppColors.healthy,
+                                              light: 0.85, dark: 0.75)
+                                          : AppColors.pastel(context, AppColors.overspent,
+                                              light: 0.85, dark: 0.75),
                                       borderRadius: BorderRadius.circular(3),
                                     ),
                                     child: Text(

@@ -48,7 +48,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Account Label ─────────────────────────────────────────
           _ToggleRow(
-            icon: Icons.account_balance_wallet_outlined,
+            icon: Icons.account_balance_wallet_rounded,
             title: S.of(context).txListAccountLabel,
             subtitle: S.of(context).txListAccountSubtitle,
             value: s.showAccount,
@@ -59,7 +59,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Category Icon ─────────────────────────────────────────
           _ToggleRow(
-            icon: Icons.category_outlined,
+            icon: Icons.category_rounded,
             title: S.of(context).txListCategoryIcon,
             subtitle: S.of(context).txListCategorySubtitle,
             value: s.showCategoryIcon,
@@ -167,7 +167,7 @@ class _CompactPreviewRow extends StatelessWidget {
                   light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.restaurant, size: 16, color: AppColors.accent),
+            child: Icon(Icons.restaurant_rounded, size: 16, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
         ],
@@ -226,7 +226,7 @@ class _ExpandedPreviewRow extends StatelessWidget {
                   light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.restaurant, size: 18, color: AppColors.accent),
+            child: Icon(Icons.restaurant_rounded, size: 18, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
         ],
@@ -377,7 +377,7 @@ class _DropdownChip extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     color: AppColors.tp(context))),
             const SizedBox(width: 4),
-            Icon(Icons.arrow_drop_down, size: 18, color: AppColors.ts(context)),
+            Icon(Icons.arrow_drop_down_rounded, size: 18, color: AppColors.ts(context)),
           ],
         ),
       ),

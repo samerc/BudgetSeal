@@ -65,10 +65,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   List<(String, String, IconData)> _accountTypes(BuildContext context) {
     final l = S.of(context);
     return [
-      ('cash', l.acctTypeCash, Icons.wallet),
-      ('bank', l.acctTypeBank, Icons.account_balance),
-      ('credit', l.acctTypeCredit, Icons.credit_card),
-      ('wallet', l.acctTypeDigital, Icons.account_balance_wallet),
+      ('cash', l.acctTypeCash, Icons.money_rounded),
+      ('bank', l.acctTypeBank, Icons.account_balance_rounded),
+      ('credit', l.acctTypeCredit, Icons.credit_card_rounded),
+      ('wallet', l.acctTypeDigital, Icons.account_balance_wallet_rounded),
     ];
   }
 
@@ -236,7 +236,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   value: 'archive',
                   child: Row(
                     children: [
-                      Icon(Icons.archive_outlined,
+                      Icon(Icons.archive_rounded,
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
                       Text(l.acctArchiveTitle,
@@ -408,7 +408,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.settings_outlined,
+                      Icon(Icons.settings_rounded,
                           size: 18, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
@@ -452,7 +452,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               // ── Type ──
               _formSection(
                 context,
-                icon: Icons.category_outlined,
+                icon: Icons.category_rounded,
                 title: l.acctTypeSection,
                 child: Wrap(
                   spacing: 8,
@@ -469,7 +469,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.accent.withValues(alpha: 0.12)
+                              ? AppColors.accentLight
                               : AppColors.sfv(context),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(

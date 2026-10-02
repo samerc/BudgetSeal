@@ -15,6 +15,7 @@ import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
@@ -150,7 +151,8 @@ class _TravelExchangeScreenState
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CalculatorAmountField(
                   value: _sourceAmount,
-                  hintText: '0.00',
+                  hintText: formatNumber(0,
+                      decimals: currencyDecimals(fromAcc?.currency ?? _baseCurrency)),
                   currency: fromAcc?.currency ?? _baseCurrency,
                   fontSize: 24,
                   onChanged: (v) => setState(() => _sourceAmount = v),
@@ -199,7 +201,7 @@ class _TravelExchangeScreenState
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CalculatorAmountField(
                   value: _receivedAmount,
-                  hintText: '0.00',
+                  hintText: formatNumber(0, decimals: currencyDecimals(_targetCurrency)),
                   currency: _targetCurrency,
                   fontSize: 24,
                   onChanged: (v) => setState(() => _receivedAmount = v),
@@ -243,11 +245,11 @@ class _TravelExchangeScreenState
             FilledButton.icon(
               onPressed: _canExchange ? (_loading ? null : _doExchange) : null,
               icon: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                          color: AppColors.onAccent, strokeWidth: 2))
                   : const Icon(Icons.flight_takeoff_rounded, size: 18),
               label: Text(S.of(context).travelExchangeButton,
                   style:
@@ -478,13 +480,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label,
-        style: TextStyle(
-          fontSize: TypographyTokens.sectionHeaderSize,
-          fontWeight: TypographyTokens.sectionHeaderWeight,
-          letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.accentText(context),
-        ));
+    return SectionHeader(label);
   }
 }
 

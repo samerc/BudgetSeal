@@ -24,6 +24,7 @@ import '../../shared/widgets/budget_progress.dart';
 import '../../shared/widgets/currency_display.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/brand_palette.dart';
@@ -178,15 +179,6 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         _ => type[0].toUpperCase() + type.substring(1),
       };
 
-  static IconData _sectionIcon(String type) => switch (type) {
-        'spending' => Icons.shopping_bag_rounded,
-        'flexible' => Icons.savings_rounded,
-        _ => Icons.category_rounded,
-      };
-
-  static Color _sectionColor(String type, BuildContext context) =>
-      AppColors.tp(context);
-
   @override
   bool get wantKeepAlive => true;
 
@@ -316,7 +308,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   PopupMenuItem(
                     value: 'archived',
                     child: Row(children: [
-                      Icon(Icons.unarchive_outlined,
+                      Icon(Icons.unarchive_rounded,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 12),
                       Text(l.allocArchivedTitle),
@@ -635,7 +627,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           if (!checkFreeLimit(context, ref, allocs.length, FreeLimits.maxEnvelopes, 'envelopes')) return;
           context.push('/allocations/new');
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -661,28 +653,14 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
 
       widgets.add(
         Padding(
-          padding: EdgeInsets.only(
+          padding: EdgeInsetsDirectional.only(
             top: widgets.isEmpty ? 4 : 20,
             bottom: 8,
-            left: 4,
+            start: 4,
           ),
           child: Row(
             children: [
-              Icon(
-                _sectionIcon(type),
-                size: 16,
-                color: _sectionColor(type, context),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _sectionTitle(type),
-                style: TextStyle(
-                  fontSize: TypographyTokens.sectionHeaderSize,
-                  fontWeight: TypographyTokens.sectionHeaderWeight,
-                  color: _sectionColor(type, context),
-                  letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                ),
-              ),
+              SectionHeader(_sectionTitle(type)),
               const SizedBox(width: 8),
               Text(
                 '${items.length}',

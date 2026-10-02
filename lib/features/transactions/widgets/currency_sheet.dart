@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/widgets/section_header.dart';
 
 // ---------------------------------------------------------------------------
 // Common currencies
@@ -258,18 +259,8 @@ class _CurrencySheetState extends State<CurrencySheet>
                 children: [
                   // Account currencies (pinned at top)
                   if (_query.isEmpty && widget.accountCurrencies.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                      child: Text(
-                        S.of(context).currencyYourAccounts,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          color: AppColors.ts(context),
-                        ),
-                      ),
-                    ),
+                    SectionHeader(S.of(context).currencyYourAccounts,
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 4)),
                     for (final code in widget.accountCurrencies)
                       _buildCurrencyTile(code, currencyName(tr, code)),
                     Divider(
@@ -282,18 +273,8 @@ class _CurrencySheetState extends State<CurrencySheet>
                   ],
                   // Recently used section
                   if (recentCodes.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                      child: Text(
-                        S.of(context).currencyRecentlyUsed,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          color: AppColors.ts(context),
-                        ),
-                      ),
-                    ),
+                    SectionHeader(S.of(context).currencyRecentlyUsed,
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 4)),
                     for (final code in recentCodes)
                       _buildCurrencyTile(code, currencyName(tr, code)),
                     Divider(
@@ -303,18 +284,8 @@ class _CurrencySheetState extends State<CurrencySheet>
                       color: AppColors.bd(context),
                     ),
                     const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                      child: Text(
-                        S.of(context).currencyAll,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          color: AppColors.ts(context),
-                        ),
-                      ),
-                    ),
+                    SectionHeader(S.of(context).currencyAll,
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 4)),
                   ],
                   // Full filtered list
                   for (final (code, _) in filtered)
@@ -385,7 +356,7 @@ class _CurrencySheetState extends State<CurrencySheet>
             )
           : null,
       selected: isSelected,
-      selectedTileColor: AppColors.accent.withValues(alpha: 0.04),
+      selectedTileColor: AppColors.accentLight,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onTap: () => Navigator.pop(context, code),
     );

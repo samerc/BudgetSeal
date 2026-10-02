@@ -6,6 +6,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 /// Budget tab ⋮ → Reorder envelopes: drag to set the order the Budget tab
 /// (and funding screen) list envelopes in.
@@ -41,7 +42,9 @@ Future<void> showReorderEnvelopesSheet(
                     Expanded(
                       child: Text(tr.allocReorderTitle,
                           style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w800)),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: TypographyTokens.displayFamily)),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(ctx, true),

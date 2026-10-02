@@ -361,7 +361,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (_lines.isNotEmpty) {
           _lines[0].categoryId = null;
           _lines[0].categoryName = null;
-          _lines[0].categoryColor = AppColors.textSecondary;
+          _lines[0].categoryColor = AppColors.ts(context);
         }
         _autoFilled = false;
       });
@@ -1151,7 +1151,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.overspentLight,
+                  color: AppColors.pastel(context, AppColors.overspent,
+                      light: 0.85, dark: 0.75),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                       color: AppColors.overspent.withValues(alpha: 0.3)),
@@ -1280,7 +1281,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? Icons.list_alt_rounded
                   : Icons.category_rounded,
           size: 30,
-          color: Colors.white,
+          color: AppColors.pastel(context, typeColor,
+              light: 0.5, dark: 0.4, inverse: true),
         ),
       );
     }

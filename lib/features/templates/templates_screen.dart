@@ -244,7 +244,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   // Group button
                   PopupMenuButton<_GroupMode>(
-                    icon: Icon(Icons.workspaces_outlined,
+                    icon: Icon(Icons.workspaces_rounded,
                         color: AppColors.ts(context)),
                     tooltip: S.of(context).tmplGroupTooltip,
                     onSelected: (v) => setState(() => _group = v),
@@ -314,11 +314,14 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                           title: S.of(context).tmplNoTitle,
                           subtitle: S.of(context).tmplNoSubtitle,
                         )
-                      : _group == _GroupMode.none
-                          ? _buildFlatList(
-                              filtered, catMap, acctMap, txColors)
-                          : _buildGroupedList(
-                              filtered, catMap, acctMap, txColors),
+                      : RefreshIndicator(
+                          onRefresh: _load,
+                          child: _group == _GroupMode.none
+                              ? _buildFlatList(
+                                  filtered, catMap, acctMap, txColors)
+                              : _buildGroupedList(
+                                  filtered, catMap, acctMap, txColors),
+                        ),
             ),
           ],
         ),
@@ -534,7 +537,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.edit_outlined, color: AppColors.ts(ctx)),
+              leading: Icon(Icons.edit_rounded, color: AppColors.ts(ctx)),
               title: Text(S.of(ctx).commonEdit),
               onTap: () {
                 Navigator.pop(ctx);
@@ -546,7 +549,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete_outline,
+              leading: Icon(Icons.delete_outline_rounded,
                   color: AppColors.overspent),
               title: Text(S.of(ctx).commonDelete),
               onTap: () {
@@ -573,14 +576,14 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? color : color.withValues(alpha: 0.08),
+          color: isSelected ? color : AppColors.pastel(context, color, light: 0.85, dark: 0.75),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(label,
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : color)),
+                color: isSelected ? AppColors.inkOn(color) : color)),
       ),
     );
   }

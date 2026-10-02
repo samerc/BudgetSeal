@@ -20,7 +20,9 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'widgets/delete_with_undo.dart';
@@ -46,10 +48,9 @@ class TransactionDetailScreen extends ConsumerWidget {
               surfaceTintColor: Colors.transparent,
               elevation: 0,
             ),
-            body: Center(
-              child: Text(S.of(context).txDetailNotFound,
-                  style: TextStyle(
-                      color: AppColors.ts(context), fontSize: 16)),
+            body: EmptyState(
+              icon: Icons.receipt_long_rounded,
+              title: S.of(context).txDetailNotFound,
             ),
           );
         }
@@ -128,7 +129,7 @@ class _DetailBody extends ConsumerWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
+            icon: const Icon(Icons.edit_rounded),
             tooltip: S.of(context).commonEdit,
             onPressed: () => _editTransaction(context, ref),
           ),
@@ -173,7 +174,7 @@ class _DetailBody extends ConsumerWidget {
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline, size: 20, color: AppColors.overspent),
+                    Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.overspent),
                     const SizedBox(width: 12),
                     Text(S.of(context).commonDelete,
                         style: TextStyle(color: AppColors.overspent)),
@@ -222,7 +223,10 @@ class _DetailBody extends ConsumerWidget {
                                   light: 0.35, dark: 0.3),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(icon, color: Colors.white, size: 30),
+                            child: Icon(icon,
+                                color: AppColors.pastel(context, typeColor,
+                                    light: 0.5, dark: 0.4, inverse: true),
+                                size: 30),
                           ),
                       const SizedBox(height: 6),
                       Text(
@@ -347,7 +351,7 @@ class _DetailBody extends ConsumerWidget {
                   // Multi-account: show all account names
                   return _detailRow(context, S.of(context).txDetailAccounts,
                       involvedNames.join(', '),
-                      icon: Icons.account_balance_wallet_outlined);
+                      icon: Icons.account_balance_wallet_rounded);
                 }
                 // The line's account (per-line accounts), as shown in the name.
                 final accountId = entry.lines.isNotEmpty
@@ -357,7 +361,7 @@ class _DetailBody extends ConsumerWidget {
                   onTap: () => context.push('/accounts/$accountId'),
                   child: _detailRow(context, S.of(context).commonAccount,
                       '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
-                      icon: Icons.account_balance_wallet_outlined),
+                      icon: Icons.account_balance_wallet_rounded),
                 );
               }),
               if (tx.note.isNotEmpty) ...[
@@ -385,15 +389,9 @@ class _DetailBody extends ConsumerWidget {
           // -- Split lines --
           if (entry.lines.length > 1) ...[
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-              child: Text(S.of(context).txDetailSplitItems(entry.lines.length),
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.ts(context))),
-            ),
+            SectionHeader(S.of(context).txDetailSplitItems(entry.lines.length),
+                padding:
+                    const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
             _card(context, children: [
               for (var i = 0; i < entry.lines.length; i++) ...[
                 if (i > 0) _divider(context),
@@ -411,15 +409,9 @@ class _DetailBody extends ConsumerWidget {
                   (entry.lines.first.categoryId != null &&
                       entry.lines.first.categoryId != tx.categoryId))) ...[
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-              child: Text(S.of(context).txDetailLineDetail,
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.ts(context))),
-            ),
+            SectionHeader(S.of(context).txDetailLineDetail,
+                padding:
+                    const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
             _buildSingleLineCard(context, entry.lines.first, categoryMap),
           ],
 
@@ -688,25 +680,12 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.link_rounded,
-                      size: 14, color: AppColors.ts(context)),
-                  const SizedBox(width: 6),
-                  Text(
-                    related.length == 1 ? S.of(context).txDetailRelatedSingle : S.of(context).txDetailRelatedPlural,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.ts(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            SectionHeader(
+                related.length == 1
+                    ? S.of(context).txDetailRelatedSingle
+                    : S.of(context).txDetailRelatedPlural,
+                padding:
+                    const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
             ...related.map((r) {
               final isIncome = r.type == 'income';
               final color = isIncome ? AppColors.healthy : AppColors.overspent;

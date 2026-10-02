@@ -65,7 +65,9 @@ class TypeChip extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selected ? color : color.withValues(alpha: 0.08),
+            color: selected
+                ? color
+                : AppColors.pastel(context, color, light: 0.88, dark: 0.78),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected ? color : color.withValues(alpha: 0.25),
@@ -74,14 +76,15 @@ class TypeChip extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: selected ? Colors.white : color),
+              Icon(icon,
+                  size: 18, color: selected ? AppColors.inkOn(color) : color),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: selected ? Colors.white : color,
+                  color: selected ? AppColors.inkOn(color) : color,
                 ),
               ),
             ],
@@ -147,8 +150,8 @@ class CategoryPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: hasCategory
-              ? color.withValues(alpha: 0.1)
-              : AppColors.bd(context),
+              ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
+              : AppColors.sfv(context),
           border: Border.all(
             color: hasCategory
                 ? color.withValues(alpha: 0.35)

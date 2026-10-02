@@ -1043,7 +1043,7 @@
   "@txDetailUnknownAccount": {
     "description": "Fallback"
   },
-  "txDetailSplitItems": "SPLIT ITEMS ({count})",
+  "txDetailSplitItems": "Split items ({count})",
   "@txDetailSplitItems": {
     "description": "Section header",
     "placeholders": {
@@ -3183,7 +3183,7 @@
   "@notifBillsTitle": {
     "description": "Card title"
   },
-  "notifBillsDesc": "You'll receive a notification when recurring transactions are due within 2 days. Checks on app startup.",
+  "notifBillsDesc": "You'll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.",
   "@notifBillsDesc": {
     "description": "Description"
   },
@@ -5479,7 +5479,7 @@
   "@leftoverLoadError": {
     "description": "Leftover resolution error"
   },
-  "leftoverCurrentBalance": "Current Balance",
+  "leftoverCurrentBalance": "Current balance",
   "@leftoverCurrentBalance": {
     "description": "Leftover resolution section label"
   },

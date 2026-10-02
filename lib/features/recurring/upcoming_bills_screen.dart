@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -91,7 +92,7 @@ class _UpcomingBillsScreenState
               onTap: () => Navigator.pop(ctx, 'skip'),
             ),
             ListTile(
-              leading: const Icon(Icons.edit_outlined),
+              leading: const Icon(Icons.edit_rounded),
               title: Text(tr.commonEdit),
               onTap: () => Navigator.pop(ctx, 'edit'),
             ),
@@ -165,13 +166,13 @@ class _UpcomingBillsScreenState
   }
 }
 
-class _BillCard extends StatelessWidget {
+class _BillCard extends ConsumerWidget {
   final RecurringTransaction bill;
   final VoidCallback onTap;
   const _BillCard({required this.bill, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
     final due = bill.nextDueDate;
     final daysUntil = due.difference(DateTime(now.year, now.month, now.day)).inDays;
@@ -199,11 +200,7 @@ class _BillCard extends StatelessWidget {
       _ => Icons.arrow_upward_rounded,
     };
 
-    final typeColor = switch (bill.type) {
-      'income' => AppColors.healthy,
-      'transfer' => AppColors.accent,
-      _ => AppColors.overspent,
-    };
+    final typeColor = ref.watch(txColorsProvider).forType(bill.type);
 
     return Container(
       decoration: BoxDecoration(

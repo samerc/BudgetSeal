@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -191,7 +192,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       _TypeChip(
                         label: S.of(context).typeExpense,
                         selected: _typeFilter == 'expense',
-                        color: AppColors.overspent,
+                        color: ref.watch(txColorsProvider).expense,
                         onTap: () =>
                             setState(() => _typeFilter = 'expense'),
                       ),
@@ -199,7 +200,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       _TypeChip(
                         label: S.of(context).typeIncome,
                         selected: _typeFilter == 'income',
-                        color: AppColors.healthy,
+                        color: ref.watch(txColorsProvider).income,
                         onTap: () =>
                             setState(() => _typeFilter = 'income'),
                       ),
@@ -372,7 +373,7 @@ class _TypeChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? chipColor.withValues(alpha: 0.15)
+              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
           border: selected
@@ -392,7 +393,7 @@ class _TypeChip extends StatelessWidget {
   }
 }
 
-class _RecurringTile extends StatelessWidget {
+class _RecurringTile extends ConsumerWidget {
   final RecurringTransaction item;
   final String frequencyLabel;
   final ValueChanged<bool> onToggle;
@@ -408,9 +409,8 @@ class _RecurringTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isIncome = item.type == 'income';
-    final color = isIncome ? AppColors.healthy : AppColors.overspent;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = ref.watch(txColorsProvider).forType(item.type);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

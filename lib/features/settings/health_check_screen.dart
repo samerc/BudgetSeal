@@ -20,6 +20,8 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/services/auto_backup_service.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 
 class HealthCheckScreen extends ConsumerStatefulWidget {
   const HealthCheckScreen({super.key});
@@ -505,17 +507,12 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
   Widget _statusCard(
       BuildContext context, bool healthy, _HealthReport report) {
+    final tone = healthy ? AppColors.healthy : AppColors.overspent;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: healthy
-              ? [const Color(0xFF10B981), const Color(0xFF059669)]
-              : [const Color(0xFFEF4444), const Color(0xFFDC2626)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.pastel(context, tone, light: 0.85, dark: 0.75),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
       ),
       child: Column(
         children: [
@@ -523,16 +520,17 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             healthy
                 ? Icons.check_circle_rounded
                 : Icons.warning_rounded,
-            color: Colors.white,
+            color: tone,
             size: 48,
           ),
           const SizedBox(height: 12),
           Text(
             healthy ? S.of(context).healthAllClear : S.of(context).healthIssuesFound,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.tp(context),
               fontSize: 22,
-              fontWeight: FontWeight.bold,
+              fontFamily: TypographyTokens.displayFamily,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
@@ -540,7 +538,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             healthy
                 ? S.of(context).healthDataConsistent
                 : S.of(context).healthDiscrepancies,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: TextStyle(color: AppColors.ts(context), fontSize: 13),
           ),
           const SizedBox(height: 16),
           Row(
@@ -565,26 +563,19 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     return Column(
       children: [
         Text(value,
-            style: const TextStyle(
-                color: Colors.white,
+            style: TextStyle(
+                color: AppColors.tp(context),
                 fontWeight: FontWeight.bold,
                 fontSize: 16)),
         const SizedBox(height: 2),
         Text(label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11)),
+            style: TextStyle(color: AppColors.ts(context), fontSize: 11)),
       ],
     );
   }
 
-  Widget _sectionHeader(BuildContext context, String title) {
-    return Text(title,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: AppColors.ts(context),
-          letterSpacing: 0.5,
-        ));
-  }
+  Widget _sectionHeader(BuildContext context, String title) =>
+      SectionHeader(title);
 
   Widget _invariantTile(BuildContext context, _CurrencyCheck check) {
     return Container(

@@ -9,6 +9,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
@@ -503,18 +504,8 @@ class _SubscriptionDetailScreenState
 
           // ── Price History ──
           if (priceHistory.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-              child: Text(
-                tr.subDetailPriceHistory,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.ts(context),
-                ),
-              ),
-            ),
+            SectionHeader(tr.subDetailPriceHistory,
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 8)),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -611,18 +602,8 @@ class _SubscriptionDetailScreenState
 
           // ── Past Transactions ──
           if (_pastTransactions.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-              child: Text(
-                tr.subDetailPastTx,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.ts(context),
-                ),
-              ),
-            ),
+            SectionHeader(tr.subDetailPastTx,
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 8)),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
@@ -641,18 +622,8 @@ class _SubscriptionDetailScreenState
 
           // ── Upcoming ──
           if (upcoming.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-              child: Text(
-                tr.subDetailUpcoming,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.ts(context),
-                ),
-              ),
-            ),
+            SectionHeader(tr.subDetailUpcoming,
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 8)),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.sf(context),

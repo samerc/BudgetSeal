@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -690,7 +691,7 @@ class _MonthHeader extends StatelessWidget {
 
 // ─── Planned Payment Card ─────────────────────────────────────────────────────
 
-class _PlannedCard extends StatelessWidget {
+class _PlannedCard extends ConsumerWidget {
   final _PlannedItem item;
   final String baseCurrency;
   final VoidCallback onPost;
@@ -706,7 +707,7 @@ class _PlannedCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tx = item.tx;
 
     final typeIcon = switch (tx.type) {
@@ -715,11 +716,7 @@ class _PlannedCard extends StatelessWidget {
       _ => Icons.arrow_upward_rounded,
     };
 
-    final typeColor = switch (tx.type) {
-      'income' => AppColors.healthy,
-      'transfer' => AppColors.accent,
-      _ => AppColors.overspent,
-    };
+    final typeColor = ref.watch(txColorsProvider).forType(tx.type);
 
     final title = tx.note.isNotEmpty ? tx.note : _typeLabel(context, tx.type);
 

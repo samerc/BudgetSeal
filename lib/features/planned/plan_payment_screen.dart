@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
@@ -298,10 +299,11 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
   // ─── Build ──────────────────────────────────────────────────────────────────
 
   Color _typeColor() {
+    final colors = ref.watch(txColorsProvider);
     return switch (_type) {
-      _PlanType.income => AppColors.healthy,
-      _PlanType.expense => AppColors.overspent,
-      _PlanType.transfer => AppColors.accent,
+      _PlanType.income => colors.income,
+      _PlanType.expense => colors.expense,
+      _PlanType.transfer => colors.transfer,
     };
   }
 
@@ -336,6 +338,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
               onPressed: _loading ? null : _save,
               style: FilledButton.styleFrom(
                 backgroundColor: _typeColor(),
+                foregroundColor: AppColors.inkOn(_typeColor()),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: Size.zero,
@@ -343,11 +346,11 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     borderRadius: BorderRadius.circular(10)),
               ),
               icon: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 14,
                       width: 14,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                          color: AppColors.inkOn(_typeColor()), strokeWidth: 2))
                   : const Icon(Icons.check_rounded, size: 18),
               label: Text(S.of(context).plannedPlanButton,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
@@ -648,7 +651,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
           label: tr.typeExpense,
           icon: Icons.arrow_upward_rounded,
           selected: _type == _PlanType.expense,
-          color: AppColors.overspent,
+          color: ref.watch(txColorsProvider).expense,
           onTap: () => setState(() => _type = _PlanType.expense),
         ),
         const SizedBox(width: 8),
@@ -656,7 +659,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
           label: tr.typeIncome,
           icon: Icons.arrow_downward_rounded,
           selected: _type == _PlanType.income,
-          color: AppColors.healthy,
+          color: ref.watch(txColorsProvider).income,
           onTap: () => setState(() => _type = _PlanType.income),
         ),
         const SizedBox(width: 8),
@@ -664,7 +667,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
           label: tr.typeTransfer,
           icon: Icons.swap_horiz_rounded,
           selected: _type == _PlanType.transfer,
-          color: AppColors.accent,
+          color: ref.watch(txColorsProvider).transfer,
           onTap: () => setState(() => _type = _PlanType.transfer),
         ),
       ],
@@ -747,7 +750,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     decoration: BoxDecoration(
                       color: selected
                           ? color
-                          : color.withValues(alpha: 0.06),
+                          : AppColors.pastel(context, color, light: 0.9, dark: 0.8),
                       borderRadius: BorderRadius.circular(RadiusTokens.pill),
                       border: Border.all(
                         color: selected
@@ -760,7 +763,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : color,
+                        color: selected ? AppColors.inkOn(color) : color,
                       ),
                     ),
                   ),

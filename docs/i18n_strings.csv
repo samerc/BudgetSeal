@@ -181,7 +181,7 @@ tx_detail_time,Detail label,Time,الوقت,Heure
 tx_detail_accounts,Detail label (multi),Accounts,الحسابات,Comptes
 tx_detail_note,Detail label,Note,ملاحظة,Note
 tx_detail_unknown_account,Fallback,Unknown,غير معروف,Inconnu
-tx_detail_split_items,Section header,SPLIT ITEMS ({count}),عناصر مقسمة ({count}),ÉLÉMENTS RÉPARTIS ({count})
+tx_detail_split_items,Section header,Split items ({count}),عناصر مقسمة ({count}),Éléments répartis ({count})
 tx_detail_line_detail,Section header,Line detail,تفاصيل السطر,Détail de la ligne
 tx_detail_uncategorized,Fallback,Uncategorized,بدون فئة,Non catégorisé
 tx_detail_related_single,Section header,Related transaction,معاملة مرتبطة,Transaction liée
@@ -583,7 +583,7 @@ period_select_allocation,Dropdown hint,Select allocation,اختر ظرفاً,Sé
 leftover_title,AppBar title,Resolve Leftovers,حل المتبقيات,Résoudre les restes
 leftover_no_allocation,Error state,No allocation specified.,لم يتم تحديد ظرف.,Aucune enveloppe spécifiée.
 leftover_not_found,Error state,Allocation not found.,الظرف غير موجود.,Enveloppe introuvable.
-leftover_current_balance,Label,Current Balance,الرصيد الحالي,Solde actuel
+leftover_current_balance,Label,Current balance,الرصيد الحالي,Solde actuel
 leftover_no_balance,Text,No balance,لا رصيد,Aucun solde
 leftover_no_positive,Info,No positive balance to resolve.,لا رصيد إيجابي لحله.,Aucun solde positif à résoudre.
 leftover_currency_to_resolve,Label,Currency to resolve,العملة المراد حلها,Devise à résoudre
@@ -761,7 +761,7 @@ notif_custom_message,Hint,Custom message (optional),رسالة مخصصة (اخ�
 notif_envelope_title,Card title,Envelope Alerts,تنبيهات الأظرف,Alertes d'enveloppes
 notif_envelope_desc,Description,"You'll get a notification when envelopes are overspent or bills are coming up. The app checks when it opens or comes back to the foreground, at most once a day per alert.",ستصلك إشعارات عند تجاوز الأظرف أو اقتراب الفواتير. يتحقق التطبيق عند فتحه أو العودة إليه، مرة واحدة يومياً كحد أقصى لكل تنبيه.,"Vous recevez une notification quand des enveloppes sont dépassées ou que des factures approchent. L'app vérifie à l'ouverture ou au retour au premier plan, au plus une fois par jour par alerte."
 notif_bills_title,Card title,Upcoming Bills,الفواتير القادمة,Factures à venir
-notif_bills_desc,Description,You'll receive a notification when recurring transactions are due within 2 days. Checks on app startup.,ستتلقى إشعاراً عندما تكون المعاملات المتكررة مستحقة خلال يومين. يتم التحقق عند بدء التطبيق.,Vous recevrez une notification quand des transactions récurrentes sont dues sous 2 jours. Vérification au démarrage.
+notif_bills_desc,Description,"You'll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.",ستتلقى إشعاراً عندما تكون المعاملات المتكررة مستحقة خلال يومين. يتم التحقق عند فتح التطبيق أو العودة إليه، مرة واحدة يومياً على الأكثر.,"Vous recevrez une notification quand des transactions récurrentes sont dues sous 2 jours. Vérifié à l'ouverture de l'app ou à son retour, au plus une fois par jour."
 # ──────────────────────────────────────────────,,,,
 # EXCHANGE RATES,,,,
 # ──────────────────────────────────────────────,,,,

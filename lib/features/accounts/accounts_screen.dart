@@ -202,7 +202,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           if (!checkFreeLimit(context, ref, accounts.length, FreeLimits.maxAccounts, 'accounts')) return;
           context.push('/accounts/new');
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -412,12 +412,18 @@ class _AccountTile extends StatelessWidget {
         _ => Icons.money_rounded,
       };
 
-  Color _typeColor(String type) => switch (type) {
-        'bank' => const Color(0xFF1565C0),
-        'credit' => const Color(0xFFE65100),
-        'wallet' => AppColors.accent,
-        _ => AppColors.healthy,
-      };
+  // Same HSL scheme as the More page icons: one saturation/lightness for
+  // every type (lifted in dark mode) so the hues read in both themes.
+  Color _typeColor(String type) {
+    final hue = switch (type) {
+      'bank' => 212.0,
+      'credit' => 24.0,
+      'wallet' => 40.0,
+      _ => 152.0,
+    };
+    return HSLColor.fromAHSL(1, hue, 0.62, AppColors.isDark ? 0.62 : 0.5)
+        .toColor();
+  }
 
   @override
   Widget build(BuildContext context) {

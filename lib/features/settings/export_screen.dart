@@ -138,7 +138,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.file_download_outlined,
+                      Icon(Icons.file_download_rounded,
                           size: 24, color: AppColors.accent),
                       const SizedBox(width: 12),
                       Text(S.of(context).exportTransTitle,
@@ -156,11 +156,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                   FilledButton.icon(
                     onPressed: _exporting ? null : _exportTransactions,
                     icon: _exporting
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
+                                color: AppColors.onAccent, strokeWidth: 2))
                         : const Icon(Icons.share_rounded, size: 18),
                     label: Text(
                         _exporting ? S.of(context).backupExporting : S.of(context).backupExportShare),

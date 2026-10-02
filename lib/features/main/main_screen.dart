@@ -197,7 +197,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 label: S.of(context).tabHome,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.swap_vert),
+                icon: const Icon(Icons.swap_vert_rounded),
                 selectedIcon: const Icon(Icons.swap_vert_rounded),
                 label: S.of(context).tabActivity,
               ),
@@ -212,7 +212,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 label: S.of(context).tabReports,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.grid_view),
+                icon: const Icon(Icons.grid_view_outlined),
                 selectedIcon: const Icon(Icons.grid_view_rounded),
                 label: S.of(context).tabMore,
               ),

@@ -29,13 +29,13 @@ import '../../core/providers/sync_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
-import '../../core/services/daily_reminder_service.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/app_info.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
@@ -520,11 +520,10 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
-                      setSheetState(() {
-                        incomeColor = const Color(0xFF10B981);
-                        expenseColor = const Color(0xFFEF4444);
-                        transferColor = const Color(0xFF6366F1);
-                      });
+                      // Clear the custom colors so all three follow the
+                      // theme-adaptive defaults again.
+                      ref.read(txColorsProvider.notifier).update(const TxColors());
+                      Navigator.pop(ctx);
                     },
                     child: Text(tr.txColorsReset,
                         style: TextStyle(
@@ -618,8 +617,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                           : null,
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check_rounded,
-                            size: 18, color: Colors.white)
+                        ? Icon(Icons.check_rounded,
+                            size: 18, color: AppColors.inkOn(p.$2))
                         : null,
                   ),
                   const SizedBox(height: 3),
@@ -1085,15 +1084,12 @@ class _EntryModeCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.08)
+              ? AppColors.accentLight
               : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accent
-                : AppColors.bd(context),
-            width: isSelected ? 1.5 : 1,
-          ),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          border: isSelected
+              ? Border.all(color: AppColors.accent, width: 1.5)
+              : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1103,7 +1099,7 @@ class _EntryModeCard extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.accent.withValues(alpha: 0.15)
+                    ? AppColors.accentLight
                     : AppColors.th(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1175,7 +1171,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           // ── Appearance ──
           _SectionHeader(title: l.settingsAppearanceSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.palette_outlined, title: l.tileTheme,
+          _SettingsTile(icon: Icons.palette_rounded, title: l.tileTheme,
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
           Builder(builder: (context) {
@@ -1187,12 +1183,12 @@ class SettingsDetailScreen extends ConsumerWidget {
                 subtitle: accentLabel, iconColor: AppColors.accent,
                 onTap: () => _showAccentColorPicker(context, ref));
           }),
-          _SettingsTile(icon: Icons.color_lens_outlined, title: l.tileColors,
+          _SettingsTile(icon: Icons.color_lens_rounded, title: l.tileColors,
               subtitle: l.tileColorsSub, iconColor: const Color(0xFFEC407A),
               onTap: () => _showColorConfig(context, ref)),
           Builder(builder: (context) {
             final mode = ref.watch(entryModeProvider);
-            return _SettingsTile(icon: Icons.touch_app_outlined, title: S.of(context).tileEntryMode,
+            return _SettingsTile(icon: Icons.touch_app_rounded, title: S.of(context).tileEntryMode,
                 subtitle: mode == 'assisted' ? S.of(context).entryModeAssistedShort : S.of(context).entryModeClassicShort,
                 iconColor: const Color(0xFF42A5F5),
                 onTap: () => _showEntryModePicker(context, ref));
@@ -1208,7 +1204,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final homeTab = ref.watch(homeTabProvider);
             final sl = S.of(context);
             final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
-            return _SettingsTile(icon: Icons.home_outlined, title: sl.tileStartScreen,
+            return _SettingsTile(icon: Icons.home_rounded, title: sl.tileStartScreen,
                 subtitle: homeTabLabel,
                 iconColor: const Color(0xFF26A69A),
                 onTap: () => _showHomeTabPicker(context, ref));
@@ -1246,12 +1242,24 @@ class SettingsDetailScreen extends ConsumerWidget {
             final resolvedLocale = localeNow ?? WidgetsBinding.instance.platformDispatcher.locale.languageCode;
             if (resolvedLocale != 'ar') return const SizedBox.shrink();
             final useArabic = ref.watch(arabicDigitsProvider);
-            return SwitchListTile(
-              secondary: Icon(Icons.format_list_numbered_rounded, color: const Color(0xFF26A69A)),
-              title: Text(S.of(context).tileArabicDigits),
-              subtitle: Text(useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789'),
-              value: useArabic,
-              onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
+            return Material(
+              type: MaterialType.transparency,
+              child: SwitchListTile(
+                contentPadding:
+                    const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
+                secondary: const _SettingsIcon(
+                    icon: Icons.format_list_numbered_rounded,
+                    color: Color(0xFF26A69A)),
+                title: Text(S.of(context).tileArabicDigits,
+                    style: TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+                subtitle: Text(useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789',
+                    style: TextStyle(
+                        fontSize: 13.5, color: AppColors.ts(context))),
+                value: useArabic,
+                onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
+              ),
             );
           }),
           _SettingsTile(icon: Icons.view_list_rounded, title: l.tileTxList,
@@ -1350,15 +1358,15 @@ class SettingsDetailScreen extends ConsumerWidget {
                     ),
                     title: Text(S.of(context).tileSyncReceipts,
                         style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.tp(context))),
                     subtitle: Text(
                       receiptSyncEnabled
                           ? S.of(context).tileSyncReceiptsOn
                           : S.of(context).tileSyncReceiptsOff,
                       style: TextStyle(
-                          fontSize: 12, color: AppColors.ts(context)),
+                          fontSize: 13.5, color: AppColors.ts(context)),
                     ),
                     value: receiptSyncEnabled,
                     onChanged: (_) =>
@@ -1501,18 +1509,8 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: TypographyTokens.sectionHeaderSize,
-          fontWeight: TypographyTokens.sectionHeaderWeight,
-          letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.accentText(context),
-        ),
-      ),
-    );
+    return SectionHeader(title,
+        padding: const EdgeInsets.fromLTRB(4, 12, 4, 6));
   }
 }
 
@@ -1712,9 +1710,11 @@ class _BiometricTile extends ConsumerWidget {
         leading: const _SettingsIcon(
             icon: Icons.fingerprint_rounded, color: Color(0xFF7C4DFF)),
         title: Text(S.of(context).tileBiometricLock,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w700,
+                color: AppColors.tp(context))),
         subtitle: Text(S.of(context).tileBiometricSub,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+            style: TextStyle(fontSize: 13.5, color: AppColors.ts(context))),
         trailing: Switch.adaptive(
           value: enabled,
           activeTrackColor: AppColors.accent,
@@ -1923,7 +1923,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                           child: Icon(Icons.restart_alt_rounded,
                               size: 18, color: AppColors.th(context)),
                         )
-                      : Icon(Icons.edit_outlined,
+                      : Icon(Icons.edit_rounded,
                           size: 16, color: AppColors.th(context)),
                   onTap: () => _editSymbol(context, code, currentSymbol),
                 );
@@ -2101,7 +2101,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: selected
-                          ? AppColors.accent.withValues(alpha: 0.15)
+                          ? AppColors.accentLight
                           : AppColors.sfv(context),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
@@ -2157,7 +2157,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: selected
-                          ? AppColors.accent.withValues(alpha: 0.15)
+                          ? AppColors.accentLight
                           : AppColors.sfv(context),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
@@ -2199,7 +2199,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: selected
-                          ? AppColors.accent.withValues(alpha: 0.15)
+                          ? AppColors.accentLight
                           : AppColors.sfv(context),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
@@ -2275,161 +2275,6 @@ class _DateFormatSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
         ]),
-      ),
-    );
-  }
-}
-
-// ─── Daily Reminder Tile ─────────────────────────────────────────────────────
-
-class _DailyReminderTile extends StatefulWidget {
-  const _DailyReminderTile();
-
-  @override
-  State<_DailyReminderTile> createState() => _DailyReminderTileState();
-}
-
-class _DailyReminderTileState extends State<_DailyReminderTile> {
-  bool _enabled = false;
-  TimeOfDay _time = const TimeOfDay(hour: 19, minute: 0);
-  String _message = '';
-  final _messageCtrl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    final enabled = await DailyReminderService.isEnabled();
-    final time = await DailyReminderService.getTime();
-    final message = await DailyReminderService.getMessage();
-    if (mounted) {
-      setState(() {
-        _enabled = enabled;
-        _time = time;
-        _message = message;
-        _messageCtrl.text = message;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _messageCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          SwitchListTile.adaptive(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-            secondary: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF9800).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.notifications_active_rounded,
-                  size: 18, color: Color(0xFFFF9800)),
-            ),
-            title: Text(S.of(context).notifDailyTitle,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            subtitle: Text(
-              _enabled
-                  ? S.of(context).notifEveryDayAt(_time.format(context))
-                  : S.of(context).notifDailyDisabled,
-              style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
-            ),
-            value: _enabled,
-            onChanged: (v) async {
-              await DailyReminderService.setEnabled(v);
-              setState(() => _enabled = v);
-            },
-            activeTrackColor: AppColors.accent,
-          ),
-          if (_enabled) ...[
-            Divider(height: 1, color: AppColors.bd(context)),
-            // Time picker
-            ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16),
-              dense: true,
-              leading: Icon(Icons.schedule_rounded,
-                  size: 18, color: AppColors.ts(context)),
-              title: Text(S.of(context).notifTime,
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.tp(context))),
-              trailing: TextButton(
-                onPressed: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: _time,
-                  );
-                  if (picked != null) {
-                    await DailyReminderService.setTime(picked);
-                    setState(() => _time = picked);
-                  }
-                },
-                child: Text(
-                  _time.format(context),
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-            // Custom message
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: TextField(
-                controller: _messageCtrl,
-                style: TextStyle(
-                    fontSize: 13, color: AppColors.tp(context)),
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  hintText: S.of(context).notifCustomMessage,
-                  hintStyle: TextStyle(
-                      fontSize: 13, color: AppColors.th(context)),
-                  filled: true,
-                  fillColor: AppColors.sfv(context),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
-                  isDense: true,
-                  suffixIcon: _message.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear_rounded,
-                              size: 16, color: AppColors.th(context)),
-                          onPressed: () async {
-                            await DailyReminderService.setMessage('');
-                            _messageCtrl.clear();
-                            setState(() => _message = '');
-                          },
-                        )
-                      : null,
-                ),
-                onSubmitted: (v) async {
-                  await DailyReminderService.setMessage(v);
-                  setState(() => _message = v.trim());
-                },
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -2629,7 +2474,7 @@ class _ShareHouseholdSettingsSheetState
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
               const SizedBox(height: 16),
@@ -2638,11 +2483,11 @@ class _ShareHouseholdSettingsSheetState
                 child: FilledButton.icon(
                   onPressed: _loading ? null : _share,
                   icon: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
+                              strokeWidth: 2, color: AppColors.onAccent),
                         )
                       : const Icon(Icons.share_rounded, size: 20),
                   label: Text(
@@ -2651,7 +2496,6 @@ class _ShareHouseholdSettingsSheetState
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),

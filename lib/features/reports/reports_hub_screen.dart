@@ -21,6 +21,8 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/empty_state.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
@@ -306,54 +308,16 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
                 // Toggle: Trend vs Daily Pace
                 Row(
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _showDailyPace = false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: !_showDailyPace
-                                ? AppColors.accent.withValues(alpha: 0.12)
-                                : AppColors.sfv(context),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(S.of(context).reports6MonthTrend,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: !_showDailyPace
-                                      ? AppColors.accent
-                                      : AppColors.ts(context),
-                                )),
-                          ),
-                        ),
-                      ),
+                    _ToggleChip(
+                      label: S.of(context).reports6MonthTrend,
+                      selected: !_showDailyPace,
+                      onTap: () => setState(() => _showDailyPace = false),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _showDailyPace = true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _showDailyPace
-                                ? AppColors.accent.withValues(alpha: 0.12)
-                                : AppColors.sfv(context),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(S.of(context).reportsDailyPaceToggle,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: _showDailyPace
-                                      ? AppColors.accent
-                                      : AppColors.ts(context),
-                                )),
-                          ),
-                        ),
-                      ),
+                    _ToggleChip(
+                      label: S.of(context).reportsDailyPaceToggle,
+                      selected: _showDailyPace,
+                      onTap: () => setState(() => _showDailyPace = true),
                     ),
                   ],
                 ),
@@ -462,6 +426,20 @@ class _DailyPaceChart extends StatelessWidget {
           ),
         ),
         borderData: FlBorderData(show: false),
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => AppColors.popup(context),
+            getTooltipItems: (spots) => spots
+                .map((s) => LineTooltipItem(
+                      formatAmount(s.y, currency: baseCurrency),
+                      TextStyle(
+                          color: s.bar.color ?? AppColors.tp(context),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ))
+                .toList(),
+          ),
+        ),
         lineBarsData: [
           // Actual cumulative
           LineChartBarData(
@@ -1177,9 +1155,9 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             // List
             Expanded(
               child: filtered.isEmpty
-                  ? Center(
-                      child: Text(S.of(context).reportsNoExpenses,
-                          style: TextStyle(color: AppColors.ts(context))))
+                  ? EmptyState(
+                      icon: Icons.pie_chart_outline_rounded,
+                      title: S.of(context).reportsNoExpenses)
                   : Builder(builder: (context) {
                       final rows = _showByTransactions
                           ? [
@@ -1691,7 +1669,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                                 radius: 4,
                                 color: AppColors.healthy,
                                 strokeWidth: 2,
-                                strokeColor: Colors.white,
+                                strokeColor: AppColors.sf(context),
                               );
                             }
                             return FlDotCirclePainter(
@@ -1709,12 +1687,13 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                     ],
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
+                        getTooltipColor: (_) => AppColors.popup(context),
                         getTooltipItems: (spots) {
                           return spots.map((spot) {
                             return LineTooltipItem(
                               '${S.of(context).reportsDayN(spot.x.toInt())}\n${formatAmount(spot.y, currency: _reportsBaseCurrency)}',
                               TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.tp(context),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600),
                             );
@@ -1934,10 +1913,10 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: (savingsRate >= 0.1
+                          color: AppColors.pastel(context, savingsRate >= 0.1
                                   ? AppColors.healthy
-                                  : AppColors.caution)
-                              .withValues(alpha: 0.1),
+                                  : AppColors.caution,
+                                  light: 0.85, dark: 0.75),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(Icons.savings_rounded,
@@ -1958,6 +1937,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                             Text('${(savingsRate * 100).round()}%',
                                 style: TextStyle(
                                     fontSize: 20,
+                                    fontFamily: TypographyTokens.displayFamily,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.tp(context))),
                           ],
@@ -1996,16 +1976,8 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
 
               // ── Actionable Tips ──
               if (tips.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-                  child: Text(S.of(context).reportsTipsSection,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                        color: AppColors.th(context),
-                      )),
-                ),
+                SectionHeader(S.of(context).reportsTipsSection,
+                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
                 ...tips.map((tip) => Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(14),
@@ -2662,9 +2634,9 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
-          return Center(
-              child: Text(S.of(context).healthNoAccounts,
-                  style: TextStyle(color: AppColors.ts(context))));
+          return EmptyState(
+              icon: Icons.account_balance_wallet_rounded,
+              title: S.of(context).healthNoAccounts);
         }
 
         // We need transaction data to compute historical balances
@@ -2810,10 +2782,9 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     children: [
                       Text(S.of(context).reportsNetWorth,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                            color: AppColors.tp(context).withValues(alpha: 0.55),
+                            color: AppColors.ts(context),
                           )),
                       const SizedBox(height: 8),
                       Row(
@@ -2825,32 +2796,33 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                                   currency: baseCurrency),
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.tp(context).withValues(alpha: 0.6),
+                                color: AppColors.ts(context),
                               ),
                             ),
                             Text(
                               formatDate(_compareDate),
                               style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.tp(context).withValues(alpha: 0.5),
+                                color: AppColors.ts(context),
                               ),
                             ),
                           ]),
                           Icon(Icons.arrow_forward_rounded,
                               size: 16,
-                              color: AppColors.tp(context).withValues(alpha: 0.4)),
+                              color: AppColors.th(context)),
                           Column(children: [
                             Text(
                               formatAmount(netWorthNow, currency: baseCurrency),
                               style: TextStyle(
                                 fontSize: 20,
+                                fontFamily: TypographyTokens.displayFamily,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.tp(context),
                               ),
                             ),
                             Text(S.of(context).commonToday,
                                 style: TextStyle(
-                                    fontSize: 10, color: AppColors.tp(context).withValues(alpha: 0.5))),
+                                    fontSize: 10, color: AppColors.ts(context))),
                           ]),
                         ],
                       ),
@@ -2860,7 +2832,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                       if (foreignTotals.isNotEmpty) ...[
                         const SizedBox(height: 10),
                         Divider(
-                            color: AppColors.tp(context).withValues(alpha: 0.1),
+                            color: AppColors.bd(context),
                             height: 1),
                         const SizedBox(height: 8),
                         Wrap(
@@ -2872,7 +2844,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.tp(context).withValues(alpha: 0.6),
+                                  color: AppColors.ts(context),
                                 ),
                               )).toList(),
                         ),
@@ -2914,9 +2886,8 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
             flex: 3,
             child: Text(label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
                 color: isAsset ? AppColors.healthy : AppColors.overspent,
               )),
           ),
@@ -3110,8 +3081,9 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: (isUp ? AppColors.healthy : AppColors.overspent)
-            .withValues(alpha: 0.15),
+        color: AppColors.pastel(context,
+            isUp ? AppColors.healthy : AppColors.overspent,
+            light: 0.85, dark: 0.75),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

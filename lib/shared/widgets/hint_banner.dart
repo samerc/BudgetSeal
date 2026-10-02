@@ -18,7 +18,7 @@ Future<void> showHintIfNeeded(
   required String hintId,
   required String title,
   required String body,
-  IconData icon = Icons.lightbulb_outline,
+  IconData icon = Icons.lightbulb_outline_rounded,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool('hint_dismissed_$hintId') ?? false) return;

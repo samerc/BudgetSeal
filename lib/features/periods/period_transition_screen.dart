@@ -11,6 +11,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../core/providers/date_format_provider.dart';
 
@@ -275,13 +276,15 @@ class _PeriodTransitionScreenState
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               decoration: BoxDecoration(
                 color: AppColors.sf(context),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+                boxShadow: Theme.of(context).brightness == Brightness.light
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ]
+                    : null,
               ),
               child: SafeArea(
                 top: false,
@@ -341,10 +344,9 @@ class _ResolutionCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final overspent = resolution.balance < 0;
 
-    return Card(
+    return AppCard(
       margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 1,
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -375,9 +377,9 @@ class _ResolutionCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: overspent
-                        ? AppColors.overspentLight
-                        : AppColors.healthyLight,
+                    color: AppColors.pastel(context,
+                        overspent ? AppColors.overspent : AppColors.healthy,
+                        light: 0.85, dark: 0.75),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -540,7 +542,7 @@ class _RadioOption extends StatelessWidget {
               ),
             ),
             Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
               size: 20,
               color: selected ? AppColors.accent : AppColors.th(context),
             ),

@@ -847,13 +847,7 @@ class _FundingAllocationTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.cardShadow(context),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -993,8 +987,7 @@ class _FundingAllocationTile extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: () => onAmountChanged(suggestedAmount!),
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            AppColors.accent.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.accentLight,
                         foregroundColor: AppColors.accent,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 10),
@@ -1069,13 +1062,15 @@ class _BottomFundBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        boxShadow: Theme.of(context).brightness == Brightness.light
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
+                ),
+              ]
+            : null,
       ),
       child: SafeArea(
         top: false,

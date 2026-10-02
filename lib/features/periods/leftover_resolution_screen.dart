@@ -9,6 +9,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
@@ -105,8 +106,9 @@ class _LeftoverResolutionScreenState
     if (_args == null) {
       return Scaffold(
         appBar: AppBar(title: Text(S.of(context).leftoverTitle)),
-        body: Center(
-          child: Text(S.of(context).leftoverNoAllocation),
+        body: EmptyState(
+          icon: Icons.savings_rounded,
+          title: S.of(context).leftoverNoAllocation,
         ),
       );
     }
@@ -123,7 +125,10 @@ class _LeftoverResolutionScreenState
         data: (allocations) {
           final allocation = _findAllocation(allocations);
           if (allocation == null) {
-            return Center(child: Text(S.of(context).leftoverNotFound));
+            return EmptyState(
+              icon: Icons.savings_rounded,
+              title: S.of(context).leftoverNotFound,
+            );
           }
 
           final otherAllocations = allocations
@@ -151,13 +156,7 @@ class _LeftoverResolutionScreenState
                         decoration: BoxDecoration(
                           color: AppColors.sf(context),
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          boxShadow: AppColors.cardShadow(context),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +170,7 @@ class _LeftoverResolutionScreenState
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    Icons.account_balance_wallet_outlined,
+                                    Icons.account_balance_wallet_rounded,
                                     color: AppColors.accent,
                                     size: 22,
                                   ),
@@ -205,9 +204,10 @@ class _LeftoverResolutionScreenState
                             // Balance breakdown
                             Text(
                               S.of(context).leftoverCurrentBalance,
-                              style: textTheme.bodySmall?.copyWith(
+                              style: TextStyle(
+                                fontSize: TypographyTokens.captionSize,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
+                                color: AppColors.ts(context),
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -383,13 +383,16 @@ class _LeftoverResolutionScreenState
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                   decoration: BoxDecoration(
                     color: AppColors.sf(context),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, -2),
-                      ),
-                    ],
+                    boxShadow: Theme.of(context).brightness ==
+                            Brightness.light
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: SafeArea(
                     top: false,
@@ -453,9 +456,11 @@ class _BalanceRow extends StatelessWidget {
             ? AppColors.healthy
             : AppColors.ts(context);
     final bgColor = amount < 0
-        ? AppColors.overspentLight
+        ? AppColors.pastel(context, AppColors.overspent,
+            light: 0.85, dark: 0.75)
         : isPositive
-            ? AppColors.healthyLight
+            ? AppColors.pastel(context, AppColors.healthy,
+                light: 0.85, dark: 0.75)
             : AppColors.sfv(context);
 
     return Padding(
@@ -568,7 +573,7 @@ class _ResolutionOption extends StatelessWidget {
                 ),
               ),
               Icon(
-                selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
                 size: 20,
                 color: selected ? AppColors.accent : AppColors.th(context),
               ),

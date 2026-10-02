@@ -897,7 +897,7 @@ class _AssistedTransactionScreenState
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: selected != null
-                ? color.withValues(alpha: 0.08)
+                ? AppColors.pastel(context, color, light: 0.88, dark: 0.78)
                 : AppColors.sfv(context),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -911,7 +911,7 @@ class _AssistedTransactionScreenState
               Icon(
                 isDestination
                     ? Icons.arrow_forward_rounded
-                    : Icons.account_balance_wallet_outlined,
+                    : Icons.account_balance_wallet_rounded,
                 size: 18,
                 color: selected != null ? color : AppColors.ts(context),
               ),
@@ -1001,7 +1001,7 @@ class _AssistedTransactionScreenState
                   margin: const EdgeInsets.only(bottom: 6),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? color.withValues(alpha: 0.1)
+                        ? AppColors.pastel(ctx, color, light: 0.85, dark: 0.75)
                         : AppColors.sfv(ctx),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: isSelected
@@ -1667,13 +1667,15 @@ class _AssistedTransactionScreenState
               child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              color: typeColor.withValues(alpha: 0.08),
+              color: AppColors.pastel(context, typeColor,
+                  light: 0.88, dark: 0.78),
               child: Row(
                 children: [
                   if (isTransfer)
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor: typeColor.withValues(alpha: 0.15),
+                      backgroundColor: AppColors.pastel(context, typeColor,
+                          light: 0.8, dark: 0.7),
                       child: Icon(Icons.swap_horiz_rounded,
                           color: typeColor, size: 24),
                     )
@@ -1744,7 +1746,7 @@ class _AssistedTransactionScreenState
                         ),
                       ),
                     ),
-                    Icon(Icons.edit_outlined,
+                    Icon(Icons.edit_rounded,
                         size: 16, color: AppColors.th(context)),
                   ],
                 ),
@@ -1856,8 +1858,10 @@ class _AssistedTransactionScreenState
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: _transferExchangeRate <= 1.0
-                        ? AppColors.overspent.withValues(alpha: 0.08)
-                        : AppColors.healthy.withValues(alpha: 0.06),
+                        ? AppColors.pastel(context, AppColors.overspent,
+                            light: 0.88, dark: 0.78)
+                        : AppColors.pastel(context, AppColors.healthy,
+                            light: 0.9, dark: 0.8),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                     border: Border.all(
                         color: _transferExchangeRate <= 1.0
@@ -2116,6 +2120,7 @@ class _AssistedTransactionScreenState
                         onPressed: _saving ? null : _save,
                         style: FilledButton.styleFrom(
                           backgroundColor: typeColor,
+                          foregroundColor: AppColors.inkOn(typeColor),
                           disabledBackgroundColor:
                               typeColor.withValues(alpha: 0.7),
                           padding:
@@ -2124,11 +2129,12 @@ class _AssistedTransactionScreenState
                               borderRadius: BorderRadius.circular(12)),
                         ),
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
+                                    color: AppColors.inkOn(typeColor),
+                                    strokeWidth: 2))
                             : Text(
                                 isTransfer
                                     ? S.of(context).txAfSaveTransfer
@@ -2181,7 +2187,8 @@ class _AssistedTransactionScreenState
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? typeColor.withValues(alpha: 0.15)
+                      ? AppColors.pastel(context, typeColor,
+                          light: 0.8, dark: 0.7)
                       : AppColors.sfv(context),
                   borderRadius: BorderRadius.circular(8),
                   border: isActive
@@ -2240,7 +2247,7 @@ class _AssistedTransactionScreenState
             padding: const EdgeInsets.symmetric(horizontal: 3),
             child: Material(
               color: isOp
-                  ? AppColors.accent.withValues(alpha: 0.1)
+                  ? AppColors.accentLight
                   : AppColors.sf(context),
               borderRadius: BorderRadius.circular(12),
               child: InkWell(
@@ -2265,7 +2272,7 @@ class _AssistedTransactionScreenState
                   height: 54,
                   alignment: Alignment.center,
                   child: isBack
-                      ? Icon(Icons.backspace_outlined,
+                      ? Icon(Icons.backspace_rounded,
                           size: 20, color: AppColors.ts(context))
                       : Text(
                           key,
@@ -2331,14 +2338,14 @@ class _AssistedTransactionScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  size: 16, color: isSelected ? Colors.white : color),
+                  size: 16, color: isSelected ? AppColors.inkOn(color) : color),
               const SizedBox(width: 4),
               Text(label,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: isSelected
-                        ? Colors.white
+                        ? AppColors.inkOn(color)
                         : AppColors.ts(context),
                   )),
             ],
@@ -2365,7 +2372,7 @@ class _AssistedTransactionScreenState
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color:
-                      isSelected ? Colors.white : AppColors.ts(context),
+                      isSelected ? AppColors.inkOn(color) : AppColors.ts(context),
                 )),
           ),
         ),

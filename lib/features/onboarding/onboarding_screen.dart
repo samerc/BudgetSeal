@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,7 @@ import '../../core/sync/invite_code.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/currency_sheet.dart' show kCurrencies;
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/brand_palette.dart' show brandInk;
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
@@ -191,15 +193,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        // Fixed night surface: light status bar icons in every theme.
+        value: SystemUiOverlayStyle.light,
+        child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.accent,
-              AppColors.accent.withValues(alpha: 0.8),
-              const Color(0xFF312E81),
+              AppColors.primaryLight,
+              AppColors.primary,
+              AppColors.darkBackground,
             ],
           ),
         ),
@@ -220,7 +225,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       height: 8,
                       decoration: BoxDecoration(
                         color: i == _currentPage
-                            ? Colors.white
+                            ? AppColors.accentBright
                             : Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -272,6 +277,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -340,12 +346,11 @@ class _WelcomePageState extends State<_WelcomePage>
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.pastel(context, Colors.white,
-                      light: 0.85, dark: 0.78),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const Icon(Icons.account_balance_wallet_rounded,
-                    size: 40, color: Colors.white),
+                child: Icon(Icons.account_balance_wallet_rounded,
+                    size: 40, color: AppColors.accentBright),
               ),
             ),
           ),
@@ -359,6 +364,7 @@ class _WelcomePageState extends State<_WelcomePage>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30,
+                  fontFamily: TypographyTokens.displayFamily,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
@@ -446,8 +452,7 @@ class _CompactStep extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.pastel(context, Colors.white,
-            light: 0.88, dark: 0.8),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
@@ -457,8 +462,7 @@ class _CompactStep extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: AppColors.pastel(context, Colors.white,
-                  light: 0.85, dark: 0.78),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -545,6 +549,7 @@ class _SetupPage extends StatelessWidget {
             Text(s.onboardSetupTitle,
                 style: TextStyle(
                     fontSize: 24,
+                    fontFamily: TypographyTokens.displayFamily,
                     fontWeight: FontWeight.w700,
                     color: Colors.white)),
             const SizedBox(height: 4),
@@ -639,7 +644,7 @@ class _SetupPage extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
                               color: sel
-                                  ? Colors.white
+                                  ? AppColors.accentBright
                                   : Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -648,14 +653,14 @@ class _SetupPage extends StatelessWidget {
                                 Icon(t.$3,
                                     size: 18,
                                     color: sel
-                                        ? AppColors.accent
+                                        ? brandInk
                                         : Colors.white70),
                                 const SizedBox(height: 4),
                                 Text(t.$2,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: sel
-                                          ? AppColors.accent
+                                          ? brandInk
                                           : Colors.white70,
                                       fontWeight: FontWeight.w600,
                                     )),
@@ -672,8 +677,7 @@ class _SetupPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.pastel(context, Colors.white,
-                          light: 0.88, dark: 0.8),
+                      color: Colors.white.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                           color: Colors.white.withValues(alpha: 0.1)),
@@ -774,8 +778,7 @@ class _FormCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.pastel(context, Colors.white,
-            light: 0.88, dark: 0.8),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
@@ -864,8 +867,7 @@ class _DonePage extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: AppColors.pastel(context, Colors.white,
-                  light: 0.85, dark: 0.78),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(26),
             ),
             child: const Icon(Icons.check_rounded,
@@ -876,6 +878,7 @@ class _DonePage extends StatelessWidget {
             S.of(context).onboardAllSet,
             style: TextStyle(
               fontSize: 28,
+              fontFamily: TypographyTokens.displayFamily,
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
@@ -931,9 +934,9 @@ class _OnboardingButton extends StatelessWidget {
       child: FilledButton(
         onPressed: loading ? null : onTap,
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: AppColors.accent,
-          disabledBackgroundColor: Colors.white.withValues(alpha: 0.5),
+          backgroundColor: AppColors.accentBright,
+          foregroundColor: brandInk,
+          disabledBackgroundColor: AppColors.accentBright.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
@@ -943,7 +946,7 @@ class _OnboardingButton extends StatelessWidget {
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                  color: AppColors.accent,
+                  color: brandInk,
                   strokeWidth: 2.5,
                 ),
               )
@@ -1320,7 +1323,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
-                  prefixIcon: const Icon(Icons.vpn_key_outlined),
+                  prefixIcon: const Icon(Icons.vpn_key_rounded),
                 ),
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
               ),

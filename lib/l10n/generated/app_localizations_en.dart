@@ -1304,7 +1304,7 @@ class SEn extends S {
 
   @override
   String txDetailSplitItems(int count) {
-    return 'SPLIT ITEMS ($count)';
+    return 'Split items ($count)';
   }
 
   @override
@@ -3386,7 +3386,7 @@ class SEn extends S {
 
   @override
   String get notifBillsDesc =>
-      'You\'ll receive a notification when recurring transactions are due within 2 days. Checks on app startup.';
+      'You\'ll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.';
 
   @override
   String get fxTitle => 'Exchange Rates';
@@ -5329,7 +5329,7 @@ class SEn extends S {
   String get leftoverLoadError => 'Couldn\'t load data';
 
   @override
-  String get leftoverCurrentBalance => 'Current Balance';
+  String get leftoverCurrentBalance => 'Current balance';
 
   @override
   String get leftoverNoBalance => 'No balance';

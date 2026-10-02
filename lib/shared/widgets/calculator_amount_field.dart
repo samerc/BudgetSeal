@@ -54,6 +54,7 @@ class CalculatorAmountField extends StatelessWidget {
     final effectiveStyle = style ??
         TextStyle(
           fontSize: fontSize,
+          fontFamily: TypographyTokens.displayFamily,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
           color: AppColors.tp(context),

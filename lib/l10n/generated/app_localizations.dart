@@ -2287,7 +2287,7 @@ abstract class S {
   /// Section header
   ///
   /// In en, this message translates to:
-  /// **'SPLIT ITEMS ({count})'**
+  /// **'Split items ({count})'**
   String txDetailSplitItems(int count);
 
   /// Section header
@@ -5977,7 +5977,7 @@ abstract class S {
   /// Description
   ///
   /// In en, this message translates to:
-  /// **'You\'ll receive a notification when recurring transactions are due within 2 days. Checks on app startup.'**
+  /// **'You\'ll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.'**
   String get notifBillsDesc;
 
   /// AppBar title
@@ -9643,7 +9643,7 @@ abstract class S {
   /// Leftover resolution section label
   ///
   /// In en, this message translates to:
-  /// **'Current Balance'**
+  /// **'Current balance'**
   String get leftoverCurrentBalance;
 
   /// Leftover resolution empty balance

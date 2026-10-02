@@ -34,6 +34,7 @@ import '../../shared/utils/note_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
 import 'widgets/bills_boxes.dart';
 
@@ -369,7 +370,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           icon: Icons.savings_rounded,
                           label: qs.dashboardQuickFund,
                           tooltip: qs.dashboardFundEnvelopesTooltip,
-                          color: const Color(0xFF7E57C2),
+                          color: kPlannedColor,
                           onTap: () => context.push('/funding'),
                         ),
                       ],
@@ -378,7 +379,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         icon: Icons.call_split_rounded,
                         label: qs.dashboardQuickSplit,
                         tooltip: qs.dashboardSplitBillTooltip,
-                        color: const Color(0xFFFF8A65),
+                        color: kSplitColor,
                         onTap: () {
                           if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
                           context.push('/bill-splitter');
@@ -481,7 +482,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                         children: [
                                           Row(
                                             children: [
-                                              Icon(Icons.account_balance_wallet_outlined,
+                                              Icon(Icons.account_balance_wallet_rounded,
                                                   size: 13, color: AppColors.ts(context)),
                                               const SizedBox(width: 5),
                                               Text(S.of(context).dashboardUnallocated,
@@ -584,8 +585,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: AppColors.accent
-                                      .withValues(alpha: 0.06),
+                                  color: AppColors.accentLight,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
@@ -1077,7 +1077,8 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
           return ListTile(
             leading: CircleAvatar(
                 radius: 16,
-                backgroundColor: color.withValues(alpha: 0.15),
+                backgroundColor: AppColors.pastel(context, color,
+                    light: 0.82, dark: 0.72),
                 child: Text(c.name[0],
                     style: TextStyle(
                         color: color, fontWeight: FontWeight.w600))),
@@ -1121,14 +1122,8 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
     ]);
   }
 
-  Widget _sectionHead(BuildContext context, String t) => Padding(
-      padding: const EdgeInsets.only(bottom: 4, top: 4),
-      child: Text(t,
-          style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ts(context),
-              letterSpacing: 0.5)));
+  Widget _sectionHead(BuildContext context, String t) => SectionHeader(t,
+      padding: const EdgeInsets.only(bottom: 4, top: 4));
 
 }
 

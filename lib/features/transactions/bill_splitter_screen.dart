@@ -11,6 +11,8 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/section_header.dart';
 import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
@@ -722,15 +724,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ],
             if (_items.isEmpty && _ocrResult == null) ...[
               const SizedBox(height: 40),
-              Center(child: Icon(Icons.receipt_long_rounded,
-                  size: 48, color: AppColors.ts(context))),
-              const SizedBox(height: 12),
-              Center(child: Text(S.of(context).billEmptyTitle,
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context)))),
-              const SizedBox(height: 6),
-              Center(child: Text(S.of(context).billEmptySubtitle,
-                  style: TextStyle(fontSize: 13, color: AppColors.ts(context)))),
+              EmptyState(
+                icon: Icons.receipt_long_rounded,
+                title: S.of(context).billEmptyTitle,
+                subtitle: S.of(context).billEmptySubtitle,
+              ),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _scanReceipt,
@@ -779,9 +777,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             _buildSplitEvenlyToggle(),
             const SizedBox(height: 12),
             if (!_splitEvenly && _people.length > 1) ...[
-              Text(S.of(context).billAssignItems, style: TextStyle(fontSize: 11,
-                  fontWeight: FontWeight.w700, letterSpacing: 0.8,
-                  color: AppColors.ts(context))),
+              SectionHeader(S.of(context).billAssignItems),
               const SizedBox(height: 8),
               for (var i = 0; i < _items.length; i++) _buildAssignableItem(i),
             ],
@@ -1009,9 +1005,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(S.of(context).billWhosSplitting, style: TextStyle(fontSize: 11,
-              fontWeight: FontWeight.w700, letterSpacing: 0.8,
-              color: AppColors.ts(context))),
+          SectionHeader(S.of(context).billWhosSplitting),
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 6, children: [
             for (final p in _people) _personChip(p),
@@ -1029,7 +1023,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             )),
             const SizedBox(width: 8),
             IconButton.filled(onPressed: _addPerson,
-              icon: const Icon(Icons.add, size: 18),
+              icon: const Icon(Icons.add_rounded, size: 18),
               style: IconButton.styleFrom(backgroundColor: AppColors.accent)),
           ]),
         ],
@@ -1257,7 +1251,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? color.withValues(alpha: 0.2) : AppColors.sfv(context),
+          color: isActive
+              ? AppColors.pastel(context, color, light: 0.8, dark: 0.7)
+              : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? color : AppColors.bd(context),
@@ -1396,7 +1392,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          color: selected
+              ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(CardTokens.radius),
           border: Border.all(color: selected ? color : AppColors.bd(context)),
         ),
@@ -1483,7 +1481,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.accent.withValues(alpha: 0.12)
+                ? AppColors.accentLight
                 : AppColors.sfv(context),
             borderRadius: BorderRadius.circular(8),
             border: selected
@@ -1560,8 +1558,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       margin: const EdgeInsets.only(bottom: 2),
                       decoration: BoxDecoration(
                         color: _selectedLineIndices.containsKey(i)
-                            ? _personColor(_selectedLineIndices[i]!)
-                                .withValues(alpha: 0.1)
+                            ? AppColors.pastel(context,
+                                _personColor(_selectedLineIndices[i]!),
+                                light: 0.85, dark: 0.75)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(6),
                       ),

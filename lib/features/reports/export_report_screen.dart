@@ -106,11 +106,11 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                   FilledButton.icon(
                     onPressed: _exporting ? null : _export,
                     icon: _exporting
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
+                                color: AppColors.onAccent, strokeWidth: 2))
                         : const Icon(Icons.share_rounded, size: 18),
                     label: Text(
                         _exporting ? S.of(context).exportGenerating : S.of(context).exportGenerateShare),

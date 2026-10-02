@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -76,7 +77,10 @@ class _LockScreenState extends State<LockScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      body: Center(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        // Fixed night surface: light status bar icons in every theme.
+        value: SystemUiOverlayStyle.light,
+        child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -84,19 +88,19 @@ class _LockScreenState extends State<LockScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.pastel(context, Colors.white,
-                    light: 0.85, dark: 0.78),
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(Icons.lock_rounded,
-                  size: 36, color: Colors.white70),
+              child: Icon(Icons.lock_rounded,
+                  size: 36, color: AppColors.accentBright),
             ),
             const SizedBox(height: 24),
             Text(
               S.of(context).appName,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.w700,
+                fontFamily: TypographyTokens.displayFamily,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
               ),
             ),
@@ -124,6 +128,7 @@ class _LockScreenState extends State<LockScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

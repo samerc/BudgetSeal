@@ -10,6 +10,7 @@ import '../../core/sync/sync_encryption.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../core/providers/date_format_provider.dart';
 
@@ -119,7 +120,7 @@ class SyncScreen extends ConsumerWidget {
               _ActionButton(
                 icon: Icons.people_outline_rounded,
                 label: S.of(context).syncShareHousehold,
-                color: const Color(0xFF7E57C2),
+                color: AppColors.accent,
                 onTap: () => _showShareSheet(context, notifier),
               ),
             if (syncState.activeProvider is GoogleDriveProvider)
@@ -138,18 +139,8 @@ class SyncScreen extends ConsumerWidget {
 
           // ── Provider list ─────────────────────────────────────
           if (!isConnected) ...[
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 12),
-              child: Text(
-                S.of(context).syncConnectSection,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.ts(context),
-                ),
-              ),
-            ),
+            SectionHeader(S.of(context).syncConnectSection,
+                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 12)),
             ...notifier.providerOptions.map((option) {
               final isOneDriveOrDropbox =
                   option.iconKey == 'onedrive' || option.iconKey == 'dropbox';
@@ -337,7 +328,7 @@ class _ProviderOptionTile extends StatelessWidget {
         'onedrive' => Icons.cloud_rounded,
         'dropbox' => Icons.cloud_circle_rounded,
         'local' => Icons.folder_open_rounded,
-        _ => Icons.cloud_outlined,
+        _ => Icons.cloud_rounded,
       };
 
   Color _colorForKey(String key) => switch (key) {
@@ -356,7 +347,7 @@ class _ProviderOptionTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
       ),
       child: Material(
@@ -364,7 +355,7 @@ class _ProviderOptionTile extends StatelessWidget {
         type: MaterialType.transparency,
         child: ListTile(
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+              borderRadius: BorderRadius.circular(CardTokens.radius)),
           leading: Container(
             width: 40,
             height: 40,
@@ -417,13 +408,14 @@ class _ActionButton extends StatelessWidget {
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white),
+                    strokeWidth: 2, color: AppColors.inkOn(color)),
               )
             : Icon(icon, size: 20),
         label: Text(label,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         style: FilledButton.styleFrom(
           backgroundColor: color,
+          foregroundColor: AppColors.inkOn(color),
           disabledBackgroundColor: color.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(CardTokens.radius),
@@ -548,7 +540,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(CardTokens.radius),
                   ),
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
               const SizedBox(height: 16),
@@ -557,11 +549,11 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 child: FilledButton.icon(
                   onPressed: _loading ? null : _share,
                   icon: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
+                              strokeWidth: 2, color: AppColors.onAccent),
                         )
                       : const Icon(Icons.share_rounded, size: 20),
                   label: Text(
@@ -570,7 +562,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                         fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(CardTokens.radius),
                     ),

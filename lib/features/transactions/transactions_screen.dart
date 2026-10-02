@@ -28,6 +28,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/delete_with_undo.dart';
+import 'widgets/feature_colors.dart';
 import 'widgets/export_entries.dart';
 import 'widgets/tx_form_args.dart';
 import 'widgets/tx_tile.dart';
@@ -259,7 +260,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               children: [
                 for (final a in accounts)
                   ListTile(
-                    leading: const Icon(Icons.account_balance_wallet_outlined),
+                    leading: const Icon(Icons.account_balance_wallet_rounded),
                     title: Text(a.name),
                     trailing: Text(a.currency),
                     onTap: () => Navigator.pop(ctx, a.id),
@@ -681,8 +682,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             FloatingActionButton.small(
               heroTag: 'fab_split',
               tooltip: S.of(context).txSplitBillTooltip,
-              backgroundColor: const Color(0xFFFF8A65),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.pastel(context, kSplitColor,
+                  light: 0.75, dark: 0.55),
+              foregroundColor: AppColors.tp(context),
               elevation: 2,
               onPressed: () {
                 if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
@@ -715,8 +717,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     _showTypePicker(context);
                   },
                   child: Center(
-                    child: const Icon(Icons.add_rounded,
-                        size: 28, color: Colors.white),
+                    child: Icon(Icons.add_rounded,
+                        size: 28, color: AppColors.onAccent),
                   ),
                 ),
               ),
@@ -1247,21 +1249,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               _FilterChip(
                 label: S.of(context).typeIncome,
                 selected: _typeFilter == 'income',
-                color: AppColors.healthy,
+                color: ref.watch(txColorsProvider).income,
                 onTap: () { setState(() => _typeFilter = 'income'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: S.of(context).typeExpense,
                 selected: _typeFilter == 'expense',
-                color: AppColors.overspent,
+                color: ref.watch(txColorsProvider).expense,
                 onTap: () { setState(() => _typeFilter = 'expense'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: S.of(context).typeTransfer,
                 selected: _typeFilter == 'transfer',
-                color: AppColors.accent,
+                color: ref.watch(txColorsProvider).transfer,
                 onTap: () { setState(() => _typeFilter = 'transfer'); _saveFilters(); },
               ),
             ],
@@ -1416,7 +1418,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             children: [
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.account_balance_wallet_outlined,
+                  icon: Icons.account_balance_wallet_rounded,
                   label: _accountFilter != null
                       ? (ref
                               .watch(accountsProvider)
@@ -1433,7 +1435,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.category_outlined,
+                  icon: Icons.category_rounded,
                   label: _categoryFilterName ?? S.of(context).txAllCategories,
                   active: _categoryFilter != null,
                   onTap: _pickCategoryFilter,
@@ -1504,7 +1506,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
             for (final a in accounts)
               ListTile(
-                leading: const Icon(Icons.account_balance_wallet_outlined),
+                leading: const Icon(Icons.account_balance_wallet_rounded),
                 title: Text(a.name),
                 trailing: Text(a.currency),
                 selected: a.id == _accountFilter,
@@ -2097,7 +2099,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       duration: const Duration(milliseconds: 1500),
       decoration: BoxDecoration(
         color: _highlightedTxId == e.tx.id
-            ? AppColors.accent.withValues(alpha: 0.12)
+            ? AppColors.accentLight
             : Colors.transparent,
         borderRadius: radius,
       ),
@@ -2269,7 +2271,8 @@ class _PlannedSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.12),
+                  color: AppColors.pastel(context, kPlannedColor,
+                      light: 0.85, dark: 0.75),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -2278,7 +2281,7 @@ class _PlannedSection extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
-                    color: const Color(0xFF7E57C2),
+                    color: kPlannedColor,
                   ),
                 ),
               ),
@@ -2359,7 +2362,8 @@ class _PlannedTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                color: AppColors.pastel(context, kPlannedColor,
+                    light: 0.85, dark: 0.75),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -2370,7 +2374,7 @@ class _PlannedTile extends StatelessWidget {
                           ? Icons.swap_horiz_rounded
                           : Icons.remove_rounded,
                   size: 16,
-                  color: const Color(0xFF7E57C2),
+                  color: kPlannedColor,
                 ),
               ),
             ),
@@ -2452,7 +2456,7 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? AppColors.primary;
+    final c = color ?? AppColors.accent;
     return GestureDetector(
       onTap: () {
         hapticLight();
@@ -2462,18 +2466,15 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? c : c.withValues(alpha: 0.06),
+          color: selected ? c : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? c : c.withValues(alpha: 0.2),
-          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : c,
+            color: selected ? AppColors.inkOn(c) : AppColors.tp(context),
           ),
         ),
       ),

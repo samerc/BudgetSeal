@@ -351,7 +351,7 @@ class AllocationCard extends StatelessWidget {
                             onTap: onSpend,
                             child: Padding(
                               padding: const EdgeInsets.all(8),
-                              child: Icon(Icons.shopping_cart_outlined,
+                              child: Icon(Icons.shopping_cart_rounded,
                                   size: 18, color: AppColors.tp(context)),
                             ),
                           ),

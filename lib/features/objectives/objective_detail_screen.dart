@@ -429,7 +429,7 @@ class _ObjectiveDetailScreenState
               // Amount
               CalculatorAmountField(
                 value: amount,
-                hintText: '0.00',
+                hintText: formatNumber(0, decimals: currencyDecimals(_currency)),
                 currency: _currency,
                 fontSize: 28,
                 onChanged: (v) => setModalState(() => amount = v),
@@ -738,8 +738,9 @@ class _ObjectiveDetailScreenState
                     Container(
                       width: 32, height: 32,
                       decoration: BoxDecoration(
-                        color: (isIncome ? AppColors.healthy : AppColors.overspent)
-                            .withValues(alpha: 0.1),
+                        color: AppColors.pastel(context,
+                            isIncome ? AppColors.healthy : AppColors.overspent,
+                            light: 0.85, dark: 0.75),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -821,8 +822,8 @@ class _ObjectiveDetailScreenState
             child: FilledButton.icon(
               onPressed: _loading ? null : _save,
               icon: _loading
-                  ? const SizedBox(height: 14, width: 14,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? SizedBox(height: 14, width: 14,
+                      child: CircularProgressIndicator(color: AppColors.onAccent, strokeWidth: 2))
                   : const Icon(Icons.check_rounded, size: 18),
               label: Text(S.of(context).commonSave),
               style: FilledButton.styleFrom(
@@ -978,7 +979,7 @@ class _ObjectiveDetailScreenState
                             width: 38, height: 38,
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.accent.withValues(alpha: 0.15)
+                                  ? AppColors.accentLight
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(10),
                               border: isSelected
@@ -1055,7 +1056,7 @@ class _ObjectiveDetailScreenState
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: CalculatorAmountField(
             value: _targetAmount,
-            hintText: '0.00',
+            hintText: formatNumber(0, decimals: currencyDecimals(_currency)),
             label: S.of(context).objTargetAmountLabel,
             currency: _currency,
             fontSize: 24,
@@ -1129,7 +1130,7 @@ class _ObjectiveDetailScreenState
                   color: c, shape: BoxShape.circle,
                   border: selected ? Border.all(color: AppColors.tp(context), width: 3) : null,
                 ),
-                child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 16) : null,
+                child: selected ? Icon(Icons.check_rounded, color: AppColors.inkOn(c), size: 16) : null,
               ),
             );
           }).toList(),
@@ -1291,12 +1292,10 @@ class _TypeChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.accent.withValues(alpha: 0.12)
+                ? AppColors.accentLight
                 : AppColors.sf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? AppColors.accent : AppColors.bd(context),
-            ),
+            border: selected ? Border.all(color: AppColors.accent) : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

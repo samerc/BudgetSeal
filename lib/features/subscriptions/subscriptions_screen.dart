@@ -361,7 +361,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           if (cancelledCount > 0) ...[
                             const SizedBox(width: 16),
                             _CountChip(
-                              icon: Icons.cancel_outlined,
+                              icon: Icons.cancel_rounded,
                               label: '$cancelledCount',
                               subtitle: S.of(context).subCancelled,
                               color: AppColors.overspent,
@@ -520,7 +520,7 @@ class _StatusChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? chipColor.withValues(alpha: 0.15)
+              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
           border: selected

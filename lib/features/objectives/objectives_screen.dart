@@ -7,6 +7,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -36,17 +37,24 @@ class ObjectivesScreen extends ConsumerWidget {
                     onPressed: () => context.pop(),
                   ),
                   const SizedBox(width: 4),
+                  // Long titles (FR/AR) shrink instead of running under Add.
                   Expanded(
-                    child: Text(
-                      S.of(context).objTitle,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.screenTitleSize,
-                        fontFamily: TypographyTokens.displayFamily,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.tp(context),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        S.of(context).objTitle,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: TypographyTokens.screenTitleSize,
+                          fontFamily: TypographyTokens.displayFamily,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.tp(context),
+                        ),
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   FilledButton.icon(
                     onPressed: () => context.push('/objectives/new'),
                     icon: const Icon(Icons.add_rounded, size: 18),
@@ -131,13 +139,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(title,
-            style: TextStyle(
-              fontSize: TypographyTokens.sectionHeaderSize,
-              fontWeight: TypographyTokens.sectionHeaderWeight,
-              letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-              color: AppColors.accentText(context),
-            )),
+        SectionHeader(title),
         const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

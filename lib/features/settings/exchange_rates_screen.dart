@@ -278,14 +278,15 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                     margin: const EdgeInsets.only(bottom: 4),
                     decoration: BoxDecoration(
                       color: AppColors.sf(context),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(CardTokens.radius),
+                      boxShadow: AppColors.cardShadow(context),
                     ),
                     child: Material(
                       // Transparent Material so the ripple paints above the card fill.
                       type: MaterialType.transparency,
                       child: ListTile(
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(CardTokens.radius)),
                         onTap: () => _editRate(row),
                         leading: Container(
                           width: 40,
@@ -324,7 +325,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                                   ? AppColors.accent
                                   : AppColors.ts(context)),
                         ),
-                        trailing: Icon(Icons.edit_outlined,
+                        trailing: Icon(Icons.edit_rounded,
                             size: 18, color: AppColors.th(context)),
                       ),
                     ),

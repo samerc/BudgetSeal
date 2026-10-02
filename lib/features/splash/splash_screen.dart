@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 
 /// Continues the Android/iOS launch screen seamlessly: same background, same
@@ -63,6 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
                   'BudgetSeal',
                   style: TextStyle(
                     fontSize: 26,
+                    fontFamily: TypographyTokens.displayFamily,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
                     color: AppColors.tp(context),

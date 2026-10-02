@@ -15,6 +15,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
 // ---------------------------------------------------------------------------
@@ -71,7 +72,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         heroTag: 'fab_categories',
         tooltip: S.of(context).catAddTooltip,
         onPressed: () => _showForm(categories: categories),
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
       body: SafeArea(
         bottom: false,
@@ -476,7 +477,7 @@ class _TypeChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? chipColor.withValues(alpha: 0.15)
+              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
           border: selected
@@ -541,14 +542,14 @@ class _CategoriesSliver extends ConsumerWidget {
     final tiles = <Widget>[];
 
     if (expenseGroups.isNotEmpty) {
-      tiles.add(_sectionLabel(context, S.of(context).catSectionExpense, AppColors.overspent));
+      tiles.add(_sectionLabel(S.of(context).catSectionExpense));
       for (final g in expenseGroups) {
         tiles.add(_buildGroupTile(
             context, g, subsByParent[g.id] ?? [], accountMap, allocMap));
       }
     }
     if (incomeGroups.isNotEmpty) {
-      tiles.add(_sectionLabel(context, S.of(context).catSectionIncome, AppColors.healthy));
+      tiles.add(_sectionLabel(S.of(context).catSectionIncome));
       for (final g in incomeGroups) {
         tiles.add(_buildGroupTile(
             context, g, subsByParent[g.id] ?? [], accountMap, allocMap));
@@ -563,33 +564,8 @@ class _CategoriesSliver extends ConsumerWidget {
     );
   }
 
-  Widget _sectionLabel(BuildContext context, String label, Color color) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 16, 4, 6),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 16,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: TypographyTokens.sectionHeaderSize,
-              fontWeight: TypographyTokens.sectionHeaderWeight,
-              letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _sectionLabel(String label) => SectionHeader(label,
+      padding: const EdgeInsetsDirectional.fromSTEB(4, 16, 4, 6));
 
   Widget _buildGroupTile(
     BuildContext context,
@@ -1045,7 +1021,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                                 height: 38,
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? AppColors.accent.withValues(alpha: 0.15)
+                                      ? AppColors.accentLight
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(10),
                                   border: isSelected
@@ -1099,8 +1075,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                           : null,
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check,
-                            size: 14, color: Colors.white)
+                        ? Icon(Icons.check_rounded,
+                            size: 14, color: AppColors.inkOn(c))
                         : null,
                   ),
                 );

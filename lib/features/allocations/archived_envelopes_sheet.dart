@@ -8,6 +8,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 
 /// Lists archived envelopes with an Unarchive action (Budget tab menu).
 Future<void> showArchivedEnvelopesSheet(
@@ -37,7 +38,9 @@ Future<void> showArchivedEnvelopesSheet(
               padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 8),
               child: Text(tr.allocArchivedTitle,
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w800)),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: TypographyTokens.displayFamily)),
             ),
             if (archived.isEmpty)
               Padding(

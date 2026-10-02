@@ -318,10 +318,10 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     final (statusText, statusColor, statusIcon) = !_hasWifi && !state.isRunning
         ? (tr.wcNoWifi, AppColors.th(context), Icons.wifi_off_rounded)
         : switch (state.status) {
-            WebServerStatus.stopped => (tr.wcStopped, AppColors.ts(context), Icons.stop_circle_outlined),
-            WebServerStatus.starting => (tr.wcStarting, const Color(0xFF0EA5E9), Icons.hourglass_top_rounded),
-            WebServerStatus.running => (tr.wcRunning, const Color(0xFF059669), Icons.check_circle_rounded),
-            WebServerStatus.error => (tr.wcError, const Color(0xFFDC2626), Icons.error_outline_rounded),
+            WebServerStatus.stopped => (tr.wcStopped, AppColors.ts(context), Icons.stop_circle_rounded),
+            WebServerStatus.starting => (tr.wcStarting, AppColors.accent, Icons.hourglass_top_rounded),
+            WebServerStatus.running => (tr.wcRunning, AppColors.healthy, Icons.check_circle_rounded),
+            WebServerStatus.error => (tr.wcError, AppColors.overspent, Icons.error_outline_rounded),
           };
 
     return Container(
@@ -356,7 +356,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       Text(
                         state.errorMessage!,
                         style: TextStyle(
-                            fontSize: 13, color: const Color(0xFFDC2626)),
+                            fontSize: 13, color: AppColors.overspent),
                       ),
                     ] else if (state.isRunning && state.startedAt != null) ...[
                       const SizedBox(height: 2),
@@ -528,8 +528,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     : Icons.lock_open_rounded,
                 size: 18,
                 color: _hasPinSet
-                    ? const Color(0xFF059669)
-                    : const Color(0xFFD97706),
+                    ? AppColors.healthy
+                    : AppColors.caution,
               ),
               const SizedBox(width: 8),
               Text(
@@ -538,8 +538,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: _hasPinSet
-                      ? const Color(0xFF059669)
-                      : const Color(0xFFD97706),
+                      ? AppColors.healthy
+                      : AppColors.caution,
                 ),
               ),
               const Spacer(),
@@ -560,22 +560,22 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: const Color(0xFFF59E0B)),
+        border: Border.all(color: AppColors.caution),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFD97706), size: 20),
+          Icon(Icons.warning_amber_rounded,
+              color: AppColors.caution, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               S.of(context).wcIosWarning,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF92400E),
+                  color: AppColors.tp(context),
                   height: 1.4),
             ),
           ),
@@ -585,14 +585,13 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   }
 
   Widget _buildNoWifiBanner() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF3B1111) : const Color(0xFFFEE2E2),
+        color: AppColors.pastel(context, AppColors.overspent, light: 0.88, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(
-          color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+          color: AppColors.overspent.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -601,7 +600,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           Row(
             children: [
               Icon(Icons.wifi_off_rounded,
-                  color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                  color: AppColors.overspent,
                   size: 20),
               const SizedBox(width: 8),
               Text(
@@ -609,7 +608,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                  color: AppColors.overspent,
                 ),
               ),
               const Spacer(),
@@ -625,7 +624,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     S.of(context).commonRetry,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                      color: AppColors.overspent,
                     ),
                   ),
                 ),
@@ -638,9 +637,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: isDark
-                  ? const Color(0xFFFCA5A5).withValues(alpha: 0.8)
-                  : const Color(0xFFDC2626).withValues(alpha: 0.75),
+              color: AppColors.tp(context),
             ),
           ),
         ],
@@ -655,12 +652,12 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isPublic
-            ? const Color(0xFFFEF3C7)
+            ? AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75)
             : AppColors.accentLight,
         borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(
           color: isPublic
-              ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
+              ? AppColors.caution.withValues(alpha: 0.4)
               : AppColors.accent.withValues(alpha: 0.3),
         ),
       ),
@@ -670,8 +667,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           Row(
             children: [
               Icon(
-                isPublic ? Icons.warning_amber_rounded : Icons.shield_outlined,
-                color: isPublic ? const Color(0xFF92400E) : AppColors.accentText(context),
+                isPublic ? Icons.warning_amber_rounded : Icons.shield_rounded,
+                color: isPublic ? AppColors.caution : AppColors.accentText(context),
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -681,7 +678,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isPublic
-                      ? const Color(0xFF92400E)
+                      ? AppColors.tp(context)
                       : AppColors.accentText(context),
                 ),
               ),
@@ -698,7 +695,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               fontSize: 13,
               height: 1.5,
               color: isPublic
-                  ? const Color(0xFF92400E)
+                  ? AppColors.tp(context)
                   : AppColors.tp(context),
             ),
           ),
@@ -711,15 +708,15 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+        border: Border.all(color: AppColors.caution.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.shield_outlined,
-              color: Color(0xFF92400E), size: 20),
+          Icon(Icons.shield_rounded,
+              color: AppColors.caution, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -727,19 +724,19 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               children: [
                 Text(
                   S.of(context).wcSecurityWarning,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF92400E)),
+                      color: AppColors.tp(context)),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _wifiName != null && _wifiName!.isNotEmpty
                       ? S.of(context).wcSecurityWarningNamed(_wifiName!)
                       : S.of(context).wcSecurityWarningUnnamed,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF92400E),
+                      color: AppColors.tp(context),
                       height: 1.4),
                 ),
               ],
@@ -764,7 +761,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           _infoRow(Icons.wifi_rounded,
               S.of(context).wcInfo1),
           const SizedBox(height: 10),
-          _infoRow(Icons.timer_outlined,
+          _infoRow(Icons.timer_rounded,
               S.of(context).wcInfo2),
           const SizedBox(height: 10),
           _infoRow(Icons.security_rounded,

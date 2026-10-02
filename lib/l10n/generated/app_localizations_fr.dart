@@ -1317,7 +1317,7 @@ class SFr extends S {
 
   @override
   String txDetailSplitItems(int count) {
-    return 'ÉLÉMENTS RÉPARTIS ($count)';
+    return 'Éléments répartis ($count)';
   }
 
   @override
@@ -3428,7 +3428,7 @@ class SFr extends S {
 
   @override
   String get notifBillsDesc =>
-      'Vous recevrez une notification quand des transactions récurrentes sont dues sous 2 jours. Vérification au démarrage.';
+      'Vous recevrez une notification quand des transactions récurrentes sont dues sous 2 jours. Vérifié à l\'ouverture de l\'app ou à son retour, au plus une fois par jour.';
 
   @override
   String get fxTitle => 'Taux de change';

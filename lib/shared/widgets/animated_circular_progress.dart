@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 /// Animated circular progress ring with optional overspend indicator.
 ///
 /// Draws a background track, a main progress arc, and (if progress > 1.0)
@@ -9,7 +11,7 @@ import 'package:flutter/material.dart';
 /// rendered centered inside the ring.
 class AnimatedCircularProgress extends StatefulWidget {
   final double progress;
-  final Color color;
+  final Color? color;
   final Color? overspendColor;
   final Color? trackColor;
   final double strokeWidth;
@@ -21,7 +23,7 @@ class AnimatedCircularProgress extends StatefulWidget {
   const AnimatedCircularProgress({
     super.key,
     required this.progress,
-    this.color = const Color(0xFF6366F1),
+    this.color,
     this.overspendColor,
     this.trackColor,
     this.strokeWidth = 3.5,
@@ -77,7 +79,7 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
   Widget build(BuildContext context) {
     final trackColor =
         widget.trackColor ?? Theme.of(context).dividerColor.withValues(alpha: 0.3);
-    final overspendColor = widget.overspendColor ?? const Color(0xFFEF4444);
+    final overspendColor = widget.overspendColor ?? AppColors.overspent;
 
     return RepaintBoundary(
       child: SizedBox(
@@ -88,7 +90,7 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
           builder: (_, child) => CustomPaint(
             painter: _CircularProgressPainter(
               progress: _animation.value.clamp(0.0, 3.0),
-              color: widget.color,
+              color: widget.color ?? AppColors.accent,
               overspendColor: overspendColor,
               trackColor: trackColor,
               strokeWidth: widget.strokeWidth,

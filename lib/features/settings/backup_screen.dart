@@ -13,6 +13,7 @@ import '../../core/services/auto_backup_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../core/providers/date_format_provider.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
@@ -296,7 +297,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 // Frequency picker
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined,
+                    Icon(Icons.timer_rounded,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(S.of(context).backupFrequency,
@@ -332,7 +333,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 // Retention picker
                 Row(
                   children: [
-                    Icon(Icons.folder_outlined,
+                    Icon(Icons.folder_rounded,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(S.of(context).backupKeepLast,
@@ -395,11 +396,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 child: FilledButton.icon(
                   onPressed: _working ? null : _exportBackup,
                   icon: _working
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
+                              color: AppColors.onAccent, strokeWidth: 2))
                       : const Icon(Icons.share_rounded, size: 18),
                   label:
                       Text(_working ? S.of(context).backupExporting : S.of(context).backupExportShare),
@@ -448,18 +449,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
           // ── Local backup history ──
           if (_backups.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-              child: Text(
-                S.of(context).backupLocalSection,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                  color: AppColors.th(context),
-                ),
-              ),
-            ),
+            SectionHeader(S.of(context).backupLocalSection,
+                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
             ..._backups.map((b) => Container(
                   margin: const EdgeInsets.only(bottom: 6),
                   decoration: BoxDecoration(
@@ -509,7 +500,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                             onPressed: () => _restoreLocalBackup(b),
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete_outline,
+                            icon: Icon(Icons.delete_outline_rounded,
                                 size: 18, color: AppColors.overspent),
                             tooltip: S.of(context).commonDelete,
                             onPressed: () => _deleteLocalBackup(b),

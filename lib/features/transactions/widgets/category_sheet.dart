@@ -315,7 +315,7 @@ class _CategorySheetState extends State<CategorySheet>
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? color.withValues(alpha: 0.15)
+              ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(20),
           border: selected
