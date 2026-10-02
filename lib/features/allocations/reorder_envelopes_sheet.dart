@@ -48,6 +48,11 @@ Future<void> showReorderEnvelopesSheet(
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(ctx, true),
+                      // The theme's minimum size is full-width; in a Row
+                      // that would be infinite.
+                      style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 44),
+                          padding: const EdgeInsets.symmetric(horizontal: 18)),
                       child: Text(tr.commonSave),
                     ),
                   ],

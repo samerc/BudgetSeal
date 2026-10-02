@@ -229,6 +229,8 @@ class _CategorySheetState extends State<CategorySheet>
                           FilledButton(
                             onPressed: () => _submitNew(_newCatCtrl.text),
                             style: FilledButton.styleFrom(
+                                // Full-width theme minimum is infinite in a Row.
+                                minimumSize: const Size(0, 40),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 10)),
                             child: Text(S.of(context).catSheetAdd),
