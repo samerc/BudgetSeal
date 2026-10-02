@@ -12,8 +12,10 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../core/providers/database_provider.dart';
 import '../../l10n/s_lookup.dart';
 import '../../core/providers/web_companion_provider.dart';
+import 'api/changes_handler.dart';
 import 'web_companion_auth.dart';
 import 'web_companion_router.dart';
 
@@ -28,6 +30,7 @@ class WebCompanionService {
   HttpServer? _server;
   Timer? _autoStopTimer;
   Timer? _sessionPruneTimer;
+  ChangeFeed? _changes;
 
   WebCompanionService(this._ref);
 
@@ -46,7 +49,8 @@ class WebCompanionService {
       }
 
       // Build the request handler pipeline
-      final handler = buildRouter(_ref, auth);
+      _changes = ChangeFeed(_ref.read(databaseProvider));
+      final handler = buildRouter(_ref, auth, _changes!);
       final pipeline = const Pipeline()
           .addMiddleware(_catchAllErrorMiddleware())
           .addMiddleware(_privateIpMiddleware())
@@ -87,6 +91,8 @@ class WebCompanionService {
       debugPrint('[WebCompanion] Start failed: $e');
       notifier.setError(currentS().wcStartFailed);
       _server = null;
+      _changes?.dispose();
+      _changes = null;
     }
   }
 
@@ -100,6 +106,8 @@ class WebCompanionService {
 
     await _server?.close(force: true);
     _server = null;
+    _changes?.dispose();
+    _changes = null;
 
     if (Platform.isAndroid) {
       await FlutterForegroundTask.stopService();

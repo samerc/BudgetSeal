@@ -8,6 +8,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import 'api/accounts_handler.dart';
 import 'api/categories_handler.dart';
+import 'api/changes_handler.dart';
 import 'api/dashboard_handler.dart';
 import 'api/envelopes_handler.dart';
 import 'api/import_handler.dart';
@@ -23,7 +24,7 @@ import '../../shared/utils/format_number.dart';
 import 'web_companion_auth.dart';
 
 /// Assembles the full shelf request handler.
-Handler buildRouter(Ref ref, WebCompanionAuth auth) {
+Handler buildRouter(Ref ref, WebCompanionAuth auth, ChangeFeed changes) {
   final router = Router();
 
   // ── Auth (no token required) ────────────────────────────────────────────────
@@ -68,6 +69,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   api.get('/envelopes', listEnvelopesHandler(ref));
   api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));
+  api.get('/changes', changesHandler(changes));
   api.post('/import', importCsvHandler(ref));
   api.get('/upcoming', upcomingBillsHandler(ref));
   api.post('/recurring/<id>/post-now', recurringActionHandler(ref, post: true));

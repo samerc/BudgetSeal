@@ -6,6 +6,7 @@ import 'package:budgetseal/core/providers/database_provider.dart';
 import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/features/web_companion/api/accounts_handler.dart';
 import 'package:budgetseal/features/web_companion/api/categories_handler.dart';
+import 'package:budgetseal/features/web_companion/api/changes_handler.dart';
 import 'package:budgetseal/features/web_companion/api/dashboard_handler.dart';
 import 'package:budgetseal/features/web_companion/api/envelopes_handler.dart';
 import 'package:budgetseal/features/web_companion/api/import_handler.dart';
@@ -511,6 +512,29 @@ void main() {
 
     final again = await call(h, 'POST', body: {'accountId': 'usd', 'rows': rows});
     expect(again['imported'], 0);
+  });
+
+  test('changes long-poll wakes on a write and names the tables', () async {
+    final feed = ChangeFeed(db);
+    addTearDown(feed.dispose);
+    final h = changesHandler(feed, wait: const Duration(seconds: 5));
+    final first = await call(h, 'GET', query: '?since=-1');
+    final v0 = first['version'] as int;
+
+    final waiting = call(h, 'GET', query: '?since=$v0');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'expense', 'accountId': 'usd', 'amount': 3,
+    });
+    final woke = await waiting;
+    expect(woke['version'], v0 + 1);
+    expect(woke['tables'], contains('transactions'));
+
+    // Nothing new: an idle poll returns the same version after the wait.
+    final idle = await call(changesHandler(feed, wait: const Duration(milliseconds: 100)),
+        'GET', query: '?since=${woke['version']}');
+    expect(idle['version'], woke['version']);
+    expect(idle['tables'], isEmpty);
   });
 
   test('money moves between envelopes and Ready to assign', () async {

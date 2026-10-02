@@ -315,6 +315,7 @@ async function api(path, opts = {}) {
     else toast(LOCALE === 'en' && err.error ? err.error : t('web_err_request'), true);
     return null;
   }
+  if (opts.method && opts.method !== 'GET') state.lastWrite = Date.now();
   try { return await res.json(); } catch (_) { return {}; }
 }
 
@@ -422,6 +423,7 @@ function closeModal() {
   if (!o) return;
   o.remove();
   modalReturnFocus?.focus?.();
+  setTimeout(liveFlush, 400);
 }
 
 function confirmDialog(title, msg, label, danger = true) {
@@ -593,6 +595,7 @@ function showAuth(message) {
 }
 
 function sessionExpired() {
+  stopLive();
   state.token = null;
   sessionStorage.removeItem('bs_token');
   invalidate();
@@ -605,6 +608,7 @@ function enterApp() {
   navigate(location.hash || '#/');
   refs();
   startConnectionCheck();
+  startLive();
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
@@ -1617,6 +1621,7 @@ async function saveBulk() {
     body: JSON.stringify({ items }),
   }).catch(() => null);
   if (btn) btn.disabled = false;
+  state.lastWrite = Date.now();
   if (!res) { setConnection(false); toast(t('web_offline_short'), true); return; }
   if (res.status === 401) { sessionExpired(); return; }
   const data = await res.json().catch(() => ({}));
@@ -2950,15 +2955,94 @@ async function checkConnection() {
     setConnection(false);
   }
 }
-function startConnectionCheck() { stopConnectionCheck(); checkConnection(); connTimer = setInterval(checkConnection, 15000); }
+function startConnectionCheck() { stopConnectionCheck(); checkConnection(); connTimer = setInterval(checkConnection, 30000); }
 function stopConnectionCheck() { clearInterval(connTimer); connTimer = null; }
 
-// Coming back to the tab: show what changed on the phone meanwhile.
+// Coming back to the tab: draw what changed while it was hidden.
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !state.token) return;
   checkConnection();
-  if (Date.now() - state.lastRender > 30000 && !document.getElementById('modal-overlay')) refresh(true);
+  liveFlush();
 });
+
+// ── Live updates ──────────────────────────────────────────────────────────────
+// Long-polls /api/changes: the phone answers as soon as anything is written
+// (on the phone or in a browser) and the page redraws quietly. Open dialogs,
+// a hidden tab, typing, and pages holding unsaved input (bulk entry, import)
+// wait; the redraw happens once they're done. This tab's own saves already
+// redraw, so a change right after one is ignored.
+
+const live = { version: null, ctrl: null, pending: false, timer: null };
+
+async function liveLoop() {
+  const token = state.token;
+  while (state.token && state.token === token) {
+    live.ctrl = new AbortController();
+    const asked = Date.now();
+    try {
+      const res = await fetch(`/api/changes?since=${live.version ?? -1}`, { headers: { Authorization: `Bearer ${token}` }, signal: live.ctrl.signal });
+      if (res.status === 401) { if (state.token === token) sessionExpired(); return; }
+      if (!res.ok) throw new Error(String(res.status));
+      const d = await res.json();
+      const changed = live.version != null && d.version !== live.version;
+      live.version = d.version;
+      setConnection(true);
+      if (changed && Date.now() - (state.lastWrite || 0) > 1500) { live.pending = true; liveFlush(); }
+      // The phone holds the request until something changes; a quick answer
+      // without a change (an old server, a proxy) mustn't turn into a busy loop.
+      if (!changed && Date.now() - asked < 1000) await new Promise(r => setTimeout(r, 2000));
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      setConnection(false);
+      await new Promise(r => setTimeout(r, 5000));
+    }
+  }
+}
+function startLive() { stopLive(); live.version = null; live.pending = false; liveLoop(); }
+function stopLive() { live.ctrl?.abort(); live.ctrl = null; }
+
+function liveBusy() {
+  if (document.hidden || document.getElementById('modal-overlay')) return true;
+  if (state.route === '#/bulk' || state.route === '#/import') return true;
+  // The transaction list redraws without touching its toolbar, so typing in
+  // its search box doesn't block it.
+  const typing = document.activeElement?.matches?.('input, textarea, select');
+  return typing && !txView;
+}
+
+function liveFlush() {
+  if (!live.pending || liveBusy()) return;
+  live.pending = false;
+  clearTimeout(live.timer);
+  live.timer = setTimeout(() => {
+    invalidate();
+    if (txView) reloadTx();
+    else navigate(state.route, true);
+  }, 120);
+}
+document.addEventListener('focusout', () => setTimeout(liveFlush, 300));
+
+/** Redraws the loaded transaction rows (and an account's balance) in place. */
+async function reloadTx() {
+  const v = txView;
+  if (!v) return;
+  const pages = Math.min(v.page, 5);
+  const [d, acct] = await Promise.all([
+    api(`/api/transactions?${txQuery(1, PAGE * pages)}`, { quiet: true }),
+    v.accountId ? api(`/api/accounts/${encodeURIComponent(v.accountId)}`, { quiet: true }) : null,
+  ]);
+  if (!d || txView !== v) return;
+  v.items = d.items;
+  v.hasMore = !!d.hasMore;
+  v.page = pages;
+  if (acct) {
+    v.account = acct;
+    const el = document.querySelector('.acct-head-bal');
+    if (el) { el.textContent = fmt(acct.balance, acct.currency); el.classList.toggle('expense', acct.balance < 0); }
+  }
+  drawTx();
+}
+
 
 // ── Sidebar (narrow screens) ──────────────────────────────────────────────────
 
@@ -3091,6 +3175,7 @@ function showShortcuts() {
 function signOut() {
   for (const id of [...pendingDeletes.keys()]) commitDelete(id, true);
   fetch('/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${state.token}` } }).catch(() => {});
+  stopLive();
   state.token = null;
   sessionStorage.removeItem('bs_token');
   invalidate();
