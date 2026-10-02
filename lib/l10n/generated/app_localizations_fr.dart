@@ -9,6 +9,101 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webAcctBalanceAfter => 'Solde après cette transaction';
+
+  @override
+  String webAcctReconciledOn(String date) {
+    return 'Rapproché le $date';
+  }
+
+  @override
+  String get webAcctNeverReconciled => 'Jamais rapproché';
+
+  @override
+  String get webAcctReconcile => 'Rapprocher';
+
+  @override
+  String webAcctReconcileTitle(String name) {
+    return 'Rapprocher $name';
+  }
+
+  @override
+  String get webAcctReconcileHelp =>
+      'Saisissez le solde affiché par votre banque ou portefeuille. S’il diffère, un « Ajustement de solde » est enregistré pour les aligner.';
+
+  @override
+  String get webAcctStatementBalance => 'Solde réel';
+
+  @override
+  String get webAcctReconcileMatches => 'Identique — rien à ajuster.';
+
+  @override
+  String webAcctReconcileDiff(String amount) {
+    return 'Un ajustement de $amount sera enregistré.';
+  }
+
+  @override
+  String get webAcctReconciled => 'Rapproché — tout correspond';
+
+  @override
+  String webAcctAdjusted(String amount) {
+    return 'Rapproché — ajusté de $amount';
+  }
+
+  @override
+  String get webAcctEdit => 'Modifier le compte';
+
+  @override
+  String get webAcctDecimals => 'Décimales';
+
+  @override
+  String webAcctDecimalsAuto(int n) {
+    return 'Auto ($n)';
+  }
+
+  @override
+  String get webAcctStartingBalance => 'Solde de départ';
+
+  @override
+  String get webAcctStartingHelp =>
+      'Ce que le compte contenait avant votre première transaction. Le modifier décale tous les soldes suivants.';
+
+  @override
+  String get webAcctSaved => 'Compte enregistré';
+
+  @override
+  String get webAcctArchive => 'Archiver';
+
+  @override
+  String webAcctArchiveTitle(String name) {
+    return 'Archiver $name ?';
+  }
+
+  @override
+  String get webAcctArchiveMsg =>
+      'Il est masqué des listes et des choix. Ses transactions restent, et vous pouvez le désarchiver à tout moment.';
+
+  @override
+  String webAcctArchiveNotZero(String amount) {
+    return 'Ce compte contient encore $amount. Transférez-le ou rapprochez-le à zéro d’abord — les comptes archivés ne comptent plus dans votre argent.';
+  }
+
+  @override
+  String get webAcctArchived => 'Archivé';
+
+  @override
+  String get webAcctArchivedSection => 'Archivés';
+
+  @override
+  String get webAcctArchivedToast => 'Compte archivé';
+
+  @override
+  String get webAcctUnarchive => 'Désarchiver';
+
+  @override
+  String get webAcctUnarchived => 'Compte restauré';
+
+  @override
   String get webNavUpcoming => 'À venir';
 
   @override

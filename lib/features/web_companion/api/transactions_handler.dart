@@ -10,6 +10,7 @@ import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
 import '../../../shared/utils/note_text.dart';
+import '_running.dart';
 import '_serializers.dart';
 import '_validation.dart';
 
@@ -71,7 +72,10 @@ Handler listTransactionsHandler(Ref ref) {
           }
           return expr;
         })
-        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+        ..orderBy([
+          (t) => OrderingTerm.desc(t.createdAt),
+          (t) => OrderingTerm.desc(t.id),
+        ])
         // One extra row tells the browser whether a next page exists.
         ..limit(limit + 1, offset: offset);
 
@@ -107,14 +111,27 @@ Handler listTransactionsHandler(Ref ref) {
             ..where((h) => h.id.equals(householdId)))
           .getSingleOrNull();
 
+      // One account's page: what each row did to it and the balance after.
+      final account = accountFilter == null ? null : acctMap[accountFilter];
+      final running = account == null || account.householdId != householdId
+          ? null
+          : await accountRunning(db, account);
+
       return ok({
         'page': page,
         'limit': limit,
         'hasMore': hasMore,
         'baseCurrency': household?.baseCurrency ?? 'USD',
         'items': txs
-            .map((t) => txToJson(t, catMap, acctMap,
-                firstLine: firstLine[t.id], lineCount: lineCount[t.id] ?? 0))
+            .map((t) => {
+                  ...txToJson(t, catMap, acctMap,
+                      firstLine: firstLine[t.id],
+                      lineCount: lineCount[t.id] ?? 0),
+                  if (running?[t.id] != null) ...{
+                    'accountAmount': running![t.id]!.effect,
+                    'runningBalance': running[t.id]!.balance,
+                  },
+                })
             .toList(),
       });
     } catch (e) {

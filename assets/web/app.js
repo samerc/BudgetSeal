@@ -186,6 +186,12 @@ function parseAmount(s) {
   return Number.isFinite(v) ? v : NaN;
 }
 
+/** A typed amount that may be negative: "-50", "(50)". */
+function parseSigned(raw) {
+  const v = parseAmount(String(raw ?? '').replace(/[-()]/g, ''));
+  return /^\s*[-(]/.test(String(raw ?? '')) ? -v : v;
+}
+
 function amountInputValue(v, cur) {
   if (v == null || v === '') return '';
   return Number(v).toFixed(decimalsFor(cur)).replace(/\.?0+$/, m => (m.startsWith('.') ? '' : m)).replace('.', NUM.decimal);
@@ -501,7 +507,14 @@ function txRow(tx, base, opts = {}) {
       ? `<div class="row-amount-sub num">${esc(fmt(amt * rate, base))}</div>`
       : `<div class="row-amount-sub"><span class="tag warn">${esc(t('web_tx_no_rate'))}</span></div>`;
   }
-  const cls = tx.type === 'income' ? 'income' : tx.type === 'expense' ? 'expense' : '';
+  let cls = tx.type === 'income' ? 'income' : tx.type === 'expense' ? 'expense' : '';
+  let amountText = fmtSigned(amt, shownCur, tx.type);
+  if (opts.account && tx.accountAmount != null) {
+    const e = tx.accountAmount;
+    cls = e > 0 ? 'income' : e < 0 ? 'expense' : '';
+    amountText = (e > 0 ? '+' : '') + fmt(e, opts.account.currency);
+    amountSub = `<div class="row-amount-sub num" title="${esc(t('web_acct_balance_after'))}">${esc(fmt(tx.runningBalance, opts.account.currency))}</div>`;
+  }
   return `<div class="row clickable" data-action="edit-tx" data-id="${esc(tx.id)}" tabindex="0">
     ${chip}
     <div class="row-main">
@@ -513,7 +526,7 @@ function txRow(tx, base, opts = {}) {
       <button class="icon-btn danger" data-action="del-tx" data-id="${esc(tx.id)}" title="${esc(t('common_delete'))}" aria-label="${esc(t('common_delete'))}">${IC.trash}</button>
     </div>` : ''}
     <div class="row-end">
-      <div class="row-amount ${cls}">${esc(fmtSigned(amt, shownCur, tx.type))}</div>
+      <div class="row-amount ${cls}">${esc(amountText)}</div>
       ${amountSub}
     </div>
   </div>`;
@@ -971,9 +984,9 @@ async function renderTransactions(opts = {}) {
   const accountId = opts.accountId || null;
   if (!txView || txView.accountId !== accountId) txView = newTxView(accountId);
   const v = txView;
-  const { accounts } = await refs();
+  const [, account] = await Promise.all([refs(), accountId ? api(`/api/accounts/${encodeURIComponent(accountId)}`, { quiet: true }) : null]);
   if (txView !== v) return;
-  const account = accountId ? accounts.find(a => a.id === accountId) : null;
+  v.account = account;
 
   const now = new Date();
   const monthPills = [`<button class="pill${v.month < 0 ? ' active' : ''}" data-month="-1">${esc(t('web_whole_year'))}</button>`]
@@ -983,9 +996,15 @@ async function renderTransactions(opts = {}) {
 
   const head = account
     ? `<a class="back-link" href="#/accounts">${IC.back}${esc(t('nav_accounts'))}</a>
-       ${pageHead(account.name, `<span class="num">${esc(fmt(account.balance, account.currency))}</span>`,
-         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
-          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`)}`
+       ${pageHead(account.name, `<span class="num acct-head-bal${account.balance < 0 ? ' expense' : ''}">${esc(fmt(account.balance, account.currency))}</span>
+           <span class="acct-head-meta">${esc(account.reconciledAt ? t('web_acct_reconciled_on', { date: fmtDate(account.reconciledAt, true) }) : t('web_acct_never_reconciled'))}</span>
+           ${account.archived ? `<span class="tag warn">${esc(t('web_acct_archived'))}</span>` : ''}`,
+         `<button class="btn btn-ghost" data-action="edit-account" data-id="${esc(account.id)}">${IC.edit}${esc(t('web_goal_edit'))}</button>
+          ${account.archived
+            ? `<button class="btn btn-tonal" data-action="unarchive-account" data-id="${esc(account.id)}">${esc(t('web_acct_unarchive'))}</button>`
+            : `<button class="btn btn-ghost" data-action="reconcile" data-id="${esc(account.id)}">${IC.check}${esc(t('web_acct_reconcile'))}</button>
+          <button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`}`)}`
     : pageHead(t('nav_transactions'), '',
         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
          <a class="btn btn-tonal" href="#/bulk">${IC.grid}${esc(t('web_bulk_add'))}</a>
@@ -1079,7 +1098,7 @@ function drawTx() {
     groups[groups.length - 1].items.push(tx);
   }
   box.innerHTML = `<div class="card card-flush list">
-    ${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.date))}</span></div>${g.items.map(tx => txRow(tx, state.baseCurrency, { actions: true })).join('')}`).join('')}
+    ${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.date))}</span></div>${g.items.map(tx => txRow(tx, state.baseCurrency, { actions: true, account: v.account })).join('')}`).join('')}
     ${v.hasMore ? `<div class="load-more"><button class="btn btn-tonal" data-action="more-tx">${esc(t('web_load_more'))}</button></div>` : ''}
   </div>`;
   if (v.flash) {
@@ -1623,9 +1642,10 @@ function bulkBad(i) {
 
 async function renderAccounts(quiet) {
   if (!quiet) setContent(pageHead(t('nav_accounts'), '') + skeleton(5));
-  const d = await api('/api/accounts');
+  const d = await api('/api/accounts?archived=1');
   if (!d || state.route !== '#/accounts') return;
-  cache.accounts = d.items || [];
+  const archived = (d.items || []).filter(a => a.archived);
+  cache.accounts = (d.items || []).filter(a => !a.archived);
   const add = `<button class="btn btn-primary" data-action="add-account">${IC.plus}${esc(t('web_acct_add'))}</button>`;
   if (!cache.accounts.length) {
     setContent(pageHead(t('nav_accounts'), '', add) + `<div class="card">${emptyState(IC.wallet, t('web_acct_empty_title'), t('web_acct_empty_sub'), { action: 'add-account', label: t('web_acct_add') })}</div>`);
@@ -1649,7 +1669,112 @@ async function renderAccounts(quiet) {
           <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${esc(a.currency)}${a.isTravel ? ` · ${esc(t('web_acct_travel'))}` : ''}</div></div>
           <div class="row-end"><div class="row-amount${a.balance < 0 ? ' expense' : ''}">${esc(fmt(a.balance, a.currency))}</div></div>
           <span class="chev hint" style="display:inline-grid">${IC.right}</span>
-        </a>`).join('')}</div>`).join('')}`);
+        </a>`).join('')}</div>`).join('')}
+    ${archived.length ? `<div class="section-head"><span class="section-title">${esc(t('web_acct_archived_section'))}</span></div>
+      <div class="card card-flush list">${archived.map(a => `
+        <a class="row clickable archived" href="#/accounts/${esc(a.id)}">
+          <span class="type-icon">${TYPE_ICON[a.type] || IC.wallet}</span>
+          <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${esc(a.currency)}</div></div>
+          <button class="btn btn-sm btn-tonal" data-action="unarchive-account" data-id="${esc(a.id)}">${esc(t('web_acct_unarchive'))}</button>
+        </a>`).join('')}</div>` : ''}`);
+}
+
+/** Reconcile: type the bank's balance; a difference becomes a "Balance adjustment". */
+function openReconcile(id) {
+  const a = txView?.account;
+  if (!a || a.id !== id) return;
+  openModal({
+    title: t('web_acct_reconcile_title', { name: a.name }), narrow: true,
+    submit: t('web_acct_reconcile'),
+    body: `
+      <p class="modal-text">${esc(t('web_acct_reconcile_help'))}</p>
+      <div class="field"><label class="label" for="rc-bal">${esc(t('web_acct_statement_balance'))}</label>
+        <div class="input-cur"><input id="rc-bal" class="input amount num" inputmode="decimal" autocomplete="off" autofocus value="${esc(amountInputValue(a.balance, a.currency))}"><span class="cur">${esc(a.currency)}</span></div>
+        <div class="help" id="rc-diff"></div></div>`,
+    onOpen: f => {
+      const input = f.querySelector('#rc-bal');
+      const out = f.querySelector('#rc-diff');
+      const update = () => {
+        const v = parseSigned(input.value);
+        if (!Number.isFinite(v)) { out.textContent = ''; return; }
+        const diff = v - a.balance;
+        const zero = 0.5 / 10 ** decimalsFor(a.currency);
+        out.classList.toggle('warn', Math.abs(diff) >= zero);
+        out.textContent = Math.abs(diff) < zero ? t('web_acct_reconcile_matches') : t('web_acct_reconcile_diff', { amount: (diff > 0 ? '+' : '') + fmt(diff, a.currency) });
+      };
+      input.addEventListener('input', update);
+      input.select();
+      update();
+    },
+    onSubmit: async f => {
+      const balance = parseSigned(f.querySelector('#rc-bal').value);
+      if (!Number.isFinite(balance)) { toast(t('web_val_valid_amount'), true); return false; }
+      const r = await api(`/api/accounts/${encodeURIComponent(id)}/reconcile`, { method: 'POST', body: { balance } });
+      if (!r) return false;
+      toast(r.adjusted ? t('web_acct_adjusted', { amount: (r.adjusted > 0 ? '+' : '') + fmt(r.adjusted, a.currency) }) : t('web_acct_reconciled'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+function openEditAccount(id) {
+  const a = txView?.account;
+  if (!a || a.id !== id) return;
+  const zero = 0.5 / 10 ** decimalsFor(a.currency);
+  openModal({
+    title: t('web_acct_edit'),
+    submit: t('common_save'),
+    extra: a.archived ? null : { label: t('web_acct_archive'), run: () => archiveAccount(a, Math.abs(a.balance) < zero) },
+    body: `
+      <div class="field"><label class="label" for="ae-name">${esc(t('web_form_name'))}</label><input id="ae-name" class="input" maxlength="100" value="${esc(a.name)}" autofocus></div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="ae-type">${esc(t('web_form_type'))}</label><select id="ae-type" class="input">
+          ${['bank', 'cash', 'credit', 'wallet'].map(k => `<option value="${k}"${a.type === k ? ' selected' : ''}>${esc(t(`web_acct_type_${k}`))}</option>`).join('')}</select></div>
+        <div class="field"><label class="label" for="ae-dp">${esc(t('web_acct_decimals'))}</label><select id="ae-dp" class="input">
+          <option value="">${esc(t('web_acct_decimals_auto', { n: decimalsFor(a.currency) }))}</option>
+          ${[0, 1, 2, 3].map(n => `<option value="${n}"${a.decimalPlaces === n ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label class="label" for="ae-init">${esc(t('web_acct_starting_balance'))}</label>
+        <div class="input-cur"><input id="ae-init" class="input num" inputmode="decimal" autocomplete="off" value="${esc(amountInputValue(a.initialBalance, a.currency))}"><span class="cur">${esc(a.currency)}</span></div>
+        <div class="help">${esc(t('web_acct_starting_help'))}</div></div>`,
+    onSubmit: async f => {
+      const name = f.querySelector('#ae-name').value.trim();
+      if (!name) { toast(t('web_val_name_required'), true); return false; }
+      const raw = f.querySelector('#ae-init').value.trim();
+      const v = raw ? parseSigned(raw) : 0;
+      if (!Number.isFinite(v)) { toast(t('web_val_valid_amount'), true); return false; }
+      const dp = f.querySelector('#ae-dp').value;
+      const body = { name, type: f.querySelector('#ae-type').value, initialBalance: v, decimalPlaces: dp === '' ? null : Number(dp) };
+      const r = await api(`/api/accounts/${encodeURIComponent(id)}`, { method: 'PUT', body });
+      if (!r) return false;
+      toast(t('web_acct_saved'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+async function archiveAccount(a, atZero) {
+  if (!atZero) {
+    openModal({ title: t('web_acct_archive'), narrow: true, submit: null, body: `<p class="modal-text">${esc(t('web_acct_archive_not_zero', { amount: fmt(a.balance, a.currency) }))}</p>` });
+    return;
+  }
+  if (!(await confirmDialog(t('web_acct_archive_title', { name: a.name }), t('web_acct_archive_msg'), t('web_acct_archive'), false))) return;
+  const r = await api(`/api/accounts/${encodeURIComponent(a.id)}/archive`, { method: 'POST', body: { archived: true } });
+  if (!r) return;
+  toast(t('web_acct_archived_toast'));
+  invalidate();
+  location.hash = '#/accounts';
+}
+
+async function unarchiveAccount(id) {
+  const r = await api(`/api/accounts/${encodeURIComponent(id)}/archive`, { method: 'POST', body: { archived: false } });
+  if (!r) return;
+  toast(t('web_acct_unarchived'));
+  refresh(true);
 }
 
 function openAddAccount() {
@@ -2652,6 +2777,9 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'reconcile': el => openReconcile(el.dataset.id),
+  'edit-account': el => openEditAccount(el.dataset.id),
+  'unarchive-account': el => unarchiveAccount(el.dataset.id),
   'add-goal': () => openGoalForm(),
   'add-plan': () => openPlanForm(),
   'plan': el => openPlan(el.dataset.id),

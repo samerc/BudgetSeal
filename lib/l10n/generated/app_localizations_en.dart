@@ -9,6 +9,101 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webAcctBalanceAfter => 'Balance after this transaction';
+
+  @override
+  String webAcctReconciledOn(String date) {
+    return 'Reconciled $date';
+  }
+
+  @override
+  String get webAcctNeverReconciled => 'Never reconciled';
+
+  @override
+  String get webAcctReconcile => 'Reconcile';
+
+  @override
+  String webAcctReconcileTitle(String name) {
+    return 'Reconcile $name';
+  }
+
+  @override
+  String get webAcctReconcileHelp =>
+      'Enter the balance your bank or wallet shows right now. If it differs, a “Balance adjustment” is recorded so they match.';
+
+  @override
+  String get webAcctStatementBalance => 'Actual balance';
+
+  @override
+  String get webAcctReconcileMatches => 'Matches — nothing to adjust.';
+
+  @override
+  String webAcctReconcileDiff(String amount) {
+    return 'An adjustment of $amount will be recorded.';
+  }
+
+  @override
+  String get webAcctReconciled => 'Reconciled — it matches';
+
+  @override
+  String webAcctAdjusted(String amount) {
+    return 'Reconciled — adjusted by $amount';
+  }
+
+  @override
+  String get webAcctEdit => 'Edit account';
+
+  @override
+  String get webAcctDecimals => 'Decimal places';
+
+  @override
+  String webAcctDecimalsAuto(int n) {
+    return 'Auto ($n)';
+  }
+
+  @override
+  String get webAcctStartingBalance => 'Starting balance';
+
+  @override
+  String get webAcctStartingHelp =>
+      'What the account held before your first transaction. Changing it moves every balance after it.';
+
+  @override
+  String get webAcctSaved => 'Account saved';
+
+  @override
+  String get webAcctArchive => 'Archive';
+
+  @override
+  String webAcctArchiveTitle(String name) {
+    return 'Archive $name?';
+  }
+
+  @override
+  String get webAcctArchiveMsg =>
+      'It’s hidden from lists and pickers. Its transactions stay, and you can unarchive it any time.';
+
+  @override
+  String webAcctArchiveNotZero(String amount) {
+    return 'This account still holds $amount. Move it to another account or reconcile it to zero first — archived accounts no longer count toward your money.';
+  }
+
+  @override
+  String get webAcctArchived => 'Archived';
+
+  @override
+  String get webAcctArchivedSection => 'Archived';
+
+  @override
+  String get webAcctArchivedToast => 'Account archived';
+
+  @override
+  String get webAcctUnarchive => 'Unarchive';
+
+  @override
+  String get webAcctUnarchived => 'Account restored';
+
+  @override
   String get webNavUpcoming => 'Upcoming';
 
   @override

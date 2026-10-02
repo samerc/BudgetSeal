@@ -9,6 +9,101 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webAcctBalanceAfter => 'الرصيد بعد هذه المعاملة';
+
+  @override
+  String webAcctReconciledOn(String date) {
+    return 'تمت المطابقة في $date';
+  }
+
+  @override
+  String get webAcctNeverReconciled => 'لم تتم المطابقة بعد';
+
+  @override
+  String get webAcctReconcile => 'مطابقة';
+
+  @override
+  String webAcctReconcileTitle(String name) {
+    return 'مطابقة $name';
+  }
+
+  @override
+  String get webAcctReconcileHelp =>
+      'أدخل الرصيد الذي يظهره مصرفك أو محفظتك الآن. إن اختلف، تُسجَّل «تسوية رصيد» ليتطابقا.';
+
+  @override
+  String get webAcctStatementBalance => 'الرصيد الفعلي';
+
+  @override
+  String get webAcctReconcileMatches => 'متطابق — لا شيء للتسوية.';
+
+  @override
+  String webAcctReconcileDiff(String amount) {
+    return 'ستُسجَّل تسوية بمقدار $amount.';
+  }
+
+  @override
+  String get webAcctReconciled => 'تمت المطابقة — الرصيد متطابق';
+
+  @override
+  String webAcctAdjusted(String amount) {
+    return 'تمت المطابقة — سُوّي بمقدار $amount';
+  }
+
+  @override
+  String get webAcctEdit => 'تعديل الحساب';
+
+  @override
+  String get webAcctDecimals => 'المنازل العشرية';
+
+  @override
+  String webAcctDecimalsAuto(int n) {
+    return 'تلقائي ($n)';
+  }
+
+  @override
+  String get webAcctStartingBalance => 'الرصيد الافتتاحي';
+
+  @override
+  String get webAcctStartingHelp =>
+      'ما كان في الحساب قبل أول معاملة. تغييره يحرّك كل الأرصدة التي بعده.';
+
+  @override
+  String get webAcctSaved => 'تم حفظ الحساب';
+
+  @override
+  String get webAcctArchive => 'أرشفة';
+
+  @override
+  String webAcctArchiveTitle(String name) {
+    return 'أرشفة $name؟';
+  }
+
+  @override
+  String get webAcctArchiveMsg =>
+      'سيُخفى من القوائم والاختيارات. تبقى معاملاته، ويمكنك إلغاء أرشفته في أي وقت.';
+
+  @override
+  String webAcctArchiveNotZero(String amount) {
+    return 'لا يزال في هذا الحساب $amount. انقله إلى حساب آخر أو طابقه إلى الصفر أولًا — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.';
+  }
+
+  @override
+  String get webAcctArchived => 'مؤرشف';
+
+  @override
+  String get webAcctArchivedSection => 'المؤرشفة';
+
+  @override
+  String get webAcctArchivedToast => 'تمت أرشفة الحساب';
+
+  @override
+  String get webAcctUnarchive => 'إلغاء الأرشفة';
+
+  @override
+  String get webAcctUnarchived => 'تمت استعادة الحساب';
+
+  @override
   String get webNavUpcoming => 'القادمة';
 
   @override

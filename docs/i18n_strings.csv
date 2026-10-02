@@ -2254,3 +2254,32 @@ web_plan_updated,,Saved,تم الحفظ,Enregistré
 web_plan_deleted,,Planned payment deleted,تم حذف الدفعة المخطّطة,Paiement prévu supprimé
 web_plan_delete_title,,Delete this planned payment?,حذف هذه الدفعة المخطّطة؟,Supprimer ce paiement prévu ?
 web_plan_delete_msg,,"It was never recorded, so no balance changes.",لم تُسجَّل أبدًا، لذا لن يتغير أي رصيد.,Il n’a jamais été enregistré : aucun solde ne change.
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_acct_balance_after,,Balance after this transaction,الرصيد بعد هذه المعاملة,Solde après cette transaction
+web_acct_reconciled_on,,Reconciled {date},تمت المطابقة في {date},Rapproché le {date}
+web_acct_never_reconciled,,Never reconciled,لم تتم المطابقة بعد,Jamais rapproché
+web_acct_reconcile,,Reconcile,مطابقة,Rapprocher
+web_acct_reconcile_title,,Reconcile {name},مطابقة {name},Rapprocher {name}
+web_acct_reconcile_help,,"Enter the balance your bank or wallet shows right now. If it differs, a “Balance adjustment” is recorded so they match.",أدخل الرصيد الذي يظهره مصرفك أو محفظتك الآن. إن اختلف، تُسجَّل «تسوية رصيد» ليتطابقا.,"Saisissez le solde affiché par votre banque ou portefeuille. S’il diffère, un « Ajustement de solde » est enregistré pour les aligner."
+web_acct_statement_balance,,Actual balance,الرصيد الفعلي,Solde réel
+web_acct_reconcile_matches,,Matches — nothing to adjust.,متطابق — لا شيء للتسوية.,Identique — rien à ajuster.
+web_acct_reconcile_diff,,An adjustment of {amount} will be recorded.,ستُسجَّل تسوية بمقدار {amount}.,Un ajustement de {amount} sera enregistré.
+web_acct_reconciled,,Reconciled — it matches,تمت المطابقة — الرصيد متطابق,Rapproché — tout correspond
+web_acct_adjusted,,Reconciled — adjusted by {amount},تمت المطابقة — سُوّي بمقدار {amount},Rapproché — ajusté de {amount}
+web_acct_edit,,Edit account,تعديل الحساب,Modifier le compte
+web_acct_decimals,,Decimal places,المنازل العشرية,Décimales
+web_acct_decimals_auto,,Auto ({n}),تلقائي ({n}),Auto ({n})
+web_acct_starting_balance,,Starting balance,الرصيد الافتتاحي,Solde de départ
+web_acct_starting_help,,What the account held before your first transaction. Changing it moves every balance after it.,ما كان في الحساب قبل أول معاملة. تغييره يحرّك كل الأرصدة التي بعده.,Ce que le compte contenait avant votre première transaction. Le modifier décale tous les soldes suivants.
+web_acct_saved,,Account saved,تم حفظ الحساب,Compte enregistré
+web_acct_archive,,Archive,أرشفة,Archiver
+web_acct_archive_title,,Archive {name}?,أرشفة {name}؟,Archiver {name} ?
+web_acct_archive_msg,,"It’s hidden from lists and pickers. Its transactions stay, and you can unarchive it any time.",سيُخفى من القوائم والاختيارات. تبقى معاملاته، ويمكنك إلغاء أرشفته في أي وقت.,"Il est masqué des listes et des choix. Ses transactions restent, et vous pouvez le désarchiver à tout moment."
+web_acct_archive_not_zero,,This account still holds {amount}. Move it to another account or reconcile it to zero first — archived accounts no longer count toward your money.,لا يزال في هذا الحساب {amount}. انقله إلى حساب آخر أو طابقه إلى الصفر أولًا — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.,Ce compte contient encore {amount}. Transférez-le ou rapprochez-le à zéro d’abord — les comptes archivés ne comptent plus dans votre argent.
+web_acct_archived,,Archived,مؤرشف,Archivé
+web_acct_archived_section,,Archived,المؤرشفة,Archivés
+web_acct_archived_toast,,Account archived,تمت أرشفة الحساب,Compte archivé
+web_acct_unarchive,,Unarchive,إلغاء الأرشفة,Désarchiver
+web_acct_unarchived,,Account restored,تمت استعادة الحساب,Compte restauré

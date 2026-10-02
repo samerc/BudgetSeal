@@ -99,6 +99,162 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webAcctBalanceAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance after this transaction'**
+  String get webAcctBalanceAfter;
+
+  /// No description provided for @webAcctReconciledOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled {date}'**
+  String webAcctReconciledOn(String date);
+
+  /// No description provided for @webAcctNeverReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Never reconciled'**
+  String get webAcctNeverReconciled;
+
+  /// No description provided for @webAcctReconcile.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get webAcctReconcile;
+
+  /// No description provided for @webAcctReconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile {name}'**
+  String webAcctReconcileTitle(String name);
+
+  /// No description provided for @webAcctReconcileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the balance your bank or wallet shows right now. If it differs, a “Balance adjustment” is recorded so they match.'**
+  String get webAcctReconcileHelp;
+
+  /// No description provided for @webAcctStatementBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual balance'**
+  String get webAcctStatementBalance;
+
+  /// No description provided for @webAcctReconcileMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches — nothing to adjust.'**
+  String get webAcctReconcileMatches;
+
+  /// No description provided for @webAcctReconcileDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'An adjustment of {amount} will be recorded.'**
+  String webAcctReconcileDiff(String amount);
+
+  /// No description provided for @webAcctReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled — it matches'**
+  String get webAcctReconciled;
+
+  /// No description provided for @webAcctAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled — adjusted by {amount}'**
+  String webAcctAdjusted(String amount);
+
+  /// No description provided for @webAcctEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit account'**
+  String get webAcctEdit;
+
+  /// No description provided for @webAcctDecimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Decimal places'**
+  String get webAcctDecimals;
+
+  /// No description provided for @webAcctDecimalsAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto ({n})'**
+  String webAcctDecimalsAuto(int n);
+
+  /// No description provided for @webAcctStartingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting balance'**
+  String get webAcctStartingBalance;
+
+  /// No description provided for @webAcctStartingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What the account held before your first transaction. Changing it moves every balance after it.'**
+  String get webAcctStartingHelp;
+
+  /// No description provided for @webAcctSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Account saved'**
+  String get webAcctSaved;
+
+  /// No description provided for @webAcctArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get webAcctArchive;
+
+  /// No description provided for @webAcctArchiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive {name}?'**
+  String webAcctArchiveTitle(String name);
+
+  /// No description provided for @webAcctArchiveMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'It’s hidden from lists and pickers. Its transactions stay, and you can unarchive it any time.'**
+  String get webAcctArchiveMsg;
+
+  /// No description provided for @webAcctArchiveNotZero.
+  ///
+  /// In en, this message translates to:
+  /// **'This account still holds {amount}. Move it to another account or reconcile it to zero first — archived accounts no longer count toward your money.'**
+  String webAcctArchiveNotZero(String amount);
+
+  /// No description provided for @webAcctArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get webAcctArchived;
+
+  /// No description provided for @webAcctArchivedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get webAcctArchivedSection;
+
+  /// No description provided for @webAcctArchivedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Account archived'**
+  String get webAcctArchivedToast;
+
+  /// No description provided for @webAcctUnarchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get webAcctUnarchive;
+
+  /// No description provided for @webAcctUnarchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Account restored'**
+  String get webAcctUnarchived;
+
   /// No description provided for @webNavUpcoming.
   ///
   /// In en, this message translates to:

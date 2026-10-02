@@ -4,6 +4,7 @@ import 'package:budgetseal/core/database/app_database.dart';
 import 'package:budgetseal/core/engine/balance_calculator.dart';
 import 'package:budgetseal/core/providers/database_provider.dart';
 import 'package:budgetseal/core/providers/household_provider.dart';
+import 'package:budgetseal/features/web_companion/api/accounts_handler.dart';
 import 'package:budgetseal/features/web_companion/api/categories_handler.dart';
 import 'package:budgetseal/features/web_companion/api/dashboard_handler.dart';
 import 'package:budgetseal/features/web_companion/api/envelopes_handler.dart';
@@ -16,6 +17,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelf/shelf.dart';
 
 /// Hands the handlers a live Ref, like the server does.
@@ -424,6 +426,56 @@ void main() {
     expect((await call(createPlannedHandler(ref), 'POST', body: {
       'type': 'transfer', 'accountId': 'usd', 'amount': 10, 'date': '2026-12-05',
     }))['status'], 400);
+  });
+
+  test('account page: running balance, reconcile, edit, archive at zero',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    Future<void> add(String type, double amount, String date,
+            {String acct = 'usd'}) =>
+        call(createTransactionHandler(ref), 'POST', body: {
+          'type': type, 'accountId': acct, 'amount': amount, 'date': date,
+        });
+    await add('income', 100, '2026-09-01');
+    await add('expense', 30, '2026-09-02');
+    await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'transfer', 'accountId': 'usd', 'destinationAccountId': 'usd2',
+      'amount': 20, 'date': '2026-09-03',
+    });
+    await add('expense', 999, '2026-09-04', acct: 'usd2'); // other account
+
+    final page = await call(listTransactionsHandler(ref), 'GET',
+        query: '?accountId=usd');
+    final rows = page['items'] as List;
+    expect(rows.map((r) => r['runningBalance']), [50, 70, 100]);
+    expect(rows.map((r) => r['accountAmount']), [-20, -30, 100]);
+
+    final rec = await call(reconcileAccountHandler(ref), 'POST',
+        id: 'usd', body: {'balance': 45});
+    expect(rec['adjusted'], -5);
+    final detail = await call(getAccountHandler(ref), 'GET', id: 'usd');
+    expect(detail['balance'], 45);
+    expect(detail['reconciledAt'], isNotNull);
+
+    expect((await call(updateAccountHandler(ref), 'PUT',
+            id: 'usd', body: {'name': 'Checking', 'decimalPlaces': 3}))['status'],
+        200);
+    expect((await call(getAccountHandler(ref), 'GET', id: 'usd'))['name'],
+        'Checking');
+
+    final refused = await call(archiveAccountHandler(ref), 'POST',
+        id: 'usd', body: {'archived': true});
+    expect(refused['status'], 400);
+    expect(refused['code'], 'not_zero');
+    await call(reconcileAccountHandler(ref), 'POST',
+        id: 'usd', body: {'balance': 0});
+    expect((await call(archiveAccountHandler(ref), 'POST',
+            id: 'usd', body: {'archived': true}))['status'],
+        200);
+    final active = await call(listAccountsHandler(ref), 'GET');
+    expect((active['items'] as List).map((a) => a['id']), isNot(contains('usd')));
+    final all = await call(listAccountsHandler(ref), 'GET', query: '?archived=1');
+    expect((all['items'] as List).map((a) => a['id']), contains('usd'));
   });
 
   test('money moves between envelopes and Ready to assign', () async {

@@ -60,6 +60,10 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   api.get('/accounts', listAccountsHandler(ref));
   api.post('/accounts', createAccountHandler(ref));
+  api.get('/accounts/<id>', getAccountHandler(ref));
+  api.put('/accounts/<id>', updateAccountHandler(ref));
+  api.post('/accounts/<id>/archive', archiveAccountHandler(ref));
+  api.post('/accounts/<id>/reconcile', reconcileAccountHandler(ref));
 
   api.get('/envelopes', listEnvelopesHandler(ref));
   api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));

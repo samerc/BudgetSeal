@@ -792,6 +792,12 @@ kbd {
   .row-actions { display: none; }
 }
 
+/* Account page */
+.acct-head-bal { font-weight: 800; color: var(--text); }
+.row.archived .row-main, .row.archived .type-icon { opacity: .55; }
+.acct-head-meta { margin-inline-start: 8px; }
+.acct-head-meta::before { content: "·"; margin-inline-end: 8px; }
+
 /* Upcoming */
 .row-sub.overdue { color: color-mix(in srgb, #6577E0 82%, var(--text)); font-weight: 700; }
 .day-head .btn-sm { margin-block: -6px; }
