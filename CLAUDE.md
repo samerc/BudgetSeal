@@ -478,6 +478,9 @@ The envelope detail screen shows: balance hero card (pastel of the linked catego
 ### Multi-Currency Envelopes
 Envelopes can hold balances in multiple currencies. The fund sheet offers a currency picker showing all available unallocated currencies. The balance hero card shows the target currency balance prominently, with other currencies as `+ $50`. The allocation card does the same.
 
+### Moving Money Between Envelopes
+`AllocationEngine.moveMoney(fromAllocationId?, toAllocationId?, amount, currency)` — null side = Ready to assign; envelope↔envelope rows use entryType `'transfer'`, RTA→envelope `'funding'`, envelope→RTA `'withdrawal'`; one db transaction; an envelope source must hold the amount (StateError). UI: `showMoveMoneySheet()` (`features/allocations/move_money_sheet.dart`) from the envelope ⋮ menu (Move money; becomes Cover when overspent), the red **Cover** pill on overspent `AllocationCard`s (`onCover`), and the Saved SnackBar (`envelopeAfterSave()` in `widgets/save_feedback.dart` reads the consumption row → "X left" / "over by X" + Cover → `/allocations/:id` with extra `{'cover': true}` opens the sheet).
+
 ### Withdrawal Validation
 `withdrawFromAllocation()` checks sufficient balance before debiting. Throws `StateError` if the allocation doesn't have enough in the requested currency. Callers must catch and show an error.
 

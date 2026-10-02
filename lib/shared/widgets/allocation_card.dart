@@ -18,6 +18,10 @@ class AllocationCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onSpend;
 
+  /// Shown instead of the spend button while the envelope is overspent:
+  /// move money in to bring it back to zero.
+  final VoidCallback? onCover;
+
   /// Optional linked-category info for displaying a category icon.
   final String? categoryName;
   final String? categoryIcon;
@@ -48,6 +52,7 @@ class AllocationCard extends StatelessWidget {
     this.envelopeIcon,
     this.onTap,
     this.onSpend,
+    this.onCover,
     this.needsReview = false,
     this.categoryName,
     this.categoryIcon,
@@ -316,7 +321,26 @@ class AllocationCard extends StatelessWidget {
                             ),
                         ],
                       ),
-                      if (onSpend != null && !_isFlexible) ...[
+                      if (onCover != null && isTargetOverspent) ...[
+                        const SizedBox(width: 8),
+                        Material(
+                          color: AppColors.overspent,
+                          shape: const StadiumBorder(),
+                          child: InkWell(
+                            customBorder: const StadiumBorder(),
+                            onTap: onCover,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 7),
+                              child: Text(S.of(context).allocCoverButton,
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white)),
+                            ),
+                          ),
+                        ),
+                      ] else if (onSpend != null && !_isFlexible) ...[
                         const SizedBox(width: 8),
                         Material(
                           color: AppColors.pastel(context, iconColor,

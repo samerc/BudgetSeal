@@ -99,6 +99,96 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @txSavedEnvelopeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved · {envelope}: {amount} left'**
+  String txSavedEnvelopeLeft(String envelope, String amount);
+
+  /// No description provided for @txSavedEnvelopeOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved · {envelope} is over by {amount}'**
+  String txSavedEnvelopeOver(String envelope, String amount);
+
+  /// No description provided for @allocMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move money'**
+  String get allocMoveTitle;
+
+  /// No description provided for @allocMoveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Move money between envelopes, or back to Ready to assign.'**
+  String get allocMoveDesc;
+
+  /// No description provided for @allocCoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover overspending'**
+  String get allocCoverTitle;
+
+  /// No description provided for @allocCoverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Take money from another envelope (or Ready to assign) to bring this one back to zero.'**
+  String get allocCoverDesc;
+
+  /// No description provided for @allocMoveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get allocMoveFrom;
+
+  /// No description provided for @allocMoveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get allocMoveTo;
+
+  /// No description provided for @allocMoveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get allocMoveButton;
+
+  /// No description provided for @allocCoverButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get allocCoverButton;
+
+  /// No description provided for @allocMoveMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Move money'**
+  String get allocMoveMenu;
+
+  /// No description provided for @allocMoveNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} only has {amount}.'**
+  String allocMoveNotEnough(String name, String amount);
+
+  /// No description provided for @allocMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {name}'**
+  String allocMovedTo(String name);
+
+  /// No description provided for @allocMovedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {name}'**
+  String allocMovedFrom(String name);
+
+  /// No description provided for @allocMoveDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved {amount} from {from} to {to}'**
+  String allocMoveDone(String amount, String from, String to);
+
   /// No description provided for @tmplEditTitle.
   ///
   /// In en, this message translates to:

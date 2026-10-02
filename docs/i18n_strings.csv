@@ -2119,3 +2119,21 @@ shortcut_upcoming_bills,,Upcoming bills,الفواتير القادمة,Factures
 cat_sheet_recent,,Recent,الأخيرة,Récentes
 tx_form_swap_accounts,,Swap accounts,تبديل الحسابين,Inverser les comptes
 tx_form_save_and_new,,Save & new,حفظ وجديد,Enregistrer + nouveau
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+tx_saved_envelope_left,,Saved · {envelope}: {amount} left,تم الحفظ · {envelope}: متبقٍ {amount},Enregistrée · {envelope} : reste {amount}
+tx_saved_envelope_over,,Saved · {envelope} is over by {amount},تم الحفظ · {envelope} متجاوز بمقدار {amount},Enregistrée · {envelope} dépasse de {amount}
+alloc_move_title,,Move money,نقل المال,Déplacer de l'argent
+alloc_move_desc,,"Move money between envelopes, or back to Ready to assign.",انقل المال بين الأظرف، أو أعده إلى «جاهز للتوزيع».,"Déplacez de l'argent entre enveloppes, ou vers « Prêt à attribuer »."
+alloc_cover_title,,Cover overspending,تغطية التجاوز,Couvrir le dépassement
+alloc_cover_desc,,Take money from another envelope (or Ready to assign) to bring this one back to zero.,خذ مالاً من ظرف آخر (أو من «جاهز للتوزيع») لإعادة هذا الظرف إلى الصفر.,Prenez de l'argent d'une autre enveloppe (ou de « Prêt à attribuer ») pour ramener celle-ci à zéro.
+alloc_move_from,,From,من,De
+alloc_move_to,,To,إلى,Vers
+alloc_move_button,,Move,نقل,Déplacer
+alloc_cover_button,,Cover,تغطية,Couvrir
+alloc_move_menu,,Move money,نقل المال,Déplacer de l'argent
+alloc_move_not_enough,,{name} only has {amount}.,{name} فيه {amount} فقط.,{name} ne contient que {amount}.
+alloc_moved_to,,Moved to {name},نُقل إلى {name},Déplacé vers {name}
+alloc_moved_from,,Moved from {name},نُقل من {name},Déplacé depuis {name}
+alloc_move_done,,Moved {amount} from {from} to {to},نُقل {amount} من {from} إلى {to},{amount} déplacé de {from} vers {to}

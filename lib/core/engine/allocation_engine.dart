@@ -605,4 +605,50 @@ class AllocationEngine {
     ));
   }
 
+  /// Move [amount] of [currency] between envelopes; a null side is Ready to
+  /// assign (Unallocated) — null → envelope is funding, envelope → null is a
+  /// withdrawal. An envelope source must hold the amount ([StateError]
+  /// otherwise). Both ledger rows are written atomically.
+  Future<void> moveMoney({
+    String? fromAllocationId,
+    String? toAllocationId,
+    required double amount,
+    required String currency,
+    String deviceId = 'local',
+    String fromNote = '',
+    String toNote = '',
+  }) async {
+    if (amount <= 0 || fromAllocationId == toAllocationId) return;
+    await _db.transaction(() async {
+      if (fromAllocationId != null) {
+        final balances =
+            await _ledgerDao.getBalanceByCurrency(fromAllocationId);
+        final available = balances[currency] ?? 0;
+        if (amount > available + 0.005) {
+          throw StateError('Insufficient balance: $currency $available '
+              'available, $amount requested');
+        }
+        await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+          id: _uuid.v4(),
+          allocationId: fromAllocationId,
+          entryType: toAllocationId == null ? 'withdrawal' : 'transfer',
+          amount: -amount,
+          currency: currency,
+          note: Value(fromNote),
+          deviceId: deviceId,
+        ));
+      }
+      if (toAllocationId != null) {
+        await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+          id: _uuid.v4(),
+          allocationId: toAllocationId,
+          entryType: fromAllocationId == null ? 'funding' : 'transfer',
+          amount: amount,
+          currency: currency,
+          note: Value(toNote),
+          deviceId: deviceId,
+        ));
+      }
+    });
+  }
 }

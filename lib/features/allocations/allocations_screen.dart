@@ -28,6 +28,7 @@ import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/brand_palette.dart';
 import 'archived_envelopes_sheet.dart';
+import 'move_money_sheet.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -741,6 +742,14 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             onTap: () {
               hapticLight();
               context.push('/allocations/${a.data.allocation.id}');
+            },
+            onCover: () {
+              final cur = a.data.allocation.targetCurrency ?? baseCurrency;
+              showMoveMoneySheet(context, ref,
+                  toId: a.data.allocation.id,
+                  currency: cur,
+                  amount: -(a.balanceByCurrency[cur] ?? 0),
+                  cover: true);
             },
             onSpend: () {
               // Pre-fill with the linked category.

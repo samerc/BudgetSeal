@@ -33,6 +33,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/utils/save_errors.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
+import 'widgets/save_feedback.dart';
 import 'widgets/transaction_form_widgets.dart';
 import '../../l10n/generated/app_localizations.dart';
 
@@ -999,44 +1000,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
       // Build envelope feedback message
       String snackText = S.of(context).txFormSaved;
+      EnvelopeFeedback? envelope;
       try {
-        if (_type != _TxType.transfer) {
-          final categories = ref.read(categoriesProvider).value ?? [];
-          final allocations = ref.read(allocationsProvider).value ?? [];
-          final firstCatId = _lines
-              .where((l) => l.categoryId != null)
-              .map((l) => l.categoryId!)
-              .firstOrNull;
-          if (firstCatId != null) {
-            final catData = categories
-                .where((c) => c.id == firstCatId)
-                .firstOrNull;
-            if (catData?.allocationId != null) {
-              final alloc = allocations
-                  .where((a) =>
-                      a.data.allocation.id == catData!.allocationId)
-                  .firstOrNull;
-              if (alloc != null) {
-                snackText =
-                    S.of(context).txFormSavedEnvelope(alloc.data.allocation.name);
-              }
-            }
-          }
+        if (_type == _TxType.expense) {
+          envelope =
+              await envelopeAfterSave(ref.read(databaseProvider), txId);
         }
-      } catch (_) {
-        // Provider might be unavailable if widget tree is torn down
+      } catch (e) {
+        debugPrint('[AddTransaction] Envelope feedback failed: $e');
       }
-
       if (!mounted) return;
+      if (envelope != null) snackText = envelope.message(S.of(context));
       // Capture navigator and messenger before any async/pop calls
       final nav = GoRouter.of(context);
       final messenger = ScaffoldMessenger.maybeOf(context);
-      final undoAction = widget.editTransactionId == null
+      // Overspent → offer to cover it (opens the envelope's cover sheet);
+      // otherwise Undo for a new transaction.
+      final coverId = envelope?.overspent == true ? envelope!.allocationId : null;
+      final undoAction = coverId != null
           ? SnackBarAction(
-              label: S.of(context).txUndoAction,
-              onPressed: _undoSaveAction(txId),
+              label: S.of(context).allocCoverButton,
+              onPressed: () =>
+                  nav.push('/allocations/$coverId', extra: {'cover': true}),
             )
-          : null;
+          : widget.editTransactionId == null
+              ? SnackBarAction(
+                  label: S.of(context).txUndoAction,
+                  onPressed: _undoSaveAction(txId),
+                )
+              : null;
       if (addAnother) {
         _resetForNext();
         messenger?.clearSnackBars();

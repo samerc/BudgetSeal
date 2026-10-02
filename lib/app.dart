@@ -136,7 +136,9 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/allocations/:id',
           pageBuilder: (_, state) => slideUpPage(
             child: AllocationDetailScreen(
-                allocationId: state.pathParameters['id']!),
+              allocationId: state.pathParameters['id']!,
+              openCover: (state.extra as Map?)?['cover'] == true,
+            ),
             state: state,
           ),
         ),

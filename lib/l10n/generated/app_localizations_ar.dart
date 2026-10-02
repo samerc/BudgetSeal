@@ -9,6 +9,65 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String txSavedEnvelopeLeft(String envelope, String amount) {
+    return 'تم الحفظ · $envelope: متبقٍ $amount';
+  }
+
+  @override
+  String txSavedEnvelopeOver(String envelope, String amount) {
+    return 'تم الحفظ · $envelope متجاوز بمقدار $amount';
+  }
+
+  @override
+  String get allocMoveTitle => 'نقل المال';
+
+  @override
+  String get allocMoveDesc =>
+      'انقل المال بين الأظرف، أو أعده إلى «جاهز للتوزيع».';
+
+  @override
+  String get allocCoverTitle => 'تغطية التجاوز';
+
+  @override
+  String get allocCoverDesc =>
+      'خذ مالاً من ظرف آخر (أو من «جاهز للتوزيع») لإعادة هذا الظرف إلى الصفر.';
+
+  @override
+  String get allocMoveFrom => 'من';
+
+  @override
+  String get allocMoveTo => 'إلى';
+
+  @override
+  String get allocMoveButton => 'نقل';
+
+  @override
+  String get allocCoverButton => 'تغطية';
+
+  @override
+  String get allocMoveMenu => 'نقل المال';
+
+  @override
+  String allocMoveNotEnough(String name, String amount) {
+    return '$name فيه $amount فقط.';
+  }
+
+  @override
+  String allocMovedTo(String name) {
+    return 'نُقل إلى $name';
+  }
+
+  @override
+  String allocMovedFrom(String name) {
+    return 'نُقل من $name';
+  }
+
+  @override
+  String allocMoveDone(String amount, String from, String to) {
+    return 'نُقل $amount من $from إلى $to';
+  }
+
+  @override
   String get tmplEditTitle => 'تعديل القالب';
 
   @override

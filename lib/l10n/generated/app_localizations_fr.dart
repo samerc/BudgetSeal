@@ -9,6 +9,65 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String txSavedEnvelopeLeft(String envelope, String amount) {
+    return 'Enregistrée · $envelope : reste $amount';
+  }
+
+  @override
+  String txSavedEnvelopeOver(String envelope, String amount) {
+    return 'Enregistrée · $envelope dépasse de $amount';
+  }
+
+  @override
+  String get allocMoveTitle => 'Déplacer de l\'argent';
+
+  @override
+  String get allocMoveDesc =>
+      'Déplacez de l\'argent entre enveloppes, ou vers « Prêt à attribuer ».';
+
+  @override
+  String get allocCoverTitle => 'Couvrir le dépassement';
+
+  @override
+  String get allocCoverDesc =>
+      'Prenez de l\'argent d\'une autre enveloppe (ou de « Prêt à attribuer ») pour ramener celle-ci à zéro.';
+
+  @override
+  String get allocMoveFrom => 'De';
+
+  @override
+  String get allocMoveTo => 'Vers';
+
+  @override
+  String get allocMoveButton => 'Déplacer';
+
+  @override
+  String get allocCoverButton => 'Couvrir';
+
+  @override
+  String get allocMoveMenu => 'Déplacer de l\'argent';
+
+  @override
+  String allocMoveNotEnough(String name, String amount) {
+    return '$name ne contient que $amount.';
+  }
+
+  @override
+  String allocMovedTo(String name) {
+    return 'Déplacé vers $name';
+  }
+
+  @override
+  String allocMovedFrom(String name) {
+    return 'Déplacé depuis $name';
+  }
+
+  @override
+  String allocMoveDone(String amount, String from, String to) {
+    return '$amount déplacé de $from vers $to';
+  }
+
+  @override
   String get tmplEditTitle => 'Modifier le modèle';
 
   @override

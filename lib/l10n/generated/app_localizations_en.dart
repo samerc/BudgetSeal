@@ -9,6 +9,65 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String txSavedEnvelopeLeft(String envelope, String amount) {
+    return 'Saved · $envelope: $amount left';
+  }
+
+  @override
+  String txSavedEnvelopeOver(String envelope, String amount) {
+    return 'Saved · $envelope is over by $amount';
+  }
+
+  @override
+  String get allocMoveTitle => 'Move money';
+
+  @override
+  String get allocMoveDesc =>
+      'Move money between envelopes, or back to Ready to assign.';
+
+  @override
+  String get allocCoverTitle => 'Cover overspending';
+
+  @override
+  String get allocCoverDesc =>
+      'Take money from another envelope (or Ready to assign) to bring this one back to zero.';
+
+  @override
+  String get allocMoveFrom => 'From';
+
+  @override
+  String get allocMoveTo => 'To';
+
+  @override
+  String get allocMoveButton => 'Move';
+
+  @override
+  String get allocCoverButton => 'Cover';
+
+  @override
+  String get allocMoveMenu => 'Move money';
+
+  @override
+  String allocMoveNotEnough(String name, String amount) {
+    return '$name only has $amount.';
+  }
+
+  @override
+  String allocMovedTo(String name) {
+    return 'Moved to $name';
+  }
+
+  @override
+  String allocMovedFrom(String name) {
+    return 'Moved from $name';
+  }
+
+  @override
+  String allocMoveDone(String amount, String from, String to) {
+    return 'Moved $amount from $from to $to';
+  }
+
+  @override
   String get tmplEditTitle => 'Edit template';
 
   @override

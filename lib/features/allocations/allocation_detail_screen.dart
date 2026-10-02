@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'move_money_sheet.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
@@ -31,7 +32,12 @@ import '../../shared/widgets/category_icon.dart';
 
 class AllocationDetailScreen extends ConsumerStatefulWidget {
   final String allocationId;
-  const AllocationDetailScreen({super.key, required this.allocationId});
+
+  /// Open the cover / move-money sheet once loaded ("Cover" on a Saved
+  /// message).
+  final bool openCover;
+  const AllocationDetailScreen(
+      {super.key, required this.allocationId, this.openCover = false});
 
   @override
   ConsumerState<AllocationDetailScreen> createState() =>
@@ -65,7 +71,13 @@ class _AllocationDetailScreenState
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
     _targetCurrencyController.text = baseCurrency;
-    if (!_isNew) _loadAllocation();
+    if (!_isNew) {
+      _loadAllocation().then((_) async {
+        if (!widget.openCover || !mounted) return;
+        await ref.read(allocationsProvider.future);
+        if (mounted) _moveMoney();
+      });
+    }
   }
 
   Future<void> _loadAllocation() async {
@@ -203,6 +215,8 @@ class _AllocationDetailScreenState
               onSelected: (v) {
                 if (v == 'settings') {
                   setState(() => _showSettings = !_showSettings);
+                } else if (v == 'move') {
+                  _moveMoney();
                 } else if (v == 'withdraw') {
                   _showWithdrawSheet();
                 } else if (v == 'revalue') {
@@ -223,8 +237,16 @@ class _AllocationDetailScreenState
                     Text(l.allocEditSettings),
                   ]),
                 ),
-                if (_type == 'saving' || _type == 'flexible')
-                  PopupMenuItem(
+                PopupMenuItem(
+                  value: 'move',
+                  child: Row(children: [
+                    Icon(Icons.swap_horiz_rounded,
+                        size: 18, color: AppColors.accent),
+                    const SizedBox(width: 10),
+                    Text(l.allocMoveMenu),
+                  ]),
+                ),
+                PopupMenuItem(
                     value: 'withdraw',
                     child: Row(children: [
                       Icon(Icons.output_rounded,
@@ -1496,6 +1518,26 @@ class _AllocationDetailScreenState
   // ---------------------------------------------------------------------------
   // Withdraw from savings envelope
   // ---------------------------------------------------------------------------
+
+  /// Move money out of this envelope — or, when it's overspent, cover it.
+  Future<void> _moveMoney() async {
+    final currency = _targetCurrencyController.text.isNotEmpty
+        ? _targetCurrencyController.text
+        : null;
+    final all = ref.read(allocationsProvider).value ?? const [];
+    final me = all.where((a) => a.data.allocation.id == widget.allocationId)
+        .firstOrNull;
+    final bal = currency != null ? (me?.balanceByCurrency[currency] ?? 0) : 0.0;
+    // The sheet invalidates the allocation providers this screen watches.
+    bal < 0
+        ? await showMoveMoneySheet(context, ref,
+            toId: widget.allocationId,
+            currency: currency,
+            amount: -bal,
+            cover: true)
+        : await showMoveMoneySheet(context, ref,
+            fromId: widget.allocationId, currency: currency);
+  }
 
   Future<void> _showWithdrawSheet() async {
     double withdrawAmount = 0;

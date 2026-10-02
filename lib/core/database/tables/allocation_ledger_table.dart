@@ -21,6 +21,7 @@ class AllocationLedger extends Table {
   TextColumn get destAccountId =>
       text().nullable().references(Accounts, #id, onDelete: KeyAction.setNull)();
   // 'funding' | 'consumption' | 'adjustment' | 'period_reset' | 'carry_forward'
+  // | 'withdrawal' | 'transfer' (envelope → envelope) | 'revaluation'
   TextColumn get entryType => text()();
   // Positive = credit to allocation; Negative = debit from allocation
   RealColumn get amount => real()();

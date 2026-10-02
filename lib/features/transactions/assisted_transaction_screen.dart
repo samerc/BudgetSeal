@@ -6,11 +6,12 @@ import 'package:go_router/go_router.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
-import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/services/autofill_service.dart';
+import '../../core/providers/database_provider.dart';
 import '../../core/services/last_used_service.dart';
 import 'widgets/category_sheet.dart' show recentCategoryIds;
+import 'widgets/save_feedback.dart';
 import 'widgets/transaction_form_widgets.dart' show DateQuickChip;
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -1503,6 +1504,7 @@ class _AssistedTransactionScreenState
         _selectedTime.hour, _selectedTime.minute,
       );
 
+      String? expenseTxId;
       if (_type == 'transfer') {
         await engine.recordTransfer(
           householdId: householdId,
@@ -1539,7 +1541,7 @@ class _AssistedTransactionScreenState
                   ))
               .toList();
 
-          await engine.recordTransaction(
+          final id = await engine.recordTransaction(
             householdId: householdId,
             accountId: _accountId!,
             type: entry.key,
@@ -1548,6 +1550,7 @@ class _AssistedTransactionScreenState
             note: _title,
             date: saveDate,
           );
+          if (entry.key == 'expense') expenseTxId = id;
         }
         LastUsedService.rememberAccount(_accountId!);
       }
@@ -1555,29 +1558,21 @@ class _AssistedTransactionScreenState
       if (mounted) {
         // Build envelope feedback message
         String snackText = S.of(context).txFormSaved;
-        if (_type != 'transfer') {
-          final categories = ref.read(categoriesProvider).value ?? [];
-          final allocations = ref.read(allocationsProvider).value ?? [];
-          final firstCat = validItems
-              .where((item) => item.category != null)
-              .map((item) => item.category!)
-              .firstOrNull;
-          if (firstCat != null) {
-            final catData = categories
-                .where((c) => c.id == firstCat.id)
-                .firstOrNull;
-            if (catData?.allocationId != null) {
-              final alloc = allocations
-                  .where((a) =>
-                      a.data.allocation.id == catData!.allocationId)
-                  .firstOrNull;
-              if (alloc != null) {
-                snackText =
-                    S.of(context).txFormSavedEnvelope(alloc.data.allocation.name);
-              }
-            }
+        EnvelopeFeedback? envelope;
+        if (expenseTxId != null) {
+          try {
+            envelope = await envelopeAfterSave(
+                ref.read(databaseProvider), expenseTxId);
+          } catch (e) {
+            debugPrint('[AssistedTx] Envelope feedback failed: $e');
           }
         }
+        if (!mounted) return;
+        if (envelope != null) snackText = envelope.message(S.of(context));
+        final nav = GoRouter.of(context);
+        final coverId =
+            envelope?.overspent == true ? envelope!.allocationId : null;
+        final coverLabel = S.of(context).allocCoverButton;
 
         // Pop first, then show snackbar on the parent screen
         final messenger = ScaffoldMessenger.maybeOf(context);
@@ -1586,8 +1581,15 @@ class _AssistedTransactionScreenState
         messenger?.showSnackBar(SnackBar(
           content: Text(snackText),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
           dismissDirection: DismissDirection.horizontal,
+          action: coverId != null
+              ? SnackBarAction(
+                  label: coverLabel,
+                  onPressed: () => nav
+                      .push('/allocations/$coverId', extra: {'cover': true}),
+                )
+              : null,
         ));
       }
     } catch (e) {
