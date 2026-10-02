@@ -7,6 +7,7 @@ import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/features/web_companion/api/categories_handler.dart';
 import 'package:budgetseal/features/web_companion/api/dashboard_handler.dart';
 import 'package:budgetseal/features/web_companion/api/envelopes_handler.dart';
+import 'package:budgetseal/features/web_companion/api/objectives_handler.dart';
 import 'package:budgetseal/features/web_companion/api/recurring_handler.dart';
 import 'package:budgetseal/features/web_companion/api/subscriptions_handler.dart';
 import 'package:budgetseal/features/web_companion/api/transactions_handler.dart';
@@ -286,6 +287,64 @@ void main() {
 
     final empty = await call(h, 'POST', body: {'items': []});
     expect(empty['status'], 400);
+  });
+
+  test('goals and loans: create, pay, progress, delete with payments',
+      () async {
+    final goal = await call(createObjectiveHandler(ref), 'POST', body: {
+      'type': 'goal',
+      'name': 'Laptop',
+      'targetAmount': 1000,
+      'targetCurrency': 'USD',
+      'endDate': '2099-01-01',
+    });
+    expect(goal['status'], 201);
+    final loan = await call(createObjectiveHandler(ref), 'POST', body: {
+      'type': 'loan',
+      'name': 'Car help',
+      'contactName': 'Sam',
+      'direction': 'lent',
+      'targetAmount': 300,
+      'targetCurrency': 'USD',
+    });
+    final gid = goal['id'] as String, lid = loan['id'] as String;
+
+    final paid = await call(payObjectiveHandler(ref), 'POST',
+        id: gid, body: {'accountId': 'usd', 'amount': 250});
+    expect(paid['status'], 201);
+    expect(paid['currentAmount'], 250);
+    await call(payObjectiveHandler(ref), 'POST',
+        id: lid, body: {'accountId': 'usd', 'amount': 100});
+    // Goal savings leave the account; money lent coming back arrives.
+    expect((await balances())['usd'], -150);
+
+    final list = await call(listObjectivesHandler(ref), 'GET');
+    final byId = {for (final o in list['items'] as List) o['id']: o};
+    expect(byId[gid]['currentAmount'], 250);
+    expect(byId[gid]['monthlyPace'], isNotNull);
+    expect(byId[lid]['currentAmount'], 100);
+    expect(byId[lid]['direction'], 'lent');
+
+    final detail = await call(getObjectiveHandler(ref), 'GET', id: gid);
+    final payments = detail['payments'] as List;
+    expect(payments, hasLength(1));
+    expect(payments.first['amount'], 250);
+    expect(payments.first['note'], isNot(contains('[obj:')));
+
+    final edited = await call(updateObjectiveHandler(ref), 'PUT',
+        id: gid, body: {'name': 'New laptop', 'targetAmount': 1200});
+    expect(edited['status'], 200);
+    expect((await call(updateObjectiveHandler(ref), 'PUT',
+            id: gid, body: {'type': 'other'}))['status'],
+        400);
+
+    final del = await call(
+        deleteObjectiveHandler(ref), 'DELETE',
+        id: gid, query: '?payments=delete');
+    expect(del['status'], 200);
+    expect((await balances())['usd'], 100);
+    final after = await call(listObjectivesHandler(ref), 'GET');
+    expect((after['items'] as List).map((o) => o['id']), [lid]);
   });
 
   test('money moves between envelopes and Ready to assign', () async {

@@ -791,6 +791,15 @@ kbd {
   .row-actions { display: none; }
 }
 
+/* Goals & loans */
+.goal-hero { display: flex; align-items: center; gap: 14px; }
+.goal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 14px; }
+.goal-stats .stat { padding: 10px 12px; border-radius: 14px; background: var(--container); }
+.goal-stats .stat-label { font-size: 12px; font-weight: 700; color: var(--text-2); }
+.goal-stats .stat-value { font-weight: 800; font-size: 15px; margin-top: 2px; }
+.card.clickable { cursor: pointer; transition: box-shadow var(--fast), transform var(--fast); }
+.card.clickable:hover { box-shadow: var(--shadow-pop); }
+
 /* Bulk entry grid */
 .bulk-card { padding: 8px 12px 12px; }
 .bulk-grid { --cols: 150px 118px minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(130px, 1fr) 36px; }

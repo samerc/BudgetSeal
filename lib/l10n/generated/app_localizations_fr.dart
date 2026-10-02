@@ -9,6 +9,185 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webNavGoals => 'Objectifs et prêts';
+
+  @override
+  String get webGoalsSub =>
+      'Épargnez vers une cible, ou suivez l\'argent prêté ou emprunté.';
+
+  @override
+  String get webGoalNew => 'Nouvel objectif ou prêt';
+
+  @override
+  String get webGoalCreate => 'Créer';
+
+  @override
+  String get webGoalEdit => 'Modifier';
+
+  @override
+  String get webGoalsEmptyTitle => 'Aucun objectif ni prêt pour le moment';
+
+  @override
+  String get webGoalsEmptySub =>
+      'Les objectifs suivent l\'épargne vers une cible. Les prêts suivent l\'argent prêté ou emprunté.';
+
+  @override
+  String get webGoalsSection => 'Objectifs';
+
+  @override
+  String get webLoansSection => 'Prêts';
+
+  @override
+  String get webGoalKindGoal => 'Objectif';
+
+  @override
+  String get webGoalKindLoan => 'Prêt';
+
+  @override
+  String get webGoalSaved => 'Épargné';
+
+  @override
+  String get webGoalYouOwe => 'Vous devez';
+
+  @override
+  String get webGoalOwedToYou => 'On vous doit';
+
+  @override
+  String webGoalLentTo(String name) {
+    return 'Prêté à $name';
+  }
+
+  @override
+  String webGoalBorrowedFrom(String name) {
+    return 'Emprunté à $name';
+  }
+
+  @override
+  String webGoalDue(String date) {
+    return 'Échéance $date';
+  }
+
+  @override
+  String get webGoalPaidOff => 'Remboursé';
+
+  @override
+  String webGoalPaidBack(String amount) {
+    return '$amount remboursés';
+  }
+
+  @override
+  String get webGoalPaidBackLabel => 'Remboursé';
+
+  @override
+  String get webGoalRemaining => 'Restant';
+
+  @override
+  String webGoalPerMonth(String amount) {
+    return '$amount par mois pour rester dans les temps';
+  }
+
+  @override
+  String get webGoalPerMonthLabel => 'Nécessaire par mois';
+
+  @override
+  String get webGoalDeadline => 'Échéance';
+
+  @override
+  String get webGoalPayments => 'Paiements';
+
+  @override
+  String get webGoalNoPayments => 'Aucun paiement pour le moment';
+
+  @override
+  String get webGoalAddFunds => 'Ajouter des fonds';
+
+  @override
+  String get webGoalPayReceived => 'Paiement reçu';
+
+  @override
+  String get webGoalPaySent => 'Enregistrer un paiement';
+
+  @override
+  String get webGoalFillRest => 'Tout le reste';
+
+  @override
+  String get webGoalFromAccount => 'Depuis le compte';
+
+  @override
+  String get webGoalIntoAccount => 'Vers le compte';
+
+  @override
+  String webGoalConverted(String cur) {
+    return 'Converti en $cur au dernier taux du téléphone';
+  }
+
+  @override
+  String get webGoalLentChoice => 'J\'ai prêté';
+
+  @override
+  String get webGoalBorrowedChoice => 'J\'ai emprunté';
+
+  @override
+  String get webGoalLentHint => 'Vous avez prêté — les paiements sont entrants';
+
+  @override
+  String get webGoalBorrowedHint => 'Vous devez — les paiements sont sortants';
+
+  @override
+  String get webGoalPerson => 'Personne';
+
+  @override
+  String get webGoalTarget => 'Montant cible';
+
+  @override
+  String get webGoalLoanAmount => 'Montant du prêt';
+
+  @override
+  String get webGoalDeadlineOpt => 'Échéance (facultatif)';
+
+  @override
+  String get webGoalDueBy => 'À rembourser avant (facultatif)';
+
+  @override
+  String get webGoalWhatGoal =>
+      'Chaque dépôt sort de l’argent du compte choisi et est enregistré comme transaction.';
+
+  @override
+  String get webGoalWhatLoan =>
+      'Chaque paiement fait entrer ou sortir de l’argent du compte choisi.';
+
+  @override
+  String webGoalDeleteTitle(String name) {
+    return 'Supprimer $name ?';
+  }
+
+  @override
+  String get webGoalDeleteMsg => 'Cette action est irréversible.';
+
+  @override
+  String webGoalDeletePayments(int n) {
+    return 'Paiements liés : $n. L\'argent a déjà été déplacé entre vos comptes — les garder ou tout supprimer ?';
+  }
+
+  @override
+  String get webGoalDeleteKeep => 'Supprimer, garder les paiements';
+
+  @override
+  String get webGoalDeleteAll => 'Tout supprimer';
+
+  @override
+  String get webToastGoalAdded => 'Créé';
+
+  @override
+  String get webToastGoalUpdated => 'Enregistré';
+
+  @override
+  String get webToastGoalDeleted => 'Supprimé';
+
+  @override
+  String get webToastGoalPaid => 'Paiement enregistré';
+
+  @override
   String get webBulkAdd => 'Ajouter plusieurs';
 
   @override

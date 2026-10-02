@@ -9,6 +9,185 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webNavGoals => 'Goals & loans';
+
+  @override
+  String get webGoalsSub =>
+      'Save toward a target, or track money you lent or borrowed.';
+
+  @override
+  String get webGoalNew => 'New goal or loan';
+
+  @override
+  String get webGoalCreate => 'Create';
+
+  @override
+  String get webGoalEdit => 'Edit';
+
+  @override
+  String get webGoalsEmptyTitle => 'No goals or loans yet';
+
+  @override
+  String get webGoalsEmptySub =>
+      'Goals track savings toward a target. Loans track money you lent or borrowed.';
+
+  @override
+  String get webGoalsSection => 'Goals';
+
+  @override
+  String get webLoansSection => 'Loans';
+
+  @override
+  String get webGoalKindGoal => 'Goal';
+
+  @override
+  String get webGoalKindLoan => 'Loan';
+
+  @override
+  String get webGoalSaved => 'Saved';
+
+  @override
+  String get webGoalYouOwe => 'You owe';
+
+  @override
+  String get webGoalOwedToYou => 'Owed to you';
+
+  @override
+  String webGoalLentTo(String name) {
+    return 'Lent to $name';
+  }
+
+  @override
+  String webGoalBorrowedFrom(String name) {
+    return 'Borrowed from $name';
+  }
+
+  @override
+  String webGoalDue(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String get webGoalPaidOff => 'Paid off';
+
+  @override
+  String webGoalPaidBack(String amount) {
+    return '$amount paid back';
+  }
+
+  @override
+  String get webGoalPaidBackLabel => 'Paid back';
+
+  @override
+  String get webGoalRemaining => 'Remaining';
+
+  @override
+  String webGoalPerMonth(String amount) {
+    return '$amount a month to stay on track';
+  }
+
+  @override
+  String get webGoalPerMonthLabel => 'Needed per month';
+
+  @override
+  String get webGoalDeadline => 'Deadline';
+
+  @override
+  String get webGoalPayments => 'Payments';
+
+  @override
+  String get webGoalNoPayments => 'No payments yet';
+
+  @override
+  String get webGoalAddFunds => 'Add funds';
+
+  @override
+  String get webGoalPayReceived => 'Payment received';
+
+  @override
+  String get webGoalPaySent => 'Record payment';
+
+  @override
+  String get webGoalFillRest => 'All that’s left';
+
+  @override
+  String get webGoalFromAccount => 'From account';
+
+  @override
+  String get webGoalIntoAccount => 'Into account';
+
+  @override
+  String webGoalConverted(String cur) {
+    return 'Converted to $cur at the phone’s latest rate';
+  }
+
+  @override
+  String get webGoalLentChoice => 'I lent';
+
+  @override
+  String get webGoalBorrowedChoice => 'I borrowed';
+
+  @override
+  String get webGoalLentHint => 'You gave money — payments come in';
+
+  @override
+  String get webGoalBorrowedHint => 'You owe money — payments go out';
+
+  @override
+  String get webGoalPerson => 'Person';
+
+  @override
+  String get webGoalTarget => 'Target amount';
+
+  @override
+  String get webGoalLoanAmount => 'Loan amount';
+
+  @override
+  String get webGoalDeadlineOpt => 'Deadline (optional)';
+
+  @override
+  String get webGoalDueBy => 'Due by (optional)';
+
+  @override
+  String get webGoalWhatGoal =>
+      'Each deposit moves money out of the account you pick and is recorded as a transaction.';
+
+  @override
+  String get webGoalWhatLoan =>
+      'Each payment moves money in or out of the account you pick.';
+
+  @override
+  String webGoalDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get webGoalDeleteMsg => 'This cannot be undone.';
+
+  @override
+  String webGoalDeletePayments(int n) {
+    return 'Linked payments: $n. The money already moved between your accounts — keep them, or delete everything?';
+  }
+
+  @override
+  String get webGoalDeleteKeep => 'Delete, keep payments';
+
+  @override
+  String get webGoalDeleteAll => 'Delete everything';
+
+  @override
+  String get webToastGoalAdded => 'Created';
+
+  @override
+  String get webToastGoalUpdated => 'Saved';
+
+  @override
+  String get webToastGoalDeleted => 'Deleted';
+
+  @override
+  String get webToastGoalPaid => 'Payment recorded';
+
+  @override
   String get webBulkAdd => 'Add several';
 
   @override

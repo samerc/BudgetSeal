@@ -592,10 +592,11 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - **Bulk entry** (`#/bulk`, "Add several" on Transactions; `renderBulk()`/`saveBulk()`): expense/income grid (date, type, account, category, title, amount in the account's currency). Tab across, Enter down (adds a row copying date/type/account), Ctrl+Enter saves; paste (TSV or CSV lines) recognises dates (`parseLooseDate`, day-first unless impossible or en-US), amounts (minus/parentheses → expense), category and account names; the rest is the title. Draft in `sessionStorage` (`bs_bulk`). Saved via `POST /api/transactions/bulk`; a 400 carries `row` and that row is highlighted.
 - **Currencies in the form**: an expense/income line in a non-base currency shows a rate field ("1 EUR = ? USD"); empty → the server uses `latestCachedRate()` (no network in a request), else 1.0 + "No rate". A transfer between accounts in different currencies asks for the **amount received**; the server stores `exchangeRateToBase = received / sent` (source → destination, as the app does) and refuses a cross-currency transfer without it.
 - **Budget**: `budgetSnapshot()` (`api/_budget.dart`, shared by dashboard + envelopes) returns envelopes in the Budget tab's order (sortOrder nulls-last, then name) with `spentByCurrency` (period consumption from `watchSpendingInPeriod().first`) and the linked category's color, plus `unallocated` per currency and the current `period`. Fund dialog: To target / All available chips; over-funding warns inline and the second submit goes ahead. Move dialog (`openMove()`, ⇄ on every card; overspent cards show **Cover** instead of Fund): From/To selects (Ready to assign = `''`), currency, "Overspent amount" / "All of it" chips; Cover takes from Ready to assign, or the richest envelope when RTA can't cover it. An envelope source can't give more than it holds (client + server); RTA may go negative after the second submit.
+- **Goals & loans** (`#/goals`, `api/objectives_handler.dart`): progress = sum of the `[obj:ID|amount]` tags on non-deleted, posted transactions (legacy `[obj:ID]` → lines in the objective's currency), the same rule as the phone's `_syncCurrentAmount`; the pay handler stores it back into `objectives.currentAmount`. Pay = `recordTransaction` (income for a lent loan, else expense) with a line in the objective's currency at `latestCachedRate()`, note `"<prefix> — <name> [obj:ID|amount]"` (prefix from `currentS()`). Delete soft-deletes; `?payments=delete` also deletes the payments (one db transaction). Cards reuse the envelope card styles; goals count up, loans show what's still owed.
 - **Recurring/subscriptions** share handlers (`listRecurring/createRecurring/updateRecurring/deleteRecurring` with `subscription:`), always filtering `deleted = false`. Editable: title, amount (subscriptions add a price-history entry), note, account, destination, category, frequency/interval, next date (also sets `anchorDay`), enabled. Subscriptions page shows per-month/per-year cost (`perMonth()`).
 - **Notes**: payloads carry `visibleNote()`; the PUT handler re-appends the hidden `[obj:…]` tag (`noteTag()`), and an empty `note` clears it. Edits record the new transaction, carry `receiptPath`, and soft-delete the old one inside one `db.transaction`.
 - **Connection**: `/auth/status` every 15 s; unreachable → banner + red dot; `authenticated:false` → PIN screen with "session ended". Coming back to the tab after 30 s re-renders the page (`visibilitychange`). PIN errors show attempts left / lockout minutes (`attemptsLeft`, `retryInMinutes` from `/auth/pin`).
-- Token in `sessionStorage` (`bs_token`). `api()` shows localized toasts (429, 5xx, missing rate; English users see the server's 400 message). Shortcuts: N new, / search, R reload, 1–8 pages, Enter saves a form, Esc closes, ? help.
+- Token in `sessionStorage` (`bs_token`). `api()` shows localized toasts (429, 5xx, missing rate; English users see the server's 400 message). Shortcuts: N new, / search, R reload, 1–9 pages, Enter saves a form, Esc closes, ? help.
 - Visual QA without a phone: a mock server serving `assets/web` with canned JSON + headless Edge screenshots works well (Edge won't go below ~500 px wide — use an iframe for phone width).
 
 ### REST API Endpoints
@@ -624,6 +625,13 @@ GET  /api/envelopes                    → { items, unallocated, period, baseCur
 POST /api/envelopes/:id/fund           → add funding
 POST /api/envelopes/move               → { fromId?, toId?, amount, currency } (null side = Ready to assign; AllocationEngine.moveMoney; 400 if the source envelope lacks it)
 
+GET  /api/objectives                   → goals & loans (currentAmount from payment tags, paymentCount, monthlyPace)
+POST /api/objectives                   → create { type goal|loan, name, targetAmount, targetCurrency, endDate?, contactName?, direction lent|borrowed, colorHex, icon? }
+GET  /api/objectives/:id               → one + payments
+PUT  /api/objectives/:id               → update
+DELETE /api/objectives/:id?payments=keep|delete → soft delete (optionally its payments too)
+POST /api/objectives/:id/pay           → { accountId, amount, categoryId?, date? } → real transaction
+
 GET  /api/recurring                    → recurring items (not subscriptions, not deleted)
 POST /api/recurring                    → create (transfer needs destinationAccountId)
 PUT  /api/recurring/:id                → update
@@ -648,6 +656,7 @@ Tests: `test/features/web_companion_api_test.dart` calls the handlers with an in
 #/envelopes       Budget: Ready to assign + envelope cards + fund / move / cover
 #/reports         Month arrows, stats, daily chart, category donut/shares, biggest expenses
 #/accounts        Net worth per currency, accounts by type
+#/goals           Goals & loans: cards, detail with payments, pay, create/edit/delete
 #/categories      Expense/Income toggle, parents with subcategories
 #/recurring       Active + paused recurring items
 #/subscriptions   Monthly/yearly cost + subscriptions

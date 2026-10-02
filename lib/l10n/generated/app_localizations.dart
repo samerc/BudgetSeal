@@ -99,6 +99,324 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webNavGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals & loans'**
+  String get webNavGoals;
+
+  /// No description provided for @webGoalsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Save toward a target, or track money you lent or borrowed.'**
+  String get webGoalsSub;
+
+  /// No description provided for @webGoalNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New goal or loan'**
+  String get webGoalNew;
+
+  /// No description provided for @webGoalCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get webGoalCreate;
+
+  /// No description provided for @webGoalEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get webGoalEdit;
+
+  /// No description provided for @webGoalsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals or loans yet'**
+  String get webGoalsEmptyTitle;
+
+  /// No description provided for @webGoalsEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals track savings toward a target. Loans track money you lent or borrowed.'**
+  String get webGoalsEmptySub;
+
+  /// No description provided for @webGoalsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get webGoalsSection;
+
+  /// No description provided for @webLoansSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans'**
+  String get webLoansSection;
+
+  /// No description provided for @webGoalKindGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get webGoalKindGoal;
+
+  /// No description provided for @webGoalKindLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan'**
+  String get webGoalKindLoan;
+
+  /// No description provided for @webGoalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get webGoalSaved;
+
+  /// No description provided for @webGoalYouOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe'**
+  String get webGoalYouOwe;
+
+  /// No description provided for @webGoalOwedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed to you'**
+  String get webGoalOwedToYou;
+
+  /// No description provided for @webGoalLentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Lent to {name}'**
+  String webGoalLentTo(String name);
+
+  /// No description provided for @webGoalBorrowedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Borrowed from {name}'**
+  String webGoalBorrowedFrom(String name);
+
+  /// No description provided for @webGoalDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String webGoalDue(String date);
+
+  /// No description provided for @webGoalPaidOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid off'**
+  String get webGoalPaidOff;
+
+  /// No description provided for @webGoalPaidBack.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} paid back'**
+  String webGoalPaidBack(String amount);
+
+  /// No description provided for @webGoalPaidBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid back'**
+  String get webGoalPaidBackLabel;
+
+  /// No description provided for @webGoalRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get webGoalRemaining;
+
+  /// No description provided for @webGoalPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month to stay on track'**
+  String webGoalPerMonth(String amount);
+
+  /// No description provided for @webGoalPerMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed per month'**
+  String get webGoalPerMonthLabel;
+
+  /// No description provided for @webGoalDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline'**
+  String get webGoalDeadline;
+
+  /// No description provided for @webGoalPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get webGoalPayments;
+
+  /// No description provided for @webGoalNoPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments yet'**
+  String get webGoalNoPayments;
+
+  /// No description provided for @webGoalAddFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Add funds'**
+  String get webGoalAddFunds;
+
+  /// No description provided for @webGoalPayReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get webGoalPayReceived;
+
+  /// No description provided for @webGoalPaySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Record payment'**
+  String get webGoalPaySent;
+
+  /// No description provided for @webGoalFillRest.
+  ///
+  /// In en, this message translates to:
+  /// **'All that’s left'**
+  String get webGoalFillRest;
+
+  /// No description provided for @webGoalFromAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'From account'**
+  String get webGoalFromAccount;
+
+  /// No description provided for @webGoalIntoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Into account'**
+  String get webGoalIntoAccount;
+
+  /// No description provided for @webGoalConverted.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted to {cur} at the phone’s latest rate'**
+  String webGoalConverted(String cur);
+
+  /// No description provided for @webGoalLentChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'I lent'**
+  String get webGoalLentChoice;
+
+  /// No description provided for @webGoalBorrowedChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'I borrowed'**
+  String get webGoalBorrowedChoice;
+
+  /// No description provided for @webGoalLentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You gave money — payments come in'**
+  String get webGoalLentHint;
+
+  /// No description provided for @webGoalBorrowedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe money — payments go out'**
+  String get webGoalBorrowedHint;
+
+  /// No description provided for @webGoalPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get webGoalPerson;
+
+  /// No description provided for @webGoalTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount'**
+  String get webGoalTarget;
+
+  /// No description provided for @webGoalLoanAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan amount'**
+  String get webGoalLoanAmount;
+
+  /// No description provided for @webGoalDeadlineOpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline (optional)'**
+  String get webGoalDeadlineOpt;
+
+  /// No description provided for @webGoalDueBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Due by (optional)'**
+  String get webGoalDueBy;
+
+  /// No description provided for @webGoalWhatGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Each deposit moves money out of the account you pick and is recorded as a transaction.'**
+  String get webGoalWhatGoal;
+
+  /// No description provided for @webGoalWhatLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Each payment moves money in or out of the account you pick.'**
+  String get webGoalWhatLoan;
+
+  /// No description provided for @webGoalDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String webGoalDeleteTitle(String name);
+
+  /// No description provided for @webGoalDeleteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get webGoalDeleteMsg;
+
+  /// No description provided for @webGoalDeletePayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked payments: {n}. The money already moved between your accounts — keep them, or delete everything?'**
+  String webGoalDeletePayments(int n);
+
+  /// No description provided for @webGoalDeleteKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete, keep payments'**
+  String get webGoalDeleteKeep;
+
+  /// No description provided for @webGoalDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete everything'**
+  String get webGoalDeleteAll;
+
+  /// No description provided for @webToastGoalAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get webToastGoalAdded;
+
+  /// No description provided for @webToastGoalUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get webToastGoalUpdated;
+
+  /// No description provided for @webToastGoalDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get webToastGoalDeleted;
+
+  /// No description provided for @webToastGoalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get webToastGoalPaid;
+
   /// No description provided for @webBulkAdd.
   ///
   /// In en, this message translates to:

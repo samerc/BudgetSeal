@@ -262,6 +262,7 @@ const IC = {
   repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
   grid: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
+  target: svg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
   chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
 };
 const TYPE_ICON = { bank: IC.bank, cash: IC.cash, credit: IC.card, wallet: IC.wallet };
@@ -603,6 +604,7 @@ const routes = {
   '#/subscriptions': () => renderRecurring(true),
   '#/reports': renderReports,
   '#/bulk': renderBulk,
+  '#/goals': renderGoals,
 };
 
 function navigate(hash, quiet = false) {
@@ -1807,6 +1809,256 @@ function openCategoryForm(c = null) {
   });
 }
 
+// ── Goals & loans ─────────────────────────────────────────────────────────────
+
+/** What a goal/loan card shows: goals count up, loans show what's still owed. */
+function goalFigures(o) {
+  const cur = o.targetCurrency;
+  const paid = Number(o.currentAmount) || 0;
+  const target = Number(o.targetAmount) || 0;
+  const loan = o.type === 'loan';
+  const left = Math.max(0, target - paid);
+  const done = target > 0 && paid >= target - 0.004;
+  const pct = target > 0 ? Math.max(0, Math.min(100, (paid / target) * 100)) : null;
+  return {
+    cur, paid, target, loan, left, done, pct,
+    big: loan ? left : paid,
+    label: loan ? (o.direction === 'borrowed' ? t('web_goal_you_owe') : t('web_goal_owed_to_you')) : t('web_goal_saved'),
+    sub: loan ? (o.direction === 'borrowed' ? t('web_goal_borrowed_from', { name: o.contactName || '—' }) : t('web_goal_lent_to', { name: o.contactName || '—' }))
+      : o.endDate ? t('web_goal_due', { date: fmtDate(o.endDate, true) }) : t('web_goal_kind_goal'),
+    meta: done ? (loan ? t('web_goal_paid_off') : t('web_env_reached'))
+      : loan ? t('web_goal_paid_back', { amount: fmt(paid, cur) })
+      : target > 0 ? t('web_env_to_go', { amount: fmt(left, cur) }) : '',
+    metaEnd: target > 0 ? t('web_env_of', { amount: fmt(target, cur) }) : '',
+    payLabel: loan ? (o.direction === 'borrowed' ? t('web_goal_pay_sent') : t('web_goal_pay_received')) : t('web_goal_add_funds'),
+  };
+}
+
+function goalChip(o, cls = '') {
+  const color = safeHex(o.colorHex);
+  const inner = isEmoji(o.icon) ? esc(o.icon) : `<span style="color:${pastelInk(color)}">${esc((o.name || '?').charAt(0).toUpperCase())}</span>`;
+  return `<span class="chip-icon ${cls}" style="background:${pastel(color)}">${inner}</span>`;
+}
+
+async function renderGoals(quiet) {
+  const head = actions => pageHead(t('web_nav_goals'), esc(t('web_goals_sub')), actions);
+  if (!quiet) setContent(head('') + skeleton(4));
+  const d = await api('/api/objectives');
+  if (!d || state.route !== '#/goals') return;
+  cache.goals = d.items || [];
+  const add = `<button class="btn btn-primary" data-action="add-goal">${IC.plus}${esc(t('web_goal_new'))}</button>`;
+  if (!cache.goals.length) {
+    setContent(head(add) + `<div class="card">${emptyState(IC.target, t('web_goals_empty_title'), t('web_goals_empty_sub'), { action: 'add-goal', label: t('web_goal_new') })}</div>`);
+    return;
+  }
+  const card = o => {
+    const f = goalFigures(o);
+    return `<div class="card env-card clickable" data-action="open-goal" data-id="${esc(o.id)}" tabindex="0" role="button">
+      <div class="env-top">${goalChip(o)}
+        <div class="row-main"><div class="env-name">${esc(o.name)}</div><div class="env-kind">${esc(f.sub)}</div></div>
+      </div>
+      <div><div class="env-amount num">${esc(fmt(f.big, f.cur))}</div><div class="env-kind">${esc(f.label)}</div></div>
+      ${f.pct != null ? `<div class="bar"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--income)' : safeHex(o.colorHex)}"></span></div>` : ''}
+      ${f.meta || f.metaEnd ? `<div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
+      <div class="env-foot">
+        <span class="env-kind">${o.monthlyPace ? esc(t('web_goal_per_month', { amount: fmt(o.monthlyPace, f.cur) })) : ''}</span>
+        ${f.done && f.loan ? '' : `<button class="btn btn-sm btn-tonal" data-action="pay-goal" data-id="${esc(o.id)}">${IC.plus}${esc(f.payLabel)}</button>`}
+      </div>
+    </div>`;
+  };
+  const goals = cache.goals.filter(o => o.type !== 'loan');
+  const loans = cache.goals.filter(o => o.type === 'loan');
+  const section = (title, list) => list.length ? `<div class="section-head"><span class="section-title">${esc(title)}</span></div><div class="grid-auto">${list.map(card).join('')}</div>` : '';
+  setContent(head(add) + section(t('web_goals_section'), goals) + section(t('web_loans_section'), loans));
+}
+
+async function openGoal(id) {
+  const o = await api(`/api/objectives/${encodeURIComponent(id)}`);
+  if (!o) return;
+  const f = goalFigures(o);
+  const stat = (label, value) => value ? `<div class="stat"><div class="stat-label">${esc(label)}</div><div class="stat-value num">${esc(value)}</div></div>` : '';
+  openModal({
+    title: o.name,
+    submit: f.done && f.loan ? null : f.payLabel,
+    extra: { label: t('web_goal_edit'), run: () => openGoalForm(o) },
+    body: `
+      <div class="goal-hero">${goalChip(o, 'lg')}
+        <div><div class="env-amount num">${esc(fmt(f.big, f.cur))}</div><div class="env-kind">${esc(f.label)} · ${esc(f.sub)}</div></div>
+      </div>
+      ${f.pct != null ? `<div class="bar" style="margin:14px 0 6px"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--income)' : safeHex(o.colorHex)}"></span></div>
+        <div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
+      <div class="goal-stats">
+        ${stat(f.loan ? t('web_goal_paid_back_label') : t('web_goal_saved'), fmt(f.paid, f.cur))}
+        ${f.target > 0 ? stat(t('web_goal_remaining'), fmt(f.left, f.cur)) : ''}
+        ${o.monthlyPace ? stat(t('web_goal_per_month_label'), fmt(o.monthlyPace, f.cur)) : ''}
+        ${o.endDate ? stat(t('web_goal_deadline'), fmtDate(o.endDate, true)) : ''}
+      </div>
+      <div class="label" style="margin-top:16px">${esc(t('web_goal_payments'))}</div>
+      ${o.payments?.length ? `<div class="lines-box">${o.payments.map(p => `
+        <div class="row"><div class="row-main"><div class="row-title">${esc(fmtDate(p.date, true))}</div><div class="row-sub">${esc([p.accountName, p.note].filter(Boolean).join(' · '))}</div></div>
+        <div class="row-amount num ${p.type === 'income' ? 'income' : ''}">${esc(fmt(p.amount, f.cur))}</div></div>`).join('')}</div>`
+        : `<p class="help">${esc(t('web_goal_no_payments'))}</p>`}`,
+    onSubmit: () => { openPayGoal(o); return false; },
+  });
+}
+
+async function openPayGoal(o) {
+  const { accounts, categories } = await refs();
+  if (!accounts.length) { toast(t('web_need_account'), true); return; }
+  const f = goalFigures(o);
+  const txType = f.loan && o.direction !== 'borrowed' ? 'income' : 'expense';
+  const lastAcct = lsGet(`bs_goal_acct_${o.id}`) || lsGet('bs_last_account');
+  const acctId = (accounts.find(a => a.id === lastAcct && a.currency === o.targetCurrency) || accounts.find(a => a.currency === o.targetCurrency) || accounts.find(a => a.id === lastAcct) || accounts[0]).id;
+  const lastCat = lsGet(`bs_goal_cat_${o.id}`) || '';
+  openModal({
+    title: `${f.payLabel} · ${o.name}`,
+    submit: f.payLabel,
+    body: `
+      <div class="field">
+        <label class="label" for="g-amount">${esc(t('web_form_amount'))}</label>
+        <div class="input-cur"><input id="g-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" autofocus><span class="cur">${esc(f.cur)}</span></div>
+        ${f.left > 0 ? `<div class="chips"><button type="button" class="pill" data-fill="${f.left}">${esc(f.loan ? t('web_goal_fill_rest') : t('web_fund_to_target'))}</button></div>` : ''}
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="g-account">${esc(txType === 'income' ? t('web_goal_into_account') : t('web_goal_from_account'))}</label><select id="g-account" class="input">${accountOptions(accounts, acctId)}</select>
+          <div class="help" id="g-conv"></div></div>
+        <div class="field"><label class="label" for="g-cat">${esc(t('web_form_category'))}</label><select id="g-cat" class="input">${categoryOptions(categories, txType, lastCat)}</select></div>
+      </div>
+      <div class="field"><label class="label" for="g-date">${esc(t('web_form_date'))}</label><input id="g-date" type="date" class="input" value="${esc(dayKey())}" max="${esc(dayKey())}"></div>`,
+    onOpen: form => {
+      const conv = () => {
+        const a = accounts.find(x => x.id === form.querySelector('#g-account').value);
+        form.querySelector('#g-conv').textContent = a && a.currency !== o.targetCurrency ? t('web_goal_converted', { cur: a.currency }) : '';
+      };
+      form.querySelector('#g-account').addEventListener('change', conv);
+      form.querySelectorAll('[data-fill]').forEach(b => b.addEventListener('click', () => {
+        form.querySelector('#g-amount').value = amountInputValue(Number(b.dataset.fill), f.cur);
+      }));
+      conv();
+    },
+    onSubmit: async form => {
+      const amount = parseAmount(form.querySelector('#g-amount').value);
+      if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      const accountId = form.querySelector('#g-account').value;
+      const categoryId = form.querySelector('#g-cat').value || null;
+      const r = await api(`/api/objectives/${encodeURIComponent(o.id)}/pay`, { method: 'POST', body: { accountId, categoryId, amount, date: form.querySelector('#g-date').value || dayKey() } });
+      if (!r) return false;
+      lsSet(`bs_goal_acct_${o.id}`, accountId);
+      lsSet(`bs_goal_cat_${o.id}`, categoryId || '');
+      toast(t('web_toast_goal_paid'));
+      invalidate();
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+async function openGoalForm(o = null) {
+  const { accounts } = await refs();
+  let type = o?.type || 'goal';
+  let dir = o?.direction || 'lent';
+  let color = o?.colorHex ? safeHex(o.colorHex) : CAT_COLORS[0];
+  const currencies = [...new Set([o?.targetCurrency, state.baseCurrency, ...accounts.map(a => a.currency)].filter(Boolean))];
+  openModal({
+    title: o ? t('web_goal_edit') : t('web_goal_new'),
+    submit: o ? t('common_save') : t('web_goal_create'),
+    extra: o ? { label: t('common_delete'), run: () => deleteGoal(o) } : null,
+    body: `
+      ${o ? '' : `<div class="field"><div class="seg full" id="g-type">
+        <button type="button" data-type="goal" class="${type === 'goal' ? 'active' : ''}">${esc(t('web_goal_kind_goal'))}</button>
+        <button type="button" data-type="loan" class="${type === 'loan' ? 'active' : ''}">${esc(t('web_goal_kind_loan'))}</button>
+      </div><div class="help" id="g-type-help"></div></div>`}
+      <div class="field-row">
+        <div class="field"><label class="label" for="g-name">${esc(t('web_form_name'))}</label><input id="g-name" class="input" maxlength="100" value="${esc(o?.name || '')}" autofocus></div>
+        <div class="field" style="max-width:110px"><label class="label" for="g-icon">${esc(t('web_cat_icon'))}</label><input id="g-icon" class="input" maxlength="8" value="${esc(isEmoji(o?.icon) ? o.icon : '')}" placeholder="🎯" style="text-align:center;font-size:20px"></div>
+      </div>
+      <div id="g-loan">
+        <div class="field"><div class="seg full" id="g-dir">
+          <button type="button" data-dir="lent" class="${dir === 'lent' ? 'active' : ''}">${esc(t('web_goal_lent_choice'))}</button>
+          <button type="button" data-dir="borrowed" class="${dir === 'borrowed' ? 'active' : ''}">${esc(t('web_goal_borrowed_choice'))}</button>
+        </div><div class="help" id="g-dir-help"></div></div>
+        <div class="field"><label class="label" for="g-person">${esc(t('web_goal_person'))}</label><input id="g-person" class="input" maxlength="100" value="${esc(o?.contactName || '')}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field" style="flex:2"><label class="label" for="g-target" id="g-target-label"></label><input id="g-target" class="input num" inputmode="decimal" autocomplete="off" value="${o?.targetAmount ? esc(amountInputValue(o.targetAmount, o.targetCurrency)) : ''}" placeholder="${esc(t('web_form_optional'))}"></div>
+        <div class="field"><label class="label" for="g-cur">${esc(t('web_form_currency'))}</label><select id="g-cur" class="input" ${o?.paymentCount ? 'disabled' : ''}>${currencies.map(c => `<option${c === (o?.targetCurrency || state.baseCurrency) ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label class="label" for="g-end" id="g-end-label"></label><input id="g-end" type="date" class="input" value="${o?.endDate ? esc(dayKey(o.endDate)) : ''}"></div>
+      <div class="field"><label class="label">${esc(t('web_cat_color'))}</label><div class="swatches" id="g-colors">
+        ${CAT_COLORS.map(x => `<button type="button" class="swatch${x.toLowerCase() === color.toLowerCase() ? ' active' : ''}" data-color="${x}" style="background:${x}" aria-label="${x}"></button>`).join('')}
+      </div></div>`,
+    onOpen: f => {
+      const sync = () => {
+        const loan = type === 'loan';
+        f.querySelector('#g-loan').classList.toggle('hidden', !loan);
+        f.querySelector('#g-target-label').textContent = loan ? t('web_goal_loan_amount') : t('web_goal_target');
+        f.querySelector('#g-end-label').textContent = loan ? t('web_goal_due_by') : t('web_goal_deadline_opt');
+        const th = f.querySelector('#g-type-help');
+        if (th) th.textContent = loan ? t('web_goal_what_loan') : t('web_goal_what_goal');
+        f.querySelector('#g-dir-help').textContent = dir === 'lent' ? t('web_goal_lent_hint') : t('web_goal_borrowed_hint');
+        f.querySelectorAll('#g-type button').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+        f.querySelectorAll('#g-dir button').forEach(b => b.classList.toggle('active', b.dataset.dir === dir));
+      };
+      f.querySelector('#g-type')?.addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) { type = b.dataset.type; sync(); } });
+      f.querySelector('#g-dir').addEventListener('click', e => { const b = e.target.closest('[data-dir]'); if (b) { dir = b.dataset.dir; sync(); } });
+      f.querySelector('#g-colors').addEventListener('click', e => {
+        const b = e.target.closest('[data-color]'); if (!b) return;
+        color = b.dataset.color;
+        f.querySelectorAll('#g-colors .swatch').forEach(x => x.classList.toggle('active', x === b));
+      });
+      sync();
+    },
+    onSubmit: async f => {
+      const name = f.querySelector('#g-name').value.trim();
+      if (!name) { toast(t('web_val_name_required'), true); return false; }
+      const rawTarget = f.querySelector('#g-target').value.trim();
+      const target = rawTarget ? parseAmount(rawTarget) : 0;
+      if (!(target >= 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      if (type === 'loan' && !(target > 0)) { toast(t('web_val_valid_amount'), true); f.querySelector('#g-target').focus(); return false; }
+      const body = {
+        type, name, targetAmount: target, colorHex: color,
+        targetCurrency: f.querySelector('#g-cur').value,
+        endDate: f.querySelector('#g-end').value || null,
+        icon: f.querySelector('#g-icon').value.trim(),
+      };
+      if (type === 'loan') { body.direction = dir; body.contactName = f.querySelector('#g-person').value.trim(); }
+      const r = o
+        ? await api(`/api/objectives/${encodeURIComponent(o.id)}`, { method: 'PUT', body })
+        : await api('/api/objectives', { method: 'POST', body });
+      if (!r) return false;
+      toast(o ? t('web_toast_goal_updated') : t('web_toast_goal_added'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+/** Delete; with payments, choose whether they go too (money returns to the accounts). */
+function deleteGoal(o) {
+  const del = async payments => {
+    const r = await api(`/api/objectives/${encodeURIComponent(o.id)}?payments=${payments}`, { method: 'DELETE' });
+    if (!r) return false;
+    toast(t('web_toast_goal_deleted'));
+    invalidate();
+    closeModal();
+    refresh(true);
+    return true;
+  };
+  if (!o.paymentCount) {
+    confirmDialog(t('web_goal_delete_title', { name: o.name }), t('web_goal_delete_msg')).then(ok => ok && del('keep'));
+    return;
+  }
+  openModal({
+    title: t('web_goal_delete_title', { name: o.name }), narrow: true, danger: true,
+    submit: t('web_goal_delete_all'),
+    extra: { label: t('web_goal_delete_keep'), run: () => del('keep') },
+    body: `<p class="modal-text">${esc(t('web_goal_delete_payments', { n: o.paymentCount }))}</p>`,
+    onSubmit: () => del('delete'),
+  });
+}
+
 // ── Recurring & subscriptions ─────────────────────────────────────────────────
 
 async function renderRecurring(subs, quiet) {
@@ -2190,6 +2442,9 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'add-goal': () => openGoalForm(),
+  'open-goal': el => openGoal(el.dataset.id),
+  'pay-goal': el => { const o = (cache.goals || []).find(x => x.id === el.dataset.id); if (o) openPayGoal(o); },
   'bulk-save': () => saveBulk(),
   'bulk-add': () => { bulk.rows.push(bulkRow(bulk.rows[bulk.rows.length - 1])); drawBulk({ row: bulk.rows.length - 1, col: 'amount' }); },
   'bulk-del': el => { bulk.rows.splice(Number(el.dataset.row), 1); if (!bulk.rows.length) bulk.rows.push(bulkRow()); bulk.bad = -1; drawBulk(); bulkStore(); },
@@ -2234,7 +2489,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('keydown', e => {
   // Rows are focusable: Enter opens them like a click.
-  if (e.key === 'Enter' && e.target.matches('.row[data-action]')) { e.preventDefault(); e.target.click(); }
+  if (e.key === 'Enter' && e.target.matches('.row[data-action], .card[data-action]')) { e.preventDefault(); e.target.click(); }
 });
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
@@ -2259,7 +2514,7 @@ function initShortcuts() {
       else { location.hash = '#/transactions'; setTimeout(() => document.getElementById('tx-search')?.focus(), 150); }
     }
     else if (e.key === '?') showShortcuts();
-    else if (/^[1-8]$/.test(e.key)) {
+    else if (/^[1-9]$/.test(e.key)) {
       const links = [...document.querySelectorAll('.nav-link')];
       links[Number(e.key) - 1]?.click();
     }
@@ -2267,7 +2522,7 @@ function initShortcuts() {
 }
 
 function showShortcuts() {
-  const rows = [['N', 'web_shortcut_new_tx'], ['/', 'web_shortcut_search'], ['R', 'web_shortcut_refresh'], ['1–8', 'web_shortcut_pages'], ['Esc', 'web_shortcut_close'], ['?', 'web_shortcut_help']];
+  const rows = [['N', 'web_shortcut_new_tx'], ['/', 'web_shortcut_search'], ['R', 'web_shortcut_refresh'], ['1–9', 'web_shortcut_pages'], ['Esc', 'web_shortcut_close'], ['?', 'web_shortcut_help']];
   openModal({
     title: t('web_shortcuts_title'), narrow: true,
     body: `<div class="kbd-grid">${rows.map(([k, l]) => `<kbd>${esc(k)}</kbd><span>${esc(t(l))}</span>`).join('')}</div>`,

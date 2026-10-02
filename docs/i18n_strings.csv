@@ -2154,3 +2154,62 @@ web_bulk_empty,,Fill in at least one row.,املأ صفًا واحدًا على 
 web_bulk_row_bad,,Check row {n},تحقّق من الصف {n},Vérifiez la ligne {n}
 web_bulk_pasted,,Rows pasted: {n},الصفوف الملصقة: {n},Lignes collées : {n}
 web_bulk_saved,,Transactions added: {n},المعاملات المضافة: {n},Transactions ajoutées : {n}
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_nav_goals,,Goals & loans,الأهداف والقروض,Objectifs et prêts
+web_goals_sub,,"Save toward a target, or track money you lent or borrowed.",ادّخر نحو هدف، أو تتبّع المال الذي أقرضته أو اقترضته.,"Épargnez vers une cible, ou suivez l'argent prêté ou emprunté."
+web_goal_new,,New goal or loan,هدف أو قرض جديد,Nouvel objectif ou prêt
+web_goal_create,,Create,إنشاء,Créer
+web_goal_edit,,Edit,تعديل,Modifier
+web_goals_empty_title,,No goals or loans yet,لا توجد أهداف أو قروض بعد,Aucun objectif ni prêt pour le moment
+web_goals_empty_sub,,Goals track savings toward a target. Loans track money you lent or borrowed.,الأهداف تتبّع الادخار نحو غاية. القروض تتبّع الأموال التي أقرضتها أو اقترضتها.,Les objectifs suivent l'épargne vers une cible. Les prêts suivent l'argent prêté ou emprunté.
+web_goals_section,,Goals,الأهداف,Objectifs
+web_loans_section,,Loans,القروض,Prêts
+web_goal_kind_goal,,Goal,هدف,Objectif
+web_goal_kind_loan,,Loan,قرض,Prêt
+web_goal_saved,,Saved,تم ادخاره,Épargné
+web_goal_you_owe,,You owe,عليك,Vous devez
+web_goal_owed_to_you,,Owed to you,لك,On vous doit
+web_goal_lent_to,,Lent to {name},أُقرض لـ {name},Prêté à {name}
+web_goal_borrowed_from,,Borrowed from {name},اقتُرض من {name},Emprunté à {name}
+web_goal_due,,Due {date},الموعد {date},Échéance {date}
+web_goal_paid_off,,Paid off,تم السداد,Remboursé
+web_goal_paid_back,,{amount} paid back,المسدَّد: {amount},{amount} remboursés
+web_goal_paid_back_label,,Paid back,المسدَّد,Remboursé
+web_goal_remaining,,Remaining,المتبقي,Restant
+web_goal_per_month,,{amount} a month to stay on track,المطلوب شهريًا: {amount},{amount} par mois pour rester dans les temps
+web_goal_per_month_label,,Needed per month,المطلوب شهرياً,Nécessaire par mois
+web_goal_deadline,,Deadline,الموعد النهائي,Échéance
+web_goal_payments,,Payments,الدفعات,Paiements
+web_goal_no_payments,,No payments yet,لا توجد مدفوعات بعد,Aucun paiement pour le moment
+web_goal_add_funds,,Add funds,إضافة أموال,Ajouter des fonds
+web_goal_pay_received,,Payment received,دفعة مستلمة,Paiement reçu
+web_goal_pay_sent,,Record payment,تسجيل دفعة,Enregistrer un paiement
+web_goal_fill_rest,,All that’s left,كل المتبقي,Tout le reste
+web_goal_from_account,,From account,من الحساب,Depuis le compte
+web_goal_into_account,,Into account,إلى الحساب,Vers le compte
+web_goal_converted,,Converted to {cur} at the phone’s latest rate,يُحوَّل إلى {cur} بآخر سعر في الهاتف,Converti en {cur} au dernier taux du téléphone
+web_goal_lent_hint,,You gave money — payments come in,أنت أعطيت المال — المدفوعات واردة,Vous avez prêté — les paiements sont entrants
+web_goal_borrowed_hint,,You owe money — payments go out,أنت مدين — المدفوعات صادرة,Vous devez — les paiements sont sortants
+web_goal_person,,Person,الشخص,Personne
+web_goal_target,,Target amount,المبلغ المستهدف,Montant cible
+web_goal_loan_amount,,Loan amount,مبلغ القرض,Montant du prêt
+web_goal_deadline_opt,,Deadline (optional),الموعد النهائي (اختياري),Échéance (facultatif)
+web_goal_due_by,,Due by (optional),يُسدَّد قبل (اختياري),À rembourser avant (facultatif)
+web_goal_what_goal,,Each deposit moves money out of the account you pick and is recorded as a transaction.,كل إيداع يُخرج المال من الحساب الذي تختاره ويُسجَّل كمعاملة.,Chaque dépôt sort de l’argent du compte choisi et est enregistré comme transaction.
+web_goal_what_loan,,Each payment moves money in or out of the account you pick.,كل دفعة تُدخل المال إلى الحساب الذي تختاره أو تُخرجه منه.,Chaque paiement fait entrer ou sortir de l’argent du compte choisi.
+web_goal_delete_title,,Delete {name}?,حذف {name}؟,Supprimer {name} ?
+web_goal_delete_msg,,This cannot be undone.,لا يمكن التراجع عن هذا.,Cette action est irréversible.
+web_goal_delete_payments,,"Linked payments: {n}. The money already moved between your accounts — keep them, or delete everything?",الدفعات المرتبطة: {n}. انتقل المال بالفعل بين حساباتك — هل تُبقيها أم تحذف كل شيء؟,Paiements liés : {n}. L'argent a déjà été déplacé entre vos comptes — les garder ou tout supprimer ?
+web_goal_delete_keep,,"Delete, keep payments",حذف مع الإبقاء على الدفعات,"Supprimer, garder les paiements"
+web_goal_delete_all,,Delete everything,حذف كل شيء,Tout supprimer
+web_toast_goal_added,,Created,تم الإنشاء,Créé
+web_toast_goal_updated,,Saved,تم الحفظ,Enregistré
+web_toast_goal_deleted,,Deleted,تم الحذف,Supprimé
+web_toast_goal_paid,,Payment recorded,تم تسجيل الدفعة,Paiement enregistré
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_goal_lent_choice,,I lent,أقرضت,J'ai prêté
+web_goal_borrowed_choice,,I borrowed,اقترضت,J'ai emprunté

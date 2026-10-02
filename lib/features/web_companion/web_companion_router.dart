@@ -10,6 +10,7 @@ import 'api/accounts_handler.dart';
 import 'api/categories_handler.dart';
 import 'api/dashboard_handler.dart';
 import 'api/envelopes_handler.dart';
+import 'api/objectives_handler.dart';
 import 'api/recurring_handler.dart';
 import 'api/reports_handler.dart';
 import 'api/subscriptions_handler.dart';
@@ -61,6 +62,12 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   api.get('/envelopes', listEnvelopesHandler(ref));
   api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));
+  api.get('/objectives', listObjectivesHandler(ref));
+  api.post('/objectives', createObjectiveHandler(ref));
+  api.get('/objectives/<id>', getObjectiveHandler(ref));
+  api.put('/objectives/<id>', updateObjectiveHandler(ref));
+  api.delete('/objectives/<id>', deleteObjectiveHandler(ref));
+  api.post('/objectives/<id>/pay', payObjectiveHandler(ref));
   api.post('/envelopes/<id>/fund', fundEnvelopeHandler(ref));
 
   api.get('/recurring', listRecurringHandler(ref));

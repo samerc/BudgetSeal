@@ -9,6 +9,185 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webNavGoals => 'الأهداف والقروض';
+
+  @override
+  String get webGoalsSub =>
+      'ادّخر نحو هدف، أو تتبّع المال الذي أقرضته أو اقترضته.';
+
+  @override
+  String get webGoalNew => 'هدف أو قرض جديد';
+
+  @override
+  String get webGoalCreate => 'إنشاء';
+
+  @override
+  String get webGoalEdit => 'تعديل';
+
+  @override
+  String get webGoalsEmptyTitle => 'لا توجد أهداف أو قروض بعد';
+
+  @override
+  String get webGoalsEmptySub =>
+      'الأهداف تتبّع الادخار نحو غاية. القروض تتبّع الأموال التي أقرضتها أو اقترضتها.';
+
+  @override
+  String get webGoalsSection => 'الأهداف';
+
+  @override
+  String get webLoansSection => 'القروض';
+
+  @override
+  String get webGoalKindGoal => 'هدف';
+
+  @override
+  String get webGoalKindLoan => 'قرض';
+
+  @override
+  String get webGoalSaved => 'تم ادخاره';
+
+  @override
+  String get webGoalYouOwe => 'عليك';
+
+  @override
+  String get webGoalOwedToYou => 'لك';
+
+  @override
+  String webGoalLentTo(String name) {
+    return 'أُقرض لـ $name';
+  }
+
+  @override
+  String webGoalBorrowedFrom(String name) {
+    return 'اقتُرض من $name';
+  }
+
+  @override
+  String webGoalDue(String date) {
+    return 'الموعد $date';
+  }
+
+  @override
+  String get webGoalPaidOff => 'تم السداد';
+
+  @override
+  String webGoalPaidBack(String amount) {
+    return 'المسدَّد: $amount';
+  }
+
+  @override
+  String get webGoalPaidBackLabel => 'المسدَّد';
+
+  @override
+  String get webGoalRemaining => 'المتبقي';
+
+  @override
+  String webGoalPerMonth(String amount) {
+    return 'المطلوب شهريًا: $amount';
+  }
+
+  @override
+  String get webGoalPerMonthLabel => 'المطلوب شهرياً';
+
+  @override
+  String get webGoalDeadline => 'الموعد النهائي';
+
+  @override
+  String get webGoalPayments => 'الدفعات';
+
+  @override
+  String get webGoalNoPayments => 'لا توجد مدفوعات بعد';
+
+  @override
+  String get webGoalAddFunds => 'إضافة أموال';
+
+  @override
+  String get webGoalPayReceived => 'دفعة مستلمة';
+
+  @override
+  String get webGoalPaySent => 'تسجيل دفعة';
+
+  @override
+  String get webGoalFillRest => 'كل المتبقي';
+
+  @override
+  String get webGoalFromAccount => 'من الحساب';
+
+  @override
+  String get webGoalIntoAccount => 'إلى الحساب';
+
+  @override
+  String webGoalConverted(String cur) {
+    return 'يُحوَّل إلى $cur بآخر سعر في الهاتف';
+  }
+
+  @override
+  String get webGoalLentChoice => 'أقرضت';
+
+  @override
+  String get webGoalBorrowedChoice => 'اقترضت';
+
+  @override
+  String get webGoalLentHint => 'أنت أعطيت المال — المدفوعات واردة';
+
+  @override
+  String get webGoalBorrowedHint => 'أنت مدين — المدفوعات صادرة';
+
+  @override
+  String get webGoalPerson => 'الشخص';
+
+  @override
+  String get webGoalTarget => 'المبلغ المستهدف';
+
+  @override
+  String get webGoalLoanAmount => 'مبلغ القرض';
+
+  @override
+  String get webGoalDeadlineOpt => 'الموعد النهائي (اختياري)';
+
+  @override
+  String get webGoalDueBy => 'يُسدَّد قبل (اختياري)';
+
+  @override
+  String get webGoalWhatGoal =>
+      'كل إيداع يُخرج المال من الحساب الذي تختاره ويُسجَّل كمعاملة.';
+
+  @override
+  String get webGoalWhatLoan =>
+      'كل دفعة تُدخل المال إلى الحساب الذي تختاره أو تُخرجه منه.';
+
+  @override
+  String webGoalDeleteTitle(String name) {
+    return 'حذف $name؟';
+  }
+
+  @override
+  String get webGoalDeleteMsg => 'لا يمكن التراجع عن هذا.';
+
+  @override
+  String webGoalDeletePayments(int n) {
+    return 'الدفعات المرتبطة: $n. انتقل المال بالفعل بين حساباتك — هل تُبقيها أم تحذف كل شيء؟';
+  }
+
+  @override
+  String get webGoalDeleteKeep => 'حذف مع الإبقاء على الدفعات';
+
+  @override
+  String get webGoalDeleteAll => 'حذف كل شيء';
+
+  @override
+  String get webToastGoalAdded => 'تم الإنشاء';
+
+  @override
+  String get webToastGoalUpdated => 'تم الحفظ';
+
+  @override
+  String get webToastGoalDeleted => 'تم الحذف';
+
+  @override
+  String get webToastGoalPaid => 'تم تسجيل الدفعة';
+
+  @override
   String get webBulkAdd => 'إضافة عدة معاملات';
 
   @override
