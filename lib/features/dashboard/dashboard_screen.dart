@@ -900,19 +900,29 @@ class _MiniStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
             style:
                 TextStyle(fontSize: 13, color: AppColors.ts(context))),
-        AnimatedAmount(
-            amount: amount,
-            currency: currency,
-            prefix: prefix.isNotEmpty ? prefix : null,
-            style: TextStyle(
-                fontSize: bold ? 16 : 14,
-                fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-                color: color)),
+        const SizedBox(width: 6),
+        // Narrow phones / large text: the amount shrinks instead of
+        // running past the card edge.
+        Expanded(
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: AnimatedAmount(
+                  amount: amount,
+                  currency: currency,
+                  prefix: prefix.isNotEmpty ? prefix : null,
+                  style: TextStyle(
+                      fontSize: bold ? 16 : 14,
+                      fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+                      color: color)),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -964,13 +974,20 @@ class _QuickAction extends StatelessWidget {
                   child: Icon(icon, size: 20, color: AppColors.tp(context)),
                 ),
                 const SizedBox(height: 6),
-                Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
+                // Five actions share the width: shrink the label rather
+                // than cut it ("Expen…") on narrow phones.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(label,
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.tp(context))),
+                  ),
+                ),
               ]),
             ),
           ),

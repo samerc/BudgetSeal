@@ -20,13 +20,17 @@ class TxListSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // ── Live Preview ──────────────────────────────────────────
-          Text(S.of(context).txListSelectLayout,
-              style: TextStyle(
-                fontSize: TypographyTokens.screenTitleSize,
-                fontFamily: TypographyTokens.displayFamily,
-                fontWeight: TypographyTokens.screenTitleWeight,
-                color: AppColors.tp(context),
-              )),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(S.of(context).txListSelectLayout,
+                style: TextStyle(
+                  fontSize: TypographyTokens.screenTitleSize,
+                  fontFamily: TypographyTokens.displayFamily,
+                  fontWeight: TypographyTokens.screenTitleWeight,
+                  color: AppColors.tp(context),
+                )),
+          ),
           const SizedBox(height: 16),
           _LayoutPreview(settings: s),
           const SizedBox(height: 28),

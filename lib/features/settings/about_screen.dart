@@ -145,11 +145,15 @@ class AboutScreen extends ConsumerWidget {
                 Icon(Icons.shield_rounded,
                     size: 14, color: AppColors.healthy),
                 const SizedBox(width: 6),
-                Text(
-                  l.aboutPrivacy,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.ts(context),
+                // Wraps on narrow phones instead of overflowing.
+                Flexible(
+                  child: Text(
+                    l.aboutPrivacy,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.ts(context),
+                    ),
                   ),
                 ),
               ],

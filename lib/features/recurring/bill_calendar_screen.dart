@@ -233,7 +233,12 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).billCalTitle),
+        // The month picker takes the actions space: shrink, don't cut.
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(S.of(context).billCalTitle),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.chevron_left_rounded),

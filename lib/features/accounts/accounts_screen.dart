@@ -49,13 +49,17 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   ),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text(
-                      S.of(context).acctTitle,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.screenTitleSize,
-                        fontFamily: TypographyTokens.displayFamily,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.tp(context),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        S.of(context).acctTitle,
+                        style: TextStyle(
+                          fontSize: TypographyTokens.screenTitleSize,
+                          fontFamily: TypographyTokens.displayFamily,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.tp(context),
+                        ),
                       ),
                     ),
                   ),

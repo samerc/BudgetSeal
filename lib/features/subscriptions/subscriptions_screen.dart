@@ -222,13 +222,17 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                       ),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: Text(
-                          S.of(context).subTitle,
-                          style: TextStyle(
-                            fontSize: TypographyTokens.screenTitleSize,
-                            fontFamily: TypographyTokens.displayFamily,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.tp(context),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            S.of(context).subTitle,
+                            style: TextStyle(
+                              fontSize: TypographyTokens.screenTitleSize,
+                              fontFamily: TypographyTokens.displayFamily,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.tp(context),
+                            ),
                           ),
                         ),
                       ),
@@ -255,16 +259,20 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  '${formatAmount(monthlyTotal, currency: baseCurrency)}${S.of(context).subFreqMonth}',
-                                  style: TextStyle(
-                                    color: AppColors.tp(context),
-                                    fontSize: TypographyTokens.screenTitleSize,
-                                    fontFamily: TypographyTokens.displayFamily,
-                                    fontWeight: FontWeight.w800,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: Text(
+                                    '${formatAmount(monthlyTotal, currency: baseCurrency)}${S.of(context).subFreqMonth}',
+                                    style: TextStyle(
+                                      color: AppColors.tp(context),
+                                      fontSize: TypographyTokens.screenTitleSize,
+                                      fontFamily: TypographyTokens.displayFamily,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 GestureDetector(

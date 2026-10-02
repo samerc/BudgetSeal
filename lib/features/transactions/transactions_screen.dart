@@ -866,13 +866,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
       child: Row(
         children: [
-          Text(
-            S.of(context).txTitle,
-            style: TextStyle(
-              fontSize: TypographyTokens.screenTitleSize,
-              fontFamily: TypographyTokens.displayFamily,
-              fontWeight: TypographyTokens.screenTitleWeight,
-              color: AppColors.tp(context),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              S.of(context).txTitle,
+              style: TextStyle(
+                fontSize: TypographyTokens.screenTitleSize,
+                fontFamily: TypographyTokens.displayFamily,
+                fontWeight: TypographyTokens.screenTitleWeight,
+                color: AppColors.tp(context),
+              ),
             ),
           ),
           const Spacer(),
