@@ -9,6 +9,120 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webImportBtn => 'Import CSV';
+
+  @override
+  String get webImportTitle => 'Import a CSV file';
+
+  @override
+  String get webImportSub =>
+      'Bring in a bank statement or a spreadsheet. Rows already in BudgetSeal are skipped.';
+
+  @override
+  String get webImportChoose => 'Choose a CSV file, or drop it here';
+
+  @override
+  String get webImportChooseHint =>
+      'It needs a date and an amount (or debit and credit) column. Commas, semicolons and tabs all work.';
+
+  @override
+  String webImportRowsFound(int n) {
+    return 'Rows found: $n · choose another file';
+  }
+
+  @override
+  String get webImportTooBig => 'That file is over 5 MB.';
+
+  @override
+  String get webImportUnreadableFile => 'Couldn\'t read that file as CSV.';
+
+  @override
+  String get webImportColumns => 'Columns';
+
+  @override
+  String webImportColumnN(int n) {
+    return 'Column $n';
+  }
+
+  @override
+  String get webImportHasHeader => 'First row is a header';
+
+  @override
+  String get webImportRoleSkip => 'Skip';
+
+  @override
+  String get webImportRoleDate => 'Date';
+
+  @override
+  String get webImportRoleDescription => 'Description';
+
+  @override
+  String get webImportRoleAmount => 'Amount (±)';
+
+  @override
+  String get webImportRoleDebit => 'Money out';
+
+  @override
+  String get webImportRoleCredit => 'Money in';
+
+  @override
+  String get webImportRoleCategory => 'Category';
+
+  @override
+  String get webImportPreview => 'How it will look';
+
+  @override
+  String get webImportNeedCols =>
+      'Pick a Date column and an Amount column (or Money out / Money in).';
+
+  @override
+  String get webImportInto => 'Import into';
+
+  @override
+  String get webImportReadyRows => 'rows ready';
+
+  @override
+  String webImportUnreadable(int n) {
+    return 'Rows without a readable date or amount: $n';
+  }
+
+  @override
+  String get webImportCheck => 'Check & import';
+
+  @override
+  String get webImportConfirmTitle => 'Import these transactions?';
+
+  @override
+  String webImportWillAdd(String account, int n) {
+    return 'New transactions for $account: $n';
+  }
+
+  @override
+  String webImportCategorized(int n) {
+    return 'With a category (matched or guessed from your past titles): $n';
+  }
+
+  @override
+  String webImportDupes(int n) {
+    return 'Already in BudgetSeal, skipped: $n';
+  }
+
+  @override
+  String webImportGo(int n) {
+    return 'Import $n';
+  }
+
+  @override
+  String webImportNothingNew(int n) {
+    return 'Nothing new — all $n rows are already in BudgetSeal.';
+  }
+
+  @override
+  String webImportDone(int n) {
+    return 'Imported: $n';
+  }
+
+  @override
   String get webAcctBalanceAfter => 'Balance after this transaction';
 
   @override

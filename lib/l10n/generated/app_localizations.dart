@@ -99,6 +99,192 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webImportBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Import CSV'**
+  String get webImportBtn;
+
+  /// No description provided for @webImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a CSV file'**
+  String get webImportTitle;
+
+  /// No description provided for @webImportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring in a bank statement or a spreadsheet. Rows already in BudgetSeal are skipped.'**
+  String get webImportSub;
+
+  /// No description provided for @webImportChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a CSV file, or drop it here'**
+  String get webImportChoose;
+
+  /// No description provided for @webImportChooseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It needs a date and an amount (or debit and credit) column. Commas, semicolons and tabs all work.'**
+  String get webImportChooseHint;
+
+  /// No description provided for @webImportRowsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows found: {n} · choose another file'**
+  String webImportRowsFound(int n);
+
+  /// No description provided for @webImportTooBig.
+  ///
+  /// In en, this message translates to:
+  /// **'That file is over 5 MB.'**
+  String get webImportTooBig;
+
+  /// No description provided for @webImportUnreadableFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read that file as CSV.'**
+  String get webImportUnreadableFile;
+
+  /// No description provided for @webImportColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get webImportColumns;
+
+  /// No description provided for @webImportColumnN.
+  ///
+  /// In en, this message translates to:
+  /// **'Column {n}'**
+  String webImportColumnN(int n);
+
+  /// No description provided for @webImportHasHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'First row is a header'**
+  String get webImportHasHeader;
+
+  /// No description provided for @webImportRoleSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get webImportRoleSkip;
+
+  /// No description provided for @webImportRoleDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get webImportRoleDate;
+
+  /// No description provided for @webImportRoleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get webImportRoleDescription;
+
+  /// No description provided for @webImportRoleAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (±)'**
+  String get webImportRoleAmount;
+
+  /// No description provided for @webImportRoleDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Money out'**
+  String get webImportRoleDebit;
+
+  /// No description provided for @webImportRoleCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Money in'**
+  String get webImportRoleCredit;
+
+  /// No description provided for @webImportRoleCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get webImportRoleCategory;
+
+  /// No description provided for @webImportPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'How it will look'**
+  String get webImportPreview;
+
+  /// No description provided for @webImportNeedCols.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a Date column and an Amount column (or Money out / Money in).'**
+  String get webImportNeedCols;
+
+  /// No description provided for @webImportInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Import into'**
+  String get webImportInto;
+
+  /// No description provided for @webImportReadyRows.
+  ///
+  /// In en, this message translates to:
+  /// **'rows ready'**
+  String get webImportReadyRows;
+
+  /// No description provided for @webImportUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows without a readable date or amount: {n}'**
+  String webImportUnreadable(int n);
+
+  /// No description provided for @webImportCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check & import'**
+  String get webImportCheck;
+
+  /// No description provided for @webImportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import these transactions?'**
+  String get webImportConfirmTitle;
+
+  /// No description provided for @webImportWillAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'New transactions for {account}: {n}'**
+  String webImportWillAdd(String account, int n);
+
+  /// No description provided for @webImportCategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'With a category (matched or guessed from your past titles): {n}'**
+  String webImportCategorized(int n);
+
+  /// No description provided for @webImportDupes.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in BudgetSeal, skipped: {n}'**
+  String webImportDupes(int n);
+
+  /// No description provided for @webImportGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {n}'**
+  String webImportGo(int n);
+
+  /// No description provided for @webImportNothingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new — all {n} rows are already in BudgetSeal.'**
+  String webImportNothingNew(int n);
+
+  /// No description provided for @webImportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported: {n}'**
+  String webImportDone(int n);
+
   /// No description provided for @webAcctBalanceAfter.
   ///
   /// In en, this message translates to:

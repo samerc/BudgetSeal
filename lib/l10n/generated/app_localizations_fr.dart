@@ -9,6 +9,121 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webImportBtn => 'Importer un CSV';
+
+  @override
+  String get webImportTitle => 'Importer un fichier CSV';
+
+  @override
+  String get webImportSub =>
+      'Importez un relevé bancaire ou un tableur. Les lignes déjà présentes dans BudgetSeal sont ignorées.';
+
+  @override
+  String get webImportChoose => 'Choisissez un fichier CSV ou déposez-le ici';
+
+  @override
+  String get webImportChooseHint =>
+      'Il faut une colonne date et une colonne montant (ou débit et crédit). Virgules, points-virgules et tabulations fonctionnent.';
+
+  @override
+  String webImportRowsFound(int n) {
+    return 'Lignes trouvées : $n · choisir un autre fichier';
+  }
+
+  @override
+  String get webImportTooBig => 'Ce fichier dépasse 5 Mo.';
+
+  @override
+  String get webImportUnreadableFile =>
+      'Impossible de lire ce fichier comme un CSV.';
+
+  @override
+  String get webImportColumns => 'Colonnes';
+
+  @override
+  String webImportColumnN(int n) {
+    return 'Colonne $n';
+  }
+
+  @override
+  String get webImportHasHeader => 'La première ligne est un en-tête';
+
+  @override
+  String get webImportRoleSkip => 'Ignorer';
+
+  @override
+  String get webImportRoleDate => 'Date';
+
+  @override
+  String get webImportRoleDescription => 'Description';
+
+  @override
+  String get webImportRoleAmount => 'Montant (±)';
+
+  @override
+  String get webImportRoleDebit => 'Débit';
+
+  @override
+  String get webImportRoleCredit => 'Crédit';
+
+  @override
+  String get webImportRoleCategory => 'Catégorie';
+
+  @override
+  String get webImportPreview => 'Aperçu';
+
+  @override
+  String get webImportNeedCols =>
+      'Choisissez une colonne Date et une colonne Montant (ou Débit / Crédit).';
+
+  @override
+  String get webImportInto => 'Importer dans';
+
+  @override
+  String get webImportReadyRows => 'lignes prêtes';
+
+  @override
+  String webImportUnreadable(int n) {
+    return 'Lignes sans date ou montant lisible : $n';
+  }
+
+  @override
+  String get webImportCheck => 'Vérifier et importer';
+
+  @override
+  String get webImportConfirmTitle => 'Importer ces transactions ?';
+
+  @override
+  String webImportWillAdd(String account, int n) {
+    return 'Nouvelles transactions pour $account : $n';
+  }
+
+  @override
+  String webImportCategorized(int n) {
+    return 'Avec une catégorie (trouvée ou devinée d’après vos titres) : $n';
+  }
+
+  @override
+  String webImportDupes(int n) {
+    return 'Déjà dans BudgetSeal, ignorées : $n';
+  }
+
+  @override
+  String webImportGo(int n) {
+    return 'Importer $n';
+  }
+
+  @override
+  String webImportNothingNew(int n) {
+    return 'Rien de nouveau — les $n lignes sont déjà dans BudgetSeal.';
+  }
+
+  @override
+  String webImportDone(int n) {
+    return 'Importées : $n';
+  }
+
+  @override
   String get webAcctBalanceAfter => 'Solde après cette transaction';
 
   @override

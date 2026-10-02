@@ -9,6 +9,120 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webImportBtn => 'استيراد CSV';
+
+  @override
+  String get webImportTitle => 'استيراد ملف CSV';
+
+  @override
+  String get webImportSub =>
+      'استورد كشف حساب مصرفي أو جدول بيانات. تُتخطّى الصفوف الموجودة مسبقًا في BudgetSeal.';
+
+  @override
+  String get webImportChoose => 'اختر ملف CSV أو أفلته هنا';
+
+  @override
+  String get webImportChooseHint =>
+      'يلزم عمود للتاريخ وعمود للمبلغ (أو مدين ودائن). تعمل الفواصل والفواصل المنقوطة وعلامات الجدولة.';
+
+  @override
+  String webImportRowsFound(int n) {
+    return 'الصفوف الموجودة: $n · اختر ملفًا آخر';
+  }
+
+  @override
+  String get webImportTooBig => 'حجم هذا الملف يتجاوز 5 ميغابايت.';
+
+  @override
+  String get webImportUnreadableFile => 'تعذّرت قراءة هذا الملف بصيغة CSV.';
+
+  @override
+  String get webImportColumns => 'الأعمدة';
+
+  @override
+  String webImportColumnN(int n) {
+    return 'العمود $n';
+  }
+
+  @override
+  String get webImportHasHeader => 'الصف الأول عناوين';
+
+  @override
+  String get webImportRoleSkip => 'تخطٍّ';
+
+  @override
+  String get webImportRoleDate => 'التاريخ';
+
+  @override
+  String get webImportRoleDescription => 'الوصف';
+
+  @override
+  String get webImportRoleAmount => 'المبلغ (±)';
+
+  @override
+  String get webImportRoleDebit => 'مدين (صادر)';
+
+  @override
+  String get webImportRoleCredit => 'دائن (وارد)';
+
+  @override
+  String get webImportRoleCategory => 'الفئة';
+
+  @override
+  String get webImportPreview => 'المعاينة';
+
+  @override
+  String get webImportNeedCols =>
+      'اختر عمودًا للتاريخ وعمودًا للمبلغ (أو مدين / دائن).';
+
+  @override
+  String get webImportInto => 'الاستيراد إلى';
+
+  @override
+  String get webImportReadyRows => 'صفوف جاهزة';
+
+  @override
+  String webImportUnreadable(int n) {
+    return 'صفوف بلا تاريخ أو مبلغ مقروء: $n';
+  }
+
+  @override
+  String get webImportCheck => 'تحقّق واستورد';
+
+  @override
+  String get webImportConfirmTitle => 'استيراد هذه المعاملات؟';
+
+  @override
+  String webImportWillAdd(String account, int n) {
+    return 'معاملات جديدة لـ $account: $n';
+  }
+
+  @override
+  String webImportCategorized(int n) {
+    return 'مع فئة (مطابقة أو مستنتجة من عناوينك السابقة): $n';
+  }
+
+  @override
+  String webImportDupes(int n) {
+    return 'موجودة مسبقًا في BudgetSeal وتُتخطّى: $n';
+  }
+
+  @override
+  String webImportGo(int n) {
+    return 'استيراد $n';
+  }
+
+  @override
+  String webImportNothingNew(int n) {
+    return 'لا جديد — كل الصفوف ($n) موجودة مسبقًا في BudgetSeal.';
+  }
+
+  @override
+  String webImportDone(int n) {
+    return 'تم الاستيراد: $n';
+  }
+
+  @override
   String get webAcctBalanceAfter => 'الرصيد بعد هذه المعاملة';
 
   @override

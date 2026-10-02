@@ -792,6 +792,24 @@ kbd {
   .row-actions { display: none; }
 }
 
+/* CSV import */
+.drop-zone { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px 20px; text-align: center; cursor: pointer;
+  border: 2px dashed var(--line); transition: border-color var(--fast), background var(--fast); }
+.drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-fill); }
+.drop-title { font-weight: 800; font-size: 16px; }
+.imp-table-wrap { overflow-x: auto; }
+.imp-table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+.imp-table th { padding: 8px 6px; min-width: 130px; }
+.imp-table th .input { min-height: 36px; padding: 6px 10px; font-size: 13px; padding-inline-end: 28px; background-position: right 10px center; }
+[dir="rtl"] .imp-table th .input { background-position: left 10px center; }
+.imp-table td { padding: 8px 12px; border-top: 1px solid var(--line); white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.imp-table td.skip { color: var(--hint); }
+.imp-table tr.is-head td { font-weight: 800; color: var(--text-2); }
+.imp-foot { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+.imp-count { font-size: 14px; color: var(--text-2); padding-bottom: 10px; }
+.imp-count b { font-size: 20px; color: var(--text); }
+.check { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
+
 /* Account page */
 .acct-head-bal { font-weight: 800; color: var(--text); }
 .row.archived .row-main, .row.archived .type-icon { opacity: .55; }

@@ -268,6 +268,7 @@ const IC = {
   repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
   grid: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
+  upload: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>'),
   calendar: svg('<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   target: svg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
   chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
@@ -618,6 +619,7 @@ const routes = {
   '#/subscriptions': () => renderRecurring(true),
   '#/reports': renderReports,
   '#/bulk': renderBulk,
+  '#/import': renderImport,
   '#/goals': renderGoals,
   '#/upcoming': renderUpcoming,
 };
@@ -628,7 +630,7 @@ function navigate(hash, quiet = false) {
   state.route = route;
   const acct = route.match(/^#\/accounts\/([\w-]+)$/);
   const base = acct ? '#/accounts' : route;
-  const navBase = base === '#/bulk' ? '#/transactions' : base;
+  const navBase = base === '#/bulk' || base === '#/import' ? '#/transactions' : base;
   document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === navBase));
   toggleSidebar(false);
   if (changed && !quiet) window.scrollTo(0, 0);
@@ -1007,6 +1009,7 @@ async function renderTransactions(opts = {}) {
           <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`}`)}`
     : pageHead(t('nav_transactions'), '',
         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+         <a class="btn btn-ghost" href="#/import">${IC.upload}${esc(t('web_import_btn'))}</a>
          <a class="btn btn-tonal" href="#/bulk">${IC.grid}${esc(t('web_bulk_add'))}</a>
          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`);
 
@@ -1636,6 +1639,214 @@ async function saveBulk() {
 function bulkBad(i) {
   bulk.bad = i;
   drawBulk({ row: i, col: 'amount' });
+}
+
+// ── CSV import ────────────────────────────────────────────────────────────────
+// The browser reads the file and maps its columns (roles as in the app's
+// import screen); the phone skips rows already in the account, matches or
+// guesses categories, and records the rest. A dry run shows the counts first.
+
+const IMPORT_ROLES = ['skip', 'date', 'description', 'amount', 'debit', 'credit', 'category'];
+let imp = null;
+
+/** RFC 4180-ish: quotes, doubled quotes, newlines inside quotes; , ; or tab. */
+function parseCsv(text) {
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const count = ch => first.split(ch).length - 1;
+  const sep = ['\t', ';', ','].reduce((best, ch) => (count(ch) > count(best) ? ch : best), ',');
+  const rows = [];
+  let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === sep) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); cell = '';
+      if (row.some(x => x.trim())) rows.push(row);
+      row = [];
+    } else cell += c;
+  }
+  row.push(cell);
+  if (row.some(x => x.trim())) rows.push(row);
+  const width = Math.max(0, ...rows.map(r => r.length));
+  return rows.map(r => r.concat(Array(width - r.length).fill('')).map(x => x.trim()));
+}
+
+const looksDate = s => /^\d{1,4}[/\-.]\d{1,2}[/\-.]\d{1,4}(?:[ T].*)?$/.test(s);
+const looksAmount = s => /^[-+(]?[\d.,]*\d[\d.,]*\)?$/.test(s.replace(/\p{Sc}|\b[A-Z]{3}\b|\s/gu, ''));
+
+/** Best guess per column from the header words and the first rows (the app's scoring). */
+function guessRoles(data) {
+  const width = data[0]?.length || 0;
+  const roles = Array(width).fill('skip');
+  const head = (data[0] || []).map(h => h.toLowerCase());
+  const has = (h, words) => words.some(w => h.includes(w));
+  const score = { date: [], amount: [], description: [], category: [], debit: [], credit: [] };
+  for (let c = 0; c < width; c++) {
+    const h = head[c] || '';
+    const sample = data.slice(1, 6).map(r => r[c] || '');
+    score.date[c] = (has(h, ['date', 'time', 'posted', 'jour', 'تاريخ']) ? 3 : 0) + sample.filter(looksDate).length;
+    score.amount[c] = (has(h, ['amount', 'sum', 'value', 'total', 'montant', 'مبلغ']) ? 3 : 0) + sample.filter(s => looksAmount(s) && !looksDate(s)).length;
+    score.description[c] = (has(h, ['desc', 'memo', 'note', 'narrative', 'detail', 'particular', 'reference', 'libell', 'payee', 'وصف']) ? 3 : 0) + sample.filter(s => s.length > 10 && s.includes(' ')).length;
+    score.category[c] = has(h, ['category', 'catég', 'group', 'فئة']) ? 3 : 0;
+    score.debit[c] = has(h, ['debit', 'débit', 'withdraw', 'out', 'paid out', 'مدين']) ? 4 : 0;
+    score.credit[c] = has(h, ['credit', 'crédit', 'deposit', 'paid in', 'دائن']) ? 4 : 0;
+  }
+  const take = (role, min) => {
+    let best = -1;
+    for (let c = 0; c < width; c++) if (roles[c] === 'skip' && score[role][c] >= min && (best < 0 || score[role][c] > score[role][best])) best = c;
+    if (best >= 0) roles[best] = role;
+    return best >= 0;
+  };
+  take('date', 1);
+  const split = take('debit', 4) & take('credit', 4);
+  if (!split) { roles.forEach((r, c) => { if (r === 'debit' || r === 'credit') roles[c] = 'skip'; }); take('amount', 1); }
+  take('description', 1);
+  take('category', 3);
+  return roles;
+}
+
+/** The rows the phone gets: { date, description, amount (signed), category }. */
+function importRows() {
+  const { data, roles, header } = imp;
+  const col = r => roles.indexOf(r);
+  const [cd, cs, ca, cdb, ccr, cc] = ['date', 'description', 'amount', 'debit', 'credit', 'category'].map(col);
+  const body = header ? data.slice(1) : data;
+  // Slash dates are ambiguous: any first field above 12 means day-first (the app's rule).
+  const dayFirst = cd >= 0 && body.some(r => { const m = (r[cd] || '').match(/^(\d{1,2})[/\-.]\d{1,2}[/\-.]/); return m && +m[1] > 12; });
+  const day = s => {
+    const m = (s || '').match(/^(\d{1,4})[/\-.](\d{1,2})[/\-.](\d{1,4})/);
+    if (!m) return null;
+    let y, mo, d;
+    if (m[1].length === 4) [y, mo, d] = [+m[1], +m[2], +m[3]];
+    else { y = m[3].length === 2 ? 2000 + +m[3] : +m[3]; mo = dayFirst ? +m[2] : +m[1]; d = dayFirst ? +m[1] : +m[2]; }
+    if (y < 1900 || y > 2100 || mo < 1 || mo > 12 || d < 1 || d > new Date(y, mo, 0).getDate()) return null;
+    return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  };
+  const num = s => { const v = parseSigned(String(s || '').replace(/\p{Sc}|\b[A-Z]{3}\b|\s/gu, '')); return Number.isFinite(v) ? v : null; };
+  return body.map(r => {
+    let amount = null;
+    if (ca >= 0) amount = num(r[ca]);
+    else if (cdb >= 0 || ccr >= 0) amount = Math.abs(num(r[ccr]) || 0) - Math.abs(num(r[cdb]) || 0);
+    return { date: cd >= 0 ? day(r[cd]) : dayKey(), description: cs >= 0 ? r[cs] : '', amount, category: cc >= 0 ? r[cc] : '' };
+  });
+}
+
+async function renderImport() {
+  const { accounts } = await refs();
+  if (state.route !== '#/import') return;
+  if (!imp) imp = { data: null, roles: [], header: true, name: '', accountId: lsGet('bs_import_account') || lsGet('bs_last_account') };
+  if (!accounts.some(a => a.id === imp.accountId)) imp.accountId = accounts[0]?.id || '';
+  const head = `<a class="back-link" href="#/transactions">${IC.back}${esc(t('nav_transactions'))}</a>${pageHead(t('web_import_title'), esc(t('web_import_sub')))}`;
+  if (!accounts.length) { setContent(head + `<div class="card">${emptyState(IC.wallet, t('web_need_account'), '')}</div>`); return; }
+
+  const drop = `<label class="card drop-zone" id="imp-drop">
+      <input type="file" id="imp-file" accept=".csv,.txt,text/csv" class="sr-only">
+      <span class="chip-icon lg" style="background:var(--accent-fill);color:var(--accent)">${IC.upload}</span>
+      <span class="drop-title">${esc(imp.name || t('web_import_choose'))}</span>
+      <span class="help">${esc(imp.data ? t('web_import_rows_found', { n: imp.data.length - (imp.header ? 1 : 0) }) : t('web_import_choose_hint'))}</span>
+    </label>`;
+  if (!imp.data) { setContent(head + drop); wireImportFile(); return; }
+
+  const rows = importRows();
+  const ok = rows.filter(r => r.date && r.amount);
+  const preview = imp.data.slice(0, 7);
+  setContent(`${head}${drop}
+    <div class="section-head"><span class="section-title">${esc(t('web_import_columns'))}</span>
+      <label class="check"><input type="checkbox" id="imp-header" ${imp.header ? 'checked' : ''}> ${esc(t('web_import_has_header'))}</label></div>
+    <div class="card card-flush"><div class="imp-table-wrap"><table class="imp-table">
+      <thead><tr>${imp.roles.map((r, c) => `<th><select class="input" data-col="${c}" aria-label="${esc(t('web_import_column_n', { n: c + 1 }))}">${IMPORT_ROLES.map(k => `<option value="${k}"${k === r ? ' selected' : ''}>${esc(t(`web_import_role_${k}`))}</option>`).join('')}</select></th>`).join('')}</tr></thead>
+      <tbody>${preview.map((r, i) => `<tr class="${i === 0 && imp.header ? 'is-head' : ''}">${r.map((c, j) => `<td class="${imp.roles[j] === 'skip' ? 'skip' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div></div>
+    <div class="section-head"><span class="section-title">${esc(t('web_import_preview'))}</span></div>
+    <div class="card card-flush list">${ok.slice(0, 5).map(r => `
+      <div class="row"><div class="row-main"><div class="row-title">${esc(r.description || '—')}</div><div class="row-sub">${esc([fmtDate(r.date, true), r.category].filter(Boolean).join(' · '))}</div></div>
+      <div class="row-end"><div class="row-amount ${r.amount > 0 ? 'income' : 'expense'}">${esc((r.amount > 0 ? '+' : '') + fmtPlain(r.amount))}</div></div></div>`).join('') || `<div class="row"><div class="row-main"><div class="row-sub">${esc(t('web_import_need_cols'))}</div></div></div>`}</div>
+    <div class="card imp-foot">
+      <div class="field" style="margin:0;flex:1;min-width:200px"><label class="label" for="imp-account">${esc(t('web_import_into'))}</label><select id="imp-account" class="input">${accountOptions(accounts, imp.accountId)}</select></div>
+      <div class="imp-count"><b class="num">${ok.length}</b> ${esc(t('web_import_ready_rows'))}${rows.length - ok.length ? `<div class="help warn">${esc(t('web_import_unreadable', { n: rows.length - ok.length }))}</div>` : ''}</div>
+      <button class="btn btn-primary" data-action="import-run" ${ok.length ? '' : 'disabled'}>${IC.upload}${esc(t('web_import_check'))}</button>
+    </div>`);
+  wireImportFile();
+  document.querySelectorAll('.imp-table select').forEach(s => s.addEventListener('change', () => {
+    const c = Number(s.dataset.col);
+    // One column per role (except skip): taking a role frees its old column.
+    if (s.value !== 'skip') imp.roles = imp.roles.map((r, i) => (r === s.value && i !== c ? 'skip' : r));
+    if (s.value === 'amount') imp.roles = imp.roles.map(r => (r === 'debit' || r === 'credit' ? 'skip' : r));
+    if (s.value === 'debit' || s.value === 'credit') imp.roles = imp.roles.map(r => (r === 'amount' ? 'skip' : r));
+    imp.roles[c] = s.value;
+    renderImport();
+  }));
+  document.getElementById('imp-header').addEventListener('change', e => { imp.header = e.target.checked; renderImport(); });
+  document.getElementById('imp-account').addEventListener('change', e => { imp.accountId = e.target.value; lsSet('bs_import_account', imp.accountId); });
+}
+
+function wireImportFile() {
+  const input = document.getElementById('imp-file');
+  const zone = document.getElementById('imp-drop');
+  const load = file => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast(t('web_import_too_big'), true); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = parseCsv(String(reader.result || ''));
+      if (data.length < 1 || (data[0] || []).length < 2) { toast(t('web_import_unreadable_file'), true); return; }
+      imp.data = data;
+      imp.name = file.name;
+      imp.header = !looksAmount(data[0].find(x => x) || '') && !data[0].some(looksDate);
+      imp.roles = guessRoles(data);
+      renderImport();
+    };
+    reader.onerror = () => toast(t('web_import_unreadable_file'), true);
+    reader.readAsText(file);
+  };
+  input.addEventListener('change', () => load(input.files[0]));
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('over'); load(e.dataTransfer.files[0]); });
+}
+
+async function runImport() {
+  const rows = importRows().filter(r => r.date && r.amount);
+  if (!rows.length || !imp.accountId) return;
+  const acct = (cache.accounts || []).find(a => a.id === imp.accountId);
+  const send = async dryRun => {
+    const sum = { imported: 0, ready: 0, duplicates: 0, skipped: 0, categorized: 0 };
+    for (let i = 0; i < rows.length; i += 500) {
+      const r = await api('/api/import', { method: 'POST', body: { accountId: imp.accountId, dryRun, rows: rows.slice(i, i + 500) } });
+      if (!r) return null;
+      for (const k of Object.keys(sum)) sum[k] += r[k] || 0;
+    }
+    return sum;
+  };
+  const check = await send(true);
+  if (!check) return;
+  if (!check.ready) { toast(t('web_import_nothing_new', { n: check.duplicates }), true); return; }
+  const lines = [
+    t('web_import_will_add', { n: check.ready, account: acct?.name || '' }),
+    check.categorized ? t('web_import_categorized', { n: check.categorized }) : '',
+    check.duplicates ? t('web_import_dupes', { n: check.duplicates }) : '',
+  ].filter(Boolean);
+  openModal({
+    title: t('web_import_confirm_title'), narrow: true,
+    submit: t('web_import_go', { n: check.ready }),
+    body: lines.map(l => `<p class="modal-text">${esc(l)}</p>`).join(''),
+    onSubmit: async () => {
+      const done = await send(false);
+      if (!done) return false;
+      toast(t('web_import_done', { n: done.imported }));
+      imp = null;
+      invalidate();
+      closeModal();
+      location.hash = `#/accounts/${acct?.id || ''}`;
+      return true;
+    },
+  });
 }
 
 // ── Accounts ──────────────────────────────────────────────────────────────────
@@ -2777,6 +2988,7 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'import-run': () => runImport(),
   'reconcile': el => openReconcile(el.dataset.id),
   'edit-account': el => openEditAccount(el.dataset.id),
   'unarchive-account': el => unarchiveAccount(el.dataset.id),

@@ -2283,3 +2283,37 @@ web_acct_archived_section,,Archived,المؤرشفة,Archivés
 web_acct_archived_toast,,Account archived,تمت أرشفة الحساب,Compte archivé
 web_acct_unarchive,,Unarchive,إلغاء الأرشفة,Désarchiver
 web_acct_unarchived,,Account restored,تمت استعادة الحساب,Compte restauré
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_import_btn,,Import CSV,استيراد CSV,Importer un CSV
+web_import_title,,Import a CSV file,استيراد ملف CSV,Importer un fichier CSV
+web_import_sub,,Bring in a bank statement or a spreadsheet. Rows already in BudgetSeal are skipped.,استورد كشف حساب مصرفي أو جدول بيانات. تُتخطّى الصفوف الموجودة مسبقًا في BudgetSeal.,Importez un relevé bancaire ou un tableur. Les lignes déjà présentes dans BudgetSeal sont ignorées.
+web_import_choose,,"Choose a CSV file, or drop it here",اختر ملف CSV أو أفلته هنا,Choisissez un fichier CSV ou déposez-le ici
+web_import_choose_hint,,"It needs a date and an amount (or debit and credit) column. Commas, semicolons and tabs all work.",يلزم عمود للتاريخ وعمود للمبلغ (أو مدين ودائن). تعمل الفواصل والفواصل المنقوطة وعلامات الجدولة.,"Il faut une colonne date et une colonne montant (ou débit et crédit). Virgules, points-virgules et tabulations fonctionnent."
+web_import_rows_found,,Rows found: {n} · choose another file,الصفوف الموجودة: {n} · اختر ملفًا آخر,Lignes trouvées : {n} · choisir un autre fichier
+web_import_too_big,,That file is over 5 MB.,حجم هذا الملف يتجاوز 5 ميغابايت.,Ce fichier dépasse 5 Mo.
+web_import_unreadable_file,,Couldn't read that file as CSV.,تعذّرت قراءة هذا الملف بصيغة CSV.,Impossible de lire ce fichier comme un CSV.
+web_import_columns,,Columns,الأعمدة,Colonnes
+web_import_column_n,,Column {n},العمود {n},Colonne {n}
+web_import_has_header,,First row is a header,الصف الأول عناوين,La première ligne est un en-tête
+web_import_role_skip,,Skip,تخطٍّ,Ignorer
+web_import_role_date,,Date,التاريخ,Date
+web_import_role_description,,Description,الوصف,Description
+web_import_role_amount,,Amount (±),المبلغ (±),Montant (±)
+web_import_role_debit,,Money out,مدين (صادر),Débit
+web_import_role_credit,,Money in,دائن (وارد),Crédit
+web_import_role_category,,Category,الفئة,Catégorie
+web_import_preview,,How it will look,المعاينة,Aperçu
+web_import_need_cols,,Pick a Date column and an Amount column (or Money out / Money in).,اختر عمودًا للتاريخ وعمودًا للمبلغ (أو مدين / دائن).,Choisissez une colonne Date et une colonne Montant (ou Débit / Crédit).
+web_import_into,,Import into,الاستيراد إلى,Importer dans
+web_import_ready_rows,,rows ready,صفوف جاهزة,lignes prêtes
+web_import_unreadable,,Rows without a readable date or amount: {n},صفوف بلا تاريخ أو مبلغ مقروء: {n},Lignes sans date ou montant lisible : {n}
+web_import_check,,Check & import,تحقّق واستورد,Vérifier et importer
+web_import_confirm_title,,Import these transactions?,استيراد هذه المعاملات؟,Importer ces transactions ?
+web_import_will_add,,New transactions for {account}: {n},معاملات جديدة لـ {account}: {n},Nouvelles transactions pour {account} : {n}
+web_import_categorized,,With a category (matched or guessed from your past titles): {n},مع فئة (مطابقة أو مستنتجة من عناوينك السابقة): {n},Avec une catégorie (trouvée ou devinée d’après vos titres) : {n}
+web_import_dupes,,"Already in BudgetSeal, skipped: {n}",موجودة مسبقًا في BudgetSeal وتُتخطّى: {n},"Déjà dans BudgetSeal, ignorées : {n}"
+web_import_go,,Import {n},استيراد {n},Importer {n}
+web_import_nothing_new,,Nothing new — all {n} rows are already in BudgetSeal.,لا جديد — كل الصفوف ({n}) موجودة مسبقًا في BudgetSeal.,Rien de nouveau — les {n} lignes sont déjà dans BudgetSeal.
+web_import_done,,Imported: {n},تم الاستيراد: {n},Importées : {n}
