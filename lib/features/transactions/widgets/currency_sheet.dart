@@ -32,6 +32,33 @@ const kCurrencies = [
   ('TRY', 'Turkish Lira'),
 ];
 
+/// Translated name for a [kCurrencies] code; falls back to the code.
+String currencyName(S s, String code) => switch (code) {
+    'USD' => s.currencyNameUsd,
+    'EUR' => s.currencyNameEur,
+    'GBP' => s.currencyNameGbp,
+    'JPY' => s.currencyNameJpy,
+    'CHF' => s.currencyNameChf,
+    'CAD' => s.currencyNameCad,
+    'AUD' => s.currencyNameAud,
+    'CNY' => s.currencyNameCny,
+    'INR' => s.currencyNameInr,
+    'BRL' => s.currencyNameBrl,
+    'MXN' => s.currencyNameMxn,
+    'SGD' => s.currencyNameSgd,
+    'HKD' => s.currencyNameHkd,
+    'NOK' => s.currencyNameNok,
+    'SEK' => s.currencyNameSek,
+    'NZD' => s.currencyNameNzd,
+    'ZAR' => s.currencyNameZar,
+    'AED' => s.currencyNameAed,
+    'LBP' => s.currencyNameLbp,
+    'SAR' => s.currencyNameSar,
+    'KWD' => s.currencyNameKwd,
+    'TRY' => s.currencyNameTry,
+    _ => code,
+  };
+
 /// Currency code to flag emoji mapping.
 const kCurrencyFlags = <String, String>{
   'USD': '\u{1F1FA}\u{1F1F8}',
@@ -145,10 +172,14 @@ class _CurrencySheetState extends State<CurrencySheet>
 
   @override
   Widget build(BuildContext context) {
+    final tr = S.of(context);
+    final q = _query.toLowerCase();
+    // Search matches the code, the translated name and the English name.
     final filtered = kCurrencies
         .where((c) =>
             c.$1.contains(_query.toUpperCase()) ||
-            c.$2.toLowerCase().contains(_query.toLowerCase()))
+            currencyName(tr, c.$1).toLowerCase().contains(q) ||
+            c.$2.toLowerCase().contains(q))
         .toList();
 
     // Build the recently-used list (only when not searching, max 3).
@@ -240,13 +271,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                       ),
                     ),
                     for (final code in widget.accountCurrencies)
-                      _buildCurrencyTile(
-                        code,
-                        kCurrencies
-                            .firstWhere((c) => c.$1 == code,
-                                orElse: () => (code, code))
-                            .$2,
-                      ),
+                      _buildCurrencyTile(code, currencyName(tr, code)),
                     Divider(
                       height: 1,
                       indent: 20,
@@ -270,13 +295,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                       ),
                     ),
                     for (final code in recentCodes)
-                      _buildCurrencyTile(
-                        code,
-                        kCurrencies
-                            .firstWhere((c) => c.$1 == code,
-                                orElse: () => (code, code))
-                            .$2,
-                      ),
+                      _buildCurrencyTile(code, currencyName(tr, code)),
                     Divider(
                       height: 1,
                       indent: 20,
@@ -298,8 +317,8 @@ class _CurrencySheetState extends State<CurrencySheet>
                     ),
                   ],
                   // Full filtered list
-                  for (final (code, name) in filtered)
-                    _buildCurrencyTile(code, name),
+                  for (final (code, _) in filtered)
+                    _buildCurrencyTile(code, currencyName(tr, code)),
                 ],
               ),
             ),

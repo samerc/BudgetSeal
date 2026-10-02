@@ -1,4 +1,28 @@
 {
+  "webEnvBalanceOfTarget": "{balance} من {target}",
+  "webShortcutRefresh": "تحديث الصفحة الحالية",
+  "currencyNameUsd": "دولار أمريكي",
+  "currencyNameEur": "يورو",
+  "currencyNameGbp": "جنيه إسترليني",
+  "currencyNameJpy": "ين ياباني",
+  "currencyNameChf": "فرنك سويسري",
+  "currencyNameCad": "دولار كندي",
+  "currencyNameAud": "دولار أسترالي",
+  "currencyNameCny": "يوان صيني",
+  "currencyNameInr": "روبية هندية",
+  "currencyNameBrl": "ريال برازيلي",
+  "currencyNameMxn": "بيزو مكسيكي",
+  "currencyNameSgd": "دولار سنغافوري",
+  "currencyNameHkd": "دولار هونغ كونغ",
+  "currencyNameNok": "كرونة نرويجية",
+  "currencyNameSek": "كرونة سويدية",
+  "currencyNameNzd": "دولار نيوزيلندي",
+  "currencyNameZar": "راند جنوب أفريقي",
+  "currencyNameAed": "درهم إماراتي",
+  "currencyNameLbp": "ليرة لبنانية",
+  "currencyNameSar": "ريال سعودي",
+  "currencyNameKwd": "دينار كويتي",
+  "currencyNameTry": "ليرة تركية",
   "notifAlertsChannel": "تنبيهات BudgetSeal",
   "notifAlertsChannelDesc": "تنبيهات الأظرف المنخفضة والفواتير القادمة",
   "widgetReadyToAssign": "جاهز للتوزيع: {amount}",
@@ -276,10 +300,6 @@
   "@commonChange": {
     "description": "Button change"
   },
-  "commonFund": "تمويل",
-  "@commonFund": {
-    "description": "Button fund"
-  },
   "commonNoData": "لا توجد بيانات",
   "@commonNoData": {
     "description": "Empty state"
@@ -301,17 +321,9 @@
   "@appName": {
     "description": "MaterialApp title / splash / lock"
   },
-  "appTagline": "ميزانية بهدف",
-  "@appTagline": {
-    "description": "Splash screen tagline"
-  },
   "appTaglineAbout": "ميزانية الأظرف بكل بساطة.",
   "@appTaglineAbout": {
     "description": "About screen tagline"
-  },
-  "appBrandAbbr": "PP",
-  "@appBrandAbbr": {
-    "description": "Web sidebar logo abbreviation"
   },
   "tabHome": "الرئيسية",
   "@tabHome": {
@@ -369,14 +381,6 @@
   "@navReports": {
     "description": "Web sidebar label"
   },
-  "navServerStatus": "الخادم",
-  "@navServerStatus": {
-    "description": "Web sidebar connection label"
-  },
-  "navSignOut": "تسجيل الخروج",
-  "@navSignOut": {
-    "description": "Web sidebar button"
-  },
   "typeIncome": "الدخل",
   "@typeIncome": {
     "description": "Transaction type label"
@@ -400,10 +404,6 @@
   "dashboardWelcomeBody": "هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
-  },
-  "dashboardHouseholdLabel": "الأسرة",
-  "@dashboardHouseholdLabel": {
-    "description": "Header subtitle"
   },
   "dashboardDefaultName": "BudgetSeal",
   "@dashboardDefaultName": {
@@ -429,22 +429,6 @@
   "@dashboardQuickSplit": {
     "description": "Quick action button"
   },
-  "dashboardSectionYourMoney": "أموالك",
-  "@dashboardSectionYourMoney": {
-    "description": "Section header"
-  },
-  "dashboardReadyToAssign": "جاهز للتوزيع",
-  "@dashboardReadyToAssign": {
-    "description": "Unallocated label"
-  },
-  "dashboardMoneyNotInEnvelope": "أموال لم تُوزَّع بعد على ظرف",
-  "@dashboardMoneyNotInEnvelope": {
-    "description": "Unallocated subtitle"
-  },
-  "dashboardSectionActivity": "النشاط",
-  "@dashboardSectionActivity": {
-    "description": "Section header"
-  },
   "dashboardQuickTemplates": "قوالب سريعة",
   "@dashboardQuickTemplates": {
     "description": "Section title"
@@ -453,10 +437,6 @@
   "@dashboardViewAll": {
     "description": "Link text"
   },
-  "dashboardRecent": "الأخيرة",
-  "@dashboardRecent": {
-    "description": "Section title"
-  },
   "dashboardNoTransactionsYet": "لا توجد معاملات بعد",
   "@dashboardNoTransactionsYet": {
     "description": "Empty state"
@@ -464,10 +444,6 @@
   "dashboardNoTransactionsToday": "لا معاملات اليوم — اضغط + لإضافة واحدة",
   "@dashboardNoTransactionsToday": {
     "description": "Nudge banner"
-  },
-  "dashboardTotalAcrossAccounts": "الإجمالي عبر جميع الحسابات",
-  "@dashboardTotalAcrossAccounts": {
-    "description": "Net worth subtitle"
   },
   "dashboardLabelExpenses": "مصاريف",
   "@dashboardLabelExpenses": {
@@ -492,101 +468,6 @@
   "dashboardThisMonth": "هذا الشهر",
   "@dashboardThisMonth": {
     "description": "Toggle label"
-  },
-  "dashboardEnvelopes": "الأظرف",
-  "@dashboardEnvelopes": {
-    "description": "Card title"
-  },
-  "dashboardOnTrack": "على المسار",
-  "@dashboardOnTrack": {
-    "description": "Envelope health status"
-  },
-  "dashboardRunningLow": "ينفد",
-  "@dashboardRunningLow": {
-    "description": "Envelope health status"
-  },
-  "dashboardOverspent": "تجاوز الحد",
-  "@dashboardOverspent": {
-    "description": "Envelope health status"
-  },
-  "dashboardHeadsUp": "تنبيه",
-  "@dashboardHeadsUp": {
-    "description": "Budget insights header"
-  },
-  "dashboardIsOverLimit": "تجاوز حده بمقدار {amount}",
-  "@dashboardIsOverLimit": {
-    "description": "Budget insight \"{name} is {amount} over its limit\"",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardHasPercentLeft": "لم يتبقَّ منه سوى {percent}%",
-  "@dashboardHasPercentLeft": {
-    "description": "Budget insight \"{name} has only {percent}% left\"",
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardBudgetLeftOf": "{amount} متبقٍّ من ميزانية {total}",
-  "@dashboardBudgetLeftOf": {
-    "description": "Status card (under budget)",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardBudgetOver": "{amount} فوق ميزانية {total}",
-  "@dashboardBudgetOver": {
-    "description": "Status card (over budget)",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardSpendingPerDay": "إنفاق {amount}/يوم · ~{projected} نهاية الشهر",
-  "@dashboardSpendingPerDay": {
-    "description": "Velocity line",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "projected": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardMoneySits1Day": "المال يبقى يوماً واحداً قبل إنفاقه",
-  "@dashboardMoneySits1Day": {
-    "description": "Age of money (singular)"
-  },
-  "dashboardMoneySitsNDays": "المال يبقى {n} أيام قبل إنفاقه",
-  "@dashboardMoneySitsNDays": {
-    "description": "Age of money (plural)",
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "dashboardAgeOfMoneyTitle": "عمر المال",
-  "@dashboardAgeOfMoneyTitle": {
-    "description": "Info dialog title"
-  },
-  "dashboardAgeOfMoneyExplanation": "يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\n\nاعتبره احتياطياً:\n\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\n• 14–30 يوماً — لديك هامش بسيط\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\n• 60+ يوماً — صحة مالية قوية\n\nالهدف زيادة هذا الرقم بمرور الوقت.",
-  "@dashboardAgeOfMoneyExplanation": {
-    "description": "Info dialog content"
   },
   "dashboardSearchPlaceholder": "البحث في المعاملات والحسابات...",
   "@dashboardSearchPlaceholder": {
@@ -625,18 +506,6 @@
   "@customizeTitle": {
     "description": "Bottom sheet title"
   },
-  "customizeInstructions": "اسحب لإعادة الترتيب. بدّل لإظهار/إخفاء الأقسام.",
-  "@customizeInstructions": {
-    "description": "Instructions text"
-  },
-  "dashboardSectionStatusLabel": "بطاقة الحالة",
-  "@dashboardSectionStatusLabel": {
-    "description": "Section label"
-  },
-  "dashboardSectionStatusDesc": "حالة الميزانية، السرعة، عمر المال",
-  "@dashboardSectionStatusDesc": {
-    "description": "Section description"
-  },
   "dashboardSectionSpendingLabel": "نظرة عامة على الإنفاق",
   "@dashboardSectionSpendingLabel": {
     "description": "Section label"
@@ -659,14 +528,6 @@
   },
   "dashboardSectionMoneyDesc": "الفواتير وصافي الثروة وغير المخصص",
   "@dashboardSectionMoneyDesc": {
-    "description": "Section description"
-  },
-  "dashboardSectionUnallocatedLabel": "جاهز للتوزيع",
-  "@dashboardSectionUnallocatedLabel": {
-    "description": "Section label"
-  },
-  "dashboardSectionUnallocatedDesc": "أموال غير موزعة",
-  "@dashboardSectionUnallocatedDesc": {
     "description": "Section description"
   },
   "dashboardSectionActivityLabel": "النشاط الأخير",
@@ -832,10 +693,6 @@
   "@txSplitBillTooltip": {
     "description": "FAB tooltip"
   },
-  "txAddTooltip": "إضافة معاملة",
-  "@txAddTooltip": {
-    "description": "FAB tooltip"
-  },
   "txFromDate": "من تاريخ",
   "@txFromDate": {
     "description": "Date range filter"
@@ -851,10 +708,6 @@
   "txMaxAmount": "الحد الأقصى",
   "@txMaxAmount": {
     "description": "Amount range hint"
-  },
-  "txClearFilters": "مسح الفلاتر المتقدمة",
-  "@txClearFilters": {
-    "description": "Filter clear link"
   },
   "txSelectYear": "اختر السنة",
   "@txSelectYear": {
@@ -947,27 +800,6 @@
   "@txContextDuplicate": {
     "description": "Context menu"
   },
-  "txDeleteTitle": "حذف المعاملة؟",
-  "@txDeleteTitle": {
-    "description": "Delete dialog title"
-  },
-  "txDeleteCannotUndo": "لا يمكن التراجع عن هذا الإجراء.",
-  "@txDeleteCannotUndo": {
-    "description": "Delete dialog content"
-  },
-  "txDeleteShort": "حذف؟",
-  "@txDeleteShort": {
-    "description": "Swipe-to-delete title"
-  },
-  "txDeleteWithReversal": "حذف {label}؟ سيتم التراجع عن خصومات الأظرف.",
-  "@txDeleteWithReversal": {
-    "description": "Swipe-to-delete content",
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
   "txNAccounts": "{count} حسابات",
   "@txNAccounts": {
     "description": "Multi-account label",
@@ -976,10 +808,6 @@
         "type": "int"
       }
     }
-  },
-  "txFormEditTitle": "تعديل",
-  "@txFormEditTitle": {
-    "description": "AppBar title editing"
   },
   "txFormNewTitle": "معاملة جديدة",
   "@txFormNewTitle": {
@@ -1000,10 +828,6 @@
   "txFormAutoDetected": "تم الكشف تلقائياً",
   "@txFormAutoDetected": {
     "description": "Auto-fill label"
-  },
-  "txFormNoCategory": "بدون فئة",
-  "@txFormNoCategory": {
-    "description": "No category label"
   },
   "txFormFromAccount": "من حساب",
   "@txFormFromAccount": {
@@ -1071,10 +895,6 @@
   "@txFormRateNotSetTitle": {
     "description": "Dialog title"
   },
-  "txFormRateNotSetContent": "الحفظ على أي حال، أم العودة لتعيين السعر؟",
-  "@txFormRateNotSetContent": {
-    "description": "Dialog content"
-  },
   "txFormDuplicateTitle": "معاملة مكررة محتملة",
   "@txFormDuplicateTitle": {
     "description": "Dialog title"
@@ -1086,24 +906,6 @@
   "txFormSaved": "تم حفظ المعاملة",
   "@txFormSaved": {
     "description": "Success snackbar"
-  },
-  "txFormSavedEnvelope": "تم حفظ المعاملة · تم تحديث ظرف {envelopeName}",
-  "@txFormSavedEnvelope": {
-    "description": "Success with envelope",
-    "placeholders": {
-      "envelopeName": {
-        "type": "String"
-      }
-    }
-  },
-  "txFormErrorSaving": "خطأ في الحفظ: {error}",
-  "@txFormErrorSaving": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "txFormReceiptAttached": "إيصال مرفق",
   "@txFormReceiptAttached": {
@@ -1212,14 +1014,6 @@
   "txDetailNoReceipt": "لا يوجد إيصال مرفق",
   "@txDetailNoReceipt": {
     "description": "Empty state"
-  },
-  "txDetailDeleteTitle": "حذف المعاملة",
-  "@txDetailDeleteTitle": {
-    "description": "Delete dialog title"
-  },
-  "txDetailDeleteContent": "هل أنت متأكد من حذف هذه المعاملة؟\n\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\n\nلا يمكن التراجع عن هذا.",
-  "@txDetailDeleteContent": {
-    "description": "Delete dialog content"
   },
   "txAfDiscardTitle": "Abandonner المعاملة؟",
   "@txAfDiscardTitle": {
@@ -1364,30 +1158,9 @@
   "@catSheetNew": {
     "description": "New button"
   },
-  "catSheetNameHint": "اسم الفئة",
-  "@catSheetNameHint": {
-    "description": "Text field hint"
-  },
   "catSheetAdd": "إضافة",
   "@catSheetAdd": {
     "description": "Add button"
-  },
-  "catSheetNoMatching": "لا فئات مطابقة",
-  "@catSheetNoMatching": {
-    "description": "Empty search"
-  },
-  "catSheetNoYet": "لا فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.",
-  "@catSheetNoYet": {
-    "description": "Empty state"
-  },
-  "catSheetNSubcategories": "{count} فئات فرعية",
-  "@catSheetNSubcategories": {
-    "description": "Parent subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "txWidgetSelectAccount": "اختر حساباً",
   "@txWidgetSelectAccount": {
@@ -1525,10 +1298,6 @@
   "@billTip": {
     "description": "Section title"
   },
-  "billTipNone": "بدون",
-  "@billTipNone": {
-    "description": "Tip trailing"
-  },
   "billPercentage": "نسبة مئوية",
   "@billPercentage": {
     "description": "Tip mode"
@@ -1609,15 +1378,6 @@
   "@allocNewPeriodStarted": {
     "description": "Banner title"
   },
-  "allocNNeedReview": "{count} ظرف(أظرف) تحتاج مراجعة",
-  "@allocNNeedReview": {
-    "description": "Banner subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "allocReview": "مراجعة",
   "@allocReview": {
     "description": "Banner button"
@@ -1634,20 +1394,8 @@
   "@allocRemaining": {
     "description": "Summary label"
   },
-  "allocUnallocated": "غير موزع",
-  "@allocUnallocated": {
-    "description": "Banner label"
-  },
-  "allocFundEnvelopes": "تمويل الأظرف",
-  "@allocFundEnvelopes": {
-    "description": "Button"
-  },
   "allocSectionSpending": "إنفاق",
   "@allocSectionSpending": {
-    "description": "Section header"
-  },
-  "allocSectionSavings": "ادخار",
-  "@allocSectionSavings": {
     "description": "Section header"
   },
   "allocSectionFlexible": "مُرحَّل",
@@ -1735,22 +1483,6 @@
   "@allocSpendingDesc": {
     "description": "Type description"
   },
-  "allocSavingGoalTitle": "ادخار (بهدف)",
-  "@allocSavingGoalTitle": {
-    "description": "Type option"
-  },
-  "allocSavingGoalDesc": "لهدف محدد كالضرائب أو الإجازة. حدد هدفاً وموّله تدريجياً.",
-  "@allocSavingGoalDesc": {
-    "description": "Type description"
-  },
-  "allocSavingOpenTitle": "ادخار (مفتوح)",
-  "@allocSavingOpenTitle": {
-    "description": "Type option"
-  },
-  "allocSavingOpenDesc": "للادخار العام بدون هدف محدد. ادخر كلما استطعت.",
-  "@allocSavingOpenDesc": {
-    "description": "Type description"
-  },
   "allocInfoBanner": "الأظرف لا تنقل المال بين الحسابات. إنها تساعدك على تخطيط استخدام أموالك الحالية.",
   "@allocInfoBanner": {
     "description": "Info text"
@@ -1759,21 +1491,9 @@
   "@allocPurposeSection": {
     "description": "Section header"
   },
-  "allocSaving": "ادخار",
-  "@allocSaving": {
-    "description": "Chip label"
-  },
-  "allocFlexible": "مُرحَّل",
-  "@allocFlexible": {
-    "description": "Chip label"
-  },
   "allocCycleSection": "الدورة",
   "@allocCycleSection": {
     "description": "Section header"
-  },
-  "allocPeriodicDesc": "• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)",
-  "@allocPeriodicDesc": {
-    "description": "Help text"
   },
   "allocPeriodic": "دوري",
   "@allocPeriodic": {
@@ -1783,38 +1503,6 @@
   "@allocPermanent": {
     "description": "Chip label"
   },
-  "allocRolloverTitle": "ترحيل الرصيد",
-  "@allocRolloverTitle": {
-    "description": "Switch title"
-  },
-  "allocRolloverSubtitle": "ترحيل الأموال المتبقية للفترة التالية",
-  "@allocRolloverSubtitle": {
-    "description": "Switch subtitle"
-  },
-  "allocAutoResetTitle": "إعادة تعيين تلقائية",
-  "@allocAutoResetTitle": {
-    "description": "Switch title"
-  },
-  "allocAutoResetSubtitle": "إعادة التعيين تلقائياً عند بداية الفترة",
-  "@allocAutoResetSubtitle": {
-    "description": "Switch subtitle"
-  },
-  "allocSavingsTargetSection": "هدف الادخار",
-  "@allocSavingsTargetSection": {
-    "description": "Section header"
-  },
-  "allocMonthlyBudgetSection": "الميزانية الشهرية",
-  "@allocMonthlyBudgetSection": {
-    "description": "Section header"
-  },
-  "allocSavingsTargetHelp": "كم تريد أن تدخر في هذا الظرف؟",
-  "@allocSavingsTargetHelp": {
-    "description": "Help text"
-  },
-  "allocMonthlyBudgetHelp": "كم تريد أن تنفق من هذا الظرف كل شهر؟",
-  "@allocMonthlyBudgetHelp": {
-    "description": "Help text"
-  },
   "allocTargetAmount": "المبلغ المستهدف",
   "@allocTargetAmount": {
     "description": "Field label"
@@ -1823,58 +1511,17 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocLinkedCategories": "الفئات المرتبطة",
-  "@allocLinkedCategories": {
-    "description": "Section header"
-  },
-  "allocLinkedHelp": "المصاريف بهذه الفئات ستُخصم من هذا الظرف.",
-  "@allocLinkedHelp": {
-    "description": "Help text"
-  },
-  "allocNoCategoriesWarning": "لا فئات مرتبطة. اضغط + لربط الفئات حتى تُخصم المصاريف من هذا الظرف.",
-  "@allocNoCategoriesWarning": {
-    "description": "Warning banner"
-  },
   "allocLinkCategory": "ربط فئة",
   "@allocLinkCategory": {
     "description": "Button"
-  },
-  "allocSavedLabel": "مدّخر",
-  "@allocSavedLabel": {
-    "description": "Balance hero label (savings)"
-  },
-  "allocAvailableLabel": "متاح",
-  "@allocAvailableLabel": {
-    "description": "Balance hero label (spending)"
-  },
-  "allocLeftSuffix": "متبقٍّ",
-  "@allocLeftSuffix": {
-    "description": "Progress bar suffix"
   },
   "allocFromUnallocated": "من رصيدك غير الموزع",
   "@allocFromUnallocated": {
     "description": "Fund sheet subtitle"
   },
-  "allocOverfundingTitle": "تمويل زائد",
-  "@allocOverfundingTitle": {
-    "description": "Dialog title"
-  },
-  "allocOverfundingMsg": "سيصبح رصيدك غير الموزع سالباً. المتابعة؟",
-  "@allocOverfundingMsg": {
-    "description": "Dialog content"
-  },
   "allocFundAnyway": "تمويل على أي حال",
   "@allocFundAnyway": {
     "description": "Dialog button"
-  },
-  "allocCouldNotFund": "تعذّر التمويل: {error}",
-  "@allocCouldNotFund": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "allocRecentActivity": "النشاط الأخير",
   "@allocRecentActivity": {
@@ -1884,26 +1531,6 @@
   "@allocNoActivity": {
     "description": "Empty state"
   },
-  "allocLedgerFunded": "موّل",
-  "@allocLedgerFunded": {
-    "description": "Ledger type"
-  },
-  "allocLedgerSpent": "مُنفَق",
-  "@allocLedgerSpent": {
-    "description": "Ledger type"
-  },
-  "allocLedgerAdjustment": "تعديل",
-  "@allocLedgerAdjustment": {
-    "description": "Ledger type"
-  },
-  "allocLedgerPeriodReset": "إعادة تعيين الفترة",
-  "@allocLedgerPeriodReset": {
-    "description": "Ledger type"
-  },
-  "allocLedgerCarried": "مُرحَّل",
-  "@allocLedgerCarried": {
-    "description": "Ledger type"
-  },
   "allocSpendingHistory": "تاريخ الإنفاق",
   "@allocSpendingHistory": {
     "description": "Section header"
@@ -1912,33 +1539,13 @@
   "@allocWithdrawTitle": {
     "description": "Sheet title"
   },
-  "allocWithdrawHelp": "نقل المال من هذا الظرف إلى غير الموزع.",
-  "@allocWithdrawHelp": {
-    "description": "Sheet subtitle"
-  },
-  "allocWithdrawAmount": "المبلغ المراد سحبه",
-  "@allocWithdrawAmount": {
-    "description": "Field label"
-  },
   "allocWithdrawButton": "سحب",
   "@allocWithdrawButton": {
     "description": "Button"
   },
-  "allocAllLinked": "جميع الفئات مرتبطة بأظرف بالفعل",
-  "@allocAllLinked": {
-    "description": "Snackbar"
-  },
-  "allocLinkTitle": "ربط فئة",
-  "@allocLinkTitle": {
-    "description": "Sheet title"
-  },
   "allocNoForeignBalances": "لا أرصدة بعملات أجنبية لإعادة تقييمها",
   "@allocNoForeignBalances": {
     "description": "Snackbar"
-  },
-  "allocRevalueTitle": "إعادة تقييم الأرصدة الأجنبية",
-  "@allocRevalueTitle": {
-    "description": "Sheet title"
   },
   "allocBalanceInEnvelope": "الرصيد في هذا الظرف",
   "@allocBalanceInEnvelope": {
@@ -1955,10 +1562,6 @@
   "allocNewRate": "السعر الجديد",
   "@allocNewRate": {
     "description": "Field label"
-  },
-  "allocFetchButton": "جلب",
-  "@allocFetchButton": {
-    "description": "Button"
   },
   "allocNewValue": "القيمة الجديدة",
   "@allocNewValue": {
@@ -1979,10 +1582,6 @@
   "allocApplyRevaluation": "تطبيق إعادة التقييم",
   "@allocApplyRevaluation": {
     "description": "Button"
-  },
-  "allocRevaluationApplied": "تم تطبيق إعادة التقييم",
-  "@allocRevaluationApplied": {
-    "description": "Snackbar"
   },
   "allocArchiveTitle": "أرشفة الظرف",
   "@allocArchiveTitle": {
@@ -2008,26 +1607,6 @@
   "@allocDeletePermanently": {
     "description": "Dialog button"
   },
-  "allocDeleteNoLinkedTitle": "حذف الظرف نهائياً",
-  "@allocDeleteNoLinkedTitle": {
-    "description": "Dialog title"
-  },
-  "allocDeleteNoLinkedMsg": "هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.",
-  "@allocDeleteNoLinkedMsg": {
-    "description": "Dialog content"
-  },
-  "allocCreated": "تم إنشاء الظرف",
-  "@allocCreated": {
-    "description": "Snackbar"
-  },
-  "allocUpdated": "تم تحديث الظرف",
-  "@allocUpdated": {
-    "description": "Snackbar"
-  },
-  "allocSavedPrefix": "مدّخر:",
-  "@allocSavedPrefix": {
-    "description": "Allocation card prefix"
-  },
   "allocPercentSaved": "{pct}% مدّخر",
   "@allocPercentSaved": {
     "description": "Progress text",
@@ -2040,10 +1619,6 @@
   "fundTitle": "تمويل الأظرف",
   "@fundTitle": {
     "description": "AppBar title"
-  },
-  "fundError": "تعذّر تحميل الأظرف",
-  "@fundError": {
-    "description": "Error retry"
   },
   "fundOverfundingTitle": "تمويل زائد",
   "@fundOverfundingTitle": {
@@ -2459,10 +2034,6 @@
   "@objNoTitle": {
     "description": "Empty state title"
   },
-  "objNoSubtitle": "أنشئ هدف ادخار أو تتبع أموالاً أقرضتها أو اقترضتها.",
-  "@objNoSubtitle": {
-    "description": "Empty state subtitle"
-  },
   "objGoalsSection": "الأهداف",
   "@objGoalsSection": {
     "description": "Section header"
@@ -2617,10 +2188,6 @@
   "@objWhatIsLoan": {"description": "Goals & loans"},
   "objTargetOptional": "اختياري — اتركه فارغاً لهدف مفتوح",
   "@objTargetOptional": {"description": "Goals & loans"},
-  "objIcon": "أيقونة",
-  "@objIcon": {"description": "Goals & loans"},
-  "objChooseIcon": "اختر أيقونة (اختياري)",
-  "@objChooseIcon": {"description": "Goals & loans"},
   "objRemoveIcon": "إزالة الأيقونة",
   "@objRemoveIcon": {"description": "Goals & loans"},
   "objIntro": "الأهداف تتبّع الادخار نحو غاية. القروض تتبّع الأموال التي أقرضتها أو اقترضتها.",
@@ -2810,10 +2377,6 @@
   "@settingsToolsSection": {
     "description": "Section header"
   },
-  "settingsAutomationSection": "الأتمتة",
-  "@settingsAutomationSection": {
-    "description": "Section header"
-  },
   "settingsAccountsSub": "إدارة حساباتك وأرصدتك",
   "@settingsAccountsSub": {
     "description": "Tile subtitle"
@@ -2826,20 +2389,8 @@
   "@settingsBillSplitterSub": {
     "description": "Tile subtitle"
   },
-  "settingsBillCalendarSub": "عرض الفواتير المتكررة القادمة",
-  "@settingsBillCalendarSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsUpcomingBillsSub": "فواتير مستحقة قريباً مع الأولوية",
-  "@settingsUpcomingBillsSub": {
-    "description": "Tile subtitle"
-  },
   "settingsTravelSub": "صرف عملة لرحلة",
   "@settingsTravelSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsExchangeRatesSub": "عرض وتحديث أسعار الصرف",
-  "@settingsExchangeRatesSub": {
     "description": "Tile subtitle"
   },
   "settingsWebCompanionSub": "إدارة ميزانيتك من المتصفح",
@@ -2850,20 +2401,12 @@
   "@settingsRecurringSub": {
     "description": "Tile subtitle"
   },
-  "settingsTemplatesSub": "حفظ المعاملات المتكررة",
-  "@settingsTemplatesSub": {
-    "description": "Tile subtitle"
-  },
   "settingsSubscriptionsSub": "تتبع الاشتراكات المتكررة",
   "@settingsSubscriptionsSub": {
     "description": "Tile subtitle"
   },
   "settingsGoalsSub": "أهداف الادخار وتتبع الديون",
   "@settingsGoalsSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsPeriodSub": "إنهاء الفترة وحل المتبقيات",
-  "@settingsPeriodSub": {
     "description": "Tile subtitle"
   },
   "settingsCustomization": "الإعدادات والتخصيص",
@@ -2978,14 +2521,6 @@
   "@householdNameTitle": {
     "description": "Dialog title"
   },
-  "tileBillCalendar": "تقويم الفواتير",
-  "@tileBillCalendar": {
-    "description": "Tile title"
-  },
-  "tileUpcomingBills": "الفواتير القادمة",
-  "@tileUpcomingBills": {
-    "description": "Tile title"
-  },
   "tileTravelExchange": "صرف السفر",
   "@tileTravelExchange": {
     "description": "Tile title"
@@ -2998,24 +2533,12 @@
   "@tileWebCompanion": {
     "description": "Tile title"
   },
-  "tileRecurring": "المتكررة",
-  "@tileRecurring": {
-    "description": "Tile title"
-  },
-  "tileTemplates": "القوالب",
-  "@tileTemplates": {
-    "description": "Tile title"
-  },
   "tileSubscriptions": "الاشتراكات",
   "@tileSubscriptions": {
     "description": "Tile title"
   },
   "tileGoalsLoans": "الأهداف والقروض",
   "@tileGoalsLoans": {
-    "description": "Tile title"
-  },
-  "tilePeriodTransition": "انتقال الفترة",
-  "@tilePeriodTransition": {
     "description": "Tile title"
   },
   "syncTitle": "المزامنة السحابية",
@@ -3169,42 +2692,6 @@
   "syncEncryptionRemoved": "تم إزالة التشفير",
   "@syncEncryptionRemoved": {
     "description": "Snackbar"
-  },
-  "providerGoogleDrive": "Google Drive",
-  "@providerGoogleDrive": {
-    "description": "Provider name"
-  },
-  "providerGoogleDriveSub": "تسجيل الدخول بحساب Google",
-  "@providerGoogleDriveSub": {
-    "description": "Provider subtitle"
-  },
-  "providerOnedrive": "OneDrive",
-  "@providerOnedrive": {
-    "description": "Provider name"
-  },
-  "providerOnedriveSub": "يتطلب تثبيت تطبيق OneDrive",
-  "@providerOnedriveSub": {
-    "description": "Provider subtitle"
-  },
-  "providerDropbox": "Dropbox",
-  "@providerDropbox": {
-    "description": "Provider name"
-  },
-  "providerDropboxSub": "يتطلب تثبيت تطبيق Dropbox",
-  "@providerDropboxSub": {
-    "description": "Provider subtitle"
-  },
-  "providerLocalFile": "ملف محلي",
-  "@providerLocalFile": {
-    "description": "Provider name"
-  },
-  "providerLocalFileSub": "اختر أي ملف على جهازك",
-  "@providerLocalFileSub": {
-    "description": "Provider subtitle"
-  },
-  "syncNoFileFound": "لم يتم العثور على ملف مزامنة",
-  "@syncNoFileFound": {
-    "description": "Error"
   },
   "backupTitle": "النسخ الاحتياطي والاستعادة",
   "@backupTitle": {
@@ -3430,18 +2917,6 @@
   "fxRefreshTooltip": "تحديث الأسعار",
   "@fxRefreshTooltip": {
     "description": "Tooltip"
-  },
-  "fxCouldNotFetch": "تعذّر جلب الأسعار",
-  "@fxCouldNotFetch": {
-    "description": "Error title"
-  },
-  "fxNoRates": "لا أسعار متاحة",
-  "@fxNoRates": {
-    "description": "Empty title"
-  },
-  "fxCheckInternet": "تحقق من اتصالك بالإنترنت وأعد المحاولة.",
-  "@fxCheckInternet": {
-    "description": "Subtitle"
   },
   "fxCacheInfo": "تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.",
   "@fxCacheInfo": {
@@ -3957,26 +3432,6 @@
   "@onboardEmptySub": {
     "description": "Toggle subtitle"
   },
-  "onboardEntrySection": "إدخال المعاملات",
-  "@onboardEntrySection": {
-    "description": "Section"
-  },
-  "onboardAssisted": "مساعَد",
-  "@onboardAssisted": {
-    "description": "Toggle title"
-  },
-  "onboardAssistedSub": "خطوة بخطوة، سريع للاستخدام اليومي",
-  "@onboardAssistedSub": {
-    "description": "Toggle subtitle"
-  },
-  "onboardClassic": "النموذج الكلاسيكي",
-  "@onboardClassic": {
-    "description": "Toggle title"
-  },
-  "onboardClassicSub": "جميع الحقول دفعة واحدة، للإدخالات المعقدة",
-  "@onboardClassicSub": {
-    "description": "Toggle subtitle"
-  },
   "onboardCreateStart": "إنشاء وبدء",
   "@onboardCreateStart": {
     "description": "Button"
@@ -4447,14 +3902,6 @@
   "wcForegroundChannelDesc": "خادم المرافق الإلكتروني BudgetSeal يعمل",
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
-  },
-  "webPageTitle": "BudgetSeal Web",
-  "@webPageTitle": {
-    "description": "Browser tab title"
-  },
-  "webAuthSubtitle": "أدخل رمز PIN للمتابعة",
-  "@webAuthSubtitle": {
-    "description": "Auth screen"
   },
   "webAuthLockout": "محاولات كثيرة جداً. أعد المحاولة لاحقاً.",
   "@webAuthLockout": {
@@ -5355,34 +4802,6 @@
   "@engineAutoReset": {
     "description": "Ledger note"
   },
-  "nfThousandsComma": "فاصلة (1,000)",
-  "@nfThousandsComma": {
-    "description": "Option"
-  },
-  "nfThousandsPeriod": "نقطة (1.000)",
-  "@nfThousandsPeriod": {
-    "description": "Option"
-  },
-  "nfThousandsSpace": "مسافة (1 000)",
-  "@nfThousandsSpace": {
-    "description": "Option"
-  },
-  "nfThousandsNone": "بدون (1000)",
-  "@nfThousandsNone": {
-    "description": "Option"
-  },
-  "nfDecimalPeriod": "نقطة (0.50)",
-  "@nfDecimalPeriod": {
-    "description": "Option"
-  },
-  "nfDecimalComma": "فاصلة (0,50)",
-  "@nfDecimalComma": {
-    "description": "Option"
-  },
-  "nfNegativeMinus": "سالب (-$100)",
-  "@nfNegativeMinus": {
-    "description": "Option"
-  },
   "textScaleSmall": "صغير",
   "@textScaleSmall": {
     "description": "Option"
@@ -5399,24 +4818,8 @@
   "@textScaleExtraLarge": {
     "description": "Option"
   },
-  "defcatFoodDining": "الطعام والمطاعم",
-  "@defcatFoodDining": {
-    "description": "Default category"
-  },
   "defcatGroceries": "بقالة",
   "@defcatGroceries": {
-    "description": "Default category"
-  },
-  "defcatRestaurants": "مطاعم",
-  "@defcatRestaurants": {
-    "description": "Default category"
-  },
-  "defcatCoffeeSnacks": "قهوة ووجبات خفيفة",
-  "@defcatCoffeeSnacks": {
-    "description": "Default category"
-  },
-  "defcatTransportation": "المواصلات",
-  "@defcatTransportation": {
     "description": "Default category"
   },
   "defcatFuel": "وقود",
@@ -5429,18 +4832,6 @@
   },
   "defcatParkingTolls": "مواقف ورسوم",
   "@defcatParkingTolls": {
-    "description": "Default category"
-  },
-  "defcatHousing": "السكن",
-  "@defcatHousing": {
-    "description": "Default category"
-  },
-  "defcatRentMortgage": "إيجار / رهن عقاري",
-  "@defcatRentMortgage": {
-    "description": "Default category"
-  },
-  "defcatUtilities": "خدمات",
-  "@defcatUtilities": {
     "description": "Default category"
   },
   "defcatMaintenance": "صيانة",
@@ -5459,10 +4850,6 @@
   "@defcatElectronics": {
     "description": "Default category"
   },
-  "defcatHouseholdItems": "مستلزمات المنزل",
-  "@defcatHouseholdItems": {
-    "description": "Default category"
-  },
   "defcatEntertainment": "ترفيه",
   "@defcatEntertainment": {
     "description": "Default category"
@@ -5471,28 +4858,12 @@
   "@defcatSubscriptions": {
     "description": "Default category"
   },
-  "defcatMoviesEvents": "أفلام وفعاليات",
-  "@defcatMoviesEvents": {
-    "description": "Default category"
-  },
-  "defcatHobbies": "هوايات",
-  "@defcatHobbies": {
-    "description": "Default category"
-  },
   "defcatHealth": "الصحة",
   "@defcatHealth": {
     "description": "Default category"
   },
-  "defcatMedical": "طبي",
-  "@defcatMedical": {
-    "description": "Default category"
-  },
   "defcatPharmacy": "صيدلية",
   "@defcatPharmacy": {
-    "description": "Default category"
-  },
-  "defcatFitness": "لياقة بدنية",
-  "@defcatFitness": {
     "description": "Default category"
   },
   "defcatPersonal": "شخصي",
@@ -5505,10 +4876,6 @@
   },
   "defcatGifts": "هدايا",
   "@defcatGifts": {
-    "description": "Default category"
-  },
-  "defcatPersonalCare": "عناية شخصية",
-  "@defcatPersonalCare": {
     "description": "Default category"
   },
   "defcatSalary": "راتب",
@@ -5623,46 +4990,9 @@
   "@defcatOther": {
     "description": "Default category preset"
   },
-  "syncErrEncryptedNoPw": "ملف المزامنة مشفر ولكن لم يتم تعيين كلمة مرور. أدخل كلمة مرور المزامنة لفك التشفير.",
-  "@syncErrEncryptedNoPw": {
-    "description": "Error"
-  },
-  "syncErrWrongPw": "كلمة مرور المزامنة خاطئة. تعذّر فك تشفير الملف.",
-  "@syncErrWrongPw": {
-    "description": "Error"
-  },
-  "syncErrInvalidFormat": "تنسيق ملف مزامنة مشفر غير صالح",
-  "@syncErrInvalidFormat": {
-    "description": "Error"
-  },
-  "googleNotConfigured": "لم يتم إعداد تسجيل الدخول بـ Google لهذا التطبيق. يلزم مشروع Google Cloud مع بيانات OAuth.",
-  "@googleNotConfigured": {
-    "description": "Error"
-  },
-  "googleNetworkError": "خطأ في الشبكة. تحقق من اتصالك بالإنترنت.",
-  "@googleNetworkError": {
-    "description": "Error"
-  },
-  "googleConnectionFailed": "فشل الاتصال: {error}",
-  "@googleConnectionFailed": {
-    "description": "Error",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "googleNotConnected": "غير متصل بـ Google Drive",
-  "@googleNotConnected": {
-    "description": "Error"
-  },
   "filePickerTitle": "اختر ملف مزامنة BudgetSeal",
   "@filePickerTitle": {
     "description": "Dialog title"
-  },
-  "filePickerNoPath": "لم يتم تعيين مسار ملف المزامنة",
-  "@filePickerNoPath": {
-    "description": "Error"
   },
   "heatmapNoData": "لا بيانات بعد",
   "@heatmapNoData": {
@@ -5671,33 +5001,6 @@
   "heatmapNoActivity": "لا نشاط",
   "@heatmapNoActivity": {
     "description": "Tooltip"
-  },
-  "backupSizeBytes": "{size} ب",
-  "@backupSizeBytes": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "backupSizeKb": "{size} ك.ب",
-  "@backupSizeKb": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "backupSizeMb": "{size} م.ب",
-  "@backupSizeMb": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
   },
   "commonTryAgain": "حاول مجدداً",
   "commonErrorDesc": "حدث خطأ غير متوقع. حاول العودة أو إعادة تشغيل التطبيق.",
@@ -5715,7 +5018,6 @@
   "tmplUseCountOne": "{count} استخدام",
   "tmplUseCountOther": "{count} استخدامات",
   "tileLanguage": "اللغة",
-  "tileLanguageSub": "لغة عرض التطبيق",
   "languageSystem": "النظام",
   "languageEnglish": "English",
   "languageArabic": "العربية",
@@ -5736,8 +5038,6 @@
   "allocLinkedCategoriesDesc": "المصاريف بهذه الفئات ستُخصم من هذا الظرف.",
   "allocNoCategoriesLinked": "لا فئات مرتبطة. اضغط + لربط الفئات حتى تُخصم المصاريف من هذا الظرف.",
   "allocAvailable": "متاح",
-  "allocPercentOfTarget": "{percent}% من {target}",
-  "allocAmountLeft": "{amount} متبقٍّ",
   "allocAmountSpent": "تم إنفاق {amount}",
   "allocAmountToGo": "{amount} للوصول إلى الهدف",
   "allocFund": "تمويل",
@@ -5830,7 +5130,6 @@
   "acctNoTransactions": "لا معاملات بعد",
   "acctAdjustDesc": "أدخل الرصيد الذي يظهره مصرفك (أو محفظتك). إن اختلف، تُسجَّل معاملة تسوية بالفرق.",
   "acctCurrentBalanceLabel": "الرصيد الحالي: {amount}",
-  "acctActualBalance": "الرصيد الفعلي",
   "acctEnterRealBalance": "أدخل الرصيد الحقيقي",
   "acctApplyAdjustment": "تطبيق التعديل",
   "acctBalanceAdjustment": "تعديل الرصيد",
@@ -5845,8 +5144,6 @@
   "acctSomethingWrong": "حدث خطأ ما. حاول مجدداً.",
   "acctArchiveTitle": "أرشفة الحساب",
   "acctArchiveMsg": "سيتم إخفاء هذا الحساب من جميع القوائم والقوائم المنسدلة. ستُحفظ معاملاتك.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.",
-  "acctCannotDeleteTitle": "لا يمكن حذف الحساب",
-  "acctCannotDeleteMsg": "هذا الحساب يحتوي على {count,plural, =1{مرجع معاملة واحد} =2{مرجعَي معاملة} few{{count} مراجع معاملات} many{{count} مرجعًا لمعاملات} other{{count} مرجع معاملة}}. لا يمكنك حذفه وهو يحتوي على معاملات.\n\nهل تريد أرشفته بدلاً من ذلك؟ الحسابات المؤرشفة مخفية من القوائم ولكنها تحافظ على كل سجل المعاملات.",
   "acctDeleteTitle": "حذف الحساب نهائياً",
   "acctDeleteMsg": "هذا الحساب ليس له معاملات. هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع.",
   "acctArchiveInstead": "أرشفة بدلاً من ذلك",
@@ -6130,10 +5427,6 @@
   "@catSheetNoMatch": { "description": "Empty state when search has no results" },
   "catSheetNoCategories": "لا توجد فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.",
   "@catSheetNoCategories": { "description": "Empty state when no categories exist" },
-  "@catSheetSubcategories": {
-    "description": "Subtitle showing subcategory count",
-    "placeholders": { "count": { "type": "int" } }
-  },
 
   "currencyYourAccounts": "حساباتك",
   "@currencyYourAccounts": { "description": "Currency sheet section header" },
@@ -6215,8 +5508,6 @@
   "plannedCreated": "تم تخطيط الدفعة",
   "plannedSaveFailed": "تعذّر حفظ الدفعة المخططة",
   "plannedBadge": "مخططة",
-  "plannedNPlanned": "{amount} مخططة",
-  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } },
   "travelExchangeSuccess": "تم التحويل {fromAmount} → {toAmount}. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.",
   "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
   "backupRestoreDialogBody": "من: {date}\nالحجم: {size}\n\nسيتم استبدال جميع بياناتك الحالية. يجب إعادة تشغيل التطبيق.",
@@ -6251,7 +5542,6 @@
   "upgradeRestoreSuccess": "تمت استعادة الشراء! تم فتح بريميوم.",
   "upgradeRestoreNone": "لم يتم العثور على شراء سابق.",
   "catSheetSearchHint": "بحث في الفئات...",
-  "catSheetSubcategories": "{count} فئات فرعية",
   "objSummaryDeadline": "الموعد النهائي",
   "plannedNoteHint": "ملاحظة (اختياري)",
   "recurringFormAccountRequired": "الحساب مطلوب",

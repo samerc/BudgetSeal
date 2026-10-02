@@ -95,7 +95,7 @@ lib/
 │       ├── period_reset_service.dart   # Auto/manual envelope period resets
 │       └── autofill_service.dart       # Last-transaction lookup for auto-fill
 ├── l10n/                       # Localization
-│   ├── app_{en,ar,fr}.arb      # ARB translation files (~1,700 keys each)
+│   ├── app_{en,ar,fr}.arb      # ARB translation files (~1,800 keys each)
 │   ├── generated/              # Auto-generated S class (flutter gen-l10n)
 │   └── s_lookup.dart           # currentS() helper for non-widget code
 ├── features/                   # Screen-level code, one folder per feature
@@ -1060,7 +1060,7 @@ Route: `/help`, accessible from More > Help Guide.
 Fully wired for 3 locales: **English**, **Arabic**, **French**. Language picker in Settings > Appearance.
 
 ### Flutter App
-- `lib/l10n/app_{en,ar,fr}.arb` — ~1,700 keys per locale
+- `lib/l10n/app_{en,ar,fr}.arb` — ~1,800 keys per locale (unused keys pruned Oct 2026)
 - Generated `S` class at `lib/l10n/generated/app_localizations.dart`, accessed via `S.of(context).keyName`
 - `l10n.yaml` configures ARB dir, output class `S`, `nullable-getter: false`
 - `lib/core/providers/locale_provider.dart` persists language choice to SharedPreferences
@@ -1069,7 +1069,7 @@ Fully wired for 3 locales: **English**, **Arabic**, **French**. Language picker 
 - Numbers always use Western numerals (0-9) via `locale: 'en_US'` in NumberFormat — standard for finance apps even in Arabic
 
 ### Web SPA
-- `assets/web/locale_{en,ar,fr}.json` — ~240 web keys (snake_case)
+- `assets/web/locale_{en,ar,fr}.json` — ~250 web keys (snake_case), generated from the CSV by `csv_to_web_json.dart`; every web key must exist in the ARBs or regeneration drops it
 - `t(key, params)` function in `app.js` for string lookup with `{param}` substitution
 - `loadLocale(lang)` fetches JSON on init, persists in `localStorage`
 
@@ -1092,6 +1092,7 @@ dart tool/translation_editor.dart   # then open http://localhost:4488
 - `docs/i18n_strings.csv` is the master source (~1,800 strings, synced with the ARBs in Oct 2026). Update CSV first, then run tooling. `csv_to_arb.dart` keeps each key's placeholder types from the current `app_en.arb` (`int`, plurals) instead of guessing from names, and turns the CSV's literal `
 ` back into real newlines — the round trip CSV → ARB is lossless. ARB values never start/end with spaces (the CSV trims them): put separators like ` · ` in the template or the code.
 - Glossary: "Ready to assign" = FR « Prêt à répartir » / AR «جاهز للتوزيع»; Web Companion = FR « Compagnon Web » / AR «المرافق الإلكتروني». French quotes are « … », Arabic «…». Android notification channel names come from the ARBs (`notifAlertsChannel`, `notifReminderChannel`, `wcForegroundChannel`) since they show in system settings.
+- Currency names in the picker come from `currencyName(S, code)` (`currency_sheet.dart`, keys `currencyName<Code>`); search matches the code, the translated and the English name. A new currency in `kCurrencies` needs a key.
 - No duplicate keys in an ARB (the last one silently wins). Counts use ICU plurals (`{n, plural, =1{…} other{…}}`; Arabic also `=2`/`few`/`many`).
 - Every feature addition/change must update `docs/i18n_strings.csv`, ARB files, and `assets/web/help.html`.
 - **Never use `S.of(context)` inside `StatefulBuilder` within `showModalBottomSheet`** — capture `final tr = S.of(context)` BEFORE the sheet to avoid `_dependents.isEmpty` crash.

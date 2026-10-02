@@ -1,4 +1,28 @@
 {
+  "webEnvBalanceOfTarget": "{balance} sur {target}",
+  "webShortcutRefresh": "Rafraîchir la page actuelle",
+  "currencyNameUsd": "Dollar américain",
+  "currencyNameEur": "Euro",
+  "currencyNameGbp": "Livre sterling",
+  "currencyNameJpy": "Yen japonais",
+  "currencyNameChf": "Franc suisse",
+  "currencyNameCad": "Dollar canadien",
+  "currencyNameAud": "Dollar australien",
+  "currencyNameCny": "Yuan chinois",
+  "currencyNameInr": "Roupie indienne",
+  "currencyNameBrl": "Réal brésilien",
+  "currencyNameMxn": "Peso mexicain",
+  "currencyNameSgd": "Dollar de Singapour",
+  "currencyNameHkd": "Dollar de Hong Kong",
+  "currencyNameNok": "Couronne norvégienne",
+  "currencyNameSek": "Couronne suédoise",
+  "currencyNameNzd": "Dollar néo-zélandais",
+  "currencyNameZar": "Rand sud-africain",
+  "currencyNameAed": "Dirham des Émirats",
+  "currencyNameLbp": "Livre libanaise",
+  "currencyNameSar": "Riyal saoudien",
+  "currencyNameKwd": "Dinar koweïtien",
+  "currencyNameTry": "Livre turque",
   "notifAlertsChannel": "Alertes BudgetSeal",
   "notifAlertsChannelDesc": "Alertes enveloppes basses et factures à venir",
   "widgetReadyToAssign": "Prêt à répartir : {amount}",
@@ -276,10 +300,6 @@
   "@commonChange": {
     "description": "Button change"
   },
-  "commonFund": "Financer",
-  "@commonFund": {
-    "description": "Button fund"
-  },
   "commonNoData": "Aucune donnée",
   "@commonNoData": {
     "description": "Empty state"
@@ -301,17 +321,9 @@
   "@appName": {
     "description": "MaterialApp title / splash / lock"
   },
-  "appTagline": "Budgétiser avec intention",
-  "@appTagline": {
-    "description": "Splash screen tagline"
-  },
   "appTaglineAbout": "Budget par enveloppes, simplifié.",
   "@appTaglineAbout": {
     "description": "About screen tagline"
-  },
-  "appBrandAbbr": "PP",
-  "@appBrandAbbr": {
-    "description": "Web sidebar logo abbreviation"
   },
   "tabHome": "Accueil",
   "@tabHome": {
@@ -369,14 +381,6 @@
   "@navReports": {
     "description": "Web sidebar label"
   },
-  "navServerStatus": "Serveur",
-  "@navServerStatus": {
-    "description": "Web sidebar connection label"
-  },
-  "navSignOut": "Déconnexion",
-  "@navSignOut": {
-    "description": "Web sidebar button"
-  },
   "typeIncome": "Revenu",
   "@typeIncome": {
     "description": "Transaction type label"
@@ -400,10 +404,6 @@
   "dashboardWelcomeBody": "Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
-  },
-  "dashboardHouseholdLabel": "Foyer",
-  "@dashboardHouseholdLabel": {
-    "description": "Header subtitle"
   },
   "dashboardDefaultName": "BudgetSeal",
   "@dashboardDefaultName": {
@@ -429,22 +429,6 @@
   "@dashboardQuickSplit": {
     "description": "Quick action button"
   },
-  "dashboardSectionYourMoney": "Votre argent",
-  "@dashboardSectionYourMoney": {
-    "description": "Section header"
-  },
-  "dashboardReadyToAssign": "Prêt à répartir",
-  "@dashboardReadyToAssign": {
-    "description": "Unallocated label"
-  },
-  "dashboardMoneyNotInEnvelope": "Argent pas encore dans une enveloppe",
-  "@dashboardMoneyNotInEnvelope": {
-    "description": "Unallocated subtitle"
-  },
-  "dashboardSectionActivity": "Activité",
-  "@dashboardSectionActivity": {
-    "description": "Section header"
-  },
   "dashboardQuickTemplates": "Modèles rapides",
   "@dashboardQuickTemplates": {
     "description": "Section title"
@@ -453,10 +437,6 @@
   "@dashboardViewAll": {
     "description": "Link text"
   },
-  "dashboardRecent": "Récent",
-  "@dashboardRecent": {
-    "description": "Section title"
-  },
   "dashboardNoTransactionsYet": "Aucune transaction pour le moment",
   "@dashboardNoTransactionsYet": {
     "description": "Empty state"
@@ -464,10 +444,6 @@
   "dashboardNoTransactionsToday": "Aucune transaction aujourd'hui — appuyez sur + pour en ajouter",
   "@dashboardNoTransactionsToday": {
     "description": "Nudge banner"
-  },
-  "dashboardTotalAcrossAccounts": "Total de tous les comptes",
-  "@dashboardTotalAcrossAccounts": {
-    "description": "Net worth subtitle"
   },
   "dashboardLabelExpenses": "Dépenses",
   "@dashboardLabelExpenses": {
@@ -492,101 +468,6 @@
   "dashboardThisMonth": "Ce mois-ci",
   "@dashboardThisMonth": {
     "description": "Toggle label"
-  },
-  "dashboardEnvelopes": "Enveloppes",
-  "@dashboardEnvelopes": {
-    "description": "Card title"
-  },
-  "dashboardOnTrack": "En bonne voie",
-  "@dashboardOnTrack": {
-    "description": "Envelope health status"
-  },
-  "dashboardRunningLow": "Presque épuisé",
-  "@dashboardRunningLow": {
-    "description": "Envelope health status"
-  },
-  "dashboardOverspent": "Dépassé",
-  "@dashboardOverspent": {
-    "description": "Envelope health status"
-  },
-  "dashboardHeadsUp": "Attention",
-  "@dashboardHeadsUp": {
-    "description": "Budget insights header"
-  },
-  "dashboardIsOverLimit": "dépasse sa limite de {amount}",
-  "@dashboardIsOverLimit": {
-    "description": "Budget insight \"{name} is {amount} over its limit\"",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardHasPercentLeft": "n'a plus que {percent}% restant",
-  "@dashboardHasPercentLeft": {
-    "description": "Budget insight \"{name} has only {percent}% left\"",
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardBudgetLeftOf": "{amount} restant sur un budget de {total}",
-  "@dashboardBudgetLeftOf": {
-    "description": "Status card (under budget)",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardBudgetOver": "{amount} au-dessus du budget de {total}",
-  "@dashboardBudgetOver": {
-    "description": "Status card (over budget)",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardSpendingPerDay": "Dépenses {amount}/jour · ~{projected} en fin de mois",
-  "@dashboardSpendingPerDay": {
-    "description": "Velocity line",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "projected": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardMoneySits1Day": "L'argent reste 1 jour avant d'être dépensé",
-  "@dashboardMoneySits1Day": {
-    "description": "Age of money (singular)"
-  },
-  "dashboardMoneySitsNDays": "L'argent reste {n} jours avant d'être dépensé",
-  "@dashboardMoneySitsNDays": {
-    "description": "Age of money (plural)",
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "dashboardAgeOfMoneyTitle": "Âge de l'argent",
-  "@dashboardAgeOfMoneyTitle": {
-    "description": "Info dialog title"
-  },
-  "dashboardAgeOfMoneyExplanation": "Cela montre combien de temps l'argent reste dans vos comptes avant d'être dépensé.\n\nConsidérez-le comme un tampon :\n\n• Moins de 14 jours — vous dépensez aussi vite que l'argent arrive\n• 14–30 jours — vous avez un petit coussin\n• 30–60 jours — vous dépensez le revenu du mois dernier. Excellent !\n• 60+ jours — excellente santé financière\n\nL'objectif est d'augmenter ce nombre avec le temps.",
-  "@dashboardAgeOfMoneyExplanation": {
-    "description": "Info dialog content"
   },
   "dashboardSearchPlaceholder": "Rechercher transactions, comptes...",
   "@dashboardSearchPlaceholder": {
@@ -625,18 +506,6 @@
   "@customizeTitle": {
     "description": "Bottom sheet title"
   },
-  "customizeInstructions": "Glissez pour réorganiser. Basculez pour afficher/masquer.",
-  "@customizeInstructions": {
-    "description": "Instructions text"
-  },
-  "dashboardSectionStatusLabel": "Carte de statut",
-  "@dashboardSectionStatusLabel": {
-    "description": "Section label"
-  },
-  "dashboardSectionStatusDesc": "Statut du budget, vélocité, âge de l'argent",
-  "@dashboardSectionStatusDesc": {
-    "description": "Section description"
-  },
   "dashboardSectionSpendingLabel": "Aperçu des dépenses",
   "@dashboardSectionSpendingLabel": {
     "description": "Section label"
@@ -659,14 +528,6 @@
   },
   "dashboardSectionMoneyDesc": "Factures, patrimoine et non alloué",
   "@dashboardSectionMoneyDesc": {
-    "description": "Section description"
-  },
-  "dashboardSectionUnallocatedLabel": "Prêt à répartir",
-  "@dashboardSectionUnallocatedLabel": {
-    "description": "Section label"
-  },
-  "dashboardSectionUnallocatedDesc": "Fonds non affectés",
-  "@dashboardSectionUnallocatedDesc": {
     "description": "Section description"
   },
   "dashboardSectionActivityLabel": "Activité récente",
@@ -832,10 +693,6 @@
   "@txSplitBillTooltip": {
     "description": "FAB tooltip"
   },
-  "txAddTooltip": "Ajouter une transaction",
-  "@txAddTooltip": {
-    "description": "FAB tooltip"
-  },
   "txFromDate": "Du",
   "@txFromDate": {
     "description": "Date range filter"
@@ -851,10 +708,6 @@
   "txMaxAmount": "Max",
   "@txMaxAmount": {
     "description": "Amount range hint"
-  },
-  "txClearFilters": "Effacer les filtres avancés",
-  "@txClearFilters": {
-    "description": "Filter clear link"
   },
   "txSelectYear": "Choisir l'année",
   "@txSelectYear": {
@@ -947,27 +800,6 @@
   "@txContextDuplicate": {
     "description": "Context menu"
   },
-  "txDeleteTitle": "Supprimer la transaction ?",
-  "@txDeleteTitle": {
-    "description": "Delete dialog title"
-  },
-  "txDeleteCannotUndo": "Cette action est irréversible.",
-  "@txDeleteCannotUndo": {
-    "description": "Delete dialog content"
-  },
-  "txDeleteShort": "Supprimer ?",
-  "@txDeleteShort": {
-    "description": "Swipe-to-delete title"
-  },
-  "txDeleteWithReversal": "Supprimer {label} ? Cela annulera les déductions des enveloppes.",
-  "@txDeleteWithReversal": {
-    "description": "Swipe-to-delete content",
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
   "txNAccounts": "{count} comptes",
   "@txNAccounts": {
     "description": "Multi-account label",
@@ -976,10 +808,6 @@
         "type": "int"
       }
     }
-  },
-  "txFormEditTitle": "Modifier",
-  "@txFormEditTitle": {
-    "description": "AppBar title editing"
   },
   "txFormNewTitle": "Nouvelle transaction",
   "@txFormNewTitle": {
@@ -1000,10 +828,6 @@
   "txFormAutoDetected": "Détecté automatiquement",
   "@txFormAutoDetected": {
     "description": "Auto-fill label"
-  },
-  "txFormNoCategory": "Aucune catégorie",
-  "@txFormNoCategory": {
-    "description": "No category label"
   },
   "txFormFromAccount": "Depuis le compte",
   "@txFormFromAccount": {
@@ -1071,10 +895,6 @@
   "@txFormRateNotSetTitle": {
     "description": "Dialog title"
   },
-  "txFormRateNotSetContent": "Enregistrer quand même, ou revenir définir le taux ?",
-  "@txFormRateNotSetContent": {
-    "description": "Dialog content"
-  },
   "txFormDuplicateTitle": "Doublon possible",
   "@txFormDuplicateTitle": {
     "description": "Dialog title"
@@ -1086,24 +906,6 @@
   "txFormSaved": "Transaction enregistrée",
   "@txFormSaved": {
     "description": "Success snackbar"
-  },
-  "txFormSavedEnvelope": "Transaction enregistrée · Enveloppe {envelopeName} mise à jour",
-  "@txFormSavedEnvelope": {
-    "description": "Success with envelope",
-    "placeholders": {
-      "envelopeName": {
-        "type": "String"
-      }
-    }
-  },
-  "txFormErrorSaving": "Erreur lors de l'enregistrement : {error}",
-  "@txFormErrorSaving": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "txFormReceiptAttached": "Reçu joint",
   "@txFormReceiptAttached": {
@@ -1212,14 +1014,6 @@
   "txDetailNoReceipt": "Aucun reçu joint",
   "@txDetailNoReceipt": {
     "description": "Empty state"
-  },
-  "txDetailDeleteTitle": "Supprimer la transaction",
-  "@txDetailDeleteTitle": {
-    "description": "Delete dialog title"
-  },
-  "txDetailDeleteContent": "Voulez-vous vraiment supprimer cette transaction ?\n\nCela annulera les déductions des enveloppes et restaurera le solde. Les écritures seront supprimées.\n\nCette action est irréversible.",
-  "@txDetailDeleteContent": {
-    "description": "Delete dialog content"
   },
   "txAfDiscardTitle": "Abandonner la transaction ?",
   "@txAfDiscardTitle": {
@@ -1364,30 +1158,9 @@
   "@catSheetNew": {
     "description": "New button"
   },
-  "catSheetNameHint": "Nom de la catégorie",
-  "@catSheetNameHint": {
-    "description": "Text field hint"
-  },
   "catSheetAdd": "Ajouter",
   "@catSheetAdd": {
     "description": "Add button"
-  },
-  "catSheetNoMatching": "Aucune catégorie correspondante",
-  "@catSheetNoMatching": {
-    "description": "Empty search"
-  },
-  "catSheetNoYet": "Aucune catégorie.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.",
-  "@catSheetNoYet": {
-    "description": "Empty state"
-  },
-  "catSheetNSubcategories": "{count} sous-catégories",
-  "@catSheetNSubcategories": {
-    "description": "Parent subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "txWidgetSelectAccount": "Sélectionner un compte",
   "@txWidgetSelectAccount": {
@@ -1525,10 +1298,6 @@
   "@billTip": {
     "description": "Section title"
   },
-  "billTipNone": "Aucun",
-  "@billTipNone": {
-    "description": "Tip trailing"
-  },
   "billPercentage": "Pourcentage",
   "@billPercentage": {
     "description": "Tip mode"
@@ -1609,15 +1378,6 @@
   "@allocNewPeriodStarted": {
     "description": "Banner title"
   },
-  "allocNNeedReview": "{count} enveloppe(s) à examiner",
-  "@allocNNeedReview": {
-    "description": "Banner subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "allocReview": "Examiner",
   "@allocReview": {
     "description": "Banner button"
@@ -1634,20 +1394,8 @@
   "@allocRemaining": {
     "description": "Summary label"
   },
-  "allocUnallocated": "Non affecté",
-  "@allocUnallocated": {
-    "description": "Banner label"
-  },
-  "allocFundEnvelopes": "Financer les enveloppes",
-  "@allocFundEnvelopes": {
-    "description": "Button"
-  },
   "allocSectionSpending": "Dépenses",
   "@allocSectionSpending": {
-    "description": "Section header"
-  },
-  "allocSectionSavings": "Épargne",
-  "@allocSectionSavings": {
     "description": "Section header"
   },
   "allocSectionFlexible": "Cumulatif",
@@ -1735,22 +1483,6 @@
   "@allocSpendingDesc": {
     "description": "Type description"
   },
-  "allocSavingGoalTitle": "Épargne (avec objectif)",
-  "@allocSavingGoalTitle": {
-    "description": "Type option"
-  },
-  "allocSavingGoalDesc": "Pour un objectif précis comme les impôts ou les vacances. Définissez un objectif et financez-le.",
-  "@allocSavingGoalDesc": {
-    "description": "Type description"
-  },
-  "allocSavingOpenTitle": "Épargne (libre)",
-  "@allocSavingOpenTitle": {
-    "description": "Type option"
-  },
-  "allocSavingOpenDesc": "Pour l'épargne générale sans objectif précis. Mettez de l'argent de côté quand vous pouvez.",
-  "@allocSavingOpenDesc": {
-    "description": "Type description"
-  },
   "allocInfoBanner": "Les enveloppes ne déplacent pas l'argent entre les comptes. Elles vous aident à planifier l'utilisation de votre argent.",
   "@allocInfoBanner": {
     "description": "Info text"
@@ -1759,21 +1491,9 @@
   "@allocPurposeSection": {
     "description": "Section header"
   },
-  "allocSaving": "Épargne",
-  "@allocSaving": {
-    "description": "Chip label"
-  },
-  "allocFlexible": "Cumulatif",
-  "@allocFlexible": {
-    "description": "Chip label"
-  },
   "allocCycleSection": "Cycle",
   "@allocCycleSection": {
     "description": "Section header"
-  },
-  "allocPeriodicDesc": "• Périodique : se réinitialise chaque mois (ex. budget courses)\n• Permanent : s'accumule dans le temps (ex. fonds d'urgence)",
-  "@allocPeriodicDesc": {
-    "description": "Help text"
   },
   "allocPeriodic": "Périodique",
   "@allocPeriodic": {
@@ -1783,38 +1503,6 @@
   "@allocPermanent": {
     "description": "Chip label"
   },
-  "allocRolloverTitle": "Reporter le solde",
-  "@allocRolloverTitle": {
-    "description": "Switch title"
-  },
-  "allocRolloverSubtitle": "Reporter les fonds restants à la prochaine période",
-  "@allocRolloverSubtitle": {
-    "description": "Switch subtitle"
-  },
-  "allocAutoResetTitle": "Réinitialisation auto",
-  "@allocAutoResetTitle": {
-    "description": "Switch title"
-  },
-  "allocAutoResetSubtitle": "Réinitialiser automatiquement au début de la période",
-  "@allocAutoResetSubtitle": {
-    "description": "Switch subtitle"
-  },
-  "allocSavingsTargetSection": "Objectif d'épargne",
-  "@allocSavingsTargetSection": {
-    "description": "Section header"
-  },
-  "allocMonthlyBudgetSection": "Budget mensuel",
-  "@allocMonthlyBudgetSection": {
-    "description": "Section header"
-  },
-  "allocSavingsTargetHelp": "Combien souhaitez-vous épargner dans cette enveloppe ?",
-  "@allocSavingsTargetHelp": {
-    "description": "Help text"
-  },
-  "allocMonthlyBudgetHelp": "Combien souhaitez-vous dépenser dans cette enveloppe chaque mois ?",
-  "@allocMonthlyBudgetHelp": {
-    "description": "Help text"
-  },
   "allocTargetAmount": "Montant cible",
   "@allocTargetAmount": {
     "description": "Field label"
@@ -1823,58 +1511,17 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocLinkedCategories": "Catégories liées",
-  "@allocLinkedCategories": {
-    "description": "Section header"
-  },
-  "allocLinkedHelp": "Les dépenses avec ces catégories seront débitées de cette enveloppe.",
-  "@allocLinkedHelp": {
-    "description": "Help text"
-  },
-  "allocNoCategoriesWarning": "Aucune catégorie liée. Appuyez sur + pour lier des catégories.",
-  "@allocNoCategoriesWarning": {
-    "description": "Warning banner"
-  },
   "allocLinkCategory": "Lier une catégorie",
   "@allocLinkCategory": {
     "description": "Button"
-  },
-  "allocSavedLabel": "Épargné",
-  "@allocSavedLabel": {
-    "description": "Balance hero label (savings)"
-  },
-  "allocAvailableLabel": "Disponible",
-  "@allocAvailableLabel": {
-    "description": "Balance hero label (spending)"
-  },
-  "allocLeftSuffix": "restant",
-  "@allocLeftSuffix": {
-    "description": "Progress bar suffix"
   },
   "allocFromUnallocated": "Depuis votre solde non affecté",
   "@allocFromUnallocated": {
     "description": "Fund sheet subtitle"
   },
-  "allocOverfundingTitle": "Surfinancement",
-  "@allocOverfundingTitle": {
-    "description": "Dialog title"
-  },
-  "allocOverfundingMsg": "Votre solde non affecté deviendra négatif. Continuer ?",
-  "@allocOverfundingMsg": {
-    "description": "Dialog content"
-  },
   "allocFundAnyway": "Financer quand même",
   "@allocFundAnyway": {
     "description": "Dialog button"
-  },
-  "allocCouldNotFund": "Impossible de financer : {error}",
-  "@allocCouldNotFund": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "allocRecentActivity": "Activité récente",
   "@allocRecentActivity": {
@@ -1884,26 +1531,6 @@
   "@allocNoActivity": {
     "description": "Empty state"
   },
-  "allocLedgerFunded": "Financé",
-  "@allocLedgerFunded": {
-    "description": "Ledger type"
-  },
-  "allocLedgerSpent": "Dépensé",
-  "@allocLedgerSpent": {
-    "description": "Ledger type"
-  },
-  "allocLedgerAdjustment": "Ajustement",
-  "@allocLedgerAdjustment": {
-    "description": "Ledger type"
-  },
-  "allocLedgerPeriodReset": "Réinitialisation de période",
-  "@allocLedgerPeriodReset": {
-    "description": "Ledger type"
-  },
-  "allocLedgerCarried": "Reporté",
-  "@allocLedgerCarried": {
-    "description": "Ledger type"
-  },
   "allocSpendingHistory": "Historique des dépenses",
   "@allocSpendingHistory": {
     "description": "Section header"
@@ -1912,33 +1539,13 @@
   "@allocWithdrawTitle": {
     "description": "Sheet title"
   },
-  "allocWithdrawHelp": "Transférer l'argent de cette enveloppe vers Non affecté.",
-  "@allocWithdrawHelp": {
-    "description": "Sheet subtitle"
-  },
-  "allocWithdrawAmount": "Montant à retirer",
-  "@allocWithdrawAmount": {
-    "description": "Field label"
-  },
   "allocWithdrawButton": "Retirer",
   "@allocWithdrawButton": {
     "description": "Button"
   },
-  "allocAllLinked": "Toutes les catégories sont déjà liées à des enveloppes",
-  "@allocAllLinked": {
-    "description": "Snackbar"
-  },
-  "allocLinkTitle": "Lier une catégorie",
-  "@allocLinkTitle": {
-    "description": "Sheet title"
-  },
   "allocNoForeignBalances": "Aucun solde en devise étrangère à réévaluer",
   "@allocNoForeignBalances": {
     "description": "Snackbar"
-  },
-  "allocRevalueTitle": "Réévaluer les soldes étrangers",
-  "@allocRevalueTitle": {
-    "description": "Sheet title"
   },
   "allocBalanceInEnvelope": "solde dans cette enveloppe",
   "@allocBalanceInEnvelope": {
@@ -1955,10 +1562,6 @@
   "allocNewRate": "Nouveau taux",
   "@allocNewRate": {
     "description": "Field label"
-  },
-  "allocFetchButton": "Récupérer",
-  "@allocFetchButton": {
-    "description": "Button"
   },
   "allocNewValue": "Nouvelle valeur",
   "@allocNewValue": {
@@ -1979,10 +1582,6 @@
   "allocApplyRevaluation": "Appliquer la réévaluation",
   "@allocApplyRevaluation": {
     "description": "Button"
-  },
-  "allocRevaluationApplied": "Réévaluation appliquée",
-  "@allocRevaluationApplied": {
-    "description": "Snackbar"
   },
   "allocArchiveTitle": "Archiver l'enveloppe",
   "@allocArchiveTitle": {
@@ -2008,26 +1607,6 @@
   "@allocDeletePermanently": {
     "description": "Dialog button"
   },
-  "allocDeleteNoLinkedTitle": "Supprimer l'enveloppe définitivement",
-  "@allocDeleteNoLinkedTitle": {
-    "description": "Dialog title"
-  },
-  "allocDeleteNoLinkedMsg": "Cette enveloppe n'a pas de catégories liées. Tout l'historique sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.",
-  "@allocDeleteNoLinkedMsg": {
-    "description": "Dialog content"
-  },
-  "allocCreated": "Enveloppe créée",
-  "@allocCreated": {
-    "description": "Snackbar"
-  },
-  "allocUpdated": "Enveloppe mise à jour",
-  "@allocUpdated": {
-    "description": "Snackbar"
-  },
-  "allocSavedPrefix": "Épargné :",
-  "@allocSavedPrefix": {
-    "description": "Allocation card prefix"
-  },
   "allocPercentSaved": "{pct}% épargné",
   "@allocPercentSaved": {
     "description": "Progress text",
@@ -2040,10 +1619,6 @@
   "fundTitle": "Financer les enveloppes",
   "@fundTitle": {
     "description": "AppBar title"
-  },
-  "fundError": "Impossible de charger les enveloppes",
-  "@fundError": {
-    "description": "Error retry"
   },
   "fundOverfundingTitle": "Surfinancement",
   "@fundOverfundingTitle": {
@@ -2459,10 +2034,6 @@
   "@objNoTitle": {
     "description": "Empty state title"
   },
-  "objNoSubtitle": "Créez un objectif d'épargne ou suivez l'argent prêté ou emprunté.",
-  "@objNoSubtitle": {
-    "description": "Empty state subtitle"
-  },
   "objGoalsSection": "Objectifs",
   "@objGoalsSection": {
     "description": "Section header"
@@ -2617,10 +2188,6 @@
   "@objWhatIsLoan": {"description": "Goals & loans"},
   "objTargetOptional": "Facultatif — laissez vide pour un objectif ouvert",
   "@objTargetOptional": {"description": "Goals & loans"},
-  "objIcon": "Icône",
-  "@objIcon": {"description": "Goals & loans"},
-  "objChooseIcon": "Choisir une icône (facultatif)",
-  "@objChooseIcon": {"description": "Goals & loans"},
   "objRemoveIcon": "Supprimer l'icône",
   "@objRemoveIcon": {"description": "Goals & loans"},
   "objIntro": "Les objectifs suivent l'épargne vers une cible. Les prêts suivent l'argent prêté ou emprunté.",
@@ -2810,10 +2377,6 @@
   "@settingsToolsSection": {
     "description": "Section header"
   },
-  "settingsAutomationSection": "Automatisation",
-  "@settingsAutomationSection": {
-    "description": "Section header"
-  },
   "settingsAccountsSub": "Gérez vos comptes et soldes",
   "@settingsAccountsSub": {
     "description": "Tile subtitle"
@@ -2826,20 +2389,8 @@
   "@settingsBillSplitterSub": {
     "description": "Tile subtitle"
   },
-  "settingsBillCalendarSub": "Voir les factures récurrentes à venir",
-  "@settingsBillCalendarSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsUpcomingBillsSub": "Factures bientôt dues avec urgence",
-  "@settingsUpcomingBillsSub": {
-    "description": "Tile subtitle"
-  },
   "settingsTravelSub": "Échanger des devises pour un voyage",
   "@settingsTravelSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsExchangeRatesSub": "Voir et actualiser les taux de change",
-  "@settingsExchangeRatesSub": {
     "description": "Tile subtitle"
   },
   "settingsWebCompanionSub": "Gérez votre budget depuis un navigateur",
@@ -2850,20 +2401,12 @@
   "@settingsRecurringSub": {
     "description": "Tile subtitle"
   },
-  "settingsTemplatesSub": "Enregistrer les transactions fréquentes",
-  "@settingsTemplatesSub": {
-    "description": "Tile subtitle"
-  },
   "settingsSubscriptionsSub": "Suivre les abonnements récurrents",
   "@settingsSubscriptionsSub": {
     "description": "Tile subtitle"
   },
   "settingsGoalsSub": "Objectifs d'épargne et suivi des dettes",
   "@settingsGoalsSub": {
-    "description": "Tile subtitle"
-  },
-  "settingsPeriodSub": "Terminer la période et résoudre les restes",
-  "@settingsPeriodSub": {
     "description": "Tile subtitle"
   },
   "settingsCustomization": "Paramètres et personnalisation",
@@ -2978,14 +2521,6 @@
   "@householdNameTitle": {
     "description": "Dialog title"
   },
-  "tileBillCalendar": "Calendrier des factures",
-  "@tileBillCalendar": {
-    "description": "Tile title"
-  },
-  "tileUpcomingBills": "Factures à venir",
-  "@tileUpcomingBills": {
-    "description": "Tile title"
-  },
   "tileTravelExchange": "Change de voyage",
   "@tileTravelExchange": {
     "description": "Tile title"
@@ -2998,24 +2533,12 @@
   "@tileWebCompanion": {
     "description": "Tile title"
   },
-  "tileRecurring": "Récurrents",
-  "@tileRecurring": {
-    "description": "Tile title"
-  },
-  "tileTemplates": "Modèles",
-  "@tileTemplates": {
-    "description": "Tile title"
-  },
   "tileSubscriptions": "Abonnements",
   "@tileSubscriptions": {
     "description": "Tile title"
   },
   "tileGoalsLoans": "Objectifs et prêts",
   "@tileGoalsLoans": {
-    "description": "Tile title"
-  },
-  "tilePeriodTransition": "Transition de période",
-  "@tilePeriodTransition": {
     "description": "Tile title"
   },
   "syncTitle": "Synchronisation cloud",
@@ -3169,42 +2692,6 @@
   "syncEncryptionRemoved": "Chiffrement supprimé",
   "@syncEncryptionRemoved": {
     "description": "Snackbar"
-  },
-  "providerGoogleDrive": "Google Drive",
-  "@providerGoogleDrive": {
-    "description": "Provider name"
-  },
-  "providerGoogleDriveSub": "Connectez-vous avec votre compte Google",
-  "@providerGoogleDriveSub": {
-    "description": "Provider subtitle"
-  },
-  "providerOnedrive": "OneDrive",
-  "@providerOnedrive": {
-    "description": "Provider name"
-  },
-  "providerOnedriveSub": "Nécessite l'application OneDrive installée",
-  "@providerOnedriveSub": {
-    "description": "Provider subtitle"
-  },
-  "providerDropbox": "Dropbox",
-  "@providerDropbox": {
-    "description": "Provider name"
-  },
-  "providerDropboxSub": "Nécessite l'application Dropbox installée",
-  "@providerDropboxSub": {
-    "description": "Provider subtitle"
-  },
-  "providerLocalFile": "Fichier local",
-  "@providerLocalFile": {
-    "description": "Provider name"
-  },
-  "providerLocalFileSub": "Choisissez un fichier sur votre appareil",
-  "@providerLocalFileSub": {
-    "description": "Provider subtitle"
-  },
-  "syncNoFileFound": "Aucun fichier de synchronisation trouvé",
-  "@syncNoFileFound": {
-    "description": "Error"
   },
   "backupTitle": "Sauvegarde et restauration",
   "@backupTitle": {
@@ -3430,18 +2917,6 @@
   "fxRefreshTooltip": "Actualiser les taux",
   "@fxRefreshTooltip": {
     "description": "Tooltip"
-  },
-  "fxCouldNotFetch": "Impossible de récupérer les taux",
-  "@fxCouldNotFetch": {
-    "description": "Error title"
-  },
-  "fxNoRates": "Aucun taux disponible",
-  "@fxNoRates": {
-    "description": "Empty title"
-  },
-  "fxCheckInternet": "Vérifiez votre connexion internet et réessayez.",
-  "@fxCheckInternet": {
-    "description": "Subtitle"
   },
   "fxCacheInfo": "Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.",
   "@fxCacheInfo": {
@@ -3957,26 +3432,6 @@
   "@onboardEmptySub": {
     "description": "Toggle subtitle"
   },
-  "onboardEntrySection": "Saisie des transactions",
-  "@onboardEntrySection": {
-    "description": "Section"
-  },
-  "onboardAssisted": "Assisté",
-  "@onboardAssisted": {
-    "description": "Toggle title"
-  },
-  "onboardAssistedSub": "Étape par étape, rapide pour l'utilisation quotidienne",
-  "@onboardAssistedSub": {
-    "description": "Toggle subtitle"
-  },
-  "onboardClassic": "Formulaire classique",
-  "@onboardClassic": {
-    "description": "Toggle title"
-  },
-  "onboardClassicSub": "Tous les champs à la fois, pour les saisies complexes",
-  "@onboardClassicSub": {
-    "description": "Toggle subtitle"
-  },
   "onboardCreateStart": "Créer et commencer",
   "@onboardCreateStart": {
     "description": "Button"
@@ -4447,14 +3902,6 @@
   "wcForegroundChannelDesc": "Le serveur Compagnon Web BudgetSeal est en marche",
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
-  },
-  "webPageTitle": "BudgetSeal Web",
-  "@webPageTitle": {
-    "description": "Browser tab title"
-  },
-  "webAuthSubtitle": "Entrez votre PIN pour continuer",
-  "@webAuthSubtitle": {
-    "description": "Auth screen"
   },
   "webAuthLockout": "Trop de tentatives. Réessayez plus tard.",
   "@webAuthLockout": {
@@ -5355,34 +4802,6 @@
   "@engineAutoReset": {
     "description": "Ledger note"
   },
-  "nfThousandsComma": "Virgule (1,000)",
-  "@nfThousandsComma": {
-    "description": "Option"
-  },
-  "nfThousandsPeriod": "Point (1.000)",
-  "@nfThousandsPeriod": {
-    "description": "Option"
-  },
-  "nfThousandsSpace": "Espace (1 000)",
-  "@nfThousandsSpace": {
-    "description": "Option"
-  },
-  "nfThousandsNone": "Aucun (1000)",
-  "@nfThousandsNone": {
-    "description": "Option"
-  },
-  "nfDecimalPeriod": "Point (0.50)",
-  "@nfDecimalPeriod": {
-    "description": "Option"
-  },
-  "nfDecimalComma": "Virgule (0,50)",
-  "@nfDecimalComma": {
-    "description": "Option"
-  },
-  "nfNegativeMinus": "Moins (-100 $)",
-  "@nfNegativeMinus": {
-    "description": "Option"
-  },
   "textScaleSmall": "Petit",
   "@textScaleSmall": {
     "description": "Option"
@@ -5399,24 +4818,8 @@
   "@textScaleExtraLarge": {
     "description": "Option"
   },
-  "defcatFoodDining": "Alimentation et restaurants",
-  "@defcatFoodDining": {
-    "description": "Default category"
-  },
   "defcatGroceries": "Courses",
   "@defcatGroceries": {
-    "description": "Default category"
-  },
-  "defcatRestaurants": "Restaurants",
-  "@defcatRestaurants": {
-    "description": "Default category"
-  },
-  "defcatCoffeeSnacks": "Café et snacks",
-  "@defcatCoffeeSnacks": {
-    "description": "Default category"
-  },
-  "defcatTransportation": "Transport",
-  "@defcatTransportation": {
     "description": "Default category"
   },
   "defcatFuel": "Carburant",
@@ -5429,18 +4832,6 @@
   },
   "defcatParkingTolls": "Parking et péages",
   "@defcatParkingTolls": {
-    "description": "Default category"
-  },
-  "defcatHousing": "Logement",
-  "@defcatHousing": {
-    "description": "Default category"
-  },
-  "defcatRentMortgage": "Loyer / Hypothèque",
-  "@defcatRentMortgage": {
-    "description": "Default category"
-  },
-  "defcatUtilities": "Services publics",
-  "@defcatUtilities": {
     "description": "Default category"
   },
   "defcatMaintenance": "Entretien",
@@ -5459,10 +4850,6 @@
   "@defcatElectronics": {
     "description": "Default category"
   },
-  "defcatHouseholdItems": "Articles ménagers",
-  "@defcatHouseholdItems": {
-    "description": "Default category"
-  },
   "defcatEntertainment": "Divertissement",
   "@defcatEntertainment": {
     "description": "Default category"
@@ -5471,28 +4858,12 @@
   "@defcatSubscriptions": {
     "description": "Default category"
   },
-  "defcatMoviesEvents": "Cinéma et événements",
-  "@defcatMoviesEvents": {
-    "description": "Default category"
-  },
-  "defcatHobbies": "Loisirs",
-  "@defcatHobbies": {
-    "description": "Default category"
-  },
   "defcatHealth": "Santé",
   "@defcatHealth": {
     "description": "Default category"
   },
-  "defcatMedical": "Médical",
-  "@defcatMedical": {
-    "description": "Default category"
-  },
   "defcatPharmacy": "Pharmacie",
   "@defcatPharmacy": {
-    "description": "Default category"
-  },
-  "defcatFitness": "Fitness",
-  "@defcatFitness": {
     "description": "Default category"
   },
   "defcatPersonal": "Personnel",
@@ -5505,10 +4876,6 @@
   },
   "defcatGifts": "Cadeaux",
   "@defcatGifts": {
-    "description": "Default category"
-  },
-  "defcatPersonalCare": "Soins personnels",
-  "@defcatPersonalCare": {
     "description": "Default category"
   },
   "defcatSalary": "Salaire",
@@ -5623,46 +4990,9 @@
   "@defcatOther": {
     "description": "Default category preset"
   },
-  "syncErrEncryptedNoPw": "Le fichier de synchronisation est chiffré mais aucun mot de passe n'est défini. Entrez votre mot de passe pour déchiffrer.",
-  "@syncErrEncryptedNoPw": {
-    "description": "Error"
-  },
-  "syncErrWrongPw": "Mot de passe de synchronisation incorrect. Impossible de déchiffrer le fichier.",
-  "@syncErrWrongPw": {
-    "description": "Error"
-  },
-  "syncErrInvalidFormat": "Format de fichier de synchronisation chiffré invalide",
-  "@syncErrInvalidFormat": {
-    "description": "Error"
-  },
-  "googleNotConfigured": "La connexion Google n'est pas configurée pour cette application. Un projet Google Cloud avec des identifiants OAuth est requis.",
-  "@googleNotConfigured": {
-    "description": "Error"
-  },
-  "googleNetworkError": "Erreur réseau. Vérifiez votre connexion internet.",
-  "@googleNetworkError": {
-    "description": "Error"
-  },
-  "googleConnectionFailed": "Échec de la connexion : {error}",
-  "@googleConnectionFailed": {
-    "description": "Error",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "googleNotConnected": "Non connecté à Google Drive",
-  "@googleNotConnected": {
-    "description": "Error"
-  },
   "filePickerTitle": "Sélectionnez le fichier de synchronisation BudgetSeal",
   "@filePickerTitle": {
     "description": "Dialog title"
-  },
-  "filePickerNoPath": "Aucun chemin de fichier de synchronisation défini",
-  "@filePickerNoPath": {
-    "description": "Error"
   },
   "heatmapNoData": "Pas encore de données",
   "@heatmapNoData": {
@@ -5671,33 +5001,6 @@
   "heatmapNoActivity": "Aucune activité",
   "@heatmapNoActivity": {
     "description": "Tooltip"
-  },
-  "backupSizeBytes": "{size} o",
-  "@backupSizeBytes": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "backupSizeKb": "{size} Ko",
-  "@backupSizeKb": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "backupSizeMb": "{size} Mo",
-  "@backupSizeMb": {
-    "description": "Size format",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
   },
   "commonTryAgain": "Réessayer",
   "commonErrorDesc": "Une erreur inattendue s'est produite. Essayez de revenir en arrière ou de redémarrer l'application.",
@@ -5715,7 +5018,6 @@
   "tmplUseCountOne": "{count} utilisation",
   "tmplUseCountOther": "{count} utilisations",
   "tileLanguage": "Langue",
-  "tileLanguageSub": "Langue d'affichage de l'application",
   "languageSystem": "Système",
   "languageEnglish": "English",
   "languageArabic": "العربية",
@@ -5736,8 +5038,6 @@
   "allocLinkedCategoriesDesc": "Les dépenses de ces catégories seront débitées de cette enveloppe.",
   "allocNoCategoriesLinked": "Aucune catégorie liée. Appuyez sur + pour lier des catégories afin que les dépenses soient débitées de cette enveloppe.",
   "allocAvailable": "Disponible",
-  "allocPercentOfTarget": "{percent}% de {target}",
-  "allocAmountLeft": "{amount} restant",
   "allocAmountSpent": "{amount} dépensés",
   "allocAmountToGo": "encore {amount}",
   "allocFund": "Financer",
@@ -5830,7 +5130,6 @@
   "acctNoTransactions": "Aucune transaction pour le moment",
   "acctAdjustDesc": "Saisissez le solde affiché par votre banque (ou portefeuille). S'il diffère, une transaction d'ajustement est enregistrée pour la différence.",
   "acctCurrentBalanceLabel": "Solde actuel : {amount}",
-  "acctActualBalance": "Solde réel",
   "acctEnterRealBalance": "Entrez le solde réel",
   "acctApplyAdjustment": "Appliquer l'ajustement",
   "acctBalanceAdjustment": "Ajustement du solde",
@@ -5845,8 +5144,6 @@
   "acctSomethingWrong": "Une erreur est survenue. Veuillez réessayer.",
   "acctArchiveTitle": "Archiver le compte",
   "acctArchiveMsg": "Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nVous pouvez le désarchiver plus tard depuis les Paramètres.",
-  "acctCannotDeleteTitle": "Impossible de supprimer le compte",
-  "acctCannotDeleteMsg": "Ce compte a {count,plural, =1{1 référence de transaction} other{{count} références de transactions}}. Vous ne pouvez pas le supprimer tant qu'il a des transactions.\n\nVoulez-vous l'archiver à la place ? Les comptes archivés sont masqués des listes mais préservent tout l'historique.",
   "acctDeleteTitle": "Supprimer le compte définitivement",
   "acctDeleteMsg": "Ce compte n'a aucune transaction. Êtes-vous sûr de vouloir le supprimer définitivement ? Cette action est irréversible.",
   "acctArchiveInstead": "Archiver à la place",
@@ -6130,10 +5427,6 @@
   "@catSheetNoMatch": { "description": "Empty state when search has no results" },
   "catSheetNoCategories": "Aucune catégorie pour le moment.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.",
   "@catSheetNoCategories": { "description": "Empty state when no categories exist" },
-  "@catSheetSubcategories": {
-    "description": "Subtitle showing subcategory count",
-    "placeholders": { "count": { "type": "int" } }
-  },
 
   "currencyYourAccounts": "Vos comptes",
   "@currencyYourAccounts": { "description": "Currency sheet section header" },
@@ -6215,8 +5508,6 @@
   "plannedCreated": "Paiement planifié",
   "plannedSaveFailed": "Impossible d'enregistrer le paiement planifié",
   "plannedBadge": "Planifié",
-  "plannedNPlanned": "{amount} planifiés",
-  "@plannedNPlanned": { "description": "Envelope card planned amount label", "placeholders": { "amount": { "type": "String" } } },
   "travelExchangeSuccess": "Échangé {fromAmount} → {toAmount}. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.",
   "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
   "backupRestoreDialogBody": "Du : {date}\nTaille : {size}\n\nCela remplacera vos données actuelles. L'application devra redémarrer.",
@@ -6251,7 +5542,6 @@
   "upgradeRestoreSuccess": "Achat restauré ! Premium débloqué.",
   "upgradeRestoreNone": "Aucun achat précédent trouvé.",
   "catSheetSearchHint": "Rechercher des catégories...",
-  "catSheetSubcategories": "{count} sous-catégories",
   "objSummaryDeadline": "Échéance",
   "plannedNoteHint": "Note (optionnel)",
   "recurringFormAccountRequired": "Le compte est requis",

@@ -9,6 +9,80 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String webEnvBalanceOfTarget(String balance, String target) {
+    return '$balance of $target';
+  }
+
+  @override
+  String get webShortcutRefresh => 'Refresh current page';
+
+  @override
+  String get currencyNameUsd => 'US Dollar';
+
+  @override
+  String get currencyNameEur => 'Euro';
+
+  @override
+  String get currencyNameGbp => 'British Pound';
+
+  @override
+  String get currencyNameJpy => 'Japanese Yen';
+
+  @override
+  String get currencyNameChf => 'Swiss Franc';
+
+  @override
+  String get currencyNameCad => 'Canadian Dollar';
+
+  @override
+  String get currencyNameAud => 'Australian Dollar';
+
+  @override
+  String get currencyNameCny => 'Chinese Yuan';
+
+  @override
+  String get currencyNameInr => 'Indian Rupee';
+
+  @override
+  String get currencyNameBrl => 'Brazilian Real';
+
+  @override
+  String get currencyNameMxn => 'Mexican Peso';
+
+  @override
+  String get currencyNameSgd => 'Singapore Dollar';
+
+  @override
+  String get currencyNameHkd => 'Hong Kong Dollar';
+
+  @override
+  String get currencyNameNok => 'Norwegian Krone';
+
+  @override
+  String get currencyNameSek => 'Swedish Krona';
+
+  @override
+  String get currencyNameNzd => 'New Zealand Dollar';
+
+  @override
+  String get currencyNameZar => 'South African Rand';
+
+  @override
+  String get currencyNameAed => 'UAE Dirham';
+
+  @override
+  String get currencyNameLbp => 'Lebanese Pound';
+
+  @override
+  String get currencyNameSar => 'Saudi Riyal';
+
+  @override
+  String get currencyNameKwd => 'Kuwaiti Dinar';
+
+  @override
+  String get currencyNameTry => 'Turkish Lira';
+
+  @override
   String get notifAlertsChannel => 'BudgetSeal alerts';
 
   @override
@@ -743,9 +817,6 @@ class SEn extends S {
   String get commonChange => 'Change';
 
   @override
-  String get commonFund => 'Fund';
-
-  @override
   String get commonNoData => 'No data';
 
   @override
@@ -773,13 +844,7 @@ class SEn extends S {
   String get appName => 'BudgetSeal';
 
   @override
-  String get appTagline => 'Budget with purpose';
-
-  @override
   String get appTaglineAbout => 'Envelope budgeting, simplified.';
-
-  @override
-  String get appBrandAbbr => 'PP';
 
   @override
   String get tabHome => 'Home';
@@ -824,12 +889,6 @@ class SEn extends S {
   String get navReports => 'Reports';
 
   @override
-  String get navServerStatus => 'Server';
-
-  @override
-  String get navSignOut => 'Sign out';
-
-  @override
   String get typeIncome => 'Income';
 
   @override
@@ -847,9 +906,6 @@ class SEn extends S {
   @override
   String get dashboardWelcomeBody =>
       'This is your financial overview. Tap the quick actions below to start recording transactions.';
-
-  @override
-  String get dashboardHouseholdLabel => 'Household';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -870,25 +926,10 @@ class SEn extends S {
   String get dashboardQuickSplit => 'Split';
 
   @override
-  String get dashboardSectionYourMoney => 'Your Money';
-
-  @override
-  String get dashboardReadyToAssign => 'Ready to assign';
-
-  @override
-  String get dashboardMoneyNotInEnvelope => 'Money not yet in an envelope';
-
-  @override
-  String get dashboardSectionActivity => 'Activity';
-
-  @override
   String get dashboardQuickTemplates => 'Quick Templates';
 
   @override
   String get dashboardViewAll => 'View all';
-
-  @override
-  String get dashboardRecent => 'Recent';
 
   @override
   String get dashboardNoTransactionsYet => 'No transactions yet';
@@ -896,9 +937,6 @@ class SEn extends S {
   @override
   String get dashboardNoTransactionsToday =>
       'No transactions today — tap + to add one';
-
-  @override
-  String get dashboardTotalAcrossAccounts => 'Total across all accounts';
 
   @override
   String get dashboardLabelExpenses => 'Expenses';
@@ -917,61 +955,6 @@ class SEn extends S {
 
   @override
   String get dashboardThisMonth => 'This Month';
-
-  @override
-  String get dashboardEnvelopes => 'Envelopes';
-
-  @override
-  String get dashboardOnTrack => 'On track';
-
-  @override
-  String get dashboardRunningLow => 'Running low';
-
-  @override
-  String get dashboardOverspent => 'Overspent';
-
-  @override
-  String get dashboardHeadsUp => 'Heads up';
-
-  @override
-  String dashboardIsOverLimit(String amount) {
-    return 'is $amount over its limit';
-  }
-
-  @override
-  String dashboardHasPercentLeft(String percent) {
-    return 'has only $percent% left';
-  }
-
-  @override
-  String dashboardBudgetLeftOf(String amount, String total) {
-    return '$amount left of $total budget';
-  }
-
-  @override
-  String dashboardBudgetOver(String amount, String total) {
-    return '$amount over $total budget';
-  }
-
-  @override
-  String dashboardSpendingPerDay(String amount, String projected) {
-    return 'Spending $amount/day · ~$projected by month end';
-  }
-
-  @override
-  String get dashboardMoneySits1Day => 'Money sits 1 day before being spent';
-
-  @override
-  String dashboardMoneySitsNDays(int n) {
-    return 'Money sits $n days before being spent';
-  }
-
-  @override
-  String get dashboardAgeOfMoneyTitle => 'Age of Money';
-
-  @override
-  String get dashboardAgeOfMoneyExplanation =>
-      'This shows how long money sits in your accounts before you spend it.\n\nThink of it as a buffer:\n\n• Under 14 days — you\'re spending money almost as fast as it comes in\n• 14–30 days — you have a small cushion, getting ahead\n• 30–60 days — you\'re spending last month\'s income. Great!\n• 60+ days — strong financial health, big safety net\n\nThe goal is to increase this number over time. The higher it is, the more financially secure you are.';
 
   @override
   String get dashboardSearchPlaceholder => 'Search transactions, accounts...';
@@ -1000,17 +983,6 @@ class SEn extends S {
   String get customizeTitle => 'Customize Dashboard';
 
   @override
-  String get customizeInstructions =>
-      'Drag to reorder. Toggle to show/hide sections.';
-
-  @override
-  String get dashboardSectionStatusLabel => 'Status Card';
-
-  @override
-  String get dashboardSectionStatusDesc =>
-      'Budget status, velocity, age of money';
-
-  @override
   String get dashboardSectionSpendingLabel => 'Spending Overview';
 
   @override
@@ -1028,12 +1000,6 @@ class SEn extends S {
 
   @override
   String get dashboardSectionMoneyDesc => 'Bills, net worth and unallocated';
-
-  @override
-  String get dashboardSectionUnallocatedLabel => 'Ready to Assign';
-
-  @override
-  String get dashboardSectionUnallocatedDesc => 'Unallocated funds';
 
   @override
   String get dashboardSectionActivityLabel => 'Recent Activity';
@@ -1152,9 +1118,6 @@ class SEn extends S {
   String get txSplitBillTooltip => 'Split Bill';
 
   @override
-  String get txAddTooltip => 'Add transaction';
-
-  @override
   String get txFromDate => 'From date';
 
   @override
@@ -1165,9 +1128,6 @@ class SEn extends S {
 
   @override
   String get txMaxAmount => 'Max';
-
-  @override
-  String get txClearFilters => 'Clear advanced filters';
 
   @override
   String get txSelectYear => 'Select Year';
@@ -1224,26 +1184,9 @@ class SEn extends S {
   String get txContextDuplicate => 'Duplicate';
 
   @override
-  String get txDeleteTitle => 'Delete transaction?';
-
-  @override
-  String get txDeleteCannotUndo => 'This action cannot be undone.';
-
-  @override
-  String get txDeleteShort => 'Delete?';
-
-  @override
-  String txDeleteWithReversal(String label) {
-    return 'Delete $label? This will reverse any envelope deductions.';
-  }
-
-  @override
   String txNAccounts(int count) {
     return '$count accounts';
   }
-
-  @override
-  String get txFormEditTitle => 'Edit';
 
   @override
   String get txFormNewTitle => 'New Transaction';
@@ -1259,9 +1202,6 @@ class SEn extends S {
 
   @override
   String get txFormAutoDetected => 'Auto-detected';
-
-  @override
-  String get txFormNoCategory => 'No category';
 
   @override
   String get txFormFromAccount => 'From account';
@@ -1310,10 +1250,6 @@ class SEn extends S {
   String get txFormRateNotSetTitle => 'Exchange rate not set';
 
   @override
-  String get txFormRateNotSetContent =>
-      'Save anyway, or go back to set the rate?';
-
-  @override
   String get txFormDuplicateTitle => 'Possible Duplicate';
 
   @override
@@ -1322,16 +1258,6 @@ class SEn extends S {
 
   @override
   String get txFormSaved => 'Transaction saved';
-
-  @override
-  String txFormSavedEnvelope(String envelopeName) {
-    return 'Transaction saved · $envelopeName envelope updated';
-  }
-
-  @override
-  String txFormErrorSaving(String error) {
-    return 'Error saving: $error';
-  }
 
   @override
   String get txFormReceiptAttached => 'Receipt attached';
@@ -1406,13 +1332,6 @@ class SEn extends S {
 
   @override
   String get txDetailNoReceipt => 'No receipt attached';
-
-  @override
-  String get txDetailDeleteTitle => 'Delete Transaction';
-
-  @override
-  String get txDetailDeleteContent =>
-      'Are you sure you want to delete this transaction?\n\nThis will reverse any envelope deductions and restore the balance. Ledger entries will be removed.\n\nThis cannot be undone.';
 
   @override
   String get txAfDiscardTitle => 'Discard transaction?';
@@ -1514,22 +1433,7 @@ class SEn extends S {
   String get catSheetNew => 'New';
 
   @override
-  String get catSheetNameHint => 'Category name';
-
-  @override
   String get catSheetAdd => 'Add';
-
-  @override
-  String get catSheetNoMatching => 'No matching categories';
-
-  @override
-  String get catSheetNoYet =>
-      'No categories yet.\nTap \"New\" above to create one.';
-
-  @override
-  String catSheetNSubcategories(int count) {
-    return '$count subcategories';
-  }
 
   @override
   String get txWidgetSelectAccount => 'Select account';
@@ -1636,9 +1540,6 @@ class SEn extends S {
 
   @override
   String get billTip => 'Tip';
-
-  @override
-  String get billTipNone => '';
 
   @override
   String get billPercentage => 'Percentage';
@@ -1823,11 +1724,6 @@ class SEn extends S {
   String get allocNewPeriodStarted => 'New period started';
 
   @override
-  String allocNNeedReview(int count) {
-    return '$count envelope(s) need review';
-  }
-
-  @override
   String get allocReview => 'Review';
 
   @override
@@ -1840,16 +1736,7 @@ class SEn extends S {
   String get allocRemaining => 'Remaining';
 
   @override
-  String get allocUnallocated => 'Unallocated';
-
-  @override
-  String get allocFundEnvelopes => 'Fund Envelopes';
-
-  @override
   String get allocSectionSpending => 'Spending';
-
-  @override
-  String get allocSectionSavings => 'Savings';
 
   @override
   String get allocSectionFlexible => 'Rollover';
@@ -1907,20 +1794,6 @@ class SEn extends S {
       'For recurring expenses like groceries or fuel. Set a monthly budget and spend from it.';
 
   @override
-  String get allocSavingGoalTitle => 'Saving (with goal)';
-
-  @override
-  String get allocSavingGoalDesc =>
-      'For a specific goal like taxes or vacation. Set a target and fund it over time.';
-
-  @override
-  String get allocSavingOpenTitle => 'Saving (open)';
-
-  @override
-  String get allocSavingOpenDesc =>
-      'For general savings with no specific goal. Put money aside whenever you can.';
-
-  @override
   String get allocInfoBanner =>
       'Envelopes don\'t move money between accounts. They help you plan how to use the money you already have.';
 
@@ -1928,17 +1801,7 @@ class SEn extends S {
   String get allocPurposeSection => 'Purpose';
 
   @override
-  String get allocSaving => 'Saving';
-
-  @override
-  String get allocFlexible => 'Rollover';
-
-  @override
   String get allocCycleSection => 'Cycle';
-
-  @override
-  String get allocPeriodicDesc =>
-      '• Periodic: resets each month (e.g. groceries budget)\n• Permanent: accumulates over time (e.g. emergency fund)';
 
   @override
   String get allocPeriodic => 'Periodic';
@@ -1947,78 +1810,19 @@ class SEn extends S {
   String get allocPermanent => 'Permanent';
 
   @override
-  String get allocRolloverTitle => 'Rollover balance';
-
-  @override
-  String get allocRolloverSubtitle =>
-      'Carry remaining funds to the next period';
-
-  @override
-  String get allocAutoResetTitle => 'Auto-reset';
-
-  @override
-  String get allocAutoResetSubtitle => 'Reset automatically at period start';
-
-  @override
-  String get allocSavingsTargetSection => 'Savings target';
-
-  @override
-  String get allocMonthlyBudgetSection => 'Monthly budget';
-
-  @override
-  String get allocSavingsTargetHelp =>
-      'How much do you want to save in this envelope?';
-
-  @override
-  String get allocMonthlyBudgetHelp =>
-      'How much do you want to spend in this envelope each month?';
-
-  @override
   String get allocTargetAmount => 'Target amount';
 
   @override
   String get allocBudgetAmount => 'Budget amount';
 
   @override
-  String get allocLinkedCategories => 'Linked categories';
-
-  @override
-  String get allocLinkedHelp =>
-      'Expenses with these categories will debit this envelope.';
-
-  @override
-  String get allocNoCategoriesWarning =>
-      'No categories linked. Tap + to link categories so expenses debit this envelope.';
-
-  @override
   String get allocLinkCategory => 'Link Category';
-
-  @override
-  String get allocSavedLabel => 'Saved';
-
-  @override
-  String get allocAvailableLabel => 'Available';
-
-  @override
-  String get allocLeftSuffix => 'left';
 
   @override
   String get allocFromUnallocated => 'From your unallocated balance';
 
   @override
-  String get allocOverfundingTitle => 'Over-funding';
-
-  @override
-  String get allocOverfundingMsg =>
-      'Your unallocated balance will go negative. Continue anyway?';
-
-  @override
   String get allocFundAnyway => 'Fund Anyway';
-
-  @override
-  String allocCouldNotFund(String error) {
-    return 'Could not fund: $error';
-  }
 
   @override
   String get allocRecentActivity => 'Recent activity';
@@ -2027,48 +1831,17 @@ class SEn extends S {
   String get allocNoActivity => 'No activity yet';
 
   @override
-  String get allocLedgerFunded => 'Funded';
-
-  @override
-  String get allocLedgerSpent => 'Spent';
-
-  @override
-  String get allocLedgerAdjustment => 'Adjustment';
-
-  @override
-  String get allocLedgerPeriodReset => 'Period Reset';
-
-  @override
-  String get allocLedgerCarried => 'Carried Forward';
-
-  @override
   String get allocSpendingHistory => 'Spending history';
 
   @override
   String get allocWithdrawTitle => 'Withdraw from Savings';
 
   @override
-  String get allocWithdrawHelp =>
-      'Move money from this envelope back to Unallocated.';
-
-  @override
-  String get allocWithdrawAmount => 'Amount to withdraw';
-
-  @override
   String get allocWithdrawButton => 'Withdraw';
-
-  @override
-  String get allocAllLinked => 'All categories are already linked to envelopes';
-
-  @override
-  String get allocLinkTitle => 'Link a Category';
 
   @override
   String get allocNoForeignBalances =>
       'No foreign-currency balances to revalue';
-
-  @override
-  String get allocRevalueTitle => 'Revalue Foreign Balances';
 
   @override
   String get allocBalanceInEnvelope => 'balance in this envelope';
@@ -2081,9 +1854,6 @@ class SEn extends S {
 
   @override
   String get allocNewRate => 'New rate';
-
-  @override
-  String get allocFetchButton => 'Fetch';
 
   @override
   String get allocNewValue => 'New value';
@@ -2099,9 +1869,6 @@ class SEn extends S {
 
   @override
   String get allocApplyRevaluation => 'Apply Revaluation';
-
-  @override
-  String get allocRevaluationApplied => 'Revaluation applied';
 
   @override
   String get allocArchiveTitle => 'Archive Envelope';
@@ -2121,22 +1888,6 @@ class SEn extends S {
 
   @override
   String get allocDeletePermanently => 'Delete Permanently';
-
-  @override
-  String get allocDeleteNoLinkedTitle => 'Delete Envelope Permanently';
-
-  @override
-  String get allocDeleteNoLinkedMsg =>
-      'This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.';
-
-  @override
-  String get allocCreated => 'Envelope created';
-
-  @override
-  String get allocUpdated => 'Envelope updated';
-
-  @override
-  String get allocSavedPrefix => 'Saved:';
 
   @override
   String allocPercentSaved(int pct) {
@@ -2193,16 +1944,6 @@ class SEn extends S {
 
   @override
   String get allocAvailable => 'Available';
-
-  @override
-  String allocPercentOfTarget(int percent, String target) {
-    return '$percent% of $target';
-  }
-
-  @override
-  String allocAmountLeft(String amount) {
-    return '$amount left';
-  }
 
   @override
   String allocAmountSpent(String amount) {
@@ -2409,9 +2150,6 @@ class SEn extends S {
 
   @override
   String get fundTitle => 'Fund Envelopes';
-
-  @override
-  String get fundError => 'Couldn\'t load envelopes';
 
   @override
   String get fundCouldntLoad => 'Couldn\'t load envelopes';
@@ -2647,9 +2385,6 @@ class SEn extends S {
   }
 
   @override
-  String get acctActualBalance => 'Actual balance';
-
-  @override
   String get acctEnterRealBalance => 'Enter the real balance';
 
   @override
@@ -2697,20 +2432,6 @@ class SEn extends S {
   @override
   String get acctArchiveMsg =>
       'This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.';
-
-  @override
-  String get acctCannotDeleteTitle => 'Cannot Delete Account';
-
-  @override
-  String acctCannotDeleteMsg(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 's',
-      one: '',
-    );
-    return 'This account has $count transaction reference$_temp0. You can\'t delete it while it has transactions.\n\nWould you like to archive it instead? Archived accounts are hidden from lists but preserve all transaction history.';
-  }
 
   @override
   String get acctDeleteTitle => 'Delete Account Permanently';
@@ -3089,10 +2810,6 @@ class SEn extends S {
   String get objNoTitle => 'No goals or loans yet';
 
   @override
-  String get objNoSubtitle =>
-      'Create a savings goal or track money you lent or borrowed.';
-
-  @override
   String get objGoalsSection => 'Goals';
 
   @override
@@ -3228,12 +2945,6 @@ class SEn extends S {
       'Optional — leave blank for an open-ended goal';
 
   @override
-  String get objIcon => 'Icon';
-
-  @override
-  String get objChooseIcon => 'Choose an icon (optional)';
-
-  @override
   String get objRemoveIcon => 'Remove icon';
 
   @override
@@ -3261,9 +2972,6 @@ class SEn extends S {
   String get settingsToolsSection => 'Tools';
 
   @override
-  String get settingsAutomationSection => 'Automation';
-
-  @override
   String get settingsAccountsSub => 'Manage your accounts and balances';
 
   @override
@@ -3273,16 +2981,7 @@ class SEn extends S {
   String get settingsBillSplitterSub => 'Split bills & scan receipts';
 
   @override
-  String get settingsBillCalendarSub => 'View upcoming recurring bills';
-
-  @override
-  String get settingsUpcomingBillsSub => 'Bills due soon with urgency';
-
-  @override
   String get settingsTravelSub => 'Exchange currency for a trip';
-
-  @override
-  String get settingsExchangeRatesSub => 'View and refresh currency rates';
 
   @override
   String get settingsWebCompanionSub => 'Manage your budget from a browser';
@@ -3291,16 +2990,10 @@ class SEn extends S {
   String get settingsRecurringSub => 'Manage recurring transactions';
 
   @override
-  String get settingsTemplatesSub => 'Save frequent transactions';
-
-  @override
   String get settingsSubscriptionsSub => 'Track recurring subscriptions';
 
   @override
   String get settingsGoalsSub => 'Savings goals and debt tracking';
-
-  @override
-  String get settingsPeriodSub => 'End period and resolve leftovers';
 
   @override
   String get settingsCustomization => 'Settings & Customization';
@@ -3391,12 +3084,6 @@ class SEn extends S {
   String get householdNameTitle => 'Household Name';
 
   @override
-  String get tileBillCalendar => 'Bill Calendar';
-
-  @override
-  String get tileUpcomingBills => 'Upcoming Bills';
-
-  @override
   String get tileTravelExchange => 'Travel Exchange';
 
   @override
@@ -3406,19 +3093,10 @@ class SEn extends S {
   String get tileWebCompanion => 'Web Companion';
 
   @override
-  String get tileRecurring => 'Recurring';
-
-  @override
-  String get tileTemplates => 'Templates';
-
-  @override
   String get tileSubscriptions => 'Subscriptions';
 
   @override
   String get tileGoalsLoans => 'Goals & Loans';
-
-  @override
-  String get tilePeriodTransition => 'Period Transition';
 
   @override
   String get syncTitle => 'Cloud Sync';
@@ -3541,33 +3219,6 @@ class SEn extends S {
 
   @override
   String get syncEncryptionRemoved => 'Sync encryption removed';
-
-  @override
-  String get providerGoogleDrive => 'Google Drive';
-
-  @override
-  String get providerGoogleDriveSub => 'Sign in with your Google account';
-
-  @override
-  String get providerOnedrive => 'OneDrive';
-
-  @override
-  String get providerOnedriveSub => 'Requires the OneDrive app installed';
-
-  @override
-  String get providerDropbox => 'Dropbox';
-
-  @override
-  String get providerDropboxSub => 'Requires the Dropbox app installed';
-
-  @override
-  String get providerLocalFile => 'Local File';
-
-  @override
-  String get providerLocalFileSub => 'Pick any file on your device';
-
-  @override
-  String get syncNoFileFound => 'No sync file found';
 
   @override
   String get backupTitle => 'Backup & Restore';
@@ -3742,15 +3393,6 @@ class SEn extends S {
 
   @override
   String get fxRefreshTooltip => 'Refresh rates';
-
-  @override
-  String get fxCouldNotFetch => 'Could not fetch rates';
-
-  @override
-  String get fxNoRates => 'No rates available';
-
-  @override
-  String get fxCheckInternet => 'Check your internet connection and try again.';
 
   @override
   String get fxCacheInfo =>
@@ -4603,12 +4245,6 @@ class SEn extends S {
       'BudgetSeal Web Companion server is running';
 
   @override
-  String get webPageTitle => 'BudgetSeal Web';
-
-  @override
-  String get webAuthSubtitle => 'Enter your PIN to continue';
-
-  @override
   String get webAuthLockout => 'Too many attempts. Try again later.';
 
   @override
@@ -5255,27 +4891,6 @@ class SEn extends S {
   String get engineAutoReset => 'Period auto-reset';
 
   @override
-  String get nfThousandsComma => 'Comma (1,000)';
-
-  @override
-  String get nfThousandsPeriod => 'Period (1.000)';
-
-  @override
-  String get nfThousandsSpace => 'Space (1 000)';
-
-  @override
-  String get nfThousandsNone => 'None (1000)';
-
-  @override
-  String get nfDecimalPeriod => 'Period (0.50)';
-
-  @override
-  String get nfDecimalComma => 'Comma (0,50)';
-
-  @override
-  String get nfNegativeMinus => 'Minus (-\$100)';
-
-  @override
   String get textScaleSmall => 'Small';
 
   @override
@@ -5288,19 +4903,7 @@ class SEn extends S {
   String get textScaleExtraLarge => 'Extra Large';
 
   @override
-  String get defcatFoodDining => 'Food & Dining';
-
-  @override
   String get defcatGroceries => 'Groceries';
-
-  @override
-  String get defcatRestaurants => 'Restaurants';
-
-  @override
-  String get defcatCoffeeSnacks => 'Coffee & Snacks';
-
-  @override
-  String get defcatTransportation => 'Transportation';
 
   @override
   String get defcatFuel => 'Fuel';
@@ -5310,15 +4913,6 @@ class SEn extends S {
 
   @override
   String get defcatParkingTolls => 'Parking & Tolls';
-
-  @override
-  String get defcatHousing => 'Housing';
-
-  @override
-  String get defcatRentMortgage => 'Rent / Mortgage';
-
-  @override
-  String get defcatUtilities => 'Utilities';
 
   @override
   String get defcatMaintenance => 'Maintenance';
@@ -5333,31 +4927,16 @@ class SEn extends S {
   String get defcatElectronics => 'Electronics';
 
   @override
-  String get defcatHouseholdItems => 'Household Items';
-
-  @override
   String get defcatEntertainment => 'Entertainment';
 
   @override
   String get defcatSubscriptions => 'Subscriptions';
 
   @override
-  String get defcatMoviesEvents => 'Movies & Events';
-
-  @override
-  String get defcatHobbies => 'Hobbies';
-
-  @override
   String get defcatHealth => 'Health';
 
   @override
-  String get defcatMedical => 'Medical';
-
-  @override
   String get defcatPharmacy => 'Pharmacy';
-
-  @override
-  String get defcatFitness => 'Fitness';
 
   @override
   String get defcatPersonal => 'Personal';
@@ -5367,9 +4946,6 @@ class SEn extends S {
 
   @override
   String get defcatGifts => 'Gifts';
-
-  @override
-  String get defcatPersonalCare => 'Personal Care';
 
   @override
   String get defcatSalary => 'Salary';
@@ -5456,58 +5032,13 @@ class SEn extends S {
   String get defcatOther => 'Other';
 
   @override
-  String get syncErrEncryptedNoPw =>
-      'Sync file is encrypted but no password is set. Enter your sync password to decrypt.';
-
-  @override
-  String get syncErrWrongPw =>
-      'Wrong sync password. Could not decrypt the sync file.';
-
-  @override
-  String get syncErrInvalidFormat => 'Invalid encrypted sync file format';
-
-  @override
-  String get googleNotConfigured =>
-      'Google Sign-In is not configured for this app. A Google Cloud project with OAuth credentials is required.';
-
-  @override
-  String get googleNetworkError =>
-      'Network error. Check your internet connection.';
-
-  @override
-  String googleConnectionFailed(String error) {
-    return 'Connection failed: $error';
-  }
-
-  @override
-  String get googleNotConnected => 'Not connected to Google Drive';
-
-  @override
   String get filePickerTitle => 'Select BudgetSeal Sync File';
-
-  @override
-  String get filePickerNoPath => 'No sync file path set';
 
   @override
   String get heatmapNoData => 'No data yet';
 
   @override
   String get heatmapNoActivity => 'No activity';
-
-  @override
-  String backupSizeBytes(String size) {
-    return '$size B';
-  }
-
-  @override
-  String backupSizeKb(String size) {
-    return '$size KB';
-  }
-
-  @override
-  String backupSizeMb(String size) {
-    return '$size MB';
-  }
 
   @override
   String get onboardWelcomeTitle => 'BudgetSeal';
@@ -5587,21 +5118,6 @@ class SEn extends S {
 
   @override
   String get onboardEmptySub => 'Create your own from scratch';
-
-  @override
-  String get onboardEntrySection => 'Transaction entry';
-
-  @override
-  String get onboardAssisted => 'Assisted';
-
-  @override
-  String get onboardAssistedSub => 'Step-by-step, fast for daily use';
-
-  @override
-  String get onboardClassic => 'Classic form';
-
-  @override
-  String get onboardClassicSub => 'All fields at once, for complex entries';
 
   @override
   String get onboardCreateStart => 'Create & Start';
@@ -5910,9 +5426,6 @@ class SEn extends S {
 
   @override
   String get tileLanguage => 'Language';
-
-  @override
-  String get tileLanguageSub => 'App display language';
 
   @override
   String get languageSystem => 'System';
@@ -6449,11 +5962,6 @@ class SEn extends S {
   String get plannedBadge => 'Planned';
 
   @override
-  String plannedNPlanned(String amount) {
-    return '$amount planned';
-  }
-
-  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'Exchanged $fromAmount → $toAmount. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.';
   }
@@ -6551,11 +6059,6 @@ class SEn extends S {
 
   @override
   String get catSheetSearchHint => 'Search categories...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count subcategories';
-  }
 
   @override
   String get objSummaryDeadline => 'Deadline';

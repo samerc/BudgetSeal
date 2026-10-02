@@ -9,6 +9,80 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String webEnvBalanceOfTarget(String balance, String target) {
+    return '$balance من $target';
+  }
+
+  @override
+  String get webShortcutRefresh => 'تحديث الصفحة الحالية';
+
+  @override
+  String get currencyNameUsd => 'دولار أمريكي';
+
+  @override
+  String get currencyNameEur => 'يورو';
+
+  @override
+  String get currencyNameGbp => 'جنيه إسترليني';
+
+  @override
+  String get currencyNameJpy => 'ين ياباني';
+
+  @override
+  String get currencyNameChf => 'فرنك سويسري';
+
+  @override
+  String get currencyNameCad => 'دولار كندي';
+
+  @override
+  String get currencyNameAud => 'دولار أسترالي';
+
+  @override
+  String get currencyNameCny => 'يوان صيني';
+
+  @override
+  String get currencyNameInr => 'روبية هندية';
+
+  @override
+  String get currencyNameBrl => 'ريال برازيلي';
+
+  @override
+  String get currencyNameMxn => 'بيزو مكسيكي';
+
+  @override
+  String get currencyNameSgd => 'دولار سنغافوري';
+
+  @override
+  String get currencyNameHkd => 'دولار هونغ كونغ';
+
+  @override
+  String get currencyNameNok => 'كرونة نرويجية';
+
+  @override
+  String get currencyNameSek => 'كرونة سويدية';
+
+  @override
+  String get currencyNameNzd => 'دولار نيوزيلندي';
+
+  @override
+  String get currencyNameZar => 'راند جنوب أفريقي';
+
+  @override
+  String get currencyNameAed => 'درهم إماراتي';
+
+  @override
+  String get currencyNameLbp => 'ليرة لبنانية';
+
+  @override
+  String get currencyNameSar => 'ريال سعودي';
+
+  @override
+  String get currencyNameKwd => 'دينار كويتي';
+
+  @override
+  String get currencyNameTry => 'ليرة تركية';
+
+  @override
   String get notifAlertsChannel => 'تنبيهات BudgetSeal';
 
   @override
@@ -761,9 +835,6 @@ class SAr extends S {
   String get commonChange => 'تغيير';
 
   @override
-  String get commonFund => 'تمويل';
-
-  @override
   String get commonNoData => 'لا توجد بيانات';
 
   @override
@@ -791,13 +862,7 @@ class SAr extends S {
   String get appName => 'BudgetSeal';
 
   @override
-  String get appTagline => 'ميزانية بهدف';
-
-  @override
   String get appTaglineAbout => 'ميزانية الأظرف بكل بساطة.';
-
-  @override
-  String get appBrandAbbr => 'PP';
 
   @override
   String get tabHome => 'الرئيسية';
@@ -842,12 +907,6 @@ class SAr extends S {
   String get navReports => 'التقارير';
 
   @override
-  String get navServerStatus => 'الخادم';
-
-  @override
-  String get navSignOut => 'تسجيل الخروج';
-
-  @override
   String get typeIncome => 'الدخل';
 
   @override
@@ -865,9 +924,6 @@ class SAr extends S {
   @override
   String get dashboardWelcomeBody =>
       'هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.';
-
-  @override
-  String get dashboardHouseholdLabel => 'الأسرة';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -888,25 +944,10 @@ class SAr extends S {
   String get dashboardQuickSplit => 'تقسيم';
 
   @override
-  String get dashboardSectionYourMoney => 'أموالك';
-
-  @override
-  String get dashboardReadyToAssign => 'جاهز للتوزيع';
-
-  @override
-  String get dashboardMoneyNotInEnvelope => 'أموال لم تُوزَّع بعد على ظرف';
-
-  @override
-  String get dashboardSectionActivity => 'النشاط';
-
-  @override
   String get dashboardQuickTemplates => 'قوالب سريعة';
 
   @override
   String get dashboardViewAll => 'عرض الكل';
-
-  @override
-  String get dashboardRecent => 'الأخيرة';
 
   @override
   String get dashboardNoTransactionsYet => 'لا توجد معاملات بعد';
@@ -914,9 +955,6 @@ class SAr extends S {
   @override
   String get dashboardNoTransactionsToday =>
       'لا معاملات اليوم — اضغط + لإضافة واحدة';
-
-  @override
-  String get dashboardTotalAcrossAccounts => 'الإجمالي عبر جميع الحسابات';
 
   @override
   String get dashboardLabelExpenses => 'مصاريف';
@@ -935,61 +973,6 @@ class SAr extends S {
 
   @override
   String get dashboardThisMonth => 'هذا الشهر';
-
-  @override
-  String get dashboardEnvelopes => 'الأظرف';
-
-  @override
-  String get dashboardOnTrack => 'على المسار';
-
-  @override
-  String get dashboardRunningLow => 'ينفد';
-
-  @override
-  String get dashboardOverspent => 'تجاوز الحد';
-
-  @override
-  String get dashboardHeadsUp => 'تنبيه';
-
-  @override
-  String dashboardIsOverLimit(String amount) {
-    return 'تجاوز حده بمقدار $amount';
-  }
-
-  @override
-  String dashboardHasPercentLeft(String percent) {
-    return 'لم يتبقَّ منه سوى $percent%';
-  }
-
-  @override
-  String dashboardBudgetLeftOf(String amount, String total) {
-    return '$amount متبقٍّ من ميزانية $total';
-  }
-
-  @override
-  String dashboardBudgetOver(String amount, String total) {
-    return '$amount فوق ميزانية $total';
-  }
-
-  @override
-  String dashboardSpendingPerDay(String amount, String projected) {
-    return 'إنفاق $amount/يوم · ~$projected نهاية الشهر';
-  }
-
-  @override
-  String get dashboardMoneySits1Day => 'المال يبقى يوماً واحداً قبل إنفاقه';
-
-  @override
-  String dashboardMoneySitsNDays(int n) {
-    return 'المال يبقى $n أيام قبل إنفاقه';
-  }
-
-  @override
-  String get dashboardAgeOfMoneyTitle => 'عمر المال';
-
-  @override
-  String get dashboardAgeOfMoneyExplanation =>
-      'يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\n\nاعتبره احتياطياً:\n\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\n• 14–30 يوماً — لديك هامش بسيط\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\n• 60+ يوماً — صحة مالية قوية\n\nالهدف زيادة هذا الرقم بمرور الوقت.';
 
   @override
   String get dashboardSearchPlaceholder => 'البحث في المعاملات والحسابات...';
@@ -1018,16 +1001,6 @@ class SAr extends S {
   String get customizeTitle => 'تخصيص لوحة التحكم';
 
   @override
-  String get customizeInstructions =>
-      'اسحب لإعادة الترتيب. بدّل لإظهار/إخفاء الأقسام.';
-
-  @override
-  String get dashboardSectionStatusLabel => 'بطاقة الحالة';
-
-  @override
-  String get dashboardSectionStatusDesc => 'حالة الميزانية، السرعة، عمر المال';
-
-  @override
   String get dashboardSectionSpendingLabel => 'نظرة عامة على الإنفاق';
 
   @override
@@ -1044,12 +1017,6 @@ class SAr extends S {
 
   @override
   String get dashboardSectionMoneyDesc => 'الفواتير وصافي الثروة وغير المخصص';
-
-  @override
-  String get dashboardSectionUnallocatedLabel => 'جاهز للتوزيع';
-
-  @override
-  String get dashboardSectionUnallocatedDesc => 'أموال غير موزعة';
 
   @override
   String get dashboardSectionActivityLabel => 'النشاط الأخير';
@@ -1167,9 +1134,6 @@ class SAr extends S {
   String get txSplitBillTooltip => 'تقسيم الفاتورة';
 
   @override
-  String get txAddTooltip => 'إضافة معاملة';
-
-  @override
   String get txFromDate => 'من تاريخ';
 
   @override
@@ -1180,9 +1144,6 @@ class SAr extends S {
 
   @override
   String get txMaxAmount => 'الحد الأقصى';
-
-  @override
-  String get txClearFilters => 'مسح الفلاتر المتقدمة';
 
   @override
   String get txSelectYear => 'اختر السنة';
@@ -1239,26 +1200,9 @@ class SAr extends S {
   String get txContextDuplicate => 'تكرار';
 
   @override
-  String get txDeleteTitle => 'حذف المعاملة؟';
-
-  @override
-  String get txDeleteCannotUndo => 'لا يمكن التراجع عن هذا الإجراء.';
-
-  @override
-  String get txDeleteShort => 'حذف؟';
-
-  @override
-  String txDeleteWithReversal(String label) {
-    return 'حذف $label؟ سيتم التراجع عن خصومات الأظرف.';
-  }
-
-  @override
   String txNAccounts(int count) {
     return '$count حسابات';
   }
-
-  @override
-  String get txFormEditTitle => 'تعديل';
 
   @override
   String get txFormNewTitle => 'معاملة جديدة';
@@ -1274,9 +1218,6 @@ class SAr extends S {
 
   @override
   String get txFormAutoDetected => 'تم الكشف تلقائياً';
-
-  @override
-  String get txFormNoCategory => 'بدون فئة';
 
   @override
   String get txFormFromAccount => 'من حساب';
@@ -1325,10 +1266,6 @@ class SAr extends S {
   String get txFormRateNotSetTitle => 'لم يتم تعيين سعر الصرف';
 
   @override
-  String get txFormRateNotSetContent =>
-      'الحفظ على أي حال، أم العودة لتعيين السعر؟';
-
-  @override
   String get txFormDuplicateTitle => 'معاملة مكررة محتملة';
 
   @override
@@ -1337,16 +1274,6 @@ class SAr extends S {
 
   @override
   String get txFormSaved => 'تم حفظ المعاملة';
-
-  @override
-  String txFormSavedEnvelope(String envelopeName) {
-    return 'تم حفظ المعاملة · تم تحديث ظرف $envelopeName';
-  }
-
-  @override
-  String txFormErrorSaving(String error) {
-    return 'خطأ في الحفظ: $error';
-  }
 
   @override
   String get txFormReceiptAttached => 'إيصال مرفق';
@@ -1421,13 +1348,6 @@ class SAr extends S {
 
   @override
   String get txDetailNoReceipt => 'لا يوجد إيصال مرفق';
-
-  @override
-  String get txDetailDeleteTitle => 'حذف المعاملة';
-
-  @override
-  String get txDetailDeleteContent =>
-      'هل أنت متأكد من حذف هذه المعاملة؟\n\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\n\nلا يمكن التراجع عن هذا.';
 
   @override
   String get txAfDiscardTitle => 'Abandonner المعاملة؟';
@@ -1528,21 +1448,7 @@ class SAr extends S {
   String get catSheetNew => 'جديد';
 
   @override
-  String get catSheetNameHint => 'اسم الفئة';
-
-  @override
   String get catSheetAdd => 'إضافة';
-
-  @override
-  String get catSheetNoMatching => 'لا فئات مطابقة';
-
-  @override
-  String get catSheetNoYet => 'لا فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.';
-
-  @override
-  String catSheetNSubcategories(int count) {
-    return '$count فئات فرعية';
-  }
 
   @override
   String get txWidgetSelectAccount => 'اختر حساباً';
@@ -1648,9 +1554,6 @@ class SAr extends S {
 
   @override
   String get billTip => 'بقشيش';
-
-  @override
-  String get billTipNone => 'بدون';
 
   @override
   String get billPercentage => 'نسبة مئوية';
@@ -1833,11 +1736,6 @@ class SAr extends S {
   String get allocNewPeriodStarted => 'بدأت فترة جديدة';
 
   @override
-  String allocNNeedReview(int count) {
-    return '$count ظرف(أظرف) تحتاج مراجعة';
-  }
-
-  @override
   String get allocReview => 'مراجعة';
 
   @override
@@ -1850,16 +1748,7 @@ class SAr extends S {
   String get allocRemaining => 'متبقٍّ';
 
   @override
-  String get allocUnallocated => 'غير موزع';
-
-  @override
-  String get allocFundEnvelopes => 'تمويل الأظرف';
-
-  @override
   String get allocSectionSpending => 'إنفاق';
-
-  @override
-  String get allocSectionSavings => 'ادخار';
 
   @override
   String get allocSectionFlexible => 'مُرحَّل';
@@ -1917,20 +1806,6 @@ class SAr extends S {
       'للنفقات المتكررة كالبقالة أو الوقود. حدد ميزانية شهرية وأنفق منها.';
 
   @override
-  String get allocSavingGoalTitle => 'ادخار (بهدف)';
-
-  @override
-  String get allocSavingGoalDesc =>
-      'لهدف محدد كالضرائب أو الإجازة. حدد هدفاً وموّله تدريجياً.';
-
-  @override
-  String get allocSavingOpenTitle => 'ادخار (مفتوح)';
-
-  @override
-  String get allocSavingOpenDesc =>
-      'للادخار العام بدون هدف محدد. ادخر كلما استطعت.';
-
-  @override
   String get allocInfoBanner =>
       'الأظرف لا تنقل المال بين الحسابات. إنها تساعدك على تخطيط استخدام أموالك الحالية.';
 
@@ -1938,17 +1813,7 @@ class SAr extends S {
   String get allocPurposeSection => 'الغرض';
 
   @override
-  String get allocSaving => 'ادخار';
-
-  @override
-  String get allocFlexible => 'مُرحَّل';
-
-  @override
   String get allocCycleSection => 'الدورة';
-
-  @override
-  String get allocPeriodicDesc =>
-      '• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)';
 
   @override
   String get allocPeriodic => 'دوري';
@@ -1957,74 +1822,19 @@ class SAr extends S {
   String get allocPermanent => 'دائم';
 
   @override
-  String get allocRolloverTitle => 'ترحيل الرصيد';
-
-  @override
-  String get allocRolloverSubtitle => 'ترحيل الأموال المتبقية للفترة التالية';
-
-  @override
-  String get allocAutoResetTitle => 'إعادة تعيين تلقائية';
-
-  @override
-  String get allocAutoResetSubtitle =>
-      'إعادة التعيين تلقائياً عند بداية الفترة';
-
-  @override
-  String get allocSavingsTargetSection => 'هدف الادخار';
-
-  @override
-  String get allocMonthlyBudgetSection => 'الميزانية الشهرية';
-
-  @override
-  String get allocSavingsTargetHelp => 'كم تريد أن تدخر في هذا الظرف؟';
-
-  @override
-  String get allocMonthlyBudgetHelp => 'كم تريد أن تنفق من هذا الظرف كل شهر؟';
-
-  @override
   String get allocTargetAmount => 'المبلغ المستهدف';
 
   @override
   String get allocBudgetAmount => 'مبلغ الميزانية';
 
   @override
-  String get allocLinkedCategories => 'الفئات المرتبطة';
-
-  @override
-  String get allocLinkedHelp => 'المصاريف بهذه الفئات ستُخصم من هذا الظرف.';
-
-  @override
-  String get allocNoCategoriesWarning =>
-      'لا فئات مرتبطة. اضغط + لربط الفئات حتى تُخصم المصاريف من هذا الظرف.';
-
-  @override
   String get allocLinkCategory => 'ربط فئة';
-
-  @override
-  String get allocSavedLabel => 'مدّخر';
-
-  @override
-  String get allocAvailableLabel => 'متاح';
-
-  @override
-  String get allocLeftSuffix => 'متبقٍّ';
 
   @override
   String get allocFromUnallocated => 'من رصيدك غير الموزع';
 
   @override
-  String get allocOverfundingTitle => 'تمويل زائد';
-
-  @override
-  String get allocOverfundingMsg => 'سيصبح رصيدك غير الموزع سالباً. المتابعة؟';
-
-  @override
   String get allocFundAnyway => 'تمويل على أي حال';
-
-  @override
-  String allocCouldNotFund(String error) {
-    return 'تعذّر التمويل: $error';
-  }
 
   @override
   String get allocRecentActivity => 'النشاط الأخير';
@@ -2033,46 +1843,16 @@ class SAr extends S {
   String get allocNoActivity => 'لا نشاط بعد';
 
   @override
-  String get allocLedgerFunded => 'موّل';
-
-  @override
-  String get allocLedgerSpent => 'مُنفَق';
-
-  @override
-  String get allocLedgerAdjustment => 'تعديل';
-
-  @override
-  String get allocLedgerPeriodReset => 'إعادة تعيين الفترة';
-
-  @override
-  String get allocLedgerCarried => 'مُرحَّل';
-
-  @override
   String get allocSpendingHistory => 'تاريخ الإنفاق';
 
   @override
   String get allocWithdrawTitle => 'السحب من المدخرات';
 
   @override
-  String get allocWithdrawHelp => 'نقل المال من هذا الظرف إلى غير الموزع.';
-
-  @override
-  String get allocWithdrawAmount => 'المبلغ المراد سحبه';
-
-  @override
   String get allocWithdrawButton => 'سحب';
 
   @override
-  String get allocAllLinked => 'جميع الفئات مرتبطة بأظرف بالفعل';
-
-  @override
-  String get allocLinkTitle => 'ربط فئة';
-
-  @override
   String get allocNoForeignBalances => 'لا أرصدة بعملات أجنبية لإعادة تقييمها';
-
-  @override
-  String get allocRevalueTitle => 'إعادة تقييم الأرصدة الأجنبية';
 
   @override
   String get allocBalanceInEnvelope => 'الرصيد في هذا الظرف';
@@ -2085,9 +1865,6 @@ class SAr extends S {
 
   @override
   String get allocNewRate => 'السعر الجديد';
-
-  @override
-  String get allocFetchButton => 'جلب';
 
   @override
   String get allocNewValue => 'القيمة الجديدة';
@@ -2103,9 +1880,6 @@ class SAr extends S {
 
   @override
   String get allocApplyRevaluation => 'تطبيق إعادة التقييم';
-
-  @override
-  String get allocRevaluationApplied => 'تم تطبيق إعادة التقييم';
 
   @override
   String get allocArchiveTitle => 'أرشفة الظرف';
@@ -2125,22 +1899,6 @@ class SAr extends S {
 
   @override
   String get allocDeletePermanently => 'حذف نهائي';
-
-  @override
-  String get allocDeleteNoLinkedTitle => 'حذف الظرف نهائياً';
-
-  @override
-  String get allocDeleteNoLinkedMsg =>
-      'هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.';
-
-  @override
-  String get allocCreated => 'تم إنشاء الظرف';
-
-  @override
-  String get allocUpdated => 'تم تحديث الظرف';
-
-  @override
-  String get allocSavedPrefix => 'مدّخر:';
 
   @override
   String allocPercentSaved(int pct) {
@@ -2196,16 +1954,6 @@ class SAr extends S {
 
   @override
   String get allocAvailable => 'متاح';
-
-  @override
-  String allocPercentOfTarget(int percent, String target) {
-    return '$percent% من $target';
-  }
-
-  @override
-  String allocAmountLeft(String amount) {
-    return '$amount متبقٍّ';
-  }
 
   @override
   String allocAmountSpent(String amount) {
@@ -2423,9 +2171,6 @@ class SAr extends S {
 
   @override
   String get fundTitle => 'تمويل الأظرف';
-
-  @override
-  String get fundError => 'تعذّر تحميل الأظرف';
 
   @override
   String get fundCouldntLoad => 'تعذّر تحميل الأظرف';
@@ -2662,9 +2407,6 @@ class SAr extends S {
   }
 
   @override
-  String get acctActualBalance => 'الرصيد الفعلي';
-
-  @override
   String get acctEnterRealBalance => 'أدخل الرصيد الحقيقي';
 
   @override
@@ -2712,23 +2454,6 @@ class SAr extends S {
   @override
   String get acctArchiveMsg =>
       'سيتم إخفاء هذا الحساب من جميع القوائم والقوائم المنسدلة. ستُحفظ معاملاتك.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.';
-
-  @override
-  String get acctCannotDeleteTitle => 'لا يمكن حذف الحساب';
-
-  @override
-  String acctCannotDeleteMsg(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count مرجع معاملة',
-      many: '$count مرجعًا لمعاملات',
-      few: '$count مراجع معاملات',
-      two: 'مرجعَي معاملة',
-      one: 'مرجع معاملة واحد',
-    );
-    return 'هذا الحساب يحتوي على $_temp0. لا يمكنك حذفه وهو يحتوي على معاملات.\n\nهل تريد أرشفته بدلاً من ذلك؟ الحسابات المؤرشفة مخفية من القوائم ولكنها تحافظ على كل سجل المعاملات.';
-  }
 
   @override
   String get acctDeleteTitle => 'حذف الحساب نهائياً';
@@ -3109,10 +2834,6 @@ class SAr extends S {
   String get objNoTitle => 'لا أهداف أو قروض بعد';
 
   @override
-  String get objNoSubtitle =>
-      'أنشئ هدف ادخار أو تتبع أموالاً أقرضتها أو اقترضتها.';
-
-  @override
   String get objGoalsSection => 'الأهداف';
 
   @override
@@ -3246,12 +2967,6 @@ class SAr extends S {
   String get objTargetOptional => 'اختياري — اتركه فارغاً لهدف مفتوح';
 
   @override
-  String get objIcon => 'أيقونة';
-
-  @override
-  String get objChooseIcon => 'اختر أيقونة (اختياري)';
-
-  @override
   String get objRemoveIcon => 'إزالة الأيقونة';
 
   @override
@@ -3279,9 +2994,6 @@ class SAr extends S {
   String get settingsToolsSection => 'الأدوات';
 
   @override
-  String get settingsAutomationSection => 'الأتمتة';
-
-  @override
   String get settingsAccountsSub => 'إدارة حساباتك وأرصدتك';
 
   @override
@@ -3291,16 +3003,7 @@ class SAr extends S {
   String get settingsBillSplitterSub => 'تقسيم الفواتير ومسح الإيصالات';
 
   @override
-  String get settingsBillCalendarSub => 'عرض الفواتير المتكررة القادمة';
-
-  @override
-  String get settingsUpcomingBillsSub => 'فواتير مستحقة قريباً مع الأولوية';
-
-  @override
   String get settingsTravelSub => 'صرف عملة لرحلة';
-
-  @override
-  String get settingsExchangeRatesSub => 'عرض وتحديث أسعار الصرف';
 
   @override
   String get settingsWebCompanionSub => 'إدارة ميزانيتك من المتصفح';
@@ -3309,16 +3012,10 @@ class SAr extends S {
   String get settingsRecurringSub => 'إدارة المعاملات المتكررة';
 
   @override
-  String get settingsTemplatesSub => 'حفظ المعاملات المتكررة';
-
-  @override
   String get settingsSubscriptionsSub => 'تتبع الاشتراكات المتكررة';
 
   @override
   String get settingsGoalsSub => 'أهداف الادخار وتتبع الديون';
-
-  @override
-  String get settingsPeriodSub => 'إنهاء الفترة وحل المتبقيات';
 
   @override
   String get settingsCustomization => 'الإعدادات والتخصيص';
@@ -3408,12 +3105,6 @@ class SAr extends S {
   String get householdNameTitle => 'اسم الأسرة';
 
   @override
-  String get tileBillCalendar => 'تقويم الفواتير';
-
-  @override
-  String get tileUpcomingBills => 'الفواتير القادمة';
-
-  @override
   String get tileTravelExchange => 'صرف السفر';
 
   @override
@@ -3423,19 +3114,10 @@ class SAr extends S {
   String get tileWebCompanion => 'المرافق الإلكتروني';
 
   @override
-  String get tileRecurring => 'المتكررة';
-
-  @override
-  String get tileTemplates => 'القوالب';
-
-  @override
   String get tileSubscriptions => 'الاشتراكات';
 
   @override
   String get tileGoalsLoans => 'الأهداف والقروض';
-
-  @override
-  String get tilePeriodTransition => 'انتقال الفترة';
 
   @override
   String get syncTitle => 'المزامنة السحابية';
@@ -3557,33 +3239,6 @@ class SAr extends S {
 
   @override
   String get syncEncryptionRemoved => 'تم إزالة التشفير';
-
-  @override
-  String get providerGoogleDrive => 'Google Drive';
-
-  @override
-  String get providerGoogleDriveSub => 'تسجيل الدخول بحساب Google';
-
-  @override
-  String get providerOnedrive => 'OneDrive';
-
-  @override
-  String get providerOnedriveSub => 'يتطلب تثبيت تطبيق OneDrive';
-
-  @override
-  String get providerDropbox => 'Dropbox';
-
-  @override
-  String get providerDropboxSub => 'يتطلب تثبيت تطبيق Dropbox';
-
-  @override
-  String get providerLocalFile => 'ملف محلي';
-
-  @override
-  String get providerLocalFileSub => 'اختر أي ملف على جهازك';
-
-  @override
-  String get syncNoFileFound => 'لم يتم العثور على ملف مزامنة';
 
   @override
   String get backupTitle => 'النسخ الاحتياطي والاستعادة';
@@ -3758,15 +3413,6 @@ class SAr extends S {
 
   @override
   String get fxRefreshTooltip => 'تحديث الأسعار';
-
-  @override
-  String get fxCouldNotFetch => 'تعذّر جلب الأسعار';
-
-  @override
-  String get fxNoRates => 'لا أسعار متاحة';
-
-  @override
-  String get fxCheckInternet => 'تحقق من اتصالك بالإنترنت وأعد المحاولة.';
 
   @override
   String get fxCacheInfo =>
@@ -4613,12 +4259,6 @@ class SAr extends S {
       'خادم المرافق الإلكتروني BudgetSeal يعمل';
 
   @override
-  String get webPageTitle => 'BudgetSeal Web';
-
-  @override
-  String get webAuthSubtitle => 'أدخل رمز PIN للمتابعة';
-
-  @override
   String get webAuthLockout => 'محاولات كثيرة جداً. أعد المحاولة لاحقاً.';
 
   @override
@@ -5263,27 +4903,6 @@ class SAr extends S {
   String get engineAutoReset => 'إعادة تعيين تلقائية للفترة';
 
   @override
-  String get nfThousandsComma => 'فاصلة (1,000)';
-
-  @override
-  String get nfThousandsPeriod => 'نقطة (1.000)';
-
-  @override
-  String get nfThousandsSpace => 'مسافة (1 000)';
-
-  @override
-  String get nfThousandsNone => 'بدون (1000)';
-
-  @override
-  String get nfDecimalPeriod => 'نقطة (0.50)';
-
-  @override
-  String get nfDecimalComma => 'فاصلة (0,50)';
-
-  @override
-  String get nfNegativeMinus => 'سالب (-\$100)';
-
-  @override
   String get textScaleSmall => 'صغير';
 
   @override
@@ -5296,19 +4915,7 @@ class SAr extends S {
   String get textScaleExtraLarge => 'كبير جداً';
 
   @override
-  String get defcatFoodDining => 'الطعام والمطاعم';
-
-  @override
   String get defcatGroceries => 'بقالة';
-
-  @override
-  String get defcatRestaurants => 'مطاعم';
-
-  @override
-  String get defcatCoffeeSnacks => 'قهوة ووجبات خفيفة';
-
-  @override
-  String get defcatTransportation => 'المواصلات';
 
   @override
   String get defcatFuel => 'وقود';
@@ -5318,15 +4925,6 @@ class SAr extends S {
 
   @override
   String get defcatParkingTolls => 'مواقف ورسوم';
-
-  @override
-  String get defcatHousing => 'السكن';
-
-  @override
-  String get defcatRentMortgage => 'إيجار / رهن عقاري';
-
-  @override
-  String get defcatUtilities => 'خدمات';
 
   @override
   String get defcatMaintenance => 'صيانة';
@@ -5341,31 +4939,16 @@ class SAr extends S {
   String get defcatElectronics => 'إلكترونيات';
 
   @override
-  String get defcatHouseholdItems => 'مستلزمات المنزل';
-
-  @override
   String get defcatEntertainment => 'ترفيه';
 
   @override
   String get defcatSubscriptions => 'الاشتراكات';
 
   @override
-  String get defcatMoviesEvents => 'أفلام وفعاليات';
-
-  @override
-  String get defcatHobbies => 'هوايات';
-
-  @override
   String get defcatHealth => 'الصحة';
 
   @override
-  String get defcatMedical => 'طبي';
-
-  @override
   String get defcatPharmacy => 'صيدلية';
-
-  @override
-  String get defcatFitness => 'لياقة بدنية';
 
   @override
   String get defcatPersonal => 'شخصي';
@@ -5375,9 +4958,6 @@ class SAr extends S {
 
   @override
   String get defcatGifts => 'هدايا';
-
-  @override
-  String get defcatPersonalCare => 'عناية شخصية';
 
   @override
   String get defcatSalary => 'راتب';
@@ -5464,57 +5044,13 @@ class SAr extends S {
   String get defcatOther => 'أخرى';
 
   @override
-  String get syncErrEncryptedNoPw =>
-      'ملف المزامنة مشفر ولكن لم يتم تعيين كلمة مرور. أدخل كلمة مرور المزامنة لفك التشفير.';
-
-  @override
-  String get syncErrWrongPw =>
-      'كلمة مرور المزامنة خاطئة. تعذّر فك تشفير الملف.';
-
-  @override
-  String get syncErrInvalidFormat => 'تنسيق ملف مزامنة مشفر غير صالح';
-
-  @override
-  String get googleNotConfigured =>
-      'لم يتم إعداد تسجيل الدخول بـ Google لهذا التطبيق. يلزم مشروع Google Cloud مع بيانات OAuth.';
-
-  @override
-  String get googleNetworkError => 'خطأ في الشبكة. تحقق من اتصالك بالإنترنت.';
-
-  @override
-  String googleConnectionFailed(String error) {
-    return 'فشل الاتصال: $error';
-  }
-
-  @override
-  String get googleNotConnected => 'غير متصل بـ Google Drive';
-
-  @override
   String get filePickerTitle => 'اختر ملف مزامنة BudgetSeal';
-
-  @override
-  String get filePickerNoPath => 'لم يتم تعيين مسار ملف المزامنة';
 
   @override
   String get heatmapNoData => 'لا بيانات بعد';
 
   @override
   String get heatmapNoActivity => 'لا نشاط';
-
-  @override
-  String backupSizeBytes(String size) {
-    return '$size ب';
-  }
-
-  @override
-  String backupSizeKb(String size) {
-    return '$size ك.ب';
-  }
-
-  @override
-  String backupSizeMb(String size) {
-    return '$size م.ب';
-  }
 
   @override
   String get onboardWelcomeTitle => 'BudgetSeal';
@@ -5593,21 +5129,6 @@ class SAr extends S {
 
   @override
   String get onboardEmptySub => 'أنشئ فئاتك من الصفر';
-
-  @override
-  String get onboardEntrySection => 'إدخال المعاملات';
-
-  @override
-  String get onboardAssisted => 'مساعَد';
-
-  @override
-  String get onboardAssistedSub => 'خطوة بخطوة، سريع للاستخدام اليومي';
-
-  @override
-  String get onboardClassic => 'النموذج الكلاسيكي';
-
-  @override
-  String get onboardClassicSub => 'جميع الحقول دفعة واحدة، للإدخالات المعقدة';
 
   @override
   String get onboardCreateStart => 'إنشاء وبدء';
@@ -5911,9 +5432,6 @@ class SAr extends S {
 
   @override
   String get tileLanguage => 'اللغة';
-
-  @override
-  String get tileLanguageSub => 'لغة عرض التطبيق';
 
   @override
   String get languageSystem => 'النظام';
@@ -6462,11 +5980,6 @@ class SAr extends S {
   String get plannedBadge => 'مخططة';
 
   @override
-  String plannedNPlanned(String amount) {
-    return '$amount مخططة';
-  }
-
-  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'تم التحويل $fromAmount → $toAmount. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.';
   }
@@ -6564,11 +6077,6 @@ class SAr extends S {
 
   @override
   String get catSheetSearchHint => 'بحث في الفئات...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count فئات فرعية';
-  }
 
   @override
   String get objSummaryDeadline => 'الموعد النهائي';

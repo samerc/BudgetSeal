@@ -9,6 +9,80 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String webEnvBalanceOfTarget(String balance, String target) {
+    return '$balance sur $target';
+  }
+
+  @override
+  String get webShortcutRefresh => 'Rafraîchir la page actuelle';
+
+  @override
+  String get currencyNameUsd => 'Dollar américain';
+
+  @override
+  String get currencyNameEur => 'Euro';
+
+  @override
+  String get currencyNameGbp => 'Livre sterling';
+
+  @override
+  String get currencyNameJpy => 'Yen japonais';
+
+  @override
+  String get currencyNameChf => 'Franc suisse';
+
+  @override
+  String get currencyNameCad => 'Dollar canadien';
+
+  @override
+  String get currencyNameAud => 'Dollar australien';
+
+  @override
+  String get currencyNameCny => 'Yuan chinois';
+
+  @override
+  String get currencyNameInr => 'Roupie indienne';
+
+  @override
+  String get currencyNameBrl => 'Réal brésilien';
+
+  @override
+  String get currencyNameMxn => 'Peso mexicain';
+
+  @override
+  String get currencyNameSgd => 'Dollar de Singapour';
+
+  @override
+  String get currencyNameHkd => 'Dollar de Hong Kong';
+
+  @override
+  String get currencyNameNok => 'Couronne norvégienne';
+
+  @override
+  String get currencyNameSek => 'Couronne suédoise';
+
+  @override
+  String get currencyNameNzd => 'Dollar néo-zélandais';
+
+  @override
+  String get currencyNameZar => 'Rand sud-africain';
+
+  @override
+  String get currencyNameAed => 'Dirham des Émirats';
+
+  @override
+  String get currencyNameLbp => 'Livre libanaise';
+
+  @override
+  String get currencyNameSar => 'Riyal saoudien';
+
+  @override
+  String get currencyNameKwd => 'Dinar koweïtien';
+
+  @override
+  String get currencyNameTry => 'Livre turque';
+
+  @override
   String get notifAlertsChannel => 'Alertes BudgetSeal';
 
   @override
@@ -752,9 +826,6 @@ class SFr extends S {
   String get commonChange => 'Modifier';
 
   @override
-  String get commonFund => 'Financer';
-
-  @override
   String get commonNoData => 'Aucune donnée';
 
   @override
@@ -782,13 +853,7 @@ class SFr extends S {
   String get appName => 'BudgetSeal';
 
   @override
-  String get appTagline => 'Budgétiser avec intention';
-
-  @override
   String get appTaglineAbout => 'Budget par enveloppes, simplifié.';
-
-  @override
-  String get appBrandAbbr => 'PP';
 
   @override
   String get tabHome => 'Accueil';
@@ -833,12 +898,6 @@ class SFr extends S {
   String get navReports => 'Rapports';
 
   @override
-  String get navServerStatus => 'Serveur';
-
-  @override
-  String get navSignOut => 'Déconnexion';
-
-  @override
   String get typeIncome => 'Revenu';
 
   @override
@@ -856,9 +915,6 @@ class SFr extends S {
   @override
   String get dashboardWelcomeBody =>
       'Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.';
-
-  @override
-  String get dashboardHouseholdLabel => 'Foyer';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -879,26 +935,10 @@ class SFr extends S {
   String get dashboardQuickSplit => 'Diviser';
 
   @override
-  String get dashboardSectionYourMoney => 'Votre argent';
-
-  @override
-  String get dashboardReadyToAssign => 'Prêt à répartir';
-
-  @override
-  String get dashboardMoneyNotInEnvelope =>
-      'Argent pas encore dans une enveloppe';
-
-  @override
-  String get dashboardSectionActivity => 'Activité';
-
-  @override
   String get dashboardQuickTemplates => 'Modèles rapides';
 
   @override
   String get dashboardViewAll => 'Voir tout';
-
-  @override
-  String get dashboardRecent => 'Récent';
 
   @override
   String get dashboardNoTransactionsYet => 'Aucune transaction pour le moment';
@@ -906,9 +946,6 @@ class SFr extends S {
   @override
   String get dashboardNoTransactionsToday =>
       'Aucune transaction aujourd\'hui — appuyez sur + pour en ajouter';
-
-  @override
-  String get dashboardTotalAcrossAccounts => 'Total de tous les comptes';
 
   @override
   String get dashboardLabelExpenses => 'Dépenses';
@@ -927,62 +964,6 @@ class SFr extends S {
 
   @override
   String get dashboardThisMonth => 'Ce mois-ci';
-
-  @override
-  String get dashboardEnvelopes => 'Enveloppes';
-
-  @override
-  String get dashboardOnTrack => 'En bonne voie';
-
-  @override
-  String get dashboardRunningLow => 'Presque épuisé';
-
-  @override
-  String get dashboardOverspent => 'Dépassé';
-
-  @override
-  String get dashboardHeadsUp => 'Attention';
-
-  @override
-  String dashboardIsOverLimit(String amount) {
-    return 'dépasse sa limite de $amount';
-  }
-
-  @override
-  String dashboardHasPercentLeft(String percent) {
-    return 'n\'a plus que $percent% restant';
-  }
-
-  @override
-  String dashboardBudgetLeftOf(String amount, String total) {
-    return '$amount restant sur un budget de $total';
-  }
-
-  @override
-  String dashboardBudgetOver(String amount, String total) {
-    return '$amount au-dessus du budget de $total';
-  }
-
-  @override
-  String dashboardSpendingPerDay(String amount, String projected) {
-    return 'Dépenses $amount/jour · ~$projected en fin de mois';
-  }
-
-  @override
-  String get dashboardMoneySits1Day =>
-      'L\'argent reste 1 jour avant d\'être dépensé';
-
-  @override
-  String dashboardMoneySitsNDays(int n) {
-    return 'L\'argent reste $n jours avant d\'être dépensé';
-  }
-
-  @override
-  String get dashboardAgeOfMoneyTitle => 'Âge de l\'argent';
-
-  @override
-  String get dashboardAgeOfMoneyExplanation =>
-      'Cela montre combien de temps l\'argent reste dans vos comptes avant d\'être dépensé.\n\nConsidérez-le comme un tampon :\n\n• Moins de 14 jours — vous dépensez aussi vite que l\'argent arrive\n• 14–30 jours — vous avez un petit coussin\n• 30–60 jours — vous dépensez le revenu du mois dernier. Excellent !\n• 60+ jours — excellente santé financière\n\nL\'objectif est d\'augmenter ce nombre avec le temps.';
 
   @override
   String get dashboardSearchPlaceholder =>
@@ -1012,17 +993,6 @@ class SFr extends S {
   String get customizeTitle => 'Personnaliser le tableau de bord';
 
   @override
-  String get customizeInstructions =>
-      'Glissez pour réorganiser. Basculez pour afficher/masquer.';
-
-  @override
-  String get dashboardSectionStatusLabel => 'Carte de statut';
-
-  @override
-  String get dashboardSectionStatusDesc =>
-      'Statut du budget, vélocité, âge de l\'argent';
-
-  @override
   String get dashboardSectionSpendingLabel => 'Aperçu des dépenses';
 
   @override
@@ -1041,12 +1011,6 @@ class SFr extends S {
 
   @override
   String get dashboardSectionMoneyDesc => 'Factures, patrimoine et non alloué';
-
-  @override
-  String get dashboardSectionUnallocatedLabel => 'Prêt à répartir';
-
-  @override
-  String get dashboardSectionUnallocatedDesc => 'Fonds non affectés';
 
   @override
   String get dashboardSectionActivityLabel => 'Activité récente';
@@ -1165,9 +1129,6 @@ class SFr extends S {
   String get txSplitBillTooltip => 'Partager l\'addition';
 
   @override
-  String get txAddTooltip => 'Ajouter une transaction';
-
-  @override
   String get txFromDate => 'Du';
 
   @override
@@ -1178,9 +1139,6 @@ class SFr extends S {
 
   @override
   String get txMaxAmount => 'Max';
-
-  @override
-  String get txClearFilters => 'Effacer les filtres avancés';
 
   @override
   String get txSelectYear => 'Choisir l\'année';
@@ -1237,26 +1195,9 @@ class SFr extends S {
   String get txContextDuplicate => 'Dupliquer';
 
   @override
-  String get txDeleteTitle => 'Supprimer la transaction ?';
-
-  @override
-  String get txDeleteCannotUndo => 'Cette action est irréversible.';
-
-  @override
-  String get txDeleteShort => 'Supprimer ?';
-
-  @override
-  String txDeleteWithReversal(String label) {
-    return 'Supprimer $label ? Cela annulera les déductions des enveloppes.';
-  }
-
-  @override
   String txNAccounts(int count) {
     return '$count comptes';
   }
-
-  @override
-  String get txFormEditTitle => 'Modifier';
 
   @override
   String get txFormNewTitle => 'Nouvelle transaction';
@@ -1272,9 +1213,6 @@ class SFr extends S {
 
   @override
   String get txFormAutoDetected => 'Détecté automatiquement';
-
-  @override
-  String get txFormNoCategory => 'Aucune catégorie';
 
   @override
   String get txFormFromAccount => 'Depuis le compte';
@@ -1325,10 +1263,6 @@ class SFr extends S {
   String get txFormRateNotSetTitle => 'Taux de change non défini';
 
   @override
-  String get txFormRateNotSetContent =>
-      'Enregistrer quand même, ou revenir définir le taux ?';
-
-  @override
   String get txFormDuplicateTitle => 'Doublon possible';
 
   @override
@@ -1337,16 +1271,6 @@ class SFr extends S {
 
   @override
   String get txFormSaved => 'Transaction enregistrée';
-
-  @override
-  String txFormSavedEnvelope(String envelopeName) {
-    return 'Transaction enregistrée · Enveloppe $envelopeName mise à jour';
-  }
-
-  @override
-  String txFormErrorSaving(String error) {
-    return 'Erreur lors de l\'enregistrement : $error';
-  }
 
   @override
   String get txFormReceiptAttached => 'Reçu joint';
@@ -1421,13 +1345,6 @@ class SFr extends S {
 
   @override
   String get txDetailNoReceipt => 'Aucun reçu joint';
-
-  @override
-  String get txDetailDeleteTitle => 'Supprimer la transaction';
-
-  @override
-  String get txDetailDeleteContent =>
-      'Voulez-vous vraiment supprimer cette transaction ?\n\nCela annulera les déductions des enveloppes et restaurera le solde. Les écritures seront supprimées.\n\nCette action est irréversible.';
 
   @override
   String get txAfDiscardTitle => 'Abandonner la transaction ?';
@@ -1531,22 +1448,7 @@ class SFr extends S {
   String get catSheetNew => 'Nouveau';
 
   @override
-  String get catSheetNameHint => 'Nom de la catégorie';
-
-  @override
   String get catSheetAdd => 'Ajouter';
-
-  @override
-  String get catSheetNoMatching => 'Aucune catégorie correspondante';
-
-  @override
-  String get catSheetNoYet =>
-      'Aucune catégorie.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.';
-
-  @override
-  String catSheetNSubcategories(int count) {
-    return '$count sous-catégories';
-  }
 
   @override
   String get txWidgetSelectAccount => 'Sélectionner un compte';
@@ -1655,9 +1557,6 @@ class SFr extends S {
 
   @override
   String get billTip => 'Pourboire';
-
-  @override
-  String get billTipNone => 'Aucun';
 
   @override
   String get billPercentage => 'Pourcentage';
@@ -1845,11 +1744,6 @@ class SFr extends S {
   String get allocNewPeriodStarted => 'Nouvelle période commencée';
 
   @override
-  String allocNNeedReview(int count) {
-    return '$count enveloppe(s) à examiner';
-  }
-
-  @override
   String get allocReview => 'Examiner';
 
   @override
@@ -1862,16 +1756,7 @@ class SFr extends S {
   String get allocRemaining => 'Restant';
 
   @override
-  String get allocUnallocated => 'Non affecté';
-
-  @override
-  String get allocFundEnvelopes => 'Financer les enveloppes';
-
-  @override
   String get allocSectionSpending => 'Dépenses';
-
-  @override
-  String get allocSectionSavings => 'Épargne';
 
   @override
   String get allocSectionFlexible => 'Cumulatif';
@@ -1929,20 +1814,6 @@ class SFr extends S {
       'Pour les dépenses récurrentes comme les courses ou le carburant. Définissez un budget mensuel.';
 
   @override
-  String get allocSavingGoalTitle => 'Épargne (avec objectif)';
-
-  @override
-  String get allocSavingGoalDesc =>
-      'Pour un objectif précis comme les impôts ou les vacances. Définissez un objectif et financez-le.';
-
-  @override
-  String get allocSavingOpenTitle => 'Épargne (libre)';
-
-  @override
-  String get allocSavingOpenDesc =>
-      'Pour l\'épargne générale sans objectif précis. Mettez de l\'argent de côté quand vous pouvez.';
-
-  @override
   String get allocInfoBanner =>
       'Les enveloppes ne déplacent pas l\'argent entre les comptes. Elles vous aident à planifier l\'utilisation de votre argent.';
 
@@ -1950,17 +1821,7 @@ class SFr extends S {
   String get allocPurposeSection => 'Objectif';
 
   @override
-  String get allocSaving => 'Épargne';
-
-  @override
-  String get allocFlexible => 'Cumulatif';
-
-  @override
   String get allocCycleSection => 'Cycle';
-
-  @override
-  String get allocPeriodicDesc =>
-      '• Périodique : se réinitialise chaque mois (ex. budget courses)\n• Permanent : s\'accumule dans le temps (ex. fonds d\'urgence)';
 
   @override
   String get allocPeriodic => 'Périodique';
@@ -1969,79 +1830,19 @@ class SFr extends S {
   String get allocPermanent => 'Permanent';
 
   @override
-  String get allocRolloverTitle => 'Reporter le solde';
-
-  @override
-  String get allocRolloverSubtitle =>
-      'Reporter les fonds restants à la prochaine période';
-
-  @override
-  String get allocAutoResetTitle => 'Réinitialisation auto';
-
-  @override
-  String get allocAutoResetSubtitle =>
-      'Réinitialiser automatiquement au début de la période';
-
-  @override
-  String get allocSavingsTargetSection => 'Objectif d\'épargne';
-
-  @override
-  String get allocMonthlyBudgetSection => 'Budget mensuel';
-
-  @override
-  String get allocSavingsTargetHelp =>
-      'Combien souhaitez-vous épargner dans cette enveloppe ?';
-
-  @override
-  String get allocMonthlyBudgetHelp =>
-      'Combien souhaitez-vous dépenser dans cette enveloppe chaque mois ?';
-
-  @override
   String get allocTargetAmount => 'Montant cible';
 
   @override
   String get allocBudgetAmount => 'Montant du budget';
 
   @override
-  String get allocLinkedCategories => 'Catégories liées';
-
-  @override
-  String get allocLinkedHelp =>
-      'Les dépenses avec ces catégories seront débitées de cette enveloppe.';
-
-  @override
-  String get allocNoCategoriesWarning =>
-      'Aucune catégorie liée. Appuyez sur + pour lier des catégories.';
-
-  @override
   String get allocLinkCategory => 'Lier une catégorie';
-
-  @override
-  String get allocSavedLabel => 'Épargné';
-
-  @override
-  String get allocAvailableLabel => 'Disponible';
-
-  @override
-  String get allocLeftSuffix => 'restant';
 
   @override
   String get allocFromUnallocated => 'Depuis votre solde non affecté';
 
   @override
-  String get allocOverfundingTitle => 'Surfinancement';
-
-  @override
-  String get allocOverfundingMsg =>
-      'Votre solde non affecté deviendra négatif. Continuer ?';
-
-  @override
   String get allocFundAnyway => 'Financer quand même';
-
-  @override
-  String allocCouldNotFund(String error) {
-    return 'Impossible de financer : $error';
-  }
 
   @override
   String get allocRecentActivity => 'Activité récente';
@@ -2050,49 +1851,17 @@ class SFr extends S {
   String get allocNoActivity => 'Aucune activité';
 
   @override
-  String get allocLedgerFunded => 'Financé';
-
-  @override
-  String get allocLedgerSpent => 'Dépensé';
-
-  @override
-  String get allocLedgerAdjustment => 'Ajustement';
-
-  @override
-  String get allocLedgerPeriodReset => 'Réinitialisation de période';
-
-  @override
-  String get allocLedgerCarried => 'Reporté';
-
-  @override
   String get allocSpendingHistory => 'Historique des dépenses';
 
   @override
   String get allocWithdrawTitle => 'Retrait de l\'épargne';
 
   @override
-  String get allocWithdrawHelp =>
-      'Transférer l\'argent de cette enveloppe vers Non affecté.';
-
-  @override
-  String get allocWithdrawAmount => 'Montant à retirer';
-
-  @override
   String get allocWithdrawButton => 'Retirer';
-
-  @override
-  String get allocAllLinked =>
-      'Toutes les catégories sont déjà liées à des enveloppes';
-
-  @override
-  String get allocLinkTitle => 'Lier une catégorie';
 
   @override
   String get allocNoForeignBalances =>
       'Aucun solde en devise étrangère à réévaluer';
-
-  @override
-  String get allocRevalueTitle => 'Réévaluer les soldes étrangers';
 
   @override
   String get allocBalanceInEnvelope => 'solde dans cette enveloppe';
@@ -2105,9 +1874,6 @@ class SFr extends S {
 
   @override
   String get allocNewRate => 'Nouveau taux';
-
-  @override
-  String get allocFetchButton => 'Récupérer';
 
   @override
   String get allocNewValue => 'Nouvelle valeur';
@@ -2123,9 +1889,6 @@ class SFr extends S {
 
   @override
   String get allocApplyRevaluation => 'Appliquer la réévaluation';
-
-  @override
-  String get allocRevaluationApplied => 'Réévaluation appliquée';
 
   @override
   String get allocArchiveTitle => 'Archiver l\'enveloppe';
@@ -2145,23 +1908,6 @@ class SFr extends S {
 
   @override
   String get allocDeletePermanently => 'Supprimer définitivement';
-
-  @override
-  String get allocDeleteNoLinkedTitle =>
-      'Supprimer l\'enveloppe définitivement';
-
-  @override
-  String get allocDeleteNoLinkedMsg =>
-      'Cette enveloppe n\'a pas de catégories liées. Tout l\'historique sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.';
-
-  @override
-  String get allocCreated => 'Enveloppe créée';
-
-  @override
-  String get allocUpdated => 'Enveloppe mise à jour';
-
-  @override
-  String get allocSavedPrefix => 'Épargné :';
 
   @override
   String allocPercentSaved(int pct) {
@@ -2220,16 +1966,6 @@ class SFr extends S {
 
   @override
   String get allocAvailable => 'Disponible';
-
-  @override
-  String allocPercentOfTarget(int percent, String target) {
-    return '$percent% de $target';
-  }
-
-  @override
-  String allocAmountLeft(String amount) {
-    return '$amount restant';
-  }
 
   @override
   String allocAmountSpent(String amount) {
@@ -2437,9 +2173,6 @@ class SFr extends S {
 
   @override
   String get fundTitle => 'Financer les enveloppes';
-
-  @override
-  String get fundError => 'Impossible de charger les enveloppes';
 
   @override
   String get fundCouldntLoad => 'Impossible de charger les enveloppes';
@@ -2679,9 +2412,6 @@ class SFr extends S {
   }
 
   @override
-  String get acctActualBalance => 'Solde réel';
-
-  @override
   String get acctEnterRealBalance => 'Entrez le solde réel';
 
   @override
@@ -2730,20 +2460,6 @@ class SFr extends S {
   @override
   String get acctArchiveMsg =>
       'Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nVous pouvez le désarchiver plus tard depuis les Paramètres.';
-
-  @override
-  String get acctCannotDeleteTitle => 'Impossible de supprimer le compte';
-
-  @override
-  String acctCannotDeleteMsg(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count références de transactions',
-      one: '1 référence de transaction',
-    );
-    return 'Ce compte a $_temp0. Vous ne pouvez pas le supprimer tant qu\'il a des transactions.\n\nVoulez-vous l\'archiver à la place ? Les comptes archivés sont masqués des listes mais préservent tout l\'historique.';
-  }
 
   @override
   String get acctDeleteTitle => 'Supprimer le compte définitivement';
@@ -3124,10 +2840,6 @@ class SFr extends S {
   String get objNoTitle => 'Aucun objectif ou prêt';
 
   @override
-  String get objNoSubtitle =>
-      'Créez un objectif d\'épargne ou suivez l\'argent prêté ou emprunté.';
-
-  @override
   String get objGoalsSection => 'Objectifs';
 
   @override
@@ -3263,12 +2975,6 @@ class SFr extends S {
       'Facultatif — laissez vide pour un objectif ouvert';
 
   @override
-  String get objIcon => 'Icône';
-
-  @override
-  String get objChooseIcon => 'Choisir une icône (facultatif)';
-
-  @override
   String get objRemoveIcon => 'Supprimer l\'icône';
 
   @override
@@ -3296,9 +3002,6 @@ class SFr extends S {
   String get settingsToolsSection => 'Outils';
 
   @override
-  String get settingsAutomationSection => 'Automatisation';
-
-  @override
   String get settingsAccountsSub => 'Gérez vos comptes et soldes';
 
   @override
@@ -3309,17 +3012,7 @@ class SFr extends S {
       'Partager les additions et scanner les reçus';
 
   @override
-  String get settingsBillCalendarSub => 'Voir les factures récurrentes à venir';
-
-  @override
-  String get settingsUpcomingBillsSub => 'Factures bientôt dues avec urgence';
-
-  @override
   String get settingsTravelSub => 'Échanger des devises pour un voyage';
-
-  @override
-  String get settingsExchangeRatesSub =>
-      'Voir et actualiser les taux de change';
 
   @override
   String get settingsWebCompanionSub =>
@@ -3329,16 +3022,10 @@ class SFr extends S {
   String get settingsRecurringSub => 'Gérer les transactions récurrentes';
 
   @override
-  String get settingsTemplatesSub => 'Enregistrer les transactions fréquentes';
-
-  @override
   String get settingsSubscriptionsSub => 'Suivre les abonnements récurrents';
 
   @override
   String get settingsGoalsSub => 'Objectifs d\'épargne et suivi des dettes';
-
-  @override
-  String get settingsPeriodSub => 'Terminer la période et résoudre les restes';
 
   @override
   String get settingsCustomization => 'Paramètres et personnalisation';
@@ -3431,12 +3118,6 @@ class SFr extends S {
   String get householdNameTitle => 'Nom du foyer';
 
   @override
-  String get tileBillCalendar => 'Calendrier des factures';
-
-  @override
-  String get tileUpcomingBills => 'Factures à venir';
-
-  @override
   String get tileTravelExchange => 'Change de voyage';
 
   @override
@@ -3446,19 +3127,10 @@ class SFr extends S {
   String get tileWebCompanion => 'Compagnon Web';
 
   @override
-  String get tileRecurring => 'Récurrents';
-
-  @override
-  String get tileTemplates => 'Modèles';
-
-  @override
   String get tileSubscriptions => 'Abonnements';
 
   @override
   String get tileGoalsLoans => 'Objectifs et prêts';
-
-  @override
-  String get tilePeriodTransition => 'Transition de période';
 
   @override
   String get syncTitle => 'Synchronisation cloud';
@@ -3585,35 +3257,6 @@ class SFr extends S {
 
   @override
   String get syncEncryptionRemoved => 'Chiffrement supprimé';
-
-  @override
-  String get providerGoogleDrive => 'Google Drive';
-
-  @override
-  String get providerGoogleDriveSub =>
-      'Connectez-vous avec votre compte Google';
-
-  @override
-  String get providerOnedrive => 'OneDrive';
-
-  @override
-  String get providerOnedriveSub =>
-      'Nécessite l\'application OneDrive installée';
-
-  @override
-  String get providerDropbox => 'Dropbox';
-
-  @override
-  String get providerDropboxSub => 'Nécessite l\'application Dropbox installée';
-
-  @override
-  String get providerLocalFile => 'Fichier local';
-
-  @override
-  String get providerLocalFileSub => 'Choisissez un fichier sur votre appareil';
-
-  @override
-  String get syncNoFileFound => 'Aucun fichier de synchronisation trouvé';
 
   @override
   String get backupTitle => 'Sauvegarde et restauration';
@@ -3792,16 +3435,6 @@ class SFr extends S {
 
   @override
   String get fxRefreshTooltip => 'Actualiser les taux';
-
-  @override
-  String get fxCouldNotFetch => 'Impossible de récupérer les taux';
-
-  @override
-  String get fxNoRates => 'Aucun taux disponible';
-
-  @override
-  String get fxCheckInternet =>
-      'Vérifiez votre connexion internet et réessayez.';
 
   @override
   String get fxCacheInfo =>
@@ -4667,12 +4300,6 @@ class SFr extends S {
       'Le serveur Compagnon Web BudgetSeal est en marche';
 
   @override
-  String get webPageTitle => 'BudgetSeal Web';
-
-  @override
-  String get webAuthSubtitle => 'Entrez votre PIN pour continuer';
-
-  @override
   String get webAuthLockout => 'Trop de tentatives. Réessayez plus tard.';
 
   @override
@@ -5330,27 +4957,6 @@ class SFr extends S {
   String get engineAutoReset => 'Réinitialisation automatique de période';
 
   @override
-  String get nfThousandsComma => 'Virgule (1,000)';
-
-  @override
-  String get nfThousandsPeriod => 'Point (1.000)';
-
-  @override
-  String get nfThousandsSpace => 'Espace (1 000)';
-
-  @override
-  String get nfThousandsNone => 'Aucun (1000)';
-
-  @override
-  String get nfDecimalPeriod => 'Point (0.50)';
-
-  @override
-  String get nfDecimalComma => 'Virgule (0,50)';
-
-  @override
-  String get nfNegativeMinus => 'Moins (-100 \$)';
-
-  @override
   String get textScaleSmall => 'Petit';
 
   @override
@@ -5363,19 +4969,7 @@ class SFr extends S {
   String get textScaleExtraLarge => 'Très grand';
 
   @override
-  String get defcatFoodDining => 'Alimentation et restaurants';
-
-  @override
   String get defcatGroceries => 'Courses';
-
-  @override
-  String get defcatRestaurants => 'Restaurants';
-
-  @override
-  String get defcatCoffeeSnacks => 'Café et snacks';
-
-  @override
-  String get defcatTransportation => 'Transport';
 
   @override
   String get defcatFuel => 'Carburant';
@@ -5385,15 +4979,6 @@ class SFr extends S {
 
   @override
   String get defcatParkingTolls => 'Parking et péages';
-
-  @override
-  String get defcatHousing => 'Logement';
-
-  @override
-  String get defcatRentMortgage => 'Loyer / Hypothèque';
-
-  @override
-  String get defcatUtilities => 'Services publics';
 
   @override
   String get defcatMaintenance => 'Entretien';
@@ -5408,31 +4993,16 @@ class SFr extends S {
   String get defcatElectronics => 'Électronique';
 
   @override
-  String get defcatHouseholdItems => 'Articles ménagers';
-
-  @override
   String get defcatEntertainment => 'Divertissement';
 
   @override
   String get defcatSubscriptions => 'Abonnements';
 
   @override
-  String get defcatMoviesEvents => 'Cinéma et événements';
-
-  @override
-  String get defcatHobbies => 'Loisirs';
-
-  @override
   String get defcatHealth => 'Santé';
 
   @override
-  String get defcatMedical => 'Médical';
-
-  @override
   String get defcatPharmacy => 'Pharmacie';
-
-  @override
-  String get defcatFitness => 'Fitness';
 
   @override
   String get defcatPersonal => 'Personnel';
@@ -5442,9 +5012,6 @@ class SFr extends S {
 
   @override
   String get defcatGifts => 'Cadeaux';
-
-  @override
-  String get defcatPersonalCare => 'Soins personnels';
 
   @override
   String get defcatSalary => 'Salaire';
@@ -5531,61 +5098,14 @@ class SFr extends S {
   String get defcatOther => 'Autre';
 
   @override
-  String get syncErrEncryptedNoPw =>
-      'Le fichier de synchronisation est chiffré mais aucun mot de passe n\'est défini. Entrez votre mot de passe pour déchiffrer.';
-
-  @override
-  String get syncErrWrongPw =>
-      'Mot de passe de synchronisation incorrect. Impossible de déchiffrer le fichier.';
-
-  @override
-  String get syncErrInvalidFormat =>
-      'Format de fichier de synchronisation chiffré invalide';
-
-  @override
-  String get googleNotConfigured =>
-      'La connexion Google n\'est pas configurée pour cette application. Un projet Google Cloud avec des identifiants OAuth est requis.';
-
-  @override
-  String get googleNetworkError =>
-      'Erreur réseau. Vérifiez votre connexion internet.';
-
-  @override
-  String googleConnectionFailed(String error) {
-    return 'Échec de la connexion : $error';
-  }
-
-  @override
-  String get googleNotConnected => 'Non connecté à Google Drive';
-
-  @override
   String get filePickerTitle =>
       'Sélectionnez le fichier de synchronisation BudgetSeal';
-
-  @override
-  String get filePickerNoPath =>
-      'Aucun chemin de fichier de synchronisation défini';
 
   @override
   String get heatmapNoData => 'Pas encore de données';
 
   @override
   String get heatmapNoActivity => 'Aucune activité';
-
-  @override
-  String backupSizeBytes(String size) {
-    return '$size o';
-  }
-
-  @override
-  String backupSizeKb(String size) {
-    return '$size Ko';
-  }
-
-  @override
-  String backupSizeMb(String size) {
-    return '$size Mo';
-  }
 
   @override
   String get onboardWelcomeTitle => 'BudgetSeal';
@@ -5666,23 +5186,6 @@ class SFr extends S {
 
   @override
   String get onboardEmptySub => 'Créez les vôtres à partir de zéro';
-
-  @override
-  String get onboardEntrySection => 'Saisie des transactions';
-
-  @override
-  String get onboardAssisted => 'Assisté';
-
-  @override
-  String get onboardAssistedSub =>
-      'Étape par étape, rapide pour l\'utilisation quotidienne';
-
-  @override
-  String get onboardClassic => 'Formulaire classique';
-
-  @override
-  String get onboardClassicSub =>
-      'Tous les champs à la fois, pour les saisies complexes';
 
   @override
   String get onboardCreateStart => 'Créer et commencer';
@@ -5994,9 +5497,6 @@ class SFr extends S {
 
   @override
   String get tileLanguage => 'Langue';
-
-  @override
-  String get tileLanguageSub => 'Langue d\'affichage de l\'application';
 
   @override
   String get languageSystem => 'Système';
@@ -6539,11 +6039,6 @@ class SFr extends S {
   String get plannedBadge => 'Planifié';
 
   @override
-  String plannedNPlanned(String amount) {
-    return '$amount planifiés';
-  }
-
-  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'Échangé $fromAmount → $toAmount. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.';
   }
@@ -6641,11 +6136,6 @@ class SFr extends S {
 
   @override
   String get catSheetSearchHint => 'Rechercher des catégories...';
-
-  @override
-  String catSheetSubcategories(int count) {
-    return '$count sous-catégories';
-  }
 
   @override
   String get objSummaryDeadline => 'Échéance';

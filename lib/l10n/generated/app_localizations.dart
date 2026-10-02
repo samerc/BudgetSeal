@@ -99,6 +99,150 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webEnvBalanceOfTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{balance} of {target}'**
+  String webEnvBalanceOfTarget(String balance, String target);
+
+  /// No description provided for @webShortcutRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh current page'**
+  String get webShortcutRefresh;
+
+  /// No description provided for @currencyNameUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get currencyNameUsd;
+
+  /// No description provided for @currencyNameEur.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get currencyNameEur;
+
+  /// No description provided for @currencyNameGbp.
+  ///
+  /// In en, this message translates to:
+  /// **'British Pound'**
+  String get currencyNameGbp;
+
+  /// No description provided for @currencyNameJpy.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Yen'**
+  String get currencyNameJpy;
+
+  /// No description provided for @currencyNameChf.
+  ///
+  /// In en, this message translates to:
+  /// **'Swiss Franc'**
+  String get currencyNameChf;
+
+  /// No description provided for @currencyNameCad.
+  ///
+  /// In en, this message translates to:
+  /// **'Canadian Dollar'**
+  String get currencyNameCad;
+
+  /// No description provided for @currencyNameAud.
+  ///
+  /// In en, this message translates to:
+  /// **'Australian Dollar'**
+  String get currencyNameAud;
+
+  /// No description provided for @currencyNameCny.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese Yuan'**
+  String get currencyNameCny;
+
+  /// No description provided for @currencyNameInr.
+  ///
+  /// In en, this message translates to:
+  /// **'Indian Rupee'**
+  String get currencyNameInr;
+
+  /// No description provided for @currencyNameBrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazilian Real'**
+  String get currencyNameBrl;
+
+  /// No description provided for @currencyNameMxn.
+  ///
+  /// In en, this message translates to:
+  /// **'Mexican Peso'**
+  String get currencyNameMxn;
+
+  /// No description provided for @currencyNameSgd.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore Dollar'**
+  String get currencyNameSgd;
+
+  /// No description provided for @currencyNameHkd.
+  ///
+  /// In en, this message translates to:
+  /// **'Hong Kong Dollar'**
+  String get currencyNameHkd;
+
+  /// No description provided for @currencyNameNok.
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian Krone'**
+  String get currencyNameNok;
+
+  /// No description provided for @currencyNameSek.
+  ///
+  /// In en, this message translates to:
+  /// **'Swedish Krona'**
+  String get currencyNameSek;
+
+  /// No description provided for @currencyNameNzd.
+  ///
+  /// In en, this message translates to:
+  /// **'New Zealand Dollar'**
+  String get currencyNameNzd;
+
+  /// No description provided for @currencyNameZar.
+  ///
+  /// In en, this message translates to:
+  /// **'South African Rand'**
+  String get currencyNameZar;
+
+  /// No description provided for @currencyNameAed.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Dirham'**
+  String get currencyNameAed;
+
+  /// No description provided for @currencyNameLbp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lebanese Pound'**
+  String get currencyNameLbp;
+
+  /// No description provided for @currencyNameSar.
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi Riyal'**
+  String get currencyNameSar;
+
+  /// No description provided for @currencyNameKwd.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwaiti Dinar'**
+  String get currencyNameKwd;
+
+  /// No description provided for @currencyNameTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish Lira'**
+  String get currencyNameTry;
+
   /// No description provided for @notifAlertsChannel.
   ///
   /// In en, this message translates to:
@@ -1264,12 +1408,6 @@ abstract class S {
   /// **'Change'**
   String get commonChange;
 
-  /// Button fund
-  ///
-  /// In en, this message translates to:
-  /// **'Fund'**
-  String get commonFund;
-
   /// Empty state
   ///
   /// In en, this message translates to:
@@ -1324,23 +1462,11 @@ abstract class S {
   /// **'BudgetSeal'**
   String get appName;
 
-  /// Splash screen tagline
-  ///
-  /// In en, this message translates to:
-  /// **'Budget with purpose'**
-  String get appTagline;
-
   /// About screen tagline
   ///
   /// In en, this message translates to:
   /// **'Envelope budgeting, simplified.'**
   String get appTaglineAbout;
-
-  /// Web sidebar logo abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'PP'**
-  String get appBrandAbbr;
 
   /// Bottom nav tab
   ///
@@ -1426,18 +1552,6 @@ abstract class S {
   /// **'Reports'**
   String get navReports;
 
-  /// Web sidebar connection label
-  ///
-  /// In en, this message translates to:
-  /// **'Server'**
-  String get navServerStatus;
-
-  /// Web sidebar button
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get navSignOut;
-
   /// Transaction type label
   ///
   /// In en, this message translates to:
@@ -1473,12 +1587,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This is your financial overview. Tap the quick actions below to start recording transactions.'**
   String get dashboardWelcomeBody;
-
-  /// Header subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Household'**
-  String get dashboardHouseholdLabel;
 
   /// Fallback household name
   ///
@@ -1516,30 +1624,6 @@ abstract class S {
   /// **'Split'**
   String get dashboardQuickSplit;
 
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Your Money'**
-  String get dashboardSectionYourMoney;
-
-  /// Unallocated label
-  ///
-  /// In en, this message translates to:
-  /// **'Ready to assign'**
-  String get dashboardReadyToAssign;
-
-  /// Unallocated subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Money not yet in an envelope'**
-  String get dashboardMoneyNotInEnvelope;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Activity'**
-  String get dashboardSectionActivity;
-
   /// Section title
   ///
   /// In en, this message translates to:
@@ -1552,12 +1636,6 @@ abstract class S {
   /// **'View all'**
   String get dashboardViewAll;
 
-  /// Section title
-  ///
-  /// In en, this message translates to:
-  /// **'Recent'**
-  String get dashboardRecent;
-
   /// Empty state
   ///
   /// In en, this message translates to:
@@ -1569,12 +1647,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No transactions today — tap + to add one'**
   String get dashboardNoTransactionsToday;
-
-  /// Net worth subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Total across all accounts'**
-  String get dashboardTotalAcrossAccounts;
 
   /// Mini stat label
   ///
@@ -1611,90 +1683,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This Month'**
   String get dashboardThisMonth;
-
-  /// Card title
-  ///
-  /// In en, this message translates to:
-  /// **'Envelopes'**
-  String get dashboardEnvelopes;
-
-  /// Envelope health status
-  ///
-  /// In en, this message translates to:
-  /// **'On track'**
-  String get dashboardOnTrack;
-
-  /// Envelope health status
-  ///
-  /// In en, this message translates to:
-  /// **'Running low'**
-  String get dashboardRunningLow;
-
-  /// Envelope health status
-  ///
-  /// In en, this message translates to:
-  /// **'Overspent'**
-  String get dashboardOverspent;
-
-  /// Budget insights header
-  ///
-  /// In en, this message translates to:
-  /// **'Heads up'**
-  String get dashboardHeadsUp;
-
-  /// Budget insight "{name} is {amount} over its limit"
-  ///
-  /// In en, this message translates to:
-  /// **'is {amount} over its limit'**
-  String dashboardIsOverLimit(String amount);
-
-  /// Budget insight "{name} has only {percent}% left"
-  ///
-  /// In en, this message translates to:
-  /// **'has only {percent}% left'**
-  String dashboardHasPercentLeft(String percent);
-
-  /// Status card (under budget)
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} left of {total} budget'**
-  String dashboardBudgetLeftOf(String amount, String total);
-
-  /// Status card (over budget)
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} over {total} budget'**
-  String dashboardBudgetOver(String amount, String total);
-
-  /// Velocity line
-  ///
-  /// In en, this message translates to:
-  /// **'Spending {amount}/day · ~{projected} by month end'**
-  String dashboardSpendingPerDay(String amount, String projected);
-
-  /// Age of money (singular)
-  ///
-  /// In en, this message translates to:
-  /// **'Money sits 1 day before being spent'**
-  String get dashboardMoneySits1Day;
-
-  /// Age of money (plural)
-  ///
-  /// In en, this message translates to:
-  /// **'Money sits {n} days before being spent'**
-  String dashboardMoneySitsNDays(int n);
-
-  /// Info dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Age of Money'**
-  String get dashboardAgeOfMoneyTitle;
-
-  /// Info dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'This shows how long money sits in your accounts before you spend it.\n\nThink of it as a buffer:\n\n• Under 14 days — you\'re spending money almost as fast as it comes in\n• 14–30 days — you have a small cushion, getting ahead\n• 30–60 days — you\'re spending last month\'s income. Great!\n• 60+ days — strong financial health, big safety net\n\nThe goal is to increase this number over time. The higher it is, the more financially secure you are.'**
-  String get dashboardAgeOfMoneyExplanation;
 
   /// Global search hint
   ///
@@ -1744,24 +1732,6 @@ abstract class S {
   /// **'Customize Dashboard'**
   String get customizeTitle;
 
-  /// Instructions text
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to reorder. Toggle to show/hide sections.'**
-  String get customizeInstructions;
-
-  /// Section label
-  ///
-  /// In en, this message translates to:
-  /// **'Status Card'**
-  String get dashboardSectionStatusLabel;
-
-  /// Section description
-  ///
-  /// In en, this message translates to:
-  /// **'Budget status, velocity, age of money'**
-  String get dashboardSectionStatusDesc;
-
   /// Section label
   ///
   /// In en, this message translates to:
@@ -1797,18 +1767,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Bills, net worth and unallocated'**
   String get dashboardSectionMoneyDesc;
-
-  /// Section label
-  ///
-  /// In en, this message translates to:
-  /// **'Ready to Assign'**
-  String get dashboardSectionUnallocatedLabel;
-
-  /// Section description
-  ///
-  /// In en, this message translates to:
-  /// **'Unallocated funds'**
-  String get dashboardSectionUnallocatedDesc;
 
   /// Section label
   ///
@@ -2002,12 +1960,6 @@ abstract class S {
   /// **'Split Bill'**
   String get txSplitBillTooltip;
 
-  /// FAB tooltip
-  ///
-  /// In en, this message translates to:
-  /// **'Add transaction'**
-  String get txAddTooltip;
-
   /// Date range filter
   ///
   /// In en, this message translates to:
@@ -2031,12 +1983,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Max'**
   String get txMaxAmount;
-
-  /// Filter clear link
-  ///
-  /// In en, this message translates to:
-  /// **'Clear advanced filters'**
-  String get txClearFilters;
 
   /// Year picker dialog title
   ///
@@ -2122,41 +2068,11 @@ abstract class S {
   /// **'Duplicate'**
   String get txContextDuplicate;
 
-  /// Delete dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete transaction?'**
-  String get txDeleteTitle;
-
-  /// Delete dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'This action cannot be undone.'**
-  String get txDeleteCannotUndo;
-
-  /// Swipe-to-delete title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete?'**
-  String get txDeleteShort;
-
-  /// Swipe-to-delete content
-  ///
-  /// In en, this message translates to:
-  /// **'Delete {label}? This will reverse any envelope deductions.'**
-  String txDeleteWithReversal(String label);
-
   /// Multi-account label
   ///
   /// In en, this message translates to:
   /// **'{count} accounts'**
   String txNAccounts(int count);
-
-  /// AppBar title editing
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get txFormEditTitle;
 
   /// AppBar title creating
   ///
@@ -2187,12 +2103,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Auto-detected'**
   String get txFormAutoDetected;
-
-  /// No category label
-  ///
-  /// In en, this message translates to:
-  /// **'No category'**
-  String get txFormNoCategory;
 
   /// Transfer source hint
   ///
@@ -2278,12 +2188,6 @@ abstract class S {
   /// **'Exchange rate not set'**
   String get txFormRateNotSetTitle;
 
-  /// Dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'Save anyway, or go back to set the rate?'**
-  String get txFormRateNotSetContent;
-
   /// Dialog title
   ///
   /// In en, this message translates to:
@@ -2301,18 +2205,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Transaction saved'**
   String get txFormSaved;
-
-  /// Success with envelope
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction saved · {envelopeName} envelope updated'**
-  String txFormSavedEnvelope(String envelopeName);
-
-  /// Error snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Error saving: {error}'**
-  String txFormErrorSaving(String error);
 
   /// Receipt indicator
   ///
@@ -2445,18 +2337,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No receipt attached'**
   String get txDetailNoReceipt;
-
-  /// Delete dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Transaction'**
-  String get txDetailDeleteTitle;
-
-  /// Delete dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete this transaction?\n\nThis will reverse any envelope deductions and restore the balance. Ledger entries will be removed.\n\nThis cannot be undone.'**
-  String get txDetailDeleteContent;
 
   /// Back confirmation title
   ///
@@ -2638,35 +2518,11 @@ abstract class S {
   /// **'New'**
   String get catSheetNew;
 
-  /// Text field hint
-  ///
-  /// In en, this message translates to:
-  /// **'Category name'**
-  String get catSheetNameHint;
-
   /// Add button
   ///
   /// In en, this message translates to:
   /// **'Add'**
   String get catSheetAdd;
-
-  /// Empty search
-  ///
-  /// In en, this message translates to:
-  /// **'No matching categories'**
-  String get catSheetNoMatching;
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No categories yet.\nTap \"New\" above to create one.'**
-  String get catSheetNoYet;
-
-  /// Parent subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'{count} subcategories'**
-  String catSheetNSubcategories(int count);
 
   /// Dropdown hint
   ///
@@ -2877,12 +2733,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Tip'**
   String get billTip;
-
-  /// Tip trailing
-  ///
-  /// In en, this message translates to:
-  /// **''**
-  String get billTipNone;
 
   /// Tip mode
   ///
@@ -3196,12 +3046,6 @@ abstract class S {
   /// **'New period started'**
   String get allocNewPeriodStarted;
 
-  /// Banner subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'{count} envelope(s) need review'**
-  String allocNNeedReview(int count);
-
   /// Banner button
   ///
   /// In en, this message translates to:
@@ -3226,29 +3070,11 @@ abstract class S {
   /// **'Remaining'**
   String get allocRemaining;
 
-  /// Banner label
-  ///
-  /// In en, this message translates to:
-  /// **'Unallocated'**
-  String get allocUnallocated;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Fund Envelopes'**
-  String get allocFundEnvelopes;
-
   /// Section header
   ///
   /// In en, this message translates to:
   /// **'Spending'**
   String get allocSectionSpending;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Savings'**
-  String get allocSectionSavings;
 
   /// Section header
   ///
@@ -3358,30 +3184,6 @@ abstract class S {
   /// **'For recurring expenses like groceries or fuel. Set a monthly budget and spend from it.'**
   String get allocSpendingDesc;
 
-  /// Type option
-  ///
-  /// In en, this message translates to:
-  /// **'Saving (with goal)'**
-  String get allocSavingGoalTitle;
-
-  /// Type description
-  ///
-  /// In en, this message translates to:
-  /// **'For a specific goal like taxes or vacation. Set a target and fund it over time.'**
-  String get allocSavingGoalDesc;
-
-  /// Type option
-  ///
-  /// In en, this message translates to:
-  /// **'Saving (open)'**
-  String get allocSavingOpenTitle;
-
-  /// Type description
-  ///
-  /// In en, this message translates to:
-  /// **'For general savings with no specific goal. Put money aside whenever you can.'**
-  String get allocSavingOpenDesc;
-
   /// Info text
   ///
   /// In en, this message translates to:
@@ -3394,29 +3196,11 @@ abstract class S {
   /// **'Purpose'**
   String get allocPurposeSection;
 
-  /// Chip label
-  ///
-  /// In en, this message translates to:
-  /// **'Saving'**
-  String get allocSaving;
-
-  /// Chip label
-  ///
-  /// In en, this message translates to:
-  /// **'Rollover'**
-  String get allocFlexible;
-
   /// Section header
   ///
   /// In en, this message translates to:
   /// **'Cycle'**
   String get allocCycleSection;
-
-  /// Help text
-  ///
-  /// In en, this message translates to:
-  /// **'• Periodic: resets each month (e.g. groceries budget)\n• Permanent: accumulates over time (e.g. emergency fund)'**
-  String get allocPeriodicDesc;
 
   /// Chip label
   ///
@@ -3430,54 +3214,6 @@ abstract class S {
   /// **'Permanent'**
   String get allocPermanent;
 
-  /// Switch title
-  ///
-  /// In en, this message translates to:
-  /// **'Rollover balance'**
-  String get allocRolloverTitle;
-
-  /// Switch subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Carry remaining funds to the next period'**
-  String get allocRolloverSubtitle;
-
-  /// Switch title
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-reset'**
-  String get allocAutoResetTitle;
-
-  /// Switch subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Reset automatically at period start'**
-  String get allocAutoResetSubtitle;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Savings target'**
-  String get allocSavingsTargetSection;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Monthly budget'**
-  String get allocMonthlyBudgetSection;
-
-  /// Help text
-  ///
-  /// In en, this message translates to:
-  /// **'How much do you want to save in this envelope?'**
-  String get allocSavingsTargetHelp;
-
-  /// Help text
-  ///
-  /// In en, this message translates to:
-  /// **'How much do you want to spend in this envelope each month?'**
-  String get allocMonthlyBudgetHelp;
-
   /// Field label
   ///
   /// In en, this message translates to:
@@ -3490,47 +3226,11 @@ abstract class S {
   /// **'Budget amount'**
   String get allocBudgetAmount;
 
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Linked categories'**
-  String get allocLinkedCategories;
-
-  /// Help text
-  ///
-  /// In en, this message translates to:
-  /// **'Expenses with these categories will debit this envelope.'**
-  String get allocLinkedHelp;
-
-  /// Warning banner
-  ///
-  /// In en, this message translates to:
-  /// **'No categories linked. Tap + to link categories so expenses debit this envelope.'**
-  String get allocNoCategoriesWarning;
-
   /// Button
   ///
   /// In en, this message translates to:
   /// **'Link Category'**
   String get allocLinkCategory;
-
-  /// Balance hero label (savings)
-  ///
-  /// In en, this message translates to:
-  /// **'Saved'**
-  String get allocSavedLabel;
-
-  /// Balance hero label (spending)
-  ///
-  /// In en, this message translates to:
-  /// **'Available'**
-  String get allocAvailableLabel;
-
-  /// Progress bar suffix
-  ///
-  /// In en, this message translates to:
-  /// **'left'**
-  String get allocLeftSuffix;
 
   /// Fund sheet subtitle
   ///
@@ -3538,29 +3238,11 @@ abstract class S {
   /// **'From your unallocated balance'**
   String get allocFromUnallocated;
 
-  /// Dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Over-funding'**
-  String get allocOverfundingTitle;
-
-  /// Dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'Your unallocated balance will go negative. Continue anyway?'**
-  String get allocOverfundingMsg;
-
   /// Dialog button
   ///
   /// In en, this message translates to:
   /// **'Fund Anyway'**
   String get allocFundAnyway;
-
-  /// Error snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Could not fund: {error}'**
-  String allocCouldNotFund(String error);
 
   /// Section header
   ///
@@ -3574,36 +3256,6 @@ abstract class S {
   /// **'No activity yet'**
   String get allocNoActivity;
 
-  /// Ledger type
-  ///
-  /// In en, this message translates to:
-  /// **'Funded'**
-  String get allocLedgerFunded;
-
-  /// Ledger type
-  ///
-  /// In en, this message translates to:
-  /// **'Spent'**
-  String get allocLedgerSpent;
-
-  /// Ledger type
-  ///
-  /// In en, this message translates to:
-  /// **'Adjustment'**
-  String get allocLedgerAdjustment;
-
-  /// Ledger type
-  ///
-  /// In en, this message translates to:
-  /// **'Period Reset'**
-  String get allocLedgerPeriodReset;
-
-  /// Ledger type
-  ///
-  /// In en, this message translates to:
-  /// **'Carried Forward'**
-  String get allocLedgerCarried;
-
   /// Section header
   ///
   /// In en, this message translates to:
@@ -3616,18 +3268,6 @@ abstract class S {
   /// **'Withdraw from Savings'**
   String get allocWithdrawTitle;
 
-  /// Sheet subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Move money from this envelope back to Unallocated.'**
-  String get allocWithdrawHelp;
-
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount to withdraw'**
-  String get allocWithdrawAmount;
-
   /// Button
   ///
   /// In en, this message translates to:
@@ -3637,26 +3277,8 @@ abstract class S {
   /// Snackbar
   ///
   /// In en, this message translates to:
-  /// **'All categories are already linked to envelopes'**
-  String get allocAllLinked;
-
-  /// Sheet title
-  ///
-  /// In en, this message translates to:
-  /// **'Link a Category'**
-  String get allocLinkTitle;
-
-  /// Snackbar
-  ///
-  /// In en, this message translates to:
   /// **'No foreign-currency balances to revalue'**
   String get allocNoForeignBalances;
-
-  /// Sheet title
-  ///
-  /// In en, this message translates to:
-  /// **'Revalue Foreign Balances'**
-  String get allocRevalueTitle;
 
   /// Label
   ///
@@ -3681,12 +3303,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'New rate'**
   String get allocNewRate;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Fetch'**
-  String get allocFetchButton;
 
   /// Label
   ///
@@ -3717,12 +3333,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Apply Revaluation'**
   String get allocApplyRevaluation;
-
-  /// Snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Revaluation applied'**
-  String get allocRevaluationApplied;
 
   /// Dialog title
   ///
@@ -3759,36 +3369,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Delete Permanently'**
   String get allocDeletePermanently;
-
-  /// Dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Envelope Permanently'**
-  String get allocDeleteNoLinkedTitle;
-
-  /// Dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.'**
-  String get allocDeleteNoLinkedMsg;
-
-  /// Snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Envelope created'**
-  String get allocCreated;
-
-  /// Snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Envelope updated'**
-  String get allocUpdated;
-
-  /// Allocation card prefix
-  ///
-  /// In en, this message translates to:
-  /// **'Saved:'**
-  String get allocSavedPrefix;
 
   /// Progress text
   ///
@@ -3885,18 +3465,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Available'**
   String get allocAvailable;
-
-  /// No description provided for @allocPercentOfTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent}% of {target}'**
-  String allocPercentOfTarget(int percent, String target);
-
-  /// No description provided for @allocAmountLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} left'**
-  String allocAmountLeft(String amount);
 
   /// No description provided for @allocAmountSpent.
   ///
@@ -4173,12 +3741,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Fund Envelopes'**
   String get fundTitle;
-
-  /// Error retry
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load envelopes'**
-  String get fundError;
 
   /// No description provided for @fundCouldntLoad.
   ///
@@ -4576,12 +4138,6 @@ abstract class S {
   /// **'Current balance: {amount}'**
   String acctCurrentBalanceLabel(String amount);
 
-  /// No description provided for @acctActualBalance.
-  ///
-  /// In en, this message translates to:
-  /// **'Actual balance'**
-  String get acctActualBalance;
-
   /// No description provided for @acctEnterRealBalance.
   ///
   /// In en, this message translates to:
@@ -4665,18 +4221,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.'**
   String get acctArchiveMsg;
-
-  /// No description provided for @acctCannotDeleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot Delete Account'**
-  String get acctCannotDeleteTitle;
-
-  /// No description provided for @acctCannotDeleteMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'This account has {count} transaction reference{count,plural, =1{} other{s}}. You can\'t delete it while it has transactions.\n\nWould you like to archive it instead? Archived accounts are hidden from lists but preserve all transaction history.'**
-  String acctCannotDeleteMsg(int count);
 
   /// No description provided for @acctDeleteTitle.
   ///
@@ -5350,12 +4894,6 @@ abstract class S {
   /// **'No goals or loans yet'**
   String get objNoTitle;
 
-  /// Empty state subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Create a savings goal or track money you lent or borrowed.'**
-  String get objNoSubtitle;
-
   /// Section header
   ///
   /// In en, this message translates to:
@@ -5605,18 +5143,6 @@ abstract class S {
   /// Goals & loans
   ///
   /// In en, this message translates to:
-  /// **'Icon'**
-  String get objIcon;
-
-  /// Goals & loans
-  ///
-  /// In en, this message translates to:
-  /// **'Choose an icon (optional)'**
-  String get objChooseIcon;
-
-  /// Goals & loans
-  ///
-  /// In en, this message translates to:
   /// **'Remove icon'**
   String get objRemoveIcon;
 
@@ -5662,12 +5188,6 @@ abstract class S {
   /// **'Tools'**
   String get settingsToolsSection;
 
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Automation'**
-  String get settingsAutomationSection;
-
   /// Tile subtitle
   ///
   /// In en, this message translates to:
@@ -5689,26 +5209,8 @@ abstract class S {
   /// Tile subtitle
   ///
   /// In en, this message translates to:
-  /// **'View upcoming recurring bills'**
-  String get settingsBillCalendarSub;
-
-  /// Tile subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Bills due soon with urgency'**
-  String get settingsUpcomingBillsSub;
-
-  /// Tile subtitle
-  ///
-  /// In en, this message translates to:
   /// **'Exchange currency for a trip'**
   String get settingsTravelSub;
-
-  /// Tile subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'View and refresh currency rates'**
-  String get settingsExchangeRatesSub;
 
   /// Tile subtitle
   ///
@@ -5725,12 +5227,6 @@ abstract class S {
   /// Tile subtitle
   ///
   /// In en, this message translates to:
-  /// **'Save frequent transactions'**
-  String get settingsTemplatesSub;
-
-  /// Tile subtitle
-  ///
-  /// In en, this message translates to:
   /// **'Track recurring subscriptions'**
   String get settingsSubscriptionsSub;
 
@@ -5739,12 +5235,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Savings goals and debt tracking'**
   String get settingsGoalsSub;
-
-  /// Tile subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'End period and resolve leftovers'**
-  String get settingsPeriodSub;
 
   /// Tile title
   ///
@@ -5917,18 +5407,6 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Bill Calendar'**
-  String get tileBillCalendar;
-
-  /// Tile title
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming Bills'**
-  String get tileUpcomingBills;
-
-  /// Tile title
-  ///
-  /// In en, this message translates to:
   /// **'Travel Exchange'**
   String get tileTravelExchange;
 
@@ -5947,18 +5425,6 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Recurring'**
-  String get tileRecurring;
-
-  /// Tile title
-  ///
-  /// In en, this message translates to:
-  /// **'Templates'**
-  String get tileTemplates;
-
-  /// Tile title
-  ///
-  /// In en, this message translates to:
   /// **'Subscriptions'**
   String get tileSubscriptions;
 
@@ -5967,12 +5433,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Goals & Loans'**
   String get tileGoalsLoans;
-
-  /// Tile title
-  ///
-  /// In en, this message translates to:
-  /// **'Period Transition'**
-  String get tilePeriodTransition;
 
   /// AppBar title
   ///
@@ -6201,60 +5661,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Sync encryption removed'**
   String get syncEncryptionRemoved;
-
-  /// Provider name
-  ///
-  /// In en, this message translates to:
-  /// **'Google Drive'**
-  String get providerGoogleDrive;
-
-  /// Provider subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in with your Google account'**
-  String get providerGoogleDriveSub;
-
-  /// Provider name
-  ///
-  /// In en, this message translates to:
-  /// **'OneDrive'**
-  String get providerOnedrive;
-
-  /// Provider subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Requires the OneDrive app installed'**
-  String get providerOnedriveSub;
-
-  /// Provider name
-  ///
-  /// In en, this message translates to:
-  /// **'Dropbox'**
-  String get providerDropbox;
-
-  /// Provider subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Requires the Dropbox app installed'**
-  String get providerDropboxSub;
-
-  /// Provider name
-  ///
-  /// In en, this message translates to:
-  /// **'Local File'**
-  String get providerLocalFile;
-
-  /// Provider subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Pick any file on your device'**
-  String get providerLocalFileSub;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'No sync file found'**
-  String get syncNoFileFound;
 
   /// AppBar title
   ///
@@ -6585,24 +5991,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Refresh rates'**
   String get fxRefreshTooltip;
-
-  /// Error title
-  ///
-  /// In en, this message translates to:
-  /// **'Could not fetch rates'**
-  String get fxCouldNotFetch;
-
-  /// Empty title
-  ///
-  /// In en, this message translates to:
-  /// **'No rates available'**
-  String get fxNoRates;
-
-  /// Subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Check your internet connection and try again.'**
-  String get fxCheckInternet;
 
   /// Info text
   ///
@@ -8182,18 +7570,6 @@ abstract class S {
   /// **'BudgetSeal Web Companion server is running'**
   String get wcForegroundChannelDesc;
 
-  /// Browser tab title
-  ///
-  /// In en, this message translates to:
-  /// **'BudgetSeal Web'**
-  String get webPageTitle;
-
-  /// Auth screen
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your PIN to continue'**
-  String get webAuthSubtitle;
-
   /// Auth error
   ///
   /// In en, this message translates to:
@@ -9433,48 +8809,6 @@ abstract class S {
   /// Option
   ///
   /// In en, this message translates to:
-  /// **'Comma (1,000)'**
-  String get nfThousandsComma;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Period (1.000)'**
-  String get nfThousandsPeriod;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Space (1 000)'**
-  String get nfThousandsSpace;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'None (1000)'**
-  String get nfThousandsNone;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Period (0.50)'**
-  String get nfDecimalPeriod;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Comma (0,50)'**
-  String get nfDecimalComma;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Minus (-\$100)'**
-  String get nfNegativeMinus;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
   /// **'Small'**
   String get textScaleSmall;
 
@@ -9499,32 +8833,8 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Food & Dining'**
-  String get defcatFoodDining;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
   /// **'Groceries'**
   String get defcatGroceries;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Restaurants'**
-  String get defcatRestaurants;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Coffee & Snacks'**
-  String get defcatCoffeeSnacks;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Transportation'**
-  String get defcatTransportation;
 
   /// Default category
   ///
@@ -9543,24 +8853,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Parking & Tolls'**
   String get defcatParkingTolls;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Housing'**
-  String get defcatHousing;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Rent / Mortgage'**
-  String get defcatRentMortgage;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Utilities'**
-  String get defcatUtilities;
 
   /// Default category
   ///
@@ -9589,12 +8881,6 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Household Items'**
-  String get defcatHouseholdItems;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
   /// **'Entertainment'**
   String get defcatEntertainment;
 
@@ -9607,38 +8893,14 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Movies & Events'**
-  String get defcatMoviesEvents;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Hobbies'**
-  String get defcatHobbies;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
   /// **'Health'**
   String get defcatHealth;
 
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Medical'**
-  String get defcatMedical;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
   /// **'Pharmacy'**
   String get defcatPharmacy;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Fitness'**
-  String get defcatFitness;
 
   /// Default category
   ///
@@ -9657,12 +8919,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Gifts'**
   String get defcatGifts;
-
-  /// Default category
-  ///
-  /// In en, this message translates to:
-  /// **'Personal Care'**
-  String get defcatPersonalCare;
 
   /// Default category
   ///
@@ -9832,59 +9088,11 @@ abstract class S {
   /// **'Other'**
   String get defcatOther;
 
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Sync file is encrypted but no password is set. Enter your sync password to decrypt.'**
-  String get syncErrEncryptedNoPw;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Wrong sync password. Could not decrypt the sync file.'**
-  String get syncErrWrongPw;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid encrypted sync file format'**
-  String get syncErrInvalidFormat;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Google Sign-In is not configured for this app. A Google Cloud project with OAuth credentials is required.'**
-  String get googleNotConfigured;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Network error. Check your internet connection.'**
-  String get googleNetworkError;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Connection failed: {error}'**
-  String googleConnectionFailed(String error);
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'Not connected to Google Drive'**
-  String get googleNotConnected;
-
   /// Dialog title
   ///
   /// In en, this message translates to:
   /// **'Select BudgetSeal Sync File'**
   String get filePickerTitle;
-
-  /// Error
-  ///
-  /// In en, this message translates to:
-  /// **'No sync file path set'**
-  String get filePickerNoPath;
 
   /// Empty state
   ///
@@ -9897,24 +9105,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No activity'**
   String get heatmapNoActivity;
-
-  /// Size format
-  ///
-  /// In en, this message translates to:
-  /// **'{size} B'**
-  String backupSizeBytes(String size);
-
-  /// Size format
-  ///
-  /// In en, this message translates to:
-  /// **'{size} KB'**
-  String backupSizeKb(String size);
-
-  /// Size format
-  ///
-  /// In en, this message translates to:
-  /// **'{size} MB'**
-  String backupSizeMb(String size);
 
   /// Onboarding welcome page title
   ///
@@ -10071,36 +9261,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Create your own from scratch'**
   String get onboardEmptySub;
-
-  /// Onboarding section label
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction entry'**
-  String get onboardEntrySection;
-
-  /// Onboarding entry mode option title
-  ///
-  /// In en, this message translates to:
-  /// **'Assisted'**
-  String get onboardAssisted;
-
-  /// Onboarding entry mode option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Step-by-step, fast for daily use'**
-  String get onboardAssistedSub;
-
-  /// Onboarding entry mode option title
-  ///
-  /// In en, this message translates to:
-  /// **'Classic form'**
-  String get onboardClassic;
-
-  /// Onboarding entry mode option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'All fields at once, for complex entries'**
-  String get onboardClassicSub;
 
   /// Onboarding submit button
   ///
@@ -10641,12 +9801,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Language'**
   String get tileLanguage;
-
-  /// Settings tile subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'App display language'**
-  String get tileLanguageSub;
 
   /// Language option
   ///
@@ -11506,12 +10660,6 @@ abstract class S {
   /// **'Planned'**
   String get plannedBadge;
 
-  /// Envelope card planned amount label
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} planned'**
-  String plannedNPlanned(String amount);
-
   /// SnackBar after successful travel exchange
   ///
   /// In en, this message translates to:
@@ -11691,12 +10839,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Search categories...'**
   String get catSheetSearchHint;
-
-  /// Subtitle showing subcategory count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} subcategories'**
-  String catSheetSubcategories(int count);
 
   /// Summary row label
   ///
