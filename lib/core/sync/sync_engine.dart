@@ -34,7 +34,7 @@ class SyncEngine {
 
     final data = {
       'version': 1,
-      'exportedAt': DateTime.now().toIso8601String(),
+      'exportedAt': DateTime.now().toUtc().toIso8601String(),
       'households': households.map(_householdToMap).toList(),
       'users': users.map(_userToMap).toList(),
       'accounts': accounts.map(_accountToMap).toList(),
@@ -166,31 +166,37 @@ class SyncEngine {
       changed += await _mergeTable(
           _db.households, _list(data, 'households'), _householdFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.users, _list(data, 'users'), _userFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.accounts, _list(data, 'accounts'), _accountFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.allocations, _list(data, 'allocations'), _allocationFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.categories, _list(data, 'categories'), _categoryFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.transactions, _list(data, 'transactions'), _transactionFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(_db.transactionLines,
@@ -200,26 +206,31 @@ class SyncEngine {
       changed += await _mergeTable(_db.allocationLedger,
           _list(data, 'allocationLedger'), _ledgerFromMap,
           getId: (m) => m['id'] as String,
+          column: 'created_at',
           getModified: (m) => _parseDate(m['createdAt']));
 
       changed += await _mergeTable(_db.recurringTransactions,
           _list(data, 'recurringTransactions'), _recurringFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(_db.transactionTemplates,
           _list(data, 'transactionTemplates'), _templateFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
           _db.fxRates, _list(data, 'fxRates'), _fxRateFromMap,
           getId: (m) => m['id'] as String,
+          column: 'fetched_at',
           getModified: (m) => _parseDate(m['fetchedAt']));
 
       changed += await _mergeTable(
           _db.objectives, _list(data, 'objectives'), _objectiveFromMap,
           getId: (m) => m['id'] as String,
+          column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
     });
 
@@ -235,22 +246,20 @@ class SyncEngine {
     Insertable<dynamic> Function(Map<String, dynamic>) fromMap, {
     required String Function(Map<String, dynamic>) getId,
     required DateTime? Function(Map<String, dynamic>) getModified,
+    String? column,
   }) async {
     if (remoteRows.isEmpty) return 0;
 
-    // Bulk-fetch all local rows' IDs + timestamp columns in one query.
+    // Bulk-fetch all local rows' IDs + the table's own timestamp column in
+    // one query. A table without one (transaction lines) is insert-only.
     final localRows = await (_db.customSelect(
-      'SELECT id, last_modified, created_at, fetched_at, last_used_at '
-      'FROM ${table.actualTableName}',
+      'SELECT id, ${column ?? 'NULL'} AS ts FROM ${table.actualTableName}',
     )).get();
 
     final localTimestamps = <String, DateTime?>{};
     for (final row in localRows) {
       final id = row.data['id'] as String;
-      final tsStr = row.data['last_modified'] ??
-          row.data['created_at'] ??
-          row.data['fetched_at'] ??
-          row.data['last_used_at'];
+      final tsStr = row.data['ts'];
       DateTime? ts;
       if (tsStr != null) {
         ts = tsStr is int
@@ -300,7 +309,9 @@ class SyncEngine {
   DateTime? _parseDate(dynamic v) {
     if (v == null) return null;
     if (v is int) return DateTime.fromMillisecondsSinceEpoch(v * 1000);
-    return DateTime.tryParse(v.toString());
+    // Files are written in UTC ("…Z"); older files have local times
+    // without a zone, which tryParse reads as local.
+    return DateTime.tryParse(v.toString())?.toLocal();
   }
 
   // ── Row → Map converters ──────────────────────────────────────
@@ -311,8 +322,8 @@ class SyncEngine {
         'baseCurrency': h.baseCurrency,
         'periodStartDay': h.periodStartDay,
         'createdByDeviceId': h.createdByDeviceId,
-        'createdAt': h.createdAt.toIso8601String(),
-        'lastModified': h.lastModified.toIso8601String(),
+        'createdAt': h.createdAt.toUtc().toIso8601String(),
+        'lastModified': h.lastModified.toUtc().toIso8601String(),
       };
 
   Map<String, dynamic> _userToMap(User u) => {
@@ -321,8 +332,8 @@ class SyncEngine {
         'displayName': u.name,
         'role': u.role,
         'deviceId': u.deviceId,
-        'createdAt': u.createdAt.toIso8601String(),
-        'lastModified': u.lastModified.toIso8601String(),
+        'createdAt': u.createdAt.toUtc().toIso8601String(),
+        'lastModified': u.lastModified.toUtc().toIso8601String(),
       };
 
   Map<String, dynamic> _accountToMap(Account a) => {
@@ -336,8 +347,8 @@ class SyncEngine {
         'isTravel': a.isTravel,
         'archived': a.archived,
         'deviceId': a.deviceId,
-        'createdAt': a.createdAt.toIso8601String(),
-        'lastModified': a.lastModified.toIso8601String(),
+        'createdAt': a.createdAt.toUtc().toIso8601String(),
+        'lastModified': a.lastModified.toUtc().toIso8601String(),
         'deleted': a.deleted,
       };
 
@@ -352,8 +363,8 @@ class SyncEngine {
         'icon': c.icon,
         'colorHex': c.colorHex,
         'archived': c.archived,
-        'createdAt': c.createdAt.toIso8601String(),
-        'lastModified': c.lastModified.toIso8601String(),
+        'createdAt': c.createdAt.toUtc().toIso8601String(),
+        'lastModified': c.lastModified.toUtc().toIso8601String(),
         'deleted': c.deleted,
       };
 
@@ -372,8 +383,8 @@ class SyncEngine {
         'archived': a.archived,
         'sortOrder': a.sortOrder,
         'deviceId': a.deviceId,
-        'createdAt': a.createdAt.toIso8601String(),
-        'lastModified': a.lastModified.toIso8601String(),
+        'createdAt': a.createdAt.toUtc().toIso8601String(),
+        'lastModified': a.lastModified.toUtc().toIso8601String(),
         'deleted': a.deleted,
       };
 
@@ -392,8 +403,8 @@ class SyncEngine {
         'status': t.status,
         'createdBy': t.createdBy,
         'deviceId': t.deviceId,
-        'createdAt': t.createdAt.toIso8601String(),
-        'lastModified': t.lastModified.toIso8601String(),
+        'createdAt': t.createdAt.toUtc().toIso8601String(),
+        'lastModified': t.lastModified.toUtc().toIso8601String(),
         'deleted': t.deleted,
       };
 
@@ -419,7 +430,7 @@ class SyncEngine {
         'exchangeRateToBase': l.exchangeRateToBase,
         'note': l.note,
         'deviceId': l.deviceId,
-        'createdAt': l.createdAt.toIso8601String(),
+        'createdAt': l.createdAt.toUtc().toIso8601String(),
       };
 
   Map<String, dynamic> _recurringToMap(RecurringTransaction r) => {
@@ -435,15 +446,15 @@ class SyncEngine {
         'note': r.note,
         'frequency': r.frequency,
         'interval': r.interval,
-        'nextDueDate': r.nextDueDate.toIso8601String(),
+        'nextDueDate': r.nextDueDate.toUtc().toIso8601String(),
         'anchorDay': r.anchorDay,
-        'endDate': r.endDate?.toIso8601String(),
-        'lastGeneratedDate': r.lastGeneratedDate?.toIso8601String(),
+        'endDate': r.endDate?.toUtc().toIso8601String(),
+        'lastGeneratedDate': r.lastGeneratedDate?.toUtc().toIso8601String(),
         'enabled': r.enabled,
         'isSubscription': r.isSubscription,
         'priceHistory': r.priceHistory,
-        'createdAt': r.createdAt.toIso8601String(),
-        'lastModified': r.lastModified.toIso8601String(),
+        'createdAt': r.createdAt.toUtc().toIso8601String(),
+        'lastModified': r.lastModified.toUtc().toIso8601String(),
         'deleted': r.deleted,
       };
 
@@ -457,9 +468,9 @@ class SyncEngine {
         'accountId': t.accountId,
         'categoryId': t.categoryId,
         'useCount': t.useCount,
-        'lastUsedAt': t.lastUsedAt?.toIso8601String(),
-        'createdAt': t.createdAt.toIso8601String(),
-        'lastModified': t.lastModified.toIso8601String(),
+        'lastUsedAt': t.lastUsedAt?.toUtc().toIso8601String(),
+        'createdAt': t.createdAt.toUtc().toIso8601String(),
+        'lastModified': t.lastModified.toUtc().toIso8601String(),
         'deleted': t.deleted,
       };
 
@@ -468,7 +479,7 @@ class SyncEngine {
         'baseCurrency': f.fromCurrency,
         'targetCurrency': f.toCurrency,
         'rate': f.rate,
-        'fetchedAt': f.fetchedAt.toIso8601String(),
+        'fetchedAt': f.fetchedAt.toUtc().toIso8601String(),
       };
 
   // ── Map → Companion converters ────────────────────────────────
@@ -665,14 +676,14 @@ class SyncEngine {
         'targetAmount': o.targetAmount,
         'targetCurrency': o.targetCurrency,
         'currentAmount': o.currentAmount,
-        'endDate': o.endDate?.toIso8601String(),
+        'endDate': o.endDate?.toUtc().toIso8601String(),
         'contactName': o.contactName,
         'direction': o.direction,
         'colorHex': o.colorHex,
         'archived': o.archived,
         'deviceId': o.deviceId,
-        'createdAt': o.createdAt.toIso8601String(),
-        'lastModified': o.lastModified.toIso8601String(),
+        'createdAt': o.createdAt.toUtc().toIso8601String(),
+        'lastModified': o.lastModified.toUtc().toIso8601String(),
         'deleted': o.deleted,
       };
 

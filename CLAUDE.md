@@ -216,7 +216,7 @@ Recurring transactions can be flagged as subscriptions (`isSubscription` column)
 ### Cloud Sync
 Single-file sync approach (`PocketPlan_Sync.json`):
 - Exports all 12 tables as JSON
-- Merge by `lastModified` timestamp (newer row wins)
+- Merge by `lastModified` timestamp (newer row wins). `_mergeTable` is told each table's own timestamp column (`column:` — `last_modified`, ledger `created_at`, fx `fetched_at`); transaction lines have none and are insert-only (edits always make a new transaction). Dates are written in UTC (`…Z`); `_parseDate` reads them back as local and still accepts older zone-less files. Two-device tests: `test/core/sync/sync_engine_test.dart`.
 - Supports Google Drive (OAuth) and system file picker (Dropbox/OneDrive/local)
 - Auto-syncs on app resume and pause via `WidgetsBindingObserver`
 - Restore from sync file during onboarding
