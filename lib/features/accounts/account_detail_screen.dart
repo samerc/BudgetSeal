@@ -572,7 +572,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             if (_isNew || _showSettings) ...[
             const SizedBox(height: 16),
             SizedBox(
-              height: 48,
               child: FilledButton(
                 onPressed: _loading ? null : _save,
                 style: FilledButton.styleFrom(

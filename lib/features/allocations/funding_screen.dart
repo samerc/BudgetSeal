@@ -1082,7 +1082,6 @@ class _BottomFundBar extends StatelessWidget {
         minimum: const EdgeInsets.only(bottom: 8),
         child: SizedBox(
           width: double.infinity,
-          height: 54,
           child: FilledButton(
             onPressed: canFund ? onFund : null,
             style: FilledButton.styleFrom(

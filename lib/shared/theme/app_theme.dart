@@ -129,6 +129,9 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v,
     ),
     // Cashew TextInput: filled, borderless in every state, radius 15.
     inputDecorationTheme: InputDecorationTheme(
+      // Error and helper text wrap instead of being cut at one line.
+      errorMaxLines: 3,
+      helperMaxLines: 3,
       filled: true,
       fillColor: surfaces.container,
       border: OutlineInputBorder(

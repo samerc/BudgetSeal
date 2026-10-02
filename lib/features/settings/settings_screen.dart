@@ -2479,7 +2479,6 @@ class _ShareHouseholdSettingsSheetState
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 52,
                 child: FilledButton.icon(
                   onPressed: _loading ? null : _share,
                   icon: _loading
@@ -2538,7 +2537,6 @@ class _ShareHouseholdSettingsSheetState
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 52,
                 child: FilledButton.icon(
                   onPressed: _shareCode,
                   icon: const Icon(Icons.share_rounded, size: 20),

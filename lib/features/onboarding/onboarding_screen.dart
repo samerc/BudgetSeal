@@ -930,7 +930,6 @@ class _OnboardingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
       child: FilledButton(
         onPressed: loading ? null : onTap,
         style: FilledButton.styleFrom(
@@ -971,7 +970,6 @@ class _RestoreFromCloudButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       width: double.infinity,
-      height: 48,
       child: OutlinedButton.icon(
         onPressed: () => _showRestoreSheet(context, ref),
         icon: const Icon(Icons.cloud_download_rounded, size: 18),
@@ -1103,7 +1101,6 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: SizedBox(
-                  height: 52,
                   child: OutlinedButton.icon(
                     onPressed: () => _restore(provider),
                     icon: Icon(
@@ -1164,7 +1161,6 @@ class _JoinHouseholdButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       width: double.infinity,
-      height: 48,
       child: OutlinedButton.icon(
         onPressed: () => _showJoinSheet(context),
         icon: const Icon(Icons.people_outline_rounded, size: 18),
@@ -1329,7 +1325,6 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 52,
                 child: FilledButton.icon(
                   onPressed: _join,
                   icon: const Icon(Icons.login_rounded, size: 20),

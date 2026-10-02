@@ -123,7 +123,6 @@ class UpgradeScreen extends ConsumerWidget {
               // ── Upgrade button ──
               SizedBox(
                 width: double.infinity,
-                height: 52,
                 child: FilledButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(

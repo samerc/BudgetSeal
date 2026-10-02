@@ -400,7 +400,6 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
       child: FilledButton.icon(
         onPressed: onTap,
         icon: loading
@@ -545,7 +544,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 52,
                 child: FilledButton.icon(
                   onPressed: _loading ? null : _share,
                   icon: _loading
@@ -604,7 +602,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 52,
                 child: FilledButton.icon(
                   onPressed: _shareCode,
                   icon: const Icon(Icons.share_rounded, size: 20),
