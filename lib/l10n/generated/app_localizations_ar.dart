@@ -9,6 +9,31 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String wcBrowsersConnected(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n متصفح متصل',
+      many: '$n متصفحًا متصلًا',
+      few: '$n متصفحات متصلة',
+      two: 'متصفحان متصلان',
+      one: 'متصفح واحد متصل',
+      zero: 'لا يوجد متصفح متصل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wcBrowsersHint => 'يُحتسب المتصفح ما دامت صفحته مفتوحة.';
+
+  @override
+  String get wcSignOutAll => 'تسجيل خروج الكل';
+
+  @override
+  String get wcSignedOutAll =>
+      'تم تسجيل خروج كل المتصفحات — سيُطلب الرمز من جديد';
+
+  @override
   String get webImportBtn => 'استيراد CSV';
 
   @override

@@ -15,7 +15,9 @@ import 'package:budgetseal/features/web_companion/api/recurring_handler.dart';
 import 'package:budgetseal/features/web_companion/api/subscriptions_handler.dart';
 import 'package:budgetseal/features/web_companion/api/transactions_handler.dart';
 import 'package:budgetseal/features/web_companion/api/upcoming_handler.dart';
+import 'package:budgetseal/features/web_companion/web_companion_auth.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -535,6 +537,29 @@ void main() {
         'GET', query: '?since=${woke['version']}');
     expect(idle['version'], woke['version']);
     expect(idle['tables'], isEmpty);
+  });
+
+  test('browsers: connected count, sign out all wakes waiting polls', () async {
+    FlutterSecureStorage.setMockInitialValues({});
+    await WebCompanionAuth.setPin('1234');
+    final auth = WebCompanionAuth();
+    final a = await auth.submitPin('1234');
+    await auth.submitPin('1234');
+    expect(auth.connectedCount(), 2);
+    expect(auth.connectedCount(within: Duration.zero), 0);
+
+    final feed = ChangeFeed(db);
+    addTearDown(feed.dispose);
+    final poll = changesHandler(feed, wait: const Duration(seconds: 10));
+    final v = (await call(poll, 'GET', query: '?since=-1'))['version'];
+    final started = DateTime.now();
+    final waiting = call(poll, 'GET', query: '?since=$v');
+    auth.revokeAllSessions();
+    feed.wake();
+    await waiting;
+    expect(DateTime.now().difference(started).inSeconds, lessThan(2));
+    expect(auth.validateToken(a), isFalse);
+    expect(auth.connectedCount(), 0);
   });
 
   test('money moves between envelopes and Ready to assign', () async {

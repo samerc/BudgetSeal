@@ -50,6 +50,13 @@ class ChangeFeed {
     return w.future.timeout(timeout, onTimeout: () {});
   }
 
+  /// Answers waiting polls now without a change — after signing everyone
+  /// out, their next request gets the 401 right away.
+  void wake() {
+    _waiter?.complete();
+    _waiter = null;
+  }
+
   void dispose() {
     _sub.cancel();
     _debounce?.cancel();

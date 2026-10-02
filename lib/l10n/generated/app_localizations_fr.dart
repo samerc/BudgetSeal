@@ -9,6 +9,29 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String wcBrowsersConnected(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n navigateurs connectés',
+      one: '1 navigateur connecté',
+      zero: 'Aucun navigateur connecté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wcBrowsersHint =>
+      'Un navigateur compte tant que sa page est ouverte.';
+
+  @override
+  String get wcSignOutAll => 'Tout déconnecter';
+
+  @override
+  String get wcSignedOutAll =>
+      'Tous les navigateurs sont déconnectés — le code PIN sera redemandé';
+
+  @override
   String get webImportBtn => 'Importer un CSV';
 
   @override

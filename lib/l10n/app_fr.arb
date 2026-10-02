@@ -1,4 +1,8 @@
 {
+  "wcBrowsersConnected": "{n, plural, =0{Aucun navigateur connecté} =1{1 navigateur connecté} other{{n} navigateurs connectés}}",
+  "wcBrowsersHint": "Un navigateur compte tant que sa page est ouverte.",
+  "wcSignOutAll": "Tout déconnecter",
+  "wcSignedOutAll": "Tous les navigateurs sont déconnectés — le code PIN sera redemandé",
   "webImportBtn": "Importer un CSV",
   "webImportTitle": "Importer un fichier CSV",
   "webImportSub": "Importez un relevé bancaire ou un tableur. Les lignes déjà présentes dans BudgetSeal sont ignorées.",

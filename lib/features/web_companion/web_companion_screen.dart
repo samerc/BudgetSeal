@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -29,11 +30,45 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   bool _hasWifi = true; // assume yes until checked
   String? _wifiName;
 
+  // Browsers: sessions with the page open now, and all signed-in sessions.
+  int _connected = 0;
+  int _sessions = 0;
+  Timer? _browserTimer;
+
   @override
   void initState() {
     super.initState();
     _checkPin();
     _checkWifiConnectivity();
+    _browserTimer =
+        Timer.periodic(const Duration(seconds: 3), (_) => _refreshBrowsers());
+  }
+
+  @override
+  void dispose() {
+    _browserTimer?.cancel();
+    super.dispose();
+  }
+
+  void _refreshBrowsers() {
+    final service = ref.read(webCompanionServiceProvider);
+    final connected = service.isRunning ? service.auth.connectedCount() : 0;
+    final sessions = service.isRunning ? service.auth.activeSessionCount : 0;
+    if (mounted && (connected != _connected || sessions != _sessions)) {
+      setState(() {
+        _connected = connected;
+        _sessions = sessions;
+      });
+    }
+  }
+
+  void _signOutAll() {
+    ref.read(webCompanionServiceProvider).signOutAllBrowsers();
+    _refreshBrowsers();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(S.of(context).wcSignedOutAll),
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   Future<void> _checkWifiConnectivity() async {
@@ -153,7 +188,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       onConfirm: (pin) async {
         await WebCompanionAuth.setPin(pin);
         // Revoke existing sessions since PIN changed
-        ref.read(webCompanionServiceProvider).auth.revokeAllSessions();
+        ref.read(webCompanionServiceProvider).signOutAllBrowsers();
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -308,6 +343,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           // Connection info (shown when running)
           if (state.isRunning) ...[
             _buildConnectionCard(state),
+            const SizedBox(height: 16),
+            _buildBrowsersCard(),
             const SizedBox(height: 16),
           ],
 
@@ -498,6 +535,74 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// How many browsers have the page open, and a way to sign them all out.
+  Widget _buildBrowsersCard() {
+    final tr = S.of(context);
+    final live = _connected > 0;
+    return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 16),
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        boxShadow: AppColors.cardShadow(context),
+      ),
+      child: Row(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                    color: AppColors.accentLight, shape: BoxShape.circle),
+                child: Icon(Icons.laptop_mac_rounded,
+                    size: 22, color: AppColors.accentText(context)),
+              ),
+              if (live)
+                PositionedDirectional(
+                  end: -1,
+                  bottom: -1,
+                  child: Container(
+                    width: 13,
+                    height: 13,
+                    decoration: BoxDecoration(
+                      color: AppColors.healthy,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.sf(context), width: 2),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr.wcBrowsersConnected(_connected),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+                const SizedBox(height: 2),
+                Text(tr.wcBrowsersHint,
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: _sessions == 0 ? null : _signOutAll,
+            style: TextButton.styleFrom(minimumSize: const Size(0, 40)),
+            child: Text(tr.wcSignOutAll),
+          ),
         ],
       ),
     );

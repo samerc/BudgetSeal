@@ -126,11 +126,16 @@ lib/
 │       ├── web_companion_auth.dart        # PIN (SHA-256 hashed), sessions, lockout
 │       └── api/
 │           ├── _validation.dart / _serializers.dart
+│           ├── _budget.dart / _running.dart  # budget snapshot, account running balance
 │           ├── dashboard_handler.dart
-│           ├── transactions_handler.dart
+│           ├── transactions_handler.dart     # list/get/create/update/delete + bulk
 │           ├── categories_handler.dart
-│           ├── accounts_handler.dart
-│           ├── envelopes_handler.dart
+│           ├── accounts_handler.dart         # + detail, edit, archive, reconcile
+│           ├── envelopes_handler.dart        # + move money / cover
+│           ├── objectives_handler.dart       # goals & loans
+│           ├── upcoming_handler.dart         # bill occurrences + planned payments
+│           ├── import_handler.dart           # CSV import
+│           ├── changes_handler.dart          # ChangeFeed + /api/changes long-poll
 │           ├── recurring_handler.dart
 │           ├── subscriptions_handler.dart
 │           └── reports_handler.dart
@@ -171,7 +176,7 @@ lib/
 
 assets/web/
     index.html    # SPA shell (PIN screen, sidebar) — no inline scripts
-    app.js        # ~1500 lines, vanilla JS, hash routing, data-action delegation, 9 screens
+    app.js        # ~3200 lines, vanilla JS, hash routing, data-action delegation, 13 screens, live updates
     styles.css    # App design language (accent vars, paper/night, RTL via logical props)
     chart.umd.min.js, nunito-sans*.woff2   # bundled so it works offline
     locale_{en,ar,fr}.json  # generated from the CSV (csv_to_web_json.dart)
@@ -565,6 +570,7 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - **Security headers** on all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`, `Content-Security-Policy` (restricts scripts/styles/fonts), `Permissions-Policy` (denies camera/mic/geo).
 - **`serverError()`** logs exception details locally via `debugPrint` but returns generic "Internal server error" to the client. Never leak stack traces, DB schema, or internal types.
 - **`/auth/status`** does not expose `activeSessions` count — prevents session enumeration.
+- **Browsers card (phone)**: while running, `web_companion_screen.dart` polls every 3 s: `auth.connectedCount()` (sessions seen within 75 s — an open page checks in at least every 30 s) and `activeSessionCount`. **Sign out all** / changing the PIN call `WebCompanionService.signOutAllBrowsers()` = `revokeAllSessions()` + `ChangeFeed.wake()`, so held long-polls answer now and the pages hit the 401 → PIN screen at once.
 - **`/auth/logout`** endpoint revokes the session token explicitly.
 - **Session timeouts**: 4-hour inactivity timeout + 8-hour absolute session lifetime. Max 10 concurrent sessions (oldest evicted).
 - **Private IP check** validates IPv4 (127.x, 10.x, 192.168.x, 172.16-31.x) and IPv6 (::1, fe80: link-local, fc/fd ULA).

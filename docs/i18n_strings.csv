@@ -2317,3 +2317,10 @@ web_import_dupes,,"Already in BudgetSeal, skipped: {n}",موجودة مسبقً�
 web_import_go,,Import {n},استيراد {n},Importer {n}
 web_import_nothing_new,,Nothing new — all {n} rows are already in BudgetSeal.,لا جديد — كل الصفوف ({n}) موجودة مسبقًا في BudgetSeal.,Rien de nouveau — les {n} lignes sont déjà dans BudgetSeal.
 web_import_done,,Imported: {n},تم الاستيراد: {n},Importées : {n}
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+wc_browsers_connected,,"{n, plural, =0{No browser connected} =1{1 browser connected} other{{n} browsers connected}}","{n, plural, =0{لا يوجد متصفح متصل} =1{متصفح واحد متصل} =2{متصفحان متصلان} few{{n} متصفحات متصلة} many{{n} متصفحًا متصلًا} other{{n} متصفح متصل}}","{n, plural, =0{Aucun navigateur connecté} =1{1 navigateur connecté} other{{n} navigateurs connectés}}"
+wc_browsers_hint,,A browser counts while its page is open.,يُحتسب المتصفح ما دامت صفحته مفتوحة.,Un navigateur compte tant que sa page est ouverte.
+wc_sign_out_all,,Sign out all,تسجيل خروج الكل,Tout déconnecter
+wc_signed_out_all,,All browsers signed out — they need the PIN again,تم تسجيل خروج كل المتصفحات — سيُطلب الرمز من جديد,Tous les navigateurs sont déconnectés — le code PIN sera redemandé

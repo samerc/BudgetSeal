@@ -9,6 +9,28 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String wcBrowsersConnected(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n browsers connected',
+      one: '1 browser connected',
+      zero: 'No browser connected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wcBrowsersHint => 'A browser counts while its page is open.';
+
+  @override
+  String get wcSignOutAll => 'Sign out all';
+
+  @override
+  String get wcSignedOutAll =>
+      'All browsers signed out — they need the PIN again';
+
+  @override
   String get webImportBtn => 'Import CSV';
 
   @override

@@ -99,6 +99,30 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @wcBrowsersConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0{No browser connected} =1{1 browser connected} other{{n} browsers connected}}'**
+  String wcBrowsersConnected(int n);
+
+  /// No description provided for @wcBrowsersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A browser counts while its page is open.'**
+  String get wcBrowsersHint;
+
+  /// No description provided for @wcSignOutAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out all'**
+  String get wcSignOutAll;
+
+  /// No description provided for @wcSignedOutAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All browsers signed out — they need the PIN again'**
+  String get wcSignedOutAll;
+
   /// No description provided for @webImportBtn.
   ///
   /// In en, this message translates to:

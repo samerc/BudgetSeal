@@ -1,4 +1,9 @@
 {
+  "wcBrowsersConnected": "{n, plural, =0{No browser connected} =1{1 browser connected} other{{n} browsers connected}}",
+  "@wcBrowsersConnected": {"placeholders": {"n": {"type": "int"}}},
+  "wcBrowsersHint": "A browser counts while its page is open.",
+  "wcSignOutAll": "Sign out all",
+  "wcSignedOutAll": "All browsers signed out — they need the PIN again",
   "webImportBtn": "Import CSV",
   "webImportTitle": "Import a CSV file",
   "webImportSub": "Bring in a bank statement or a spreadsheet. Rows already in BudgetSeal are skipped.",

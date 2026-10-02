@@ -120,6 +120,12 @@ class WebCompanionService {
 
   bool get isRunning => _server != null;
 
+  /// Ends every browser session; open pages drop to the PIN screen at once.
+  void signOutAllBrowsers() {
+    auth.revokeAllSessions();
+    _changes?.wake();
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   static Future<String?> _getWifiIp() async {

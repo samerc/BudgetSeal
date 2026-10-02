@@ -106,6 +106,16 @@ class WebCompanionAuth {
 
   int get activeSessionCount => _sessions.length;
 
+  /// Browsers with the page open: an open page checks in at least every
+  /// 30 s (status check, live-update poll), so a session seen within
+  /// [within] counts as connected.
+  int connectedCount({Duration within = const Duration(seconds: 75)}) {
+    final now = DateTime.now();
+    return _sessions.values
+        .where((s) => now.difference(s.lastActivity) <= within)
+        .length;
+  }
+
   LockoutStatus get lockoutStatus {
     if (_lockoutUntil == null) return const LockoutStatus.unlocked();
     final remaining = _lockoutUntil!.difference(DateTime.now());
