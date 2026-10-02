@@ -955,6 +955,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                   child: TextField(
                     controller: _nameCtrl,
                     autofocus: _isNew && !_showEmojiGrid,
+                    // Tapping an option below drops focus, so a rebuild
+                    // doesn't bring the keyboard back.
+                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                     textInputAction: TextInputAction.done,
                     maxLength: InputLimits.nameMaxLength,
                     decoration: InputDecoration(

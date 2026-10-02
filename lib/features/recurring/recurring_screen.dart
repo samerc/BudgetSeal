@@ -583,6 +583,9 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             TextFormField(
               controller: _titleCtrl,
               autofocus: true,
+              // Tapping an option below drops focus, so a rebuild
+              // doesn't bring the keyboard back.
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               decoration: InputDecoration(labelText: S.of(context).recurringFormTitleHint),
               textCapitalization: TextCapitalization.words,
               maxLength: InputLimits.nameMaxLength,

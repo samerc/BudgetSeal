@@ -443,6 +443,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.done,
                   autofocus: _isNew,
+                  // Tapping an option below drops focus, so a rebuild
+                  // doesn't bring the keyboard back.
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   maxLength: InputLimits.nameMaxLength,
                   style: TextStyle(color: AppColors.tp(context)),
                 ),

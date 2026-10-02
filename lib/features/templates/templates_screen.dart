@@ -693,6 +693,9 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   TextFormField(
                     controller: titleCtrl,
                     autofocus: existing == null,
+                    // Tapping an option below drops focus, so a rebuild
+                    // doesn't bring the keyboard back.
+                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(labelText: tr.commonTitle),
                     validator: (v) => (v == null || v.trim().isEmpty)
