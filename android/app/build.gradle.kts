@@ -44,9 +44,17 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appLabel"] = "BudgetSeal"
     }
 
     buildTypes {
+        // Debug builds install next to the Play Store app (own data). Google
+        // Sign-In needs its own Android OAuth client for this id + the debug
+        // keystore's SHA-1.
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders["appLabel"] = "BudgetSeal Dev"
+        }
         release {
             signingConfig = if (keystorePropertiesFile.exists())
                 signingConfigs.getByName("release")

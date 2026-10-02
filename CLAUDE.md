@@ -421,8 +421,11 @@ Service declaration (inside `<application>`):
 ### Home Screen Widget
 `SpendingWidget.kt` shows Ready to assign and today's spending, written by `HomeWidgetService` (Dart) into shared_preferences and redrawn via the `budgetseal/widget` channel in `MainActivity.kt`.
 
+### Debug vs Play Store build
+Debug builds are `com.budgetseal.app.debug`, labelled "BudgetSeal Dev" (`applicationIdSuffix` + the `appLabel` manifest placeholder in `build.gradle.kts`), so they install next to the Play Store app with their own data.
+
 ### Google Drive Setup
-Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `android/app/src/main/res/values/strings.xml` (or via google-services.json).
+Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `android/app/src/main/res/values/strings.xml` (or via google-services.json). Each Android OAuth client is tied to an app id + signing SHA-1: release (`com.budgetseal.app` + upload/Play signing key) and debug (`com.budgetseal.app.debug` + `~/.android/debug.keystore` SHA-1) need separate clients.
 
 ## iOS
 
