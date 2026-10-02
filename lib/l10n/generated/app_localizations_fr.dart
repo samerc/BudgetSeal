@@ -9,6 +9,64 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get allocEntryWithdrawn => 'Retiré';
+
+  @override
+  String get allocEntryRevaluation => 'Réévaluation';
+
+  @override
+  String get allocEntryMoved => 'Déplacé';
+
+  @override
+  String fxSetRateTitle(String currency) {
+    return 'Taux pour $currency';
+  }
+
+  @override
+  String get fxSetRateHint =>
+      'Votre taux sert aux nouvelles transactions et aux rapports jusqu\'au retour au taux en direct.';
+
+  @override
+  String get fxUseLiveRate => 'Taux en direct';
+
+  @override
+  String fxBaseLabel(String currency) {
+    return 'Devise de base : $currency';
+  }
+
+  @override
+  String get fxNoCurrencies =>
+      'Votre budget n\'utilise qu\'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.';
+
+  @override
+  String fxNoRateFor(String currency) {
+    return 'Pas encore de taux pour $currency — touchez pour en définir un';
+  }
+
+  @override
+  String get fxManualTag => 'Votre taux';
+
+  @override
+  String get fxLiveTag => 'En direct';
+
+  @override
+  String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
+
+  @override
+  String get allocArchivedTitle => 'Enveloppes archivées';
+
+  @override
+  String get allocNoArchived => 'Aucune enveloppe archivée.';
+
+  @override
+  String allocUnarchived(String name) {
+    return '$name désarchivée';
+  }
+
+  @override
+  String get txNoRate => 'Pas de taux';
+
+  @override
   String get allocReadyToAssign => 'Prêt à répartir';
 
   @override
@@ -1751,7 +1809,7 @@ class SFr extends S {
 
   @override
   String get allocArchiveMsg =>
-      'Cette enveloppe sera masquée de toutes les listes. Les catégories liées et l\'historique seront préservés.\n\nVous pourrez la désarchiver dans les Paramètres.';
+      'Cette enveloppe sera masquée de toutes les listes et ne recevra plus de dépenses. Les catégories liées et l\'historique seront préservés.\n\nVous pourrez la désarchiver depuis le menu de l\'onglet Budget (⋮ › Enveloppes archivées).';
 
   @override
   String get allocArchived => 'Enveloppe archivée';
@@ -3424,7 +3482,7 @@ class SFr extends S {
 
   @override
   String get fxCacheInfo =>
-      'Les taux sont récupérés en ligne et mis en cache 1 heure. Ils sont remplis automatiquement lors de la création de transactions.';
+      'Les taux en direct sont mis en cache une heure et remplis lors de l\'ajout d\'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu\'à ce que vous y reveniez.';
 
   @override
   String get aboutTitle => 'À propos';

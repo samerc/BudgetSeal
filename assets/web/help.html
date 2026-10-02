@@ -583,10 +583,11 @@
 
 <h3>Managing Transactions</h3>
 <ul>
-  <li><strong>Edit</strong> — tap a transaction, then tap the edit icon</li>
+  <li><strong>Edit</strong> — swipe right on a transaction, or tap it and then the edit icon. Receipts stay attached when you edit</li>
   <li><strong>Select</strong> — long-press a transaction to select it, then tap others to add them to the selection</li>
-  <li><strong>Delete</strong> — swipe left on a transaction, or select one or more and tap the delete icon. You get a few seconds to tap <em>Undo</em></li>
-  <li><strong>Duplicate</strong> — select a single transaction and tap the copy icon</li>
+  <li><strong>Delete</strong> — swipe left on a transaction, delete it from its detail screen, or select one or more and tap the delete icon. You get a few seconds to tap <em>Undo</em></li>
+  <li><strong>Duplicate</strong> — select a single transaction and tap the copy icon. Splits and transfers are copied with all their lines and accounts</li>
+  <li><strong>No rate</strong> — an amber tag on a transaction means a foreign-currency amount was saved without an exchange rate, so totals and reports leave it out. Open it and add a rate, or set one in Settings → Exchange rates</li>
   <li><strong>Search</strong> — tap the search icon on the Activity tab</li>
   <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), date range, or amount range</li>
 </ul>
@@ -643,7 +644,7 @@
 <ul>
   <li><strong>Withdraw</strong> — move money back to Unallocated (rollover envelopes)</li>
   <li><strong>Revalue Balances</strong> — update exchange rates for foreign-currency balances</li>
-  <li><strong>Archive</strong> — hide the envelope without deleting history</li>
+  <li><strong>Archive</strong> — hide the envelope without deleting history. An archived envelope stops taking spending; to bring it back, open the Budget tab's ⋮ menu → <strong>Archived envelopes</strong> → <strong>Unarchive</strong></li>
   <li><strong>Delete</strong> — permanently remove</li>
 </ul>
 
@@ -709,7 +710,7 @@
   <li><strong>Move to...</strong> — transfer the leftover to another envelope (e.g., savings)</li>
 </ul>
 
-<p>Envelopes with <strong>Auto-reset</strong> enabled handle this automatically. Others will trigger a banner on the Budget tab showing exactly how many envelopes need your review (e.g., "3 envelopes need reset").</p>
+<p>Envelopes with <strong>Auto-reset</strong> enabled handle this automatically. Others will trigger a banner on the Budget tab showing exactly how many envelopes need your review (e.g., "3 envelopes need reset"). Tap <strong>Review</strong> to choose, for each one, whether its leftover returns to Unallocated, moves to another envelope, or stays. Once reviewed, the banner goes away until the next period starts; envelopes created during the period are not asked about until it ends.</p>
 
 <!-- ══════════════════════════════════════════ -->
 <h2 id="recurring">Recurring Transactions</h2>
@@ -1147,6 +1148,7 @@
   <tr><th>Setting</th><th>What it controls</th></tr>
   <tr><td><strong>Household Name</strong></td><td>Rename your budget household</td></tr>
   <tr><td><strong>Base Currency</strong></td><td>Your primary currency for all totals and summaries</td></tr>
+  <tr><td><strong>Exchange rates</strong></td><td>Rates for every currency your accounts and recurring items use. Tap refresh for the latest live rates, or tap a currency to set your own rate — it is used instead of the live one (for new transactions, balance adjustments, imports and bills) until you choose <em>Use live rate</em></td></tr>
   <tr><td><strong>Period Start Day</strong></td><td>When your monthly budget cycle starts</td></tr>
   <tr><td><strong>Currency Symbols</strong></td><td>Override the default symbol for any currency (e.g., show "L.L." instead of "LBP")</td></tr>
   <tr><td><strong>Number Format</strong></td><td>Thousands separator (comma/period/space/none), decimal separator (period/comma), negative format (-100 or (100))</td></tr>
@@ -1161,7 +1163,7 @@
 <p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Import &amp; Export</strong>.</p>
 
 <h3>Import CSV</h3>
-<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Rows with an unreadable date or amount are skipped and counted, never dated today. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
+<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Amounts can use either convention (<code>1,234.56</code>, <code>1.234,56</code>, <code>12,50</code>), and <code>(5.00)</code> counts as negative. Rows with an unreadable date or amount are skipped and counted, never dated today. Importing into a foreign-currency account uses its current exchange rate. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
 
 <h3>Export CSV</h3>
 <p>Export all transactions as a CSV spreadsheet for use in Excel, Google Sheets, etc.</p>
@@ -1192,7 +1194,7 @@
 <p>It's money in your accounts that hasn't been assigned to any envelope yet. When you receive income, it goes to Unallocated. Your goal is to distribute it to envelopes so every dollar has a purpose.</p>
 
 <h3>Can I use multiple currencies?</h3>
-<p>Yes. Each account has its own currency. When you transfer between accounts in different currencies, an exchange rate field appears. Exchange rates are fetched automatically and cached for one hour. Reports and summaries show totals per currency — they're never mixed.</p>
+<p>Yes. Each account has its own currency. When you transfer between accounts in different currencies, an exchange rate field appears. Exchange rates are fetched automatically and cached for one hour; you can also set your own rate in Settings → Exchange rates. Reports and summaries show totals per currency — they're never mixed.</p>
 <p><strong>Paying in another currency:</strong> you can enter an expense in a different currency from the account (say €50 on a dollar card). It's saved in the account's currency using the rate you enter (or the latest known rate), and the original €50 is kept in the item's note — so account balances always stay in one currency. If no rate is known at all, the app asks you to enter one.</p>
 <p><strong>Envelopes and other currencies:</strong> spending is taken from the envelope in the currency you actually paid in. If a dollar envelope pays for something in pounds from a pound account, the envelope shows a small "other currency" debt in pounds until you fund it in pounds.</p>
 <p><strong>Recurring bills and planned payments</strong> in another currency use the latest rate when they're posted (recurring bills use the last rate saved on your device, so the app never waits for the internet at start-up). A recurring transfer between two currencies waits until a rate is known.</p>

@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/fx/fx_service.dart';
+import '../../core/providers/database_provider.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -13,6 +15,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/utils/format_number.dart';
 
 /// Date cells: `yyyy-MM-dd` or `d/M/yyyy` style, optional time after.
 final importDateRe =
@@ -308,6 +311,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                 int.parse(m.group(1)!) > 12;
           });
 
+      // A foreign account's lines need a rate, or reports drop them.
+      final rateToBase = await rateToBaseOrOne(ref.read(fxServiceProvider),
+          ref.read(databaseProvider), account.currency, baseCurrency);
+
       for (final row in rows) {
         if (row.length <= amountCol) {
           skipped++;
@@ -317,9 +324,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         final desc = descCol != null && row.length > descCol
             ? row[descCol].toString().trim()
             : '';
-        final amountStr =
-            row[amountCol].toString().replaceAll(RegExp(r'[\$,\s]'), '');
-        final amount = double.tryParse(amountStr);
+        final amount = parseLooseAmount(row[amountCol].toString());
         if (amount == null || amount == 0 || amount.abs() > 1e9) {
           skipped++;
           continue;
@@ -355,6 +360,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               currency: account.currency,
               categoryId: matchedCategoryId,
               accountId: account.id,
+              exchangeRateToBase: rateToBase,
             ),
           ],
           baseCurrency: baseCurrency,

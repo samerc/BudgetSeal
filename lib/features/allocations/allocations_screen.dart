@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' hide Column;
 
 import '../../core/engine/period_engine.dart' show budgetPeriodFor;
+import '../../core/database/app_database.dart' show Category;
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/objectives_provider.dart';
@@ -25,6 +27,7 @@ import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/brand_palette.dart';
+import 'archived_envelopes_sheet.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -285,11 +288,36 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   });
                 },
               ),
-              IconButton(
-                tooltip: l.allocHelpTooltip,
-                icon: Icon(Icons.help_outline_rounded,
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert_rounded,
                     color: AppColors.ts(context)),
-                onPressed: () => _showEnvelopeHelp(context),
+                onSelected: (v) {
+                  if (v == 'archived') {
+                    showArchivedEnvelopesSheet(context, ref);
+                  } else if (v == 'help') {
+                    _showEnvelopeHelp(context);
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'archived',
+                    child: Row(children: [
+                      Icon(Icons.unarchive_outlined,
+                          size: 20, color: AppColors.ts(context)),
+                      const SizedBox(width: 12),
+                      Text(l.allocArchivedTitle),
+                    ]),
+                  ),
+                  PopupMenuItem(
+                    value: 'help',
+                    child: Row(children: [
+                      Icon(Icons.help_outline_rounded,
+                          size: 20, color: AppColors.ts(context)),
+                      const SizedBox(width: 12),
+                      Text(l.allocHelpTooltip),
+                    ]),
+                  ),
+                ],
               ),
             ],
           ),
@@ -663,9 +691,22 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       );
 
       final pendingIds = ref.watch(pendingResetProvider).value ?? [];
+      // Envelope → its linked category (categories.allocationId; a top-level
+      // one wins over a subcategory). The legacy allocations.categoryId join
+      // is empty for envelopes created since categories link themselves.
+      final linkedCat = <String, Category>{};
+      for (final c in ref.watch(categoriesProvider).value ?? const <Category>[]) {
+        final id = c.allocationId;
+        if (id == null) continue;
+        final existing = linkedCat[id];
+        if (existing == null ||
+            (existing.parentId != null && c.parentId == null)) {
+          linkedCat[id] = c;
+        }
+      }
       for (int idx = 0; idx < items.length; idx++) {
         final a = items[idx];
-        final cat = a.data.category;
+        final cat = linkedCat[a.data.allocation.id] ?? a.data.category;
         widgets.add(
           TweenAnimationBuilder<double>(
             key: ValueKey(a.data.allocation.id),
@@ -702,8 +743,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               context.push('/allocations/${a.data.allocation.id}');
             },
             onSpend: () {
-              // Pre-fill with the first linked category.
-              final cat = a.data.category;
+              // Pre-fill with the linked category.
               context.push('/add-transaction', extra: cat != null ? {
                 'editType': 'expense',
                 'editLines': [

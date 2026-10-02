@@ -1,4 +1,20 @@
 {
+  "allocEntryWithdrawn": "مسحوب",
+  "allocEntryRevaluation": "إعادة تقييم",
+  "allocEntryMoved": "منقول",
+  "fxSetRateTitle": "سعر {currency}",
+  "fxSetRateHint": "يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.",
+  "fxUseLiveRate": "السعر المباشر",
+  "fxBaseLabel": "العملة الأساسية: {currency}",
+  "fxNoCurrencies": "ميزانيتك تستخدم عملة واحدة فقط. أضف حساباً بعملة أخرى لترى سعرها هنا.",
+  "fxNoRateFor": "لا يوجد سعر لـ {currency} بعد — اضغط لتحديده",
+  "fxManualTag": "سعرك",
+  "fxLiveTag": "مباشر",
+  "tileExchangeRatesSub": "أسعار مباشرة، أو حدّد سعرك",
+  "allocArchivedTitle": "الأظرف المؤرشفة",
+  "allocNoArchived": "لا توجد أظرف مؤرشفة.",
+  "allocUnarchived": "تم إلغاء أرشفة {name}",
+  "txNoRate": "بلا سعر صرف",
   "allocReadyToAssign": "جاهز للتوزيع",
   "allocAssign": "وزّع",
   "accentGold": "ذهبي",
@@ -1886,7 +1902,7 @@
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveMsg": "سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.",
+  "allocArchiveMsg": "سيتم إخفاء هذا الظرف من جميع القوائم ولن تُخصم منه المصاريف. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من قائمة تبويب الميزانية (⋮ › الأظرف المؤرشفة).",
   "@allocArchiveMsg": {
     "description": "Dialog content"
   },
@@ -3341,7 +3357,7 @@
   "@fxCheckInternet": {
     "description": "Subtitle"
   },
-  "fxCacheInfo": "يتم جلب الأسعار من الإنترنت وتخزينها لمدة ساعة. يتم ملؤها تلقائياً عند إنشاء المعاملات.",
+  "fxCacheInfo": "تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.",
   "@fxCacheInfo": {
     "description": "Info text"
   },

@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
+
+import '../../core/engine/recurring_engine.dart' show recurringAmountOn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -171,7 +173,8 @@ class _BillCard extends StatelessWidget {
                 ),
               ),
               Text(
-                formatAmount(bill.amount, currency: bill.currency),
+                formatAmount(recurringAmountOn(bill, bill.nextDueDate),
+                    currency: bill.currency),
                 style: TextStyle(
                   fontSize: TypographyTokens.amountRegularSize,
                   fontWeight: TypographyTokens.amountRegularWeight,

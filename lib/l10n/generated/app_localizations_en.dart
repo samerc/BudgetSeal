@@ -9,6 +9,64 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get allocEntryWithdrawn => 'Withdrawn';
+
+  @override
+  String get allocEntryRevaluation => 'Revaluation';
+
+  @override
+  String get allocEntryMoved => 'Moved';
+
+  @override
+  String fxSetRateTitle(String currency) {
+    return 'Rate for $currency';
+  }
+
+  @override
+  String get fxSetRateHint =>
+      'Your rate is used for new transactions and reports until you switch back to the live rate.';
+
+  @override
+  String get fxUseLiveRate => 'Use live rate';
+
+  @override
+  String fxBaseLabel(String currency) {
+    return 'Base currency: $currency';
+  }
+
+  @override
+  String get fxNoCurrencies =>
+      'Your budget uses only one currency. Add an account in another currency to see its rate here.';
+
+  @override
+  String fxNoRateFor(String currency) {
+    return 'No rate for $currency yet — tap to set one';
+  }
+
+  @override
+  String get fxManualTag => 'Your rate';
+
+  @override
+  String get fxLiveTag => 'Live';
+
+  @override
+  String get tileExchangeRatesSub => 'Live rates, or set your own';
+
+  @override
+  String get allocArchivedTitle => 'Archived envelopes';
+
+  @override
+  String get allocNoArchived => 'No archived envelopes.';
+
+  @override
+  String allocUnarchived(String name) {
+    return '$name unarchived';
+  }
+
+  @override
+  String get txNoRate => 'No rate';
+
+  @override
   String get allocReadyToAssign => 'Ready to assign';
 
   @override
@@ -1731,7 +1789,7 @@ class SEn extends S {
 
   @override
   String get allocArchiveMsg =>
-      'This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from Settings.';
+      'This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).';
 
   @override
   String get allocArchived => 'Envelope archived';
@@ -3023,7 +3081,7 @@ class SEn extends S {
   String get tileTravelExchange => 'Travel Exchange';
 
   @override
-  String get tileExchangeRates => 'Exchange Rates';
+  String get tileExchangeRates => 'Exchange rates';
 
   @override
   String get tileWebCompanion => 'Web Companion';
@@ -3377,7 +3435,7 @@ class SEn extends S {
 
   @override
   String get fxCacheInfo =>
-      'Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.';
+      'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.';
 
   @override
   String get aboutTitle => 'About';

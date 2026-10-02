@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -111,18 +112,22 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     setState(() => _isFunding = true);
 
     try {
-      for (final a in allocations) {
-        final amount = _parsedAmount(a.data.allocation.id);
-        if (amount <= 0) continue;
-        final currency = a.data.allocation.targetCurrency ?? baseCurrency;
-        await engine.fundAllocation(
-          allocationId: a.data.allocation.id,
-          amount: amount,
-          currency: currency,
-          deviceId: 'local',
-          note: fundNote,
-        );
-      }
+      // All or nothing: a failure halfway must not leave some envelopes
+      // funded and the rest not.
+      await ref.read(databaseProvider).transaction(() async {
+        for (final a in allocations) {
+          final amount = _parsedAmount(a.data.allocation.id);
+          if (amount <= 0) continue;
+          final currency = a.data.allocation.targetCurrency ?? baseCurrency;
+          await engine.fundAllocation(
+            allocationId: a.data.allocation.id,
+            amount: amount,
+            currency: currency,
+            deviceId: 'local',
+            note: fundNote,
+          );
+        }
+      });
 
       if (mounted) {
         hapticMedium();

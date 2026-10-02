@@ -480,6 +480,11 @@ class TxTile extends ConsumerWidget {
         (tx.exchangeRateToBase - 1.0).abs() > 0.001;
 
     final effectiveType = tx.type;
+    // A foreign line saved without a rate is left out of totals and reports
+    // — flag it so the user can open it and add one.
+    final missingRate = !isTransfer &&
+        lines.any((l) =>
+            !isRealRate(l.currency, baseCurrency, l.exchangeRateToBase));
 
     // Show running balance only when a single account is involved
     final isSingleAccount = entry.involvedAccountNames.length <= 1;
@@ -530,6 +535,26 @@ class TxTile extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      if (missingRate)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: AppColors.pastel(context, AppColors.caution,
+                  light: 0.85, dark: 0.78),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              S.of(context).txNoRate,
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: AppColors.caution,
+              ),
+            ),
           ),
         ),
       // Transfer: show destination amount if cross-currency

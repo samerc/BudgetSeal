@@ -1406,6 +1406,13 @@ class SettingsDetailScreen extends ConsumerWidget {
             },
           ),
           _SettingsTile(
+            icon: Icons.currency_exchange_rounded,
+            title: l.tileExchangeRates,
+            subtitle: l.tileExchangeRatesSub,
+            iconColor: AppColors.caution,
+            onTap: () => context.push('/exchange-rates'),
+          ),
+          _SettingsTile(
             icon: Icons.calendar_today_rounded,
             title: l.tilePeriodStartDay,
             subtitle: l.onboardDayN(household?.periodStartDay ?? 1),

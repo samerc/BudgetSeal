@@ -883,12 +883,23 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     required Map<String, Category> categoryMap,
   }) {
     final uncategorized = S.of(context).commonUncategorized;
-    final catTxns = transactions.where((e) {
-      return _baseAmountByCategory(e).keys.any((catId) {
+    // Only this category's share of each transaction (a split's other
+    // lines belong to other rows) — matched by name like the row totals.
+    double partFor(TransactionEntry e) {
+      var sum = 0.0;
+      _baseAmountByCategory(e).forEach((catId, amount) {
         final cat = catId != null ? categoryMap[catId] : null;
-        return (cat?.name ?? uncategorized) == categoryName;
+        if ((cat?.name ?? uncategorized) == categoryName) sum += amount;
       });
-    }).toList()
+      return sum;
+    }
+
+    final parts = <TransactionEntry, double>{};
+    for (final e in transactions) {
+      final part = partFor(e);
+      if (part != 0) parts[e] = part;
+    }
+    final catTxns = parts.keys.toList()
       ..sort((a, b) => b.tx.createdAt.compareTo(a.tx.createdAt));
 
     hapticLight();
@@ -996,7 +1007,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                 ),
                               ),
                               Text(
-                                formatAmount(_baseAmount(e),
+                                formatAmount(parts[e]!,
                                     currency: _reportsBaseCurrency),
                                 style: TextStyle(
                                   fontSize: 14,

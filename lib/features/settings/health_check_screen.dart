@@ -364,11 +364,20 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
           ..where((t) => t.deleted.equals(true)))
         .get();
 
-    // Delete receipt files before purging DB rows
+    // Delete receipt files before purging DB rows — except files a live
+    // transaction still uses (an edit re-saves the tx under a new id and
+    // carries its receipts over).
+    final live = await (db.select(db.transactions)
+          ..where((t) => t.householdId.equals(householdId))
+          ..where((t) => t.deleted.equals(false))
+          ..where((t) => t.receiptPath.isNotNull()))
+        .get();
+    final inUse = {for (final t in live) ...parseReceiptPaths(t.receiptPath)};
     final receiptsDir = await getReceiptsDirectory();
     for (final tx in deleted) {
       final paths = parseReceiptPaths(tx.receiptPath);
       for (final filename in paths) {
+        if (inUse.contains(filename)) continue;
         try {
           final file = File(p.join(receiptsDir.path, filename));
           if (file.existsSync()) await file.delete();

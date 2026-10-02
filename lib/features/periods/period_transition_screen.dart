@@ -6,6 +6,7 @@ import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/period_reset_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
@@ -55,13 +56,22 @@ class _PeriodTransitionScreenState
 
   void _buildResolutions() {
     // Defer to after first frame so providers are available.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Only envelopes waiting for this period's review (manual reset) —
+      // auto-reset ones were handled at launch, and an envelope reviewed
+      // already (or opened mid-period) must not lose its funding.
+      final List<String> pending;
+      try {
+        pending = await ref.read(pendingResetProvider.future);
+      } catch (_) {
+        return;
+      }
+      if (!mounted) return;
       final allocationsAsync = ref.read(allocationsProvider);
       allocationsAsync.whenData((allocations) {
         final items = <_AllocationResolution>[];
         for (final a in allocations) {
-          // Only periodic allocations participate in period transitions.
-          if (a.data.allocation.periodicity != 'periodic') continue;
+          if (!pending.contains(a.data.allocation.id)) continue;
 
           for (final entry in a.balanceByCurrency.entries) {
             if (entry.value > 0) {
@@ -98,6 +108,7 @@ class _PeriodTransitionScreenState
 
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
+      ref.invalidate(pendingResetProvider);
 
       if (mounted) {
         context.pop(); // close period transition
@@ -142,9 +153,7 @@ class _PeriodTransitionScreenState
             Builder(builder: (_) {
               final household = householdAsync.value;
               final startDay = household?.periodStartDay ?? 1;
-              final periodStart = now.day >= startDay
-                  ? DateTime(now.year, now.month, startDay)
-                  : DateTime(now.year, now.month - 1, startDay);
+              final periodStart = budgetPeriodFor(startDay, now).start;
               return Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(16),

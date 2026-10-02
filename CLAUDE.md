@@ -269,7 +269,11 @@ Nested `Column + Expanded + bottomNavigationBar` = blank screen. Nested Rows wit
 ### Data Reset Flow
 Never close the database and wait for providers. Instead: `db.batch()` delete all rows → clear SharedPreferences → `context.go('/onboarding')`.
 
-### Daily Reminder Timezone
+### Resume Work
+
+On every resume `app.dart` runs `_processDueWork()`: `processRecurring()` (invalidates transaction/balance providers if anything posted) then `NotificationService.runChecks()` (each check keeps its 24h cooldown). `MainScreen` asks for the Android 13+ notification permission once (`NotificationService.requestPermissionOnce`). Upcoming-bill views use `recurringAmountOn(rec, date)` so subscription price changes show before they post.
+
+## Daily Reminder Timezone
 Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it everything runs as UTC. Use `flutter_timezone` to get the device identifier.
 
 ### Currency Display Bug
@@ -695,7 +699,7 @@ Three levels in one screen:
 Transactions use a `deleted` boolean column (schema v12) instead of hard deletion. `AllocationEngine.deleteTransaction()` sets `deleted = true` and removes ledger entries. All transaction queries filter `deleted = false` except sync export (which includes deleted rows so they propagate across devices). The Health Check screen offers a "Purge" action to permanently remove soft-deleted transactions (also cleans up receipt files).
 
 ### Undo Delete
-Deleting from the selection bar (one or many transactions) shows a 5-second SnackBar with "Undo" action. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
+Every transaction delete — swipe left, the detail screen's Delete, the selection bar — goes through `deleteTransactionsWithUndo()` (`features/transactions/widgets/delete_with_undo.dart`) and shows a 5-second SnackBar with "Undo" (no confirm dialog for single deletes). A swiped row is hidden at once via `_swipedIds` so the Dismissible leaves the tree before the provider updates. The flow: mark `deleted=true` directly (preserving ledger entries), show SnackBar. If user taps Undo, restore `deleted=false`. If SnackBar closes without undo, call `engine.deleteTransaction()` to remove ledger entries permanently. This two-phase approach prevents data loss on accidental deletes.
 Every delete/undo write also bumps `lastModified` (sync merges by it — without the bump a delete never reaches other devices). If the app dies before the SnackBar closes, `main.dart` runs `LedgerDao.deleteForDeletedTransactions()` at startup; balance queries ignore ledger rows of deleted transactions anyway.
 
 ## Animation Widgets
@@ -749,7 +753,7 @@ Dashboard flow: Quick Actions (top) → Spending Overview (donut + income/expens
 
 ## Transaction Selection
 
-Cashew-style: long-press a transaction to enter selection mode (there is no context menu). Tap rows to select/deselect; adjacent selected rows merge into one highlighted block, with an animated check circle. The selection bar replaces the header and shows count, Edit + Duplicate (exactly one selected) and Delete (with Undo). Swipe gestures are disabled during selection mode. Rows are the shared `TxTile` widget (`lib/features/transactions/widgets/tx_tile.dart`), also used for the dashboard's recent transactions (`showBalance: false, showDate: true`).
+Cashew-style: long-press a transaction to enter selection mode (there is no context menu). Tap rows to select/deselect; adjacent selected rows merge into one highlighted block, with an animated check circle. The selection bar replaces the header and shows count, Edit + Duplicate (exactly one selected) and Delete (with Undo). Edit (selection bar, swipe right, detail screen) and Duplicate open the form with `txFormArgs()` (`widgets/tx_form_args.dart`) — every line, rate and both transfer accounts; the edit form reloads the transaction's receipts from the DB so they carry over. Changing month clears the selection. Swipe gestures are disabled during selection mode. Rows are the shared `TxTile` widget (`lib/features/transactions/widgets/tx_tile.dart`), also used for the dashboard's recent transactions (`showBalance: false, showDate: true`).
 
 ## Activity Tab FAB
 
@@ -854,6 +858,7 @@ Envelope and category icon pickers use an **inline expandable emoji grid** withi
 - Envelopes with `autoReset = true` (default): automatically zeroed out via ledger entry on period start
 - Envelopes with `autoReset = false`: flagged as "pending manual reset" — shown with amber glow on the Budget tab and a banner prompting the user to review
 - Toggle per-envelope in the envelope detail screen settings (3-dot menu)
+- "Pending" (`PeriodResetService.getPendingManualIds`) = manual, periodic, created before the current period start, positive balance, and no `period_reset`/`carry_forward` ledger row since the period start — reviewing (the `carry_forward` marker counts) clears it until the next period. The Review screen (`/period-transition`) lists only pending envelopes and invalidates `pendingResetProvider` when done.
 - `PeriodResetService.checkAndAutoReset()` runs once per app launch, tracked via SharedPreferences timestamp. The first run on an install only records the period (never empties envelopes mid-period). Reset ledger rows use the deterministic id `reset:<allocId>:<periodStart yyyy-MM-dd>:<currency>` inserted with `insertOrIgnore`, so two synced devices can't reset the same envelope twice. Period bounds come from `budgetPeriodFor()` (clamped start day).
 
 ## Future Months
@@ -971,10 +976,19 @@ Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jaka
 `formatDate()` and `formatDateSmart()` in `date_format_provider.dart` use the user's preferred pattern. Global `setDateFormatPattern()` called from `app.dart`. All user-facing date displays use `formatDate()` — month-only headers (`MMMM yyyy`) and machine formats (`yyyy-MM-dd`) are intentionally hardcoded. Settings apply instantly without restart.
 
 ### Key Rules
+- Parsing typed/imported amounts: `parseLooseAmount()` (format_number.dart) accepts `1,234.56`, `1.234,56`, `12,50`, `(5)`. Times: `TimeOfDay.format(context)` (follows the device 12/24h setting), never a hardcoded `h:mm a`.
 - Never use `toStringAsFixed()` for user-visible currency amounts — use `formatAmount()` or `formatNumber()`.
 - Never use `DateFormat('...')` for user-facing full dates — use `formatDate()`.
 - Input fields (TextControllers) and percentages may use `toStringAsFixed()` since they need `.` for parsing.
 - Month-only labels (`MMMM`, `MMM yyyy`) stay hardcoded — they're contextual, not configurable.
+
+## Archived Envelopes
+
+`recordTransaction()` ignores archived/deleted envelopes when resolving category → envelope (the line stays unbudgeted). Budget tab ⋮ menu → **Archived envelopes** (`archived_envelopes_sheet.dart`) lists them with Unarchive (`AllocationsDao.unarchive`). Envelope cards resolve their category through `categories.allocationId` (top-level category first), falling back to the legacy `allocations.categoryId` join.
+
+## Exchange Rates Screen
+
+`/exchange-rates` (Settings › Preferences › Exchange rates) lists every currency used by accounts, recurring items and manual rates. Refresh calls `getRateWithCache(forceRefresh: true)`. Tapping a currency sets a **manual rate** (`fx_rates.source = 'manual'`, `FxService.saveManualRate/clearManualRate`); `manualRate()` is checked first by `getRateWithCache()` and `latestCachedRate()` in either direction, so it wins until cleared. Lines saved without a user rate use `rateToBaseOrOne()` (live → cached → 1.0); a foreign line still at 1.0 shows an amber "No rate" tag in `TxTile`.
 
 ## Archived Accounts
 

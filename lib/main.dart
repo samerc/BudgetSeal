@@ -112,10 +112,8 @@ Future<void> _startApp() async {
   try {
     final householdId = container.read(currentHouseholdIdProvider);
     if (householdId != null) {
-      final db = container.read(databaseProvider);
-      await NotificationService.checkEnvelopes(db, householdId);
-      await NotificationService.checkBudgetWarnings(db, householdId);
-      await NotificationService.checkRecurring(db, householdId);
+      await NotificationService.runChecks(
+          container.read(databaseProvider), householdId);
     }
   } catch (e) {
     debugPrint('Notification check failed: $e');

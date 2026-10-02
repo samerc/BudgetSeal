@@ -152,6 +152,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (_lines.isEmpty) _addLine();
+    if (widget.editTransactionId != null) _loadEditReceipts();
+  }
+
+  /// An edit re-saves the transaction under a new id — carry its receipts
+  /// over so they aren't lost (and later purged with the old row).
+  Future<void> _loadEditReceipts() async {
+    try {
+      final tx = await ref
+          .read(databaseProvider)
+          .transactionsDao
+          .getById(widget.editTransactionId!);
+      final paths = parseReceiptPaths(tx?.receiptPath);
+      if (paths.isNotEmpty && mounted) {
+        setState(() => _receiptFilenames = [...paths, ..._receiptFilenames]);
+      }
+    } catch (e) {
+      debugPrint('[AddTransaction] Failed to load receipts: $e');
+    }
   }
 
   @override
@@ -413,12 +431,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return formatDate(_selectedDate);
   }
 
-  String get _timeLabel {
-    final hour = _selectedTime.hourOfPeriod == 0 ? 12 : _selectedTime.hourOfPeriod;
-    final minute = _selectedTime.minute.toString().padLeft(2, '0');
-    final period = _selectedTime.period == DayPeriod.am ? 'AM' : 'PM';
-    return '$hour:$minute $period';
-  }
+  // Follows the device's 12/24-hour setting and locale.
+  String get _timeLabel => _selectedTime.format(context);
 
   Future<void> _pickCategory(int lineIndex) async {
     final categories = ref.read(categoriesProvider).value ?? [];

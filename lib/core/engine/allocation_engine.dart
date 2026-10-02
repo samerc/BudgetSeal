@@ -460,6 +460,18 @@ class AllocationEngine {
             catAllocMap[a.categoryId] = a.id;
           }
         }
+        // An archived (or deleted) envelope no longer takes spending — the
+        // line stays unbudgeted instead of draining a hidden envelope.
+        if (catAllocMap.isNotEmpty) {
+          final live = await (_db.select(_db.allocations)
+                ..where((a) => a.id.isIn(catAllocMap.values.toSet()))
+                ..where((a) => a.archived.equals(false))
+                ..where((a) => a.deleted.equals(false)))
+              .map((a) => a.id)
+              .get();
+          final liveIds = live.toSet();
+          catAllocMap.removeWhere((_, allocId) => !liveIds.contains(allocId));
+        }
       }
 
       for (final line in lines) {

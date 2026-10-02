@@ -99,6 +99,102 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @allocEntryWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get allocEntryWithdrawn;
+
+  /// No description provided for @allocEntryRevaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Revaluation'**
+  String get allocEntryRevaluation;
+
+  /// No description provided for @allocEntryMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get allocEntryMoved;
+
+  /// No description provided for @fxSetRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate for {currency}'**
+  String fxSetRateTitle(String currency);
+
+  /// No description provided for @fxSetRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rate is used for new transactions and reports until you switch back to the live rate.'**
+  String get fxSetRateHint;
+
+  /// No description provided for @fxUseLiveRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use live rate'**
+  String get fxUseLiveRate;
+
+  /// No description provided for @fxBaseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency: {currency}'**
+  String fxBaseLabel(String currency);
+
+  /// No description provided for @fxNoCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Your budget uses only one currency. Add an account in another currency to see its rate here.'**
+  String get fxNoCurrencies;
+
+  /// No description provided for @fxNoRateFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate for {currency} yet — tap to set one'**
+  String fxNoRateFor(String currency);
+
+  /// No description provided for @fxManualTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rate'**
+  String get fxManualTag;
+
+  /// No description provided for @fxLiveTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get fxLiveTag;
+
+  /// No description provided for @tileExchangeRatesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Live rates, or set your own'**
+  String get tileExchangeRatesSub;
+
+  /// No description provided for @allocArchivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived envelopes'**
+  String get allocArchivedTitle;
+
+  /// No description provided for @allocNoArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived envelopes.'**
+  String get allocNoArchived;
+
+  /// No description provided for @allocUnarchived.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} unarchived'**
+  String allocUnarchived(String name);
+
+  /// No description provided for @txNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate'**
+  String get txNoRate;
+
   /// No description provided for @allocReadyToAssign.
   ///
   /// In en, this message translates to:
@@ -3121,7 +3217,7 @@ abstract class S {
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from Settings.'**
+  /// **'This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).'**
   String get allocArchiveMsg;
 
   /// Snackbar
@@ -5323,7 +5419,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Exchange Rates'**
+  /// **'Exchange rates'**
   String get tileExchangeRates;
 
   /// Tile title
@@ -5995,7 +6091,7 @@ abstract class S {
   /// Info text
   ///
   /// In en, this message translates to:
-  /// **'Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.'**
+  /// **'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.'**
   String get fxCacheInfo;
 
   /// AppBar title

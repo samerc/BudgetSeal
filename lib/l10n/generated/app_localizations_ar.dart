@@ -9,6 +9,64 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get allocEntryWithdrawn => 'مسحوب';
+
+  @override
+  String get allocEntryRevaluation => 'إعادة تقييم';
+
+  @override
+  String get allocEntryMoved => 'منقول';
+
+  @override
+  String fxSetRateTitle(String currency) {
+    return 'سعر $currency';
+  }
+
+  @override
+  String get fxSetRateHint =>
+      'يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.';
+
+  @override
+  String get fxUseLiveRate => 'السعر المباشر';
+
+  @override
+  String fxBaseLabel(String currency) {
+    return 'العملة الأساسية: $currency';
+  }
+
+  @override
+  String get fxNoCurrencies =>
+      'ميزانيتك تستخدم عملة واحدة فقط. أضف حساباً بعملة أخرى لترى سعرها هنا.';
+
+  @override
+  String fxNoRateFor(String currency) {
+    return 'لا يوجد سعر لـ $currency بعد — اضغط لتحديده';
+  }
+
+  @override
+  String get fxManualTag => 'سعرك';
+
+  @override
+  String get fxLiveTag => 'مباشر';
+
+  @override
+  String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
+
+  @override
+  String get allocArchivedTitle => 'الأظرف المؤرشفة';
+
+  @override
+  String get allocNoArchived => 'لا توجد أظرف مؤرشفة.';
+
+  @override
+  String allocUnarchived(String name) {
+    return 'تم إلغاء أرشفة $name';
+  }
+
+  @override
+  String get txNoRate => 'بلا سعر صرف';
+
+  @override
   String get allocReadyToAssign => 'جاهز للتوزيع';
 
   @override
@@ -1727,7 +1785,7 @@ class SAr extends S {
 
   @override
   String get allocArchiveMsg =>
-      'سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.';
+      'سيتم إخفاء هذا الظرف من جميع القوائم ولن تُخصم منه المصاريف. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من قائمة تبويب الميزانية (⋮ › الأظرف المؤرشفة).';
 
   @override
   String get allocArchived => 'تم أرشفة الظرف';
@@ -3361,7 +3419,7 @@ class SAr extends S {
 
   @override
   String get fxCacheInfo =>
-      'يتم جلب الأسعار من الإنترنت وتخزينها لمدة ساعة. يتم ملؤها تلقائياً عند إنشاء المعاملات.';
+      'تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.';
 
   @override
   String get aboutTitle => 'حول';

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/s_lookup.dart';
-import 'package:drift/drift.dart' show InsertMode, Value;
+import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
@@ -32,14 +32,14 @@ class PeriodResetService {
     if (lastResetStr == null) {
       await prefs.setString(
           _lastResetKey, currentPeriodStart.toIso8601String());
-      return _countPendingManual(db, householdId);
+      return _countPendingManual(db, householdId, periodStartDay);
     }
 
     // Check if we already reset for this period
     final lastReset = DateTime.tryParse(lastResetStr);
     if (lastReset != null && !lastReset.isBefore(currentPeriodStart)) {
       // Already reset for this period — just count pending manual ones
-      return _countPendingManual(db, householdId);
+      return _countPendingManual(db, householdId, periodStartDay);
     }
 
     // New period — perform auto-resets
@@ -96,52 +96,50 @@ class PeriodResetService {
 
     debugPrint('[PeriodReset] Auto-reset $autoResetCount envelopes');
 
-    return _countPendingManual(db, householdId);
+    return _countPendingManual(db, householdId, periodStartDay);
   }
 
-  /// Count periodic envelopes with manual reset that have non-zero balances.
+  /// Count manual-reset envelopes still waiting for this period's review.
   static Future<int> _countPendingManual(
-      AppDatabase db, String householdId) async {
-    final ledgerDao = LedgerDao(db);
-    final allocs = await (db.select(db.allocations)
-          ..where((a) => a.householdId.equals(householdId))
-          ..where((a) => a.archived.equals(false))
-          ..where((a) => a.deleted.equals(false))
-          ..where((a) => a.periodicity.equals('periodic'))
-          ..where((a) => a.autoReset.equals(false)))
-        .get();
-
-    if (allocs.isEmpty) return 0;
-    final allBalances = await ledgerDao.getAllBalances(
-        allocs.map((a) => a.id).toList());
-
-    int pending = 0;
-    for (final alloc in allocs) {
-      final balances = allBalances[alloc.id] ?? {};
-      if (balances.values.any((v) => v.abs() > 0.01)) pending++;
-    }
-    return pending;
+      AppDatabase db, String householdId, int periodStartDay) async {
+    return (await getPendingManualIds(db, householdId, periodStartDay)).length;
   }
 
-  /// Get the list of envelope IDs that need manual reset.
+  /// Envelopes with manual reset that need a review this period: periodic,
+  /// existed when the current period began, still hold money, and have no
+  /// review entry (`period_reset` / `carry_forward`) since the period began.
+  /// Reviewing (or a new envelope mid-period) clears it until the next
+  /// period starts.
   static Future<List<String>> getPendingManualIds(
-      AppDatabase db, String householdId) async {
-    final ledgerDao = LedgerDao(db);
+      AppDatabase db, String householdId, int periodStartDay) async {
+    final periodStart = budgetPeriodFor(periodStartDay).start;
     final allocs = await (db.select(db.allocations)
           ..where((a) => a.householdId.equals(householdId))
           ..where((a) => a.archived.equals(false))
           ..where((a) => a.deleted.equals(false))
           ..where((a) => a.periodicity.equals('periodic'))
-          ..where((a) => a.autoReset.equals(false)))
+          ..where((a) => a.autoReset.equals(false))
+          ..where((a) => a.createdAt.isSmallerThanValue(periodStart)))
         .get();
 
     if (allocs.isEmpty) return [];
-    final allBalances = await ledgerDao.getAllBalances(
-        allocs.map((a) => a.id).toList());
+    final ids = allocs.map((a) => a.id).toList();
+    final allBalances = await LedgerDao(db).getAllBalances(ids);
+    final reviewed = await (db.selectOnly(db.allocationLedger)
+          ..addColumns([db.allocationLedger.allocationId])
+          ..where(db.allocationLedger.allocationId.isIn(ids) &
+              db.allocationLedger.entryType
+                  .isIn(const ['period_reset', 'carry_forward']) &
+              db.allocationLedger.createdAt
+                  .isBiggerOrEqualValue(periodStart)))
+        .map((r) => r.read(db.allocationLedger.allocationId)!)
+        .get();
+    final reviewedIds = reviewed.toSet();
 
     return [
       for (final alloc in allocs)
-        if ((allBalances[alloc.id] ?? {}).values.any((v) => v.abs() > 0.01))
+        if (!reviewedIds.contains(alloc.id) &&
+            (allBalances[alloc.id] ?? {}).values.any((v) => v > 0.01))
           alloc.id,
     ];
   }

@@ -7,9 +7,12 @@ import 'household_provider.dart';
 /// IDs of envelopes needing manual period reset.
 final pendingResetProvider = FutureProvider<List<String>>((ref) async {
   final db = ref.watch(databaseProvider);
-  final householdId = ref.watch(currentHouseholdIdProvider);
-  if (householdId == null) return [];
-  return PeriodResetService.getPendingManualIds(db, householdId);
+  final household = ref.watch(householdProvider).value;
+  if (household == null) return [];
+  // Recheck once auto-resets for a new period have run.
+  await ref.watch(periodResetCheckProvider.future);
+  return PeriodResetService.getPendingManualIds(
+      db, household.id, household.periodStartDay);
 });
 
 /// Run auto-resets on app launch. Returns count of pending manual ones.

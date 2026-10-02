@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/engine/recurring_engine.dart' show recurringAmountOn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -113,7 +115,8 @@ class _Box extends StatelessWidget {
     // Only base-currency bills are summed — never mix currencies.
     final total = bills
         .where((b) => b.currency == baseCurrency)
-        .fold<double>(0, (sum, b) => sum + b.amount);
+        .fold<double>(
+            0, (sum, b) => sum + recurringAmountOn(b, b.nextDueDate));
     final bg = AppColors.pastel(context, color, light: 0.85, dark: 0.75);
     final title = Row(
       mainAxisSize: MainAxisSize.min,

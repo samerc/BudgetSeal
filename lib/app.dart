@@ -15,6 +15,10 @@ import 'core/providers/currency_symbol_provider.dart';
 import 'core/providers/date_format_provider.dart';
 import 'core/providers/database_provider.dart';
 import 'core/services/auto_backup_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/providers/allocations_provider.dart';
+import 'core/providers/engine_provider.dart';
+import 'core/providers/transactions_provider.dart';
 import 'core/services/travel_account_service.dart';
 import 'core/providers/number_format_provider.dart';
 import 'core/providers/sync_provider.dart';
@@ -376,6 +380,8 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       AutoBackupService.runIfDue();
       // Auto-archive travel wallets at zero balance
       _checkTravelAccounts();
+      // Post bills that fell due while the app sat in memory, then alerts.
+      _processDueWork();
     } else if (state == AppLifecycleState.paused) {
       // Sync on app pause (upload local changes)
       _autoSync();
@@ -386,6 +392,25 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       if (biometricEnabled) {
         setState(() => _showLock = true);
       }
+    }
+  }
+
+  Future<void> _processDueWork() async {
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null || AutoBackupService.restorePending) return;
+    try {
+      final posted = await ref.read(recurringEngineProvider).processRecurring();
+      if (posted > 0) {
+        ref.invalidate(transactionEntriesProvider);
+        ref.invalidate(monthlyTransactionsProvider);
+        ref.invalidate(accountsWithBalanceProvider);
+        ref.invalidate(allocationsProvider);
+        ref.invalidate(unallocatedProvider);
+      }
+      await NotificationService.runChecks(
+          ref.read(databaseProvider), householdId);
+    } catch (e) {
+      debugPrint('[Resume] Due work failed: $e');
     }
   }
 

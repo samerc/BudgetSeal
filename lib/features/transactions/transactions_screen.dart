@@ -13,7 +13,6 @@ import 'package:drift/drift.dart' hide Column;
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/categories_provider.dart';
-import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
@@ -24,6 +23,8 @@ import '../../shared/theme/design_tokens.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import 'widgets/delete_with_undo.dart';
+import 'widgets/tx_form_args.dart';
 import 'widgets/tx_tile.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -63,6 +64,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   // Selection mode
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
+  // Rows swiped away, hidden until the soft-delete reaches the provider
+  // (or brought back by Undo).
+  final Set<String> _swipedIds = {};
   // Month navigation
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -178,55 +182,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     );
     if (confirmed != true || !mounted) return;
 
-    // Two-phase delete (see CLAUDE.md "Undo Delete"): mark deleted=true now
-    // but keep ledger entries, so Undo can restore. The engine delete that
-    // removes ledger entries runs only once the SnackBar closes un-undone.
     final ids = _selectedIds.toList();
-    final db = ref.read(databaseProvider);
-    final engine = ref.read(allocationEngineProvider);
-    // The SnackBar outlives this screen; use the container, not `ref`.
-    final container = ProviderScope.containerOf(context);
-    Future<void> setDeleted(bool deleted) async {
-      await (db.update(db.transactions)..where((t) => t.id.isIn(ids)))
-          .write(TransactionsCompanion(
-              deleted: Value(deleted), lastModified: Value(DateTime.now())));
-      container.invalidate(transactionEntriesProvider);
-      container.invalidate(monthlyTransactionsProvider);
-    }
-
-    await setDeleted(true);
-    if (!mounted) return;
     setState(() {
       _selectionMode = false;
       _selectedIds.clear();
     });
-    var undone = false;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger
-        .showSnackBar(SnackBar(
-          content: Text(count == 1 ? tr.txTransactionDeleted : tr.txNDeleted(count)),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: tr.txUndoAction,
-            onPressed: () async {
-              undone = true;
-              await setDeleted(false);
-            },
-          ),
-        ))
-        .closed
-        .then((_) async {
-      if (undone) return;
-      for (final id in ids) {
-        await engine.deleteTransaction(id);
-      }
-    }).catchError((Object e) {
-      // Rows stay soft-deleted (balances ignore their ledger); the startup
-      // sweep in main.dart removes the leftover ledger entries.
-      debugPrint('[Transactions] Finishing delete failed: $e');
-    });
+    await deleteTransactionsWithUndo(context, ids);
   }
 
   /// Duplicate the single selected transaction into a new add form.
@@ -243,23 +204,28 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _selectedIds.clear();
     });
     if (e == null) return;
-    final tx = e.tx;
-    final categories = ref.read(categoriesProvider).value ?? const <Category>[];
-    final cat = categories.where((c) => c.id == tx.categoryId).firstOrNull;
-    context.push('/add-transaction', extra: {
-      'editType': tx.type,
-      'editNote': tx.note,
-      'editLines': [
-        {
-          'amount': tx.amount,
-          'currency': tx.currency,
-          'accountId': tx.accountId,
-          'categoryId': tx.categoryId,
-          'categoryName': cat?.name,
-          'note': tx.note,
-        },
-      ],
-    });
+    context.push('/add-transaction',
+        extra: txFormArgs(
+            e, ref.read(categoriesProvider).value ?? const <Category>[],
+            edit: false));
+  }
+
+  /// Opens the edit form straight away (selection bar Edit, swipe right).
+  void _openEditForm(String id) {
+    final entries = ref
+            .read(monthlyTransactionsProvider(
+                (year: _selectedYear, month: _selectedMonth)))
+            .value ??
+        const <TransactionEntry>[];
+    final e = entries.where((x) => x.tx.id == id).firstOrNull;
+    if (e == null) {
+      context.push('/transactions/$id');
+      return;
+    }
+    context.push('/add-transaction',
+        extra: txFormArgs(
+            e, ref.read(categoriesProvider).value ?? const <Category>[],
+            edit: true));
   }
 
   void _setMonth(int year, int month) {
@@ -267,6 +233,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     setState(() {
       _selectedYear = year;
       _selectedMonth = month;
+      // Selected rows belong to the old month — don't act on hidden rows.
+      _selectionMode = false;
+      _selectedIds.clear();
     });
     _loadPlanned();
   }
@@ -407,7 +376,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                   _selectionMode = false;
                                   _selectedIds.clear();
                                 });
-                                context.push('/transactions/$id');
+                                _openEditForm(id);
                               },
                             ),
                             IconButton(
@@ -801,13 +770,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     if (text.isEmpty) return;
 
     // Parse: last number token is the amount, rest is the note/title
-    final numPattern = RegExp(r'(\d+(?:\.\d+)?)\s*$');
+    // "Coffee 4,50" and "Rent 1,200.00" both work.
+    final numPattern = RegExp(r'(\d[\d.,]*)\s*$');
     final match = numPattern.firstMatch(text);
 
     String note = text;
     double? amount;
     if (match != null) {
-      amount = double.tryParse(match.group(1)!);
+      amount = parseLooseAmount(match.group(1)!);
       note = text.substring(0, match.start).trim();
     }
 
@@ -1272,6 +1242,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   // ── Main content builder ─────────────────────────────────────
   Widget _buildContent(List<TransactionEntry> entries,
       Map<String, Category> categoryMap, BuildContext context) {
+    if (_swipedIds.isNotEmpty) {
+      entries = entries.where((e) => !_swipedIds.contains(e.tx.id)).toList();
+    }
     // Month filtering is already done at the SQL level via
     // monthlyTransactionsProvider. Apply all filters in a single pass.
     final hasDateFilter = _dateFrom != null || _dateTo != null;
@@ -1756,38 +1729,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          context.push('/transactions/${e.tx.id}');
+          _openEditForm(e.tx.id);
           return false; // don't dismiss
         }
-        final catName = e.tx.categoryId != null
-            ? categoryMap[e.tx.categoryId]?.name
-            : null;
-        final deleteLabel =
-            '${formatSignedAmount(e.tx.amount, currency: e.tx.currency, type: e.tx.type)} ${catName ?? e.tx.note}';
-        final tr = S.of(context);
-        return await showDialog<bool>(
-              context: context,
-              builder: (dCtx) => AlertDialog(
-                title: Text(tr.txDeleteShort),
-                content: Text(tr.txDeleteWithReversal(deleteLabel)),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dCtx, false),
-                    child: Text(tr.commonCancel),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(dCtx, true),
-                    style: TextButton.styleFrom(
-                        foregroundColor: AppColors.overspent),
-                    child: Text(tr.commonDelete),
-                  ),
-                ],
-              ),
-            ) ??
-            false;
+        return true; // Undo on the SnackBar replaces a confirm dialog
       },
       onDismissed: (_) {
-        ref.read(allocationEngineProvider).deleteTransaction(e.tx.id);
+        // Hide the row now — the Dismissible must leave the tree this frame,
+        // before the soft-delete reaches the provider.
+        setState(() => _swipedIds.add(e.tx.id));
+        deleteTransactionsWithUndo(context, [e.tx.id],
+            onUndo: () {
+          if (mounted) setState(() => _swipedIds.remove(e.tx.id));
+        });
       },
       child: row,
     );

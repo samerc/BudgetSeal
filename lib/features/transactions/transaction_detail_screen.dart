@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../../shared/utils/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
@@ -14,7 +13,6 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
-import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -25,6 +23,8 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'widgets/delete_with_undo.dart';
+import 'widgets/tx_form_args.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   final String transactionId;
@@ -322,7 +322,9 @@ class _DetailBody extends ConsumerWidget {
                   icon: Icons.calendar_today_rounded),
               _divider(context),
               _detailRow(context, S.of(context).txDetailTime,
-                  DateFormat('h:mm a').format(tx.createdAt.toLocal()),
+                  // Follows the device's 12/24-hour setting.
+                  TimeOfDay.fromDateTime(tx.createdAt.toLocal())
+                      .format(context),
                   icon: Icons.access_time_rounded),
               _divider(context),
               Builder(builder: (_) {
@@ -333,8 +335,12 @@ class _DetailBody extends ConsumerWidget {
                       involvedNames.join(', '),
                       icon: Icons.account_balance_wallet_outlined);
                 }
+                // The line's account (per-line accounts), as shown in the name.
+                final accountId = entry.lines.isNotEmpty
+                    ? (entry.lines.first.accountId ?? tx.accountId)
+                    : tx.accountId;
                 return GestureDetector(
-                  onTap: () => context.push('/accounts/${tx.accountId}'),
+                  onTap: () => context.push('/accounts/$accountId'),
                   child: _detailRow(context, S.of(context).commonAccount,
                       '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
                       icon: Icons.account_balance_wallet_outlined),
@@ -540,47 +546,11 @@ class _DetailBody extends ConsumerWidget {
   }
 
   void _editTransaction(BuildContext context, WidgetRef ref) {
-    final tx = entry.tx;
-    final categories = ref.read(categoriesProvider).value ?? [];
-    final catMap = {for (final c in categories) c.id: c};
-    final editLines = entry.lines.map((l) {
-      final cat = l.categoryId != null ? catMap[l.categoryId] : null;
-      return <String, dynamic>{
-        'amount': l.amount,
-        'currency': l.currency,
-        'exchangeRateToBase': l.exchangeRateToBase,
-        'accountId': l.accountId ?? tx.accountId,
-        'categoryId': l.categoryId,
-        'categoryName': cat?.name,
-        'note': l.note,
-      };
-    }).toList();
-
-    if (editLines.isEmpty) {
-      final cat = tx.categoryId != null ? catMap[tx.categoryId] : null;
-      editLines.add({
-        'amount': tx.amount,
-        'currency': tx.currency,
-        'exchangeRateToBase': tx.exchangeRateToBase,
-        'accountId': tx.accountId,
-        'categoryId': tx.categoryId,
-        'categoryName': cat?.name,
-        'note': '',
-      });
-    }
-
+    final args = txFormArgs(
+        entry, ref.read(categoriesProvider).value ?? const [],
+        edit: true);
     context.pop();
-    context.push('/add-transaction', extra: {
-      'editTransactionId': tx.id,
-      'editType': tx.type,
-      'editNote': tx.note,
-      'editDate': tx.createdAt,
-      'editLines': editLines,
-      if (tx.type == 'transfer') ...{
-        'editFromAccountId': tx.accountId,
-        'editDestAccountId': tx.destinationAccountId,
-      },
-    });
+    context.push('/add-transaction', extra: args);
   }
 
   Future<void> _saveAsTemplate(BuildContext context, WidgetRef ref) async {
@@ -630,34 +600,14 @@ class _DetailBody extends ConsumerWidget {
     }
   }
 
+  /// Deletes right away and pops; the list shows the Undo SnackBar.
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     hapticHeavy();
-    final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(tr.txDetailDeleteTitle),
-        content: Text(tr.txDetailDeleteContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
-            style: TextButton.styleFrom(
-                foregroundColor: AppColors.overspent),
-            child: Text(tr.commonDelete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && context.mounted) {
-      final engine = ref.read(allocationEngineProvider);
-      await engine.deleteTransaction(entry.tx.id);
-      if (context.mounted) context.pop();
-    }
+    // Capture the messenger before popping so the SnackBar shows on the
+    // screen underneath.
+    final undo = deleteTransactionsWithUndo(context, [entry.tx.id]);
+    context.pop();
+    await undo;
   }
 
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
+import '../../core/services/notification_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../allocations/allocations_screen.dart';
@@ -44,6 +45,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     _currentIndex = 0;
+    // First launch with a budget (also right after onboarding): ask for the
+    // Android 13+ notification permission so bill/envelope alerts can show.
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => NotificationService.requestPermissionOnce().catchError((_) {}));
   }
 
   @override

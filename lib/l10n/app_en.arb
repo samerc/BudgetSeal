@@ -1,4 +1,24 @@
 {
+  "allocEntryWithdrawn": "Withdrawn",
+  "allocEntryRevaluation": "Revaluation",
+  "allocEntryMoved": "Moved",
+  "fxSetRateTitle": "Rate for {currency}",
+  "@fxSetRateTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "fxSetRateHint": "Your rate is used for new transactions and reports until you switch back to the live rate.",
+  "fxUseLiveRate": "Use live rate",
+  "fxBaseLabel": "Base currency: {currency}",
+  "@fxBaseLabel": {"placeholders": {"currency": {"type": "String"}}},
+  "fxNoCurrencies": "Your budget uses only one currency. Add an account in another currency to see its rate here.",
+  "fxNoRateFor": "No rate for {currency} yet — tap to set one",
+  "@fxNoRateFor": {"placeholders": {"currency": {"type": "String"}}},
+  "fxManualTag": "Your rate",
+  "fxLiveTag": "Live",
+  "tileExchangeRatesSub": "Live rates, or set your own",
+  "allocArchivedTitle": "Archived envelopes",
+  "allocNoArchived": "No archived envelopes.",
+  "allocUnarchived": "{name} unarchived",
+  "@allocUnarchived": {"placeholders": {"name": {"type": "String"}}},
+  "txNoRate": "No rate",
   "allocReadyToAssign": "Ready to assign",
   "allocAssign": "Assign",
   "accentGold": "Gold",
@@ -2110,7 +2130,7 @@
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveMsg": "This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from Settings.",
+  "allocArchiveMsg": "This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).",
   "@allocArchiveMsg": {
     "description": "Dialog content"
   },
@@ -3145,7 +3165,7 @@
   "@tileTravelExchange": {
     "description": "Tile title"
   },
-  "tileExchangeRates": "Exchange Rates",
+  "tileExchangeRates": "Exchange rates",
   "@tileExchangeRates": {
     "description": "Tile title"
   },
@@ -3598,7 +3618,7 @@
   "@fxCheckInternet": {
     "description": "Subtitle"
   },
-  "fxCacheInfo": "Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.",
+  "fxCacheInfo": "Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.",
   "@fxCacheInfo": {
     "description": "Info text"
   },

@@ -37,6 +37,28 @@ class NotificationService {
     );
   }
 
+  /// All alert checks (each has its own 24h cooldown) — at launch and on
+  /// every resume, so a phone that keeps the app in memory still gets them.
+  static Future<void> runChecks(AppDatabase db, String householdId) async {
+    await checkEnvelopes(db, householdId);
+    await checkBudgetWarnings(db, householdId);
+    await checkRecurring(db, householdId);
+  }
+
+  static const _permissionAskedKey = 'notif_permission_asked';
+
+  /// Android 13+ needs a runtime grant before any alert can show. Ask once,
+  /// on the first launch with a budget (iOS asks during [init]).
+  static Future<void> requestPermissionOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_permissionAskedKey) ?? false) return;
+    await prefs.setBool(_permissionAskedKey, true);
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+  }
+
   /// Check if enough time has passed since the last check for a given key.
   static Future<bool> _shouldCheck(String key) async {
     final prefs = await SharedPreferences.getInstance();

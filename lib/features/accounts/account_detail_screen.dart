@@ -15,6 +15,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/fx/fx_service.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -823,6 +824,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         if (householdId == null) return;
         final engine = ref.read(allocationEngineProvider);
         final currency = _currencyController.text.trim().toUpperCase();
+        final baseCurrency =
+            ref.read(householdProvider).value?.baseCurrency ?? currency;
+        final rate = await rateToBaseOrOne(ref.read(fxServiceProvider),
+            ref.read(databaseProvider), currency, baseCurrency);
+        if (!mounted) return;
 
         if (diff > 0) {
           // Positive adjustment → record as income.
@@ -831,14 +837,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             accountId: widget.accountId,
             amount: diff,
             currency: currency,
-            exchangeRateToBase: 1.0,
+            exchangeRateToBase: rate,
             createdBy: 'user',
             deviceId: 'local',
             note: S.of(context).acctBalanceAdjustment,
           );
         } else {
           // Negative adjustment → record as expense via engine (preserves balance invariant).
-          final baseCurrency = ref.read(householdProvider).value?.baseCurrency ?? currency;
           await engine.recordTransaction(
             householdId: householdId,
             accountId: widget.accountId,
@@ -848,6 +853,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               TxLine(
                 amount: diff.abs(),
                 currency: currency,
+                exchangeRateToBase: rate,
               ),
             ],
             note: S.of(context).acctBalanceAdjustment,

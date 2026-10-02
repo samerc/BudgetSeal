@@ -120,6 +120,18 @@ class _AssistedTransactionScreenState
     }
   }
 
+  /// Every account change goes through here so a foreign account always
+  /// fetches its rate — otherwise the line saves at 1.0 and reports drop it.
+  void _setAccount(String? id) {
+    _accountId = id;
+    final currency = _selectedCurrency;
+    if (currency == _baseCurrency) {
+      _expenseExchangeRate = 1.0;
+    } else {
+      _fetchExpenseRate(currency); // async: sets state after the fetch
+    }
+  }
+
   _LineItem get _activeLine => _lineItems[_activeLineIndex];
 
   @override
@@ -130,7 +142,7 @@ class _AssistedTransactionScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final accounts = ref.read(accountsProvider).value ?? [];
       if (accounts.isNotEmpty) {
-        _accountId = accounts.first.id;
+        _setAccount(accounts.first.id);
       }
       _showTitlePopup();
     });
@@ -991,13 +1003,13 @@ class _AssistedTransactionScreenState
       final categories = ref.read(categoriesProvider).value ?? [];
       final cat = categories.where((c) => c.id == categoryId).firstOrNull;
       if (cat?.defaultAccountId != null && _accountId == null) {
-        _accountId = cat!.defaultAccountId;
+        _setAccount(cat!.defaultAccountId);
       }
       return;
     }
     final canOverride = settings.overrideExisting;
     if (fill.accountId != null && (_accountId == null || canOverride)) {
-      _accountId = fill.accountId;
+      _setAccount(fill.accountId);
     }
     if (fill.title != null && (_title.isEmpty || canOverride)) {
       _title = fill.title!;
@@ -1015,7 +1027,7 @@ class _AssistedTransactionScreenState
     if (!fill.hasData) return;
     final canOverride = settings.overrideExisting;
     if (fill.accountId != null && (_accountId == null || canOverride)) {
-      _accountId = fill.accountId;
+      _setAccount(fill.accountId);
     }
     if (fill.categoryId != null &&
         (_activeLine.category == null || canOverride)) {
@@ -1648,8 +1660,7 @@ class _AssistedTransactionScreenState
               accounts: accounts,
               color: AppColors.accent,
               onSelected: (a) {
-                setState(() => _accountId = a.id);
-                _fetchExpenseRate(a.currency);
+                setState(() => _setAccount(a.id));
               },
             ),
             // Destination account (transfers only)

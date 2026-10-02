@@ -37,6 +37,32 @@ DateTime advanceRecurringDate(DateTime from, String frequency, int interval,
 
 /// Manages recurring transactions: checks for due items on app start
 /// and generates actual transactions.
+/// The effective amount of a recurring item on [date], for a recurring transaction on a given date,
+/// taking a subscription's price history into account (also used by the
+/// upcoming-bill views, so they show the price that will be charged).
+double recurringAmountOn(RecurringTransaction rec, DateTime date) {
+  if (rec.priceHistory == null || rec.priceHistory!.isEmpty) {
+    return rec.amount;
+  }
+  try {
+    final history = (jsonDecode(rec.priceHistory!) as List)
+        .map((e) => e as Map<String, dynamic>)
+        .toList()
+      ..sort((a, b) => (a['from'] as String).compareTo(b['from'] as String));
+
+    double activeAmount = rec.amount;
+    for (final entry in history) {
+      final from = DateTime.parse(entry['from'] as String);
+      if (!date.isBefore(from)) {
+        activeAmount = (entry['amount'] as num).toDouble();
+      }
+    }
+    return activeAmount;
+  } catch (_) {
+    return rec.amount;
+  }
+}
+
 class RecurringEngine {
   final AppDatabase _db;
   final AllocationEngine _allocationEngine;
@@ -107,35 +133,10 @@ class RecurringEngine {
     return generated;
   }
 
-  /// Resolve the effective amount for a recurring transaction on a given date,
-  /// taking price history into account for subscriptions.
-  double _getAmountForDate(RecurringTransaction rec, DateTime date) {
-    if (rec.priceHistory == null || rec.priceHistory!.isEmpty) {
-      return rec.amount;
-    }
-    try {
-      final history = (jsonDecode(rec.priceHistory!) as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList()
-        ..sort((a, b) => (a['from'] as String).compareTo(b['from'] as String));
-
-      double activeAmount = rec.amount;
-      for (final entry in history) {
-        final from = DateTime.parse(entry['from'] as String);
-        if (!date.isBefore(from)) {
-          activeAmount = (entry['amount'] as num).toDouble();
-        }
-      }
-      return activeAmount;
-    } catch (_) {
-      return rec.amount;
-    }
-  }
-
   Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate, String? baseCurrencyOverride]) async {
     final householdId = rec.householdId;
     final effectiveDate = forDate ?? rec.nextDueDate;
-    final amount = _getAmountForDate(rec, effectiveDate);
+    final amount = recurringAmountOn(rec, effectiveDate);
 
     // Use pre-fetched base currency, or fall back to household query.
     final String baseCurrency;

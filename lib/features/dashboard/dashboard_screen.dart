@@ -1231,6 +1231,7 @@ class _QuickTemplatesSectionState
                           .write(TransactionTemplatesCompanion(
                         useCount: Value(t.useCount + 1),
                         lastUsedAt: Value(DateTime.now()),
+                        lastModified: Value(DateTime.now()),
                       ));
 
                       if (context.mounted) {

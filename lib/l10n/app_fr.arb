@@ -1,4 +1,20 @@
 {
+  "allocEntryWithdrawn": "Retiré",
+  "allocEntryRevaluation": "Réévaluation",
+  "allocEntryMoved": "Déplacé",
+  "fxSetRateTitle": "Taux pour {currency}",
+  "fxSetRateHint": "Votre taux sert aux nouvelles transactions et aux rapports jusqu'au retour au taux en direct.",
+  "fxUseLiveRate": "Taux en direct",
+  "fxBaseLabel": "Devise de base : {currency}",
+  "fxNoCurrencies": "Votre budget n'utilise qu'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.",
+  "fxNoRateFor": "Pas encore de taux pour {currency} — touchez pour en définir un",
+  "fxManualTag": "Votre taux",
+  "fxLiveTag": "En direct",
+  "tileExchangeRatesSub": "Taux en direct, ou les vôtres",
+  "allocArchivedTitle": "Enveloppes archivées",
+  "allocNoArchived": "Aucune enveloppe archivée.",
+  "allocUnarchived": "{name} désarchivée",
+  "txNoRate": "Pas de taux",
   "allocReadyToAssign": "Prêt à répartir",
   "allocAssign": "Répartir",
   "accentGold": "Or",
@@ -1886,7 +1902,7 @@
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveMsg": "Cette enveloppe sera masquée de toutes les listes. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver dans les Paramètres.",
+  "allocArchiveMsg": "Cette enveloppe sera masquée de toutes les listes et ne recevra plus de dépenses. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver depuis le menu de l'onglet Budget (⋮ › Enveloppes archivées).",
   "@allocArchiveMsg": {
     "description": "Dialog content"
   },
@@ -3341,7 +3357,7 @@
   "@fxCheckInternet": {
     "description": "Subtitle"
   },
-  "fxCacheInfo": "Les taux sont récupérés en ligne et mis en cache 1 heure. Ils sont remplis automatiquement lors de la création de transactions.",
+  "fxCacheInfo": "Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.",
   "@fxCacheInfo": {
     "description": "Info text"
   },

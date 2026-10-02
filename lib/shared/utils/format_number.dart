@@ -244,3 +244,36 @@ String formatRateForInput(double rate) {
   if (rounded >= 1) return rounded.toStringAsFixed(2);
   return rounded.toStringAsFixed(6);
 }
+
+/// Typed or imported amounts in either convention: `1,234.56`, `1.234,56`, `12,50`,
+/// `-5`, `(5.00)` (negative), with or without a currency symbol. A lone comma
+/// followed by exactly three digits is a thousands separator (`1,234`);
+/// otherwise it is the decimal mark.
+double? parseLooseAmount(String raw) {
+  var s = raw.trim();
+  final negative = s.contains('-') || (s.startsWith('(') && s.endsWith(')'));
+  s = s.replaceAll(RegExp(r'[^0-9.,]'), '');
+  if (s.isEmpty) return null;
+  final lastComma = s.lastIndexOf(',');
+  final lastDot = s.lastIndexOf('.');
+  String normalized;
+  if (lastComma >= 0 && lastDot >= 0) {
+    // Both present: whichever comes last is the decimal mark.
+    final dec = lastComma > lastDot ? ',' : '.';
+    final thou = dec == ',' ? '.' : ',';
+    normalized = s.replaceAll(thou, '').replaceAll(dec, '.');
+  } else if (lastComma >= 0) {
+    final commas = ','.allMatches(s).length;
+    final decimals = s.length - lastComma - 1;
+    normalized = commas == 1 && decimals != 3
+        ? s.replaceAll(',', '.')
+        : s.replaceAll(',', '');
+  } else if ('.'.allMatches(s).length > 1) {
+    normalized = s.replaceAll('.', ''); // 1.234.567
+  } else {
+    normalized = s;
+  }
+  final v = double.tryParse(normalized);
+  if (v == null) return null;
+  return negative ? -v : v;
+}

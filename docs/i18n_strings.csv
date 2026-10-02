@@ -447,7 +447,7 @@ alloc_total_adjustment,Label,Total adjustment,إجمالي التعديل,Ajuste
 alloc_apply_revaluation,Button,Apply Revaluation,تطبيق إعادة التقييم,Appliquer la réévaluation
 alloc_revaluation_applied,Snackbar,Revaluation applied,تم تطبيق إعادة التقييم,Réévaluation appliquée
 alloc_archive_title,Dialog title,Archive Envelope,أرشفة الظرف,Archiver l'enveloppe
-alloc_archive_msg,Dialog content,This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from Settings.,سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.,Cette enveloppe sera masquée de toutes les listes. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver dans les Paramètres.
+alloc_archive_msg,Dialog content,This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).,سيتم إخفاء هذا الظرف من جميع القوائم ولن تُخصم منه المصاريف. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من قائمة تبويب الميزانية (⋮ › الأظرف المؤرشفة).,Cette enveloppe sera masquée de toutes les listes et ne recevra plus de dépenses. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver depuis le menu de l'onglet Budget (⋮ › Enveloppes archivées).
 alloc_archived,Snackbar,Envelope archived,تم أرشفة الظرف,Enveloppe archivée
 alloc_delete_title,Dialog title,Delete Envelope,حذف الظرف,Supprimer l'enveloppe
 alloc_archive_instead,Dialog button,Archive Instead,أرشفة بدلاً من ذلك,Archiver à la place
@@ -759,7 +759,7 @@ household_name_title,Dialog title,Household Name,اسم الأسرة,Nom du foye
 tile_bill_calendar,Tile title,Bill Calendar,تقويم الفواتير,Calendrier des factures
 tile_upcoming_bills,Tile title,Upcoming Bills,الفواتير القادمة,Factures à venir
 tile_travel_exchange,Tile title,Travel Exchange,صرف السفر,Change de voyage
-tile_exchange_rates,Tile title,Exchange Rates,أسعار الصرف,Taux de change
+tile_exchange_rates,Tile title,Exchange rates,أسعار الصرف,Taux de change
 tile_web_companion,Tile title,Web Companion,المرافق الإلكتروني,Compagnon Web
 tile_recurring,Tile title,Recurring,المتكررة,Récurrents
 tile_templates,Tile title,Templates,القوالب,Modèles
@@ -888,7 +888,7 @@ fx_refresh_tooltip,Tooltip,Refresh rates,تحديث الأسعار,Actualiser le
 fx_could_not_fetch,Error title,Could not fetch rates,تعذّر جلب الأسعار,Impossible de récupérer les taux
 fx_no_rates,Empty title,No rates available,لا أسعار متاحة,Aucun taux disponible
 fx_check_internet,Subtitle,Check your internet connection and try again.,تحقق من اتصالك بالإنترنت وأعد المحاولة.,Vérifiez votre connexion internet et réessayez.
-fx_cache_info,Info text,Rates are fetched from the internet and cached for 1 hour. They are auto-filled when creating transactions.,يتم جلب الأسعار من الإنترنت وتخزينها لمدة ساعة. يتم ملؤها تلقائياً عند إنشاء المعاملات.,Les taux sont récupérés en ligne et mis en cache 1 heure. Ils sont remplis automatiquement lors de la création de transactions.
+fx_cache_info,Info text,Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.,تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.,Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.
 # ──────────────────────────────────────────────,,,,
 # ABOUT,,,,
 # ──────────────────────────────────────────────,,,,
@@ -2086,3 +2086,22 @@ accent_sapphire,,Sapphire,ياقوتي,Saphir
 accent_plum,,Plum,برقوقي,Prune
 accent_rose,,Rose,وردي,Rose
 accent_color_pair_hint,,"Each color has a bright tone for dark mode and a deeper one for light mode, so text stays readable in both.",لكل لون درجة زاهية للوضع الداكن وأخرى أعمق للوضع الفاتح، ليبقى النص مقروءًا في الوضعين.,"Chaque couleur a un ton vif pour le mode sombre et un ton plus profond pour le mode clair, pour un texte lisible dans les deux."
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+alloc_entry_withdrawn,,Withdrawn,مسحوب,Retiré
+alloc_entry_revaluation,,Revaluation,إعادة تقييم,Réévaluation
+alloc_entry_moved,,Moved,منقول,Déplacé
+fx_set_rate_title,,Rate for {currency},سعر {currency},Taux pour {currency}
+fx_set_rate_hint,,Your rate is used for new transactions and reports until you switch back to the live rate.,يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.,Votre taux sert aux nouvelles transactions et aux rapports jusqu'au retour au taux en direct.
+fx_use_live_rate,,Use live rate,السعر المباشر,Taux en direct
+fx_base_label,,Base currency: {currency},العملة الأساسية: {currency},Devise de base : {currency}
+fx_no_currencies,,Your budget uses only one currency. Add an account in another currency to see its rate here.,ميزانيتك تستخدم عملة واحدة فقط. أضف حساباً بعملة أخرى لترى سعرها هنا.,Votre budget n'utilise qu'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.
+fx_no_rate_for,,No rate for {currency} yet — tap to set one,لا يوجد سعر لـ {currency} بعد — اضغط لتحديده,Pas encore de taux pour {currency} — touchez pour en définir un
+fx_manual_tag,,Your rate,سعرك,Votre taux
+fx_live_tag,,Live,مباشر,En direct
+tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
+alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
+alloc_no_archived,,No archived envelopes.,لا توجد أظرف مؤرشفة.,Aucune enveloppe archivée.
+alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée
+tx_no_rate,,No rate,بلا سعر صرف,Pas de taux

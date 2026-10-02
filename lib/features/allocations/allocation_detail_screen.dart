@@ -1232,7 +1232,10 @@ class _AllocationDetailScreenState
                 'adjustment' => sl.allocEntryAdjustment,
                 'period_reset' => sl.allocEntryPeriodReset,
                 'carry_forward' => sl.allocEntryCarryForward,
-                _ => entry.entryType,
+                'withdrawal' => sl.allocEntryWithdrawn,
+                'revaluation' => sl.allocEntryRevaluation,
+                'transfer' => sl.allocEntryMoved,
+                _ => sl.allocEntryAdjustment,
               };
 
               final icon = switch (entry.entryType) {
@@ -1241,6 +1244,9 @@ class _AllocationDetailScreenState
                 'adjustment' => Icons.tune_rounded,
                 'period_reset' => Icons.refresh_rounded,
                 'carry_forward' => Icons.forward_rounded,
+                'withdrawal' => Icons.outbox_rounded,
+                'revaluation' => Icons.currency_exchange_rounded,
+                'transfer' => Icons.swap_horiz_rounded,
                 _ => Icons.circle_outlined,
               };
 
