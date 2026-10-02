@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
@@ -12,6 +11,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../core/providers/date_format_provider.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
 class _AllocationResolution {
@@ -107,6 +107,7 @@ class _PeriodTransitionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
             content: Text(S.of(context).periodTransitionFailed),
           ),
         );
@@ -158,7 +159,8 @@ class _PeriodTransitionScreenState
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(Icons.calendar_today_rounded,
@@ -177,7 +179,7 @@ class _PeriodTransitionScreenState
                               )),
                           const SizedBox(height: 3),
                           Text(
-                            '${DateFormat.yMMMd().format(periodStart)} — ${_ordinal(startDay)} of each month',
+                            S.of(context).periodStartsEachMonth(formatDate(periodStart), startDay),
                             style: TextStyle(
                               color: AppColors.ts(context),
                               fontSize: 13,
@@ -307,15 +309,6 @@ class _PeriodTransitionScreenState
     );
   }
 
-  String _ordinal(int day) {
-    if (day >= 11 && day <= 13) return '${day}th';
-    return switch (day % 10) {
-      1 => '${day}st',
-      2 => '${day}nd',
-      3 => '${day}rd',
-      _ => '${day}th',
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------

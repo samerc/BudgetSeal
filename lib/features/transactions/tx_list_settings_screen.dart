@@ -162,7 +162,8 @@ class _CompactPreviewRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.15),
+              color: AppColors.pastel(context, AppColors.accent,
+                  light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.restaurant, size: 16, color: AppColors.accent),
@@ -188,7 +189,7 @@ class _CompactPreviewRow extends StatelessWidget {
                     color: AppColors.sfv(context),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text('Bank',
+                  child: Text(S.of(context).acctTypeBank,
                       style: TextStyle(
                           fontSize: 10, color: AppColors.ts(context))),
                 ),
@@ -220,7 +221,8 @@ class _ExpandedPreviewRow extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.15),
+              color: AppColors.pastel(context, AppColors.accent,
+                  light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.restaurant, size: 18, color: AppColors.accent),
@@ -255,7 +257,7 @@ class _ExpandedPreviewRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis),
               if (settings.showAccount) ...[
                 const SizedBox(height: 3),
-                Text('Bank · USD',
+                Text('${S.of(context).acctTypeBank} · USD',
                     style:
                         TextStyle(fontSize: 11, color: AppColors.th(context))),
               ],

@@ -153,7 +153,8 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
+                        color: AppColors.pastel(context, color,
+                            light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child:
@@ -342,7 +343,8 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                                     child: Text(
                                       r.title.isNotEmpty
                                           ? r.title
-                                          : formatAmount(r.amount),
+                                          : formatAmount(r.amount,
+                                              currency: r.currency),
                                       style: TextStyle(
                                         fontSize: 8,
                                         fontWeight: FontWeight.w600,

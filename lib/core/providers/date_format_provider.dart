@@ -55,6 +55,11 @@ String formatDate(DateTime date) {
 }
 
 /// Format a date with the user's preferred format, with smart "Today"/"Yesterday" prefix.
+/// Date in the user's format plus the time (locale's 12/24-hour style),
+/// e.g. for backups and sync timestamps.
+String formatDateTime(DateTime date) =>
+    '${formatDate(date)} ${DateFormat.jm().format(date)}';
+
 String formatDateSmart(DateTime date, [String? pattern]) {
   final p = pattern ?? _datePattern;
   final now = DateTime.now();

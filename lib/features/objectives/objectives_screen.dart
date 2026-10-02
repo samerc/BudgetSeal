@@ -28,7 +28,7 @@ class ObjectivesScreen extends ConsumerWidget {
           children: [
             // ── Header ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 16, 0),
               child: Row(
                 children: [
                   IconButton(

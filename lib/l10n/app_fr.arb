@@ -1,4 +1,42 @@
 {
+  "commonPerDay": "{amount}/jour",
+  "commonNOfM": "{n} sur {m}",
+  "fundAmountOfAvailable": "{currency} : {amount} sur {available}",
+  "syncNoSyncFile": "Aucun fichier de synchronisation trouvé",
+  "syncErrNeedsPassword": "Le fichier de synchronisation est chiffré. Saisissez votre mot de passe de synchronisation dans Synchronisation cloud.",
+  "travelExchangeNote": "Change de voyage → {currency}",
+  "travelConvertBackNote": "Reconversion de voyage → {currency}",
+  "healthUnallocShort": "Non alloué : {amount}",
+  "reportsRecurringSummary": "{count} actives · {amount}/mois",
+  "allocRevaluationNote": "Réévaluation : {amount} à {rate} (avant {oldRate})",
+  "notifEveryDayAt": "Tous les jours à {time}",
+  "periodStartsEachMonth": "{date} · commence le {day} de chaque mois",
+  "fundMoreThanAvailable": "{amount} de plus que le disponible en {currency}",
+  "shareHouseholdFailed": "Impossible de créer l'invitation. Vérifiez votre connexion et réessayez.",
+  "a11yPctOfTarget": "{pct} % de {amount}",
+  "a11yFlexibleEnvelope": "enveloppe flexible",
+  "a11yNeedsReview": "à vérifier",
+  "syncLocalFile": "Fichier local",
+  "syncGoogleSub": "Connectez-vous avec votre compte Google",
+  "syncOneDriveSub": "Nécessite l'application OneDrive",
+  "syncDropboxSub": "Nécessite l'application Dropbox",
+  "syncLocalFileSub": "Choisissez n'importe quel fichier sur l'appareil",
+  "syncErrGoogleNotConfigured": "La connexion Google n'est pas configurée pour cette version de l'application. Utilisez une autre option de synchronisation.",
+  "syncErrNetwork": "Erreur réseau. Vérifiez votre connexion Internet.",
+  "syncErrConnectFailed": "Connexion impossible. Veuillez réessayer.",
+  "onboardConnectFailed": "Impossible de se connecter à {provider}",
+  "onboardNoSyncFile": "Aucun fichier de synchronisation trouvé",
+  "onboardDriveJoinFailed": "Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.",
+  "onboardNoSyncFileShared": "Aucun fichier de synchronisation dans le dossier partagé",
+  "billNoteTitle": "Partage de facture",
+  "billNoteTotal": "Facture : {total}",
+  "billNoteSplitWith": "Partagé avec {people} · Total : {total}",
+  "reportsDayN": "Jour {n}",
+  "reportsTipOverPace": "À ce rythme, vous dépasserez votre budget de {amount}. Essayez de ralentir.",
+  "reportsTipUnderPace": "Excellent rythme ! Vous êtes en voie de rester {amount} sous votre budget.",
+  "reportsTipSavingHigh": "Vous épargnez {percent} % de vos revenus ce mois-ci. Continuez !",
+  "reportsTipSavingLow": "Votre taux d'épargne est faible ({percent} %). Essayez de mettre de côté au moins 10 à 20 %.",
+  "reportsTipAgeLow": "{days, plural, =0{Votre argent ne reste même pas un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} =1{Votre argent ne reste qu'un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} other{Votre argent ne reste que {days} jours avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.}}",
   "txNoRateBetween": "Aucun taux de change de {from} vers {to}. Saisissez un taux pour ce montant, ou actualisez les taux dans Paramètres › Taux de change.",
   "acctArchiveNonZero": "Ce compte contient encore {amount}. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent.",
   "receiptPickFailed": "Impossible d'ajouter la photo. Vérifiez les autorisations de l'appareil photo et des photos.",
@@ -433,7 +471,7 @@
   "@dashboardAgeOfMoneyTitle": {
     "description": "Info dialog title"
   },
-  "dashboardAgeOfMoneyExplanation": "Cela montre combien de temps l'argent reste dans vos comptes avant d'être dépensé.\\n\\nConsidérez-le comme un tampon :\\n\\n• Moins de 14 jours — vous dépensez aussi vite que l'argent arrive\\n• 14–30 jours — vous avez un petit coussin\\n• 30–60 jours — vous dépensez le revenu du mois dernier. Excellent !\\n• 60+ jours — excellente santé financière\\n\\nL'objectif est d'augmenter ce nombre avec le temps.",
+  "dashboardAgeOfMoneyExplanation": "Cela montre combien de temps l'argent reste dans vos comptes avant d'être dépensé.\n\nConsidérez-le comme un tampon :\n\n• Moins de 14 jours — vous dépensez aussi vite que l'argent arrive\n• 14–30 jours — vous avez un petit coussin\n• 30–60 jours — vous dépensez le revenu du mois dernier. Excellent !\n• 60+ jours — excellente santé financière\n\nL'objectif est d'augmenter ce nombre avec le temps.",
   "@dashboardAgeOfMoneyExplanation": {
     "description": "Info dialog content"
   },
@@ -506,7 +544,7 @@
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
-  "dashboardSectionMoneyDesc": "Patrimoine net et santé des enveloppes",
+  "dashboardSectionMoneyDesc": "Factures, patrimoine et non alloué",
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
@@ -1066,7 +1104,7 @@
   "@txDetailDeleteTitle": {
     "description": "Delete dialog title"
   },
-  "txDetailDeleteContent": "Voulez-vous vraiment supprimer cette transaction ?\\n\\nCela annulera les déductions des enveloppes et restaurera le solde. Les écritures seront supprimées.\\n\\nCette action est irréversible.",
+  "txDetailDeleteContent": "Voulez-vous vraiment supprimer cette transaction ?\n\nCela annulera les déductions des enveloppes et restaurera le solde. Les écritures seront supprimées.\n\nCette action est irréversible.",
   "@txDetailDeleteContent": {
     "description": "Delete dialog content"
   },
@@ -1225,7 +1263,7 @@
   "@catSheetNoMatching": {
     "description": "Empty search"
   },
-  "catSheetNoYet": "Aucune catégorie.\\nAppuyez sur « Nouveau » ci-dessus pour en créer une.",
+  "catSheetNoYet": "Aucune catégorie.\nAppuyez sur « Nouveau » ci-dessus pour en créer une.",
   "@catSheetNoYet": {
     "description": "Empty state"
   },
@@ -1237,18 +1275,6 @@
         "type": "int"
       }
     }
-  },
-  "currencyYourAccounts": "Vos comptes",
-  "@currencyYourAccounts": {
-    "description": "Section header"
-  },
-  "currencyRecentlyUsed": "Récemment utilisées",
-  "@currencyRecentlyUsed": {
-    "description": "Section header"
-  },
-  "currencyAll": "Toutes les devises",
-  "@currencyAll": {
-    "description": "Section header"
   },
   "txWidgetSelectAccount": "Sélectionner un compte",
   "@txWidgetSelectAccount": {
@@ -1532,7 +1558,7 @@
   "@allocNoYet": {
     "description": "Empty state title"
   },
-  "allocCreateHelp": "Créez une enveloppe pour commencer.\\nAppuyez sur ? pour l'aide.",
+  "allocCreateHelp": "Créez une enveloppe pour commencer.\nAppuyez sur ? pour l'aide.",
   "@allocCreateHelp": {
     "description": "Empty state subtitle"
   },
@@ -1632,7 +1658,7 @@
   "@allocCycleSection": {
     "description": "Section header"
   },
-  "allocPeriodicDesc": "• Périodique : se réinitialise chaque mois (ex. budget courses)\\n• Permanent : s'accumule dans le temps (ex. fonds d'urgence)",
+  "allocPeriodicDesc": "• Périodique : se réinitialise chaque mois (ex. budget courses)\n• Permanent : s'accumule dans le temps (ex. fonds d'urgence)",
   "@allocPeriodicDesc": {
     "description": "Help text"
   },
@@ -1849,7 +1875,7 @@
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveMsg": "Cette enveloppe sera masquée de toutes les listes. Les catégories liées et l'historique seront préservés.\\n\\nVous pourrez la désarchiver dans les Paramètres.",
+  "allocArchiveMsg": "Cette enveloppe sera masquée de toutes les listes. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver dans les Paramètres.",
   "@allocArchiveMsg": {
     "description": "Dialog content"
   },
@@ -1873,7 +1899,7 @@
   "@allocDeleteNoLinkedTitle": {
     "description": "Dialog title"
   },
-  "allocDeleteNoLinkedMsg": "Cette enveloppe n'a pas de catégories liées. Tout l'historique sera supprimé.\\n\\nÊtes-vous sûr ? Cette action est irréversible.",
+  "allocDeleteNoLinkedMsg": "Cette enveloppe n'a pas de catégories liées. Tout l'historique sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.",
   "@allocDeleteNoLinkedMsg": {
     "description": "Dialog content"
   },
@@ -1910,7 +1936,7 @@
   "@fundOverfundingTitle": {
     "description": "Warning dialog title"
   },
-  "fundOverfundingMsg": "Vous affectez {details}. Votre solde non affecté deviendra négatif.\\n\\nContinuer ?",
+  "fundOverfundingMsg": "Vous affectez {details}. Votre solde non affecté deviendra négatif.\n\nContinuer ?",
   "@fundOverfundingMsg": {
     "description": "Warning dialog content",
     "placeholders": {
@@ -2815,7 +2841,7 @@
   "@resetTitle": {
     "description": "Dialog title"
   },
-  "resetContent": "Cela supprimera définitivement TOUTES vos données :\\n\\n• Tous les comptes et soldes\\n• Toutes les transactions\\n• Toutes les enveloppes et catégories\\n• Tous les paramètres\\n\\nCette action est irréversible. Êtes-vous absolument sûr ?",
+  "resetContent": "Cela supprimera définitivement TOUTES vos données :\n\n• Tous les comptes et soldes\n• Toutes les transactions\n• Toutes les enveloppes et catégories\n• Tous les paramètres\n\nCette action est irréversible. Êtes-vous absolument sûr ?",
   "@resetContent": {
     "description": "Dialog content"
   },
@@ -3526,7 +3552,7 @@
   "@backupBannerDaysAgo": { "description": "Banner message", "placeholders": { "days": { "type": "int" } } },
   "backupNowButton": "Sauvegarder maintenant",
   "@backupNowButton": { "description": "Button" },
-  "syncShareInviteText": "Rejoignez mon foyer BudgetSeal ! Entrez ce code dans l'application :\n{code}",
+  "syncShareInviteText": "Rejoignez mon foyer BudgetSeal ! Saisissez ce code dans l'application :\n{code}",
   "@syncShareInviteText": { "description": "Share invite text", "placeholders": { "code": { "type": "String" } } },
   "privacyTermsTitle": "Confidentialité et conditions",
   "@privacyTermsTitle": { "description": "AppBar title" },
@@ -3690,7 +3716,7 @@
   "@healthRepairTitle": {
     "description": "Dialog title"
   },
-  "healthRepairMsg": "Cela créera des écritures d'ajustement pour réaligner les soldes des enveloppes avec les comptes. Une sauvegarde est recommandée.\\n\\nContinuer ?",
+  "healthRepairMsg": "Cela créera des écritures d'ajustement pour réaligner les soldes des enveloppes avec les comptes. Une sauvegarde est recommandée.\n\nContinuer ?",
   "@healthRepairMsg": {
     "description": "Dialog content"
   },
@@ -3850,7 +3876,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "Commencez à suivre vos dépenses.\\nVotre clarté financière commence maintenant.",
+  "onboardDoneSubtitle": "Commencez à suivre vos dépenses.\nVotre clarté financière commence maintenant.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -5630,7 +5656,7 @@
   "allocRevalError": "Impossible d'appliquer la réévaluation. Veuillez réessayer.",
   "allocFetchRateError": "Impossible de récupérer le taux pour {currency}",
   "allocDeleteLinkedWarning": "{count,plural, =1{1 catégorie est liée} other{{count} catégories sont liées}} à cette enveloppe ({names})",
-  "allocDeleteAndMore": " et {count} autre(s)",
+  "allocDeleteAndMore": "et {count} autre(s)",
   "allocDeleteConsequences": "La suppression va :\n  • Délier toutes les catégories de cette enveloppe\n  • Supprimer tout l'historique du grand livre\n\nEnvisagez l'archivage pour préserver l'historique.",
   "allocDeleteNoLinksTitle": "Supprimer l'enveloppe définitivement",
   "allocDeleteNoLinksMsg": "Cette enveloppe n'a pas de catégories liées. Tout l'historique du grand livre sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.",
@@ -5820,8 +5846,6 @@
   "recurringEditTitle": "Modifier la transaction récurrente",
   "recurringFormTitleHint": "Titre (ex. Loyer, Salaire)",
   "recurringFormTitleRequired": "Le titre est requis",
-  "recurringFormAccountRequired": "Le compte est requis",
-  "recurringFormStarts": "Début : {date}",
   "recurringFormEnds": "Fin : {date}",
   "recurringFormEndsNever": "Fin : Jamais (appuyez pour définir)",
   "recurringFormNextDue": "Prochaine échéance : {date}",
@@ -5838,7 +5862,7 @@
   "recurringResumeTooltip": "Reprendre",
   "recurringTileNext": "Prochain : {date}",
 
-  "reportsAgeDays": "{age} jours",
+  "reportsAgeDays": "{age, plural, =0{0 jour} =1{1 jour} other{{age} jours}}",
   "@reportsAgeDays": {
     "description": "Age of money display",
     "placeholders": { "age": { "type": "int" } }
@@ -6014,17 +6038,17 @@
     "description": "Snackbar after connecting sync provider",
     "placeholders": { "provider": { "type": "String" } }
   },
-  "syncLastSynced": "Dernière synchro {time}{suffix}",
+  "syncLastSynced": "Dernière synchro {time} · {suffix}",
   "@syncLastSynced": {
     "description": "Status subtitle with last sync time",
     "placeholders": { "time": { "type": "String" }, "suffix": { "type": "String" } }
   },
-  "syncChangesMerged": " · {count} modification(s) fusionnée(s)",
+  "syncChangesMerged": "{count, plural, =1{1 modification fusionnée} other{{count} modifications fusionnées}}",
   "@syncChangesMerged": {
     "description": "Suffix for changes merged",
     "placeholders": { "count": { "type": "int" } }
   },
-  "syncUpToDate": " · à jour",
+  "syncUpToDate": "à jour",
   "@syncUpToDate": { "description": "Suffix when no changes" },
 
   "languageSystemDesc": "Suivre les paramètres de l'appareil",
@@ -6077,7 +6101,6 @@
   "plannedExactDate": "Choisir une date précise (optionnel)",
   "plannedExactDateValue": "Date précise : {date}",
   "@plannedExactDateValue": { "description": "Label for exact date picker when date is selected", "placeholders": { "date": { "type": "String" } } },
-  "plannedNoteHint": "Note (optionnel)",
   "plannedSelectAccount": "Sélectionnez un compte",
   "plannedUpdated": "Paiement planifié mis à jour",
   "plannedCreated": "Paiement planifié",

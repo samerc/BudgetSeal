@@ -160,10 +160,11 @@ class AllocationCard extends StatelessWidget {
     }
     if (hasTarget) {
       final pct = progress != null ? (progress * 100).round() : 0;
-      semanticParts.add('$pct% of ${formatAmount(targetAmount!, currency: effectiveTargetCurrency)}');
+      semanticParts.add(S.of(context).a11yPctOfTarget(
+          pct, formatAmount(targetAmount!, currency: effectiveTargetCurrency)));
     }
-    if (_isFlexible) semanticParts.add('flexible envelope');
-    if (needsReview) semanticParts.add('needs review');
+    if (_isFlexible) semanticParts.add(S.of(context).a11yFlexibleEnvelope);
+    if (needsReview) semanticParts.add(S.of(context).a11yNeedsReview);
 
     // Cashew budgetContainer: tinted with the envelope's own color.
     final cardColor =

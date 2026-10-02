@@ -312,7 +312,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: color!.withValues(alpha: 0.08),
+                        color: AppColors.pastel(context, color!,
+                            light: 0.88, dark: 0.8),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -1251,7 +1252,8 @@ class _QuickTemplatesSectionState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.08),
+                        color: AppColors.pastel(context, color,
+                            light: 0.88, dark: 0.8),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: color.withValues(alpha: 0.2)),

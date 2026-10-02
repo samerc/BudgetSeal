@@ -106,7 +106,10 @@ class _RollingNumberState extends State<RollingNumber>
           final oldPadded = _oldText.padLeft(maxLen);
           final newPadded = _newText.padLeft(maxLen);
 
+          // One Text per character: in an RTL locale a plain Row would lay
+          // them out right-to-left and print the amount backwards.
           return Row(
+            textDirection: TextDirection.ltr,
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: widget.textAlign == TextAlign.end
                 ? MainAxisAlignment.end

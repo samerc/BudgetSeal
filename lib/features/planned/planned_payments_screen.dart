@@ -146,13 +146,15 @@ class _PlannedPaymentsScreenState
 
       // Build planned items
       final planned = <_PlannedItem>[];
+      if (!mounted) return;
+      final unknownAccount = S.of(context).txDetailUnknownAccount;
       for (final tx in items) {
         final txLines = linesMap[tx.id] ?? [];
         final firstLine = txLines.isNotEmpty ? txLines.first : null;
         planned.add(_PlannedItem(
           tx: tx,
           lines: txLines,
-          accountName: accountMap[tx.accountId] ?? 'Unknown',
+          accountName: accountMap[tx.accountId] ?? unknownAccount,
           categoryName:
               tx.categoryId != null ? categoryMap[tx.categoryId] : null,
           lineCurrency: firstLine?.currency ?? tx.currency,
@@ -441,7 +443,7 @@ class _PlannedPaymentsScreenState
               // ── Header ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
                   child: Row(
                     children: [
                       IconButton(
@@ -654,7 +656,8 @@ class _MonthHeader extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(RadiusTokens.pill),
                 border: Border.all(
                   color: AppColors.accent.withValues(alpha: 0.3),
@@ -724,10 +727,11 @@ class _PlannedCard extends StatelessWidget {
       child: Dismissible(
         key: ValueKey(tx.id),
         background: Container(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           padding: const EdgeInsetsDirectional.only(start: 20),
           decoration: BoxDecoration(
-            color: AppColors.healthy.withValues(alpha: 0.15),
+            color: AppColors.pastel(context, AppColors.healthy,
+                light: 0.82, dark: 0.75),
             borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
           child: Row(
@@ -746,10 +750,11 @@ class _PlannedCard extends StatelessWidget {
           ),
         ),
         secondaryBackground: Container(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           padding: const EdgeInsetsDirectional.only(end: 20),
           decoration: BoxDecoration(
-            color: AppColors.overspent.withValues(alpha: 0.15),
+            color: AppColors.pastel(context, AppColors.overspent,
+                light: 0.82, dark: 0.75),
             borderRadius: BorderRadius.circular(CardTokens.radius),
           ),
           child: Row(
@@ -794,7 +799,8 @@ class _PlannedCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.1),
+                    color: AppColors.pastel(context, typeColor,
+                        light: 0.85, dark: 0.78),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(typeIcon, size: 18, color: typeColor),

@@ -14,6 +14,7 @@ import '../sync/sync_engine.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
 import 'receipt_sync_provider.dart';
+import '../../l10n/s_lookup.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
@@ -66,25 +67,25 @@ class SyncNotifier extends Notifier<SyncState> {
       get providerOptions => [
             (
               label: 'Google Drive',
-              subtitle: 'Sign in with your Google account',
+              subtitle: currentS().syncGoogleSub,
               iconKey: 'google_drive',
               provider: googleDrive,
             ),
             (
               label: 'OneDrive',
-              subtitle: 'Requires the OneDrive app installed',
+              subtitle: currentS().syncOneDriveSub,
               iconKey: 'onedrive',
               provider: filePicker,
             ),
             (
               label: 'Dropbox',
-              subtitle: 'Requires the Dropbox app installed',
+              subtitle: currentS().syncDropboxSub,
               iconKey: 'dropbox',
               provider: filePicker,
             ),
             (
-              label: 'Local File',
-              subtitle: 'Pick any file on your device',
+              label: currentS().syncLocalFile,
+              subtitle: currentS().syncLocalFileSub,
               iconKey: 'local',
               provider: filePicker,
             ),
@@ -243,7 +244,7 @@ class SyncNotifier extends Notifier<SyncState> {
       if (json == null) {
         state = state.copyWith(
           status: SyncStatus.error,
-          lastError: 'No sync file found',
+          lastError: currentS().syncNoSyncFile,
         );
         return;
       }

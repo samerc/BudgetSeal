@@ -618,7 +618,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             ),
           ),
           Text(
-            'Unalloc: ${formatNumber(check.unallocated)}',
+            S.of(context).healthUnallocShort(formatNumber(check.unallocated)),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,

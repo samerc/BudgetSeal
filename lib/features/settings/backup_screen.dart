@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,6 +13,7 @@ import '../../core/services/auto_backup_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../core/providers/date_format_provider.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -191,7 +191,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         title: Text(tr.backupRestoreDialogTitle),
         content: Text(
           tr.backupRestoreDialogBody(
-              DateFormat.yMMMd().add_jm().format(backup.created),
+              formatDateTime(backup.created),
               backup.sizeFormatted),
         ),
         actions: [
@@ -367,7 +367,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 if (_lastAutoBackup != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    S.of(context).backupLastAutoBackup(DateFormat.yMMMd().add_jm().format(_lastAutoBackup!)),
+                    S.of(context).backupLastAutoBackup(formatDateTime(_lastAutoBackup!)),
                     style: TextStyle(
                         fontSize: 11, color: AppColors.th(context)),
                   ),
@@ -479,14 +479,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.accent.withValues(alpha: 0.1),
+                          color: AppColors.pastel(context, AppColors.accent,
+                              light: 0.85, dark: 0.78),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(Icons.storage_rounded,
                             size: 18, color: AppColors.accent),
                       ),
                       title: Text(
-                        DateFormat.yMMMd().add_jm().format(b.created),
+                        formatDateTime(b.created),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

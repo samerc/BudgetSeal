@@ -202,7 +202,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                 controller: _searchCtrl,
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
-                  hintText: 'Search\u2026',
+                  hintText: S.of(context).commonSearchHint,
                   prefixIcon:
                       const Icon(Icons.search_rounded, size: 18),
                   filled: true,
@@ -357,7 +357,8 @@ class _CurrencySheetState extends State<CurrencySheet>
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(Icons.check_rounded,

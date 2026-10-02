@@ -74,8 +74,8 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       if (entry.value > available + 0.01) {
         willExceed = true;
         final deficit = entry.value - available;
-        exceedDetails = '${formatAmount(deficit, currency: entry.key)} '
-            'more than available in ${entry.key}';
+        exceedDetails = S.of(context).fundMoreThanAvailable(
+            formatAmount(deficit, currency: entry.key), entry.key);
         break;
       }
     }
@@ -397,7 +397,8 @@ class _InstructionStep extends StatelessWidget {
           width: 22,
           height: 22,
           decoration: BoxDecoration(
-            color: AppColors.accent.withValues(alpha: 0.1),
+            color: AppColors.pastel(context, AppColors.accent,
+                light: 0.85, dark: 0.78),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Center(
@@ -554,8 +555,11 @@ class _FundingBanner extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${entry.key}: ${formatAmount(entry.value, currency: entry.key)}'
-                        ' of ${formatAmount(unallocated[entry.key] ?? 0, currency: entry.key)}',
+                        S.of(context).fundAmountOfAvailable(
+                            entry.key,
+                            formatAmount(entry.value, currency: entry.key),
+                            formatAmount(unallocated[entry.key] ?? 0,
+                                currency: entry.key)),
                         style: TextStyle(
                           color: AppColors.tp(context).withValues(alpha: 0.65),
                           fontSize: 12,
@@ -619,7 +623,8 @@ class _QuickFillTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.06),
+        color: AppColors.pastel(context, AppColors.accent,
+            light: 0.88, dark: 0.8),
         borderRadius: BorderRadius.circular(CardTokens.radius),
         border: Border.all(
           color: AppColors.accent.withValues(alpha: 0.2),
@@ -640,7 +645,8 @@ class _QuickFillTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.12),
+                    color: AppColors.pastel(context, AppColors.accent,
+                        light: 0.85, dark: 0.78),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -761,7 +767,8 @@ class _FundingAllocationTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.healthy.withValues(alpha: 0.1),
+                      color: AppColors.pastel(context, AppColors.healthy,
+                          light: 0.85, dark: 0.78),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

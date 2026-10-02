@@ -143,7 +143,8 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.08),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.88, dark: 0.8),
                         borderRadius: BorderRadius.circular(CardTokens.radius),
                         border: Border.all(
                             color: AppColors.accent.withValues(alpha: 0.2)),

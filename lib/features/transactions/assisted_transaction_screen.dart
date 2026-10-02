@@ -632,7 +632,8 @@ class _AssistedTransactionScreenState
                                 margin:
                                     const EdgeInsets.only(top: 4, bottom: 2),
                                 decoration: BoxDecoration(
-                                  color: color.withValues(alpha: 0.06),
+                                  color: AppColors.pastel(context, color,
+                                      light: 0.88, dark: 0.8),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -923,7 +924,8 @@ class _AssistedTransactionScreenState
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
+                        color: AppColors.pastel(context, color,
+                            light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(Icons.account_balance_wallet_rounded,
@@ -1739,7 +1741,8 @@ class _AssistedTransactionScreenState
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withValues(alpha: 0.1),
+                                color: AppColors.pastel(context, AppColors.accent,
+                                    light: 0.85, dark: 0.78),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Icon(Icons.swap_vert_rounded,
@@ -1804,7 +1807,8 @@ class _AssistedTransactionScreenState
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.healthy.withValues(alpha: 0.08),
+                              color: AppColors.pastel(context, AppColors.healthy,
+                                  light: 0.88, dark: 0.8),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -1842,7 +1846,8 @@ class _AssistedTransactionScreenState
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.06),
+                    color: AppColors.pastel(context, AppColors.accent,
+                        light: 0.88, dark: 0.8),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                         color: AppColors.accent.withValues(alpha: 0.2)),

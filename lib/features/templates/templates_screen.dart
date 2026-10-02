@@ -213,7 +213,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           children: [
             // ── Header ───────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
               child: Row(
                 children: [
                   IconButton(
@@ -449,7 +449,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.1),
+                            color: AppColors.pastel(context, color,
+                                light: 0.85, dark: 0.78),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

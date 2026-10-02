@@ -70,7 +70,8 @@ class _TravelExchangeScreenState
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.08),
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.88, dark: 0.8),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
                 border: Border.all(
                     color: AppColors.accent.withValues(alpha: 0.15)),
@@ -164,7 +165,8 @@ class _TravelExchangeScreenState
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.85, dark: 0.78),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.arrow_downward_rounded,
@@ -274,6 +276,8 @@ class _TravelExchangeScreenState
   }
 
   Future<void> _doExchange() async {
+    // Translated before any await (context may change meanwhile).
+    final exchangeNote = S.of(context).travelExchangeNote(_targetCurrency);
     setState(() => _loading = true);
     try {
       final db = ref.read(databaseProvider);
@@ -337,7 +341,7 @@ class _TravelExchangeScreenState
         exchangeRateToBase: _effectiveRate,
         createdBy: 'local',
         deviceId: 'local',
-        note: 'Travel exchange → $_targetCurrency',
+        note: exchangeNote,
         date: DateTime.now(),
       );
 

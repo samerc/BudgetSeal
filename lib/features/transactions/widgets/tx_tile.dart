@@ -124,7 +124,8 @@ class TxTile extends ConsumerWidget {
                   onTap: () {
                     final catId = cat?.id;
                     if (catId != null && onCategoryTap != null) {
-                      onCategoryTap!(catId, catName ?? 'Unknown');
+                      onCategoryTap!(
+                          catId, catName ?? S.of(context).commonUncategorized);
                     }
                   },
                   child: Hero(
@@ -506,7 +507,8 @@ class TxTile extends ConsumerWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

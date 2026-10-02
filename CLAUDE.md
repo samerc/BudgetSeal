@@ -1030,7 +1030,9 @@ dart tool/translation_editor.dart   # then open http://localhost:4488
 ```
 
 ### Key Rules
-- `docs/i18n_strings.csv` is the master source (~1,500 strings). Update CSV first, then run tooling.
+- `docs/i18n_strings.csv` is the master source (~1,800 strings, synced with the ARBs in Oct 2026). Update CSV first, then run tooling. `csv_to_arb.dart` keeps each key's placeholder types from the current `app_en.arb` (`int`, plurals) instead of guessing from names, and turns the CSV's literal `
+` back into real newlines — the round trip CSV → ARB is lossless. ARB values never start/end with spaces (the CSV trims them): put separators like ` · ` in the template or the code.
+- No duplicate keys in an ARB (the last one silently wins). Counts use ICU plurals (`{n, plural, =1{…} other{…}}`; Arabic also `=2`/`few`/`many`).
 - Every feature addition/change must update `docs/i18n_strings.csv`, ARB files, and `assets/web/help.html`.
 - **Never use `S.of(context)` inside `StatefulBuilder` within `showModalBottomSheet`** — capture `final tr = S.of(context)` BEFORE the sheet to avoid `_dependents.isEmpty` crash.
 - Use `currentS()` from `s_lookup.dart` in services/engines without BuildContext.
@@ -1041,4 +1043,6 @@ dart tool/translation_editor.dart   # then open http://localhost:4488
 - `AlignmentDirectional.centerStart/centerEnd` for directional alignment
 - Transfer arrows use direction-aware `→`/`←` based on `Directionality.of(context)`
 - Month swipe gestures invert in RTL
+- Widgets that draw a number one character per widget (e.g. `RollingNumber`) must force `TextDirection.ltr` on their Row, or amounts print backwards in Arabic
+- Asymmetric paddings use `EdgeInsetsDirectional.fromSTEB`, never `EdgeInsets.fromLTRB` (charts excepted — fl_chart doesn't mirror)
 - `FadedEdges` gradient resolved directionally

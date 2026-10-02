@@ -84,7 +84,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               // ── Header ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
                   child: Row(
                     children: [
                       IconButton(
@@ -438,7 +438,8 @@ class _SummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: AppColors.pastel(context, color,
+            light: 0.85, dark: 0.78),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(label,
@@ -613,7 +614,7 @@ class _CategoriesSliver extends ConsumerWidget {
             onTap: () => onEdit(group),
             onLongPress: () => _showActions(context, group),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 14, 10),
+              padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 14, 10),
               child: Row(
                 children: [
                   // Emoji icon in colored circle
@@ -621,7 +622,8 @@ class _CategoriesSliver extends ConsumerWidget {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
+                      color: AppColors.pastel(context, color,
+                          light: 0.85, dark: 0.78),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -685,7 +687,7 @@ class _CategoriesSliver extends ConsumerWidget {
                 onTap: () => onEdit(sub),
                 onLongPress: () => _showActions(context, sub),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 14, 8),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
                   child: Row(
                     children: [
                       Text(
@@ -925,7 +927,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: _color.withValues(alpha: 0.15),
+                      color: AppColors.pastel(context, _color,
+                          light: 0.85, dark: 0.78),
                       borderRadius: BorderRadius.circular(CardTokens.radius),
                       border: Border.all(
                         color: _showEmojiGrid

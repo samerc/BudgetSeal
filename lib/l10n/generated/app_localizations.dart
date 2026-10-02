@@ -99,6 +99,235 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @commonPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}/day'**
+  String commonPerDay(String amount);
+
+  /// No description provided for @commonNOfM.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {m}'**
+  String commonNOfM(int n, int m);
+
+  /// No description provided for @fundAmountOfAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency}: {amount} of {available}'**
+  String fundAmountOfAvailable(
+      String currency, String amount, String available);
+
+  /// No description provided for @syncNoSyncFile.
+  ///
+  /// In en, this message translates to:
+  /// **'No sync file found'**
+  String get syncNoSyncFile;
+
+  /// No description provided for @syncErrNeedsPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The sync file is encrypted. Enter your sync password in Cloud Sync to read it.'**
+  String get syncErrNeedsPassword;
+
+  /// No description provided for @travelExchangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel exchange → {currency}'**
+  String travelExchangeNote(String currency);
+
+  /// No description provided for @travelConvertBackNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel convert back → {currency}'**
+  String travelConvertBackNote(String currency);
+
+  /// No description provided for @healthUnallocShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Unallocated: {amount}'**
+  String healthUnallocShort(String amount);
+
+  /// No description provided for @reportsRecurringSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active · {amount}/month'**
+  String reportsRecurringSummary(int count, String amount);
+
+  /// No description provided for @allocRevaluationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Revaluation: {amount} at {rate} (was {oldRate})'**
+  String allocRevaluationNote(String amount, String rate, String oldRate);
+
+  /// No description provided for @notifEveryDayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day at {time}'**
+  String notifEveryDayAt(String time);
+
+  /// No description provided for @periodStartsEachMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · starts on day {day} each month'**
+  String periodStartsEachMonth(String date, int day);
+
+  /// No description provided for @fundMoreThanAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} more than available in {currency}'**
+  String fundMoreThanAvailable(String amount, String currency);
+
+  /// No description provided for @shareHouseholdFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the invite. Check your connection and try again.'**
+  String get shareHouseholdFailed;
+
+  /// No description provided for @a11yPctOfTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of {amount}'**
+  String a11yPctOfTarget(int pct, String amount);
+
+  /// No description provided for @a11yFlexibleEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'flexible envelope'**
+  String get a11yFlexibleEnvelope;
+
+  /// No description provided for @a11yNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'needs review'**
+  String get a11yNeedsReview;
+
+  /// No description provided for @syncLocalFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Local file'**
+  String get syncLocalFile;
+
+  /// No description provided for @syncGoogleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your Google account'**
+  String get syncGoogleSub;
+
+  /// No description provided for @syncOneDriveSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires the OneDrive app installed'**
+  String get syncOneDriveSub;
+
+  /// No description provided for @syncDropboxSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires the Dropbox app installed'**
+  String get syncDropboxSub;
+
+  /// No description provided for @syncLocalFileSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick any file on your device'**
+  String get syncLocalFileSub;
+
+  /// No description provided for @syncErrGoogleNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In is not set up for this build of the app. Use another sync option.'**
+  String get syncErrGoogleNotConfigured;
+
+  /// No description provided for @syncErrNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Check your internet connection.'**
+  String get syncErrNetwork;
+
+  /// No description provided for @syncErrConnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect. Please try again.'**
+  String get syncErrConnectFailed;
+
+  /// No description provided for @onboardConnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect to {provider}'**
+  String onboardConnectFailed(String provider);
+
+  /// No description provided for @onboardNoSyncFile.
+  ///
+  /// In en, this message translates to:
+  /// **'No sync file found'**
+  String get onboardNoSyncFile;
+
+  /// No description provided for @onboardDriveJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect to Google Drive. Make sure you\'re signed in and have access to the shared folder.'**
+  String get onboardDriveJoinFailed;
+
+  /// No description provided for @onboardNoSyncFileShared.
+  ///
+  /// In en, this message translates to:
+  /// **'No sync file found in the shared folder'**
+  String get onboardNoSyncFileShared;
+
+  /// No description provided for @billNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill split'**
+  String get billNoteTitle;
+
+  /// No description provided for @billNoteTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill: {total}'**
+  String billNoteTotal(String total);
+
+  /// No description provided for @billNoteSplitWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Split with {people} · Total: {total}'**
+  String billNoteSplitWith(String people, String total);
+
+  /// No description provided for @reportsDayN.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {n}'**
+  String reportsDayN(int n);
+
+  /// No description provided for @reportsTipOverPace.
+  ///
+  /// In en, this message translates to:
+  /// **'At your current pace, you\'ll exceed your budget by {amount}. Try to slow down.'**
+  String reportsTipOverPace(String amount);
+
+  /// No description provided for @reportsTipUnderPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Great pace! You\'re on track to stay {amount} under budget.'**
+  String reportsTipUnderPace(String amount);
+
+  /// No description provided for @reportsTipSavingHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re saving {percent}% of your income this month. Keep it up!'**
+  String reportsTipSavingHigh(int percent);
+
+  /// No description provided for @reportsTipSavingLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your savings rate is low ({percent}%). Try to set aside at least 10–20%.'**
+  String reportsTipSavingLow(int percent);
+
+  /// No description provided for @reportsTipAgeLow.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Your money sits only 1 day before being spent. A buffer of 30+ days is healthier.} other{Your money sits only {days} days before being spent. A buffer of 30+ days is healthier.}}'**
+  String reportsTipAgeLow(int days);
+
   /// No description provided for @txNoRateBetween.
   ///
   /// In en, this message translates to:
@@ -200,12 +429,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}'**
   String dashBillsCount(int count);
-
-  /// Dialog/button cancel
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get commonCancel;
 
   /// Dialog/button delete
   ///
@@ -792,7 +1015,7 @@ abstract class S {
   /// Info dialog content
   ///
   /// In en, this message translates to:
-  /// **'This shows how long money sits in your accounts before you spend it.\\n\\nThink of it as a buffer:\\n\\n• Under 14 days — you\'re spending money almost as fast as it comes in\\n• 14–30 days — you have a small cushion, getting ahead\\n• 30–60 days — you\'re spending last month\'s income. Great!\\n• 60+ days — strong financial health, big safety net\\n\\nThe goal is to increase this number over time. The higher it is, the more financially secure you are.'**
+  /// **'This shows how long money sits in your accounts before you spend it.\n\nThink of it as a buffer:\n\n• Under 14 days — you\'re spending money almost as fast as it comes in\n• 14–30 days — you have a small cushion, getting ahead\n• 30–60 days — you\'re spending last month\'s income. Great!\n• 60+ days — strong financial health, big safety net\n\nThe goal is to increase this number over time. The higher it is, the more financially secure you are.'**
   String get dashboardAgeOfMoneyExplanation;
 
   /// Global search hint
@@ -894,7 +1117,7 @@ abstract class S {
   /// Section description
   ///
   /// In en, this message translates to:
-  /// **'Net worth and envelope health'**
+  /// **'Bills, net worth and unallocated'**
   String get dashboardSectionMoneyDesc;
 
   /// Section label
@@ -1554,7 +1777,7 @@ abstract class S {
   /// Delete dialog content
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this transaction?\\n\\nThis will reverse any envelope deductions and restore the balance. Ledger entries will be removed.\\n\\nThis cannot be undone.'**
+  /// **'Are you sure you want to delete this transaction?\n\nThis will reverse any envelope deductions and restore the balance. Ledger entries will be removed.\n\nThis cannot be undone.'**
   String get txDetailDeleteContent;
 
   /// Back confirmation title
@@ -1758,7 +1981,7 @@ abstract class S {
   /// Empty state
   ///
   /// In en, this message translates to:
-  /// **'No categories yet.\\nTap \"New\" above to create one.'**
+  /// **'No categories yet.\nTap \"New\" above to create one.'**
   String get catSheetNoYet;
 
   /// Parent subtitle
@@ -1766,24 +1989,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count} subcategories'**
   String catSheetNSubcategories(int count);
-
-  /// Currency sheet section header
-  ///
-  /// In en, this message translates to:
-  /// **'Your accounts'**
-  String get currencyYourAccounts;
-
-  /// Currency sheet section header
-  ///
-  /// In en, this message translates to:
-  /// **'Recently used'**
-  String get currencyRecentlyUsed;
-
-  /// Currency sheet section header
-  ///
-  /// In en, this message translates to:
-  /// **'All currencies'**
-  String get currencyAll;
 
   /// Dropdown hint
   ///
@@ -2373,12 +2578,6 @@ abstract class S {
   /// **'Rollover'**
   String get allocSectionFlexible;
 
-  /// No description provided for @allocNoMatch.
-  ///
-  /// In en, this message translates to:
-  /// **'No envelopes match \"{query}\"'**
-  String allocNoMatch(String query);
-
   /// FAB tooltip
   ///
   /// In en, this message translates to:
@@ -2390,12 +2589,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No envelopes yet'**
   String get allocNoYet;
-
-  /// Empty state subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Create an envelope to start budgeting.\nTap ? for help.'**
-  String get allocCreateHelp;
 
   /// Empty state button
   ///
@@ -2544,7 +2737,7 @@ abstract class S {
   /// Help text
   ///
   /// In en, this message translates to:
-  /// **'• Periodic: resets each month (e.g. groceries budget)\\n• Permanent: accumulates over time (e.g. emergency fund)'**
+  /// **'• Periodic: resets each month (e.g. groceries budget)\n• Permanent: accumulates over time (e.g. emergency fund)'**
   String get allocPeriodicDesc;
 
   /// Chip label
@@ -2862,7 +3055,7 @@ abstract class S {
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\\n\\nYou can unarchive it later from Settings.'**
+  /// **'This envelope will be hidden from all lists. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from Settings.'**
   String get allocArchiveMsg;
 
   /// Snackbar
@@ -2898,7 +3091,7 @@ abstract class S {
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This envelope has no linked categories. All ledger history will be removed.\\n\\nAre you sure? This cannot be undone.'**
+  /// **'This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.'**
   String get allocDeleteNoLinkedMsg;
 
   /// Snackbar
@@ -3192,7 +3385,7 @@ abstract class S {
   /// No description provided for @allocDeleteAndMore.
   ///
   /// In en, this message translates to:
-  /// **' and {count} more'**
+  /// **'and {count} more'**
   String allocDeleteAndMore(int count);
 
   /// No description provided for @allocDeleteConsequences.
@@ -3278,6 +3471,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count,plural, =1{1 loan} other{{count} loans}}'**
   String allocLoansCount(int count);
+
+  /// No description provided for @allocNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No envelopes match \"{query}\"'**
+  String allocNoMatch(String query);
+
+  /// Empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create an envelope to start budgeting.\nTap ? for help.'**
+  String get allocCreateHelp;
 
   /// No description provided for @allocNEnvelopesNeedReset.
   ///
@@ -3402,7 +3607,7 @@ abstract class S {
   /// Warning dialog content
   ///
   /// In en, this message translates to:
-  /// **'You\'re assigning {details}. Your unallocated balance will go negative.\\n\\nContinue anyway?'**
+  /// **'You\'re assigning {details}. Your unallocated balance will go negative.\n\nContinue anyway?'**
   String fundOverfundingMsg(String details);
 
   /// Dialog button
@@ -4022,6 +4227,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Category updated'**
   String get catUpdated;
+
+  /// Dialog/button cancel
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
 
   /// No description provided for @commonArchive.
   ///
@@ -4761,252 +4972,6 @@ abstract class S {
   /// **'Delete everything'**
   String get objDeleteAll;
 
-  /// Travel exchange screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Travel Exchange'**
-  String get travelTitle;
-
-  /// Travel exchange info banner
-  ///
-  /// In en, this message translates to:
-  /// **'Exchange money for your trip. A temporary travel wallet will be created automatically.'**
-  String get travelInfo;
-
-  /// Travel exchange section label
-  ///
-  /// In en, this message translates to:
-  /// **'From'**
-  String get travelFrom;
-
-  /// Travel exchange dropdown hint
-  ///
-  /// In en, this message translates to:
-  /// **'Select account'**
-  String get travelSelectAccount;
-
-  /// Travel exchange section label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount to exchange'**
-  String get travelAmountToExchange;
-
-  /// Travel exchange section label
-  ///
-  /// In en, this message translates to:
-  /// **'Travel currency'**
-  String get travelCurrencySection;
-
-  /// Travel exchange currency picker label
-  ///
-  /// In en, this message translates to:
-  /// **'Currency you receive'**
-  String get travelCurrencyReceive;
-
-  /// Travel exchange section label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount received'**
-  String get travelAmountReceived;
-
-  /// Travel exchange submit button
-  ///
-  /// In en, this message translates to:
-  /// **'Exchange & Create Travel Wallet'**
-  String get travelExchangeButton;
-
-  /// Travel exchange reactivate dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Existing Travel Wallet'**
-  String get travelExistingWallet;
-
-  /// Travel exchange reactivate dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Create New'**
-  String get travelCreateNew;
-
-  /// Travel exchange reactivate dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Reactivate'**
-  String get travelReactivate;
-
-  /// Period transition screen title
-  ///
-  /// In en, this message translates to:
-  /// **'New Period'**
-  String get periodNewTitle;
-
-  /// Period transition error message
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load envelopes'**
-  String get periodError;
-
-  /// Period transition subheading
-  ///
-  /// In en, this message translates to:
-  /// **'Resolve leftover balances'**
-  String get periodResolveLeftovers;
-
-  /// Period transition item count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} items'**
-  String periodNItems(int count);
-
-  /// Period transition empty state title
-  ///
-  /// In en, this message translates to:
-  /// **'No leftover balances to resolve'**
-  String get periodNoLeftovers;
-
-  /// Period transition empty state subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'All periodic allocations have zero or negative balances.'**
-  String get periodAllZero;
-
-  /// Period transition submit button
-  ///
-  /// In en, this message translates to:
-  /// **'Complete Period Transition'**
-  String get periodCompleteButton;
-
-  /// Period transition allocation type label
-  ///
-  /// In en, this message translates to:
-  /// **'Rollover allocation'**
-  String get periodRollover;
-
-  /// Period transition allocation type label
-  ///
-  /// In en, this message translates to:
-  /// **'Periodic allocation'**
-  String get periodPeriodic;
-
-  /// Period resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Return to Unallocated'**
-  String get periodReturnUnallocated;
-
-  /// Period resolution option description
-  ///
-  /// In en, this message translates to:
-  /// **'Balance returns to the pool'**
-  String get periodReturnDesc;
-
-  /// Period resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Carry Forward'**
-  String get periodCarryForward;
-
-  /// Period resolution option description
-  ///
-  /// In en, this message translates to:
-  /// **'Keep balance for next period'**
-  String get periodCarryDesc;
-
-  /// Period resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Move to...'**
-  String get periodMoveTo;
-
-  /// Period resolution option description
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer to another allocation'**
-  String get periodMoveDesc;
-
-  /// Period resolution dropdown hint
-  ///
-  /// In en, this message translates to:
-  /// **'Select allocation'**
-  String get periodSelectAllocation;
-
-  /// Leftover resolution screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Resolve Leftovers'**
-  String get leftoverTitle;
-
-  /// Leftover resolution missing args
-  ///
-  /// In en, this message translates to:
-  /// **'No allocation specified.'**
-  String get leftoverNoAllocation;
-
-  /// Leftover resolution missing allocation
-  ///
-  /// In en, this message translates to:
-  /// **'Allocation not found.'**
-  String get leftoverNotFound;
-
-  /// Leftover resolution section label
-  ///
-  /// In en, this message translates to:
-  /// **'Current Balance'**
-  String get leftoverCurrentBalance;
-
-  /// Leftover resolution empty balance
-  ///
-  /// In en, this message translates to:
-  /// **'No balance'**
-  String get leftoverNoBalance;
-
-  /// Leftover resolution empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No positive balance to resolve.'**
-  String get leftoverNoPositive;
-
-  /// Leftover resolution section label
-  ///
-  /// In en, this message translates to:
-  /// **'Currency to resolve'**
-  String get leftoverCurrencyToResolve;
-
-  /// Leftover resolution dropdown option
-  ///
-  /// In en, this message translates to:
-  /// **'All currencies'**
-  String get leftoverAllCurrencies;
-
-  /// Leftover resolution section label
-  ///
-  /// In en, this message translates to:
-  /// **'What to do with the leftover'**
-  String get leftoverWhatToDo;
-
-  /// Leftover resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Leftover balance goes back to the pool'**
-  String get leftoverReturnSubtitle;
-
-  /// Leftover resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Keep the balance for the next period'**
-  String get leftoverKeepSubtitle;
-
-  /// Leftover resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Move to another allocation'**
-  String get leftoverMoveTitle;
-
-  /// Leftover resolution option
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer leftover to a different allocation'**
-  String get leftoverMoveSubtitle;
-
   /// Screen title
   ///
   /// In en, this message translates to:
@@ -5238,7 +5203,7 @@ abstract class S {
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This will permanently delete ALL your data:\\n\\n• All accounts and balances\\n• All transactions\\n• All envelopes and categories\\n• All settings\\n\\nThis cannot be undone. Are you absolutely sure?'**
+  /// **'This will permanently delete ALL your data:\n\n• All accounts and balances\n• All transactions\n• All envelopes and categories\n• All settings\n\nThis cannot be undone. Are you absolutely sure?'**
   String get resetContent;
 
   /// Destructive button
@@ -6585,7 +6550,7 @@ abstract class S {
   /// **'Backup Now'**
   String get backupNowButton;
 
-  /// Share invite text
+  /// No description provided for @syncShareInviteText.
   ///
   /// In en, this message translates to:
   /// **'Join my BudgetSeal household! Enter this code in the app:\n{code}'**
@@ -6942,7 +6907,7 @@ abstract class S {
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This will create adjustment ledger entries to bring allocation balances back in line with account balances. A backup is recommended before proceeding.\\n\\nContinue?'**
+  /// **'This will create adjustment ledger entries to bring allocation balances back in line with account balances. A backup is recommended before proceeding.\n\nContinue?'**
   String get healthRepairMsg;
 
   /// Button
@@ -6980,306 +6945,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Purge'**
   String get healthPurgeButton;
-
-  /// Onboarding welcome page title
-  ///
-  /// In en, this message translates to:
-  /// **'BudgetSeal'**
-  String get onboardWelcomeTitle;
-
-  /// Onboarding welcome tagline
-  ///
-  /// In en, this message translates to:
-  /// **'Give every dollar a purpose.'**
-  String get onboardTagline;
-
-  /// Onboarding step 1
-  ///
-  /// In en, this message translates to:
-  /// **'Add accounts — where your money lives'**
-  String get onboardStep1;
-
-  /// Onboarding step 2
-  ///
-  /// In en, this message translates to:
-  /// **'Create envelopes — budget for each category'**
-  String get onboardStep2;
-
-  /// Onboarding step 3
-  ///
-  /// In en, this message translates to:
-  /// **'Fund envelopes — distribute your income'**
-  String get onboardStep3;
-
-  /// Onboarding step 4
-  ///
-  /// In en, this message translates to:
-  /// **'Spend — each expense draws from its envelope'**
-  String get onboardStep4;
-
-  /// Onboarding welcome button
-  ///
-  /// In en, this message translates to:
-  /// **'Get Started'**
-  String get onboardGetStarted;
-
-  /// Onboarding restore button
-  ///
-  /// In en, this message translates to:
-  /// **'Restore from Cloud'**
-  String get onboardRestoreCloud;
-
-  /// Onboarding join button
-  ///
-  /// In en, this message translates to:
-  /// **'Join a Household'**
-  String get onboardJoinHousehold;
-
-  /// Onboarding setup page title
-  ///
-  /// In en, this message translates to:
-  /// **'Set up your household'**
-  String get onboardSetupTitle;
-
-  /// Onboarding setup subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'You can change everything later in Settings.'**
-  String get onboardChangeLater;
-
-  /// Onboarding section label
-  ///
-  /// In en, this message translates to:
-  /// **'Household'**
-  String get onboardHouseholdSection;
-
-  /// Onboarding text field label
-  ///
-  /// In en, this message translates to:
-  /// **'Household name'**
-  String get onboardHouseholdName;
-
-  /// Onboarding currency picker label
-  ///
-  /// In en, this message translates to:
-  /// **'Base currency'**
-  String get onboardBaseCurrency;
-
-  /// Onboarding dropdown label
-  ///
-  /// In en, this message translates to:
-  /// **'Period start day'**
-  String get onboardPeriodStart;
-
-  /// Onboarding section label
-  ///
-  /// In en, this message translates to:
-  /// **'First account'**
-  String get onboardFirstAccountSection;
-
-  /// Onboarding text field label
-  ///
-  /// In en, this message translates to:
-  /// **'Account name'**
-  String get onboardAccountName;
-
-  /// Onboarding account type chip
-  ///
-  /// In en, this message translates to:
-  /// **'Cash'**
-  String get onboardTypeCash;
-
-  /// Onboarding account type chip
-  ///
-  /// In en, this message translates to:
-  /// **'Bank'**
-  String get onboardTypeBank;
-
-  /// Onboarding account type chip
-  ///
-  /// In en, this message translates to:
-  /// **'Credit'**
-  String get onboardTypeCredit;
-
-  /// Onboarding account type chip
-  ///
-  /// In en, this message translates to:
-  /// **'Digital'**
-  String get onboardTypeDigital;
-
-  /// Onboarding section label
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get onboardCategoriesSection;
-
-  /// Onboarding category option title
-  ///
-  /// In en, this message translates to:
-  /// **'Full set'**
-  String get onboardFullSet;
-
-  /// Onboarding category option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'30 categories with subcategories'**
-  String get onboardFullSetSub;
-
-  /// Onboarding category option title
-  ///
-  /// In en, this message translates to:
-  /// **'Empty'**
-  String get onboardEmpty;
-
-  /// Onboarding category option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Create your own from scratch'**
-  String get onboardEmptySub;
-
-  /// Onboarding section label
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction entry'**
-  String get onboardEntrySection;
-
-  /// Onboarding entry mode option title
-  ///
-  /// In en, this message translates to:
-  /// **'Assisted'**
-  String get onboardAssisted;
-
-  /// Onboarding entry mode option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Step-by-step, fast for daily use'**
-  String get onboardAssistedSub;
-
-  /// Onboarding entry mode option title
-  ///
-  /// In en, this message translates to:
-  /// **'Classic form'**
-  String get onboardClassic;
-
-  /// Onboarding entry mode option subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'All fields at once, for complex entries'**
-  String get onboardClassicSub;
-
-  /// Onboarding submit button
-  ///
-  /// In en, this message translates to:
-  /// **'Create & Start'**
-  String get onboardCreateStart;
-
-  /// Onboarding done page title
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re all set!'**
-  String get onboardAllSet;
-
-  /// Onboarding done page subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Start tracking your expenses.\nYour financial clarity begins now.'**
-  String get onboardDoneSubtitle;
-
-  /// Onboarding done page button
-  ///
-  /// In en, this message translates to:
-  /// **'Start Using BudgetSeal'**
-  String get onboardStartUsing;
-
-  /// Onboarding restore sheet title
-  ///
-  /// In en, this message translates to:
-  /// **'Restore from Cloud'**
-  String get onboardRestoreTitle;
-
-  /// Onboarding restore sheet description
-  ///
-  /// In en, this message translates to:
-  /// **'Choose where your backup is stored. This will replace any local data.'**
-  String get onboardRestoreDesc;
-
-  /// Onboarding restore option
-  ///
-  /// In en, this message translates to:
-  /// **'Google Drive'**
-  String get onboardGoogleDrive;
-
-  /// Onboarding restore option
-  ///
-  /// In en, this message translates to:
-  /// **'Pick a File'**
-  String get onboardPickFile;
-
-  /// Onboarding join sheet description
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the invite code shared with you to join an existing BudgetSeal household.'**
-  String get onboardJoinDesc;
-
-  /// Onboarding join text field label
-  ///
-  /// In en, this message translates to:
-  /// **'Invite code'**
-  String get onboardInviteCode;
-
-  /// Onboarding join text field hint
-  ///
-  /// In en, this message translates to:
-  /// **'PP-...'**
-  String get onboardInviteHint;
-
-  /// Onboarding join button
-  ///
-  /// In en, this message translates to:
-  /// **'Join Household'**
-  String get onboardJoinButton;
-
-  /// Onboarding join validation error
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter an invite code'**
-  String get onboardEnterCodeError;
-
-  /// Onboarding join validation error
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid invite code. It should start with PP-'**
-  String get onboardInvalidCodeError;
-
-  /// Biometric setup prompt
-  ///
-  /// In en, this message translates to:
-  /// **'Set up a screen lock to protect BudgetSeal'**
-  String get lockSetupReason;
-
-  /// Biometric unlock prompt
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock BudgetSeal'**
-  String get lockUnlockReason;
-
-  /// Biometric error snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock failed: {error}'**
-  String lockFailed(String error);
-
-  /// Lock screen hint
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to unlock'**
-  String get lockTapToUnlock;
-
-  /// Lock screen button
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock'**
-  String get lockUnlockButton;
 
   /// Screen title
   ///
@@ -9585,6 +9250,276 @@ abstract class S {
   /// **'{size} MB'**
   String backupSizeMb(String size);
 
+  /// Onboarding welcome page title
+  ///
+  /// In en, this message translates to:
+  /// **'BudgetSeal'**
+  String get onboardWelcomeTitle;
+
+  /// Onboarding welcome tagline
+  ///
+  /// In en, this message translates to:
+  /// **'Give every dollar a purpose.'**
+  String get onboardTagline;
+
+  /// Onboarding step 1
+  ///
+  /// In en, this message translates to:
+  /// **'Add accounts — where your money lives'**
+  String get onboardStep1;
+
+  /// Onboarding step 2
+  ///
+  /// In en, this message translates to:
+  /// **'Create envelopes — budget for each category'**
+  String get onboardStep2;
+
+  /// Onboarding step 3
+  ///
+  /// In en, this message translates to:
+  /// **'Fund envelopes — distribute your income'**
+  String get onboardStep3;
+
+  /// Onboarding step 4
+  ///
+  /// In en, this message translates to:
+  /// **'Spend — each expense draws from its envelope'**
+  String get onboardStep4;
+
+  /// Onboarding welcome button
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardGetStarted;
+
+  /// Onboarding restore button
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get onboardRestoreCloud;
+
+  /// Onboarding join button
+  ///
+  /// In en, this message translates to:
+  /// **'Join a Household'**
+  String get onboardJoinHousehold;
+
+  /// Onboarding setup page title
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your household'**
+  String get onboardSetupTitle;
+
+  /// Onboarding setup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'You can change everything later in Settings.'**
+  String get onboardChangeLater;
+
+  /// Onboarding section label
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get onboardHouseholdSection;
+
+  /// Onboarding text field label
+  ///
+  /// In en, this message translates to:
+  /// **'Household name'**
+  String get onboardHouseholdName;
+
+  /// Onboarding currency picker label
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency'**
+  String get onboardBaseCurrency;
+
+  /// Onboarding dropdown label
+  ///
+  /// In en, this message translates to:
+  /// **'Period start day'**
+  String get onboardPeriodStart;
+
+  /// Onboarding section label
+  ///
+  /// In en, this message translates to:
+  /// **'First account'**
+  String get onboardFirstAccountSection;
+
+  /// Onboarding text field label
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get onboardAccountName;
+
+  /// Onboarding account type chip
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get onboardTypeCash;
+
+  /// Onboarding account type chip
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get onboardTypeBank;
+
+  /// Onboarding account type chip
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get onboardTypeCredit;
+
+  /// Onboarding account type chip
+  ///
+  /// In en, this message translates to:
+  /// **'Digital'**
+  String get onboardTypeDigital;
+
+  /// Onboarding section label
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get onboardCategoriesSection;
+
+  /// Onboarding category option title
+  ///
+  /// In en, this message translates to:
+  /// **'Full set'**
+  String get onboardFullSet;
+
+  /// Onboarding category option subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'30 categories with subcategories'**
+  String get onboardFullSetSub;
+
+  /// Onboarding category option title
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get onboardEmpty;
+
+  /// Onboarding category option subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own from scratch'**
+  String get onboardEmptySub;
+
+  /// Onboarding section label
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction entry'**
+  String get onboardEntrySection;
+
+  /// Onboarding entry mode option title
+  ///
+  /// In en, this message translates to:
+  /// **'Assisted'**
+  String get onboardAssisted;
+
+  /// Onboarding entry mode option subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step, fast for daily use'**
+  String get onboardAssistedSub;
+
+  /// Onboarding entry mode option title
+  ///
+  /// In en, this message translates to:
+  /// **'Classic form'**
+  String get onboardClassic;
+
+  /// Onboarding entry mode option subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'All fields at once, for complex entries'**
+  String get onboardClassicSub;
+
+  /// Onboarding submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Create & Start'**
+  String get onboardCreateStart;
+
+  /// Onboarding done page title
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get onboardAllSet;
+
+  /// Onboarding done page subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Start tracking your expenses.\nYour financial clarity begins now.'**
+  String get onboardDoneSubtitle;
+
+  /// Onboarding done page button
+  ///
+  /// In en, this message translates to:
+  /// **'Start Using BudgetSeal'**
+  String get onboardStartUsing;
+
+  /// Onboarding restore sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get onboardRestoreTitle;
+
+  /// Onboarding restore sheet description
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where your backup is stored. This will replace any local data.'**
+  String get onboardRestoreDesc;
+
+  /// Onboarding restore option
+  ///
+  /// In en, this message translates to:
+  /// **'Google Drive'**
+  String get onboardGoogleDrive;
+
+  /// Onboarding restore option
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a File'**
+  String get onboardPickFile;
+
+  /// Onboarding join sheet description
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the invite code shared with you to join an existing BudgetSeal household.'**
+  String get onboardJoinDesc;
+
+  /// Onboarding join text field label
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get onboardInviteCode;
+
+  /// Onboarding join text field hint
+  ///
+  /// In en, this message translates to:
+  /// **'PP-...'**
+  String get onboardInviteHint;
+
+  /// Onboarding join button
+  ///
+  /// In en, this message translates to:
+  /// **'Join Household'**
+  String get onboardJoinButton;
+
+  /// Onboarding join validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an invite code'**
+  String get onboardEnterCodeError;
+
+  /// Onboarding join validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid invite code. It should start with PP-'**
+  String get onboardInvalidCodeError;
+
   /// Onboarding validation error
   ///
   /// In en, this message translates to:
@@ -9633,11 +9568,113 @@ abstract class S {
   /// **'Need help? Check our guide anytime from More > Help Guide.'**
   String get onboardHelpHint;
 
+  /// Biometric setup prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a screen lock to protect BudgetSeal'**
+  String get lockSetupReason;
+
+  /// Biometric unlock prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock BudgetSeal'**
+  String get lockUnlockReason;
+
+  /// Biometric error snackbar
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock failed: {error}'**
+  String lockFailed(String error);
+
+  /// Lock screen hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to unlock'**
+  String get lockTapToUnlock;
+
+  /// Lock screen button
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get lockUnlockButton;
+
+  /// Travel exchange screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Exchange'**
+  String get travelTitle;
+
+  /// Travel exchange info banner
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange money for your trip. A temporary travel wallet will be created automatically.'**
+  String get travelInfo;
+
+  /// Travel exchange section label
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get travelFrom;
+
+  /// Travel exchange dropdown hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select account'**
+  String get travelSelectAccount;
+
+  /// Travel exchange section label
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to exchange'**
+  String get travelAmountToExchange;
+
+  /// Travel exchange section label
+  ///
+  /// In en, this message translates to:
+  /// **'Travel currency'**
+  String get travelCurrencySection;
+
+  /// Travel exchange currency picker label
+  ///
+  /// In en, this message translates to:
+  /// **'Currency you receive'**
+  String get travelCurrencyReceive;
+
+  /// Travel exchange section label
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get travelAmountReceived;
+
+  /// Travel exchange submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange & Create Travel Wallet'**
+  String get travelExchangeButton;
+
+  /// Travel exchange reactivate dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Existing Travel Wallet'**
+  String get travelExistingWallet;
+
   /// Travel exchange reactivate dialog text
   ///
   /// In en, this message translates to:
   /// **'You have a previous {currency} travel wallet:'**
   String travelPreviousWallet(String currency);
+
+  /// Travel exchange reactivate dialog button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New'**
+  String get travelCreateNew;
+
+  /// Travel exchange reactivate dialog button
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get travelReactivate;
 
   /// Travel exchange error snackbar
   ///
@@ -9651,17 +9688,191 @@ abstract class S {
   /// **'Balance: {amount}'**
   String travelBalanceLabel(String amount);
 
+  /// Period transition screen title
+  ///
+  /// In en, this message translates to:
+  /// **'New Period'**
+  String get periodNewTitle;
+
+  /// Period transition error message
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load envelopes'**
+  String get periodError;
+
+  /// Period transition subheading
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve leftover balances'**
+  String get periodResolveLeftovers;
+
+  /// Period transition item count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String periodNItems(int count);
+
+  /// Period transition empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No leftover balances to resolve'**
+  String get periodNoLeftovers;
+
+  /// Period transition empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'All periodic allocations have zero or negative balances.'**
+  String get periodAllZero;
+
+  /// Period transition submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Period Transition'**
+  String get periodCompleteButton;
+
   /// Period transition error snackbar
   ///
   /// In en, this message translates to:
   /// **'Failed to complete transition. Please try again.'**
   String get periodTransitionFailed;
 
+  /// Period transition allocation type label
+  ///
+  /// In en, this message translates to:
+  /// **'Rollover allocation'**
+  String get periodRollover;
+
+  /// Period transition allocation type label
+  ///
+  /// In en, this message translates to:
+  /// **'Periodic allocation'**
+  String get periodPeriodic;
+
+  /// Period resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Unallocated'**
+  String get periodReturnUnallocated;
+
+  /// Period resolution option description
+  ///
+  /// In en, this message translates to:
+  /// **'Balance returns to the pool'**
+  String get periodReturnDesc;
+
+  /// Period resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Carry Forward'**
+  String get periodCarryForward;
+
+  /// Period resolution option description
+  ///
+  /// In en, this message translates to:
+  /// **'Keep balance for next period'**
+  String get periodCarryDesc;
+
+  /// Period resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Move to...'**
+  String get periodMoveTo;
+
+  /// Period resolution option description
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer to another allocation'**
+  String get periodMoveDesc;
+
+  /// Period resolution dropdown hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select allocation'**
+  String get periodSelectAllocation;
+
+  /// Leftover resolution screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Leftovers'**
+  String get leftoverTitle;
+
+  /// Leftover resolution missing args
+  ///
+  /// In en, this message translates to:
+  /// **'No allocation specified.'**
+  String get leftoverNoAllocation;
+
+  /// Leftover resolution missing allocation
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation not found.'**
+  String get leftoverNotFound;
+
   /// Leftover resolution error
   ///
   /// In en, this message translates to:
   /// **'Couldn\'t load data'**
   String get leftoverLoadError;
+
+  /// Leftover resolution section label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Balance'**
+  String get leftoverCurrentBalance;
+
+  /// Leftover resolution empty balance
+  ///
+  /// In en, this message translates to:
+  /// **'No balance'**
+  String get leftoverNoBalance;
+
+  /// Leftover resolution empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No positive balance to resolve.'**
+  String get leftoverNoPositive;
+
+  /// Leftover resolution section label
+  ///
+  /// In en, this message translates to:
+  /// **'Currency to resolve'**
+  String get leftoverCurrencyToResolve;
+
+  /// Leftover resolution dropdown option
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get leftoverAllCurrencies;
+
+  /// Leftover resolution section label
+  ///
+  /// In en, this message translates to:
+  /// **'What to do with the leftover'**
+  String get leftoverWhatToDo;
+
+  /// Leftover resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Leftover balance goes back to the pool'**
+  String get leftoverReturnSubtitle;
+
+  /// Leftover resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the balance for the next period'**
+  String get leftoverKeepSubtitle;
+
+  /// Leftover resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another allocation'**
+  String get leftoverMoveTitle;
+
+  /// Leftover resolution option
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer leftover to a different allocation'**
+  String get leftoverMoveSubtitle;
 
   /// Leftover resolution error snackbar
   ///
@@ -9996,7 +10207,7 @@ abstract class S {
   /// Age of money display
   ///
   /// In en, this message translates to:
-  /// **'{age} days'**
+  /// **'{age, plural, =1{1 day} other{{age} days}}'**
   String reportsAgeDays(int age);
 
   /// About tile subtitle with app version
@@ -10311,6 +10522,24 @@ abstract class S {
   /// **'No categories yet.\nTap \"New\" above to create one.'**
   String get catSheetNoCategories;
 
+  /// Currency sheet section header
+  ///
+  /// In en, this message translates to:
+  /// **'Your accounts'**
+  String get currencyYourAccounts;
+
+  /// Currency sheet section header
+  ///
+  /// In en, this message translates to:
+  /// **'Recently used'**
+  String get currencyRecentlyUsed;
+
+  /// Currency sheet section header
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get currencyAll;
+
   /// Snackbar after connecting sync provider
   ///
   /// In en, this message translates to:
@@ -10320,19 +10549,19 @@ abstract class S {
   /// Status subtitle with last sync time
   ///
   /// In en, this message translates to:
-  /// **'Last synced {time}{suffix}'**
+  /// **'Last synced {time} · {suffix}'**
   String syncLastSynced(String time, String suffix);
 
   /// Suffix for changes merged
   ///
   /// In en, this message translates to:
-  /// **' · {count} change(s) merged'**
+  /// **'{count, plural, =1{1 change merged} other{{count} changes merged}}'**
   String syncChangesMerged(int count);
 
   /// Suffix when no changes
   ///
   /// In en, this message translates to:
-  /// **' · up to date'**
+  /// **'up to date'**
   String get syncUpToDate;
 
   /// Language picker subtitle for system option

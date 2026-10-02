@@ -324,7 +324,8 @@ class _WelcomePageState extends State<_WelcomePage>
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: AppColors.pastel(context, Colors.white,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(Icons.account_balance_wallet_rounded,
@@ -429,7 +430,8 @@ class _CompactStep extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppColors.pastel(context, Colors.white,
+            light: 0.88, dark: 0.8),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
@@ -439,7 +441,8 @@ class _CompactStep extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.pastel(context, Colors.white,
+                  light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -653,7 +656,8 @@ class _SetupPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.07),
+                      color: AppColors.pastel(context, Colors.white,
+                          light: 0.88, dark: 0.8),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                           color: Colors.white.withValues(alpha: 0.1)),
@@ -754,7 +758,8 @@ class _FormCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: AppColors.pastel(context, Colors.white,
+            light: 0.88, dark: 0.8),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
@@ -843,7 +848,8 @@ class _DonePage extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.pastel(context, Colors.white,
+                  light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(26),
             ),
             child: const Icon(Icons.check_rounded,
@@ -1001,7 +1007,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
       if (!connected) {
         setState(() {
           _loading = false;
-          _error = 'Failed to connect to ${provider.displayName}';
+          _error = S.of(context).onboardConnectFailed(provider.displayName);
         });
         return;
       }
@@ -1012,7 +1018,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
       if (state.status == SyncStatus.error) {
         setState(() {
           _loading = false;
-          _error = state.lastError ?? 'No sync file found';
+          _error = state.lastError ?? S.of(context).onboardNoSyncFile;
         });
         return;
       }
@@ -1106,7 +1112,8 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.overspent.withValues(alpha: 0.1),
+                color: AppColors.pastel(context, AppColors.overspent,
+                    light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -1212,8 +1219,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
       if (!connected) {
         setState(() {
           _loading = false;
-          _error = 'Could not connect to Google Drive. '
-              'Make sure you are signed in and have access to the shared folder.';
+          _error = S.of(context).onboardDriveJoinFailed;
         });
         return;
       }
@@ -1226,7 +1232,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
         setState(() {
           _loading = false;
           _error =
-              syncState.lastError ?? 'No sync file found in the shared folder';
+              syncState.lastError ?? S.of(context).onboardNoSyncFileShared;
         });
         return;
       }
@@ -1325,7 +1331,8 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.overspent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.overspent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(

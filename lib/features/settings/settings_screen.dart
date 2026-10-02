@@ -544,7 +544,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: AppColors.pastel(context, color,
+                light: 0.85, dark: 0.78),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(amount,
@@ -570,7 +571,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: selected.withValues(alpha: 0.15),
+                color: AppColors.pastel(context, selected,
+                    light: 0.85, dark: 0.78),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 16, color: selected),
@@ -1861,7 +1863,8 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.08),
+                      color: AppColors.pastel(context, AppColors.accent,
+                          light: 0.88, dark: 0.8),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -2315,7 +2318,7 @@ class _DailyReminderTileState extends State<_DailyReminderTile> {
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
             subtitle: Text(
               _enabled
-                  ? 'Every day at ${_time.format(context)}'
+                  ? S.of(context).notifEveryDayAt(_time.format(context))
                   : S.of(context).notifDailyDisabled,
               style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
             ),
@@ -2527,9 +2530,11 @@ class _ShareHouseholdSettingsSheetState
         _loading = false;
       });
     } catch (e) {
+      debugPrint('[ShareHousehold] Failed: $e');
+      if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Failed to share: ${e.toString()}';
+        _error = S.of(context).shareHouseholdFailed;
       });
     }
   }
@@ -2627,7 +2632,8 @@ class _ShareHouseholdSettingsSheetState
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.08),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.88, dark: 0.8),
                   borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(
                       color: AppColors.accent.withValues(alpha: 0.2)),
@@ -2681,7 +2687,8 @@ class _ShareHouseholdSettingsSheetState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.overspent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.overspent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(

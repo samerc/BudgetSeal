@@ -766,7 +766,8 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
+                          color: AppColors.pastel(context, color,
+                              light: 0.85, dark: 0.78),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -996,9 +997,9 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                             ),
                           ),
                         ),
-                        Positioned(
+                        PositionedDirectional(
                           top: 4,
-                          right: 4,
+                          end: 4,
                           child: GestureDetector(
                             onTap: () => _removeReceipt(index),
                             child: Container(

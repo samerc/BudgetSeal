@@ -9,6 +9,182 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String commonPerDay(String amount) {
+    return '$amount/يوم';
+  }
+
+  @override
+  String commonNOfM(int n, int m) {
+    return '$n من $m';
+  }
+
+  @override
+  String fundAmountOfAvailable(
+      String currency, String amount, String available) {
+    return '$currency: $amount من $available';
+  }
+
+  @override
+  String get syncNoSyncFile => 'لم يُعثر على ملف مزامنة';
+
+  @override
+  String get syncErrNeedsPassword =>
+      'ملف المزامنة مشفّر. أدخل كلمة مرور المزامنة في المزامنة السحابية لقراءته.';
+
+  @override
+  String travelExchangeNote(String currency) {
+    return 'صرف سفر ← $currency';
+  }
+
+  @override
+  String travelConvertBackNote(String currency) {
+    return 'إعادة تحويل السفر ← $currency';
+  }
+
+  @override
+  String healthUnallocShort(String amount) {
+    return 'غير مخصص: $amount';
+  }
+
+  @override
+  String reportsRecurringSummary(int count, String amount) {
+    return '$count نشطة · $amount/شهريًا';
+  }
+
+  @override
+  String allocRevaluationNote(String amount, String rate, String oldRate) {
+    return 'إعادة تقييم: $amount بسعر $rate (كان $oldRate)';
+  }
+
+  @override
+  String notifEveryDayAt(String time) {
+    return 'كل يوم الساعة $time';
+  }
+
+  @override
+  String periodStartsEachMonth(String date, int day) {
+    return '$date · تبدأ في اليوم $day من كل شهر';
+  }
+
+  @override
+  String fundMoreThanAvailable(String amount, String currency) {
+    return '$amount أكثر من المتاح بعملة $currency';
+  }
+
+  @override
+  String get shareHouseholdFailed =>
+      'تعذّر إنشاء الدعوة. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String a11yPctOfTarget(int pct, String amount) {
+    return '$pct٪ من $amount';
+  }
+
+  @override
+  String get a11yFlexibleEnvelope => 'مغلف مرن';
+
+  @override
+  String get a11yNeedsReview => 'بحاجة إلى مراجعة';
+
+  @override
+  String get syncLocalFile => 'ملف محلي';
+
+  @override
+  String get syncGoogleSub => 'سجّل الدخول بحساب Google';
+
+  @override
+  String get syncOneDriveSub => 'يتطلب تثبيت تطبيق OneDrive';
+
+  @override
+  String get syncDropboxSub => 'يتطلب تثبيت تطبيق Dropbox';
+
+  @override
+  String get syncLocalFileSub => 'اختر أي ملف على جهازك';
+
+  @override
+  String get syncErrGoogleNotConfigured =>
+      'تسجيل الدخول عبر Google غير مُعد في هذا الإصدار من التطبيق. استخدم خيار مزامنة آخر.';
+
+  @override
+  String get syncErrNetwork => 'خطأ في الشبكة. تحقق من اتصالك بالإنترنت.';
+
+  @override
+  String get syncErrConnectFailed => 'تعذّر الاتصال. حاول مرة أخرى.';
+
+  @override
+  String onboardConnectFailed(String provider) {
+    return 'تعذّر الاتصال بـ $provider';
+  }
+
+  @override
+  String get onboardNoSyncFile => 'لم يُعثر على ملف مزامنة';
+
+  @override
+  String get onboardDriveJoinFailed =>
+      'تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.';
+
+  @override
+  String get onboardNoSyncFileShared =>
+      'لم يُعثر على ملف مزامنة في المجلد المشترك';
+
+  @override
+  String get billNoteTitle => 'تقسيم الفاتورة';
+
+  @override
+  String billNoteTotal(String total) {
+    return 'الفاتورة: $total';
+  }
+
+  @override
+  String billNoteSplitWith(String people, String total) {
+    return 'مقسّمة مع $people · الإجمالي: $total';
+  }
+
+  @override
+  String reportsDayN(int n) {
+    return 'اليوم $n';
+  }
+
+  @override
+  String reportsTipOverPace(String amount) {
+    return 'بهذا المعدل ستتجاوز ميزانيتك بمقدار $amount. حاول أن تُبطئ.';
+  }
+
+  @override
+  String reportsTipUnderPace(String amount) {
+    return 'وتيرة رائعة! أنت في طريقك للبقاء أقل من ميزانيتك بمقدار $amount.';
+  }
+
+  @override
+  String reportsTipSavingHigh(int percent) {
+    return 'أنت تدّخر $percent٪ من دخلك هذا الشهر. واصل!';
+  }
+
+  @override
+  String reportsTipSavingLow(int percent) {
+    return 'معدل ادخارك منخفض ($percent٪). حاول أن تدّخر 10–20٪ على الأقل.';
+  }
+
+  @override
+  String reportsTipAgeLow(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other:
+          'تبقى أموالك $days يومًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.',
+      few:
+          'تبقى أموالك $days أيام فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.',
+      two:
+          'تبقى أموالك يومين فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.',
+      one:
+          'تبقى أموالك يومًا واحدًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.',
+      zero:
+          'تُنفق أموالك في اليوم نفسه. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String txNoRateBetween(String from, String to) {
     return 'لا يوجد سعر صرف من $from إلى $to. أدخل سعرًا لهذا المبلغ، أو حدّث الأسعار من الإعدادات › أسعار الصرف.';
   }
@@ -86,9 +262,6 @@ class SAr extends S {
     );
     return '$_temp0';
   }
-
-  @override
-  String get commonCancel => 'إلغاء';
 
   @override
   String get commonDelete => 'حذف';
@@ -397,7 +570,7 @@ class SAr extends S {
 
   @override
   String get dashboardAgeOfMoneyExplanation =>
-      'يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\\n\\nاعتبره احتياطياً:\\n\\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\\n• 14–30 يوماً — لديك هامش بسيط\\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\\n• 60+ يوماً — صحة مالية قوية\\n\\nالهدف زيادة هذا الرقم بمرور الوقت.';
+      'يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\n\nاعتبره احتياطياً:\n\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\n• 14–30 يوماً — لديك هامش بسيط\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\n• 60+ يوماً — صحة مالية قوية\n\nالهدف زيادة هذا الرقم بمرور الوقت.';
 
   @override
   String get dashboardSearchPlaceholder => 'البحث في المعاملات والحسابات...';
@@ -451,7 +624,7 @@ class SAr extends S {
   String get dashboardSectionMoneyLabel => 'أموالك';
 
   @override
-  String get dashboardSectionMoneyDesc => 'صافي الثروة وصحة الأظرف';
+  String get dashboardSectionMoneyDesc => 'الفواتير وصافي الثروة وغير المخصص';
 
   @override
   String get dashboardSectionUnallocatedLabel => 'جاهز للتوزيع';
@@ -835,7 +1008,7 @@ class SAr extends S {
 
   @override
   String get txDetailDeleteContent =>
-      'هل أنت متأكد من حذف هذه المعاملة؟\\n\\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\\n\\nلا يمكن التراجع عن هذا.';
+      'هل أنت متأكد من حذف هذه المعاملة؟\n\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\n\nلا يمكن التراجع عن هذا.';
 
   @override
   String get txAfDiscardTitle => 'Abandonner المعاملة؟';
@@ -945,22 +1118,12 @@ class SAr extends S {
   String get catSheetNoMatching => 'لا فئات مطابقة';
 
   @override
-  String get catSheetNoYet =>
-      'لا فئات بعد.\\nاضغط \"جديد\" أعلاه لإنشاء واحدة.';
+  String get catSheetNoYet => 'لا فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.';
 
   @override
   String catSheetNSubcategories(int count) {
     return '$count فئات فرعية';
   }
-
-  @override
-  String get currencyYourAccounts => 'حساباتك';
-
-  @override
-  String get currencyRecentlyUsed => 'المستخدمة مؤخراً';
-
-  @override
-  String get currencyAll => 'جميع العملات';
 
   @override
   String get txWidgetSelectAccount => 'اختر حساباً';
@@ -1283,18 +1446,10 @@ class SAr extends S {
   String get allocSectionFlexible => 'مُرحَّل';
 
   @override
-  String allocNoMatch(String query) {
-    return 'لا أظرف تطابق \"\"$query\"\"';
-  }
-
-  @override
   String get allocCreateTooltip => 'إنشاء ظرف';
 
   @override
   String get allocNoYet => 'لا أظرف بعد';
-
-  @override
-  String get allocCreateHelp => 'أنشئ ظرفاً لبدء الميزانية.\\nاضغط ؟ للمساعدة.';
 
   @override
   String get allocCreateButton => 'إنشاء ظرف';
@@ -1374,7 +1529,7 @@ class SAr extends S {
 
   @override
   String get allocPeriodicDesc =>
-      '• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)';
+      '• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)';
 
   @override
   String get allocPeriodic => 'دوري';
@@ -1538,7 +1693,7 @@ class SAr extends S {
 
   @override
   String get allocArchiveMsg =>
-      'سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\\n\\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.';
+      'سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.';
 
   @override
   String get allocArchived => 'تم أرشفة الظرف';
@@ -1557,7 +1712,7 @@ class SAr extends S {
 
   @override
   String get allocDeleteNoLinkedMsg =>
-      'هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\\n\\nهل أنت متأكد؟ لا يمكن التراجع.';
+      'هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.';
 
   @override
   String get allocCreated => 'تم إنشاء الظرف';
@@ -1738,7 +1893,7 @@ class SAr extends S {
 
   @override
   String allocDeleteAndMore(int count) {
-    return ' و$count أخرى';
+    return 'و$count أخرى';
   }
 
   @override
@@ -1812,6 +1967,14 @@ class SAr extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String allocNoMatch(String query) {
+    return 'لا أظرف تطابق \"\"$query\"\"';
+  }
+
+  @override
+  String get allocCreateHelp => 'أنشئ ظرفاً لبدء الميزانية.\nاضغط ؟ للمساعدة.';
 
   @override
   String allocNEnvelopesNeedReset(int count) {
@@ -1899,7 +2062,7 @@ class SAr extends S {
 
   @override
   String fundOverfundingMsg(String details) {
-    return 'أنت توزع $details. سيصبح رصيدك غير الموزع سالباً.\\n\\nالمتابعة؟';
+    return 'أنت توزع $details. سيصبح رصيدك غير الموزع سالباً.\n\nالمتابعة؟';
   }
 
   @override
@@ -2261,6 +2424,9 @@ class SAr extends S {
 
   @override
   String get catUpdated => 'تم تحديث الفئة';
+
+  @override
+  String get commonCancel => 'إلغاء';
 
   @override
   String get commonArchive => 'أرشفة';
@@ -2664,132 +2830,6 @@ class SAr extends S {
   String get objDeleteAll => 'حذف كل شيء';
 
   @override
-  String get travelTitle => 'صرف السفر';
-
-  @override
-  String get travelInfo =>
-      'صرّف أموالاً لرحلتك. ستُنشأ محفظة سفر مؤقتة تلقائياً.';
-
-  @override
-  String get travelFrom => 'من';
-
-  @override
-  String get travelSelectAccount => 'اختر حساباً';
-
-  @override
-  String get travelAmountToExchange => 'المبلغ للصرف';
-
-  @override
-  String get travelCurrencySection => 'عملة السفر';
-
-  @override
-  String get travelCurrencyReceive => 'العملة التي تتلقاها';
-
-  @override
-  String get travelAmountReceived => 'المبلغ المستلم';
-
-  @override
-  String get travelExchangeButton => 'صرف وإنشاء محفظة سفر';
-
-  @override
-  String get travelExistingWallet => 'محفظة سفر موجودة';
-
-  @override
-  String get travelCreateNew => 'إنشاء جديد';
-
-  @override
-  String get travelReactivate => 'إعادة تفعيل';
-
-  @override
-  String get periodNewTitle => 'فترة جديدة';
-
-  @override
-  String get periodError => 'تعذّر تحميل الأظرف';
-
-  @override
-  String get periodResolveLeftovers => 'حل الأرصدة المتبقية';
-
-  @override
-  String periodNItems(int count) {
-    return '$count عناصر';
-  }
-
-  @override
-  String get periodNoLeftovers => 'لا أرصدة متبقية لحلها';
-
-  @override
-  String get periodAllZero => 'جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.';
-
-  @override
-  String get periodCompleteButton => 'إتمام انتقال الفترة';
-
-  @override
-  String get periodRollover => 'ظرف مُرحَّل';
-
-  @override
-  String get periodPeriodic => 'ظرف دوري';
-
-  @override
-  String get periodReturnUnallocated => 'إرجاع إلى غير الموزع';
-
-  @override
-  String get periodReturnDesc => 'يعود الرصيد إلى الحوض';
-
-  @override
-  String get periodCarryForward => 'ترحيل';
-
-  @override
-  String get periodCarryDesc => 'الاحتفاظ بالرصيد للفترة التالية';
-
-  @override
-  String get periodMoveTo => 'نقل إلى...';
-
-  @override
-  String get periodMoveDesc => 'تحويل إلى ظرف آخر';
-
-  @override
-  String get periodSelectAllocation => 'اختر ظرفاً';
-
-  @override
-  String get leftoverTitle => 'حل المتبقيات';
-
-  @override
-  String get leftoverNoAllocation => 'لم يتم تحديد ظرف.';
-
-  @override
-  String get leftoverNotFound => 'الظرف غير موجود.';
-
-  @override
-  String get leftoverCurrentBalance => 'الرصيد الحالي';
-
-  @override
-  String get leftoverNoBalance => 'لا رصيد';
-
-  @override
-  String get leftoverNoPositive => 'لا رصيد إيجابي لحله.';
-
-  @override
-  String get leftoverCurrencyToResolve => 'العملة المراد حلها';
-
-  @override
-  String get leftoverAllCurrencies => 'جميع العملات';
-
-  @override
-  String get leftoverWhatToDo => 'ماذا تفعل بالمتبقي';
-
-  @override
-  String get leftoverReturnSubtitle => 'المتبقي يعود إلى الحوض';
-
-  @override
-  String get leftoverKeepSubtitle => 'الاحتفاظ بالرصيد للفترة التالية';
-
-  @override
-  String get leftoverMoveTitle => 'نقل إلى ظرف آخر';
-
-  @override
-  String get leftoverMoveSubtitle => 'تحويل المتبقي إلى ظرف مختلف';
-
-  @override
   String get settingsMoreTitle => 'المزيد';
 
   @override
@@ -2906,7 +2946,7 @@ class SAr extends S {
 
   @override
   String get resetContent =>
-      'سيؤدي هذا إلى حذف جميع بياناتك نهائياً:\\n\\n• جميع الحسابات والأرصدة\\n• جميع المعاملات\\n• جميع الأظرف والفئات\\n• جميع الإعدادات\\n\\nلا يمكن التراجع. هل أنت متأكد تماماً؟';
+      'سيؤدي هذا إلى حذف جميع بياناتك نهائياً:\n\n• جميع الحسابات والأرصدة\n• جميع المعاملات\n• جميع الأظرف والفئات\n• جميع الإعدادات\n\nلا يمكن التراجع. هل أنت متأكد تماماً؟';
 
   @override
   String get resetButton => 'حذف كل شيء';
@@ -3814,7 +3854,7 @@ class SAr extends S {
 
   @override
   String get healthRepairMsg =>
-      'سيتم إنشاء إدخالات تعديل لإعادة مطابقة أرصدة الأظرف مع الحسابات. يُنصح بعمل نسخة احتياطية قبل المتابعة.\\n\\nالمتابعة؟';
+      'سيتم إنشاء إدخالات تعديل لإعادة مطابقة أرصدة الأظرف مع الحسابات. يُنصح بعمل نسخة احتياطية قبل المتابعة.\n\nالمتابعة؟';
 
   @override
   String get healthRepairDone => 'إصلاح';
@@ -3833,161 +3873,6 @@ class SAr extends S {
 
   @override
   String get healthPurgeButton => 'تطهير';
-
-  @override
-  String get onboardWelcomeTitle => 'BudgetSeal';
-
-  @override
-  String get onboardTagline => 'امنح كل دولار غرضاً.';
-
-  @override
-  String get onboardStep1 => 'أضف حسابات — أين يعيش مالك';
-
-  @override
-  String get onboardStep2 => 'أنشئ أظرفاً — ميزانية لكل فئة';
-
-  @override
-  String get onboardStep3 => 'موّل الأظرف — وزّع دخلك';
-
-  @override
-  String get onboardStep4 => 'أنفق — كل مصروف يُسحب من ظرفه';
-
-  @override
-  String get onboardGetStarted => 'ابدأ الآن';
-
-  @override
-  String get onboardRestoreCloud => 'الاستعادة من السحابة';
-
-  @override
-  String get onboardJoinHousehold => 'الانضمام لأسرة';
-
-  @override
-  String get onboardSetupTitle => 'إعداد أسرتك';
-
-  @override
-  String get onboardChangeLater => 'يمكنك تغيير كل شيء لاحقاً من الإعدادات.';
-
-  @override
-  String get onboardHouseholdSection => 'الأسرة';
-
-  @override
-  String get onboardHouseholdName => 'اسم الأسرة';
-
-  @override
-  String get onboardBaseCurrency => 'العملة الأساسية';
-
-  @override
-  String get onboardPeriodStart => 'يوم بداية الفترة';
-
-  @override
-  String get onboardFirstAccountSection => 'الحساب الأول';
-
-  @override
-  String get onboardAccountName => 'اسم الحساب';
-
-  @override
-  String get onboardTypeCash => 'نقدي';
-
-  @override
-  String get onboardTypeBank => 'بنك';
-
-  @override
-  String get onboardTypeCredit => 'ائتمان';
-
-  @override
-  String get onboardTypeDigital => 'رقمي';
-
-  @override
-  String get onboardCategoriesSection => 'الفئات';
-
-  @override
-  String get onboardFullSet => 'مجموعة كاملة';
-
-  @override
-  String get onboardFullSetSub => '30 فئة مع فئات فرعية';
-
-  @override
-  String get onboardEmpty => 'فارغ';
-
-  @override
-  String get onboardEmptySub => 'أنشئ فئاتك من الصفر';
-
-  @override
-  String get onboardEntrySection => 'إدخال المعاملات';
-
-  @override
-  String get onboardAssisted => 'مساعَد';
-
-  @override
-  String get onboardAssistedSub => 'خطوة بخطوة، سريع للاستخدام اليومي';
-
-  @override
-  String get onboardClassic => 'النموذج الكلاسيكي';
-
-  @override
-  String get onboardClassicSub => 'جميع الحقول دفعة واحدة، للإدخالات المعقدة';
-
-  @override
-  String get onboardCreateStart => 'إنشاء وبدء';
-
-  @override
-  String get onboardAllSet => 'أنت جاهز!';
-
-  @override
-  String get onboardDoneSubtitle =>
-      'ابدأ تتبع مصاريفك.\\nوضوحك المالي يبدأ الآن.';
-
-  @override
-  String get onboardStartUsing => 'ابدأ استخدام BudgetSeal';
-
-  @override
-  String get onboardRestoreTitle => 'الاستعادة من السحابة';
-
-  @override
-  String get onboardRestoreDesc =>
-      'اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.';
-
-  @override
-  String get onboardGoogleDrive => 'Google Drive';
-
-  @override
-  String get onboardPickFile => 'اختر ملفاً';
-
-  @override
-  String get onboardJoinDesc =>
-      'أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.';
-
-  @override
-  String get onboardInviteCode => 'رمز الدعوة';
-
-  @override
-  String get onboardInviteHint => 'PP-...';
-
-  @override
-  String get onboardJoinButton => 'الانضمام للأسرة';
-
-  @override
-  String get onboardEnterCodeError => 'الرجاء إدخال رمز الدعوة';
-
-  @override
-  String get onboardInvalidCodeError => 'رمز دعوة غير صالح. يجب أن يبدأ بـ PP-';
-
-  @override
-  String get lockSetupReason => 'أعدّ قفل الشاشة لحماية BudgetSeal';
-
-  @override
-  String get lockUnlockReason => 'فتح BudgetSeal';
-
-  @override
-  String lockFailed(String error) {
-    return 'فشل الفتح: $error';
-  }
-
-  @override
-  String get lockTapToUnlock => 'اضغط للفتح';
-
-  @override
-  String get lockUnlockButton => 'فتح';
 
   @override
   String get reportsTitle => 'التقارير';
@@ -5195,6 +5080,144 @@ class SAr extends S {
   }
 
   @override
+  String get onboardWelcomeTitle => 'BudgetSeal';
+
+  @override
+  String get onboardTagline => 'امنح كل دولار غرضاً.';
+
+  @override
+  String get onboardStep1 => 'أضف حسابات — أين يعيش مالك';
+
+  @override
+  String get onboardStep2 => 'أنشئ أظرفاً — ميزانية لكل فئة';
+
+  @override
+  String get onboardStep3 => 'موّل الأظرف — وزّع دخلك';
+
+  @override
+  String get onboardStep4 => 'أنفق — كل مصروف يُسحب من ظرفه';
+
+  @override
+  String get onboardGetStarted => 'ابدأ الآن';
+
+  @override
+  String get onboardRestoreCloud => 'الاستعادة من السحابة';
+
+  @override
+  String get onboardJoinHousehold => 'الانضمام لأسرة';
+
+  @override
+  String get onboardSetupTitle => 'إعداد أسرتك';
+
+  @override
+  String get onboardChangeLater => 'يمكنك تغيير كل شيء لاحقاً من الإعدادات.';
+
+  @override
+  String get onboardHouseholdSection => 'الأسرة';
+
+  @override
+  String get onboardHouseholdName => 'اسم الأسرة';
+
+  @override
+  String get onboardBaseCurrency => 'العملة الأساسية';
+
+  @override
+  String get onboardPeriodStart => 'يوم بداية الفترة';
+
+  @override
+  String get onboardFirstAccountSection => 'الحساب الأول';
+
+  @override
+  String get onboardAccountName => 'اسم الحساب';
+
+  @override
+  String get onboardTypeCash => 'نقدي';
+
+  @override
+  String get onboardTypeBank => 'بنك';
+
+  @override
+  String get onboardTypeCredit => 'ائتمان';
+
+  @override
+  String get onboardTypeDigital => 'رقمي';
+
+  @override
+  String get onboardCategoriesSection => 'الفئات';
+
+  @override
+  String get onboardFullSet => 'مجموعة كاملة';
+
+  @override
+  String get onboardFullSetSub => '30 فئة مع فئات فرعية';
+
+  @override
+  String get onboardEmpty => 'فارغ';
+
+  @override
+  String get onboardEmptySub => 'أنشئ فئاتك من الصفر';
+
+  @override
+  String get onboardEntrySection => 'إدخال المعاملات';
+
+  @override
+  String get onboardAssisted => 'مساعَد';
+
+  @override
+  String get onboardAssistedSub => 'خطوة بخطوة، سريع للاستخدام اليومي';
+
+  @override
+  String get onboardClassic => 'النموذج الكلاسيكي';
+
+  @override
+  String get onboardClassicSub => 'جميع الحقول دفعة واحدة، للإدخالات المعقدة';
+
+  @override
+  String get onboardCreateStart => 'إنشاء وبدء';
+
+  @override
+  String get onboardAllSet => 'أنت جاهز!';
+
+  @override
+  String get onboardDoneSubtitle =>
+      'ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.';
+
+  @override
+  String get onboardStartUsing => 'ابدأ استخدام BudgetSeal';
+
+  @override
+  String get onboardRestoreTitle => 'الاستعادة من السحابة';
+
+  @override
+  String get onboardRestoreDesc =>
+      'اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.';
+
+  @override
+  String get onboardGoogleDrive => 'Google Drive';
+
+  @override
+  String get onboardPickFile => 'اختر ملفاً';
+
+  @override
+  String get onboardJoinDesc =>
+      'أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.';
+
+  @override
+  String get onboardInviteCode => 'رمز الدعوة';
+
+  @override
+  String get onboardInviteHint => 'PP-...';
+
+  @override
+  String get onboardJoinButton => 'الانضمام للأسرة';
+
+  @override
+  String get onboardEnterCodeError => 'الرجاء إدخال رمز الدعوة';
+
+  @override
+  String get onboardInvalidCodeError => 'رمز دعوة غير صالح. يجب أن يبدأ بـ PP-';
+
+  @override
   String get onboardHouseholdNameError => 'أدخل اسم الأسرة';
 
   @override
@@ -5224,9 +5247,63 @@ class SAr extends S {
       'تحتاج مساعدة؟ تحقق من دليلنا في أي وقت من المزيد > دليل المساعدة.';
 
   @override
+  String get lockSetupReason => 'أعدّ قفل الشاشة لحماية BudgetSeal';
+
+  @override
+  String get lockUnlockReason => 'فتح BudgetSeal';
+
+  @override
+  String lockFailed(String error) {
+    return 'فشل الفتح: $error';
+  }
+
+  @override
+  String get lockTapToUnlock => 'اضغط للفتح';
+
+  @override
+  String get lockUnlockButton => 'فتح';
+
+  @override
+  String get travelTitle => 'صرف السفر';
+
+  @override
+  String get travelInfo =>
+      'صرّف أموالاً لرحلتك. ستُنشأ محفظة سفر مؤقتة تلقائياً.';
+
+  @override
+  String get travelFrom => 'من';
+
+  @override
+  String get travelSelectAccount => 'اختر حساباً';
+
+  @override
+  String get travelAmountToExchange => 'المبلغ للصرف';
+
+  @override
+  String get travelCurrencySection => 'عملة السفر';
+
+  @override
+  String get travelCurrencyReceive => 'العملة التي تتلقاها';
+
+  @override
+  String get travelAmountReceived => 'المبلغ المستلم';
+
+  @override
+  String get travelExchangeButton => 'صرف وإنشاء محفظة سفر';
+
+  @override
+  String get travelExistingWallet => 'محفظة سفر موجودة';
+
+  @override
   String travelPreviousWallet(String currency) {
     return 'لديك محفظة سفر سابقة بعملة $currency:';
   }
+
+  @override
+  String get travelCreateNew => 'إنشاء جديد';
+
+  @override
+  String get travelReactivate => 'إعادة تفعيل';
 
   @override
   String get travelExchangeFailed => 'فشل التحويل. حاول مجدداً.';
@@ -5237,10 +5314,99 @@ class SAr extends S {
   }
 
   @override
+  String get periodNewTitle => 'فترة جديدة';
+
+  @override
+  String get periodError => 'تعذّر تحميل الأظرف';
+
+  @override
+  String get periodResolveLeftovers => 'حل الأرصدة المتبقية';
+
+  @override
+  String periodNItems(int count) {
+    return '$count عناصر';
+  }
+
+  @override
+  String get periodNoLeftovers => 'لا أرصدة متبقية لحلها';
+
+  @override
+  String get periodAllZero => 'جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.';
+
+  @override
+  String get periodCompleteButton => 'إتمام انتقال الفترة';
+
+  @override
   String get periodTransitionFailed => 'فشل إكمال الانتقال. حاول مجدداً.';
 
   @override
+  String get periodRollover => 'ظرف مُرحَّل';
+
+  @override
+  String get periodPeriodic => 'ظرف دوري';
+
+  @override
+  String get periodReturnUnallocated => 'إرجاع إلى غير الموزع';
+
+  @override
+  String get periodReturnDesc => 'يعود الرصيد إلى الحوض';
+
+  @override
+  String get periodCarryForward => 'ترحيل';
+
+  @override
+  String get periodCarryDesc => 'الاحتفاظ بالرصيد للفترة التالية';
+
+  @override
+  String get periodMoveTo => 'نقل إلى...';
+
+  @override
+  String get periodMoveDesc => 'تحويل إلى ظرف آخر';
+
+  @override
+  String get periodSelectAllocation => 'اختر ظرفاً';
+
+  @override
+  String get leftoverTitle => 'حل المتبقيات';
+
+  @override
+  String get leftoverNoAllocation => 'لم يتم تحديد ظرف.';
+
+  @override
+  String get leftoverNotFound => 'الظرف غير موجود.';
+
+  @override
   String get leftoverLoadError => 'تعذّر تحميل البيانات';
+
+  @override
+  String get leftoverCurrentBalance => 'الرصيد الحالي';
+
+  @override
+  String get leftoverNoBalance => 'لا رصيد';
+
+  @override
+  String get leftoverNoPositive => 'لا رصيد إيجابي لحله.';
+
+  @override
+  String get leftoverCurrencyToResolve => 'العملة المراد حلها';
+
+  @override
+  String get leftoverAllCurrencies => 'جميع العملات';
+
+  @override
+  String get leftoverWhatToDo => 'ماذا تفعل بالمتبقي';
+
+  @override
+  String get leftoverReturnSubtitle => 'المتبقي يعود إلى الحوض';
+
+  @override
+  String get leftoverKeepSubtitle => 'الاحتفاظ بالرصيد للفترة التالية';
+
+  @override
+  String get leftoverMoveTitle => 'نقل إلى ظرف آخر';
+
+  @override
+  String get leftoverMoveSubtitle => 'تحويل المتبقي إلى ظرف مختلف';
 
   @override
   String get leftoverResolveFailed => 'فشل حل المتبقي. حاول مجدداً.';
@@ -5433,7 +5599,17 @@ class SAr extends S {
 
   @override
   String reportsAgeDays(int age) {
-    return '$age أيام';
+    String _temp0 = intl.Intl.pluralLogic(
+      age,
+      locale: localeName,
+      other: '$age يوم',
+      many: '$age يومًا',
+      few: '$age أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+      zero: '0 يوم',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5627,22 +5803,39 @@ class SAr extends S {
       'لا توجد فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.';
 
   @override
+  String get currencyYourAccounts => 'حساباتك';
+
+  @override
+  String get currencyRecentlyUsed => 'المستخدمة مؤخراً';
+
+  @override
+  String get currencyAll => 'جميع العملات';
+
+  @override
   String syncConnectedTo(String provider) {
     return 'متصل بـ $provider';
   }
 
   @override
   String syncLastSynced(String time, String suffix) {
-    return 'آخر مزامنة $time$suffix';
+    return 'آخر مزامنة $time · $suffix';
   }
 
   @override
   String syncChangesMerged(int count) {
-    return ' · تم دمج $count تغيير(ات)';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم دمج $count تغيير',
+      few: 'تم دمج $count تغييرات',
+      two: 'تم دمج تغييرين',
+      one: 'تم دمج تغيير واحد',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get syncUpToDate => ' · محدّث';
+  String get syncUpToDate => 'محدّث';
 
   @override
   String get languageSystemDesc => 'اتباع إعدادات الجهاز';

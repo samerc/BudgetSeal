@@ -112,14 +112,14 @@ class _CustomizeSheet extends ConsumerWidget {
                         Icons.drag_handle_rounded,
                         color: AppColors.th(context),
                       ),
-                      title: Text(config.section.label,
+                      title: Text(_sectionLabel(S.of(context), config.section),
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: config.visible
                                   ? AppColors.tp(context)
                                   : AppColors.th(context))),
-                      subtitle: Text(config.section.description,
+                      subtitle: Text(_sectionDesc(S.of(context), config.section),
                           style: TextStyle(
                               fontSize: 11,
                               color: AppColors.ts(context))),
@@ -139,3 +139,17 @@ class _CustomizeSheet extends ConsumerWidget {
     );
   }
 }
+
+String _sectionLabel(S l, DashboardSection s) => switch (s) {
+      DashboardSection.quickActions => l.dashboardSectionQuickLabel,
+      DashboardSection.spending => l.dashboardSectionSpendingLabel,
+      DashboardSection.money => l.dashboardSectionMoneyLabel,
+      DashboardSection.activity => l.dashboardSectionActivityLabel,
+    };
+
+String _sectionDesc(S l, DashboardSection s) => switch (s) {
+      DashboardSection.quickActions => l.dashboardSectionQuickDesc,
+      DashboardSection.spending => l.dashboardSectionSpendingDesc,
+      DashboardSection.money => l.dashboardSectionMoneyDesc,
+      DashboardSection.activity => l.dashboardSectionActivityDesc,
+    };

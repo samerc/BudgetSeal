@@ -65,7 +65,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     style: const TextStyle(fontSize: 14)),
                 subtitle: Text(
                   _dailyEnabled
-                      ? 'Every day at ${_time.format(context)}'
+                      ? S.of(context).notifEveryDayAt(_time.format(context))
                       : S.of(context).notifDailyDisabled,
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context)),
@@ -207,7 +207,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, iconColor,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, size: 18, color: iconColor),

@@ -1538,7 +1538,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: AppColors.accent.withValues(alpha: 0.1),
+                              color: AppColors.pastel(context, AppColors.accent,
+                                  light: 0.85, dark: 0.78),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Icon(Icons.swap_vert_rounded,
@@ -1681,7 +1682,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: _typeColor(context).withValues(alpha: 0.06),
+              color: AppColors.pastel(context, _typeColor(context),
+                  light: 0.88, dark: 0.8),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: _typeColor(context).withValues(alpha: 0.2)),
             ),
@@ -1698,7 +1700,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       fontSize: 14),
                 ),
                 Text(
-                  formatAmount(_totalBaseAmount),
+                  formatAmount(_totalBaseAmount, currency: _baseCurrency),
                   style: TextStyle(
                     color: _typeColor(context),
                     fontWeight: FontWeight.w700,

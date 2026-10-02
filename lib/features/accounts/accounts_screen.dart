@@ -40,7 +40,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           children: [
             // ── Header ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
               child: Row(
                 children: [
                   IconButton(
@@ -443,7 +443,8 @@ class _AccountTile extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: AppColors.pastel(context, color,
+                  light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
             child: Icon(_accountIcon(acc.type), color: color, size: 20),
@@ -471,7 +472,7 @@ class _AccountTile extends StatelessWidget {
           subtitle: Text(
             acc.isTravel
                 ? S.of(context).acctTravelWallet(acc.currency)
-                : '${acc.type[0].toUpperCase()}${acc.type.substring(1)} \u00b7 ${acc.currency}',
+                : '${accountTypeLabel(S.of(context), acc.type)} \u00b7 ${acc.currency}',
             style:
                 TextStyle(color: AppColors.ts(context), fontSize: 12),
           ),
@@ -530,7 +531,8 @@ class _ArchivedAccountTile extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.ts(context).withValues(alpha: 0.1),
+                color: AppColors.pastel(context, AppColors.ts(context),
+                    light: 0.85, dark: 0.78),
                 shape: BoxShape.circle,
               ),
               child: Icon(_accountIcon(acc.type),
@@ -560,7 +562,7 @@ class _ArchivedAccountTile extends StatelessWidget {
               ],
             ),
             subtitle: Text(
-              '${acc.type[0].toUpperCase()}${acc.type.substring(1)} · ${acc.currency}',
+              '${accountTypeLabel(S.of(context), acc.type)} · ${acc.currency}',
               style: TextStyle(color: AppColors.ts(context), fontSize: 12),
             ),
             trailing: Row(
@@ -586,3 +588,12 @@ class _ArchivedAccountTile extends StatelessWidget {
     );
   }
 }
+
+/// Translated name of an account type id ('cash', 'bank', 'credit', 'wallet').
+String accountTypeLabel(S l, String type) => switch (type) {
+      'cash' => l.acctTypeCash,
+      'bank' => l.acctTypeBank,
+      'credit' => l.acctTypeCredit,
+      'wallet' => l.acctTypeDigital,
+      _ => type,
+    };

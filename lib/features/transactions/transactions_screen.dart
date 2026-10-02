@@ -654,7 +654,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Widget _buildHeader(BuildContext context) {
     if (_showSearch) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 8, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 8, 0),
         child: Row(
           children: [
             Expanded(
@@ -695,7 +695,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
       child: Row(
         children: [
           Text(
@@ -738,7 +738,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   // ── Quick-add bar (replaces FAB) ─────────────────────────────
   Widget _buildQuickAddBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 8, 6),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         border: Border(top: BorderSide(color: AppColors.bd(context))),
@@ -1346,7 +1346,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.1),
+                    color: AppColors.pastel(context, AppColors.accent,
+                        light: 0.85, dark: 0.78),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                         color: AppColors.accent.withValues(alpha: 0.3)),
@@ -1539,7 +1540,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.1),
+                      color: AppColors.pastel(context, AppColors.accent,
+                          light: 0.85, dark: 0.78),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                           color: AppColors.accent.withValues(alpha: 0.3)),
@@ -2346,7 +2348,8 @@ class _TypeOption extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.08),
+            color: AppColors.pastel(context, color,
+                light: 0.88, dark: 0.8),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(children: [
@@ -2354,7 +2357,8 @@ class _TypeOption extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: AppColors.pastel(context, color,
+                    light: 0.85, dark: 0.78),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 22, color: color),

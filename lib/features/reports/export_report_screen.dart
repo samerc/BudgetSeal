@@ -131,6 +131,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
   }
 
   Future<void> _export() async {
+    final uncategorized = S.of(context).commonUncategorized;
     setState(() => _exporting = true);
     try {
       final entries =
@@ -166,8 +167,8 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
           totalExpense += baseAmt;
           final catId = e.tx.categoryId;
           final name = catId != null
-              ? (categoryMap[catId]?.name ?? 'Uncategorized')
-              : 'Uncategorized';
+              ? (categoryMap[catId]?.name ?? uncategorized)
+              : uncategorized;
           catSpend[name] = (catSpend[name] ?? 0) + baseAmt;
         }
       }
@@ -247,7 +248,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
 
     final catRows = categoryBreakdown.map((e) {
       final pct = totalExpense > 0
-          ? (e.value / totalExpense * 100).toStringAsFixed(1)
+          ? formatNumber(e.value / totalExpense * 100, decimals: 1)
           : '0';
       return '''
         <tr>

@@ -7,6 +7,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
 import 'cloud_provider.dart';
+import '../../l10n/s_lookup.dart';
 
 const _syncFileName = 'BudgetSeal_Sync.json';
 const _folderName = 'BudgetSeal';
@@ -66,13 +67,12 @@ class GoogleDriveProvider implements CloudProvider {
       final msg = e.toString().toLowerCase();
       if (msg.contains('sign_in') || msg.contains('not configured') ||
           msg.contains('apiexception')) {
-        lastConnectError =
-            'Google Sign-In is not configured for this app. '
-            'A Google Cloud project with OAuth credentials is required.';
+        lastConnectError = currentS().syncErrGoogleNotConfigured;
       } else if (msg.contains('network')) {
-        lastConnectError = 'Network error. Check your internet connection.';
+        lastConnectError = currentS().syncErrNetwork;
       } else {
-        lastConnectError = 'Connection failed: ${e.toString()}';
+        debugPrint('Google Drive connect failed: $e');
+        lastConnectError = currentS().syncErrConnectFailed;
       }
       return false;
     }

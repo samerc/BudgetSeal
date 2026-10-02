@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../l10n/s_lookup.dart';
 import 'package:pointycastle/pointycastle.dart' as pc;
 
 const _secureStorage = FlutterSecureStorage();
@@ -76,8 +77,8 @@ class SyncEncryption {
 
     password ??= await getPassword();
     if (password == null || password.isEmpty) {
-      throw StateError('Sync file is encrypted but no password is set. '
-          'Enter your sync password to decrypt.');
+      // Shown to the user as the sync error.
+      throw StateError(currentS().syncErrNeedsPassword);
     }
 
     final parts = data.split(':');

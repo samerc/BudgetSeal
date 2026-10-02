@@ -87,6 +87,7 @@ class _LeftoverResolutionScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
             content: Text(S.of(context).leftoverResolveFailed),
           ),
         );

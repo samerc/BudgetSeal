@@ -648,7 +648,8 @@ class _MonthlySummaryCard extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 12, color: AppColors.ts(context))),
               Text(
-                '${formatAmount(dailyRate, currency: currency)}/day',
+                S.of(context).commonPerDay(
+                    formatAmount(dailyRate, currency: currency)),
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -1473,8 +1474,6 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
           typicalSpots.add(FlSpot(i.toDouble(), typicalCumulative[i]));
         }
 
-        final monthName = DateFormat('MMMM').format(month);
-
         return GestureDetector(
           dragStartBehavior: DragStartBehavior.start,
           onHorizontalDragEnd: (details) {
@@ -1567,7 +1566,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                                 day == 21 ||
                                 day == daysInMonth) {
                               return Text(
-                                '${monthName.substring(0, 3)}. $day',
+                                '${DateFormat.MMM().format(month)} $day',
                                 style: TextStyle(
                                     fontSize: 9,
                                     color: AppColors.th(context)),
@@ -1583,7 +1582,8 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                           reservedSize: 50,
                           getTitlesWidget: (value, meta) {
                             return Text(
-                              formatAmount(value),
+                              formatAmount(value,
+                                  currency: _reportsBaseCurrency),
                               style: TextStyle(
                                   fontSize: 9,
                                   color: AppColors.th(context)),
@@ -1644,7 +1644,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
                         getTooltipItems: (spots) {
                           return spots.map((spot) {
                             return LineTooltipItem(
-                              'Day ${spot.x.toInt()}\n${formatAmount(spot.y)}',
+                              '${S.of(context).reportsDayN(spot.x.toInt())}\n${formatAmount(spot.y, currency: _reportsBaseCurrency)}',
                               TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -1784,19 +1784,20 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
             totalIncome > 0 ? (totalIncome - monthExpense) / totalIncome : 0.0;
 
         // ── Actionable tips ──
+        final l = S.of(context);
         final tips = <String>[];
         if (totalBudget > 0 && projected > totalBudget) {
-          tips.add('At your current pace, you\'ll exceed your budget by ${formatAmount(projected - totalBudget, currency: baseCurrency)}. Try to slow down.');
+          tips.add(l.reportsTipOverPace(formatAmount(projected - totalBudget, currency: baseCurrency)));
         } else if (totalBudget > 0 && projected <= totalBudget * 0.85) {
-          tips.add('Great pace! You\'re on track to stay ${formatAmount(totalBudget - projected, currency: baseCurrency)} under budget.');
+          tips.add(l.reportsTipUnderPace(formatAmount(totalBudget - projected, currency: baseCurrency)));
         }
         if (savingsRate > 0.2) {
-          tips.add('You\'re saving ${(savingsRate * 100).round()}% of your income this month. Keep it up!');
+          tips.add(l.reportsTipSavingHigh((savingsRate * 100).round()));
         } else if (savingsRate < 0.05 && totalIncome > 0) {
-          tips.add('Your savings rate is low (${(savingsRate * 100).round()}%). Try to set aside at least 10-20%.');
+          tips.add(l.reportsTipSavingLow((savingsRate * 100).round()));
         }
         if (ageValue != null && ageValue < 15) {
-          tips.add('Your money sits only $ageValue days before being spent. A buffer of 30+ days is healthier.');
+          tips.add(l.reportsTipAgeLow(ageValue));
         }
 
         return GestureDetector(
@@ -1942,7 +1943,8 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.06),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.88, dark: 0.8),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: AppColors.accent.withValues(alpha: 0.15)),
@@ -2071,11 +2073,12 @@ class _VelocityCard extends StatelessWidget {
               _VelocityStat(
                   label: S.of(context).reportsDailyRate,
                   value:
-                      '${formatAmount(dailyRate, currency: baseCurrency)}/day'),
+                      S.of(context).commonPerDay(
+                          formatAmount(dailyRate, currency: baseCurrency))),
               const SizedBox(width: 16),
               _VelocityStat(
                   label: S.of(context).reportsDay,
-                  value: '$daysElapsed of $daysInMonth'),
+                  value: S.of(context).commonNOfM(daysElapsed, daysInMonth)),
             ],
           ),
         ],
@@ -2127,7 +2130,9 @@ class _BiggestExpenseCard extends StatelessWidget {
         ? categoryMap[entry.tx.categoryId]
         : null;
     final catName = cat?.name ??
-        (entry.tx.note.isNotEmpty ? visibleNote(entry.tx.note) : 'Expense');
+        (entry.tx.note.isNotEmpty
+            ? visibleNote(entry.tx.note)
+            : S.of(context).typeExpense);
     final catColor = cat != null
         ? AppColors.fromHex(cat.colorHex)
         : AppColors.overspent;
@@ -2249,7 +2254,8 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.1),
+                      color: AppColors.pastel(context, AppColors.accent,
+                          light: 0.85, dark: 0.78),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.autorenew_rounded,
@@ -2266,7 +2272,9 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.tp(context))),
                         Text(
-                            '${recs.length} active \u00b7 ${formatAmount(total, currency: baseCurrency)}/mo',
+                            S.of(context).reportsRecurringSummary(
+                                recs.length,
+                                formatAmount(total, currency: baseCurrency)),
                             style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.ts(context))),
@@ -3041,7 +3049,8 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
           ),
           const SizedBox(width: 4),
           Text(
-            '${isUp ? '+' : ''}${pct.toStringAsFixed(1)}%',
+            // Sign spelled out: formatNumber may render negatives as (5.0).
+            '${isUp ? '+' : '−'}${formatNumber(pct.abs(), decimals: 1)}%',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,

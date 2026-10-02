@@ -1,4 +1,42 @@
 {
+  "commonPerDay": "{amount}/يوم",
+  "commonNOfM": "{n} من {m}",
+  "fundAmountOfAvailable": "{currency}: {amount} من {available}",
+  "syncNoSyncFile": "لم يُعثر على ملف مزامنة",
+  "syncErrNeedsPassword": "ملف المزامنة مشفّر. أدخل كلمة مرور المزامنة في المزامنة السحابية لقراءته.",
+  "travelExchangeNote": "صرف سفر ← {currency}",
+  "travelConvertBackNote": "إعادة تحويل السفر ← {currency}",
+  "healthUnallocShort": "غير مخصص: {amount}",
+  "reportsRecurringSummary": "{count} نشطة · {amount}/شهريًا",
+  "allocRevaluationNote": "إعادة تقييم: {amount} بسعر {rate} (كان {oldRate})",
+  "notifEveryDayAt": "كل يوم الساعة {time}",
+  "periodStartsEachMonth": "{date} · تبدأ في اليوم {day} من كل شهر",
+  "fundMoreThanAvailable": "{amount} أكثر من المتاح بعملة {currency}",
+  "shareHouseholdFailed": "تعذّر إنشاء الدعوة. تحقق من اتصالك وحاول مرة أخرى.",
+  "a11yPctOfTarget": "{pct}٪ من {amount}",
+  "a11yFlexibleEnvelope": "مغلف مرن",
+  "a11yNeedsReview": "بحاجة إلى مراجعة",
+  "syncLocalFile": "ملف محلي",
+  "syncGoogleSub": "سجّل الدخول بحساب Google",
+  "syncOneDriveSub": "يتطلب تثبيت تطبيق OneDrive",
+  "syncDropboxSub": "يتطلب تثبيت تطبيق Dropbox",
+  "syncLocalFileSub": "اختر أي ملف على جهازك",
+  "syncErrGoogleNotConfigured": "تسجيل الدخول عبر Google غير مُعد في هذا الإصدار من التطبيق. استخدم خيار مزامنة آخر.",
+  "syncErrNetwork": "خطأ في الشبكة. تحقق من اتصالك بالإنترنت.",
+  "syncErrConnectFailed": "تعذّر الاتصال. حاول مرة أخرى.",
+  "onboardConnectFailed": "تعذّر الاتصال بـ {provider}",
+  "onboardNoSyncFile": "لم يُعثر على ملف مزامنة",
+  "onboardDriveJoinFailed": "تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.",
+  "onboardNoSyncFileShared": "لم يُعثر على ملف مزامنة في المجلد المشترك",
+  "billNoteTitle": "تقسيم الفاتورة",
+  "billNoteTotal": "الفاتورة: {total}",
+  "billNoteSplitWith": "مقسّمة مع {people} · الإجمالي: {total}",
+  "reportsDayN": "اليوم {n}",
+  "reportsTipOverPace": "بهذا المعدل ستتجاوز ميزانيتك بمقدار {amount}. حاول أن تُبطئ.",
+  "reportsTipUnderPace": "وتيرة رائعة! أنت في طريقك للبقاء أقل من ميزانيتك بمقدار {amount}.",
+  "reportsTipSavingHigh": "أنت تدّخر {percent}٪ من دخلك هذا الشهر. واصل!",
+  "reportsTipSavingLow": "معدل ادخارك منخفض ({percent}٪). حاول أن تدّخر 10–20٪ على الأقل.",
+  "reportsTipAgeLow": "{days, plural, =0{تُنفق أموالك في اليوم نفسه. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =1{تبقى أموالك يومًا واحدًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =2{تبقى أموالك يومين فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} few{تبقى أموالك {days} أيام فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} other{تبقى أموالك {days} يومًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.}}",
   "txNoRateBetween": "لا يوجد سعر صرف من {from} إلى {to}. أدخل سعرًا لهذا المبلغ، أو حدّث الأسعار من الإعدادات › أسعار الصرف.",
   "acctArchiveNonZero": "لا يزال هذا الحساب يحتوي على {amount}. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.",
   "receiptPickFailed": "تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.",
@@ -433,7 +471,7 @@
   "@dashboardAgeOfMoneyTitle": {
     "description": "Info dialog title"
   },
-  "dashboardAgeOfMoneyExplanation": "يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\\n\\nاعتبره احتياطياً:\\n\\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\\n• 14–30 يوماً — لديك هامش بسيط\\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\\n• 60+ يوماً — صحة مالية قوية\\n\\nالهدف زيادة هذا الرقم بمرور الوقت.",
+  "dashboardAgeOfMoneyExplanation": "يُظهر مدة بقاء المال في حساباتك قبل إنفاقه.\n\nاعتبره احتياطياً:\n\n• أقل من 14 يوماً — تنفق المال بنفس سرعة وروده\n• 14–30 يوماً — لديك هامش بسيط\n• 30–60 يوماً — تنفق دخل الشهر الماضي. ممتاز!\n• 60+ يوماً — صحة مالية قوية\n\nالهدف زيادة هذا الرقم بمرور الوقت.",
   "@dashboardAgeOfMoneyExplanation": {
     "description": "Info dialog content"
   },
@@ -506,7 +544,7 @@
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
-  "dashboardSectionMoneyDesc": "صافي الثروة وصحة الأظرف",
+  "dashboardSectionMoneyDesc": "الفواتير وصافي الثروة وغير المخصص",
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
@@ -1066,7 +1104,7 @@
   "@txDetailDeleteTitle": {
     "description": "Delete dialog title"
   },
-  "txDetailDeleteContent": "هل أنت متأكد من حذف هذه المعاملة؟\\n\\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\\n\\nلا يمكن التراجع عن هذا.",
+  "txDetailDeleteContent": "هل أنت متأكد من حذف هذه المعاملة؟\n\nسيتم التراجع عن خصومات الأظرف واستعادة الرصيد. ستُزال إدخالات السجل.\n\nلا يمكن التراجع عن هذا.",
   "@txDetailDeleteContent": {
     "description": "Delete dialog content"
   },
@@ -1225,7 +1263,7 @@
   "@catSheetNoMatching": {
     "description": "Empty search"
   },
-  "catSheetNoYet": "لا فئات بعد.\\nاضغط \"جديد\" أعلاه لإنشاء واحدة.",
+  "catSheetNoYet": "لا فئات بعد.\nاضغط \"جديد\" أعلاه لإنشاء واحدة.",
   "@catSheetNoYet": {
     "description": "Empty state"
   },
@@ -1237,18 +1275,6 @@
         "type": "int"
       }
     }
-  },
-  "currencyYourAccounts": "حساباتك",
-  "@currencyYourAccounts": {
-    "description": "Section header"
-  },
-  "currencyRecentlyUsed": "المستخدمة مؤخراً",
-  "@currencyRecentlyUsed": {
-    "description": "Section header"
-  },
-  "currencyAll": "جميع العملات",
-  "@currencyAll": {
-    "description": "Section header"
   },
   "txWidgetSelectAccount": "اختر حساباً",
   "@txWidgetSelectAccount": {
@@ -1532,7 +1558,7 @@
   "@allocNoYet": {
     "description": "Empty state title"
   },
-  "allocCreateHelp": "أنشئ ظرفاً لبدء الميزانية.\\nاضغط ؟ للمساعدة.",
+  "allocCreateHelp": "أنشئ ظرفاً لبدء الميزانية.\nاضغط ؟ للمساعدة.",
   "@allocCreateHelp": {
     "description": "Empty state subtitle"
   },
@@ -1632,7 +1658,7 @@
   "@allocCycleSection": {
     "description": "Section header"
   },
-  "allocPeriodicDesc": "• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)",
+  "allocPeriodicDesc": "• دوري: يُعاد تعيينه كل شهر (مثل: ميزانية البقالة)\n• دائم: يتراكم مع الوقت (مثل: صندوق الطوارئ)",
   "@allocPeriodicDesc": {
     "description": "Help text"
   },
@@ -1849,7 +1875,7 @@
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveMsg": "سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\\n\\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.",
+  "allocArchiveMsg": "سيتم إخفاء هذا الظرف من جميع القوائم. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.",
   "@allocArchiveMsg": {
     "description": "Dialog content"
   },
@@ -1873,7 +1899,7 @@
   "@allocDeleteNoLinkedTitle": {
     "description": "Dialog title"
   },
-  "allocDeleteNoLinkedMsg": "هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\\n\\nهل أنت متأكد؟ لا يمكن التراجع.",
+  "allocDeleteNoLinkedMsg": "هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.",
   "@allocDeleteNoLinkedMsg": {
     "description": "Dialog content"
   },
@@ -1910,7 +1936,7 @@
   "@fundOverfundingTitle": {
     "description": "Warning dialog title"
   },
-  "fundOverfundingMsg": "أنت توزع {details}. سيصبح رصيدك غير الموزع سالباً.\\n\\nالمتابعة؟",
+  "fundOverfundingMsg": "أنت توزع {details}. سيصبح رصيدك غير الموزع سالباً.\n\nالمتابعة؟",
   "@fundOverfundingMsg": {
     "description": "Warning dialog content",
     "placeholders": {
@@ -2815,7 +2841,7 @@
   "@resetTitle": {
     "description": "Dialog title"
   },
-  "resetContent": "سيؤدي هذا إلى حذف جميع بياناتك نهائياً:\\n\\n• جميع الحسابات والأرصدة\\n• جميع المعاملات\\n• جميع الأظرف والفئات\\n• جميع الإعدادات\\n\\nلا يمكن التراجع. هل أنت متأكد تماماً؟",
+  "resetContent": "سيؤدي هذا إلى حذف جميع بياناتك نهائياً:\n\n• جميع الحسابات والأرصدة\n• جميع المعاملات\n• جميع الأظرف والفئات\n• جميع الإعدادات\n\nلا يمكن التراجع. هل أنت متأكد تماماً؟",
   "@resetContent": {
     "description": "Dialog content"
   },
@@ -3690,7 +3716,7 @@
   "@healthRepairTitle": {
     "description": "Dialog title"
   },
-  "healthRepairMsg": "سيتم إنشاء إدخالات تعديل لإعادة مطابقة أرصدة الأظرف مع الحسابات. يُنصح بعمل نسخة احتياطية قبل المتابعة.\\n\\nالمتابعة؟",
+  "healthRepairMsg": "سيتم إنشاء إدخالات تعديل لإعادة مطابقة أرصدة الأظرف مع الحسابات. يُنصح بعمل نسخة احتياطية قبل المتابعة.\n\nالمتابعة؟",
   "@healthRepairMsg": {
     "description": "Dialog content"
   },
@@ -3850,7 +3876,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "ابدأ تتبع مصاريفك.\\nوضوحك المالي يبدأ الآن.",
+  "onboardDoneSubtitle": "ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -5630,7 +5656,7 @@
   "allocRevalError": "تعذّر تطبيق إعادة التقييم. حاول مجدداً.",
   "allocFetchRateError": "تعذّر جلب السعر لـ {currency}",
   "allocDeleteLinkedWarning": "{count,plural, =1{فئة واحدة مرتبطة} other{{count} فئات مرتبطة}} بهذا الظرف ({names})",
-  "allocDeleteAndMore": " و{count} أخرى",
+  "allocDeleteAndMore": "و{count} أخرى",
   "allocDeleteConsequences": "سيؤدي الحذف إلى:\n  • إلغاء ربط جميع الفئات من هذا الظرف\n  • حذف كل سجل الدفتر لهذا الظرف\n\nفكر في الأرشفة بدلاً من ذلك للحفاظ على السجل.",
   "allocDeleteNoLinksTitle": "حذف الظرف نهائياً",
   "allocDeleteNoLinksMsg": "هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.",
@@ -5820,8 +5846,6 @@
   "recurringEditTitle": "تعديل المعاملة المتكررة",
   "recurringFormTitleHint": "العنوان (مثلاً: إيجار، راتب)",
   "recurringFormTitleRequired": "العنوان مطلوب",
-  "recurringFormAccountRequired": "الحساب مطلوب",
-  "recurringFormStarts": "تبدأ: {date}",
   "recurringFormEnds": "تنتهي: {date}",
   "recurringFormEndsNever": "تنتهي: أبداً (اضغط للتعيين)",
   "recurringFormNextDue": "الاستحقاق التالي: {date}",
@@ -5838,7 +5862,7 @@
   "recurringResumeTooltip": "استئناف المعاملة المتكررة",
   "recurringTileNext": "التالي: {date}",
 
-  "reportsAgeDays": "{age} أيام",
+  "reportsAgeDays": "{age, plural, =0{0 يوم} =1{يوم واحد} =2{يومان} few{{age} أيام} many{{age} يومًا} other{{age} يوم}}",
   "@reportsAgeDays": {
     "description": "Age of money display",
     "placeholders": { "age": { "type": "int" } }
@@ -6014,17 +6038,17 @@
     "description": "Snackbar after connecting sync provider",
     "placeholders": { "provider": { "type": "String" } }
   },
-  "syncLastSynced": "آخر مزامنة {time}{suffix}",
+  "syncLastSynced": "آخر مزامنة {time} · {suffix}",
   "@syncLastSynced": {
     "description": "Status subtitle with last sync time",
     "placeholders": { "time": { "type": "String" }, "suffix": { "type": "String" } }
   },
-  "syncChangesMerged": " · تم دمج {count} تغيير(ات)",
+  "syncChangesMerged": "{count, plural, =1{تم دمج تغيير واحد} =2{تم دمج تغييرين} few{تم دمج {count} تغييرات} other{تم دمج {count} تغيير}}",
   "@syncChangesMerged": {
     "description": "Suffix for changes merged",
     "placeholders": { "count": { "type": "int" } }
   },
-  "syncUpToDate": " · محدّث",
+  "syncUpToDate": "محدّث",
   "@syncUpToDate": { "description": "Suffix when no changes" },
 
   "languageSystemDesc": "اتباع إعدادات الجهاز",
@@ -6077,7 +6101,6 @@
   "plannedExactDate": "اختر تاريخاً محدداً (اختياري)",
   "plannedExactDateValue": "التاريخ المحدد: {date}",
   "@plannedExactDateValue": { "description": "Label for exact date picker when date is selected", "placeholders": { "date": { "type": "String" } } },
-  "plannedNoteHint": "ملاحظة (اختياري)",
   "plannedSelectAccount": "اختر حساباً",
   "plannedUpdated": "تم تحديث الدفعة المخططة",
   "plannedCreated": "تم تخطيط الدفعة",

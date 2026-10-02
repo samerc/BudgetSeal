@@ -319,7 +319,8 @@ class _AllocationDetailScreenState
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _showEmojiGrid
@@ -1982,7 +1983,9 @@ class _AllocationDetailScreenState
     final warnings = <String>[];
     if (linkedCount > 0) {
       final names = linked.take(3).map((c) => c.name).join(', ');
-      final suffix = linkedCount > 3 ? S.of(context).allocDeleteAndMore(linkedCount - 3) : '';
+      final suffix = linkedCount > 3
+          ? ' ${S.of(context).allocDeleteAndMore(linkedCount - 3)}'
+          : '';
       warnings.add(
           S.of(context).allocDeleteLinkedWarning(linkedCount, '$names$suffix'));
     }
@@ -2315,6 +2318,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
 
     try {
       final ledgerDao = LedgerDao(widget.db);
+      final revaluationNote = S.of(context).allocRevaluationNote;
       final uuid = const Uuid();
 
       for (final fb in widget.foreignBalances) {
@@ -2328,11 +2332,12 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           amount: gain,
           currency: widget.targetCurrency,
           exchangeRateToBase: Value(1.0),
-          note: Value(
-            'Revaluation: ${fb.currency} ${formatAmount(fb.amount, currency: fb.currency)} '
-            'at ${formatAmount(_newRates[fb.currency] ?? fb.originalRate)} '
-            '(was ${formatAmount(fb.originalRate)})',
-          ),
+          // Rates are plain numbers, not money (no currency symbol).
+          note: Value(revaluationNote(
+            formatAmount(fb.amount, currency: fb.currency),
+            _rateText(_newRates[fb.currency] ?? fb.originalRate),
+            _rateText(fb.originalRate),
+          )),
           deviceId: 'local',
         ));
       }
@@ -2494,7 +2499,8 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -2532,7 +2538,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
           // Original rate & value
           _infoRow(
             S.of(context).allocOriginalRate,
-            formatAmount(fb.originalRate),
+            _rateText(fb.originalRate),
           ),
           const SizedBox(height: 4),
           _infoRow(
@@ -2644,3 +2650,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
     );
   }
 }
+
+/// An exchange rate for display: 4 decimals for small rates, 2 for large.
+String _rateText(double rate) =>
+    formatNumber(rate, decimals: rate >= 100 ? 2 : 4);

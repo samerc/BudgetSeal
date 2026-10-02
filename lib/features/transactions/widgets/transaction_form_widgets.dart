@@ -422,7 +422,8 @@ class LineCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.06),
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.88, dark: 0.8),
                 borderRadius: BorderRadius.circular(8),
                 border:
                     Border.all(color: AppColors.accent.withValues(alpha: 0.15)),
@@ -517,7 +518,8 @@ class LineCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
+                        color: AppColors.pastel(context, AppColors.accent,
+                            light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Icon(Icons.swap_vert_rounded,

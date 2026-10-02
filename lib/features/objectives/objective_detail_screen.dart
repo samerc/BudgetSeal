@@ -870,7 +870,8 @@ class _ObjectiveDetailScreenState
               child: Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
+                  color: AppColors.pastel(context, color,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(

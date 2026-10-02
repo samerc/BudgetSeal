@@ -220,7 +220,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: AppColors.accent.withValues(alpha: 0.1),
+            color: AppColors.pastel(context, AppColors.accent,
+                light: 0.85, dark: 0.78),
             borderRadius: BorderRadius.circular(7),
           ),
           child: Center(
@@ -345,7 +346,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.caution.withValues(alpha: 0.1),
+                    color: AppColors.pastel(context, AppColors.caution,
+                        light: 0.85, dark: 0.78),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                         color: AppColors.caution.withValues(alpha: 0.3)),
@@ -853,7 +855,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
         children: [
           // -- Main section --
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 14, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 18, 14, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1049,7 +1051,8 @@ class _GoalsLoansBanner extends ConsumerWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Icon(Icons.flag_rounded,
@@ -1102,7 +1105,8 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(Icons.mail_rounded,

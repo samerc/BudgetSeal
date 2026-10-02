@@ -33,7 +33,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   int _step = 0; // 0=items, 1=split, 2=review
 
   // ── People ──
+  // First person is always the user; named in the user's language below.
   final _people = <String>['Me'];
+  bool _meNamed = false;
   final _personCtrl = TextEditingController();
 
   // ── Items ──
@@ -67,6 +69,16 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   void initState() {
     super.initState();
     _billCurrency = ref.read(householdProvider).value?.baseCurrency ?? 'USD';
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Name the user once, before anything is assigned to them.
+    if (!_meNamed) {
+      _meNamed = true;
+      _people[0] = S.of(context).billMe;
+    }
   }
 
   @override
@@ -330,7 +342,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('OCR: "${line.text}"',
+            Text('"${line.text}"',
                 style: TextStyle(
                     fontSize: 12,
                     color: AppColors.ts(ctx),
@@ -535,10 +547,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final myShare = splits[_people.first] ?? 0;
     final total = splits.values.fold(0.0, (s, v) => s + v);
     final others = _people.where((p) => p != _people.first).toList();
+    final l = S.of(context);
+    final totalText = formatAmount(total, currency: _billCurrency);
     final note = others.isEmpty
-        ? 'Bill: ${formatAmount(total, currency: _billCurrency)}'
-        : 'Split with ${others.join(", ")} — '
-            'Total: ${formatAmount(total, currency: _billCurrency)}';
+        ? l.billNoteTotal(totalText)
+        : l.billNoteSplitWith(others.join(', '), totalText);
 
     if (!mounted) return;
     // Pop bill splitter first, then push transaction form
@@ -547,7 +560,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     if (!mounted) return;
     context.push('/add-transaction', extra: {
       'editType': 'expense',
-      'editNote': 'Bill Split — $note',
+      'editNote': '${l.billNoteTitle} — $note',
       'editLines': [
         {
           'amount': myShare,
@@ -661,7 +674,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.caution.withValues(alpha: 0.08),
+                  color: AppColors.pastel(context, AppColors.caution,
+                      light: 0.88, dark: 0.8),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.caution.withValues(alpha: 0.3)),
                 ),
@@ -828,7 +842,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     // field's text bound to its item when the list changes (e.g. after a split).
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(10),
@@ -1135,7 +1149,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           ? _tipIsAmount
               ? formatAmount(_tipAmount, currency: _billCurrency)
               : '${_tipPercent.round()}%'
-          : 'None',
+          : S.of(context).commonNone,
       expanded: _tipExpanded,
       onTap: () => setState(() => _tipExpanded = !_tipExpanded),
       child: Column(children: [
@@ -1217,7 +1231,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               }),
               child: Container(padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(6)),
                 child: Icon(Icons.swap_vert_rounded, size: 16,
                     color: AppColors.accent)),

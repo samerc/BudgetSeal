@@ -29,9 +29,12 @@ void main() {
 
     final key = fields[0].trim();
     final context = fields[1].trim();
-    final en = fields[2].trim();
-    final ar = fields[3].trim();
-    final fr = fields[4].trim();
+    // The CSV keeps one row per line, so newlines are written as a literal
+    // \n there; turn them back into real newlines for the ARB.
+    String text(String f) => f.trim().replaceAll(r'\n', '\n');
+    final en = text(fields[2]);
+    final ar = text(fields[3]);
+    final fr = text(fields[4]);
 
     if (key.isEmpty) continue;
 
@@ -46,9 +49,20 @@ void main() {
 
   print('Parsed ${entries.length} entries from CSV');
 
-  _writeArb('lib/l10n/app_en.arb', 'en', entries, (e) => e.en);
-  _writeArb('lib/l10n/app_ar.arb', 'ar', entries, (e) => e.ar);
-  _writeArb('lib/l10n/app_fr.arb', 'fr', entries, (e) => e.fr);
+  // Placeholder types (int, plural…) live in the English template's @key
+  // metadata; keep them instead of guessing from placeholder names.
+  final existingMeta = <String, dynamic>{};
+  final enArb = File('lib/l10n/app_en.arb');
+  if (enArb.existsSync()) {
+    final map = jsonDecode(enArb.readAsStringSync()) as Map<String, dynamic>;
+    map.forEach((k, v) {
+      if (k.startsWith('@') && !k.startsWith('@@')) existingMeta[k] = v;
+    });
+  }
+
+  _writeArb('lib/l10n/app_en.arb', 'en', entries, (e) => e.en, existingMeta);
+  _writeArb('lib/l10n/app_ar.arb', 'ar', entries, (e) => e.ar, existingMeta);
+  _writeArb('lib/l10n/app_fr.arb', 'fr', entries, (e) => e.fr, existingMeta);
 
   print('Done! Generated 3 ARB files in lib/l10n/');
 }
@@ -99,6 +113,7 @@ void _writeArb(
   String locale,
   List<_Entry> entries,
   String Function(_Entry) getText,
+  Map<String, dynamic> existingMeta,
 ) {
   final map = <String, dynamic>{'@@locale': locale};
 
@@ -116,7 +131,10 @@ void _writeArb(
     if (entry.context.isNotEmpty) {
       meta['description'] = entry.context;
     }
-    if (allPlaceholders.isNotEmpty) {
+    final kept = existingMeta['@${entry.key}'];
+    if (kept is Map && kept['placeholders'] != null) {
+      meta['placeholders'] = kept['placeholders'];
+    } else if (allPlaceholders.isNotEmpty) {
       final phMap = <String, dynamic>{};
       for (final ph in allPlaceholders) {
         // Guess type from name

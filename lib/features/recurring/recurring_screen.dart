@@ -102,7 +102,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
               // ── Header ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
                   child: Row(
                     children: [
                       IconButton(
@@ -431,7 +431,8 @@ class _RecurringTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: AppColors.pastel(context, color,
+                  light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(Icons.repeat_rounded, color: color, size: 20),

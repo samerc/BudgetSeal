@@ -315,7 +315,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.08),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.88, dark: 0.8),
                   borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(
                       color: AppColors.accent.withValues(alpha: 0.2)),
@@ -982,7 +983,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         exchangeRateToBase: rate,
         createdBy: 'local',
         deviceId: 'local',
-        note: 'Travel convert back → ${destAcc.currency}',
+        note: S.of(context).travelConvertBackNote(destAcc.currency),
         date: DateTime.now(),
       );
 

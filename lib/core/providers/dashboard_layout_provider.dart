@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Dashboard sections that can be reordered and toggled.
+/// Dashboard sections that can be reordered and toggled. [label] and
+/// [description] are English fallbacks; the UI shows the translated
+/// dashboardSection*Label/Desc strings.
 enum DashboardSection {
   quickActions('Quick Actions', 'Expense, income, transfer, fund'),
   spending('Spending Overview', 'Donut chart with category breakdown'),

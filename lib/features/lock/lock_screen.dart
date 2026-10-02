@@ -84,7 +84,8 @@ class _LockScreenState extends State<LockScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: AppColors.pastel(context, Colors.white,
+                    light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: const Icon(Icons.lock_rounded,

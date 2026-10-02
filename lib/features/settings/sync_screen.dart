@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/providers/sync_provider.dart';
@@ -12,6 +11,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../core/providers/date_format_provider.dart';
 
 class SyncScreen extends ConsumerWidget {
   const SyncScreen({super.key});
@@ -76,7 +76,8 @@ class SyncScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.overspent.withValues(alpha: 0.1),
+                      color: AppColors.pastel(context, AppColors.overspent,
+                          light: 0.85, dark: 0.78),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -165,7 +166,7 @@ class SyncScreen extends ConsumerWidget {
                     ),
                     if (isOneDriveOrDropbox)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(56, 4, 8, 0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(56, 4, 8, 0),
                         child: Text(
                           S.of(context).syncReceiptComingSoon,
                           style: TextStyle(
@@ -224,7 +225,8 @@ class SyncScreen extends ConsumerWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: AppColors.pastel(context, color,
+            light: 0.85, dark: 0.78),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(icon, color: color, size: 20),
@@ -235,7 +237,7 @@ class SyncScreen extends ConsumerWidget {
     if (state.status == SyncStatus.syncing) return S.of(context).syncSyncing;
     if (state.status == SyncStatus.error) return S.of(context).syncLastFailed;
     if (state.lastSyncTime != null) {
-      final formatted = DateFormat.yMMMd().add_jm().format(state.lastSyncTime!);
+      final formatted = formatDateTime(state.lastSyncTime!);
       final changes = state.lastChanges ?? 0;
       final changeSuffix = changes > 0 ? S.of(context).syncChangesMerged(changes) : S.of(context).syncUpToDate;
       return S.of(context).syncLastSynced(formatted, changeSuffix);
@@ -367,7 +369,8 @@ class _ProviderOptionTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: AppColors.pastel(context, color,
+                  light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -489,7 +492,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
     if (_inviteCode == null) return;
     SharePlus.instance.share(
       ShareParams(
-        text: 'Join my BudgetSeal household! Enter this code in the app:\n$_inviteCode',
+        text: S.of(context).syncShareInviteText(_inviteCode!),
       ),
     );
   }
@@ -578,7 +581,8 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.08),
+                  color: AppColors.pastel(context, AppColors.accent,
+                      light: 0.88, dark: 0.8),
                   borderRadius: BorderRadius.circular(CardTokens.radius),
                   border: Border.all(
                       color: AppColors.accent.withValues(alpha: 0.2)),
@@ -632,7 +636,8 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.overspent.withValues(alpha: 0.1),
+                  color: AppColors.pastel(context, AppColors.overspent,
+                      light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
