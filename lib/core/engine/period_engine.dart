@@ -112,7 +112,28 @@ class PeriodEngine {
     required String deviceId,
     String? targetAllocationId,
   }) async {
-    if (leftoverAmount <= 0) return;
+    if (leftoverAmount.abs() < 0.005) return;
+
+    // An overspent envelope (negative leftover): Ready to assign covers it,
+    // or the debt carries into the new period.
+    if (leftoverAmount < 0) {
+      await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
+        id: _uuid.v4(),
+        allocationId: allocationId,
+        entryType: resolution == LeftoverResolution.toUnallocated
+            ? 'funding'
+            : 'carry_forward',
+        amount: resolution == LeftoverResolution.toUnallocated
+            ? -leftoverAmount
+            : 0,
+        currency: currency,
+        note: Value(resolution == LeftoverResolution.toUnallocated
+            ? currentS().enginePeriodCovered
+            : currentS().engineCarryForward),
+        deviceId: deviceId,
+      ));
+      return;
+    }
 
     switch (resolution) {
       case LeftoverResolution.toUnallocated:

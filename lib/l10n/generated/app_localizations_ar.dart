@@ -9,6 +9,87 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get objSummaryPerMonth => 'المطلوب شهرياً';
+
+  @override
+  String get catLinkEnvelope => 'الظرف';
+
+  @override
+  String catLinkEnvelopeTitle(String name) {
+    return 'من أي ظرف تُصرف $name؟';
+  }
+
+  @override
+  String catCreateEnvelope(String name) {
+    return 'إنشاء ظرف «$name»';
+  }
+
+  @override
+  String get catUnlinkEnvelope => 'بلا ظرف (خارج الميزانية)';
+
+  @override
+  String get allocReorderTitle => 'إعادة ترتيب الأظرف';
+
+  @override
+  String get allocReorderHint =>
+      'اسحب المقابض. يتبع تبويب الميزانية وشاشة التمويل هذا الترتيب.';
+
+  @override
+  String get periodSummaryTitle => 'بدأت فترة ميزانية جديدة';
+
+  @override
+  String periodSummaryBody(String spent, String funded) {
+    return 'في الفترة السابقة أنفقت $spent من أصل $funded مخصّصة.';
+  }
+
+  @override
+  String periodSummaryUnder(String amount) {
+    return 'أقل من الميزانية بـ $amount';
+  }
+
+  @override
+  String periodSummaryOver(String amount) {
+    return 'فوق الميزانية بـ $amount';
+  }
+
+  @override
+  String get periodSummaryFund => 'موّل هذه الفترة';
+
+  @override
+  String get enginePeriodCovered => 'تمت تغطية التجاوز في نهاية الفترة';
+
+  @override
+  String get periodCoverFromRta => 'غطِّه من «جاهز للتوزيع»';
+
+  @override
+  String get periodCoverFromRtaDesc => 'ابدأ الفترة الجديدة من الصفر';
+
+  @override
+  String get periodCarryDebt => 'ترحيل التجاوز';
+
+  @override
+  String get periodCarryDebtDesc => 'تبدأ الفترة الجديدة تحت الصفر';
+
+  @override
+  String allocFundToTarget(String amount) {
+    return 'حتى الهدف · $amount';
+  }
+
+  @override
+  String allocFundAllAvailable(String amount) {
+    return 'كل المتاح · $amount';
+  }
+
+  @override
+  String get fundPresetLastPeriod => 'مثل الفترة السابقة';
+
+  @override
+  String get fundPresetSpent => 'ما أنفقته في الفترة السابقة';
+
+  @override
+  String get fundPresetClear => 'مسح';
+
+  @override
   String get txExportSelected => 'تصدير CSV';
 
   @override

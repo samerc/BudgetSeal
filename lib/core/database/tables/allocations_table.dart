@@ -25,6 +25,9 @@ class Allocations extends Table {
   /// If false, user must manually handle it in Period Transition.
   BoolColumn get autoReset => boolean().withDefault(const Constant(true))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  /// Manual position on the Budget tab (drag to reorder). Null = after the
+  /// ordered ones, by name.
+  IntColumn get sortOrder => integer().nullable()();
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();

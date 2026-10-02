@@ -43,6 +43,19 @@ class _ObjectiveDetailScreenState
   double _targetAmount = 0;
   double _currentAmount = 0;
   DateTime? _endDate;
+
+  /// Remaining amount spread over the months left until [_endDate]
+  /// (a started month counts); null without a future deadline or when done.
+  double? get _monthlyPace {
+    final end = _endDate;
+    final remaining = _targetAmount - _currentAmount;
+    if (end == null || remaining <= 0) return null;
+    final now = DateTime.now();
+    if (!end.isAfter(now)) return null;
+    var months = (end.year - now.year) * 12 + end.month - now.month;
+    if (end.day >= now.day) months += 1;
+    return remaining / months.clamp(1, 1200);
+  }
   String? _icon;
   String _colorHex = '#2563EB';
   String? _categoryId; // optional category for payments
@@ -667,6 +680,12 @@ class _ObjectiveDetailScreenState
                     currency: _currency,
                   ),
                 ),
+                // Pace: what's needed each month to finish by the deadline.
+                if (_monthlyPace != null)
+                  _SummaryRow(
+                    label: S.of(context).objSummaryPerMonth,
+                    value: formatAmount(_monthlyPace!, currency: _currency),
+                  ),
               ],
             ),
 

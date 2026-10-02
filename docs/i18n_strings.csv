@@ -2154,3 +2154,28 @@ tx_all_categories,,All categories,كل الفئات,Toutes les catégories
 tx_clear_all_filters,,Clear all filters,مسح كل عوامل التصفية,Effacer tous les filtres
 tx_clear_all,,Clear all,مسح الكل,Tout effacer
 tx_searching_all_months,,Showing all months,عرض كل الأشهر,Tous les mois affichés
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+obj_summary_per_month,,Needed per month,المطلوب شهرياً,Nécessaire par mois
+cat_link_envelope,,Envelope,الظرف,Enveloppe
+cat_link_envelope_title,,Where does {name} spending go?,من أي ظرف تُصرف {name}؟,Où vont les dépenses {name} ?
+cat_create_envelope,,"Create a ""{name}"" envelope",إنشاء ظرف «{name}»,Créer une enveloppe « {name} »
+cat_unlink_envelope,,No envelope (unbudgeted),بلا ظرف (خارج الميزانية),Aucune enveloppe (hors budget)
+alloc_reorder_title,,Reorder envelopes,إعادة ترتيب الأظرف,Réordonner les enveloppes
+alloc_reorder_hint,,Drag the handles. The Budget tab and funding screen follow this order.,اسحب المقابض. يتبع تبويب الميزانية وشاشة التمويل هذا الترتيب.,Faites glisser les poignées. L'onglet Budget et l'écran d'alimentation suivent cet ordre.
+period_summary_title,,A new budget period started,بدأت فترة ميزانية جديدة,Une nouvelle période budgétaire a commencé
+period_summary_body,,Last period you spent {spent} of {funded} budgeted.,في الفترة السابقة أنفقت {spent} من أصل {funded} مخصّصة.,"La période précédente, vous avez dépensé {spent} sur {funded} budgétés."
+period_summary_under,,{amount} under budget,أقل من الميزانية بـ {amount},{amount} sous le budget
+period_summary_over,,{amount} over budget,فوق الميزانية بـ {amount},{amount} au-dessus du budget
+period_summary_fund,,Fund this period,موّل هذه الفترة,Alimenter cette période
+engine_period_covered,,Overspending covered at period end,تمت تغطية التجاوز في نهاية الفترة,Dépassement couvert en fin de période
+period_cover_from_rta,,Cover from Ready to assign,غطِّه من «جاهز للتوزيع»,Couvrir avec « Prêt à attribuer »
+period_cover_from_rta_desc,,Start the new period at zero,ابدأ الفترة الجديدة من الصفر,Commencer la nouvelle période à zéro
+period_carry_debt,,Carry the overspending,ترحيل التجاوز,Reporter le dépassement
+period_carry_debt_desc,,The new period starts below zero,تبدأ الفترة الجديدة تحت الصفر,La nouvelle période commence sous zéro
+alloc_fund_to_target,,To target · {amount},حتى الهدف · {amount},Jusqu'à l'objectif · {amount}
+alloc_fund_all_available,,All available · {amount},كل المتاح · {amount},Tout le disponible · {amount}
+fund_preset_last_period,,Same as last period,مثل الفترة السابقة,Comme la période précédente
+fund_preset_spent,,What I spent last period,ما أنفقته في الفترة السابقة,Ce que j'ai dépensé
+fund_preset_clear,,Clear,مسح,Effacer

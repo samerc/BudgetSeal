@@ -99,6 +99,138 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @objSummaryPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed per month'**
+  String get objSummaryPerMonth;
+
+  /// No description provided for @catLinkEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope'**
+  String get catLinkEnvelope;
+
+  /// No description provided for @catLinkEnvelopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where does {name} spending go?'**
+  String catLinkEnvelopeTitle(String name);
+
+  /// No description provided for @catCreateEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a \"{name}\" envelope'**
+  String catCreateEnvelope(String name);
+
+  /// No description provided for @catUnlinkEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'No envelope (unbudgeted)'**
+  String get catUnlinkEnvelope;
+
+  /// No description provided for @allocReorderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder envelopes'**
+  String get allocReorderTitle;
+
+  /// No description provided for @allocReorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the handles. The Budget tab and funding screen follow this order.'**
+  String get allocReorderHint;
+
+  /// No description provided for @periodSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new budget period started'**
+  String get periodSummaryTitle;
+
+  /// No description provided for @periodSummaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Last period you spent {spent} of {funded} budgeted.'**
+  String periodSummaryBody(String spent, String funded);
+
+  /// No description provided for @periodSummaryUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} under budget'**
+  String periodSummaryUnder(String amount);
+
+  /// No description provided for @periodSummaryOver.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} over budget'**
+  String periodSummaryOver(String amount);
+
+  /// No description provided for @periodSummaryFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund this period'**
+  String get periodSummaryFund;
+
+  /// No description provided for @enginePeriodCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspending covered at period end'**
+  String get enginePeriodCovered;
+
+  /// No description provided for @periodCoverFromRta.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover from Ready to assign'**
+  String get periodCoverFromRta;
+
+  /// No description provided for @periodCoverFromRtaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the new period at zero'**
+  String get periodCoverFromRtaDesc;
+
+  /// No description provided for @periodCarryDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry the overspending'**
+  String get periodCarryDebt;
+
+  /// No description provided for @periodCarryDebtDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The new period starts below zero'**
+  String get periodCarryDebtDesc;
+
+  /// No description provided for @allocFundToTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'To target · {amount}'**
+  String allocFundToTarget(String amount);
+
+  /// No description provided for @allocFundAllAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'All available · {amount}'**
+  String allocFundAllAvailable(String amount);
+
+  /// No description provided for @fundPresetLastPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as last period'**
+  String get fundPresetLastPeriod;
+
+  /// No description provided for @fundPresetSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'What I spent last period'**
+  String get fundPresetSpent;
+
+  /// No description provided for @fundPresetClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get fundPresetClear;
+
   /// No description provided for @txExportSelected.
   ///
   /// In en, this message translates to:

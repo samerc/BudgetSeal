@@ -9,6 +9,87 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get objSummaryPerMonth => 'Needed per month';
+
+  @override
+  String get catLinkEnvelope => 'Envelope';
+
+  @override
+  String catLinkEnvelopeTitle(String name) {
+    return 'Where does $name spending go?';
+  }
+
+  @override
+  String catCreateEnvelope(String name) {
+    return 'Create a \"$name\" envelope';
+  }
+
+  @override
+  String get catUnlinkEnvelope => 'No envelope (unbudgeted)';
+
+  @override
+  String get allocReorderTitle => 'Reorder envelopes';
+
+  @override
+  String get allocReorderHint =>
+      'Drag the handles. The Budget tab and funding screen follow this order.';
+
+  @override
+  String get periodSummaryTitle => 'A new budget period started';
+
+  @override
+  String periodSummaryBody(String spent, String funded) {
+    return 'Last period you spent $spent of $funded budgeted.';
+  }
+
+  @override
+  String periodSummaryUnder(String amount) {
+    return '$amount under budget';
+  }
+
+  @override
+  String periodSummaryOver(String amount) {
+    return '$amount over budget';
+  }
+
+  @override
+  String get periodSummaryFund => 'Fund this period';
+
+  @override
+  String get enginePeriodCovered => 'Overspending covered at period end';
+
+  @override
+  String get periodCoverFromRta => 'Cover from Ready to assign';
+
+  @override
+  String get periodCoverFromRtaDesc => 'Start the new period at zero';
+
+  @override
+  String get periodCarryDebt => 'Carry the overspending';
+
+  @override
+  String get periodCarryDebtDesc => 'The new period starts below zero';
+
+  @override
+  String allocFundToTarget(String amount) {
+    return 'To target · $amount';
+  }
+
+  @override
+  String allocFundAllAvailable(String amount) {
+    return 'All available · $amount';
+  }
+
+  @override
+  String get fundPresetLastPeriod => 'Same as last period';
+
+  @override
+  String get fundPresetSpent => 'What I spent last period';
+
+  @override
+  String get fundPresetClear => 'Clear';
+
+  @override
   String get txExportSelected => 'Export CSV';
 
   @override

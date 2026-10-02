@@ -1727,6 +1727,12 @@ class $AllocationsTable extends Allocations
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("archived" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _deviceIdMeta =
       const VerificationMeta('deviceId');
   @override
@@ -1773,6 +1779,7 @@ class $AllocationsTable extends Allocations
         icon,
         autoReset,
         archived,
+        sortOrder,
         deviceId,
         createdAt,
         lastModified,
@@ -1853,6 +1860,10 @@ class $AllocationsTable extends Allocations
       context.handle(_archivedMeta,
           archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta));
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
     if (data.containsKey('device_id')) {
       context.handle(_deviceIdMeta,
           deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
@@ -1906,6 +1917,8 @@ class $AllocationsTable extends Allocations
           .read(DriftSqlType.bool, data['${effectivePrefix}auto_reset'])!,
       archived: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}archived'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order']),
       deviceId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}device_id'])!,
       createdAt: attachedDatabase.typeMapping
@@ -1941,6 +1954,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   /// If false, user must manually handle it in Period Transition.
   final bool autoReset;
   final bool archived;
+
+  /// Manual position on the Budget tab (drag to reorder). Null = after the
+  /// ordered ones, by name.
+  final int? sortOrder;
   final String deviceId;
   final DateTime createdAt;
   final DateTime lastModified;
@@ -1961,6 +1978,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       this.icon,
       required this.autoReset,
       required this.archived,
+      this.sortOrder,
       required this.deviceId,
       required this.createdAt,
       required this.lastModified,
@@ -1986,6 +2004,9 @@ class Allocation extends DataClass implements Insertable<Allocation> {
     }
     map['auto_reset'] = Variable<bool>(autoReset);
     map['archived'] = Variable<bool>(archived);
+    if (!nullToAbsent || sortOrder != null) {
+      map['sort_order'] = Variable<int>(sortOrder);
+    }
     map['device_id'] = Variable<String>(deviceId);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
@@ -2011,6 +2032,9 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       autoReset: Value(autoReset),
       archived: Value(archived),
+      sortOrder: sortOrder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sortOrder),
       deviceId: Value(deviceId),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
@@ -2034,6 +2058,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       icon: serializer.fromJson<String?>(json['icon']),
       autoReset: serializer.fromJson<bool>(json['autoReset']),
       archived: serializer.fromJson<bool>(json['archived']),
+      sortOrder: serializer.fromJson<int?>(json['sortOrder']),
       deviceId: serializer.fromJson<String>(json['deviceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
@@ -2056,6 +2081,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       'icon': serializer.toJson<String?>(icon),
       'autoReset': serializer.toJson<bool>(autoReset),
       'archived': serializer.toJson<bool>(archived),
+      'sortOrder': serializer.toJson<int?>(sortOrder),
       'deviceId': serializer.toJson<String>(deviceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
@@ -2076,6 +2102,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           Value<String?> icon = const Value.absent(),
           bool? autoReset,
           bool? archived,
+          Value<int?> sortOrder = const Value.absent(),
           String? deviceId,
           DateTime? createdAt,
           DateTime? lastModified,
@@ -2095,6 +2122,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
         icon: icon.present ? icon.value : this.icon,
         autoReset: autoReset ?? this.autoReset,
         archived: archived ?? this.archived,
+        sortOrder: sortOrder.present ? sortOrder.value : this.sortOrder,
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
@@ -2121,6 +2149,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       icon: data.icon.present ? data.icon.value : this.icon,
       autoReset: data.autoReset.present ? data.autoReset.value : this.autoReset,
       archived: data.archived.present ? data.archived.value : this.archived,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastModified: data.lastModified.present
@@ -2145,6 +2174,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
@@ -2167,6 +2197,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       icon,
       autoReset,
       archived,
+      sortOrder,
       deviceId,
       createdAt,
       lastModified,
@@ -2187,6 +2218,7 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           other.icon == this.icon &&
           other.autoReset == this.autoReset &&
           other.archived == this.archived &&
+          other.sortOrder == this.sortOrder &&
           other.deviceId == this.deviceId &&
           other.createdAt == this.createdAt &&
           other.lastModified == this.lastModified &&
@@ -2206,6 +2238,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
   final Value<String?> icon;
   final Value<bool> autoReset;
   final Value<bool> archived;
+  final Value<int?> sortOrder;
   final Value<String> deviceId;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
@@ -2224,6 +2257,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.deviceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
@@ -2243,6 +2277,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     required String deviceId,
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
@@ -2266,6 +2301,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     Expression<String>? icon,
     Expression<bool>? autoReset,
     Expression<bool>? archived,
+    Expression<int>? sortOrder,
     Expression<String>? deviceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
@@ -2285,6 +2321,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       if (icon != null) 'icon': icon,
       if (autoReset != null) 'auto_reset': autoReset,
       if (archived != null) 'archived': archived,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (deviceId != null) 'device_id': deviceId,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
@@ -2306,6 +2343,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       Value<String?>? icon,
       Value<bool>? autoReset,
       Value<bool>? archived,
+      Value<int?>? sortOrder,
       Value<String>? deviceId,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
@@ -2324,6 +2362,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       icon: icon ?? this.icon,
       autoReset: autoReset ?? this.autoReset,
       archived: archived ?? this.archived,
+      sortOrder: sortOrder ?? this.sortOrder,
       deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
@@ -2371,6 +2410,9 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (deviceId.present) {
       map['device_id'] = Variable<String>(deviceId.value);
     }
@@ -2404,6 +2446,7 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('deviceId: $deviceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
@@ -10379,6 +10422,7 @@ typedef $$AllocationsTableCreateCompanionBuilder = AllocationsCompanion
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
+  Value<int?> sortOrder,
   required String deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
@@ -10399,6 +10443,7 @@ typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
+  Value<int?> sortOrder,
   Value<String> deviceId,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
@@ -10498,6 +10543,9 @@ class $$AllocationsTableFilterComposer
 
   ColumnFilters<bool> get archived => $composableBuilder(
       column: $table.archived, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get deviceId => $composableBuilder(
       column: $table.deviceId, builder: (column) => ColumnFilters(column));
@@ -10618,6 +10666,9 @@ class $$AllocationsTableOrderingComposer
   ColumnOrderings<bool> get archived => $composableBuilder(
       column: $table.archived, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get deviceId => $composableBuilder(
       column: $table.deviceId, builder: (column) => ColumnOrderings(column));
 
@@ -10693,6 +10744,9 @@ class $$AllocationsTableAnnotationComposer
 
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   GeneratedColumn<String> get deviceId =>
       $composableBuilder(column: $table.deviceId, builder: (column) => column);
@@ -10807,6 +10861,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
+            Value<int?> sortOrder = const Value.absent(),
             Value<String> deviceId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
@@ -10826,6 +10881,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             icon: icon,
             autoReset: autoReset,
             archived: archived,
+            sortOrder: sortOrder,
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,
@@ -10845,6 +10901,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
+            Value<int?> sortOrder = const Value.absent(),
             required String deviceId,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
@@ -10864,6 +10921,7 @@ class $$AllocationsTableTableManager extends RootTableManager<
             icon: icon,
             autoReset: autoReset,
             archived: archived,
+            sortOrder: sortOrder,
             deviceId: deviceId,
             createdAt: createdAt,
             lastModified: lastModified,

@@ -74,7 +74,8 @@ class _PeriodTransitionScreenState
           if (!pending.contains(a.data.allocation.id)) continue;
 
           for (final entry in a.balanceByCurrency.entries) {
-            if (entry.value > 0) {
+            // Leftovers and overspending (negative) both need a decision.
+            if (entry.value.abs() > 0.005) {
               items.add(_AllocationResolution(
                 allocationId: a.data.allocation.id,
                 allocationName: a.data.allocation.name,
@@ -338,6 +339,7 @@ class _ResolutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final overspent = resolution.balance < 0;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -373,13 +375,15 @@ class _ResolutionCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.healthyLight,
+                    color: overspent
+                        ? AppColors.overspentLight
+                        : AppColors.healthyLight,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     formatAmount(resolution.balance, currency: resolution.currency),
-                    style: const TextStyle(
-                      color: AppColors.healthy,
+                    style: TextStyle(
+                      color: overspent ? AppColors.overspent : AppColors.healthy,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -394,8 +398,12 @@ class _ResolutionCard extends StatelessWidget {
             // Resolution options
             _RadioOption(
               icon: Icons.replay_rounded,
-              label: S.of(context).periodReturnUnallocated,
-              description: S.of(context).periodReturnDesc,
+              label: overspent
+                  ? S.of(context).periodCoverFromRta
+                  : S.of(context).periodReturnUnallocated,
+              description: overspent
+                  ? S.of(context).periodCoverFromRtaDesc
+                  : S.of(context).periodReturnDesc,
               value: LeftoverResolution.toUnallocated,
               groupValue: resolution.resolution,
               onChanged: (v) {
@@ -406,8 +414,12 @@ class _ResolutionCard extends StatelessWidget {
             ),
             _RadioOption(
               icon: Icons.forward_rounded,
-              label: S.of(context).periodCarryForward,
-              description: S.of(context).periodCarryDesc,
+              label: overspent
+                  ? S.of(context).periodCarryDebt
+                  : S.of(context).periodCarryForward,
+              description: overspent
+                  ? S.of(context).periodCarryDebtDesc
+                  : S.of(context).periodCarryDesc,
               value: LeftoverResolution.keep,
               groupValue: resolution.resolution,
               onChanged: (v) {
@@ -416,6 +428,7 @@ class _ResolutionCard extends StatelessWidget {
                 onChanged();
               },
             ),
+            if (!overspent)
             _RadioOption(
               icon: Icons.swap_horiz_rounded,
               label: S.of(context).periodMoveTo,

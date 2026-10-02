@@ -28,7 +28,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.accounts).get(); // forces open + migration
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 19);
+      expect(row.data['user_version'], 20);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -67,7 +67,7 @@ void main() {
       await db.select(db.recurringTransactions).get(); // forces migration
       await db.select(db.transactionTemplates).get();
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 19);
+      expect(row.data['user_version'], 20);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -91,7 +91,30 @@ void main() {
           .get();
       expect(cols.any((c) => c.data['name'] == 'anchor_day'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 19);
+      expect(row.data['user_version'], 20);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  test('v20 migration adds allocations sort_order to a v19 database',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test5');
+    final file = File(p.join(dir.path, 'v19.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.customStatement('ALTER TABLE allocations DROP COLUMN sort_order');
+      await db.customStatement('PRAGMA user_version = 19');
+      await db.close();
+
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.select(db.allocations).get(); // forces migration
+      final cols =
+          await db.customSelect('PRAGMA table_info(allocations)').get();
+      expect(cols.any((c) => c.data['name'] == 'sort_order'), isTrue);
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 20);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -115,7 +138,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.transactionLines).get(); // forces the full 1->18 run
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 19);
+      expect(row.data['user_version'], 20);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -147,9 +170,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 19', () {
+    test('schema version is 20', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 19);
+      expect(db.schemaVersion, 20);
     });
 
     test('tables return empty results on fresh database', () async {

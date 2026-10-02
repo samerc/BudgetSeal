@@ -139,7 +139,7 @@ class PeriodResetService {
     return [
       for (final alloc in allocs)
         if (!reviewedIds.contains(alloc.id) &&
-            (allBalances[alloc.id] ?? {}).values.any((v) => v > 0.01))
+            (allBalances[alloc.id] ?? {}).values.any((v) => v.abs() > 0.01))
           alloc.id,
     ];
   }

@@ -8,6 +8,7 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'category_envelope_sheet.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -665,6 +666,26 @@ class _CategoriesSliver extends ConsumerWidget {
                                 fontSize: 11,
                                 color: AppColors.ts(context)),
                           ),
+                        // Envelope badge: where this category's spending goes.
+                        if (allocMap[group.allocationId] != null)
+                          Row(
+                            children: [
+                              Icon(Icons.mail_outline_rounded,
+                                  size: 12, color: AppColors.accent),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  allocMap[group.allocationId]!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.accent),
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -762,6 +783,15 @@ class _CategoriesSliver extends ConsumerWidget {
                   onEdit(cat);
                 },
               ),
+              if (cat.transactionType == 'expense')
+                ListTile(
+                  leading: const Icon(Icons.mail_outline_rounded),
+                  title: Text(S.of(ctx).catLinkEnvelope),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showCategoryEnvelopeSheet(context, cat);
+                  },
+                ),
               ListTile(
                 leading: Icon(cat.archived
                     ? Icons.unarchive_rounded

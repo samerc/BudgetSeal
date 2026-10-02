@@ -971,6 +971,19 @@ class _AllocationDetailScreenState
       availableCurrencies.insert(0, defaultCurrency);
     }
 
+    // Quick amounts: what's missing to reach the target, or all of Ready
+    // to assign (in the chosen currency).
+    final me = (ref.read(allocationsProvider).value ?? const [])
+        .where((a) => a.data.allocation.id == widget.allocationId)
+        .firstOrNull;
+    double gapFor(String cur) {
+      final target = me?.data.allocation.targetAmount;
+      final targetCur = me?.data.allocation.targetCurrency ?? defaultCurrency;
+      if (target == null || cur != targetCur) return 0;
+      return (target - (me?.balanceByCurrency[cur] ?? 0))
+          .clamp(0.0, double.infinity);
+    }
+
     final tr = S.of(context);
     final surfaceColor = AppColors.sf(context);
     final hintColor = AppColors.th(context);
@@ -1114,7 +1127,31 @@ class _AllocationDetailScreenState
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                children: [
+                  if (gapFor(selectedCurrency) > 0)
+                    ActionChip(
+                      label: Text(tr.allocFundToTarget(formatAmount(
+                          gapFor(selectedCurrency),
+                          currency: selectedCurrency))),
+                      onPressed: () => setSheetState(() => amount =
+                          double.parse(gapFor(selectedCurrency)
+                              .toStringAsFixed(2))),
+                    ),
+                  if ((unallocated[selectedCurrency] ?? 0) > 0)
+                    ActionChip(
+                      label: Text(tr.allocFundAllAvailable(formatAmount(
+                          unallocated[selectedCurrency]!,
+                          currency: selectedCurrency))),
+                      onPressed: () => setSheetState(() => amount =
+                          double.parse(unallocated[selectedCurrency]!
+                              .toStringAsFixed(2))),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(

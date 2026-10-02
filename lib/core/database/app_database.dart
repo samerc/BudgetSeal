@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -187,6 +187,10 @@ class AppDatabase extends _$AppDatabase {
             // Day-of-month anchor so monthly recurrences survive short months.
             await _addColumnIfMissing(
                 m, recurringTransactions, recurringTransactions.anchorDay);
+          }
+          if (from < 20) {
+            // Manual envelope order on the Budget tab.
+            await _addColumnIfMissing(m, allocations, allocations.sortOrder);
           }
         },
       );

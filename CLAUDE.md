@@ -46,7 +46,7 @@ lib/
 ├── main.dart                   # Entry point, recurring processing, notifications
 ├── core/
 │   ├── database/
-│   │   ├── app_database.dart   # Drift database definition (schema v19)
+│   │   ├── app_database.dart   # Drift database definition (schema v20)
 │   │   ├── app_database.g.dart # Generated code (do not edit)
 │   │   ├── daos/               # Data access objects (accounts, transactions, allocations, ledger)
 │   │   └── tables/             # Table definitions (12 tables)
@@ -295,7 +295,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 
 ## Database
 
-### Schema Version: 19
+### Schema Version: 20
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -307,6 +307,7 @@ v14→v15 added `isTravel` (BOOLEAN, default false) to `accounts` for travel wal
 v15→v16 added performance indexes: `idx_transactions_household_date`, `idx_transactions_household_deleted`, `idx_transaction_lines_tx`, `idx_ledger_allocation`, `idx_allocations_household`, `idx_categories_household`.
 v16→v17 added indexes: `idx_ledger_source_tx` on `allocation_ledger(source_transaction_id)`, `idx_categories_allocation` on `categories(allocation_id)`.
 v17→v18 added `deleted` to accounts/categories/allocations/objectives/recurring/templates and `lastModified` to recurring/templates.
+v19→v20 added `sortOrder` (nullable INT) to `allocations` for the manual Budget tab order (synced).
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations
@@ -480,6 +481,14 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 
 ### Moving Money Between Envelopes
 `AllocationEngine.moveMoney(fromAllocationId?, toAllocationId?, amount, currency)` — null side = Ready to assign; envelope↔envelope rows use entryType `'transfer'`, RTA→envelope `'funding'`, envelope→RTA `'withdrawal'`; one db transaction; an envelope source must hold the amount (StateError). UI: `showMoveMoneySheet()` (`features/allocations/move_money_sheet.dart`) from the envelope ⋮ menu (Move money; becomes Cover when overspent), the red **Cover** pill on overspent `AllocationCard`s (`onCover`), and the Saved SnackBar (`envelopeAfterSave()` in `widgets/save_feedback.dart` reads the consumption row → "X left" / "over by X" + Cover → `/allocations/:id` with extra `{'cover': true}` opens the sheet).
+
+### Funding & Period Helpers
+- Funding screen presets: Quick Fill (to target), Same as last period (`LedgerDao.fundedInPeriod`: funding + incoming moves by ledger date), What I spent last period (`watchSpendingInPeriod(...).first`), Clear. Fund All runs in one db transaction; funded rows keep their input.
+- Envelope fund sheet chips: To target, All available.
+- Budget tab: `PeriodSummaryCard` (first 7 days of a period, dismissed per period via `period_summary_dismissed`); ⋮ → Reorder envelopes (`allocations.sortOrder`, schema v20, `AllocationsDao.saveOrder`; `watchAll` orders sortOrder nulls-last, then name).
+- Period review includes negative balances: `resolveLeftover` with a negative amount → `toUnallocated` writes a covering `funding` row, `keep` a `carry_forward` marker. Pending detection counts any non-zero balance.
+- Categories: envelope badge + long-press → Envelope (`category_envelope_sheet.dart`: link/unlink/create envelope named after the category).
+- Goals: `_monthlyPace` = remaining / months left (started month counts) shown as "Needed per month".
 
 ### Withdrawal Validation
 `withdrawFromAllocation()` checks sufficient balance before debiting. Throws `StateError` if the allocation doesn't have enough in the requested currency. Callers must catch and show an error.

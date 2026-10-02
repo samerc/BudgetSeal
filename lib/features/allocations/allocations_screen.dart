@@ -29,6 +29,8 @@ import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/brand_palette.dart';
 import 'archived_envelopes_sheet.dart';
 import 'move_money_sheet.dart';
+import 'period_summary_card.dart';
+import 'reorder_envelopes_sheet.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -293,13 +295,24 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 icon: Icon(Icons.more_vert_rounded,
                     color: AppColors.ts(context)),
                 onSelected: (v) {
-                  if (v == 'archived') {
+                  if (v == 'reorder') {
+                    showReorderEnvelopesSheet(context, ref);
+                  } else if (v == 'archived') {
                     showArchivedEnvelopesSheet(context, ref);
                   } else if (v == 'help') {
                     _showEnvelopeHelp(context);
                   }
                 },
                 itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'reorder',
+                    child: Row(children: [
+                      Icon(Icons.reorder_rounded,
+                          size: 20, color: AppColors.ts(context)),
+                      const SizedBox(width: 12),
+                      Text(l.allocReorderTitle),
+                    ]),
+                  ),
                   PopupMenuItem(
                     value: 'archived',
                     child: Row(children: [
@@ -364,6 +377,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 ),
               ),
             ),
+
+          // -- Last period summary (first week of a new period) --
+          if (_searchQuery.isEmpty)
+            const SliverToBoxAdapter(child: PeriodSummaryCard()),
 
           // -- Period Reset Banner --
           if (_searchQuery.isEmpty)

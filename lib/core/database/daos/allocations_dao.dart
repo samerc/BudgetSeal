@@ -25,7 +25,12 @@ class AllocationsDao extends DatabaseAccessor<AppDatabase>
       ..where(allocations.householdId.equals(householdId) &
           allocations.archived.equals(false) &
           allocations.deleted.equals(false))
-      ..orderBy([OrderingTerm.asc(allocations.name)]);
+      // Manual order first (Budget tab ⋮ → Reorder), then by name.
+      ..orderBy([
+        OrderingTerm.asc(allocations.sortOrder.isNull()),
+        OrderingTerm.asc(allocations.sortOrder),
+        OrderingTerm.asc(allocations.name),
+      ]);
 
     return query.watch().map((rows) => rows
         .map((row) => AllocationWithCategory(
@@ -85,4 +90,14 @@ class AllocationsDao extends DatabaseAccessor<AppDatabase>
                 t.deleted.equals(false))
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .get();
+
+  /// Save the Budget tab order: [ids] in display order.
+  Future<void> saveOrder(List<String> ids) => transaction(() async {
+        final now = DateTime.now();
+        for (var i = 0; i < ids.length; i++) {
+          await (update(allocations)..where((t) => t.id.equals(ids[i])))
+              .write(AllocationsCompanion(
+                  sortOrder: Value(i), lastModified: Value(now)));
+        }
+      });
 }

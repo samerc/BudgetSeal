@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/database/daos/ledger_dao.dart';
+import '../../core/engine/period_engine.dart' show budgetPeriodFor;
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -27,6 +29,59 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
   final Map<String, double> _amounts = {};
   bool _isFunding = false;
   bool _instructionsExpanded = false;
+
+  /// Last budget period, per envelope and currency (for the presets).
+  Map<String, Map<String, double>> _lastFunded = const {};
+  Map<String, Map<String, double>> _lastSpent = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastPeriod();
+  }
+
+  Future<void> _loadLastPeriod() async {
+    try {
+      final household = ref.read(householdProvider).value;
+      if (household == null) return;
+      final current = budgetPeriodFor(household.periodStartDay);
+      final last = budgetPeriodFor(household.periodStartDay,
+          current.start.subtract(const Duration(days: 1)));
+      final dao = LedgerDao(ref.read(databaseProvider));
+      final funded =
+          await dao.fundedInPeriod(household.id, last.start, last.end);
+      final spent = await dao
+          .watchSpendingInPeriod(household.id, last.start, last.end)
+          .first;
+      if (mounted) {
+        setState(() {
+          _lastFunded = funded;
+          _lastSpent = spent;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Funding] Error loading last period: $e');
+    }
+  }
+
+  /// Presets: fill each envelope from [source] (allocation → currency →
+  /// amount), in the envelope's own currency.
+  void _applyPreset(List<AllocationWithBalance> allocations,
+      String baseCurrency, Map<String, Map<String, double>> source) {
+    hapticSelection();
+    setState(() {
+      for (final a in allocations) {
+        final alloc = a.data.allocation;
+        final currency = alloc.targetCurrency ?? baseCurrency;
+        final v = source[alloc.id]?[currency] ?? 0;
+        if (v > 0) {
+          _amounts[alloc.id] = double.parse(v.toStringAsFixed(2));
+        } else {
+          _amounts.remove(alloc.id);
+        }
+      }
+    });
+  }
 
   double _parsedAmount(String allocationId) {
     return _amounts[allocationId] ?? 0.0;
@@ -238,10 +293,60 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                         itemBuilder: (context, i) {
                           // First item: Quick Fill tile
                           if (i == 0) {
-                            return _QuickFillTile(
-                              fillableCount: fillableCount,
-                              onQuickFill: () =>
-                                  _quickFill(allocations, baseCurrency),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _QuickFillTile(
+                                  fillableCount: fillableCount,
+                                  onQuickFill: () =>
+                                      _quickFill(allocations, baseCurrency),
+                                ),
+                                // More presets, one tap each.
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (_lastFunded.isNotEmpty)
+                                        ActionChip(
+                                          avatar: const Icon(
+                                              Icons.replay_rounded,
+                                              size: 16),
+                                          label: Text(S
+                                              .of(context)
+                                              .fundPresetLastPeriod),
+                                          onPressed: () => _applyPreset(
+                                              allocations,
+                                              baseCurrency,
+                                              _lastFunded),
+                                        ),
+                                      if (_lastSpent.isNotEmpty)
+                                        ActionChip(
+                                          avatar: const Icon(
+                                              Icons.receipt_long_rounded,
+                                              size: 16),
+                                          label: Text(
+                                              S.of(context).fundPresetSpent),
+                                          onPressed: () => _applyPreset(
+                                              allocations,
+                                              baseCurrency,
+                                              _lastSpent),
+                                        ),
+                                      if (_amounts.isNotEmpty)
+                                        ActionChip(
+                                          avatar: const Icon(
+                                              Icons.clear_rounded,
+                                              size: 16),
+                                          label: Text(
+                                              S.of(context).fundPresetClear),
+                                          onPressed: () =>
+                                              setState(_amounts.clear),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             );
                           }
 
@@ -840,8 +945,9 @@ class _FundingAllocationTile extends StatelessWidget {
               ),
             ],
 
-            // Row 3: currency label + input + fill button (hidden when fully funded)
-            if (!isFunded) ...[
+            // Row 3: currency label + input + fill button — kept on funded
+            // envelopes too, so extra money can still go in.
+            ...[
               const SizedBox(height: 10),
               Row(
                 children: [

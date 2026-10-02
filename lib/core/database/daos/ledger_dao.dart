@@ -115,6 +115,36 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     });
   }
 
+  /// Money put into each envelope during [from, to) — funding and moves in
+  /// (by ledger date): `Map<allocationId, Map<currency, funded>>`.
+  Future<Map<String, Map<String, double>>> fundedInPeriod(
+      String householdId, DateTime from, DateTime to) async {
+    final rows = await customSelect(
+      'SELECT l.allocation_id AS allocation_id, l.currency AS currency, '
+      'SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'INNER JOIN allocations a ON a.id = l.allocation_id '
+      "WHERE a.household_id = ? AND l.entry_type IN ('funding', 'transfer') "
+      'AND l.amount > 0 AND l.created_at >= ? AND l.created_at < ? '
+      'GROUP BY l.allocation_id, l.currency',
+      variables: [
+        Variable.withString(householdId),
+        Variable.withInt(from.millisecondsSinceEpoch ~/ 1000),
+        Variable.withInt(to.millisecondsSinceEpoch ~/ 1000),
+      ],
+      readsFrom: {allocationLedger, attachedDatabase.allocations},
+    ).get();
+    final result = <String, Map<String, double>>{};
+    for (final row in rows) {
+      final total = (row.data['total'] as num?)?.toDouble() ?? 0.0;
+      if (total > 0.001) {
+        result.putIfAbsent(row.data['allocation_id'] as String,
+            () => {})[row.data['currency'] as String] = total;
+      }
+    }
+    return result;
+  }
+
   /// Get all ledger entries for a household across all allocations.
   /// Use getAllBalances() instead when you only need sums.
   Future<List<AllocationLedgerData>> getAllForHousehold(

@@ -9,6 +9,87 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get objSummaryPerMonth => 'Nécessaire par mois';
+
+  @override
+  String get catLinkEnvelope => 'Enveloppe';
+
+  @override
+  String catLinkEnvelopeTitle(String name) {
+    return 'Où vont les dépenses $name ?';
+  }
+
+  @override
+  String catCreateEnvelope(String name) {
+    return 'Créer une enveloppe « $name »';
+  }
+
+  @override
+  String get catUnlinkEnvelope => 'Aucune enveloppe (hors budget)';
+
+  @override
+  String get allocReorderTitle => 'Réordonner les enveloppes';
+
+  @override
+  String get allocReorderHint =>
+      'Faites glisser les poignées. L\'onglet Budget et l\'écran d\'alimentation suivent cet ordre.';
+
+  @override
+  String get periodSummaryTitle => 'Une nouvelle période budgétaire a commencé';
+
+  @override
+  String periodSummaryBody(String spent, String funded) {
+    return 'La période précédente, vous avez dépensé $spent sur $funded budgétés.';
+  }
+
+  @override
+  String periodSummaryUnder(String amount) {
+    return '$amount sous le budget';
+  }
+
+  @override
+  String periodSummaryOver(String amount) {
+    return '$amount au-dessus du budget';
+  }
+
+  @override
+  String get periodSummaryFund => 'Alimenter cette période';
+
+  @override
+  String get enginePeriodCovered => 'Dépassement couvert en fin de période';
+
+  @override
+  String get periodCoverFromRta => 'Couvrir avec « Prêt à attribuer »';
+
+  @override
+  String get periodCoverFromRtaDesc => 'Commencer la nouvelle période à zéro';
+
+  @override
+  String get periodCarryDebt => 'Reporter le dépassement';
+
+  @override
+  String get periodCarryDebtDesc => 'La nouvelle période commence sous zéro';
+
+  @override
+  String allocFundToTarget(String amount) {
+    return 'Jusqu\'à l\'objectif · $amount';
+  }
+
+  @override
+  String allocFundAllAvailable(String amount) {
+    return 'Tout le disponible · $amount';
+  }
+
+  @override
+  String get fundPresetLastPeriod => 'Comme la période précédente';
+
+  @override
+  String get fundPresetSpent => 'Ce que j\'ai dépensé';
+
+  @override
+  String get fundPresetClear => 'Effacer';
+
+  @override
   String get txExportSelected => 'Exporter en CSV';
 
   @override
