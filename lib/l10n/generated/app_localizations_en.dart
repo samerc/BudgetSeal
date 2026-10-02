@@ -9,6 +9,58 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get txExportSelected => 'Export CSV';
+
+  @override
+  String get commonSeeAll => 'See all';
+
+  @override
+  String get txAllMonths => 'All months';
+
+  @override
+  String get txSelectAll => 'Select all';
+
+  @override
+  String get txBulkCategory => 'Change category';
+
+  @override
+  String get txBulkAccount => 'Change account';
+
+  @override
+  String get txBulkDate => 'Change date';
+
+  @override
+  String txBulkUpdated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n transactions updated',
+      one: '1 transaction updated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String txBulkSkipped(int n) {
+    return '$n skipped';
+  }
+
+  @override
+  String get txAllAccounts => 'All accounts';
+
+  @override
+  String get txAllCategories => 'All categories';
+
+  @override
+  String get txClearAllFilters => 'Clear all filters';
+
+  @override
+  String get txClearAll => 'Clear all';
+
+  @override
+  String get txSearchingAllMonths => 'Showing all months';
+
+  @override
   String txSavedEnvelopeLeft(String envelope, String amount) {
     return 'Saved · $envelope: $amount left';
   }

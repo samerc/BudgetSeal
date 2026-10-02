@@ -763,6 +763,14 @@ Cashew-style: long-press a transaction to enter selection mode (there is no cont
 
 The + FAB on the Activity tab uses a custom `Material` + `InkWell` circle (not `FloatingActionButton`) so both `onTap` and `onLongPress` work reliably. Tap opens expense form directly (most common action). Long-press opens a type picker bottom sheet (expense/income/transfer). **Never wrap `FloatingActionButton` with `GestureDetector(onLongPress:)`** — the FAB's internal `InkWell` swallows the long-press gesture.
 
+## Finding & Fixing Transactions
+
+- Activity tab reads `transactionEntriesProvider` (all months) instead of the monthly provider while `_allMonths` (search text, date range, or a "See all" request); the "All months" chip clears the request.
+- Filters: type, account (`_accountFilter`: header, destination or any line), category (also matches subcategories), date, amount (`parseLooseAmount`). Closed panel → `_buildActiveFilters()` chips + Clear all; `_clearAllFilters()`.
+- **See all** (account detail, envelope detail): `activityFilterRequestProvider` (`core/providers/activity_filter_provider.dart`) → `MainScreen` switches to Activity → `TransactionsScreen._applyFilterRequest` (also on first build, since tabs are lazy).
+- Selection ⋮: Select all (`_lastFiltered`), bulk category/account/date via `AllocationEngine.rewriteTransaction()` (re-records through `recordTransaction` + soft-deletes the old row, receipts carried; transfers: date only), Export CSV (`shareEntriesCsv`, one row per line in its own currency).
+- Detail screen uses `transactionByIdProvider(id)` (single row, no running-balance replay) and has Duplicate in ⋮. Envelope ledger rows, Reports drill-down rows and donut slices are tappable.
+
 ## Transaction Flash
 
 When adding a transaction via the classic form, the new transaction ID is passed back via `context.pop(txId)`. The transactions screen highlights the matching tile with a 1.5-second accent glow fade-out using `AnimatedContainer`.

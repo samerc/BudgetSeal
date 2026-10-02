@@ -971,7 +971,10 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (_, i) {
                         final e = catTxns[i];
-                        return Padding(
+                        return InkWell(
+                          // Opens the transaction over the sheet.
+                          onTap: () => ctx.push('/transactions/${e.tx.id}'),
+                          child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           child: Row(
                             children: [
@@ -1017,7 +1020,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                               ),
                             ],
                           ),
-                        );
+                        ));
                       },
                     ),
             ),
@@ -1166,6 +1169,14 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                               values: [for (final r in rows) r.value],
                               colors: colors,
                               total: total,
+                              onSliceTap: (j) => _showCategoryTransactions(
+                                context,
+                                categoryName: rows[j].key,
+                                category: catObjs[rows[j].key],
+                                color: colors[j],
+                                transactions: filtered,
+                                categoryMap: categoryMap,
+                              ),
                             );
                           }
                           final entry = rows[i - 1];
@@ -1225,11 +1236,15 @@ class _CategoryPie extends StatelessWidget {
     required this.values,
     required this.colors,
     required this.total,
+    this.onSliceTap,
   });
 
   final List<double> values;
   final List<Color> colors;
   final double total;
+
+  /// Tapping a slice opens that category's transactions.
+  final ValueChanged<int>? onSliceTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1244,6 +1259,14 @@ class _CategoryPie extends StatelessWidget {
               sectionsSpace: 2,
               centerSpaceRadius: 68,
               startDegreeOffset: -90,
+              pieTouchData: PieTouchData(
+                touchCallback: (event, response) {
+                  final i = response?.touchedSection?.touchedSectionIndex;
+                  if (event is FlTapUpEvent && i != null && i >= 0) {
+                    onSliceTap?.call(i);
+                  }
+                },
+              ),
               sections: [
                 for (var i = 0; i < values.length; i++)
                   PieChartSectionData(

@@ -9,6 +9,58 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get txExportSelected => 'Exporter en CSV';
+
+  @override
+  String get commonSeeAll => 'Tout voir';
+
+  @override
+  String get txAllMonths => 'Tous les mois';
+
+  @override
+  String get txSelectAll => 'Tout sélectionner';
+
+  @override
+  String get txBulkCategory => 'Changer la catégorie';
+
+  @override
+  String get txBulkAccount => 'Changer le compte';
+
+  @override
+  String get txBulkDate => 'Changer la date';
+
+  @override
+  String txBulkUpdated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n transactions modifiées',
+      one: '1 transaction modifiée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String txBulkSkipped(int n) {
+    return '$n ignorée(s)';
+  }
+
+  @override
+  String get txAllAccounts => 'Tous les comptes';
+
+  @override
+  String get txAllCategories => 'Toutes les catégories';
+
+  @override
+  String get txClearAllFilters => 'Effacer tous les filtres';
+
+  @override
+  String get txClearAll => 'Tout effacer';
+
+  @override
+  String get txSearchingAllMonths => 'Tous les mois affichés';
+
+  @override
   String txSavedEnvelopeLeft(String envelope, String amount) {
     return 'Enregistrée · $envelope : reste $amount';
   }

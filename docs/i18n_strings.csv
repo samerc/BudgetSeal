@@ -2137,3 +2137,20 @@ alloc_move_not_enough,,{name} only has {amount}.,{name} فيه {amount} فقط.,
 alloc_moved_to,,Moved to {name},نُقل إلى {name},Déplacé vers {name}
 alloc_moved_from,,Moved from {name},نُقل من {name},Déplacé depuis {name}
 alloc_move_done,,Moved {amount} from {from} to {to},نُقل {amount} من {from} إلى {to},{amount} déplacé de {from} vers {to}
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+tx_export_selected,,Export CSV,تصدير CSV,Exporter en CSV
+common_see_all,,See all,عرض الكل,Tout voir
+tx_all_months,,All months,كل الأشهر,Tous les mois
+tx_select_all,,Select all,تحديد الكل,Tout sélectionner
+tx_bulk_category,,Change category,تغيير الفئة,Changer la catégorie
+tx_bulk_account,,Change account,تغيير الحساب,Changer le compte
+tx_bulk_date,,Change date,تغيير التاريخ,Changer la date
+tx_bulk_updated,,"{n, plural, =1{1 transaction updated} other{{n} transactions updated}}","{n, plural, =0{لم تُعدَّل أي معاملة} =1{عُدّلت معاملة واحدة} =2{عُدّلت معاملتان} few{عُدّلت {n} معاملات} many{عُدّلت {n} معاملة} other{عُدّلت {n} معاملة}}","{n, plural, =1{1 transaction modifiée} other{{n} transactions modifiées}}"
+tx_bulk_skipped,,{n} skipped,تم تخطي {n},{n} ignorée(s)
+tx_all_accounts,,All accounts,كل الحسابات,Tous les comptes
+tx_all_categories,,All categories,كل الفئات,Toutes les catégories
+tx_clear_all_filters,,Clear all filters,مسح كل عوامل التصفية,Effacer tous les filtres
+tx_clear_all,,Clear all,مسح الكل,Tout effacer
+tx_searching_all_months,,Showing all months,عرض كل الأشهر,Tous les mois affichés

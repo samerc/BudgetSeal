@@ -231,6 +231,30 @@ final monthlyTransactionsProvider = StreamProvider.family<
   }
 });
 
+/// One transaction (detail screen) without replaying the whole history —
+/// running balances are not computed (0). Null when deleted or missing.
+final transactionByIdProvider =
+    StreamProvider.family<TransactionEntry?, String>((ref, id) async* {
+  final db = ref.watch(databaseProvider);
+  final householdId = ref.watch(currentHouseholdIdProvider);
+  if (householdId == null) {
+    yield null;
+    return;
+  }
+  final txStream = (db.select(db.transactions)
+        ..where((t) => t.id.equals(id) & t.deleted.equals(false)))
+      .watchSingleOrNull();
+  await for (final tx in txStream) {
+    if (tx == null) {
+      yield null;
+      continue;
+    }
+    final related = await _fetchRelated(db, householdId, [tx]);
+    yield _buildEntry(
+        tx, related.linesByTx[tx.id] ?? [], related.accountMap, const {});
+  }
+});
+
 /// Current month's transactions — convenience alias for dashboard use.
 /// Returns the same [AsyncValue] as [monthlyTransactionsProvider] for this
 /// calendar month.

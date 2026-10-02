@@ -99,6 +99,90 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @txExportSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get txExportSelected;
+
+  /// No description provided for @commonSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get commonSeeAll;
+
+  /// No description provided for @txAllMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'All months'**
+  String get txAllMonths;
+
+  /// No description provided for @txSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get txSelectAll;
+
+  /// No description provided for @txBulkCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Change category'**
+  String get txBulkCategory;
+
+  /// No description provided for @txBulkAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Change account'**
+  String get txBulkAccount;
+
+  /// No description provided for @txBulkDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change date'**
+  String get txBulkDate;
+
+  /// No description provided for @txBulkUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 transaction updated} other{{n} transactions updated}}'**
+  String txBulkUpdated(int n);
+
+  /// No description provided for @txBulkSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} skipped'**
+  String txBulkSkipped(int n);
+
+  /// No description provided for @txAllAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'All accounts'**
+  String get txAllAccounts;
+
+  /// No description provided for @txAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get txAllCategories;
+
+  /// No description provided for @txClearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get txClearAllFilters;
+
+  /// No description provided for @txClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get txClearAll;
+
+  /// No description provided for @txSearchingAllMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing all months'**
+  String get txSearchingAllMonths;
+
   /// No description provided for @txSavedEnvelopeLeft.
   ///
   /// In en, this message translates to:

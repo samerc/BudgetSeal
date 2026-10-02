@@ -12,6 +12,9 @@ import '../../core/database/app_database.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/activity_filter_provider.dart';
+import '../../core/providers/engine_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -23,7 +26,9 @@ import '../../shared/theme/design_tokens.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
+import 'widgets/category_sheet.dart';
 import 'widgets/delete_with_undo.dart';
+import 'widgets/export_entries.dart';
 import 'widgets/tx_form_args.dart';
 import 'widgets/tx_tile.dart';
 import '../../core/providers/premium_provider.dart';
@@ -51,6 +56,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   String? _typeFilter;
   bool _showSearch = false;
   bool _showFilters = false;
+  String? _accountFilter;
+  // Set by "See all" from an account/envelope: list every month.
+  bool _allMonthsRequested = false;
   final _searchCtrl = TextEditingController();
   String? _highlightedTxId;
   Timer? _searchDebounce;
@@ -67,6 +75,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   // Rows swiped away, hidden until the soft-delete reaches the provider
   // (or brought back by Undo).
   final Set<String> _swipedIds = {};
+  // Rows currently listed (after filters) — for "Select all".
+  List<TransactionEntry> _lastFiltered = const [];
   // Month navigation
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -110,6 +120,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     _restoreFilters();
     _loadPlanned();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // A "See all" made before this tab was first built.
+      if (mounted) _applyFilterRequest(ref.read(activityFilterRequestProvider));
       // Start at the year, then glide to the selected month.
       if (_monthScrollCtrl.hasClients) {
         _monthScrollCtrl.jumpTo(0);
@@ -190,14 +202,129 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     await deleteTransactionsWithUndo(context, ids);
   }
 
+  // ── Bulk actions on the selection ──────────────────────────
+  Future<void> _onBulkAction(String action) async {
+    switch (action) {
+      case 'all':
+        setState(() => _selectedIds.addAll(_lastFiltered.map((e) => e.tx.id)));
+      case 'export':
+        final cats = ref.read(categoriesProvider).value ?? const <Category>[];
+        try {
+          await shareEntriesCsv(
+              _lastFiltered
+                  .where((e) => _selectedIds.contains(e.tx.id))
+                  .toList(),
+              {for (final c in cats) c.id: c});
+        } catch (e) {
+          debugPrint('[Transactions] Export failed: $e');
+        }
+      case 'category':
+        final selected = _lastFiltered
+            .where((e) => _selectedIds.contains(e.tx.id))
+            .toList();
+        final incomeOnly =
+            selected.isNotEmpty && selected.every((e) => e.tx.type == 'income');
+        String? picked;
+        String? pickedType;
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => CategorySheet(
+            categories: ref.read(categoriesProvider).value ?? const [],
+            selectedId: null,
+            householdId: ref.read(currentHouseholdIdProvider),
+            initialType: incomeOnly ? 'income' : 'expense',
+            recentIds: recentCategoryIds(
+                ref.read(transactionEntriesProvider).value ?? const []),
+            onSelected: (id, name, color, txType) {
+              picked = id;
+              pickedType = txType;
+              Navigator.of(ctx).pop();
+            },
+            onCreated: (_) {},
+          ),
+        );
+        if (picked == null) return;
+        // Only transactions of the category's type (no transfers).
+        await _bulkRewrite(
+            (e) => e.tx.type == pickedType, categoryId: picked);
+      case 'account':
+        final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+        final picked = await showModalBottomSheet<String>(
+          context: context,
+          builder: (ctx) => SafeArea(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final a in accounts)
+                  ListTile(
+                    leading: const Icon(Icons.account_balance_wallet_outlined),
+                    title: Text(a.name),
+                    trailing: Text(a.currency),
+                    onTap: () => Navigator.pop(ctx, a.id),
+                  ),
+              ],
+            ),
+          ),
+        );
+        if (picked == null) return;
+        await _bulkRewrite((e) => e.tx.type != 'transfer', accountId: picked);
+      case 'date':
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime.now().add(const Duration(days: 1)),
+        );
+        if (picked == null) return;
+        await _bulkRewrite((_) => true, date: picked);
+    }
+  }
+
+  /// Re-save each selected transaction that [applies] through the engine.
+  Future<void> _bulkRewrite(bool Function(TransactionEntry) applies,
+      {String? categoryId, String? accountId, DateTime? date}) async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final engine = ref.read(allocationEngineProvider);
+    final targets = _lastFiltered
+        .where((e) => _selectedIds.contains(e.tx.id))
+        .toList();
+    var done = 0, skipped = 0;
+    for (final e in targets) {
+      if (!applies(e)) {
+        skipped++;
+        continue;
+      }
+      try {
+        await engine.rewriteTransaction(e.tx.id,
+            categoryId: categoryId, accountId: accountId, date: date);
+        done++;
+      } catch (err) {
+        debugPrint('[Transactions] Bulk edit failed for ${e.tx.id}: $err');
+        skipped++;
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+    ref.invalidate(transactionEntriesProvider);
+    ref.invalidate(monthlyTransactionsProvider);
+    messenger.showSnackBar(SnackBar(
+      content: Text(skipped == 0
+          ? tr.txBulkUpdated(done)
+          : '${tr.txBulkUpdated(done)} · ${tr.txBulkSkipped(skipped)}'),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
   /// Duplicate the single selected transaction into a new add form.
   void _duplicateSelected() {
     final id = _selectedIds.first;
-    final entries = ref
-            .read(monthlyTransactionsProvider(
-                (year: _selectedYear, month: _selectedMonth)))
-            .value ??
-        const <TransactionEntry>[];
+    final entries = _visibleEntries();
     final e = entries.where((x) => x.tx.id == id).firstOrNull;
     setState(() {
       _selectionMode = false;
@@ -223,11 +350,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   /// Opens the edit form straight away (selection bar Edit, swipe right).
   void _openEditForm(String id) {
-    final entries = ref
-            .read(monthlyTransactionsProvider(
-                (year: _selectedYear, month: _selectedMonth)))
-            .value ??
-        const <TransactionEntry>[];
+    final entries = _visibleEntries();
     final e = entries.where((x) => x.tx.id == id).firstOrNull;
     if (e == null) {
       context.push('/transactions/$id');
@@ -238,6 +361,33 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             e, ref.read(categoriesProvider).value ?? const <Category>[],
             edit: true));
   }
+
+  /// Search text or a date range: list every month, not just the open one.
+  bool get _allMonths =>
+      _allMonthsRequested ||
+      _searchQuery.isNotEmpty ||
+      _dateFrom != null ||
+      _dateTo != null;
+
+  void _applyFilterRequest(ActivityFilter? f) {
+    if (f == null) return;
+    setState(() {
+      _typeFilter = null; // every type for this account/envelope
+      _accountFilter = f.accountId;
+      _categoryFilter = f.categoryId;
+      _categoryFilterName = f.categoryName;
+      _allMonthsRequested = true;
+      _showFilters = false;
+    });
+    ref.read(activityFilterRequestProvider.notifier).clear();
+  }
+
+  List<TransactionEntry> _visibleEntries() => (_allMonths
+              ? ref.read(transactionEntriesProvider)
+              : ref.read(monthlyTransactionsProvider(
+                  (year: _selectedYear, month: _selectedMonth))))
+          .value ??
+      const <TransactionEntry>[];
 
   void _setMonth(int year, int month) {
     _initialScrollTimer?.cancel();
@@ -339,8 +489,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final entriesAsync = ref.watch(monthlyTransactionsProvider(
-        (year: _selectedYear, month: _selectedMonth)));
+    ref.listen(activityFilterRequestProvider,
+        (_, next) => _applyFilterRequest(next));
+    // Searching or a date range looks across every month.
+    final entriesAsync = _allMonths
+        ? ref.watch(transactionEntriesProvider)
+        : ref.watch(monthlyTransactionsProvider(
+            (year: _selectedYear, month: _selectedMonth)));
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryMap = {for (final c in categories) c.id: c};
 
@@ -403,6 +558,28 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                             onPressed:
                                 _selectedIds.isEmpty ? null : _deleteSelected,
                           ),
+                          PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert_rounded),
+                            onSelected: _onBulkAction,
+                            itemBuilder: (_) {
+                              final tr = S.of(context);
+                              return [
+                                PopupMenuItem(
+                                    value: 'all', child: Text(tr.txSelectAll)),
+                                PopupMenuItem(
+                                    value: 'category',
+                                    child: Text(tr.txBulkCategory)),
+                                PopupMenuItem(
+                                    value: 'account',
+                                    child: Text(tr.txBulkAccount)),
+                                PopupMenuItem(
+                                    value: 'date', child: Text(tr.txBulkDate)),
+                                PopupMenuItem(
+                                    value: 'export',
+                                    child: Text(tr.txExportSelected)),
+                              ];
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -415,6 +592,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             _buildMonthTabs(context),
             // ── Filter chips (collapsible) ───────────────────────
             if (_showFilters) _buildFilterChips(),
+            if (!_showFilters) _buildActiveFilters(),
+            if (_allMonths && !_allMonthsRequested)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 6, 20, 0),
+                child: Text(S.of(context).txSearchingAllMonths,
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.ts(context))),
+              ),
             // ── Content ──────────────────────────────────────────
             Expanded(
               child: GestureDetector(
@@ -640,7 +825,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             Expanded(
               child: TextField(
                 controller: _searchCtrl,
-                autofocus: false,
+                // Opening search means typing — bring the keyboard up.
+                autofocus: true,
                 style: const TextStyle(fontSize: 16),
                 decoration: InputDecoration(
                   hintText: S.of(context).txSearchHint,
@@ -693,7 +879,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             icon: Icon(
               Icons.filter_list_rounded,
               size: 22,
-              color: _showFilters || _typeFilter != null || _dateFrom != null || _dateTo != null || _amountMin != null || _amountMax != null || _categoryFilter != null
+              color: _showFilters || _hasAnyFilter
                   ? AppColors.accent
                   : AppColors.ts(context),
             ),
@@ -807,12 +993,32 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   void _showYearPicker(BuildContext context) async {
     final tr = S.of(context);
+    // Back to the year of the oldest transaction (at least 5 years shown).
+    final now = DateTime.now().year;
+    var firstYear = now - 5;
+    try {
+      final db = ref.read(databaseProvider);
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId != null) {
+        final oldest = await (db.select(db.transactions)
+              ..where((t) =>
+                  t.householdId.equals(householdId) & t.deleted.equals(false))
+              ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
+              ..limit(1))
+            .getSingleOrNull();
+        final y = oldest?.createdAt.toLocal().year;
+        if (y != null && y < firstYear) firstYear = y;
+      }
+    } catch (e) {
+      debugPrint('[Transactions] Oldest year lookup failed: $e');
+    }
+    if (!context.mounted) return;
     final picked = await showDialog<int>(
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(tr.txSelectYear),
-        children: List.generate(DateTime.now().year - (DateTime.now().year - 5) + 1, (i) {
-          final y = DateTime.now().year - 5 + i;
+        children: List.generate(now - firstYear + 1, (i) {
+          final y = firstYear + i;
           return SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, y),
             child: Text('$y',
@@ -1161,7 +1367,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ),
                   ),
                   onChanged: (v) => setState(() {
-                    _amountMin = double.tryParse(v);
+                    _amountMin = parseLooseAmount(v);
                   }),
                 ),
               ),
@@ -1196,28 +1402,54 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ),
                   ),
                   onChanged: (v) => setState(() {
-                    _amountMax = double.tryParse(v);
+                    _amountMax = parseLooseAmount(v);
                   }),
                 ),
               ),
             ],
           ),
         ),
+        // Account + category
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _FilterPickerBox(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: _accountFilter != null
+                      ? (ref
+                              .watch(accountsProvider)
+                              .value
+                              ?.where((a) => a.id == _accountFilter)
+                              .firstOrNull
+                              ?.name ??
+                          S.of(context).txAllAccounts)
+                      : S.of(context).txAllAccounts,
+                  active: _accountFilter != null,
+                  onTap: _pickAccountFilter,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _FilterPickerBox(
+                  icon: Icons.category_outlined,
+                  label: _categoryFilterName ?? S.of(context).txAllCategories,
+                  active: _categoryFilter != null,
+                  onTap: _pickCategoryFilter,
+                ),
+              ),
+            ],
+          ),
+        ),
         // Clear all filters button
-        if (hasAdvancedFilters)
+        if (hasAdvancedFilters || _hasAnyFilter)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: GestureDetector(
-              onTap: () => setState(() {
-                _dateFrom = null;
-                _dateTo = null;
-                _amountMin = null;
-                _amountMax = null;
-                _amountMinCtrl.clear();
-                _amountMaxCtrl.clear();
-              }),
+              onTap: _clearAllFilters,
               child: Text(
-                S.of(context).txClearFilters,
+                S.of(context).txClearAllFilters,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -1227,6 +1459,182 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
           ),
       ],
+    );
+  }
+
+  bool get _hasAnyFilter =>
+      _typeFilter != null ||
+      _accountFilter != null ||
+      _categoryFilter != null ||
+      _dateFrom != null ||
+      _dateTo != null ||
+      _amountMin != null ||
+      _amountMax != null;
+
+  void _clearAllFilters() {
+    setState(() {
+      _allMonthsRequested = false;
+      _typeFilter = null;
+      _accountFilter = null;
+      _categoryFilter = null;
+      _categoryFilterName = null;
+      _dateFrom = null;
+      _dateTo = null;
+      _amountMin = null;
+      _amountMax = null;
+      _amountMinCtrl.clear();
+      _amountMaxCtrl.clear();
+    });
+    _saveFilters();
+  }
+
+  Future<void> _pickAccountFilter() async {
+    final tr = S.of(context);
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.all_inclusive_rounded),
+              title: Text(tr.txAllAccounts),
+              onTap: () => Navigator.pop(ctx, ''),
+            ),
+            for (final a in accounts)
+              ListTile(
+                leading: const Icon(Icons.account_balance_wallet_outlined),
+                title: Text(a.name),
+                trailing: Text(a.currency),
+                selected: a.id == _accountFilter,
+                onTap: () => Navigator.pop(ctx, a.id),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _accountFilter = picked.isEmpty ? null : picked);
+  }
+
+  Future<void> _pickCategoryFilter() async {
+    final categories = ref.read(categoriesProvider).value ?? const <Category>[];
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CategorySheet(
+        categories: categories,
+        selectedId: _categoryFilter,
+        householdId: ref.read(currentHouseholdIdProvider),
+        initialType: _typeFilter == 'income' ? 'income' : 'expense',
+        recentIds: recentCategoryIds(
+            ref.read(transactionEntriesProvider).value ?? const []),
+        onSelected: (id, name, color, txType) {
+          Navigator.of(ctx).pop();
+          if (!mounted) return;
+          setState(() {
+            _categoryFilter = id;
+            _categoryFilterName = name;
+          });
+        },
+        onCreated: (_) {},
+      ),
+    );
+  }
+
+  /// Active filters as removable chips (when the filter panel is closed).
+  Widget _buildActiveFilters() {
+    final tr = S.of(context);
+    final chips = <(String, VoidCallback)>[
+      if (_typeFilter != null)
+        (
+          switch (_typeFilter) {
+            'income' => tr.typeIncome,
+            'expense' => tr.typeExpense,
+            _ => tr.typeTransfer,
+          },
+          () {
+            setState(() => _typeFilter = null);
+            _saveFilters();
+          }
+        ),
+      if (_accountFilter != null)
+        (
+          ref
+                  .watch(accountsProvider)
+                  .value
+                  ?.where((a) => a.id == _accountFilter)
+                  .firstOrNull
+                  ?.name ??
+              tr.commonAccount,
+          () => setState(() => _accountFilter = null)
+        ),
+      if (_categoryFilter != null)
+        (
+          _categoryFilterName ?? tr.commonCategory,
+          () => setState(() {
+                _categoryFilter = null;
+                _categoryFilterName = null;
+              })
+        ),
+      if (_dateFrom != null || _dateTo != null)
+        (
+          '${_dateFrom != null ? formatDate(_dateFrom!) : '…'} – ${_dateTo != null ? formatDate(_dateTo!) : '…'}',
+          () => setState(() {
+                _dateFrom = null;
+                _dateTo = null;
+              })
+        ),
+      if (_amountMin != null || _amountMax != null)
+        (
+          '${_amountMin != null ? formatNumber(_amountMin!) : '…'} – ${_amountMax != null ? formatNumber(_amountMax!) : '…'}',
+          () => setState(() {
+                _amountMin = null;
+                _amountMax = null;
+                _amountMinCtrl.clear();
+                _amountMaxCtrl.clear();
+              })
+        ),
+    ];
+    if (_allMonthsRequested) {
+      chips.insert(0, (
+        tr.txAllMonths,
+        () => setState(() => _allMonthsRequested = false)
+      ));
+    }
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      child: Row(
+        children: [
+          for (final (label, onRemove) in chips)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 6),
+              child: InputChip(
+                label: Text(label),
+                onDeleted: onRemove,
+                onPressed: () => setState(() => _showFilters = true),
+                visualDensity: VisualDensity.compact,
+                shape: const StadiumBorder(),
+                side: BorderSide.none,
+                backgroundColor: AppColors.accentLight,
+                labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accent),
+                deleteIconColor: AppColors.accent,
+              ),
+            ),
+          if (chips.length > 1)
+            TextButton(
+              onPressed: _clearAllFilters,
+              child: Text(tr.txClearAll),
+            ),
+        ],
+      ),
     );
   }
 
@@ -1265,8 +1673,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final hasAmountFilter = _amountMin != null || _amountMax != null;
     final hasSearch = _searchQuery.isNotEmpty;
     final q = hasSearch ? _searchQuery.toLowerCase() : '';
+    final hasAccountFilter = _accountFilter != null;
     final hasAnyFilter = hasDateFilter || hasTypeFilter || hasCategoryFilter ||
-        hasAmountFilter || hasSearch;
+        hasAmountFilter || hasSearch || hasAccountFilter;
 
     final filtered = hasAnyFilter
         ? entries.where((e) {
@@ -1279,15 +1688,24 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             }
             // Type
             if (hasTypeFilter && e.tx.type != _typeFilter) return false;
+            // Account (either side of a transfer, or any line's account)
+            if (hasAccountFilter &&
+                e.tx.accountId != _accountFilter &&
+                e.tx.destinationAccountId != _accountFilter &&
+                !e.lines.any((l) => l.accountId == _accountFilter)) {
+              return false;
+            }
             // Category
             if (hasCategoryFilter) {
-              var match = e.tx.categoryId == _categoryFilter;
-              if (!match) {
-                for (final l in e.lines) {
-                  if (l.categoryId == _categoryFilter) { match = true; break; }
-                }
+              // The category or one of its subcategories.
+              bool inFilter(String? id) =>
+                  id != null &&
+                  (id == _categoryFilter ||
+                      categoryMap[id]?.parentId == _categoryFilter);
+              if (!inFilter(e.tx.categoryId) &&
+                  !e.lines.any((l) => inFilter(l.categoryId))) {
+                return false;
               }
-              if (!match) return false;
             }
             // Amount range
             if (hasAmountFilter) {
@@ -1314,7 +1732,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         : entries.toList();
 
     if (filtered.isEmpty) {
-      final hasFilters = _searchQuery.isNotEmpty || _typeFilter != null || hasDateFilter || _amountMin != null || _amountMax != null || _categoryFilter != null;
+      final hasFilters = _searchQuery.isNotEmpty || _hasAnyFilter;
       final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       final monthLabel = '${monthNames[_selectedMonth - 1]} $_selectedYear';
       return Column(
@@ -1367,8 +1785,21 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ? S.of(context).txNoMatching
                     : S.of(context).txNoYet,
             subtitle: hasFilters ? null : S.of(context).txTapPlus,
-            actionLabel: hasFilters ? null : S.of(context).txAddFirst,
-            onAction: hasFilters ? null : () => context.push('/add-transaction'),
+            // No match: one tap back to everything.
+            actionLabel: hasFilters
+                ? S.of(context).txClearAllFilters
+                : S.of(context).txAddFirst,
+            onAction: hasFilters
+                ? () {
+                    _clearAllFilters();
+                    if (_searchQuery.isNotEmpty) {
+                      setState(() {
+                        _searchQuery = '';
+                        _searchCtrl.clear();
+                      });
+                    }
+                  }
+                : () => context.push('/add-transaction'),
           ),
         ],
       );
@@ -1376,6 +1807,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     // Compute month summary — skip lines where currency differs from base
     // but rate is 1.0 (exchange rate not set), as those would inflate totals.
+    _lastFiltered = filtered;
     final baseCurrencyForSummary =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
     double monthExpense = 0, monthIncome = 0;
@@ -2337,6 +2769,55 @@ class _TypeOption extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: color)),
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Account / category picker box in the filter panel.
+class _FilterPickerBox extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  const _FilterPickerBox(
+      {required this.icon,
+      required this.label,
+      required this.active,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: active ? AppColors.accentLight : AppColors.sfv(context),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Icon(icon,
+                  size: 16,
+                  color: active ? AppColors.accent : AppColors.ts(context)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                        color: active
+                            ? AppColors.accent
+                            : AppColors.tp(context))),
+              ),
+              Icon(Icons.expand_more_rounded,
+                  size: 18, color: AppColors.th(context)),
+            ],
+          ),
         ),
       ),
     );

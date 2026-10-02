@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/home_tab_provider.dart';
+import '../../core/providers/activity_filter_provider.dart';
 import '../../core/services/notification_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
@@ -85,6 +86,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     } else if (!_initialized) {
       _initialized = true;
     }
+
+    // "See all" from an account/envelope: show the Activity tab.
+    ref.listen(activityFilterRequestProvider, (_, next) {
+      if (next != null && _currentIndex != 1) setState(() => _currentIndex = 1);
+    });
 
     _visited.add(_currentIndex);
     final canGoBack = GoRouter.of(context).canPop();

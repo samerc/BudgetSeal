@@ -9,6 +9,62 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get txExportSelected => 'تصدير CSV';
+
+  @override
+  String get commonSeeAll => 'عرض الكل';
+
+  @override
+  String get txAllMonths => 'كل الأشهر';
+
+  @override
+  String get txSelectAll => 'تحديد الكل';
+
+  @override
+  String get txBulkCategory => 'تغيير الفئة';
+
+  @override
+  String get txBulkAccount => 'تغيير الحساب';
+
+  @override
+  String get txBulkDate => 'تغيير التاريخ';
+
+  @override
+  String txBulkUpdated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'عُدّلت $n معاملة',
+      many: 'عُدّلت $n معاملة',
+      few: 'عُدّلت $n معاملات',
+      two: 'عُدّلت معاملتان',
+      one: 'عُدّلت معاملة واحدة',
+      zero: 'لم تُعدَّل أي معاملة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String txBulkSkipped(int n) {
+    return 'تم تخطي $n';
+  }
+
+  @override
+  String get txAllAccounts => 'كل الحسابات';
+
+  @override
+  String get txAllCategories => 'كل الفئات';
+
+  @override
+  String get txClearAllFilters => 'مسح كل عوامل التصفية';
+
+  @override
+  String get txClearAll => 'مسح الكل';
+
+  @override
+  String get txSearchingAllMonths => 'عرض كل الأشهر';
+
+  @override
   String txSavedEnvelopeLeft(String envelope, String amount) {
     return 'تم الحفظ · $envelope: متبقٍ $amount';
   }

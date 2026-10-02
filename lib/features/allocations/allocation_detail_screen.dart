@@ -17,6 +17,7 @@ import '../../core/database/app_database.dart';
 import '../../core/database/daos/allocations_dao.dart';
 import '../../core/database/daos/ledger_dao.dart';
 import '../../core/providers/allocations_provider.dart';
+import '../../core/providers/activity_filter_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -1219,7 +1220,36 @@ class _AllocationDetailScreenState
     final ledgerDao = LedgerDao(db);
 
     return _sectionContainer(children: [
-      _sectionHeader(S.of(context).allocRecentActivity, icon: Icons.receipt_outlined),
+      Row(children: [
+        Expanded(
+          child: _sectionHeader(S.of(context).allocRecentActivity,
+              icon: Icons.receipt_outlined),
+        ),
+        Builder(builder: (_) {
+          // Its linked category (top level first) — the Activity tab filter
+          // also matches subcategories.
+          final linked = (ref.watch(categoriesProvider).value ?? const [])
+              .where((c) => c.allocationId == widget.allocationId)
+              .toList()
+            ..sort((a, b) => (a.parentId == null ? 0 : 1)
+                .compareTo(b.parentId == null ? 0 : 1));
+          if (linked.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TextButton(
+              onPressed: () {
+                ref.read(activityFilterRequestProvider.notifier).request((
+                  accountId: null,
+                  categoryId: linked.first.id,
+                  categoryName: linked.first.name,
+                ));
+                context.go('/');
+              },
+              child: Text(S.of(context).commonSeeAll),
+            ),
+          );
+        }),
+      ]),
       StreamBuilder<List<AllocationLedgerData>>(
         stream: ledgerDao.watchByAllocation(widget.allocationId),
         builder: (context, snapshot) {
@@ -1272,7 +1302,14 @@ class _AllocationDetailScreenState
                 _ => Icons.circle_outlined,
               };
 
-              return Padding(
+              // A spending row opens its transaction.
+              final txId = entry.sourceTransactionId;
+              return InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: txId == null
+                    ? null
+                    : () => context.push('/transactions/$txId'),
+                child: Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
@@ -1320,7 +1357,7 @@ class _AllocationDetailScreenState
                     ),
                   ],
                 ),
-              );
+              ));
             }).toList(),
           );
         },

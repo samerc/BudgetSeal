@@ -33,16 +33,13 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entriesAsync = ref.watch(transactionEntriesProvider);
+    // Just this transaction — no full-history replay.
+    final entryAsync = ref.watch(transactionByIdProvider(transactionId));
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryMap = {for (final c in categories) c.id: c};
 
-    return entriesAsync.when(
-      data: (entries) {
-        final entry = entries
-            .where((e) => e.tx.id == transactionId)
-            .firstOrNull;
-
+    return entryAsync.when(
+      data: (entry) {
         if (entry == null) {
           return Scaffold(
             appBar: AppBar(
@@ -70,7 +67,8 @@ class TransactionDetailScreen extends ConsumerWidget {
         body: ErrorRetry(
           message: S.of(context).txCouldNotLoad,
           details: '$e',
-          onRetry: () => ref.invalidate(transactionEntriesProvider),
+          onRetry: () =>
+              ref.invalidate(transactionByIdProvider(transactionId)),
         ),
       ),
     );
@@ -138,6 +136,12 @@ class _DetailBody extends ConsumerWidget {
             icon: Icon(Icons.more_vert_rounded, color: AppColors.ts(context)),
             onSelected: (action) {
               switch (action) {
+                case 'duplicate':
+                  final args = txFormArgs(
+                      entry, ref.read(categoriesProvider).value ?? const [],
+                      edit: false);
+                  context.pop();
+                  context.push('/add-transaction', extra: args);
                 case 'save_template':
                   _saveAsTemplate(context, ref);
                 case 'delete':
@@ -145,6 +149,16 @@ class _DetailBody extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'duplicate',
+                child: Row(
+                  children: [
+                    Icon(Icons.copy_rounded, size: 20, color: AppColors.ts(context)),
+                    const SizedBox(width: 12),
+                    Text(S.of(context).txContextDuplicate),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'save_template',
                 child: Row(

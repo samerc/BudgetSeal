@@ -651,4 +651,71 @@ class AllocationEngine {
       }
     });
   }
+
+  /// Bulk edit: re-save an income/expense transaction with a new category
+  /// (every line), account (every line) and/or date, through
+  /// [recordTransaction] so envelope debits and currency conversion follow;
+  /// the old row is then soft-deleted (receipts carry over). Transfers only
+  /// take a new date. Returns the new id (the same id for date-only
+  /// changes and transfers).
+  Future<String> rewriteTransaction(
+    String txId, {
+    String? categoryId,
+    String? accountId,
+    DateTime? date,
+  }) async {
+    return _db.transaction(() async {
+      final tx = await (_db.select(_db.transactions)
+            ..where((t) => t.id.equals(txId) & t.deleted.equals(false)))
+          .getSingle();
+      if (tx.type == 'transfer' || (categoryId == null && accountId == null)) {
+        if (date != null) {
+          // Keep the time of day.
+          final old = tx.createdAt.toLocal();
+          await (_db.update(_db.transactions)..where((t) => t.id.equals(txId)))
+              .write(TransactionsCompanion(
+            createdAt: Value(DateTime(date.year, date.month, date.day,
+                old.hour, old.minute, old.second)),
+            lastModified: Value(DateTime.now()),
+          ));
+        }
+        return txId;
+      }
+      final household = await (_db.select(_db.households)
+            ..where((h) => h.id.equals(tx.householdId)))
+          .getSingle();
+      final lines = await (_db.select(_db.transactionLines)
+            ..where((l) => l.transactionId.equals(txId)))
+          .get();
+      final old = tx.createdAt.toLocal();
+      final newId = await recordTransaction(
+        householdId: tx.householdId,
+        accountId: accountId ?? tx.accountId,
+        type: tx.type,
+        baseCurrency: household.baseCurrency,
+        note: tx.note,
+        date: date != null
+            ? DateTime(date.year, date.month, date.day, old.hour, old.minute,
+                old.second)
+            : tx.createdAt,
+        lines: [
+          for (final l in lines)
+            TxLine(
+              amount: l.amount,
+              currency: l.currency,
+              categoryId: categoryId ?? l.categoryId,
+              accountId: accountId ?? l.accountId,
+              exchangeRateToBase: l.exchangeRateToBase,
+              note: l.note,
+            ),
+        ],
+      );
+      if (tx.receiptPath != null) {
+        await (_db.update(_db.transactions)..where((t) => t.id.equals(newId)))
+            .write(TransactionsCompanion(receiptPath: Value(tx.receiptPath)));
+      }
+      await deleteTransaction(txId);
+      return newId;
+    });
+  }
 }

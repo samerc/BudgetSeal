@@ -17,6 +17,7 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/fx/fx_service.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/activity_filter_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -587,6 +588,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
                       color: AppColors.accentText(context),
                     ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(activityFilterRequestProvider.notifier).request(
+                          (accountId: widget.accountId,
+                           categoryId: null,
+                           categoryName: null));
+                      context.go('/');
+                    },
+                    child: Text(l.commonSeeAll),
                   ),
                 ],
               ),
