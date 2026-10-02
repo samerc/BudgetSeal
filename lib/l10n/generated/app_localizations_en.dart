@@ -9,6 +9,100 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String billItemN(int n) {
+    return 'Item $n';
+  }
+
+  @override
+  String get billDiscardTitle => 'Discard this bill?';
+
+  @override
+  String get billDiscardBody =>
+      'The items and splits you entered will be lost.';
+
+  @override
+  String get billWhoPaid => 'Who paid?';
+
+  @override
+  String get billPaidMe => 'I paid the whole bill';
+
+  @override
+  String get billPaidMeDesc =>
+      'Records the full bill from your account and tracks what each person owes you in Goals & Loans.';
+
+  @override
+  String get billPaidOther => 'Someone else paid';
+
+  @override
+  String billPaidOtherDesc(String name) {
+    return 'Tracks what you owe $name in Goals & Loans. Nothing leaves your account until you pay them back.';
+  }
+
+  @override
+  String get billPaidEach => 'Everyone paid their own part';
+
+  @override
+  String get billPaidEachDesc => 'Records only your share.';
+
+  @override
+  String billLinePart(String name) {
+    return '$name\'s part';
+  }
+
+  @override
+  String billLoanName(String date) {
+    return 'Bill split · $date';
+  }
+
+  @override
+  String billLoansCreated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n loans added to Goals & Loans',
+      one: '1 loan added to Goals & Loans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String billOweCreated(String name, String amount) {
+    return 'Added to Goals & Loans: you owe $name $amount';
+  }
+
+  @override
+  String get billShare => 'Share split';
+
+  @override
+  String billShareHeader(String total) {
+    return 'Bill split · total $total';
+  }
+
+  @override
+  String billSharePaidBy(String name) {
+    return 'Paid by $name';
+  }
+
+  @override
+  String get billTax => 'Tax & service';
+
+  @override
+  String get billTaxAmount => 'Tax & service amount';
+
+  @override
+  String get billTaxHint => 'Split in proportion to what each person ordered.';
+
+  @override
+  String billReceiptMatch(String total) {
+    return 'Matches the receipt total ($total)';
+  }
+
+  @override
+  String billReceiptDiff(String items, String total) {
+    return 'Items add up to $items · receipt total $total';
+  }
+
+  @override
   String webEnvBalanceOfTarget(String balance, String target) {
     return '$balance of $target';
   }

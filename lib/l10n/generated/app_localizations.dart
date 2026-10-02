@@ -99,6 +99,138 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @billItemN.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {n}'**
+  String billItemN(int n);
+
+  /// No description provided for @billDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this bill?'**
+  String get billDiscardTitle;
+
+  /// No description provided for @billDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The items and splits you entered will be lost.'**
+  String get billDiscardBody;
+
+  /// No description provided for @billWhoPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Who paid?'**
+  String get billWhoPaid;
+
+  /// No description provided for @billPaidMe.
+  ///
+  /// In en, this message translates to:
+  /// **'I paid the whole bill'**
+  String get billPaidMe;
+
+  /// No description provided for @billPaidMeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Records the full bill from your account and tracks what each person owes you in Goals & Loans.'**
+  String get billPaidMeDesc;
+
+  /// No description provided for @billPaidOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone else paid'**
+  String get billPaidOther;
+
+  /// No description provided for @billPaidOtherDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks what you owe {name} in Goals & Loans. Nothing leaves your account until you pay them back.'**
+  String billPaidOtherDesc(String name);
+
+  /// No description provided for @billPaidEach.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone paid their own part'**
+  String get billPaidEach;
+
+  /// No description provided for @billPaidEachDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Records only your share.'**
+  String get billPaidEachDesc;
+
+  /// No description provided for @billLinePart.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s part'**
+  String billLinePart(String name);
+
+  /// No description provided for @billLoanName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill split · {date}'**
+  String billLoanName(String date);
+
+  /// No description provided for @billLoansCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}'**
+  String billLoansCreated(int n);
+
+  /// No description provided for @billOweCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to Goals & Loans: you owe {name} {amount}'**
+  String billOweCreated(String name, String amount);
+
+  /// No description provided for @billShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share split'**
+  String get billShare;
+
+  /// No description provided for @billShareHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill split · total {total}'**
+  String billShareHeader(String total);
+
+  /// No description provided for @billSharePaidBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by {name}'**
+  String billSharePaidBy(String name);
+
+  /// No description provided for @billTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax & service'**
+  String get billTax;
+
+  /// No description provided for @billTaxAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax & service amount'**
+  String get billTaxAmount;
+
+  /// No description provided for @billTaxHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Split in proportion to what each person ordered.'**
+  String get billTaxHint;
+
+  /// No description provided for @billReceiptMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches the receipt total ({total})'**
+  String billReceiptMatch(String total);
+
+  /// No description provided for @billReceiptDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Items add up to {items} · receipt total {total}'**
+  String billReceiptDiff(String items, String total);
+
   /// No description provided for @webEnvBalanceOfTarget.
   ///
   /// In en, this message translates to:

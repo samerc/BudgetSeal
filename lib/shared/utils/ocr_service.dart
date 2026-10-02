@@ -16,6 +16,10 @@ class ExtractedItem {
   double get unitPrice => quantity > 1 ? amount / quantity : amount;
 }
 
+/// What a receipt line is. Only [item] and [discount] lines can be added to
+/// the bill; [tax] and [total] feed the tax field and the total check.
+enum OcrLineKind { item, discount, tax, total, other }
+
 /// A recognized text line with its bounding box on the image.
 class OcrLine {
   final String text;
@@ -23,6 +27,7 @@ class OcrLine {
   final double? parsedAmount;
   final String? parsedName;
   final int parsedQuantity;
+  final OcrLineKind kind;
 
   OcrLine({
     required this.text,
@@ -30,10 +35,14 @@ class OcrLine {
     this.parsedAmount,
     this.parsedName,
     this.parsedQuantity = 1,
+    this.kind = OcrLineKind.item,
   });
 
-  /// Whether this line looks like a billable item (has a price).
-  bool get hasPrice => parsedAmount != null && parsedAmount! > 0;
+  /// Whether this line can be added as a bill item (a discount is negative).
+  bool get hasPrice =>
+      (kind == OcrLineKind.item || kind == OcrLineKind.discount) &&
+      parsedAmount != null &&
+      parsedAmount != 0;
 }
 
 /// Result of scanning a receipt.
@@ -43,11 +52,19 @@ class OcrResult {
   final int imageHeight;
   final String rawText;
 
+  /// Largest "Total" line on the receipt (the grand total), if any.
+  final double? receiptTotal;
+
+  /// Sum of tax / VAT / service lines, if any.
+  final double? taxTotal;
+
   const OcrResult({
     required this.lines,
     required this.imageWidth,
     required this.imageHeight,
     required this.rawText,
+    this.receiptTotal,
+    this.taxTotal,
   });
 }
 
@@ -123,22 +140,56 @@ class OcrService {
 
       // Parse merged lines
       final lines = <OcrLine>[];
+      double? receiptTotal;
+      double taxTotal = 0;
       for (final raw in merged) {
-        final parsed = _parseLine(raw.text);
-        lines.add(OcrLine(
-          text: raw.text,
-          boundingBox: raw.rect,
-          parsedAmount: parsed?.amount,
-          parsedName: parsed?.name,
-          parsedQuantity: parsed?.quantity ?? 1,
-        ));
+        final kind = _classify(raw.text.toLowerCase());
+        switch (kind) {
+          case OcrLineKind.total:
+          case OcrLineKind.tax:
+            final amount = _lastPrice(raw.text);
+            if (amount != null && amount > 0) {
+              if (kind == OcrLineKind.total) {
+                if (receiptTotal == null || amount > receiptTotal) {
+                  receiptTotal = amount;
+                }
+              } else {
+                taxTotal += amount;
+              }
+            }
+            lines.add(OcrLine(
+                text: raw.text,
+                boundingBox: raw.rect,
+                parsedAmount: amount,
+                kind: kind));
+          case OcrLineKind.other:
+            lines.add(
+                OcrLine(text: raw.text, boundingBox: raw.rect, kind: kind));
+          case OcrLineKind.item:
+          case OcrLineKind.discount:
+            final parsed = _parseLine(raw.text);
+            // "-2.00" anywhere on the line also marks a discount.
+            final isDiscount = kind == OcrLineKind.discount ||
+                RegExp(r'(^|\s)-\s*[$€£¥]?\s*\d').hasMatch(raw.text);
+            final amount = parsed?.amount;
+            lines.add(OcrLine(
+              text: raw.text,
+              boundingBox: raw.rect,
+              parsedAmount:
+                  amount == null ? null : (isDiscount ? -amount : amount),
+              parsedName: parsed?.name,
+              parsedQuantity: isDiscount ? 1 : (parsed?.quantity ?? 1),
+              kind: isDiscount ? OcrLineKind.discount : OcrLineKind.item,
+            ));
+        }
       }
 
       debugPrint('[OcrService] Raw: ${rawLines.length} lines, '
           'merged: ${merged.length}, '
-          '${lines.where((l) => l.hasPrice).length} with prices');
+          '${lines.where((l) => l.hasPrice).length} with prices, '
+          'total $receiptTotal, tax $taxTotal');
       for (final l in lines) {
-        debugPrint('  ${l.hasPrice ? "✓" : "·"} "${l.text}"');
+        debugPrint('  ${l.kind.name.padRight(8)} "${l.text}"');
       }
 
       return OcrResult(
@@ -146,6 +197,8 @@ class OcrService {
         imageWidth: imgW,
         imageHeight: imgH,
         rawText: recognized.text,
+        receiptTotal: receiptTotal,
+        taxTotal: taxTotal > 0 ? taxTotal : null,
       );
     } catch (e) {
       debugPrint('[OcrService] Error: $e');
@@ -161,23 +214,23 @@ class OcrService {
     return s.replaceAll(RegExp(r'[A-Za-z*+]+$'), '').trim();
   }
 
+  static final _letter = RegExp(r'\p{L}', unicode: true);
+
+  // Optional currency symbol before ($/€/£/¥) or letters after (T, TTC, LBP…).
+  static final _priceRe = RegExp(
+    r'[$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?|\d{4,}(?:[.,]\d{1,2})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
+  );
+
   /// Try to parse a line into (name, amount) using multiple strategies.
   static ExtractedItem? _parseLine(String line) {
-    // Pre-clean: strip common trailing suffixes from the entire line
-    // so "450,000T" becomes "450,000" before regex matching.
     var trimmed = line.trim();
     if (trimmed.length < 2) return null;
-
-    final lower = trimmed.toLowerCase();
-    if (_isNonItemLine(lower)) return null;
+    if (_isNoise(trimmed.toLowerCase())) return null;
 
     // Find ALL price-like numbers in the line.
     // Match both decimal prices (12.50, 4,50), thousands-separated (317,100, 1.234.567),
     // prices starting with a separator (,450,000), and plain large numbers (765000, 90000).
-    // Optional currency symbol before ($/€/£/¥) or letters after (T, TTC, LBP, etc.).
-    final priceMatches = RegExp(
-      r'[\$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,2})?|\d{4,}(?:[.,]\d{1,2})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
-    ).allMatches(trimmed).toList();
+    final priceMatches = _priceRe.allMatches(trimmed).toList();
 
     // Filter: reject partial matches where a digit follows (e.g., "317,10" from "317,100")
     final validMatches = priceMatches.where((m) {
@@ -197,7 +250,7 @@ class OcrService {
     }
 
     // Strategy 2: Whole number price at end (e.g., "Water 3")
-    final wholePrice = RegExp(r'(.+?)\s+[\$€£¥]?\s*(\d{1,6})\s*$');
+    final wholePrice = RegExp(r'(.+?)\s+[$€£¥]?\s*(\d{1,6})\s*$');
     var match = wholePrice.firstMatch(trimmed);
     if (match != null) {
       final name = match.group(1)!;
@@ -207,13 +260,13 @@ class OcrService {
     }
 
     // Strategy 3: Price at start (e.g., "$4.50 Coffee")
-    final startPrice = RegExp(r'^[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s+(.+)');
+    final startPrice = RegExp(r'^[$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s+(.+)');
     match = startPrice.firstMatch(trimmed);
     if (match != null) return _buildItem(match.group(2)!, match.group(1)!);
 
     // Strategy 4: "qty x item price"
     final qtyPattern = RegExp(
-      r'^\d+\s*[xX×]\s*(.+?)\s+[\$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s*$',
+      r'^\d+\s*[xX×]\s*(.+?)\s+[$€£¥]?\s*(\d{1,6}[.,]\d{1,2})\s*$',
     );
     match = qtyPattern.firstMatch(trimmed);
     if (match != null) return _buildItem(match.group(1)!, match.group(2)!);
@@ -222,6 +275,25 @@ class OcrService {
   }
 
   static ExtractedItem? _buildItem(String rawName, String rawPrice) {
+    final amount = _parsePrice(rawPrice);
+    if (amount == null || amount <= 0) return null;
+    return _finishItem(rawName, amount);
+  }
+
+  /// The rightmost price on [line] (used for total and tax lines).
+  static double? _lastPrice(String line) {
+    final matches = _priceRe.allMatches(line.trim()).where((m) {
+      final cleaned =
+          _stripPriceSuffix(m.group(1)!).replaceAll(RegExp(r'^[,.]'), '');
+      return cleaned.contains(RegExp(r'[.,]')) ||
+          cleaned.replaceAll(RegExp(r'[,. ]'), '').length >= 2;
+    }).toList();
+    if (matches.isEmpty) return null;
+    return _parsePrice(matches.last.group(1)!);
+  }
+
+  /// Normalises "1,234.56" / "1.234,56" / "4,50" / "450,000T" to a number.
+  static double? _parsePrice(String rawPrice) {
     // Clean price: strip trailing suffixes (T, TTC, HT, VAT, etc.), remove spaces
     var priceStr = _stripPriceSuffix(rawPrice).replaceAll(' ', '');
     // Strip leading separator: ",450,000" → "450,000"
@@ -276,9 +348,10 @@ class OcrService {
       }
       // Otherwise it's a normal decimal: "12.50" → keep as-is
     }
-    final amount = double.tryParse(priceStr);
-    if (amount == null || amount <= 0) return null;
+    return double.tryParse(priceStr);
+  }
 
+  static ExtractedItem? _finishItem(String rawName, double amount) {
     var name = rawName.trim();
     int quantity = 1;
 
@@ -288,8 +361,7 @@ class OcrService {
       final q = int.tryParse(leadingQty.group(1)!);
       final rest = leadingQty.group(2)!;
       // Only treat as quantity if the rest looks like a name (has letters)
-      if (q != null && q >= 1 && q <= 99 &&
-          rest.contains(RegExp(r'[a-zA-Z]'))) {
+      if (q != null && q >= 1 && q <= 99 && rest.contains(_letter)) {
         quantity = q;
         name = rest;
       }
@@ -325,30 +397,77 @@ class OcrService {
     return ExtractedItem(name: name, amount: amount, quantity: quantity);
   }
 
-  static bool _isNonItemLine(String lower) {
-    // Only skip lines that are EXACTLY these labels (with optional trailing content)
-    const exactSkip = [
-      'total', 'subtotal', 'sub total', 'grand total',
-      'gratuity', 'thank you', 'receipt', 'invoice',
-      'amount due', 'balance due', 'payment',
-    ];
-    for (final s in exactSkip) {
-      if (lower.startsWith(s)) return true;
+  // Receipt keywords: English, French, Arabic, plus common Spanish/German.
+  static const _subtotalWords = [
+    'subtotal', 'sub total', 'sub-total', 'sous-total', 'sous total',
+    'total ht', 'المجموع الفرعي', 'zwischensumme',
+  ];
+  static const _totalWords = [
+    'total', 'grand total', 'amount due', 'balance due', 'net à payer',
+    'à payer', 'montant total', 'المجموع', 'الإجمالي', 'المبلغ المستحق',
+    'importe', 'summe', 'gesamt',
+  ];
+  static const _taxWords = [
+    'tax', 'vat', 'tva', 'gst', 'hst', 'iva', 'mwst', 'service', 'svc',
+    'ضريبة', 'القيمة المضافة', 'خدمة',
+  ];
+  static const _discountWords = [
+    'discount', 'remise', 'réduction', 'promo', 'coupon', 'descuento',
+    'rabatt', 'خصم', 'تخفيض',
+  ];
+  static const _otherWords = [
+    // Tip is entered separately; payment, change and contact lines aren't items.
+    'tip', 'gratuity', 'pourboire', 'cash', 'change', 'rendu', 'monnaie',
+    'espèces', 'carte', 'card', 'visa', 'mastercard', 'payment', 'paiement',
+    'paid', 'thank', 'merci', 'receipt', 'invoice', 'facture', 'reçu',
+    'www', 'http', 'tel', 'tél', 'fax', 'نقدا', 'نقداً', 'الباقي', 'الدفع',
+    'بطاقة', 'شكرا', 'شكراً', 'فاتورة', 'إيصال',
+  ];
+
+  static final _latinWord = RegExp(r'^[a-zà-ÿ .\-]+$');
+
+  static bool _has(String lower, List<String> words) {
+    for (final w in words) {
+      if (_latinWord.hasMatch(w)) {
+        // Latin keywords must be whole words ("tax" not in "taxi").
+        final re = RegExp('(^|[^a-zà-ÿ])${RegExp.escape(w)}(\$|[^a-zà-ÿ])');
+        if (re.hasMatch(lower)) return true;
+      } else if (lower.contains(w)) {
+        return true;
+      }
     }
-    // Skip lines that are clearly non-items
-    const containsSkip = [
-      'credit card', 'debit card', 'visa ', 'mastercard',
-      'www.', 'http', 'tel:', 'fax:',
-    ];
-    for (final s in containsSkip) {
-      if (lower.contains(s)) return true;
-    }
-    // Skip lines that are just numbers, dates, or codes
-    if (RegExp(r'^[\d/\-.:, ]+$').hasMatch(lower)) return true;
-    // Skip very short lines (likely headers/noise)
-    if (lower.replaceAll(RegExp(r'[^a-z]'), '').length < 2) return true;
     return false;
   }
+
+  /// Sorts a receipt line into item / discount / tax / total / other.
+  static OcrLineKind _classify(String lower) {
+    if (_isNoise(lower)) return OcrLineKind.other;
+    if (_has(lower, _subtotalWords)) return OcrLineKind.other;
+    if (_has(lower, _discountWords)) return OcrLineKind.discount;
+    if (_has(lower, _taxWords)) return OcrLineKind.tax;
+    if (_has(lower, _totalWords)) return OcrLineKind.total;
+    if (_has(lower, _otherWords)) return OcrLineKind.other;
+    return OcrLineKind.item;
+  }
+
+  /// Lines that are only numbers, dates or codes, or have almost no letters
+  /// (in any script, so Arabic item names count).
+  static bool _isNoise(String lower) {
+    if (RegExp(r'^[\d/\-.:, ]+$').hasMatch(lower)) return true;
+    if (lower.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '').length < 2) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Exposed for tests.
+  @visibleForTesting
+  static OcrLineKind classifyForTest(String line) =>
+      _classify(line.toLowerCase());
+
+  /// Exposed for tests.
+  @visibleForTesting
+  static ExtractedItem? parseLineForTest(String line) => _parseLine(line);
 }
 
 /// Internal helper for pre-merge OCR lines.

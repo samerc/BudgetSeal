@@ -9,6 +9,102 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String billItemN(int n) {
+    return 'البند $n';
+  }
+
+  @override
+  String get billDiscardTitle => 'تجاهل هذه الفاتورة؟';
+
+  @override
+  String get billDiscardBody => 'ستفقد البنود والتقسيم الذي أدخلته.';
+
+  @override
+  String get billWhoPaid => 'من دفع؟';
+
+  @override
+  String get billPaidMe => 'دفعت الفاتورة كاملة';
+
+  @override
+  String get billPaidMeDesc =>
+      'يسجّل الفاتورة كاملة من حسابك ويتتبّع ما يدين به كل شخص لك في الأهداف والقروض.';
+
+  @override
+  String get billPaidOther => 'دفع شخص آخر';
+
+  @override
+  String billPaidOtherDesc(String name) {
+    return 'يتتبّع ما تدين به لـ $name في الأهداف والقروض. لا يخرج شيء من حسابك حتى تسدّد له.';
+  }
+
+  @override
+  String get billPaidEach => 'دفع كلٌّ حصّته';
+
+  @override
+  String get billPaidEachDesc => 'يسجّل حصّتك فقط.';
+
+  @override
+  String billLinePart(String name) {
+    return 'حصّة $name';
+  }
+
+  @override
+  String billLoanName(String date) {
+    return 'تقسيم فاتورة · $date';
+  }
+
+  @override
+  String billLoansCreated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'أُضيف $n قرض إلى الأهداف والقروض',
+      many: 'أُضيف $n قرضًا إلى الأهداف والقروض',
+      few: 'أُضيفت $n قروض إلى الأهداف والقروض',
+      two: 'أُضيف قرضان إلى الأهداف والقروض',
+      one: 'أُضيف قرض واحد إلى الأهداف والقروض',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String billOweCreated(String name, String amount) {
+    return 'أُضيف إلى الأهداف والقروض: تدين لـ $name بمبلغ $amount';
+  }
+
+  @override
+  String get billShare => 'مشاركة التقسيم';
+
+  @override
+  String billShareHeader(String total) {
+    return 'تقسيم فاتورة · المجموع $total';
+  }
+
+  @override
+  String billSharePaidBy(String name) {
+    return 'دفعها $name';
+  }
+
+  @override
+  String get billTax => 'الضريبة والخدمة';
+
+  @override
+  String get billTaxAmount => 'مبلغ الضريبة والخدمة';
+
+  @override
+  String get billTaxHint => 'يُقسَّم بحسب ما طلبه كل شخص.';
+
+  @override
+  String billReceiptMatch(String total) {
+    return 'يطابق مجموع الإيصال ($total)';
+  }
+
+  @override
+  String billReceiptDiff(String items, String total) {
+    return 'مجموع البنود $items · مجموع الإيصال $total';
+  }
+
+  @override
   String webEnvBalanceOfTarget(String balance, String target) {
     return '$balance من $target';
   }

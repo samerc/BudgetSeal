@@ -9,6 +9,100 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String billItemN(int n) {
+    return 'Article $n';
+  }
+
+  @override
+  String get billDiscardTitle => 'Abandonner cette addition ?';
+
+  @override
+  String get billDiscardBody =>
+      'Les articles et la répartition saisis seront perdus.';
+
+  @override
+  String get billWhoPaid => 'Qui a payé ?';
+
+  @override
+  String get billPaidMe => 'J\'ai payé toute l\'addition';
+
+  @override
+  String get billPaidMeDesc =>
+      'Enregistre toute l\'addition sur votre compte et suit ce que chacun vous doit dans Objectifs et prêts.';
+
+  @override
+  String get billPaidOther => 'Quelqu\'un d\'autre a payé';
+
+  @override
+  String billPaidOtherDesc(String name) {
+    return 'Suit ce que vous devez à $name dans Objectifs et prêts. Rien ne sort de votre compte avant le remboursement.';
+  }
+
+  @override
+  String get billPaidEach => 'Chacun a payé sa part';
+
+  @override
+  String get billPaidEachDesc => 'Enregistre seulement votre part.';
+
+  @override
+  String billLinePart(String name) {
+    return 'Part de $name';
+  }
+
+  @override
+  String billLoanName(String date) {
+    return 'Addition partagée · $date';
+  }
+
+  @override
+  String billLoansCreated(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n prêts ajoutés à Objectifs et prêts',
+      one: '1 prêt ajouté à Objectifs et prêts',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String billOweCreated(String name, String amount) {
+    return 'Ajouté à Objectifs et prêts : vous devez $amount à $name';
+  }
+
+  @override
+  String get billShare => 'Partager la répartition';
+
+  @override
+  String billShareHeader(String total) {
+    return 'Addition partagée · total $total';
+  }
+
+  @override
+  String billSharePaidBy(String name) {
+    return 'Payé par $name';
+  }
+
+  @override
+  String get billTax => 'Taxes et service';
+
+  @override
+  String get billTaxAmount => 'Montant taxes et service';
+
+  @override
+  String get billTaxHint => 'Réparti selon ce que chacun a commandé.';
+
+  @override
+  String billReceiptMatch(String total) {
+    return 'Correspond au total du ticket ($total)';
+  }
+
+  @override
+  String billReceiptDiff(String items, String total) {
+    return 'Les articles font $items · total du ticket $total';
+  }
+
+  @override
   String webEnvBalanceOfTarget(String balance, String target) {
     return '$balance sur $target';
   }

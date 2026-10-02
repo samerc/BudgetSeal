@@ -182,11 +182,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           }
           if (_destAccountId != null) _fetchTransferRate();
         }
-      } else if (_lines.isNotEmpty && _lines.first.accountId == null) {
+      } else if (_lines.any((l) => l.accountId == null)) {
+        // Every prefilled line without an account (e.g. a bill split's
+        // per-person lines) starts on the same default account.
         final id = await LastUsedService.defaultAccount(accounts);
-        if (mounted && id != null && _lines.first.accountId == null) {
-          await _onLineAccountChanged(0, id);
-          _accountIsDefault = true;
+        if (!mounted || id == null) return;
+        for (var i = 0; i < _lines.length; i++) {
+          if (_lines[i].accountId != null) continue;
+          await _onLineAccountChanged(i, id);
+          if (!mounted) return;
+          if (i == 0) _accountIsDefault = true;
         }
       }
     } catch (e) {
@@ -1532,8 +1537,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               if (!isEdit && !needsAmount) ...[
                 OutlinedButton(
                   onPressed: _loading ? null : () => _save(addAnother: true),
+                  // The theme's minimum size is full-width; in a Row that
+                  // would be infinite.
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
+                    minimumSize: const Size(0, 52),
                   ),
                   child: Text(S.of(context).txFormSaveAndNew),
                 ),

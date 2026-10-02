@@ -2072,3 +2072,28 @@ currency_name_try,,Turkish Lira,ليرة تركية,Livre turque
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
 web_env_balance_of_target,,{balance} of {target},{balance} من {target},{balance} sur {target}
 web_shortcut_refresh,,Refresh current page,تحديث الصفحة الحالية,Rafraîchir la page actuelle
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+bill_item_n,,Item {n},البند {n},Article {n}
+bill_discard_title,,Discard this bill?,تجاهل هذه الفاتورة؟,Abandonner cette addition ?
+bill_discard_body,,The items and splits you entered will be lost.,ستفقد البنود والتقسيم الذي أدخلته.,Les articles et la répartition saisis seront perdus.
+bill_who_paid,,Who paid?,من دفع؟,Qui a payé ?
+bill_paid_me,,I paid the whole bill,دفعت الفاتورة كاملة,J'ai payé toute l'addition
+bill_paid_me_desc,,Records the full bill from your account and tracks what each person owes you in Goals & Loans.,يسجّل الفاتورة كاملة من حسابك ويتتبّع ما يدين به كل شخص لك في الأهداف والقروض.,Enregistre toute l'addition sur votre compte et suit ce que chacun vous doit dans Objectifs et prêts.
+bill_paid_other,,Someone else paid,دفع شخص آخر,Quelqu'un d'autre a payé
+bill_paid_other_desc,,Tracks what you owe {name} in Goals & Loans. Nothing leaves your account until you pay them back.,يتتبّع ما تدين به لـ {name} في الأهداف والقروض. لا يخرج شيء من حسابك حتى تسدّد له.,Suit ce que vous devez à {name} dans Objectifs et prêts. Rien ne sort de votre compte avant le remboursement.
+bill_paid_each,,Everyone paid their own part,دفع كلٌّ حصّته,Chacun a payé sa part
+bill_paid_each_desc,,Records only your share.,يسجّل حصّتك فقط.,Enregistre seulement votre part.
+bill_line_part,,{name}'s part,حصّة {name},Part de {name}
+bill_loan_name,,Bill split · {date},تقسيم فاتورة · {date},Addition partagée · {date}
+bill_loans_created,,"{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}","{n, plural, =1{أُضيف قرض واحد إلى الأهداف والقروض} =2{أُضيف قرضان إلى الأهداف والقروض} few{أُضيفت {n} قروض إلى الأهداف والقروض} many{أُضيف {n} قرضًا إلى الأهداف والقروض} other{أُضيف {n} قرض إلى الأهداف والقروض}}","{n, plural, =1{1 prêt ajouté à Objectifs et prêts} other{{n} prêts ajoutés à Objectifs et prêts}}"
+bill_owe_created,,Added to Goals & Loans: you owe {name} {amount},أُضيف إلى الأهداف والقروض: تدين لـ {name} بمبلغ {amount},Ajouté à Objectifs et prêts : vous devez {amount} à {name}
+bill_share,,Share split,مشاركة التقسيم,Partager la répartition
+bill_share_header,,Bill split · total {total},تقسيم فاتورة · المجموع {total},Addition partagée · total {total}
+bill_share_paid_by,,Paid by {name},دفعها {name},Payé par {name}
+bill_tax,,Tax & service,الضريبة والخدمة,Taxes et service
+bill_tax_amount,,Tax & service amount,مبلغ الضريبة والخدمة,Montant taxes et service
+bill_tax_hint,,Split in proportion to what each person ordered.,يُقسَّم بحسب ما طلبه كل شخص.,Réparti selon ce que chacun a commandé.
+bill_receipt_match,,Matches the receipt total ({total}),يطابق مجموع الإيصال ({total}),Correspond au total du ticket ({total})
+bill_receipt_diff,,Items add up to {items} · receipt total {total},مجموع البنود {items} · مجموع الإيصال {total},Les articles font {items} · total du ticket {total}

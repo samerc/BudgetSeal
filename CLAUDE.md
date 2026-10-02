@@ -266,6 +266,9 @@ All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages
 ### Bill Splitter — Flat ListView Only
 Nested `Column + Expanded + bottomNavigationBar` = blank screen. Nested Rows with Expanded = blank screen. AnimatedSwitcher with switch expression = blank screen. **Only working solution:** single `ListView` body, flat `if`/spread for step content, nav buttons inline at the bottom.
 
+### Buttons in a Row — Give Them a Width
+The theme gives Filled/Outlined buttons `minimumSize: Size.fromHeight(52)` (full width). A bare FilledButton/OutlinedButton as a direct `Row` child (not in `Expanded`/a sized box) gets infinite width → layout fails and the screen renders blank. Wrap it in `Expanded`, or set `minimumSize: const Size(0, 44)` in its style. (Bit the add form's "Save & new", the reorder sheet and the category sheet's Add.)
+
 ### Data Reset Flow
 Never close the database and wait for providers. Instead: `db.batch()` delete all rows → clear SharedPreferences → `context.go('/onboarding')`.
 
@@ -754,17 +757,13 @@ Every delete/undo write also bumps `lastModified` (sync merges by it — without
 
 ## Bill Splitter
 
-`lib/features/transactions/bill_splitter_screen.dart` — accessible from More > Bill Splitter (`/bill-splitter` route).
+`lib/features/transactions/bill_splitter_screen.dart` — More > Bill Splitter or the Split quick action (`/bill-splitter`, premium). Three steps in one flat ListView: Items (scan or manual; amounts via `showCalculatorSheet`, never the keyboard) → People + assignment (items start unassigned; "Everyone" chip; alone, every item is the user's) → Review.
 
-Two modes:
-- **Manual**: Enter total + number of people, even or custom split
-- **Scan Receipt**: Camera/gallery → offline OCR via `google_mlkit_text_recognition` → extracted line items with amounts → assign each item to people → per-person totals
-
-OCR service at `lib/shared/utils/ocr_service.dart` — regex parsing of receipt text to extract `(name, amount, quantity)` tuples. Line merging by Y-position (handles ML Kit splitting items across blocks). Handles both US (1,234.56) and European (1.234,56 or 4,50) number formats. Quantity detection from leading "2x" or trailing numbers. Filters out non-item lines (totals, tax, headers). Fully offline, no internet needed.
-
-Interactive receipt overlay shows tappable bounding boxes on the receipt image. Tap a person chip, then tap items to assign. Lines without detected prices prompt for manual amount entry. Quantity > 1 items offer "split into individual items" for multi-person assignment.
-
-Tip: percentage slider (0-30%) or fixed amount toggle. Cross-currency support with exchange rate input + swap button. "Create Transaction" button disabled if user's share is $0. Warning dialog if cross-currency rate not set.
+- `_people.first` is the user ("Me") and can't be removed — its share is what gets saved.
+- `_calculateBreakdown()` → items (discounts are negative items), tax & service (`_taxIsAmount`/`_taxPercent`, proportional to each person's items), tip (percentage proportional, fixed amount even). `_calculateSplits()` rounds per person with largest-remainder so shares sum to the rounded total.
+- **Who paid** (`_PaidMode`): `me` → pushes the classic form with the user's share + one line per person (`billLinePart`), then on a saved txId creates a `lent` loan per person in `objectives` (bill currency); `other` → no transaction, a `borrowed` loan to the payer for the user's share; `each` → the user's share only. Only `context.pop()` after a save — a closed form leaves the bill intact.
+- Share split → `SharePlus` text. Back steps back, then asks before discarding (`PopScope`). Bill currency change prefills the rate (`rateToBaseOrOne`); rate fields parse with `parseLooseAmount`.
+- OCR (`lib/shared/utils/ocr_service.dart`, ML Kit, offline): lines merged by Y-position, classified by `OcrLineKind` (item/discount/tax/total/other) from EN/FR/AR (+ES/DE) keywords; letters counted with `\p{L}` so Arabic names survive. `OcrResult.receiptTotal` (largest total) drives the step-1 total check; `taxTotal` prefills tax when items + tax match the receipt total. Tests: `test/features/ocr_service_test.dart`.
 
 ## Customizable Dashboard
 
