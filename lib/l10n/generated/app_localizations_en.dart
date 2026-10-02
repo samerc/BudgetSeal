@@ -9,6 +9,51 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webBulkAdd => 'Add several';
+
+  @override
+  String get webBulkTitle => 'Add several transactions';
+
+  @override
+  String get webBulkHint =>
+      'Tab moves across, Enter goes down a row, Ctrl+Enter saves. Paste rows from a spreadsheet to fill several at once.';
+
+  @override
+  String get webBulkAddRow => 'Add row';
+
+  @override
+  String get webBulkRemoveRow => 'Remove row';
+
+  @override
+  String get webBulkSave => 'Save all';
+
+  @override
+  String get webBulkClear => 'Clear all';
+
+  @override
+  String webBulkCount(int n) {
+    return 'Rows: $n';
+  }
+
+  @override
+  String get webBulkEmpty => 'Fill in at least one row.';
+
+  @override
+  String webBulkRowBad(int n) {
+    return 'Check row $n';
+  }
+
+  @override
+  String webBulkPasted(int n) {
+    return 'Rows pasted: $n';
+  }
+
+  @override
+  String webBulkSaved(int n) {
+    return 'Transactions added: $n';
+  }
+
+  @override
   String get webMoveTitle => 'Move money';
 
   @override

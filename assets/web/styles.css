@@ -791,5 +791,39 @@ kbd {
   .row-actions { display: none; }
 }
 
+/* Bulk entry grid */
+.bulk-card { padding: 8px 12px 12px; }
+.bulk-grid { --cols: 150px 118px minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(130px, 1fr) 36px; }
+.bulk-head, .bulk-row { display: grid; grid-template-columns: var(--cols); gap: 6px; align-items: center; }
+.bulk-head { padding: 6px 2px 8px; font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+.bulk-head .end { text-align: end; }
+.bulk-row { padding: 3px 2px; border-radius: 12px; }
+.bulk-row.bad { background: var(--expense-fill); box-shadow: inset 0 0 0 1px var(--expense); }
+.bulk-cell { min-width: 0; }
+.bulk-cell .input { min-height: 38px; padding: 7px 10px; font-size: 14px; border-radius: 10px; }
+.bulk-cell select.input { padding-inline-end: 28px; background-position: right 10px center; }
+[dir="rtl"] .bulk-cell select.input { background-position: left 10px center; }
+.bulk-cell.c-amount .input { text-align: end; padding-inline-end: 54px; font-weight: 800; }
+.bulk-cell .input-cur .cur { inset-inline-end: 4px; padding: 2px 7px; font-size: 11.5px; }
+.bulk-cell .icon-btn { width: 32px; height: 32px; }
+.bulk-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 2px 0; }
+.bulk-sum { font-size: 13.5px; font-weight: 700; color: var(--text-2); }
+.bulk-sum .expense { color: var(--expense); }
+.bulk-sum .income { color: var(--income); }
+
+@media (max-width: 980px) {
+  .bulk-head { display: none; }
+  .bulk-row { grid-template-columns: repeat(2, minmax(0, 1fr)) 36px; padding: 10px 6px; }
+  .bulk-row + .bulk-row { border-top: 1px solid var(--line); border-radius: 0; }
+  .bulk-row.bad { border-radius: 12px; }
+  .bulk-cell.c-date { grid-column: 1; }
+  .bulk-cell.c-type { grid-column: 2; }
+  .bulk-cell.c-del { grid-column: 3; grid-row: 1; }
+  .bulk-cell.c-account { grid-column: 1; }
+  .bulk-cell.c-category { grid-column: 2 / 4; }
+  .bulk-cell.c-note { grid-column: 1; }
+  .bulk-cell.c-amount { grid-column: 2 / 4; }
+}
+
 /* Honeypot field — hidden from people, filled by bots. */
 .hp-field { position: absolute; inset-inline-start: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }

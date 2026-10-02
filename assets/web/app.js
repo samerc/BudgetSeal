@@ -261,6 +261,7 @@ const IC = {
   plane: svg('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'),
   repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
+  grid: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
   chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
 };
 const TYPE_ICON = { bank: IC.bank, cash: IC.cash, credit: IC.card, wallet: IC.wallet };
@@ -601,6 +602,7 @@ const routes = {
   '#/recurring': () => renderRecurring(false),
   '#/subscriptions': () => renderRecurring(true),
   '#/reports': renderReports,
+  '#/bulk': renderBulk,
 };
 
 function navigate(hash, quiet = false) {
@@ -609,11 +611,13 @@ function navigate(hash, quiet = false) {
   state.route = route;
   const acct = route.match(/^#\/accounts\/([\w-]+)$/);
   const base = acct ? '#/accounts' : route;
-  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === base));
+  const navBase = base === '#/bulk' ? '#/transactions' : base;
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === navBase));
   toggleSidebar(false);
   if (changed && !quiet) window.scrollTo(0, 0);
   if (acct) return renderTransactions({ accountId: acct[1], quiet });
   if (base !== '#/transactions') txView = null;
+  if (base !== '#/bulk') bulk = null;
   return (routes[base] || renderHome)(quiet);
 }
 
@@ -980,6 +984,7 @@ async function renderTransactions(opts = {}) {
           <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`)}`
     : pageHead(t('nav_transactions'), '',
         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+         <a class="btn btn-tonal" href="#/bulk">${IC.grid}${esc(t('web_bulk_add'))}</a>
          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`);
 
   setContent(`
@@ -1361,6 +1366,253 @@ async function editTx(id, dup = false) {
   const d = await api(`/api/transactions/${encodeURIComponent(id)}`);
   if (!d) return;
   openTxForm(d, dup ? 'dup' : 'edit');
+}
+
+// ── Bulk entry ────────────────────────────────────────────────────────────────
+// A grid of expense/income rows saved in one request (all or nothing). Tab
+// moves across, Enter goes down (adding a row at the end), Ctrl+Enter saves.
+// Pasting spreadsheet rows fills one row per line. The draft survives
+// leaving the page (sessionStorage).
+
+const BULK_COLS = ['date', 'type', 'account', 'category', 'note', 'amount'];
+let bulk = null;
+
+function bulkLoad() {
+  try { const d = JSON.parse(sessionStorage.getItem('bs_bulk') || 'null'); if (Array.isArray(d)) return d; } catch (_) { /* fresh */ }
+  return null;
+}
+function bulkStore() {
+  try { sessionStorage.setItem('bs_bulk', JSON.stringify(bulk.rows.filter(r => !bulkBlank(r)).length ? bulk.rows : null)); } catch (_) { /* private mode */ }
+}
+function bulkBlank(r) { return !String(r.amount || '').trim() && !String(r.note || '').trim(); }
+
+function bulkRow(prev) {
+  const lastAcct = lsGet('bs_last_account');
+  const accounts = cache.accounts || [];
+  return {
+    date: prev?.date || dayKey(),
+    type: prev?.type || 'expense',
+    account: prev?.account || (accounts.some(a => a.id === lastAcct) ? lastAcct : accounts[0]?.id || ''),
+    category: '', note: '', amount: '',
+  };
+}
+
+async function renderBulk() {
+  setContent(pageHead(t('web_bulk_title'), '') + skeleton(4));
+  const { accounts, categories } = await refs();
+  if (state.route !== '#/bulk') return;
+  if (!accounts.length) { location.hash = '#/transactions'; toast(t('web_need_account'), true); return; }
+  bulk = { accounts, categories, rows: bulkLoad() || [], bad: -1 };
+  bulk.rows = bulk.rows.filter(r => accounts.some(a => a.id === r.account));
+  if (!bulk.rows.length) bulk.rows.push(bulkRow());
+  while (bulk.rows.length < 3) bulk.rows.push(bulkRow(bulk.rows[bulk.rows.length - 1]));
+
+  setContent(`
+    <a class="back-link" href="#/transactions">${IC.back}${esc(t('nav_transactions'))}</a>
+    ${pageHead(t('web_bulk_title'), esc(t('web_bulk_hint')),
+      `<button class="btn btn-ghost" data-action="bulk-clear">${esc(t('web_bulk_clear'))}</button>
+       <button class="btn btn-primary" data-action="bulk-save">${IC.check}${esc(t('web_bulk_save'))}</button>`)}
+    <div class="card bulk-card">
+      <div class="bulk-grid" id="bulk-grid" role="grid">
+        <div class="bulk-head" role="row">
+          ${[['web_form_date'], ['web_form_type'], ['web_form_account'], ['web_form_category'], ['web_form_title'], ['web_form_amount', 'end']]
+            .map(([k, c]) => `<span role="columnheader" class="${c || ''}">${esc(t(k))}</span>`).join('')}<span></span>
+        </div>
+        <div id="bulk-rows"></div>
+      </div>
+      <div class="bulk-foot">
+        <button class="btn btn-tonal btn-sm" data-action="bulk-add">${IC.plus}${esc(t('web_bulk_add_row'))}</button>
+        <span class="bulk-sum" id="bulk-sum"></span>
+      </div>
+    </div>`);
+  drawBulk();
+  const grid = document.getElementById('bulk-grid');
+  grid.addEventListener('input', bulkInput);
+  grid.addEventListener('change', bulkInput);
+  grid.addEventListener('keydown', bulkKey);
+  grid.addEventListener('paste', bulkPaste);
+  grid.querySelector('[data-col="amount"]')?.focus();
+}
+
+function bulkCell(r, i, col) {
+  const a = `data-row="${i}" data-col="${col}" aria-label="${esc(t({ date: 'web_form_date', type: 'web_form_type', account: 'web_form_account', category: 'web_form_category', note: 'web_form_title', amount: 'web_form_amount' }[col]))}"`;
+  switch (col) {
+    case 'date': return `<input type="date" class="input" ${a} value="${esc(r.date)}">`;
+    case 'type': return `<select class="input" ${a}>${['expense', 'income'].map(k => `<option value="${k}"${r.type === k ? ' selected' : ''}>${esc(t(`type_${k}`))}</option>`).join('')}</select>`;
+    case 'account': return `<select class="input" ${a}>${accountOptions(bulk.accounts, r.account)}</select>`;
+    case 'category': return `<select class="input" ${a}>${categoryOptions(bulk.categories, r.type, r.category)}</select>`;
+    case 'note': return `<input class="input" maxlength="500" ${a} value="${esc(r.note)}" placeholder="${esc(t('web_form_title'))}">`;
+    case 'amount': {
+      const cur = bulk.accounts.find(x => x.id === r.account)?.currency || '';
+      return `<div class="input-cur"><input class="input num" inputmode="decimal" autocomplete="off" placeholder="0" ${a} value="${esc(r.amount)}"><span class="cur">${esc(cur)}</span></div>`;
+    }
+  }
+  return '';
+}
+
+function drawBulk(focus) {
+  const box = document.getElementById('bulk-rows');
+  if (!box) return;
+  box.innerHTML = bulk.rows.map((r, i) => `<div class="bulk-row${i === bulk.bad ? ' bad' : ''}" role="row">
+    ${BULK_COLS.map(c => `<div class="bulk-cell c-${c}" role="gridcell">${bulkCell(r, i, c)}</div>`).join('')}
+    <div class="bulk-cell c-del"><button type="button" class="icon-btn danger" data-action="bulk-del" data-row="${i}" title="${esc(t('web_bulk_remove_row'))}" aria-label="${esc(t('web_bulk_remove_row'))}" tabindex="-1">${IC.trash}</button></div>
+  </div>`).join('');
+  bulkSummary();
+  if (focus) box.querySelector(`[data-row="${focus.row}"][data-col="${focus.col}"]`)?.focus();
+}
+
+function bulkSummary() {
+  const totals = {};
+  let n = 0;
+  for (const r of bulk.rows) {
+    const v = parseAmount(String(r.amount || ''));
+    if (!(v > 0)) continue;
+    n++;
+    const cur = bulk.accounts.find(x => x.id === r.account)?.currency || state.baseCurrency;
+    totals[cur] = (totals[cur] || 0) + (r.type === 'income' ? v : -v);
+  }
+  const el = document.getElementById('bulk-sum');
+  if (el) el.innerHTML = n ? `${esc(t('web_bulk_count', { n }))} · ${Object.entries(totals).map(([c, v]) => `<span class="num ${v < 0 ? 'expense' : 'income'}">${esc(fmt(v, c))}</span>`).join(' · ')}` : '';
+}
+
+function bulkInput(e) {
+  const el = e.target.closest('[data-col]');
+  if (!el) return;
+  const i = Number(el.dataset.row), col = el.dataset.col;
+  const r = bulk.rows[i];
+  if (!r) return;
+  r[col] = el.value;
+  if (bulk.bad === i) { bulk.bad = -1; el.closest('.bulk-row')?.classList.remove('bad'); }
+  if (e.type === 'change' && (col === 'type' || col === 'account')) {
+    if (col === 'type') {
+      const cat = bulk.categories.find(c => c.id === r.category);
+      if (cat && (cat.transactionType === 'income') !== (r.type === 'income')) r.category = '';
+    }
+    drawBulk({ row: i, col });
+  } else bulkSummary();
+  bulkStore();
+}
+
+function bulkKey(e) {
+  const el = e.target.closest('[data-col]');
+  if (!el) return;
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); saveBulk(); return; }
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const i = Number(el.dataset.row), col = el.dataset.col;
+  if (i === bulk.rows.length - 1) {
+    bulk.rows.push(bulkRow(bulk.rows[i]));
+    drawBulk({ row: i + 1, col });
+  } else {
+    document.querySelector(`#bulk-rows [data-row="${i + 1}"][data-col="${col}"]`)?.focus();
+  }
+}
+
+/** Spreadsheet paste: one row per line; cells are recognised by content. */
+function bulkPaste(e) {
+  const text = e.clipboardData?.getData('text/plain') || '';
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim());
+  if (lines.length < 2 && !text.includes('\t')) return; // a normal single-cell paste
+  e.preventDefault();
+  const el = e.target.closest('[data-row]');
+  let i = el ? Number(el.dataset.row) : bulk.rows.length;
+  const norm = s => s.trim().toLowerCase();
+  const catByName = new Map(bulk.categories.map(c => [norm(c.name), c]));
+  const acctByName = new Map(bulk.accounts.map(a => [norm(a.name), a]));
+  let count = 0;
+  for (const line of lines) {
+    const cells = line.split(line.includes('\t') ? '\t' : /[;,](?=(?:[^"]*"[^"]*")*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+    const r = bulk.rows[i] && bulkBlank(bulk.rows[i]) ? bulk.rows[i] : null;
+    const row = r || bulkRow(bulk.rows[i - 1] || bulk.rows[bulk.rows.length - 1]);
+    let amount = null;
+    for (const c of cells) {
+      if (!c) continue;
+      const d = parseLooseDate(c);
+      if (d) { row.date = d; continue; }
+      const cat = catByName.get(norm(c));
+      if (cat) { row.category = cat.id; row.type = cat.transactionType === 'income' ? 'income' : 'expense'; continue; }
+      const acct = acctByName.get(norm(c));
+      if (acct) { row.account = acct.id; continue; }
+      // A number, maybe with a currency symbol/code: "-12.50", "$1,200", "(5) EUR".
+      const bare = c.replace(/\p{Sc}|\b[A-Z]{3}\b|\s/gu, '');
+      if (amount == null && /^[-+(]?[\d.,]*\d[\d.,]*\)?$/.test(bare)) {
+        const v = parseAmount(bare.replace(/[-+()]/g, ''));
+        if (v > 0) { amount = v; if (/^[-(]/.test(bare)) row.type = 'expense'; continue; }
+      }
+      if (!row.note) row.note = c;
+    }
+    if (amount == null && !row.note) continue;
+    if (amount != null) row.amount = amountInputValue(amount, bulk.accounts.find(a => a.id === row.account)?.currency);
+    if (!r) bulk.rows.splice(i, 0, row);
+    i++;
+    count++;
+  }
+  if (!count) return;
+  while (bulk.rows.length > i && bulk.rows.length > 3 && bulkBlank(bulk.rows[bulk.rows.length - 1]) && bulkBlank(bulk.rows[bulk.rows.length - 2])) bulk.rows.pop();
+  if (!bulk.rows.length || !bulkBlank(bulk.rows[bulk.rows.length - 1])) bulk.rows.push(bulkRow(bulk.rows[bulk.rows.length - 1]));
+  drawBulk({ row: Math.min(i, bulk.rows.length - 1), col: 'amount' });
+  bulkStore();
+  toast(t('web_bulk_pasted', { n: count }));
+}
+
+/** 2026-09-03, 03/09/2026, 3.9.26 → YYYY-MM-DD (day first unless that's impossible or the browser is US). */
+function parseLooseDate(s) {
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return dayKey(new Date(+m[1], +m[2] - 1, +m[3]));
+  m = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2}|\d{4})$/);
+  if (!m) return null;
+  let a = +m[1], b = +m[2];
+  const y = m[3].length === 2 ? 2000 + +m[3] : +m[3];
+  const us = (navigator.language || '').toLowerCase() === 'en-us';
+  let day = a, mon = b;
+  if (b > 12 || (us && a <= 12)) { day = b; mon = a; }
+  if (mon < 1 || mon > 12 || day < 1 || day > 31) return null;
+  return dayKey(new Date(y, mon - 1, day));
+}
+
+async function saveBulk() {
+  if (!bulk) return;
+  const items = [], index = [];
+  for (let i = 0; i < bulk.rows.length; i++) {
+    const r = bulk.rows[i];
+    if (bulkBlank(r)) continue;
+    const amount = parseAmount(String(r.amount || ''));
+    if (!(amount > 0) || !r.account) { bulkBad(i); toast(t('web_bulk_row_bad', { n: i + 1 }), true); return; }
+    const cur = bulk.accounts.find(a => a.id === r.account)?.currency;
+    items.push({ type: r.type, accountId: r.account, amount, currency: cur, categoryId: r.category || null, note: String(r.note || '').trim(), date: r.date || dayKey() });
+    index.push(i);
+  }
+  if (!items.length) { toast(t('web_bulk_empty'), true); return; }
+  const btn = document.querySelector('[data-action="bulk-save"]');
+  if (btn) btn.disabled = true;
+  const res = await fetch('/api/transactions/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.token}` },
+    body: JSON.stringify({ items }),
+  }).catch(() => null);
+  if (btn) btn.disabled = false;
+  if (!res) { setConnection(false); toast(t('web_offline_short'), true); return; }
+  if (res.status === 401) { sessionExpired(); return; }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (Number.isInteger(data.row)) {
+      bulkBad(index[data.row]);
+      const msg = /exchange rate/i.test(data.error || '') ? t('web_err_no_rate') : LOCALE === 'en' && data.error ? data.error : '';
+      toast(`${t('web_bulk_row_bad', { n: index[data.row] + 1 })}${msg ? ` · ${msg}` : ''}`, true);
+    } else toast(res.status === 429 ? t('web_err_too_many') : t('web_err_request'), true);
+    return;
+  }
+  lsSet('bs_last_account', items[items.length - 1].accountId);
+  try { sessionStorage.removeItem('bs_bulk'); } catch (_) { /* private mode */ }
+  bulk = null;
+  invalidate();
+  toast(t('web_bulk_saved', { n: data.count || items.length }));
+  location.hash = '#/transactions';
+}
+
+function bulkBad(i) {
+  bulk.bad = i;
+  drawBulk({ row: i, col: 'amount' });
 }
 
 // ── Accounts ──────────────────────────────────────────────────────────────────
@@ -1938,6 +2190,10 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'bulk-save': () => saveBulk(),
+  'bulk-add': () => { bulk.rows.push(bulkRow(bulk.rows[bulk.rows.length - 1])); drawBulk({ row: bulk.rows.length - 1, col: 'amount' }); },
+  'bulk-del': el => { bulk.rows.splice(Number(el.dataset.row), 1); if (!bulk.rows.length) bulk.rows.push(bulkRow()); bulk.bad = -1; drawBulk(); bulkStore(); },
+  'bulk-clear': () => { bulk.rows = [bulkRow()]; while (bulk.rows.length < 3) bulk.rows.push(bulkRow(bulk.rows[0])); bulk.bad = -1; drawBulk({ row: 0, col: 'amount' }); bulkStore(); },
   'move': el => openMove(el.dataset.id),
   'cover': el => openMove(el.dataset.id, true),
   'add-account': openAddAccount,

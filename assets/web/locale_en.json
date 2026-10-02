@@ -285,5 +285,17 @@
   "web_env_cover": "Cover",
   "web_cover_title": "Cover {name}",
   "web_toast_moved": "Money moved",
-  "web_toast_covered": "Overspending covered"
+  "web_toast_covered": "Overspending covered",
+  "web_bulk_add": "Add several",
+  "web_bulk_title": "Add several transactions",
+  "web_bulk_hint": "Tab moves across, Enter goes down a row, Ctrl+Enter saves. Paste rows from a spreadsheet to fill several at once.",
+  "web_bulk_add_row": "Add row",
+  "web_bulk_remove_row": "Remove row",
+  "web_bulk_save": "Save all",
+  "web_bulk_clear": "Clear all",
+  "web_bulk_count": "Rows: {n}",
+  "web_bulk_empty": "Fill in at least one row.",
+  "web_bulk_row_bad": "Check row {n}",
+  "web_bulk_pasted": "Rows pasted: {n}",
+  "web_bulk_saved": "Transactions added: {n}"
 }

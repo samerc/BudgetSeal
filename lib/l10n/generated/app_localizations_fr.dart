@@ -9,6 +9,51 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webBulkAdd => 'Ajouter plusieurs';
+
+  @override
+  String get webBulkTitle => 'Ajouter plusieurs transactions';
+
+  @override
+  String get webBulkHint =>
+      'Tab passe à la cellule suivante, Entrée descend d’une ligne, Ctrl+Entrée enregistre. Collez des lignes d’un tableur pour en remplir plusieurs d’un coup.';
+
+  @override
+  String get webBulkAddRow => 'Ajouter une ligne';
+
+  @override
+  String get webBulkRemoveRow => 'Supprimer la ligne';
+
+  @override
+  String get webBulkSave => 'Tout enregistrer';
+
+  @override
+  String get webBulkClear => 'Tout effacer';
+
+  @override
+  String webBulkCount(int n) {
+    return 'Lignes : $n';
+  }
+
+  @override
+  String get webBulkEmpty => 'Remplissez au moins une ligne.';
+
+  @override
+  String webBulkRowBad(int n) {
+    return 'Vérifiez la ligne $n';
+  }
+
+  @override
+  String webBulkPasted(int n) {
+    return 'Lignes collées : $n';
+  }
+
+  @override
+  String webBulkSaved(int n) {
+    return 'Transactions ajoutées : $n';
+  }
+
+  @override
   String get webMoveTitle => 'Déplacer de l\'argent';
 
   @override

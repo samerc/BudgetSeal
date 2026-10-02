@@ -47,6 +47,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
 
   api.get('/transactions', listTransactionsHandler(ref));
   api.post('/transactions', createTransactionHandler(ref));
+  api.post('/transactions/bulk', bulkCreateTransactionsHandler(ref));
   api.get('/transactions/<id>', getTransactionHandler(ref));
   api.put('/transactions/<id>', updateTransactionHandler(ref));
   api.delete('/transactions/<id>', deleteTransactionHandler(ref));

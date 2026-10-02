@@ -27,8 +27,9 @@ Response ok(Object? data) =>
 Response created(Object? data) =>
     Response(201, body: jsonEncode(data), headers: _jsonHeaders);
 
-Response badRequest(String message) =>
-    Response(400, body: jsonEncode({'error': message}), headers: _jsonHeaders);
+Response badRequest(String message, [Map<String, Object?> extra = const {}]) =>
+    Response(400,
+        body: jsonEncode({'error': message, ...extra}), headers: _jsonHeaders);
 
 Response notFound([String message = 'Not found']) =>
     Response(404, body: jsonEncode({'error': message}), headers: _jsonHeaders);

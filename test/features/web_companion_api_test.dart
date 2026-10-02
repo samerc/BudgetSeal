@@ -261,6 +261,33 @@ void main() {
     expect(d['period'], isNotNull);
   });
 
+  test('bulk create writes every row, or none when one is bad', () async {
+    final h = bulkCreateTransactionsHandler(ref);
+    final bad = await call(h, 'POST', body: {
+      'items': [
+        {'type': 'expense', 'accountId': 'usd', 'amount': 5, 'date': '2026-09-01'},
+        {'type': 'expense', 'amount': 7},
+      ]
+    });
+    expect(bad['status'], 400);
+    expect(bad['row'], 1);
+    expect((await balances())['usd'] ?? 0, 0);
+
+    final ok = await call(h, 'POST', body: {
+      'items': [
+        {'type': 'expense', 'accountId': 'usd', 'amount': 5, 'categoryId': 'food'},
+        {'type': 'income', 'accountId': 'usd2', 'amount': 40, 'note': 'Refund'},
+      ]
+    });
+    expect(ok['status'], 201);
+    expect(ok['count'], 2);
+    expect((await balances())['usd'], -5);
+    expect((await balances())['usd2'], 40);
+
+    final empty = await call(h, 'POST', body: {'items': []});
+    expect(empty['status'], 400);
+  });
+
   test('money moves between envelopes and Ready to assign', () async {
     await call(createTransactionHandler(ref), 'POST', body: {
       'type': 'income',

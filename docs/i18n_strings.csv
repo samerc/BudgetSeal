@@ -2139,3 +2139,18 @@ web_env_cover,,Cover,تغطية,Couvrir
 web_cover_title,,Cover {name},تغطية {name},Couvrir {name}
 web_toast_moved,,Money moved,تم نقل الأموال,Argent déplacé
 web_toast_covered,,Overspending covered,تمت تغطية التجاوز,Dépassement couvert
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_bulk_add,,Add several,إضافة عدة معاملات,Ajouter plusieurs
+web_bulk_title,,Add several transactions,إضافة عدة معاملات,Ajouter plusieurs transactions
+web_bulk_hint,,"Tab moves across, Enter goes down a row, Ctrl+Enter saves. Paste rows from a spreadsheet to fill several at once.",Tab للانتقال إلى الخلية التالية، وEnter للنزول صفًا، وCtrl+Enter للحفظ. الصق صفوفًا من جدول بيانات لملء عدة صفوف دفعة واحدة.,"Tab passe à la cellule suivante, Entrée descend d’une ligne, Ctrl+Entrée enregistre. Collez des lignes d’un tableur pour en remplir plusieurs d’un coup."
+web_bulk_add_row,,Add row,إضافة صف,Ajouter une ligne
+web_bulk_remove_row,,Remove row,حذف الصف,Supprimer la ligne
+web_bulk_save,,Save all,حفظ الكل,Tout enregistrer
+web_bulk_clear,,Clear all,مسح الكل,Tout effacer
+web_bulk_count,,Rows: {n},الصفوف: {n},Lignes : {n}
+web_bulk_empty,,Fill in at least one row.,املأ صفًا واحدًا على الأقل.,Remplissez au moins une ligne.
+web_bulk_row_bad,,Check row {n},تحقّق من الصف {n},Vérifiez la ligne {n}
+web_bulk_pasted,,Rows pasted: {n},الصفوف الملصقة: {n},Lignes collées : {n}
+web_bulk_saved,,Transactions added: {n},المعاملات المضافة: {n},Transactions ajoutées : {n}

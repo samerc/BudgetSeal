@@ -285,5 +285,17 @@
   "web_env_cover": "تغطية",
   "web_cover_title": "تغطية {name}",
   "web_toast_moved": "تم نقل الأموال",
-  "web_toast_covered": "تمت تغطية التجاوز"
+  "web_toast_covered": "تمت تغطية التجاوز",
+  "web_bulk_add": "إضافة عدة معاملات",
+  "web_bulk_title": "إضافة عدة معاملات",
+  "web_bulk_hint": "Tab للانتقال إلى الخلية التالية، وEnter للنزول صفًا، وCtrl+Enter للحفظ. الصق صفوفًا من جدول بيانات لملء عدة صفوف دفعة واحدة.",
+  "web_bulk_add_row": "إضافة صف",
+  "web_bulk_remove_row": "حذف الصف",
+  "web_bulk_save": "حفظ الكل",
+  "web_bulk_clear": "مسح الكل",
+  "web_bulk_count": "الصفوف: {n}",
+  "web_bulk_empty": "املأ صفًا واحدًا على الأقل.",
+  "web_bulk_row_bad": "تحقّق من الصف {n}",
+  "web_bulk_pasted": "الصفوف الملصقة: {n}",
+  "web_bulk_saved": "المعاملات المضافة: {n}"
 }

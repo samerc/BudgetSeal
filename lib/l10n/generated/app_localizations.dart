@@ -99,6 +99,78 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webBulkAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add several'**
+  String get webBulkAdd;
+
+  /// No description provided for @webBulkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add several transactions'**
+  String get webBulkTitle;
+
+  /// No description provided for @webBulkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab moves across, Enter goes down a row, Ctrl+Enter saves. Paste rows from a spreadsheet to fill several at once.'**
+  String get webBulkHint;
+
+  /// No description provided for @webBulkAddRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add row'**
+  String get webBulkAddRow;
+
+  /// No description provided for @webBulkRemoveRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove row'**
+  String get webBulkRemoveRow;
+
+  /// No description provided for @webBulkSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all'**
+  String get webBulkSave;
+
+  /// No description provided for @webBulkClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get webBulkClear;
+
+  /// No description provided for @webBulkCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows: {n}'**
+  String webBulkCount(int n);
+
+  /// No description provided for @webBulkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in at least one row.'**
+  String get webBulkEmpty;
+
+  /// No description provided for @webBulkRowBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Check row {n}'**
+  String webBulkRowBad(int n);
+
+  /// No description provided for @webBulkPasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows pasted: {n}'**
+  String webBulkPasted(int n);
+
+  /// No description provided for @webBulkSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions added: {n}'**
+  String webBulkSaved(int n);
+
   /// No description provided for @webMoveTitle.
   ///
   /// In en, this message translates to:

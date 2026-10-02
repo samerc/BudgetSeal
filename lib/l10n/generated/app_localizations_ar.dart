@@ -9,6 +9,51 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webBulkAdd => 'إضافة عدة معاملات';
+
+  @override
+  String get webBulkTitle => 'إضافة عدة معاملات';
+
+  @override
+  String get webBulkHint =>
+      'Tab للانتقال إلى الخلية التالية، وEnter للنزول صفًا، وCtrl+Enter للحفظ. الصق صفوفًا من جدول بيانات لملء عدة صفوف دفعة واحدة.';
+
+  @override
+  String get webBulkAddRow => 'إضافة صف';
+
+  @override
+  String get webBulkRemoveRow => 'حذف الصف';
+
+  @override
+  String get webBulkSave => 'حفظ الكل';
+
+  @override
+  String get webBulkClear => 'مسح الكل';
+
+  @override
+  String webBulkCount(int n) {
+    return 'الصفوف: $n';
+  }
+
+  @override
+  String get webBulkEmpty => 'املأ صفًا واحدًا على الأقل.';
+
+  @override
+  String webBulkRowBad(int n) {
+    return 'تحقّق من الصف $n';
+  }
+
+  @override
+  String webBulkPasted(int n) {
+    return 'الصفوف الملصقة: $n';
+  }
+
+  @override
+  String webBulkSaved(int n) {
+    return 'المعاملات المضافة: $n';
+  }
+
+  @override
   String get webMoveTitle => 'نقل الأموال';
 
   @override

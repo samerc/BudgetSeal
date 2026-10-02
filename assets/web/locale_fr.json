@@ -285,5 +285,17 @@
   "web_env_cover": "Couvrir",
   "web_cover_title": "Couvrir {name}",
   "web_toast_moved": "Argent déplacé",
-  "web_toast_covered": "Dépassement couvert"
+  "web_toast_covered": "Dépassement couvert",
+  "web_bulk_add": "Ajouter plusieurs",
+  "web_bulk_title": "Ajouter plusieurs transactions",
+  "web_bulk_hint": "Tab passe à la cellule suivante, Entrée descend d’une ligne, Ctrl+Entrée enregistre. Collez des lignes d’un tableur pour en remplir plusieurs d’un coup.",
+  "web_bulk_add_row": "Ajouter une ligne",
+  "web_bulk_remove_row": "Supprimer la ligne",
+  "web_bulk_save": "Tout enregistrer",
+  "web_bulk_clear": "Tout effacer",
+  "web_bulk_count": "Lignes : {n}",
+  "web_bulk_empty": "Remplissez au moins une ligne.",
+  "web_bulk_row_bad": "Vérifiez la ligne {n}",
+  "web_bulk_pasted": "Lignes collées : {n}",
+  "web_bulk_saved": "Transactions ajoutées : {n}"
 }

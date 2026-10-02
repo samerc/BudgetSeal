@@ -172,46 +172,126 @@ Handler createTransactionHandler(Ref ref) {
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return forbidden();
 
-    final type = requireString(body, 'type');
-    if (type == null || !_types.contains(type)) {
-      return badRequest('type must be income, expense, or transfer');
-    }
-
     try {
-      final engine = ref.read(allocationEngineProvider);
       final db = ref.read(databaseProvider);
       final baseCurrency = await _baseCurrency(db, householdId);
+      final prepared =
+          await _prepareCreate(ref, db, householdId, baseCurrency, body);
+      if (prepared.error != null) return badRequest(prepared.error!);
+      return created({'id': await prepared.write!()});
+    } on CurrencyConversionException catch (e) {
+      return badRequest('No exchange rate from ${e.from} to ${e.to}');
+    } catch (e) {
+      return serverError(e);
+    }
+  };
+}
 
-      final note = truncate(optString(body, 'note') ?? '', kMaxNoteLength);
-      final date = parseWebDate(optString(body, 'date'));
+// ── POST /api/transactions/bulk ───────────────────────────────────────────────
+// { items: [ <create payload>, … ] } — every row is validated first, then all
+// are written in one db transaction (all or nothing). A bad row → 400 with
+// its index in `row`.
 
-      final String txId;
-      if (type == 'transfer') {
-        final transfer = await _readTransfer(db, householdId, body);
-        if (transfer.error != null) return badRequest(transfer.error!);
-        txId = await engine.recordTransfer(
-          householdId: householdId,
-          fromAccountId: transfer.from!,
-          toAccountId: transfer.to!,
-          amount: transfer.amount!,
-          currency: transfer.currency!,
-          exchangeRateToBase: transfer.rate!,
-          createdBy: 'web',
-          deviceId: 'web',
-          note: note,
-          date: date,
-        );
-      } else {
-        final accountId = requireString(body, 'accountId');
-        if (accountId == null) return badRequest('accountId is required');
-        if (await validateIdExists(db, 'accounts', accountId, householdId) ==
-            null) {
-          return badRequest('accountId does not exist');
+const _kMaxBulkRows = 100;
+
+Handler bulkCreateTransactionsHandler(Ref ref) {
+  return (Request request) async {
+    final body = await parseBody(request);
+    if (body == null) return badRequest('Invalid JSON body');
+
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return forbidden();
+
+    final items = body['items'];
+    if (items is! List || items.isEmpty) {
+      return badRequest('items must be a non-empty list');
+    }
+    if (items.length > _kMaxBulkRows) {
+      return badRequest('At most $_kMaxBulkRows rows at a time');
+    }
+
+    final db = ref.read(databaseProvider);
+    var row = 0;
+    try {
+      final baseCurrency = await _baseCurrency(db, householdId);
+      final writes = <Future<String> Function()>[];
+      for (; row < items.length; row++) {
+        final item = items[row];
+        if (item is! Map<String, dynamic>) {
+          return _rowError(row, 'Invalid row');
         }
-        final lines =
-            await _readLines(db, householdId, body, accountId, baseCurrency, note);
-        if (lines.error != null) return badRequest(lines.error!);
-        txId = await engine.recordTransaction(
+        final prepared =
+            await _prepareCreate(ref, db, householdId, baseCurrency, item);
+        if (prepared.error != null) return _rowError(row, prepared.error!);
+        writes.add(prepared.write!);
+      }
+      row = 0;
+      final ids = await db.transaction(() async {
+        final ids = <String>[];
+        for (; row < writes.length; row++) {
+          ids.add(await writes[row]());
+        }
+        return ids;
+      });
+      return created({'ids': ids, 'count': ids.length});
+    } on CurrencyConversionException catch (e) {
+      return _rowError(row, 'No exchange rate from ${e.from} to ${e.to}');
+    } catch (e) {
+      return serverError(e);
+    }
+  };
+}
+
+Response _rowError(int row, String error) => badRequest(error, {'row': row});
+
+/// Validates one create payload. Returns an error, or a function that writes
+/// it (nothing is written until it's called).
+Future<({String? error, Future<String> Function()? write})> _prepareCreate(
+  Ref ref,
+  AppDatabase db,
+  String householdId,
+  String baseCurrency,
+  Map<String, dynamic> body,
+) async {
+  final type = requireString(body, 'type');
+  if (type == null || !_types.contains(type)) {
+    return (error: 'type must be income, expense, or transfer', write: null);
+  }
+  final engine = ref.read(allocationEngineProvider);
+  final note = truncate(optString(body, 'note') ?? '', kMaxNoteLength);
+  final date = parseWebDate(optString(body, 'date'));
+
+  if (type == 'transfer') {
+    final transfer = await _readTransfer(db, householdId, body);
+    if (transfer.error != null) return (error: transfer.error, write: null);
+    return (
+      error: null,
+      write: () => engine.recordTransfer(
+            householdId: householdId,
+            fromAccountId: transfer.from!,
+            toAccountId: transfer.to!,
+            amount: transfer.amount!,
+            currency: transfer.currency!,
+            exchangeRateToBase: transfer.rate!,
+            createdBy: 'web',
+            deviceId: 'web',
+            note: note,
+            date: date,
+          ),
+    );
+  }
+
+  final accountId = requireString(body, 'accountId');
+  if (accountId == null) return (error: 'accountId is required', write: null);
+  if (await validateIdExists(db, 'accounts', accountId, householdId) == null) {
+    return (error: 'accountId does not exist', write: null);
+  }
+  final lines =
+      await _readLines(db, householdId, body, accountId, baseCurrency, note);
+  if (lines.error != null) return (error: lines.error, write: null);
+  return (
+    error: null,
+    write: () => engine.recordTransaction(
           householdId: householdId,
           accountId: accountId,
           type: type,
@@ -220,16 +300,8 @@ Handler createTransactionHandler(Ref ref) {
           note: note,
           deviceId: 'web',
           date: date,
-        );
-      }
-
-      return created({'id': txId});
-    } on CurrencyConversionException catch (e) {
-      return badRequest('No exchange rate from ${e.from} to ${e.to}');
-    } catch (e) {
-      return serverError(e);
-    }
-  };
+        ),
+  );
 }
 
 // ── PUT /api/transactions/:id ─────────────────────────────────────────────────
