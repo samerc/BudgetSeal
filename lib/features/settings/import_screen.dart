@@ -13,6 +13,7 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/transactions_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
@@ -44,8 +45,9 @@ DateTime? parseImportDate(String s, {required bool dayFirst}) {
   return DateTime(y, mo, d);
 }
 
-/// The role a CSV column can be assigned to.
-enum ColumnRole { skip, date, description, amount, category }
+/// The role a CSV column can be assigned to. Banks that split money in and
+/// out use [debit] (out) and [credit] (in) instead of one signed [amount].
+enum ColumnRole { skip, date, description, amount, category, debit, credit }
 
 extension ColumnRoleLabel on ColumnRole {
   String localizedLabel(BuildContext context) {
@@ -60,6 +62,10 @@ extension ColumnRoleLabel on ColumnRole {
         return S.of(context).commonAmount;
       case ColumnRole.category:
         return S.of(context).commonCategory;
+      case ColumnRole.debit:
+        return S.of(context).importColDebit;
+      case ColumnRole.credit:
+        return S.of(context).importColCredit;
     }
   }
 
@@ -75,6 +81,10 @@ extension ColumnRoleLabel on ColumnRole {
         return Icons.attach_money_rounded;
       case ColumnRole.category:
         return Icons.category_rounded;
+      case ColumnRole.debit:
+        return Icons.remove_circle_outline_rounded;
+      case ColumnRole.credit:
+        return Icons.add_circle_outline_rounded;
     }
   }
 }
@@ -257,6 +267,23 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
   // ── Import Logic ─────────────────────────────────────────────
 
+  /// A row's signed amount: the amount column, or credit − debit.
+  double? _rowAmount(List<dynamic> row) {
+    final amountCol = _colFor(ColumnRole.amount);
+    if (amountCol != null) {
+      return row.length > amountCol
+          ? parseLooseAmount(row[amountCol].toString())
+          : null;
+    }
+    final debitCol = _colFor(ColumnRole.debit);
+    final creditCol = _colFor(ColumnRole.credit);
+    if (debitCol == null && creditCol == null) return null;
+    double cell(int? c) => c != null && row.length > c
+        ? (parseLooseAmount(row[c].toString()) ?? 0).abs()
+        : 0;
+    return cell(creditCol) - cell(debitCol);
+  }
+
   Future<void> _import() async {
     if (_csvData == null || _selectedAccountId == null) return;
     final householdId = ref.read(currentHouseholdIdProvider);
@@ -267,7 +294,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     final amountCol = _colFor(ColumnRole.amount);
     final categoryCol = _colFor(ColumnRole.category);
 
-    if (amountCol == null) {
+    final hasSplitCols = _colFor(ColumnRole.debit) != null ||
+        _colFor(ColumnRole.credit) != null;
+    if (amountCol == null && !hasSplitCols) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).importAssignAmount),
@@ -283,6 +312,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     });
 
     var skipped = 0;
+    var duplicates = 0;
     try {
       final engine = ref.read(allocationEngineProvider);
       final baseCurrency =
@@ -290,6 +320,42 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       final account = (ref.read(accountsProvider).value ?? [])
           .where((a) => a.id == _selectedAccountId).firstOrNull;
       if (account == null) return;
+
+      // Already in the app (same account, day, amount, type) → skipped, so
+      // importing an overlapping statement doesn't double-count.
+      final existing = await ref.read(transactionEntriesProvider.future);
+      String dupKey(DateTime d, double amount, String type) =>
+          '${d.year}-${d.month}-${d.day}|${amount.toStringAsFixed(2)}|$type';
+      final seen = <String>{};
+      // Title → category from history ("STARBUCKS #12" ← "Starbucks").
+      final titleCats = <(String, String)>[];
+      for (final e in existing) {
+        final local = e.tx.createdAt.toLocal();
+        for (final l in e.lines) {
+          if ((l.accountId ?? e.tx.accountId) == account.id) {
+            seen.add(dupKey(local, l.amount, e.tx.type));
+          }
+        }
+        if (e.tx.type != 'transfer') {
+          final note = e.tx.note;
+          final title =
+              (note.contains(' — ') ? note.split(' — ').first : note)
+                  .toLowerCase()
+                  .trim();
+          final catId = e.lines.isNotEmpty
+              ? e.lines.first.categoryId
+              : e.tx.categoryId;
+          if (title.length >= 3 && catId != null) titleCats.add((title, catId));
+        }
+      }
+      String? guessCategory(String desc) {
+        final d = desc.toLowerCase();
+        if (d.isEmpty) return null;
+        for (final (title, catId) in titleCats) {
+          if (d == title || d.contains(title)) return catId;
+        }
+        return null;
+      }
 
       // Build a name -> id lookup for category matching
       final categories = ref.read(categoriesProvider).value ?? [];
@@ -316,15 +382,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           ref.read(databaseProvider), account.currency, baseCurrency);
 
       for (final row in rows) {
-        if (row.length <= amountCol) {
-          skipped++;
-          continue;
-        }
 
         final desc = descCol != null && row.length > descCol
             ? row[descCol].toString().trim()
             : '';
-        final amount = parseLooseAmount(row[amountCol].toString());
+        final amount = _rowAmount(row);
         if (amount == null || amount == 0 || amount.abs() > 1e9) {
           skipped++;
           continue;
@@ -342,18 +404,26 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           date = parsed;
         }
 
-        // Match category by name
+        final type = amount > 0 ? 'income' : 'expense';
+        final key = dupKey(date, amount.abs(), type);
+        if (!seen.add(key)) {
+          duplicates++;
+          continue;
+        }
+
+        // Match category by name, else guess from past titles.
         String? matchedCategoryId;
         if (categoryCol != null && row.length > categoryCol) {
           final catName = row[categoryCol].toString().toLowerCase().trim();
           matchedCategoryId = catLookup[catName];
         }
+        matchedCategoryId ??= guessCategory(desc);
 
         // Through the engine like every other write: lines + envelope debit.
         await engine.recordTransaction(
           householdId: householdId,
           accountId: account.id,
-          type: amount > 0 ? 'income' : 'expense',
+          type: type,
           lines: [
             TxLine(
               amount: amount.abs(),
@@ -376,9 +446,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         final l = S.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(skipped > 0
-                ? '${l.importSuccess(_imported)} · ${l.importSkippedRows(skipped)}'
-                : l.importSuccess(_imported)),
+            content: Text([
+              l.importSuccess(_imported),
+              if (skipped > 0) l.importSkippedRows(skipped),
+              if (duplicates > 0) l.importDuplicatesSkipped(duplicates),
+            ].join(' · ')),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -704,9 +776,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             final descStr = descCol != null && row.length > descCol
                 ? row[descCol].toString().trim()
                 : '--';
-            final amtStr = amountCol != null && row.length > amountCol
-                ? row[amountCol].toString().trim()
-                : '--';
+            final amt = _rowAmount(row);
+            final amtStr = amt != null ? formatNumber(amt) : '--';
             final catStr = categoryCol != null && row.length > categoryCol
                 ? row[categoryCol].toString().trim()
                 : null;
@@ -728,7 +799,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   _previewDataCell(descStr),
                   _previewDataCell(
                     amtStr,
-                    color: amtStr.startsWith('-')
+                    color: (amt ?? 0) < 0
                         ? AppColors.overspent
                         : AppColors.healthy,
                   ),
@@ -738,7 +809,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               ),
             );
           }),
-          if (amountCol == null)
+          if (amountCol == null &&
+              _colFor(ColumnRole.debit) == null &&
+              _colFor(ColumnRole.credit) == null)
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Row(

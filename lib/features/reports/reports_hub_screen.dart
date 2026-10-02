@@ -50,6 +50,16 @@ double _baseAmount(TransactionEntry e) {
   return e.tx.amount * e.tx.exchangeRateToBase;
 }
 
+/// Budget period start day the reports use, or null for calendar months
+/// (set by the hub from [reportsStartDayProvider]).
+int? _reportsStartDay;
+
+/// The selected bucket, [back] months/periods before the current one.
+DateTime _reportMonth(int back) {
+  final b = reportBucketFor(DateTime.now(), _reportsStartDay);
+  return DateTime(b.year, b.month - back, 1);
+}
+
 Map<String?, double> _baseAmountByCategory(TransactionEntry e) =>
     baseAmountByCategory(e, _reportsBaseCurrency);
 
@@ -99,6 +109,8 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
     // Set the module-level base currency for _baseAmount helper
     _reportsBaseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    _reportsStartDay = ref.watch(reportsStartDayProvider);
+    final periodDay = ref.watch(householdProvider).value?.periodStartDay ?? 1;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -106,15 +118,40 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
           children: [
             // ── Title ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Text(
-                S.of(context).reportsTitle,
-                style: TextStyle(
-                  fontSize: TypographyTokens.screenTitleSize,
-                  fontFamily: TypographyTokens.displayFamily,
-                  fontWeight: TypographyTokens.screenTitleWeight,
-                  color: AppColors.tp(context),
-                ),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      S.of(context).reportsTitle,
+                      style: TextStyle(
+                        fontSize: TypographyTokens.screenTitleSize,
+                        fontFamily: TypographyTokens.displayFamily,
+                        fontWeight: TypographyTokens.screenTitleWeight,
+                        color: AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                  // Calendar months vs budget periods (start day ≠ 1 only).
+                  if (periodDay != 1)
+                    PopupMenuButton<bool>(
+                      icon: Icon(Icons.date_range_rounded,
+                          color: _reportsStartDay != null
+                              ? AppColors.accent
+                              : AppColors.ts(context)),
+                      initialValue: _reportsStartDay != null,
+                      onSelected: (v) =>
+                          ref.read(reportsByPeriodProvider.notifier).set(v),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                            value: false,
+                            child: Text(S.of(context).reportsCalendarMonths)),
+                        PopupMenuItem(
+                            value: true,
+                            child: Text(S.of(context).reportsBudgetPeriods)),
+                      ],
+                    ),
+                ],
               ),
             ),
             // ── Tab bar ──
@@ -182,8 +219,7 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
   int _selectedMonthsBack = 0;
 
   DateTime get _month {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
+    return _reportMonth(_selectedMonthsBack);
   }
 
   @override
@@ -863,16 +899,12 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
   int _selectedMonthsBack = 0;
   bool _showByTransactions = false; // false = top spending, true = top tx count
 
-  DateTime get _periodStart {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
-  }
+  /// Selected month / budget period (see [reportRangeFor]).
+  DateTime get _bucket => _reportMonth(_selectedMonthsBack);
+  DateTime get _periodStart => reportRangeFor(_bucket, _reportsStartDay).start;
 
-  /// Exclusive: the first moment of the next month.
-  DateTime get _periodEnd {
-    final start = _periodStart;
-    return DateTime(start.year, start.month + 1, 1);
-  }
+  /// Exclusive.
+  DateTime get _periodEnd => reportRangeFor(_bucket, _reportsStartDay).end;
 
   void _showCategoryTransactions(
     BuildContext context, {
@@ -1072,8 +1104,9 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         }
 
         // Compute last month's spend per category for comparison
-        final prevMonthStart = DateTime(
-            _periodStart.year, _periodStart.month - 1, 1);
+        final prevMonthStart = reportRangeFor(
+                DateTime(_bucket.year, _bucket.month - 1, 1), _reportsStartDay)
+            .start;
         final lastMonthSpend = <String, double>{};
         for (final e in entries) {
           if (e.tx.type != 'expense') continue;
@@ -1113,7 +1146,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: _MonthNav(
-                month: _periodStart,
+                month: _bucket,
                 onPrev: () => setState(() => _selectedMonthsBack++),
                 onNext: _selectedMonthsBack > 0
                     ? () => setState(() => _selectedMonthsBack--)
@@ -1454,8 +1487,7 @@ class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
   int _selectedMonthsBack = 0;
 
   DateTime get _month {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
+    return _reportMonth(_selectedMonthsBack);
   }
 
   @override
@@ -1723,8 +1755,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
   int _selectedMonthsBack = 0;
 
   DateTime get _month {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month - _selectedMonthsBack, 1);
+    return _reportMonth(_selectedMonthsBack);
   }
 
   @override
@@ -1740,7 +1771,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
     return txAsync.when(
       data: (entries) {
         final now = DateTime.now();
-        final monthStart = _month;
+        final monthStart = reportRangeFor(_month, _reportsStartDay).start;
         final isCurrentMonth =
             monthStart.year == now.year && monthStart.month == now.month;
         final daysInMonth = DateUtils.getDaysInMonth(monthStart.year, monthStart.month);
@@ -1750,7 +1781,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
 
         // ── Spending velocity ──
         double monthExpense = 0;
-        final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
+        final monthEnd = reportRangeFor(_month, _reportsStartDay).end;
         for (final e in entries) {
           if (e.tx.type == 'expense' &&
               !e.tx.createdAt.isBefore(monthStart) &&
@@ -2456,7 +2487,15 @@ class _MonthNav extends StatelessWidget {
           color: AppColors.ts(context),
         ),
         Text(
-          DateFormat('MMMM yyyy').format(month),
+          // Budget periods show their date range ("25 Sep – 24 Oct").
+          _reportsStartDay == null
+              ? DateFormat('MMMM yyyy').format(month)
+              : () {
+                  final r = reportRangeFor(month, _reportsStartDay);
+                  final f = DateFormat('d MMM');
+                  return '${f.format(r.start)} – '
+                      '${f.format(r.end.subtract(const Duration(days: 1)))}';
+                }(),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,

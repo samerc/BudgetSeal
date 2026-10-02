@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,9 @@ import 'core/providers/date_format_provider.dart';
 import 'core/providers/database_provider.dart';
 import 'core/services/auto_backup_service.dart';
 import 'core/services/app_shortcuts_service.dart';
+import 'core/services/daily_reminder_service.dart';
+import 'core/services/home_widget_service.dart';
+import 'l10n/s_lookup.dart';
 import 'core/services/notification_service.dart';
 import 'core/providers/allocations_provider.dart';
 import 'core/providers/engine_provider.dart';
@@ -390,6 +394,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       // Post bills that fell due while the app sat in memory, then alerts.
       _processDueWork();
     } else if (state == AppLifecycleState.paused) {
+      _updateHomeWidget();
       // Sync on app pause (upload local changes)
       _autoSync();
       // Auto-backup if due (runs on exit as well as resume)
@@ -399,6 +404,41 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       if (biometricEnabled) {
         setState(() => _showLock = true);
       }
+    }
+  }
+
+  /// Home-screen widget: Ready to assign and today's spending (base
+  /// currency), refreshed whenever the app goes to the background.
+  void _updateHomeWidget() {
+    try {
+      final household = ref.read(householdProvider).value;
+      if (household == null) return;
+      final base = household.baseCurrency;
+      final rta = ref.read(unallocatedProvider).value?[base] ?? 0;
+      final now = DateTime.now();
+      var spentToday = 0.0;
+      for (final e in ref.read(currentMonthTransactionsProvider).value ??
+          const <TransactionEntry>[]) {
+        final d = e.tx.createdAt.toLocal();
+        if (e.tx.type != 'expense' ||
+            d.year != now.year ||
+            d.month != now.month ||
+            d.day != now.day) {
+          continue;
+        }
+        for (final l in e.lines) {
+          if (isRealRate(l.currency, base, l.exchangeRateToBase)) {
+            spentToday += l.amount * l.exchangeRateToBase;
+          }
+        }
+      }
+      final l = currentS();
+      HomeWidgetService.update(
+        title: l.widgetReadyToAssign(formatAmount(rta, currency: base)),
+        line: l.widgetSpentToday(formatAmount(spentToday, currency: base)),
+      );
+    } catch (e) {
+      debugPrint('[HomeWidget] $e');
     }
   }
 
@@ -428,6 +468,19 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       }
       await NotificationService.runChecks(
           ref.read(databaseProvider), householdId);
+      // Top up the reminder window; skip today's if something was logged.
+      final db = ref.read(databaseProvider);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final logged = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.deleted.equals(false) &
+                t.createdBy.equals('recurring').not() &
+                t.createdAt.isBiggerOrEqualValue(today))
+            ..limit(1))
+          .getSingleOrNull();
+      await DailyReminderService.refresh(loggedToday: logged != null);
     } catch (e) {
       debugPrint('[Resume] Due work failed: $e');
     }

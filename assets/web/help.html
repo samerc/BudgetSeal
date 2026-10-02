@@ -427,7 +427,7 @@
 <p>Configure the basics:</p>
 <ul>
   <li><strong>Household name</strong> — a label for your budget (e.g., "My Budget" or "Family")</li>
-  <li><strong>Base currency</strong> — the main currency you use (USD, EUR, etc.)</li>
+  <li><strong>Base currency</strong> — the main currency you use (USD, EUR, etc.). It starts on your phone's region currency</li>
   <li><strong>Period start day</strong> — when your monthly budget cycle starts (1st, 15th, etc.)</li>
   <li><strong>First account</strong> — name, type (Cash/Bank/Credit/Digital), and opening balance</li>
 </ul>
@@ -498,7 +498,8 @@
 <h3>Account Detail</h3>
 <p>Tap any account to see its transactions and manage it. From the 3-dot menu, you can:</p>
 <ul>
-  <li><strong>Adjust Balance</strong> — correct the balance without creating a transaction</li>
+  <li><strong>Reconcile balance</strong> — enter the balance your bank shows. You see the difference before confirming; if it matches, the account is simply marked reconciled, otherwise an adjustment is recorded. The balance card shows when you last reconciled</li>
+  <li><strong>See all</strong> (next to Recent transactions) — the Activity tab filtered to this account</li>
   <li><strong>Archive</strong> — hide the account (transactions are preserved). The balance must be zero first: transfer what's left to another account or adjust the balance, since archived accounts no longer count toward your money</li>
   <li><strong>Convert Back &amp; Close</strong> — for travel wallets, return remaining money and archive</li>
 </ul>
@@ -752,7 +753,7 @@
   <li>Tap <strong>Save</strong></li>
 </ol>
 
-<p>Recurring transactions are auto-posted when they're due. You can enable or disable them with the toggle switch.</p>
+<p>Recurring transactions are auto-posted when they're due — when the app opens and whenever you come back to it. A message tells you how many were posted. You can enable or disable them with the toggle switch.</p>
 
 <h3>Bill Calendar</h3>
 <p>Go to <strong>More</strong> → <strong>Bill Calendar</strong> to see a monthly calendar view of all your upcoming bills. Tap a day to see what's due.</p>
@@ -763,6 +764,7 @@
   <li><span style="color:#6577E0"><strong>Indigo</strong></span> — Overdue</li>
   <li><span style="color:#58A4C2"><strong>Blue</strong></span> — Due today, tomorrow, or in a few days</li>
 </ul>
+<p>Tap a bill to <strong>Post now</strong> (pay it early — it's recorded today and the next date moves on), <strong>Skip this one</strong> (move to the next date without recording it), or <strong>Edit</strong> it. Subscriptions show the price that will actually be charged, including scheduled price changes.</p>
 
 <div class="screenshot">Screenshot: Upcoming Bills screen showing bills with colored urgency badges</div>
 
@@ -953,6 +955,7 @@
 <h2 id="reports">Reports</h2>
 
 <p>The Reports tab has four views to help you understand your finances. All tabs except Balance Sheet have a <strong>month navigator</strong> — use the left/right arrows (or swipe) to browse past months.</p>
+<p>If your budget period doesn't start on the 1st, the calendar icon next to the title switches reports between <strong>Calendar months</strong> and <strong>Budget periods</strong> (e.g. 25 Sep – 24 Oct).</p>
 
 <h3>Overview</h3>
 <ul>
@@ -1047,7 +1050,7 @@
       <li><strong>Local File</strong> — pick any file on your device</li>
     </ul>
   </li>
-  <li>Tap to connect — the app creates a sync file automatically</li>
+  <li>Tap to connect — the app creates a sync file automatically. The Cloud Sync row in Settings then shows when you last synced (or that the last sync failed)</li>
 </ol>
 
 <p>Once connected, the app syncs automatically when you open or close it. You can also tap <strong>Sync Now</strong> anytime.</p>
@@ -1188,7 +1191,7 @@
 <p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Import &amp; Export</strong>.</p>
 
 <h3>Import CSV</h3>
-<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Amounts can use either convention (<code>1,234.56</code>, <code>1.234,56</code>, <code>12,50</code>), and <code>(5.00)</code> counts as negative. Rows with an unreadable date or amount are skipped and counted, never dated today. Importing into a foreign-currency account uses its current exchange rate. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
+<p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Amounts can use either convention (<code>1,234.56</code>, <code>1.234,56</code>, <code>12,50</code>), and <code>(5.00)</code> counts as negative. Rows with an unreadable date or amount are skipped and counted, never dated today. Importing into a foreign-currency account uses its current exchange rate. Banks that split money in and out can map <strong>Debit</strong> and <strong>Credit</strong> columns instead of one Amount. Rows already in the app (same account, day, amount and type) are skipped, so overlapping statements don't double up, and rows without a category get one from past transactions with a matching title. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
 
 <h3>Export CSV</h3>
 <p>Export all transactions as a CSV spreadsheet for use in Excel, Google Sheets, etc.</p>
@@ -1240,7 +1243,10 @@
 <p>Go to <strong>More</strong> → <strong>Settings &amp; Customization</strong> → <strong>Base Currency</strong>. Note: this changes the display currency for summaries and reports. Existing transactions keep their original currency.</p>
 
 <h3>My notifications aren't working</h3>
-<p>Make sure notifications are enabled in your device settings for BudgetSeal. On Android 13+, you need to grant notification permission explicitly. Go to <strong>Settings</strong> → <strong>Notifications</strong> to configure daily reminders and bill alerts.</p>
+<p>Make sure notifications are enabled in your device settings for BudgetSeal. On Android 13+, you need to grant notification permission explicitly. Go to <strong>Settings</strong> → <strong>Notifications</strong> to configure daily reminders and bill alerts. BudgetSeal asks for the permission the first time you open your budget. Alerts are checked when the app opens or comes back, at most once a day each; the daily reminder skips days you've already logged something.</p>
+
+<h3>Home screen widget (Android)</h3>
+<p>Add the BudgetSeal widget from your launcher's widget list. It shows your Ready to assign amount and what you've spent today, updated each time you leave the app. Tap it to open BudgetSeal.</p>
 
 </main>
 </div>

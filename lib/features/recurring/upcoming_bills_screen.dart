@@ -6,7 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/engine_provider.dart';
+import '../../core/providers/transactions_provider.dart';
+import '../../shared/utils/save_errors.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
@@ -56,6 +60,77 @@ class _UpcomingBillsScreenState
     }
   }
 
+  /// Tap a bill: post it now (paying early) or skip this occurrence.
+  Future<void> _showBillActions(RecurringTransaction bill) async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Text(
+                  bill.title.isNotEmpty ? bill.title : tr.subUntitled,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle_outline_rounded),
+              title: Text(tr.upcomingPostNow),
+              subtitle: Text(tr.upcomingPostNowDesc),
+              onTap: () => Navigator.pop(ctx, 'post'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.skip_next_rounded),
+              title: Text(tr.upcomingSkip),
+              subtitle: Text(tr.upcomingSkipDesc),
+              onTap: () => Navigator.pop(ctx, 'skip'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: Text(tr.commonEdit),
+              onTap: () => Navigator.pop(ctx, 'edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null || !mounted) return;
+    if (action == 'edit') {
+      await context.push(bill.isSubscription
+          ? '/subscriptions/${bill.id}'
+          : '/recurring');
+      _load();
+      return;
+    }
+    try {
+      final engine = ref.read(recurringEngineProvider);
+      if (action == 'post') {
+        await engine.postNow(bill.id);
+      } else {
+        await engine.skipNext(bill.id);
+      }
+      ref.invalidate(transactionEntriesProvider);
+      ref.invalidate(monthlyTransactionsProvider);
+      ref.invalidate(allocationsProvider);
+      messenger.showSnackBar(SnackBar(
+        content: Text(action == 'post' ? tr.upcomingPosted : tr.upcomingSkipped),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (e) {
+      debugPrint('[UpcomingBills] $action failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(txSaveErrorText(tr, e)),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+    _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +155,10 @@ class _UpcomingBillsScreenState
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     itemCount: _bills.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (_, i) => _BillCard(bill: _bills[i]),
+                    itemBuilder: (_, i) => _BillCard(
+                      bill: _bills[i],
+                      onTap: () => _showBillActions(_bills[i]),
+                    ),
                   ),
                 ),
     );
@@ -89,7 +167,8 @@ class _UpcomingBillsScreenState
 
 class _BillCard extends StatelessWidget {
   final RecurringTransaction bill;
-  const _BillCard({required this.bill});
+  final VoidCallback onTap;
+  const _BillCard({required this.bill, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -127,14 +206,20 @@ class _BillCard extends StatelessWidget {
     };
 
     return Container(
-      padding: CardTokens.padding,
       decoration: BoxDecoration(
         color: AppColors.sf(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
         border: Border.all(color: AppColors.cardBorder(context)),
       ),
-      child: Column(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          onTap: onTap,
+          child: Padding(
+            padding: CardTokens.padding,
+            child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -220,6 +305,9 @@ class _BillCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+          ),
+        ),
       ),
     );
   }

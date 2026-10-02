@@ -407,7 +407,7 @@ Service declaration (inside `<application>`):
 ```
 
 ### Home Screen Widget
-`SpendingWidget.kt` — shows placeholder spending data. Files in `android/app/src/main/`.
+`SpendingWidget.kt` shows Ready to assign and today's spending, written by `HomeWidgetService` (Dart) into shared_preferences and redrawn via the `budgetseal/widget` channel in `MainActivity.kt`.
 
 ### Google Drive Setup
 Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `android/app/src/main/res/values/strings.xml` (or via google-services.json).
@@ -662,6 +662,16 @@ GET  /api/reports/by-category?year&month&type → spending/income per category (
 ## Linked Transactions
 
 Mixed-type items from the assisted flow (e.g., expense + income in one session) are split into separate transactions but linked via matching `note` + `createdAt` timestamp. The transaction detail screen queries for siblings and shows a "RELATED TRANSACTIONS" section. For transactions with empty notes, the query additionally requires different `type` to avoid false positives.
+
+## Bills, Reports & Around the App (Oct 2026)
+
+- `RecurringEngine.postNow(id)` (record today, advance) / `skipNext(id)` (advance only) from Upcoming Bills (tap a bill). `RecurringEngine.postedNotice` (ValueNotifier) counts auto-posted items; `MainScreen` shows "N recurring items posted".
+- Reports: `reportsByPeriodProvider` (pref `reports_budget_period`) → `reportsStartDayProvider` (null unless the period start day ≠ 1); `reportBucketFor()` / `reportRangeFor()` in report_stats_provider.dart; the hub sets module-level `_reportsStartDay` and all month getters use `_reportMonth()`. Toggle: calendar icon by the Reports title.
+- Reconcile (account ⋮ → Reconcile balance): live difference preview, "matches" just marks reconciled; last date in prefs `reconciled_<accountId>`.
+- CSV import: Debit/Credit roles (`_rowAmount` = credit − debit), duplicate skip (account|day|amount|type vs existing lines), category guess from past titles contained in the description.
+- Settings Cloud Sync tile subtitle reflects `syncProvider` (syncing / failed / "Synced <when>"). Onboarding base currency defaults to the region currency (`_localeCurrency`).
+- Daily reminder: `DailyReminderService.refresh(loggedToday:)` on resume refills the 14-day window and cancels today's when a non-recurring transaction exists for today.
+- Home widget: `HomeWidgetService.update()` writes `widget_title`/`widget_line` to shared_preferences (Android reads `FlutterSharedPreferences` → `flutter.widget_*` in `SpendingWidget.kt`) and calls the `budgetseal/widget` method channel (`MainActivity.kt`) to redraw; app.dart calls it on pause.
 
 ## Daily Reminder
 

@@ -27,8 +27,14 @@ class SpendingWidget : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.spending_widget)
 
-            views.setTextViewText(R.id.widget_title, "BudgetSeal")
-            views.setTextViewText(R.id.widget_spending, "$0.00 today")
+            // Written by HomeWidgetService (Dart) through shared_preferences,
+            // which stores keys with a "flutter." prefix in this file.
+            val prefs = context.getSharedPreferences(
+                "FlutterSharedPreferences", Context.MODE_PRIVATE)
+            views.setTextViewText(R.id.widget_title,
+                prefs.getString("flutter.widget_title", "BudgetSeal"))
+            views.setTextViewText(R.id.widget_spending,
+                prefs.getString("flutter.widget_line", ""))
 
             // Tapping the widget opens the main activity
             val intent = Intent(context, MainActivity::class.java).apply {

@@ -9,6 +9,92 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String widgetReadyToAssign(String amount) {
+    return 'Ready to assign: $amount';
+  }
+
+  @override
+  String widgetSpentToday(String amount) {
+    return '$amount spent today';
+  }
+
+  @override
+  String get syncStatusSyncing => 'Syncing…';
+
+  @override
+  String get syncStatusFailed => 'Last sync failed — tap to check';
+
+  @override
+  String syncStatusLast(String when) {
+    return 'Synced $when';
+  }
+
+  @override
+  String get importColDebit => 'Debit (money out)';
+
+  @override
+  String get importColCredit => 'Credit (money in)';
+
+  @override
+  String importDuplicatesSkipped(int n) {
+    return '$n already in the app';
+  }
+
+  @override
+  String get acctReconcileMatches => 'Matches — nothing to adjust';
+
+  @override
+  String acctReconcileDiff(String amount) {
+    return 'Difference $amount — an adjustment will be recorded';
+  }
+
+  @override
+  String get acctReconcileConfirm => 'Mark as reconciled';
+
+  @override
+  String get acctReconciledMatch => 'Balance matches — reconciled';
+
+  @override
+  String acctLastReconciled(String date) {
+    return 'Reconciled $date';
+  }
+
+  @override
+  String get reportsCalendarMonths => 'Calendar months';
+
+  @override
+  String get reportsBudgetPeriods => 'Budget periods';
+
+  @override
+  String get upcomingPostNow => 'Post now';
+
+  @override
+  String get upcomingPostNowDesc => 'Record it today and move to the next date';
+
+  @override
+  String get upcomingSkip => 'Skip this one';
+
+  @override
+  String get upcomingSkipDesc => 'Move to the next date without recording it';
+
+  @override
+  String get upcomingPosted => 'Bill posted';
+
+  @override
+  String get upcomingSkipped => 'Skipped — next date updated';
+
+  @override
+  String recurringPostedN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n recurring items posted',
+      one: '1 recurring item posted',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get objSummaryPerMonth => 'Needed per month';
 
   @override
@@ -2440,7 +2526,7 @@ class SEn extends S {
   String get acctTypeDigital => 'Digital wallet';
 
   @override
-  String get acctAdjustBalance => 'Adjust Balance';
+  String get acctAdjustBalance => 'Reconcile balance';
 
   @override
   String get acctHideArchived => 'Hide Archived';
@@ -2547,7 +2633,7 @@ class SEn extends S {
 
   @override
   String get acctAdjustDesc =>
-      'Enter the actual balance of this account. An adjustment transaction will be created for the difference.';
+      'Enter the balance your bank (or wallet) shows. If it differs, an adjustment transaction is recorded for the difference.';
 
   @override
   String acctCurrentBalanceLabel(String amount) {
@@ -3636,7 +3722,7 @@ class SEn extends S {
 
   @override
   String get notifEnvelopeDesc =>
-      'You\'ll receive a notification when envelopes are overspent. These check on app startup, at most once every 6 hours.';
+      'You\'ll get a notification when envelopes are overspent or bills are coming up. The app checks when it opens or comes back to the foreground, at most once a day per alert.';
 
   @override
   String get notifBillsTitle => 'Upcoming Bills';

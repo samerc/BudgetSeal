@@ -1,4 +1,26 @@
 {
+  "widgetReadyToAssign": "Prêt à attribuer : {amount}",
+  "widgetSpentToday": "{amount} dépensés aujourd'hui",
+  "syncStatusSyncing": "Synchronisation…",
+  "syncStatusFailed": "Échec de la dernière synchro — touchez pour vérifier",
+  "syncStatusLast": "Synchronisé {when}",
+  "importColDebit": "Débit (sorties)",
+  "importColCredit": "Crédit (entrées)",
+  "importDuplicatesSkipped": "{n} déjà dans l'app",
+  "acctReconcileMatches": "Concorde — rien à ajuster",
+  "acctReconcileDiff": "Différence {amount} — un ajustement sera enregistré",
+  "acctReconcileConfirm": "Marquer comme rapproché",
+  "acctReconciledMatch": "Le solde concorde — rapproché",
+  "acctLastReconciled": "Rapproché le {date}",
+  "reportsCalendarMonths": "Mois civils",
+  "reportsBudgetPeriods": "Périodes budgétaires",
+  "upcomingPostNow": "Enregistrer maintenant",
+  "upcomingPostNowDesc": "L'enregistrer aujourd'hui et passer à la date suivante",
+  "upcomingSkip": "Ignorer cette échéance",
+  "upcomingSkipDesc": "Passer à la date suivante sans l'enregistrer",
+  "upcomingPosted": "Facture enregistrée",
+  "upcomingSkipped": "Ignorée — prochaine date mise à jour",
+  "recurringPostedN": "{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}",
   "objSummaryPerMonth": "Nécessaire par mois",
   "catLinkEnvelope": "Enveloppe",
   "catLinkEnvelopeTitle": "Où vont les dépenses {name} ?",
@@ -2095,7 +2117,7 @@
   "@acctTypeDigital": {
     "description": "Type option"
   },
-  "acctAdjustBalance": "Ajuster le solde",
+  "acctAdjustBalance": "Rapprocher le solde",
   "@acctAdjustBalance": {
     "description": "Menu item"
   },
@@ -3387,7 +3409,7 @@
   "@notifEnvelopeTitle": {
     "description": "Card title"
   },
-  "notifEnvelopeDesc": "Vous recevrez une notification quand les enveloppes sont dépassées. Vérification au démarrage toutes les 6 heures max.",
+  "notifEnvelopeDesc": "Vous recevez une notification quand des enveloppes sont dépassées ou que des factures approchent. L'app vérifie à l'ouverture ou au retour au premier plan, au plus une fois par jour par alerte.",
   "@notifEnvelopeDesc": {
     "description": "Description"
   },
@@ -5804,7 +5826,7 @@
   "tmplCreated": "Modèle créé",
   "acctRecentTransactions": "Transactions récentes",
   "acctNoTransactions": "Aucune transaction pour le moment",
-  "acctAdjustDesc": "Entrez le solde réel de ce compte. Une transaction d'ajustement sera créée pour la différence.",
+  "acctAdjustDesc": "Saisissez le solde affiché par votre banque (ou portefeuille). S'il diffère, une transaction d'ajustement est enregistrée pour la différence.",
   "acctCurrentBalanceLabel": "Solde actuel : {amount}",
   "acctActualBalance": "Solde réel",
   "acctEnterRealBalance": "Entrez le solde réel",

@@ -1,4 +1,26 @@
 {
+  "widgetReadyToAssign": "جاهز للتوزيع: {amount}",
+  "widgetSpentToday": "أُنفق اليوم {amount}",
+  "syncStatusSyncing": "جارٍ المزامنة…",
+  "syncStatusFailed": "فشلت آخر مزامنة — اضغط للتحقق",
+  "syncStatusLast": "تمت المزامنة {when}",
+  "importColDebit": "مدين (خارج)",
+  "importColCredit": "دائن (داخل)",
+  "importDuplicatesSkipped": "{n} موجودة مسبقاً",
+  "acctReconcileMatches": "مطابق — لا شيء للتسوية",
+  "acctReconcileDiff": "الفرق {amount} — ستُسجَّل تسوية",
+  "acctReconcileConfirm": "وضع علامة «مطابق»",
+  "acctReconciledMatch": "الرصيد مطابق — تمت المطابقة",
+  "acctLastReconciled": "طوبق في {date}",
+  "reportsCalendarMonths": "الأشهر الميلادية",
+  "reportsBudgetPeriods": "فترات الميزانية",
+  "upcomingPostNow": "سجّل الآن",
+  "upcomingPostNowDesc": "سجّلها اليوم وانتقل إلى الموعد التالي",
+  "upcomingSkip": "تخطَّ هذه المرة",
+  "upcomingSkipDesc": "انتقل إلى الموعد التالي دون تسجيلها",
+  "upcomingPosted": "تم تسجيل الفاتورة",
+  "upcomingSkipped": "تم التخطي — حُدّث الموعد التالي",
+  "recurringPostedN": "{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}",
   "objSummaryPerMonth": "المطلوب شهرياً",
   "catLinkEnvelope": "الظرف",
   "catLinkEnvelopeTitle": "من أي ظرف تُصرف {name}؟",
@@ -2095,7 +2117,7 @@
   "@acctTypeDigital": {
     "description": "Type option"
   },
-  "acctAdjustBalance": "تعديل الرصيد",
+  "acctAdjustBalance": "مطابقة الرصيد",
   "@acctAdjustBalance": {
     "description": "Menu item"
   },
@@ -3387,7 +3409,7 @@
   "@notifEnvelopeTitle": {
     "description": "Card title"
   },
-  "notifEnvelopeDesc": "ستتلقى إشعاراً عندما تتجاوز الأظرف حدها. يتم التحقق عند بدء التطبيق مرة كل 6 ساعات كحد أقصى.",
+  "notifEnvelopeDesc": "ستصلك إشعارات عند تجاوز الأظرف أو اقتراب الفواتير. يتحقق التطبيق عند فتحه أو العودة إليه، مرة واحدة يومياً كحد أقصى لكل تنبيه.",
   "@notifEnvelopeDesc": {
     "description": "Description"
   },
@@ -5804,7 +5826,7 @@
   "tmplCreated": "تم إنشاء القالب",
   "acctRecentTransactions": "المعاملات الأخيرة",
   "acctNoTransactions": "لا معاملات بعد",
-  "acctAdjustDesc": "أدخل الرصيد الفعلي لهذا الحساب. سيتم إنشاء معاملة تعديل للفرق.",
+  "acctAdjustDesc": "أدخل الرصيد الذي يظهره مصرفك (أو محفظتك). إن اختلف، تُسجَّل معاملة تسوية بالفرق.",
   "acctCurrentBalanceLabel": "الرصيد الحالي: {amount}",
   "acctActualBalance": "الرصيد الفعلي",
   "acctEnterRealBalance": "أدخل الرصيد الحقيقي",

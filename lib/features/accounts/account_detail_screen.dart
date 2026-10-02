@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:uuid/uuid.dart';
@@ -48,6 +49,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   bool _isTravel = false;
   bool _loading = false;
   double? _currentBalance;
+  DateTime? _lastReconciled;
+
+  String get _reconciledKey => 'reconciled_${widget.accountId}';
+
+  Future<void> _markReconciled() async {
+    final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_reconciledKey, now.toIso8601String());
+    if (mounted) setState(() => _lastReconciled = now);
+  }
 
   bool get _isNew => widget.accountId == 'new';
 
@@ -93,6 +104,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           _isTravel = acc.isTravel;
           _currentBalance = balance;
         });
+        final prefs = await SharedPreferences.getInstance();
+        final rec = DateTime.tryParse(prefs.getString(_reconciledKey) ?? '');
+        if (mounted && rec != null) setState(() => _lastReconciled = rec);
       }
     } catch (e) {
       debugPrint('[AccountDetail] Error loading: $e');
@@ -289,6 +303,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         ),
                       ),
                     ),
+                    if (_lastReconciled != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          l.acctLastReconciled(formatDate(_lastReconciled!)),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.tp(context)
+                                  .withValues(alpha: 0.6)),
+                        ),
+                      ),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -751,11 +776,18 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final adjustCtrl = TextEditingController();
     final currency = _currencyController.text.trim().toUpperCase();
 
+    double? entered;
+    // Captured before the sheet: S.of inside a StatefulBuilder in a modal
+    // sheet crashes (_dependents.isEmpty).
+    final tr = S.of(context);
     final result = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) {
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        final diff = entered != null && _currentBalance != null
+            ? entered! - _currentBalance!
+            : null;
         return Container(
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
@@ -768,7 +800,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                S.of(ctx).acctAdjustBalance,
+                tr.acctAdjustBalance,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -777,7 +809,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                S.of(ctx).acctAdjustDesc,
+                tr.acctAdjustDesc,
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.ts(ctx),
@@ -786,7 +818,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               if (_currentBalance != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  S.of(ctx).acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
+                  tr.acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -797,10 +829,31 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(height: 16),
               CalculatorAmountField(
                 value: double.tryParse(adjustCtrl.text) ?? 0,
-                hintText: S.of(ctx).acctEnterRealBalance,
+                hintText: tr.acctEnterRealBalance,
                 fontSize: 20,
-                onChanged: (v) => adjustCtrl.text = v.toString(),
+                onChanged: (v) => setSheet(() {
+                  adjustCtrl.text = v.toString();
+                  entered = v;
+                }),
               ),
+              // Preview: what reconciling will do.
+              if (diff != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  diff.abs() < 0.005
+                      ? tr.acctReconcileMatches
+                      : tr.acctReconcileDiff(formatSignedAmount(diff,
+                          currency: currency,
+                          type: diff > 0 ? 'income' : 'expense')),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: diff.abs() < 0.005
+                        ? AppColors.healthy
+                        : AppColors.caution,
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: () {
@@ -815,20 +868,33 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(CardTokens.radius)),
                 ),
-                child: Text(S.of(ctx).acctApplyAdjustment,
+                child: Text(
+                    diff != null && diff.abs() < 0.005
+                        ? tr.acctReconcileConfirm
+                        : tr.acctApplyAdjustment,
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
         );
-      },
+      }),
     );
     disposeAfterRouteAnimation(adjustCtrl);
 
     if (result != null && _currentBalance != null && mounted) {
       final diff = result - _currentBalance!;
-      if (diff.abs() < 0.001) return; // No change.
+      if (diff.abs() < 0.005) {
+        // Already matches the bank: just record the reconciliation.
+        await _markReconciled();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(S.of(context).acctReconciledMatch),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
+        return;
+      }
 
       setState(() => _loading = true);
       try {
@@ -872,6 +938,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           );
         }
 
+        await _markReconciled();
         await _loadAccount(); // Refresh current balance.
         if (!mounted) return;
         ref.invalidate(accountsProvider);

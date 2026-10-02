@@ -99,6 +99,138 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @widgetReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign: {amount}'**
+  String widgetReadyToAssign(String amount);
+
+  /// No description provided for @widgetSpentToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} spent today'**
+  String widgetSpentToday(String amount);
+
+  /// No description provided for @syncStatusSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncStatusSyncing;
+
+  /// No description provided for @syncStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync failed — tap to check'**
+  String get syncStatusFailed;
+
+  /// No description provided for @syncStatusLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {when}'**
+  String syncStatusLast(String when);
+
+  /// No description provided for @importColDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit (money out)'**
+  String get importColDebit;
+
+  /// No description provided for @importColCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit (money in)'**
+  String get importColCredit;
+
+  /// No description provided for @importDuplicatesSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} already in the app'**
+  String importDuplicatesSkipped(int n);
+
+  /// No description provided for @acctReconcileMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches — nothing to adjust'**
+  String get acctReconcileMatches;
+
+  /// No description provided for @acctReconcileDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference {amount} — an adjustment will be recorded'**
+  String acctReconcileDiff(String amount);
+
+  /// No description provided for @acctReconcileConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as reconciled'**
+  String get acctReconcileConfirm;
+
+  /// No description provided for @acctReconciledMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance matches — reconciled'**
+  String get acctReconciledMatch;
+
+  /// No description provided for @acctLastReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled {date}'**
+  String acctLastReconciled(String date);
+
+  /// No description provided for @reportsCalendarMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar months'**
+  String get reportsCalendarMonths;
+
+  /// No description provided for @reportsBudgetPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget periods'**
+  String get reportsBudgetPeriods;
+
+  /// No description provided for @upcomingPostNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Post now'**
+  String get upcomingPostNow;
+
+  /// No description provided for @upcomingPostNowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Record it today and move to the next date'**
+  String get upcomingPostNowDesc;
+
+  /// No description provided for @upcomingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this one'**
+  String get upcomingSkip;
+
+  /// No description provided for @upcomingSkipDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to the next date without recording it'**
+  String get upcomingSkipDesc;
+
+  /// No description provided for @upcomingPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill posted'**
+  String get upcomingPosted;
+
+  /// No description provided for @upcomingSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped — next date updated'**
+  String get upcomingSkipped;
+
+  /// No description provided for @recurringPostedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}'**
+  String recurringPostedN(int n);
+
   /// No description provided for @objSummaryPerMonth.
   ///
   /// In en, this message translates to:
@@ -4231,7 +4363,7 @@ abstract class S {
   /// Menu item
   ///
   /// In en, this message translates to:
-  /// **'Adjust Balance'**
+  /// **'Reconcile balance'**
   String get acctAdjustBalance;
 
   /// No description provided for @acctHideArchived.
@@ -4423,7 +4555,7 @@ abstract class S {
   /// No description provided for @acctAdjustDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enter the actual balance of this account. An adjustment transaction will be created for the difference.'**
+  /// **'Enter the balance your bank (or wallet) shows. If it differs, an adjustment transaction is recorded for the difference.'**
   String get acctAdjustDesc;
 
   /// No description provided for @acctCurrentBalanceLabel.
@@ -6415,7 +6547,7 @@ abstract class S {
   /// Description
   ///
   /// In en, this message translates to:
-  /// **'You\'ll receive a notification when envelopes are overspent. These check on app startup, at most once every 6 hours.'**
+  /// **'You\'ll get a notification when envelopes are overspent or bills are coming up. The app checks when it opens or comes back to the foreground, at most once a day per alert.'**
   String get notifEnvelopeDesc;
 
   /// Card title

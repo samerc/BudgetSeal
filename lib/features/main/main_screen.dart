@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/engine/recurring_engine.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/activity_filter_provider.dart';
 import '../../core/services/notification_service.dart';
@@ -48,12 +49,32 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     _currentIndex = 0;
     // First launch with a budget (also right after onboarding): ask for the
     // Android 13+ notification permission so bill/envelope alerts can show.
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => NotificationService.requestPermissionOnce().catchError((_) {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.requestPermissionOnce().catchError((_) {});
+      // Bills posted at launch (before this screen existed).
+      _showPostedNotice();
+    });
+    RecurringEngine.postedNotice.addListener(_showPostedNotice);
+  }
+
+  /// "N recurring items posted" after launch/resume processing.
+  void _showPostedNotice() {
+    final n = RecurringEngine.postedNotice.value;
+    if (n <= 0 || !mounted) return;
+    RecurringEngine.postedNotice.value = 0;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(S.of(context).recurringPostedN(n)),
+      behavior: SnackBarBehavior.floating,
+      action: SnackBarAction(
+        label: S.of(context).commonSeeAll,
+        onPressed: () => _onTabTapped(1),
+      ),
+    ));
   }
 
   @override
   void dispose() {
+    RecurringEngine.postedNotice.removeListener(_showPostedNotice);
     for (final c in _scrollControllers) {
       c.dispose();
     }

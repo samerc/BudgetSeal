@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show ValueNotifier, debugPrint;
 import 'package:uuid/uuid.dart';
 
 import '../database/app_database.dart';
@@ -130,7 +130,47 @@ class RecurringEngine {
         lastModified: Value(DateTime.now()),
       ));
     }
+    if (generated > 0) postedNotice.value += generated;
     return generated;
+  }
+
+  /// Bills posted by the last [processRecurring] run at launch/resume; the
+  /// main screen shows "N bills posted" and resets it.
+  static final postedNotice = ValueNotifier<int>(0);
+
+  /// Upcoming bills → Post now: record the next occurrence today and move
+  /// the due date on (paying a bill early).
+  Future<void> postNow(String recurringId) async {
+    final rec = await (_db.select(_db.recurringTransactions)
+          ..where((r) => r.id.equals(recurringId)))
+        .getSingle();
+    final now = DateTime.now();
+    await _generateTransaction(rec, now);
+    await _advance(rec);
+  }
+
+  /// Upcoming bills → Skip: move the due date on without posting.
+  Future<void> skipNext(String recurringId) async {
+    final rec = await (_db.select(_db.recurringTransactions)
+          ..where((r) => r.id.equals(recurringId)))
+        .getSingle();
+    await _advance(rec);
+  }
+
+  Future<void> _advance(RecurringTransaction rec) async {
+    final anchorDay = rec.anchorDay ?? rec.nextDueDate.day;
+    final next = advanceRecurringDate(
+        rec.nextDueDate, rec.frequency, rec.interval,
+        anchorDay: anchorDay);
+    final ended = rec.endDate != null && next.isAfter(rec.endDate!);
+    await (_db.update(_db.recurringTransactions)
+          ..where((r) => r.id.equals(rec.id)))
+        .write(RecurringTransactionsCompanion(
+      nextDueDate: Value(next),
+      anchorDay: Value(anchorDay),
+      enabled: ended ? const Value(false) : const Value.absent(),
+      lastModified: Value(DateTime.now()),
+    ));
   }
 
   Future<void> _generateTransaction(RecurringTransaction rec, [DateTime? forDate, String? baseCurrencyOverride]) async {

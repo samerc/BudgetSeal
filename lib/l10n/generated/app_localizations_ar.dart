@@ -9,6 +9,95 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String widgetReadyToAssign(String amount) {
+    return 'جاهز للتوزيع: $amount';
+  }
+
+  @override
+  String widgetSpentToday(String amount) {
+    return 'أُنفق اليوم $amount';
+  }
+
+  @override
+  String get syncStatusSyncing => 'جارٍ المزامنة…';
+
+  @override
+  String get syncStatusFailed => 'فشلت آخر مزامنة — اضغط للتحقق';
+
+  @override
+  String syncStatusLast(String when) {
+    return 'تمت المزامنة $when';
+  }
+
+  @override
+  String get importColDebit => 'مدين (خارج)';
+
+  @override
+  String get importColCredit => 'دائن (داخل)';
+
+  @override
+  String importDuplicatesSkipped(int n) {
+    return '$n موجودة مسبقاً';
+  }
+
+  @override
+  String get acctReconcileMatches => 'مطابق — لا شيء للتسوية';
+
+  @override
+  String acctReconcileDiff(String amount) {
+    return 'الفرق $amount — ستُسجَّل تسوية';
+  }
+
+  @override
+  String get acctReconcileConfirm => 'وضع علامة «مطابق»';
+
+  @override
+  String get acctReconciledMatch => 'الرصيد مطابق — تمت المطابقة';
+
+  @override
+  String acctLastReconciled(String date) {
+    return 'طوبق في $date';
+  }
+
+  @override
+  String get reportsCalendarMonths => 'الأشهر الميلادية';
+
+  @override
+  String get reportsBudgetPeriods => 'فترات الميزانية';
+
+  @override
+  String get upcomingPostNow => 'سجّل الآن';
+
+  @override
+  String get upcomingPostNowDesc => 'سجّلها اليوم وانتقل إلى الموعد التالي';
+
+  @override
+  String get upcomingSkip => 'تخطَّ هذه المرة';
+
+  @override
+  String get upcomingSkipDesc => 'انتقل إلى الموعد التالي دون تسجيلها';
+
+  @override
+  String get upcomingPosted => 'تم تسجيل الفاتورة';
+
+  @override
+  String get upcomingSkipped => 'تم التخطي — حُدّث الموعد التالي';
+
+  @override
+  String recurringPostedN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'سُجّل $n بند متكرر',
+      many: 'سُجّل $n بنداً متكرراً',
+      few: 'سُجّلت $n بنود متكررة',
+      two: 'سُجّل بندان متكرران',
+      one: 'سُجّل بند متكرر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get objSummaryPerMonth => 'المطلوب شهرياً';
 
   @override
@@ -2433,7 +2522,7 @@ class SAr extends S {
   String get acctTypeDigital => 'محفظة رقمية';
 
   @override
-  String get acctAdjustBalance => 'تعديل الرصيد';
+  String get acctAdjustBalance => 'مطابقة الرصيد';
 
   @override
   String get acctHideArchived => 'إخفاء المؤرشفة';
@@ -2540,7 +2629,7 @@ class SAr extends S {
 
   @override
   String get acctAdjustDesc =>
-      'أدخل الرصيد الفعلي لهذا الحساب. سيتم إنشاء معاملة تعديل للفرق.';
+      'أدخل الرصيد الذي يظهره مصرفك (أو محفظتك). إن اختلف، تُسجَّل معاملة تسوية بالفرق.';
 
   @override
   String acctCurrentBalanceLabel(String amount) {
@@ -3624,7 +3713,7 @@ class SAr extends S {
 
   @override
   String get notifEnvelopeDesc =>
-      'ستتلقى إشعاراً عندما تتجاوز الأظرف حدها. يتم التحقق عند بدء التطبيق مرة كل 6 ساعات كحد أقصى.';
+      'ستصلك إشعارات عند تجاوز الأظرف أو اقتراب الفواتير. يتحقق التطبيق عند فتحه أو العودة إليه، مرة واحدة يومياً كحد أقصى لكل تنبيه.';
 
   @override
   String get notifBillsTitle => 'الفواتير القادمة';

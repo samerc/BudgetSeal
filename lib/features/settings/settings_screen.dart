@@ -1263,12 +1263,31 @@ class SettingsDetailScreen extends ConsumerWidget {
           // ── Data & Sync ──
           _SectionHeader(title: l.settingsDataSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.cloud_sync_rounded, title: l.tileCloudSync,
-              subtitle: l.tileCloudSyncSub, iconColor: AppColors.accent,
-              onTap: () {
-                if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
-                context.push('/sync');
-              }),
+          // Shows the live sync state instead of a fixed description.
+          Builder(builder: (context) {
+            final sync = ref.watch(syncProvider);
+            final String subtitle;
+            if (sync.activeProvider == null) {
+              subtitle = l.tileCloudSyncSub;
+            } else if (sync.status == SyncStatus.syncing) {
+              subtitle = l.syncStatusSyncing;
+            } else if (sync.status == SyncStatus.error) {
+              subtitle = l.syncStatusFailed;
+            } else if (sync.lastSyncTime != null) {
+              subtitle = l.syncStatusLast(formatDateSmart(sync.lastSyncTime!.toLocal()));
+            } else {
+              subtitle = l.tileCloudSyncSub;
+            }
+            return _SettingsTile(icon: Icons.cloud_sync_rounded, title: l.tileCloudSync,
+                subtitle: subtitle,
+                iconColor: sync.status == SyncStatus.error
+                    ? AppColors.overspent
+                    : AppColors.accent,
+                onTap: () {
+                  if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
+                  context.push('/sync');
+                });
+          }),
           Builder(builder: (context) {
             final syncState = ref.watch(syncProvider);
             final isConnected = syncState.activeProvider is GoogleDriveProvider;

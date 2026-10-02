@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="$0.00 today"
+        android:text=""
         android:textColor="#FF49454F"
         android:textSize="20sp" />
 

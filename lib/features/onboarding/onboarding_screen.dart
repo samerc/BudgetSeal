@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -14,10 +15,25 @@ import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../transactions/widgets/currency_sheet.dart' show kCurrencies;
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+
+
+/// The phone's region currency (en_GB → GBP, fr_FR → EUR) when it's one
+/// the app lists, else USD — a better first guess for global users.
+String _localeCurrency() {
+  try {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    if (locale.countryCode == null) return 'USD';
+    final code =
+        NumberFormat.simpleCurrency(locale: locale.toString()).currencyName;
+    if (code != null && kCurrencies.any((c) => c.$1 == code)) return code;
+  } catch (_) {}
+  return 'USD';
+}
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -32,7 +48,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Setup fields ──
   final _nameController = TextEditingController();
-  String _baseCurrency = 'USD';
+  String _baseCurrency = _localeCurrency();
   int _periodStartDay = 1;
 
   // Account

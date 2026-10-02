@@ -9,6 +9,95 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String widgetReadyToAssign(String amount) {
+    return 'Prêt à attribuer : $amount';
+  }
+
+  @override
+  String widgetSpentToday(String amount) {
+    return '$amount dépensés aujourd\'hui';
+  }
+
+  @override
+  String get syncStatusSyncing => 'Synchronisation…';
+
+  @override
+  String get syncStatusFailed =>
+      'Échec de la dernière synchro — touchez pour vérifier';
+
+  @override
+  String syncStatusLast(String when) {
+    return 'Synchronisé $when';
+  }
+
+  @override
+  String get importColDebit => 'Débit (sorties)';
+
+  @override
+  String get importColCredit => 'Crédit (entrées)';
+
+  @override
+  String importDuplicatesSkipped(int n) {
+    return '$n déjà dans l\'app';
+  }
+
+  @override
+  String get acctReconcileMatches => 'Concorde — rien à ajuster';
+
+  @override
+  String acctReconcileDiff(String amount) {
+    return 'Différence $amount — un ajustement sera enregistré';
+  }
+
+  @override
+  String get acctReconcileConfirm => 'Marquer comme rapproché';
+
+  @override
+  String get acctReconciledMatch => 'Le solde concorde — rapproché';
+
+  @override
+  String acctLastReconciled(String date) {
+    return 'Rapproché le $date';
+  }
+
+  @override
+  String get reportsCalendarMonths => 'Mois civils';
+
+  @override
+  String get reportsBudgetPeriods => 'Périodes budgétaires';
+
+  @override
+  String get upcomingPostNow => 'Enregistrer maintenant';
+
+  @override
+  String get upcomingPostNowDesc =>
+      'L\'enregistrer aujourd\'hui et passer à la date suivante';
+
+  @override
+  String get upcomingSkip => 'Ignorer cette échéance';
+
+  @override
+  String get upcomingSkipDesc =>
+      'Passer à la date suivante sans l\'enregistrer';
+
+  @override
+  String get upcomingPosted => 'Facture enregistrée';
+
+  @override
+  String get upcomingSkipped => 'Ignorée — prochaine date mise à jour';
+
+  @override
+  String recurringPostedN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n éléments récurrents enregistrés',
+      one: '1 élément récurrent enregistré',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get objSummaryPerMonth => 'Nécessaire par mois';
 
   @override
@@ -2468,7 +2557,7 @@ class SFr extends S {
   String get acctTypeDigital => 'Portefeuille numérique';
 
   @override
-  String get acctAdjustBalance => 'Ajuster le solde';
+  String get acctAdjustBalance => 'Rapprocher le solde';
 
   @override
   String get acctHideArchived => 'Masquer les archivés';
@@ -2575,7 +2664,7 @@ class SFr extends S {
 
   @override
   String get acctAdjustDesc =>
-      'Entrez le solde réel de ce compte. Une transaction d\'ajustement sera créée pour la différence.';
+      'Saisissez le solde affiché par votre banque (ou portefeuille). S\'il diffère, une transaction d\'ajustement est enregistrée pour la différence.';
 
   @override
   String acctCurrentBalanceLabel(String amount) {
@@ -3682,7 +3771,7 @@ class SFr extends S {
 
   @override
   String get notifEnvelopeDesc =>
-      'Vous recevrez une notification quand les enveloppes sont dépassées. Vérification au démarrage toutes les 6 heures max.';
+      'Vous recevez une notification quand des enveloppes sont dépassées ou que des factures approchent. L\'app vérifie à l\'ouverture ou au retour au premier plan, au plus une fois par jour par alerte.';
 
   @override
   String get notifBillsTitle => 'Factures à venir';

@@ -132,6 +132,16 @@ class DailyReminderService {
     }
   }
 
+  /// Something was logged today: no reminder needed today.
+  static bool _loggedToday = false;
+
+  /// On resume: refill the 14-day window and drop today's reminder once
+  /// something has been logged today ([loggedToday]).
+  static Future<void> refresh({required bool loggedToday}) async {
+    _loggedToday = loggedToday;
+    await init();
+  }
+
   // ── Core ────────────────────────────────────────────────────────
 
   static Future<void> _schedule() async {
@@ -168,6 +178,11 @@ class DailyReminderService {
       final scheduledDate = _dateAtTime(time, dayOffset: i);
       // Skip if in the past (e.g., today's time already passed when i == 0)
       if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) continue;
+      // Already logged something today: today's nudge isn't needed.
+      if (i == 0 && _loggedToday) {
+        await _plugin.cancel(id: _baseNotificationId);
+        continue;
+      }
 
       await _plugin.zonedSchedule(
         id: _baseNotificationId + i,
