@@ -29,6 +29,7 @@ import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/spending_heatmap.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/utils/note_text.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -968,7 +969,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                                   children: [
                                     Text(
                                       e.tx.note.isNotEmpty
-                                          ? e.tx.note
+                                          ? visibleNote(e.tx.note)
                                           : S.of(ctx).reportsNoNote,
                                       style: TextStyle(
                                         fontSize: 14,
@@ -2126,7 +2127,7 @@ class _BiggestExpenseCard extends StatelessWidget {
         ? categoryMap[entry.tx.categoryId]
         : null;
     final catName = cat?.name ??
-        (entry.tx.note.isNotEmpty ? entry.tx.note : 'Expense');
+        (entry.tx.note.isNotEmpty ? visibleNote(entry.tx.note) : 'Expense');
     final catColor = cat != null
         ? AppColors.fromHex(cat.colorHex)
         : AppColors.overspent;
@@ -2164,7 +2165,7 @@ class _BiggestExpenseCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: AppColors.tp(context))),
                   if (entry.tx.note.isNotEmpty && cat != null)
-                    Text(entry.tx.note,
+                    Text(visibleNote(entry.tx.note),
                         style: TextStyle(
                             fontSize: 12,
                             color: AppColors.ts(context)),

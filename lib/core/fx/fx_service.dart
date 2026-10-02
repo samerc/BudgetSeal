@@ -6,6 +6,23 @@ import '../database/app_database.dart';
 import 'fx_provider.dart';
 import 'live_fx_provider.dart';
 
+/// Latest cached rate [from] → [to] (direct, or the inverse of [to] →
+/// [from]), whatever its age, or null if none was ever fetched. Offline and
+/// instant — for work that must not wait on the network (app start).
+Future<double?> latestCachedRate(AppDatabase db, String from, String to) async {
+  if (from == to) return 1.0;
+  Future<FxRate?> latest(String a, String b) => (db.select(db.fxRates)
+        ..where((t) => t.fromCurrency.equals(a) & t.toCurrency.equals(b))
+        ..orderBy([(t) => OrderingTerm.desc(t.fetchedAt)])
+        ..limit(1))
+      .getSingleOrNull();
+  final direct = await latest(from, to);
+  if (direct != null && direct.rate > 0) return direct.rate;
+  final inverse = await latest(to, from);
+  if (inverse != null && inverse.rate > 0) return 1 / inverse.rate;
+  return null;
+}
+
 /// FX rate service with caching to the local fx_rates table.
 /// Automatically falls back to cached rate if provider is unavailable.
 class FxService {

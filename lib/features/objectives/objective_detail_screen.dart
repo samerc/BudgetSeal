@@ -19,6 +19,8 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/utils/save_errors.dart';
+import '../../shared/utils/note_text.dart';
 import '../transactions/widgets/category_sheet.dart';
 import '../../l10n/generated/app_localizations.dart';
 
@@ -114,7 +116,8 @@ class _ObjectiveDetailScreenState
 
     // Primary: search by objective ID tag (new format)
     // Fallback: search by name (legacy transactions before ID tagging)
-    final idTag = '[obj:${widget.objectiveId}]';
+    // Matches "[obj:ID]" and "[obj:ID|amount]".
+    final idTag = '[obj:${widget.objectiveId}';
     final name = _nameCtrl.text.trim();
 
     var txs = await (db.select(db.transactions)
@@ -153,12 +156,27 @@ class _ObjectiveDetailScreenState
   Future<void> _syncCurrentAmount(
       AppDatabase db, List<Transaction> tagged) async {
     if (tagged.isEmpty) return;
-    final lines = await (db.select(db.transactionLines)
-          ..where((l) => l.transactionId.isIn(tagged.map((t) => t.id))))
-        .get();
-    final paid = lines
-        .where((l) => l.currency == _currency)
-        .fold<double>(0, (sum, l) => sum + l.amount);
+    final tagRe = RegExp(
+        r'\[obj:' + RegExp.escape(widget.objectiveId) + r'\|([0-9.]+)\]');
+    var paid = 0.0;
+    final untagged = <String>[];
+    for (final t in tagged) {
+      final m = tagRe.firstMatch(t.note);
+      final amount = m == null ? null : double.tryParse(m.group(1)!);
+      if (amount != null) {
+        paid += amount;
+      } else {
+        untagged.add(t.id); // older "[obj:ID]" tag: use its lines
+      }
+    }
+    if (untagged.isNotEmpty) {
+      final lines = await (db.select(db.transactionLines)
+            ..where((l) => l.transactionId.isIn(untagged)))
+          .get();
+      paid += lines
+          .where((l) => l.currency == _currency)
+          .fold<double>(0, (sum, l) => sum + l.amount);
+    }
     if ((paid - _currentAmount).abs() < 0.005) return;
     await (db.update(db.objectives)
           ..where((o) => o.id.equals(widget.objectiveId)))
@@ -451,7 +469,9 @@ class _ObjectiveDetailScreenState
         ],
         baseCurrency: ref.read(householdProvider).value?.baseCurrency ?? 'USD',
         note: '${isLoan ? (isLent ? tr.objNotePaymentReceived : tr.objNotePayment) : tr.objNoteGoalSavings}'
-            ' — $noteName [obj:${widget.objectiveId}]',
+            // The tag carries the amount in the objective's currency: the
+            // line itself is stored in the account's currency.
+            ' — $noteName [obj:${widget.objectiveId}|${result.amount}]',
         deviceId: 'local',
         date: DateTime.now(),
       );
@@ -480,9 +500,11 @@ class _ObjectiveDetailScreenState
         );
       }
     } catch (e) {
+      debugPrint('[ObjectiveDetail] Payment failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).objPaymentFailed),
+          SnackBar(content: Text(txSaveErrorText(S.of(context), e,
+                  fallback: S.of(context).objPaymentFailed)),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -719,7 +741,7 @@ class _ObjectiveDetailScreenState
                             ),
                           ),
                           if (tx.note.isNotEmpty)
-                            Text(tx.note.replaceAll(RegExp(r'\s*\[obj:[^\]]+\]'), ''),
+                            Text(visibleNote(tx.note),
                                 style: TextStyle(fontSize: 11, color: AppColors.ts(context)),
                                 maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],

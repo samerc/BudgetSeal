@@ -388,54 +388,148 @@ void main() {
   });
 
   group('multi-currency envelope debits', () {
-    test('foreign expense with a real rate converts into the envelope currency',
-        () async {
+    /// A EUR wallet with €300 of income.
+    Future<String> eurWallet() async {
+      final id = uuid.v4();
+      await db.into(db.accounts).insert(AccountsCompanion.insert(
+            id: id,
+            householdId: hh,
+            name: 'Euro wallet',
+            type: 'cash',
+            currency: 'EUR',
+            deviceId: 'device-A',
+          ));
+      await engine.recordIncome(
+        householdId: hh,
+        accountId: id,
+        amount: 300,
+        currency: 'EUR',
+        exchangeRateToBase: 1.1,
+        createdBy: 'user',
+        deviceId: 'device-A',
+      );
+      return id;
+    }
+
+    Future<double> envEur(String envId) async =>
+        (await ledgerDao.getBalanceByCurrency(envId))['EUR'] ?? 0.0;
+
+    test('a foreign expense is debited in the currency spent', () async {
+      final wallet = await eurWallet();
       await income(checking, 1000);
       await fund(groceriesEnv, 500); // USD envelope
 
-      // Spend €100 with a real rate of 1 EUR = 1.1 USD.
+      // Spend €100 from the EUR wallet in a USD envelope's category.
       await engine.recordTransaction(
         householdId: hh,
-        accountId: checking,
+        accountId: wallet,
         type: 'expense',
         lines: [
-          TxLine(amount: 100, currency: 'EUR', categoryId: groceriesCat, accountId: checking, exchangeRateToBase: 1.1),
+          TxLine(amount: 100, currency: 'EUR', categoryId: groceriesCat, accountId: wallet, exchangeRateToBase: 1.1),
         ],
         baseCurrency: 'USD',
         deviceId: 'device-A',
       );
 
-      // Envelope is debited 100 * 1.1 = 110 USD (single-currency envelope).
-      expect(await envUsd(groceriesEnv), closeTo(390, 0.001)); // 500 - 110
-      final eurBal = (await ledgerDao.getBalanceByCurrency(groceriesEnv))['EUR'];
-      expect(eurBal ?? 0, closeTo(0, 0.001),
-          reason: 'Envelope must not accumulate foreign currency');
+      // USD side untouched; the envelope owes €100 instead of being
+      // charged a converted $110 the EUR account never paid.
+      expect(await envUsd(groceriesEnv), closeTo(500, 0.001));
+      expect(await envEur(groceriesEnv), closeTo(-100, 0.001));
+      // USD invariant: checking $1000 == Unallocated $500 + envelope $500.
+      expect(await unallocUsd(), closeTo(500, 0.001));
+
+      // EUR invariant: wallet €200 == Unallocated €300 + envelopes −€100.
+      final accts = await calc.allAccountBalances(hh);
+      final unallocEur = (await calc.unallocatedByCurrency(hh))['EUR'] ?? 0;
+      expect(accts[wallet], closeTo(200, 0.001));
+      expect(unallocEur + await envEur(groceriesEnv),
+          closeTo(accts[wallet]!, 0.001));
     });
 
-    test('foreign expense with NO real rate is skipped (no inflation)',
+    test('without a rate the foreign debit is still recorded (no skipping)',
         () async {
-      await income(checking, 1000);
+      final wallet = await eurWallet();
       await fund(groceriesEnv, 500);
 
-      // rate == 1.0 for a non-base currency means "rate not set" → skip.
       await engine.recordTransaction(
         householdId: hh,
-        accountId: checking,
+        accountId: wallet,
         type: 'expense',
         lines: [
-          TxLine(amount: 100, currency: 'EUR', categoryId: groceriesCat, accountId: checking, exchangeRateToBase: 1.0),
+          TxLine(amount: 40, currency: 'EUR', categoryId: groceriesCat, accountId: wallet, exchangeRateToBase: 1.0),
         ],
         baseCurrency: 'USD',
         deviceId: 'device-A',
       );
 
-      // Envelope untouched — the unconverted 100 was NOT deducted.
       expect(await envUsd(groceriesEnv), closeTo(500, 0.001));
+      expect(await envEur(groceriesEnv), closeTo(-40, 0.001));
+    });
+  });
+
+  group('line currency follows the account', () {
+    test('a foreign line is converted into the account currency', () async {
+      await income(checking, 1000);
+      await engine.recordTransaction(
+        householdId: hh,
+        accountId: checking,
+        type: 'expense',
+        lines: [
+          TxLine(amount: 50, currency: 'EUR', accountId: checking, exchangeRateToBase: 1.1),
+        ],
+        baseCurrency: 'USD',
+        deviceId: 'device-A',
+      );
+
+      final line = (await db.select(db.transactionLines).get())
+          .singleWhere((l) => l.amount != 1000);
+      expect(line.currency, 'USD');
+      expect(line.amount, closeTo(55, 0.001));
+      expect(line.note, contains('50')); // original amount kept
+      expect(await acctUsd(checking), closeTo(945, 0.001));
+    });
+
+    test('no rate at all is refused instead of mixing currencies', () async {
+      expect(
+        () => engine.recordTransaction(
+          householdId: hh,
+          accountId: checking,
+          type: 'expense',
+          lines: [
+            TxLine(amount: 50, currency: 'EUR', accountId: checking),
+          ],
+          baseCurrency: 'USD',
+          deviceId: 'device-A',
+        ),
+        throwsA(isA<CurrencyConversionException>()),
+      );
     });
   });
 
   group('recurring transactions', () {
     DateTime dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+    test('a foreign bill posts with the latest cached rate', () async {
+      await income(checking, 1000);
+      await db.into(db.fxRates).insert(FxRatesCompanion.insert(
+          id: uuid.v4(), fromCurrency: 'EUR', toCurrency: 'USD', rate: 1.1));
+      final today = dayOnly(DateTime.now());
+      await recurring.create(
+        householdId: hh,
+        type: 'expense',
+        title: 'Streaming',
+        amount: 100,
+        currency: 'EUR',
+        accountId: checking, // a USD account
+        frequency: 'monthly',
+        startDate: today,
+        endDate: today,
+      );
+
+      expect(await recurring.processRecurring(), 1);
+      // €100 at 1.1 → $110 taken from the USD account (not $100).
+      expect(await acctUsd(checking), closeTo(890, 0.001));
+    });
 
     test('a due monthly bill posts once and advances the due date', () async {
       await income(checking, 2000);

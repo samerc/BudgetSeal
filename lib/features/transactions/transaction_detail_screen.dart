@@ -23,6 +23,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
@@ -340,7 +341,7 @@ class _DetailBody extends ConsumerWidget {
               }),
               if (tx.note.isNotEmpty) ...[
                 _divider(context),
-                _detailRow(context, S.of(context).txDetailNote, tx.note,
+                _detailRow(context, S.of(context).txDetailNote, visibleNote(tx.note),
                     icon: Icons.notes_rounded),
               ],
               if (tx.categoryId != null &&
@@ -591,7 +592,7 @@ class _DetailBody extends ConsumerWidget {
     final amount = line?.amount ?? tx.amount;
     final currency = line?.currency ?? tx.currency;
     final categoryId = line?.categoryId ?? tx.categoryId;
-    final title = tx.note.isNotEmpty ? tx.note : (categoryMap[categoryId]?.name ?? '');
+    final title = tx.note.isNotEmpty ? visibleNote(tx.note) : (categoryMap[categoryId]?.name ?? '');
 
     try {
       final db = ref.read(databaseProvider);

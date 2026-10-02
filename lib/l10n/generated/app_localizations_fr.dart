@@ -9,6 +9,11 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String txNoRateBetween(String from, String to) {
+    return 'Aucun taux de change de $from vers $to. Saisissez un taux pour ce montant, ou actualisez les taux dans Paramètres › Taux de change.';
+  }
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'Ce compte contient encore $amount. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent.';
   }

@@ -1,14 +1,28 @@
-import 'package:drift/drift.dart' show Value;
-import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
+
+import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../l10n/s_lookup.dart';
-import '../../shared/utils/format_number.dart' show isRealRate;
+import '../../shared/utils/format_number.dart'
+    show currencyDecimals, formatAmount, isRealRate;
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
+import '../fx/fx_service.dart' show latestCachedRate;
 import 'balance_calculator.dart';
 
 enum OverspendOption { useUnallocated, allowNegative, cancel }
+
+/// A line is in a different currency from its account and no exchange rate
+/// between the two is known (none entered, none cached).
+class CurrencyConversionException implements Exception {
+  final String from;
+  final String to;
+  const CurrencyConversionException(this.from, this.to);
+
+  @override
+  String toString() => 'CurrencyConversionException: no rate $from → $to';
+}
 
 /// One categorised line within a transaction.
 /// A simple transaction has one line; a split has many.
@@ -344,6 +358,7 @@ class AllocationEngine {
     if (lines.any((l) => l.exchangeRateToBase <= 0)) {
       throw ArgumentError('exchange rate must be positive');
     }
+    lines = await _toAccountCurrencies(lines, accountId, baseCurrency);
 
     final txId = _uuid.v4();
 
@@ -389,30 +404,26 @@ class AllocationEngine {
           );
     }
 
-    // For expenses: create a ledger consumption entry per categorised line.
-    // Convert to the envelope's target currency (or base) so envelopes
-    // always track a single currency instead of accumulating foreign debt.
+    // For expenses: create a ledger consumption entry per categorised line,
+    // in the line's (= its account's) currency.
     if (type == 'expense') {
-      // Pre-fetch category→allocation mappings and allocation currencies
-      // in batch to avoid N+1 queries per line.
+      // Pre-fetch category→allocation mappings in batch to avoid N+1
+      // queries per line.
       final categoryIds = lines
           .where((l) => l.categoryId != null)
           .map((l) => l.categoryId!)
           .toSet();
       final catAllocMap = <String, String>{};
-      final allocCurrencyMap = <String, String>{};
 
       if (categoryIds.isNotEmpty) {
         // Batch fetch categories
         final cats = await (_db.select(_db.categories)
               ..where((c) => c.id.isIn(categoryIds)))
             .get();
-        final linkedAllocIds = <String>{};
         final unlinkedCatIds = <String>[];
         for (final cat in cats) {
           if (cat.allocationId != null) {
             catAllocMap[cat.id] = cat.allocationId!;
-            linkedAllocIds.add(cat.allocationId!);
           } else {
             unlinkedCatIds.add(cat.id);
           }
@@ -436,7 +447,6 @@ class AllocationEngine {
             final allocId = parentAlloc[parentId];
             if (allocId != null) {
               catAllocMap[childId] = allocId;
-              linkedAllocIds.add(allocId);
               unlinkedCatIds.remove(childId);
             }
           });
@@ -448,16 +458,6 @@ class AllocationEngine {
               .get();
           for (final a in legacyAllocs) {
             catAllocMap[a.categoryId] = a.id;
-            linkedAllocIds.add(a.id);
-          }
-        }
-        // Batch fetch allocation currencies
-        if (linkedAllocIds.isNotEmpty) {
-          final allocs = await (_db.select(_db.allocations)
-                ..where((a) => a.id.isIn(linkedAllocIds)))
-              .get();
-          for (final a in allocs) {
-            allocCurrencyMap[a.id] = a.targetCurrency ?? baseCurrency;
           }
         }
       }
@@ -466,33 +466,15 @@ class AllocationEngine {
         if (line.categoryId != null) {
           final allocationId = catAllocMap[line.categoryId!];
           if (allocationId != null) {
-            final targetCurrency = allocCurrencyMap[allocationId] ?? baseCurrency;
-
-            double debitAmount;
-            String debitCurrency;
-            double debitRate;
-
-            if (line.currency == targetCurrency) {
-              // Same currency — no conversion needed
-              debitAmount = -line.amount;
-              debitCurrency = line.currency;
-              debitRate = line.exchangeRateToBase;
-            } else if (isRealRate(line.currency, baseCurrency, line.exchangeRateToBase)) {
-              // Foreign currency with a real rate — convert to base,
-              // then record in the envelope's target currency
-              final baseAmount = line.amount * line.exchangeRateToBase;
-              debitAmount = -baseAmount;
-              debitCurrency = baseCurrency;
-              debitRate = 1.0;
-              debugPrint('[AllocationEngine] Cross-currency debit: '
-                  '${line.currency} → $baseCurrency');
-            } else {
-              // Foreign currency with no real rate — skip deduction
-              // to avoid inflating the envelope with unconverted amounts.
-              debugPrint('[AllocationEngine] Skipping ledger entry: '
-                  '${line.currency} has no exchange rate');
-              continue;
-            }
+            // Debit in the currency actually spent. Converting into the
+            // envelope's currency would leave the account side in one
+            // currency and the envelope side in another, breaking
+            // Sum(accounts) = Unallocated + Sum(envelopes) per currency.
+            // A foreign-currency debit shows as "other currency" debt on
+            // the envelope until it is funded in that currency.
+            final debitAmount = -line.amount;
+            final debitCurrency = line.currency;
+            final debitRate = line.exchangeRateToBase;
 
             final lineAccountId = line.accountId ?? accountId;
             await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
@@ -536,6 +518,51 @@ class AllocationEngine {
               // reaches other devices.
               lastModified: Value(DateTime.now())));
     });
+  }
+
+  /// Every line is stored in its account's currency, so account balances
+  /// (which sum line amounts) never mix currencies. A line entered in another
+  /// currency (e.g. €50 on a USD card) is converted here — with the rate
+  /// entered on the line, or the latest cached rate — and the original
+  /// amount is kept in the line note. Throws [CurrencyConversionException]
+  /// when no rate is known.
+  Future<List<TxLine>> _toAccountCurrencies(
+      List<TxLine> lines, String accountId, String baseCurrency) async {
+    final ids = {for (final l in lines) l.accountId ?? accountId};
+    final accounts = await (_db.select(_db.accounts)
+          ..where((a) => a.id.isIn(ids)))
+        .get();
+    final currencyOf = {for (final a in accounts) a.id: a.currency};
+
+    final out = <TxLine>[];
+    for (final l in lines) {
+      final acctCurrency = currencyOf[l.accountId ?? accountId];
+      if (acctCurrency == null || acctCurrency == l.currency) {
+        out.add(l);
+        continue;
+      }
+      final lineToBase =
+          isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)
+              ? (l.currency == baseCurrency ? 1.0 : l.exchangeRateToBase)
+              : await latestCachedRate(_db, l.currency, baseCurrency);
+      final acctToBase = await latestCachedRate(_db, acctCurrency, baseCurrency);
+      if (lineToBase == null || acctToBase == null) {
+        throw CurrencyConversionException(l.currency, acctCurrency);
+      }
+      final scale = math.pow(10, currencyDecimals(acctCurrency)).toDouble();
+      final converted = (l.amount * lineToBase / acctToBase * scale).round() /
+          scale;
+      final original = formatAmount(l.amount, currency: l.currency);
+      out.add(TxLine(
+        amount: converted,
+        currency: acctCurrency,
+        categoryId: l.categoryId,
+        accountId: l.accountId,
+        exchangeRateToBase: acctToBase,
+        note: l.note.isEmpty ? original : '${l.note} ($original)',
+      ));
+    }
+    return out;
   }
 
   /// Withdraw funds from an allocation back to Unallocated.

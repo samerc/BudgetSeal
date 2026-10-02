@@ -9,6 +9,11 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String txNoRateBetween(String from, String to) {
+    return 'No exchange rate from $from to $to. Enter a rate for this amount, or refresh rates in Settings › Exchange rates.';
+  }
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'This account still holds $amount. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.';
   }

@@ -99,6 +99,12 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @txNoRateBetween.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate from {from} to {to}. Enter a rate for this amount, or refresh rates in Settings › Exchange rates.'**
+  String txNoRateBetween(String from, String to);
+
   /// No description provided for @acctArchiveNonZero.
   ///
   /// In en, this message translates to:

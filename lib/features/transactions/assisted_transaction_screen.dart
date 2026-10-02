@@ -23,6 +23,7 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/utils/save_errors.dart';
 
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
@@ -1444,6 +1445,14 @@ class _AssistedTransactionScreenState
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
           dismissDirection: DismissDirection.horizontal,
+        ));
+      }
+    } catch (e) {
+      debugPrint('[AssistedTx] Save failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(txSaveErrorText(S.of(context), e)),
+          behavior: SnackBarBehavior.floating,
         ));
       }
     } finally {

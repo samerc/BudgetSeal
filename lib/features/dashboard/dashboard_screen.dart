@@ -30,6 +30,7 @@ import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
+import '../../shared/utils/note_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -1104,7 +1105,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
                       : AppColors.accent,
             ),
             title: Text(cat?.name ??
-                (e.tx.note.isNotEmpty ? e.tx.note : e.tx.type)),
+                (e.tx.note.isNotEmpty ? visibleNote(e.tx.note) : e.tx.type)),
             subtitle: Text(
                 '${formatDate(e.tx.createdAt.toLocal())} \u00b7 ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
             onTap: () {

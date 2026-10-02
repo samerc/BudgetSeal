@@ -9,6 +9,11 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String txNoRateBetween(String from, String to) {
+    return 'لا يوجد سعر صرف من $from إلى $to. أدخل سعرًا لهذا المبلغ، أو حدّث الأسعار من الإعدادات › أسعار الصرف.';
+  }
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'لا يزال هذا الحساب يحتوي على $amount. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.';
   }

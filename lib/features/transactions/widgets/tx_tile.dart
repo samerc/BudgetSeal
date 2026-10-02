@@ -13,6 +13,7 @@ import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/utils/receipt_helper.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/utils/note_text.dart';
 
 // ---------------------------------------------------------------------------
 // Transaction tile — Cashew transactionEntry layout. Shared by the Activity
@@ -73,7 +74,7 @@ class TxTile extends ConsumerWidget {
       transferTo = entry.destinationAccountName ?? 'account';
       final arrow = Directionality.of(context) == TextDirection.rtl ? '←' : '→';
       displayName = '$transferFrom $arrow $transferTo';
-      note = tx.note.isNotEmpty ? tx.note : null;
+      note = tx.note.isNotEmpty ? visibleNote(tx.note) : null;
       transferDestAmt = tx.amount * tx.exchangeRateToBase;
       transferDestCcy = entry.destinationAccountCurrency ?? tx.currency;
     } else {
@@ -337,7 +338,7 @@ class TxTile extends ConsumerWidget {
           : names.join(', ');
     }
 
-    if (tx.note.isNotEmpty) return tx.note;
+    if (tx.note.isNotEmpty) return visibleNote(tx.note);
     return _typeLabel(context, tx.type);
   }
 
@@ -347,7 +348,7 @@ class TxTile extends ConsumerWidget {
 
     // If we have a category name, show note as subtitle (if any)
     if (catName != null && tx.note.isNotEmpty) {
-      return tx.note;
+      return visibleNote(tx.note);
     }
 
     // Show account name as subtitle if we have a display name already
@@ -382,7 +383,7 @@ class TxTile extends ConsumerWidget {
       if (lineNote != displayName) return lineNote;
     }
     // Show tx note as preview if it exists and not shown elsewhere
-    if (tx.note.isNotEmpty) return tx.note;
+    if (tx.note.isNotEmpty) return visibleNote(tx.note);
     return null;
   }
 

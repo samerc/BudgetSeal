@@ -29,6 +29,7 @@ import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/amount_field.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/utils/save_errors.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
 import 'widgets/transaction_form_widgets.dart';
@@ -859,9 +860,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       ));
       return; // skip finally setState since we're already popped
     } catch (e) {
+      debugPrint('[AddTransaction] Save failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).txFormCouldNotSave),
+          content: Text(txSaveErrorText(S.of(context), e)),
           behavior: SnackBarBehavior.floating,
         ));
       }

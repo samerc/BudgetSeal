@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:uuid/uuid.dart';
 
 import '../database/app_database.dart';
+import '../fx/fx_service.dart' show latestCachedRate;
 import 'allocation_engine.dart';
 
 /// The next occurrence after [from]. Calendar arithmetic throughout (a
@@ -77,7 +79,14 @@ class RecurringEngine {
         if (rec.endDate != null && currentDue.isAfter(rec.endDate!)) {
           break;
         }
-        await _generateTransaction(rec, currentDue, baseCurrency);
+        try {
+          await _generateTransaction(rec, currentDue, baseCurrency);
+        } catch (e) {
+          // Leave this occurrence due (it shows as overdue and retries next
+          // launch) and carry on with the other bills.
+          debugPrint('[Recurring] Posting ${rec.id} failed: $e');
+          break;
+        }
         generated++;
         currentDue = advanceRecurringDate(
             currentDue, rec.frequency, rec.interval,
@@ -139,26 +148,41 @@ class RecurringEngine {
       baseCurrency = household?.baseCurrency ?? 'USD';
     }
 
+    // Rates come from the local cache (any age): this runs at app start and
+    // must not wait on the network. Without one, an expense/income posts
+    // with no rate (flagged "No rate" in the UI); a transfer between
+    // currencies waits (it would move the wrong amount).
     if (rec.type == 'transfer' && rec.destinationAccountId != null) {
+      final dest = await (_db.select(_db.accounts)
+            ..where((a) => a.id.equals(rec.destinationAccountId!)))
+          .getSingleOrNull();
+      final destCurrency = dest?.currency ?? rec.currency;
+      final transferRate =
+          await latestCachedRate(_db, rec.currency, destCurrency);
+      if (transferRate == null) {
+        throw CurrencyConversionException(rec.currency, destCurrency);
+      }
       await _allocationEngine.recordTransfer(
         householdId: householdId,
         fromAccountId: rec.accountId,
         toAccountId: rec.destinationAccountId!,
         amount: amount,
         currency: rec.currency,
-        exchangeRateToBase: 1.0,
+        exchangeRateToBase: transferRate,
         createdBy: 'recurring',
         deviceId: 'local',
         note: rec.title.isNotEmpty ? rec.title : rec.note,
         date: effectiveDate,
       );
     } else {
+      final rate = await latestCachedRate(_db, rec.currency, baseCurrency);
       final lines = [
         TxLine(
           amount: amount,
           currency: rec.currency,
           categoryId: rec.categoryId,
           accountId: rec.accountId,
+          exchangeRateToBase: rate ?? 1.0,
         ),
       ];
       await _allocationEngine.recordTransaction(

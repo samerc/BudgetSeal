@@ -221,16 +221,37 @@ class _PlannedPaymentsScreenState
       if (householdId == null) return false;
 
       final tx = item.tx;
+      final fx = ref.read(fxServiceProvider);
+      // A plan has no reliable rate (it was saved as 1.0): take today's rate
+      // when posting. Null if offline with nothing cached.
+      Future<double?> rate(String from, String to) async {
+        if (from == to) return 1.0;
+        try {
+          return await fx.getRateWithCache(from, to);
+        } catch (e) {
+          debugPrint('[PlannedPayments] No rate $from->$to: $e');
+          return null;
+        }
+      }
 
       // 1. Create the posted transaction FIRST (if this fails, planned tx is still intact)
       if (tx.type == 'transfer') {
+        final db = ref.read(databaseProvider);
+        final dest = await (db.select(db.accounts)
+              ..where((a) => a.id.equals(tx.destinationAccountId ?? '')))
+            .getSingleOrNull();
+        final destCurrency = dest?.currency ?? tx.currency;
+        final transferRate = await rate(tx.currency, destCurrency);
+        if (transferRate == null) {
+          throw CurrencyConversionException(tx.currency, destCurrency);
+        }
         await engine.recordTransfer(
           householdId: householdId,
           fromAccountId: tx.accountId,
           toAccountId: tx.destinationAccountId ?? tx.accountId,
           amount: tx.amount,
           currency: tx.currency,
-          exchangeRateToBase: tx.exchangeRateToBase,
+          exchangeRateToBase: transferRate,
           createdBy: 'user',
           deviceId: tx.deviceId,
           note: tx.note,
@@ -238,16 +259,20 @@ class _PlannedPaymentsScreenState
         );
       } else {
         // income or expense — use recordTransaction with lines
-        final lines = item.lines
-            .map((l) => TxLine(
-                  amount: l.amount,
-                  currency: l.currency,
-                  categoryId: l.categoryId,
-                  accountId: l.accountId,
-                  exchangeRateToBase: l.exchangeRateToBase,
-                  note: l.note,
-                ))
-            .toList();
+        final lines = <TxLine>[
+          for (final l in item.lines)
+            TxLine(
+              amount: l.amount,
+              currency: l.currency,
+              categoryId: l.categoryId,
+              accountId: l.accountId,
+              exchangeRateToBase:
+                  isRealRate(l.currency, _baseCurrency, l.exchangeRateToBase)
+                      ? l.exchangeRateToBase
+                      : await rate(l.currency, _baseCurrency) ?? 1.0,
+              note: l.note,
+            ),
+        ];
 
         // If no lines exist (legacy), create one from the header
         if (lines.isEmpty) {
@@ -255,7 +280,10 @@ class _PlannedPaymentsScreenState
             amount: tx.amount,
             currency: tx.currency,
             categoryId: tx.categoryId,
-            exchangeRateToBase: tx.exchangeRateToBase,
+            exchangeRateToBase:
+                isRealRate(tx.currency, _baseCurrency, tx.exchangeRateToBase)
+                    ? tx.exchangeRateToBase
+                    : await rate(tx.currency, _baseCurrency) ?? 1.0,
           ));
         }
 

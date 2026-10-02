@@ -310,6 +310,8 @@ Handler createTransactionHandler(Ref ref) {
       }
 
       return created({'id': txId});
+    } on CurrencyConversionException catch (e) {
+      return badRequest('No exchange rate from ${e.from} to ${e.to}');
     } catch (e) {
       return serverError(e);
     }
@@ -485,6 +487,8 @@ Handler updateTransactionHandler(Ref ref) {
       }
 
       return ok({'id': newId});
+    } on CurrencyConversionException catch (e) {
+      return badRequest('No exchange rate from ${e.from} to ${e.to}');
     } catch (e) {
       return serverError(e);
     }
