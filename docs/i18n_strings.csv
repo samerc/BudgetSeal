@@ -2123,3 +2123,19 @@ web_rep_empty,,Nothing recorded this month,لا شيء مسجّل هذا الش�
 web_rep_empty_sub,,Pick another month with the arrows.,اختر شهرًا آخر بالأسهم.,Choisissez un autre mois avec les flèches.
 web_shortcut_pages,,Go to a page in the menu,الانتقال إلى صفحة في القائمة,Aller à une page du menu
 wc_start_failed,,"Couldn't start. Turn Wi‑Fi off and on, then try again.",تعذّر التشغيل. أوقف Wi‑Fi وشغّله، ثم حاول مجددًا.,Démarrage impossible. Désactivez puis réactivez le Wi‑Fi et réessayez.
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_move_title,,Move money,نقل الأموال,Déplacer de l'argent
+web_move_submit,,Move,نقل,Déplacer
+web_move_from,,From,من,De
+web_move_to,,To,إلى,Vers
+web_move_all,,All of it,الكل,Tout
+web_move_shortfall,,Overspent amount,مبلغ التجاوز,Montant dépassé
+web_move_has,,{name} has {amount},في {name}: {amount},{name} contient {amount}
+web_move_same,,Pick two different places.,اختر مكانين مختلفين.,Choisissez deux emplacements différents.
+web_move_not_enough,,{name} only has {amount}.,لا يوجد في {name} سوى {amount}.,{name} ne contient que {amount}.
+web_env_cover,,Cover,تغطية,Couvrir
+web_cover_title,,Cover {name},تغطية {name},Couvrir {name}
+web_toast_moved,,Money moved,تم نقل الأموال,Argent déplacé
+web_toast_covered,,Overspending covered,تمت تغطية التجاوز,Dépassement couvert

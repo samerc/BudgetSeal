@@ -9,6 +9,51 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get webMoveTitle => 'Déplacer de l\'argent';
+
+  @override
+  String get webMoveSubmit => 'Déplacer';
+
+  @override
+  String get webMoveFrom => 'De';
+
+  @override
+  String get webMoveTo => 'Vers';
+
+  @override
+  String get webMoveAll => 'Tout';
+
+  @override
+  String get webMoveShortfall => 'Montant dépassé';
+
+  @override
+  String webMoveHas(String name, String amount) {
+    return '$name contient $amount';
+  }
+
+  @override
+  String get webMoveSame => 'Choisissez deux emplacements différents.';
+
+  @override
+  String webMoveNotEnough(String name, String amount) {
+    return '$name ne contient que $amount.';
+  }
+
+  @override
+  String get webEnvCover => 'Couvrir';
+
+  @override
+  String webCoverTitle(String name) {
+    return 'Couvrir $name';
+  }
+
+  @override
+  String get webToastMoved => 'Argent déplacé';
+
+  @override
+  String get webToastCovered => 'Dépassement couvert';
+
+  @override
   String get webNavHome => 'Accueil';
 
   @override

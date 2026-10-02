@@ -590,7 +590,7 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - **Dates**: the browser sends the user's calendar day `YYYY-MM-DD` (`dayKey()`, never `toISOString()` — UTC shifts the day). `parseWebDate()` (transactions_handler.dart) keeps the time of day when editing, uses now for today, noon otherwise.
 - **Transactions**: grouped by day, "Load more" paging (`hasMore` from a limit+1 query), filters (type, year/month — "Whole year", search, account page). Row click = edit dialog; row buttons duplicate/delete. **Delete waits 5 s for Undo** (`pendingDeletes`, flushed with `keepalive` on `pagehide`/sign-out). Split transactions: lines shown read-only, amount/category hidden ("edited on your phone"). The form remembers the last account/type (`localStorage`), has Save & add another, Today/Yesterday chips, a category `<select>` filtered by type with subcategories indented.
 - **Currencies in the form**: an expense/income line in a non-base currency shows a rate field ("1 EUR = ? USD"); empty → the server uses `latestCachedRate()` (no network in a request), else 1.0 + "No rate". A transfer between accounts in different currencies asks for the **amount received**; the server stores `exchangeRateToBase = received / sent` (source → destination, as the app does) and refuses a cross-currency transfer without it.
-- **Budget**: `budgetSnapshot()` (`api/_budget.dart`, shared by dashboard + envelopes) returns envelopes in the Budget tab's order (sortOrder nulls-last, then name) with `spentByCurrency` (period consumption from `watchSpendingInPeriod().first`) and the linked category's color, plus `unallocated` per currency and the current `period`. Fund dialog: To target / All available chips; over-funding warns inline and the second submit goes ahead.
+- **Budget**: `budgetSnapshot()` (`api/_budget.dart`, shared by dashboard + envelopes) returns envelopes in the Budget tab's order (sortOrder nulls-last, then name) with `spentByCurrency` (period consumption from `watchSpendingInPeriod().first`) and the linked category's color, plus `unallocated` per currency and the current `period`. Fund dialog: To target / All available chips; over-funding warns inline and the second submit goes ahead. Move dialog (`openMove()`, ⇄ on every card; overspent cards show **Cover** instead of Fund): From/To selects (Ready to assign = `''`), currency, "Overspent amount" / "All of it" chips; Cover takes from Ready to assign, or the richest envelope when RTA can't cover it. An envelope source can't give more than it holds (client + server); RTA may go negative after the second submit.
 - **Recurring/subscriptions** share handlers (`listRecurring/createRecurring/updateRecurring/deleteRecurring` with `subscription:`), always filtering `deleted = false`. Editable: title, amount (subscriptions add a price-history entry), note, account, destination, category, frequency/interval, next date (also sets `anchorDay`), enabled. Subscriptions page shows per-month/per-year cost (`perMonth()`).
 - **Notes**: payloads carry `visibleNote()`; the PUT handler re-appends the hidden `[obj:…]` tag (`noteTag()`), and an empty `note` clears it. Edits record the new transaction, carry `receiptPath`, and soft-delete the old one inside one `db.transaction`.
 - **Connection**: `/auth/status` every 15 s; unreachable → banner + red dot; `authenticated:false` → PIN screen with "session ended". Coming back to the tab after 30 s re-renders the page (`visibilitychange`). PIN errors show attempts left / lockout minutes (`attemptsLeft`, `retryInMinutes` from `/auth/pin`).
@@ -620,6 +620,7 @@ POST /api/accounts                     → create (initialBalance may be negativ
 
 GET  /api/envelopes                    → { items, unallocated, period, baseCurrency }
 POST /api/envelopes/:id/fund           → add funding
+POST /api/envelopes/move               → { fromId?, toId?, amount, currency } (null side = Ready to assign; AllocationEngine.moveMoney; 400 if the source envelope lacks it)
 
 GET  /api/recurring                    → recurring items (not subscriptions, not deleted)
 POST /api/recurring                    → create (transfer needs destinationAccountId)
@@ -641,7 +642,7 @@ Tests: `test/features/web_companion_api_test.dart` calls the handlers with an in
 #/                Home (Ready to assign, net worth, accounts, envelopes, recent)
 #/transactions    Day-grouped list, search, type + month filters, CSV export
 #/accounts/<id>   One account's transactions
-#/envelopes       Budget: Ready to assign + envelope cards + fund
+#/envelopes       Budget: Ready to assign + envelope cards + fund / move / cover
 #/reports         Month arrows, stats, daily chart, category donut/shares, biggest expenses
 #/accounts        Net worth per currency, accounts by type
 #/categories      Expense/Income toggle, parents with subcategories

@@ -272,5 +272,18 @@
   "web_sub_yearly": "{amount} per year",
   "web_rep_empty": "Nothing recorded this month",
   "web_rep_empty_sub": "Pick another month with the arrows.",
-  "web_shortcut_pages": "Go to a page in the menu"
+  "web_shortcut_pages": "Go to a page in the menu",
+  "web_move_title": "Move money",
+  "web_move_submit": "Move",
+  "web_move_from": "From",
+  "web_move_to": "To",
+  "web_move_all": "All of it",
+  "web_move_shortfall": "Overspent amount",
+  "web_move_has": "{name} has {amount}",
+  "web_move_same": "Pick two different places.",
+  "web_move_not_enough": "{name} only has {amount}.",
+  "web_env_cover": "Cover",
+  "web_cover_title": "Cover {name}",
+  "web_toast_moved": "Money moved",
+  "web_toast_covered": "Overspending covered"
 }

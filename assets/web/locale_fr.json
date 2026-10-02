@@ -272,5 +272,18 @@
   "web_sub_yearly": "{amount} par an",
   "web_rep_empty": "Rien d’enregistré ce mois-ci",
   "web_rep_empty_sub": "Choisissez un autre mois avec les flèches.",
-  "web_shortcut_pages": "Aller à une page du menu"
+  "web_shortcut_pages": "Aller à une page du menu",
+  "web_move_title": "Déplacer de l'argent",
+  "web_move_submit": "Déplacer",
+  "web_move_from": "De",
+  "web_move_to": "Vers",
+  "web_move_all": "Tout",
+  "web_move_shortfall": "Montant dépassé",
+  "web_move_has": "{name} contient {amount}",
+  "web_move_same": "Choisissez deux emplacements différents.",
+  "web_move_not_enough": "{name} ne contient que {amount}.",
+  "web_env_cover": "Couvrir",
+  "web_cover_title": "Couvrir {name}",
+  "web_toast_moved": "Argent déplacé",
+  "web_toast_covered": "Dépassement couvert"
 }

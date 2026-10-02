@@ -9,6 +9,51 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webMoveTitle => 'نقل الأموال';
+
+  @override
+  String get webMoveSubmit => 'نقل';
+
+  @override
+  String get webMoveFrom => 'من';
+
+  @override
+  String get webMoveTo => 'إلى';
+
+  @override
+  String get webMoveAll => 'الكل';
+
+  @override
+  String get webMoveShortfall => 'مبلغ التجاوز';
+
+  @override
+  String webMoveHas(String name, String amount) {
+    return 'في $name: $amount';
+  }
+
+  @override
+  String get webMoveSame => 'اختر مكانين مختلفين.';
+
+  @override
+  String webMoveNotEnough(String name, String amount) {
+    return 'لا يوجد في $name سوى $amount.';
+  }
+
+  @override
+  String get webEnvCover => 'تغطية';
+
+  @override
+  String webCoverTitle(String name) {
+    return 'تغطية $name';
+  }
+
+  @override
+  String get webToastMoved => 'تم نقل الأموال';
+
+  @override
+  String get webToastCovered => 'تمت تغطية التجاوز';
+
+  @override
   String get webNavHome => 'الرئيسية';
 
   @override

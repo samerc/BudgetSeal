@@ -9,6 +9,51 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webMoveTitle => 'Move money';
+
+  @override
+  String get webMoveSubmit => 'Move';
+
+  @override
+  String get webMoveFrom => 'From';
+
+  @override
+  String get webMoveTo => 'To';
+
+  @override
+  String get webMoveAll => 'All of it';
+
+  @override
+  String get webMoveShortfall => 'Overspent amount';
+
+  @override
+  String webMoveHas(String name, String amount) {
+    return '$name has $amount';
+  }
+
+  @override
+  String get webMoveSame => 'Pick two different places.';
+
+  @override
+  String webMoveNotEnough(String name, String amount) {
+    return '$name only has $amount.';
+  }
+
+  @override
+  String get webEnvCover => 'Cover';
+
+  @override
+  String webCoverTitle(String name) {
+    return 'Cover $name';
+  }
+
+  @override
+  String get webToastMoved => 'Money moved';
+
+  @override
+  String get webToastCovered => 'Overspending covered';
+
+  @override
   String get webNavHome => 'Home';
 
   @override

@@ -401,7 +401,7 @@ function openModal({ title, body, submit, onSubmit, danger = false, narrow = fal
   });
   onOpen?.(form);
   setTimeout(() => {
-    const first = form.querySelector('[autofocus], .input:not(:disabled)');
+    const first = form.querySelector('[autofocus]') || form.querySelector('.input:not(:disabled)');
     (first || ok)?.focus();
   }, 30);
   return form;
@@ -757,7 +757,12 @@ async function renderBudget(quiet) {
       ${f.meta || f.metaEnd ? `<div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
       <div class="env-foot">
         <span class="env-cross num">${f.others.map(([c, v]) => esc((v < 0 ? '' : '+ ') + fmt(v, c))).join(' · ')}</span>
-        <button class="btn btn-sm btn-tonal" data-action="fund" data-id="${esc(e.id)}">${IC.plus}${esc(t('web_env_fund'))}</button>
+        <span class="env-actions">
+          <button class="icon-btn" data-action="move" data-id="${esc(e.id)}" title="${esc(t('web_move_title'))}" aria-label="${esc(t('web_move_title'))}">${IC.transfer}</button>
+          ${f.over
+            ? `<button class="btn btn-sm btn-cover" data-action="cover" data-id="${esc(e.id)}">${esc(t('web_env_cover'))}</button>`
+            : `<button class="btn btn-sm btn-tonal" data-action="fund" data-id="${esc(e.id)}">${IC.plus}${esc(t('web_env_fund'))}</button>`}
+        </span>
       </div>
     </div>`;
   }).join('');
@@ -833,6 +838,110 @@ function openFund(id) {
       const r = await api(`/api/envelopes/${encodeURIComponent(id)}/fund`, { method: 'POST', body: { amount, currency, note: form.querySelector('#fund-note').value.trim() } });
       if (!r) return false;
       toast(t('web_toast_env_funded'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+/**
+ * Move money between envelopes / Ready to assign (`''` = Ready to assign).
+ * Cover = a move into an overspent envelope, prefilled with the shortfall
+ * and taken from Ready to assign (or the envelope with the most money when
+ * Ready to assign has none).
+ */
+function openMove(id, cover = false) {
+  const envs = cache.envelopes || [];
+  const e = envs.find(x => x.id === id);
+  if (!e) return;
+  const f = envFigures(e);
+  const unalloc = cache.unallocated || {};
+  const holding = (key, c) => key ? ((envs.find(x => x.id === key)?.balanceByCurrency || {})[c] || 0) : (unalloc[c] || 0);
+  const name = key => key ? (envs.find(x => x.id === key)?.name || '') : t('web_rta');
+  const currencies = [...new Set([f.cur, ...Object.keys(unalloc), ...envs.flatMap(x => Object.keys(x.balanceByCurrency || {}))])];
+  const shortfall = cover ? Math.max(0, -f.bal) : 0;
+
+  let from = id, to = '';
+  if (cover) {
+    to = id;
+    from = '';
+    if (holding('', f.cur) < shortfall - 0.004) {
+      const richest = envs.filter(x => x.id !== id).sort((a, b) => holding(b.id, f.cur) - holding(a.id, f.cur))[0];
+      if (richest && holding(richest.id, f.cur) > holding('', f.cur)) from = richest.id;
+    }
+  }
+  const options = sel => [`<option value=""${sel === '' ? ' selected' : ''}>${esc(t('web_rta'))}</option>`,
+    ...envs.map(x => `<option value="${esc(x.id)}"${x.id === sel ? ' selected' : ''}>${esc(x.name)}</option>`)].join('');
+
+  openModal({
+    title: cover ? t('web_cover_title', { name: e.name }) : t('web_move_title'),
+    submit: cover ? t('web_env_cover') : t('web_move_submit'),
+    body: `
+      <div class="field-row">
+        <div class="field"><label class="label" for="mv-from">${esc(t('web_move_from'))}</label><select id="mv-from" class="input">${options(from)}</select></div>
+        <div class="field"><label class="label" for="mv-to">${esc(t('web_move_to'))}</label><select id="mv-to" class="input">${options(to)}</select></div>
+      </div>
+      <div class="field">
+        <label class="label" for="mv-amount">${esc(t('web_form_amount'))}</label>
+        <div class="input-cur"><input id="mv-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" autofocus value="${shortfall > 0 ? esc(amountInputValue(shortfall, f.cur)) : ''}"><span class="cur" id="mv-cur-badge">${esc(f.cur)}</span></div>
+        <div class="chips">
+          ${cover ? `<button type="button" class="pill" data-fill="short">${esc(t('web_move_shortfall'))}</button>` : ''}
+          <button type="button" class="pill" data-fill="all">${esc(t('web_move_all'))}</button>
+        </div>
+        <div class="help" id="mv-help"></div>
+      </div>
+      ${currencies.length > 1 ? `<div class="field"><label class="label" for="mv-cur">${esc(t('web_form_currency'))}</label>
+        <select id="mv-cur" class="input">${currencies.map(c => `<option value="${esc(c)}"${c === f.cur ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>` : ''}`,
+    onOpen: form => {
+      const amount = form.querySelector('#mv-amount');
+      const fromSel = form.querySelector('#mv-from');
+      const toSel = form.querySelector('#mv-to');
+      const curSel = form.querySelector('#mv-cur');
+      const help = form.querySelector('#mv-help');
+      const cur = () => curSel?.value || f.cur;
+      const update = () => {
+        delete form.dataset.confirmedFor;
+        delete form.dataset.okLabel;
+        const v = parseAmount(amount.value);
+        const have = holding(fromSel.value, cur());
+        const left = have - (Number.isFinite(v) ? v : 0);
+        help.textContent = t('web_move_has', { name: name(fromSel.value), amount: fmt(have, cur()) });
+        help.classList.toggle('warn', left < -0.004);
+        form.querySelector('#mv-cur-badge').textContent = cur();
+      };
+      form.querySelectorAll('[data-fill]').forEach(b => b.addEventListener('click', () => {
+        const v = b.dataset.fill === 'all' ? holding(fromSel.value, cur()) : -holding(toSel.value, cur());
+        amount.value = amountInputValue(Math.max(0, v), cur());
+        update();
+      }));
+      [amount, fromSel, toSel, curSel].forEach(el => el?.addEventListener(el === amount ? 'input' : 'change', update));
+      update();
+    },
+    onSubmit: async form => {
+      const fromId = form.querySelector('#mv-from').value;
+      const toId = form.querySelector('#mv-to').value;
+      const amount = parseAmount(form.querySelector('#mv-amount').value);
+      const currency = form.querySelector('#mv-cur')?.value || f.cur;
+      if (fromId === toId) { toast(t('web_move_same'), true); return false; }
+      if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      const have = holding(fromId, currency);
+      if (amount > have + 0.004) {
+        // An envelope can't give more than it holds; Ready to assign can go
+        // negative after a second click (same rule as funding).
+        if (fromId) { toast(t('web_move_not_enough', { name: name(fromId), amount: fmt(have, currency) }), true); return false; }
+        if (form.dataset.confirmedFor !== String(amount)) {
+          form.dataset.confirmedFor = String(amount);
+          form.dataset.okLabel = esc(t('web_fund_anyway'));
+          const help = form.querySelector('#mv-help');
+          help.textContent = t('web_fund_over_msg');
+          help.classList.add('warn');
+          return false;
+        }
+      }
+      const r = await api('/api/envelopes/move', { method: 'POST', body: { fromId: fromId || null, toId: toId || null, amount, currency } });
+      if (!r) return false;
+      toast(cover && toId === id ? t('web_toast_covered') : t('web_toast_moved'));
       closeModal();
       refresh(true);
       return true;
@@ -1829,6 +1938,8 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'move': el => openMove(el.dataset.id),
+  'cover': el => openMove(el.dataset.id, true),
   'add-account': openAddAccount,
   'add-cat': () => refs().then(() => openCategoryForm()),
   'edit-cat': el => openCategoryForm((cache.categories || []).find(c => c.id === el.dataset.id)),

@@ -334,6 +334,8 @@ img { display: block; }
 .btn-ghost:hover:not(:disabled) { background: var(--container); color: var(--text); }
 .btn-danger { background: var(--expense); color: #fff; }
 .btn-danger-text { color: var(--expense); }
+.btn-cover { background: var(--expense-fill); color: var(--expense); }
+.btn-cover:hover:not(:disabled) { background: color-mix(in srgb, var(--expense-fill) 80%, var(--expense)); }
 .btn-danger-text:hover { background: var(--expense-fill); }
 .btn-sm { min-height: 32px; padding: 5px 13px; font-size: 13px; }
 .btn-ink { background: var(--ink); color: var(--acc-bright); }
@@ -606,6 +608,7 @@ select.input { appearance: none; cursor: pointer; background-image: url("data:im
 .env-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--text-2); font-weight: 600; }
 .env-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .env-cross { font-size: 12.5px; font-weight: 700; color: var(--caution); }
+.env-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .env-card.over .env-amount { color: var(--expense); }
 
 .env-mini { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }

@@ -6,6 +6,7 @@ import 'package:budgetseal/core/providers/database_provider.dart';
 import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/features/web_companion/api/categories_handler.dart';
 import 'package:budgetseal/features/web_companion/api/dashboard_handler.dart';
+import 'package:budgetseal/features/web_companion/api/envelopes_handler.dart';
 import 'package:budgetseal/features/web_companion/api/recurring_handler.dart';
 import 'package:budgetseal/features/web_companion/api/subscriptions_handler.dart';
 import 'package:budgetseal/features/web_companion/api/transactions_handler.dart';
@@ -258,5 +259,46 @@ void main() {
     expect(d['status'], 200);
     expect((d['unallocated'] as Map)['USD'], 500);
     expect(d['period'], isNotNull);
+  });
+
+  test('money moves between envelopes and Ready to assign', () async {
+    await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'income',
+      'accountId': 'usd',
+      'amount': 500,
+      'categoryId': 'pay',
+    });
+    for (final (id, archived) in [('a', false), ('b', false), ('old', true)]) {
+      await db.into(db.allocations).insert(AllocationsCompanion.insert(
+          id: id,
+          householdId: hh,
+          name: id,
+          categoryId: 'food',
+          archived: Value(archived),
+          deviceId: 't'));
+    }
+    Future<Map<String, dynamic>> move(Map<String, dynamic> body) =>
+        call(moveEnvelopeMoneyHandler(ref), 'POST',
+            body: {'currency': 'USD', ...body});
+
+    expect((await move({'toId': 'a', 'amount': 100}))['status'], 200);
+    expect((await move({'fromId': 'a', 'toId': 'b', 'amount': 30}))['status'],
+        200);
+    // An envelope can't give more than it holds.
+    expect((await move({'fromId': 'a', 'toId': 'b', 'amount': 200}))['status'],
+        400);
+    expect((await move({'fromId': 'b', 'amount': 10}))['status'], 200);
+    expect((await move({'fromId': 'a', 'toId': 'a', 'amount': 1}))['status'],
+        400);
+    expect((await move({'toId': 'old', 'amount': 1}))['status'], 404);
+    expect((await move({'toId': 'nope', 'amount': 1}))['status'], 404);
+
+    final list = await call(listEnvelopesHandler(ref), 'GET');
+    final byId = {
+      for (final e in list['items'] as List) e['id']: e['balanceByCurrency']
+    };
+    expect(byId['a']['USD'], 70);
+    expect(byId['b']['USD'], 20);
+    expect((list['unallocated'] as Map)['USD'], 410);
   });
 }

@@ -59,6 +59,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
   api.post('/accounts', createAccountHandler(ref));
 
   api.get('/envelopes', listEnvelopesHandler(ref));
+  api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));
   api.post('/envelopes/<id>/fund', fundEnvelopeHandler(ref));
 
   api.get('/recurring', listRecurringHandler(ref));

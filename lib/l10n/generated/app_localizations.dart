@@ -99,6 +99,84 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move money'**
+  String get webMoveTitle;
+
+  /// No description provided for @webMoveSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get webMoveSubmit;
+
+  /// No description provided for @webMoveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get webMoveFrom;
+
+  /// No description provided for @webMoveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get webMoveTo;
+
+  /// No description provided for @webMoveAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All of it'**
+  String get webMoveAll;
+
+  /// No description provided for @webMoveShortfall.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent amount'**
+  String get webMoveShortfall;
+
+  /// No description provided for @webMoveHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has {amount}'**
+  String webMoveHas(String name, String amount);
+
+  /// No description provided for @webMoveSame.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick two different places.'**
+  String get webMoveSame;
+
+  /// No description provided for @webMoveNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} only has {amount}.'**
+  String webMoveNotEnough(String name, String amount);
+
+  /// No description provided for @webEnvCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get webEnvCover;
+
+  /// No description provided for @webCoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover {name}'**
+  String webCoverTitle(String name);
+
+  /// No description provided for @webToastMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Money moved'**
+  String get webToastMoved;
+
+  /// No description provided for @webToastCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspending covered'**
+  String get webToastCovered;
+
   /// No description provided for @webNavHome.
   ///
   /// In en, this message translates to:

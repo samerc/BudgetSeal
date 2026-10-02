@@ -272,5 +272,18 @@
   "web_sub_yearly": "{amount} سنويًا",
   "web_rep_empty": "لا شيء مسجّل هذا الشهر",
   "web_rep_empty_sub": "اختر شهرًا آخر بالأسهم.",
-  "web_shortcut_pages": "الانتقال إلى صفحة في القائمة"
+  "web_shortcut_pages": "الانتقال إلى صفحة في القائمة",
+  "web_move_title": "نقل الأموال",
+  "web_move_submit": "نقل",
+  "web_move_from": "من",
+  "web_move_to": "إلى",
+  "web_move_all": "الكل",
+  "web_move_shortfall": "مبلغ التجاوز",
+  "web_move_has": "في {name}: {amount}",
+  "web_move_same": "اختر مكانين مختلفين.",
+  "web_move_not_enough": "لا يوجد في {name} سوى {amount}.",
+  "web_env_cover": "تغطية",
+  "web_cover_title": "تغطية {name}",
+  "web_toast_moved": "تم نقل الأموال",
+  "web_toast_covered": "تمت تغطية التجاوز"
 }
