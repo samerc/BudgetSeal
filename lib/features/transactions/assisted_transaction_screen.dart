@@ -9,6 +9,9 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/services/autofill_service.dart';
+import '../../core/services/last_used_service.dart';
+import 'widgets/category_sheet.dart' show recentCategoryIds;
+import 'widgets/transaction_form_widgets.dart' show DateQuickChip;
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -29,7 +32,12 @@ import '../../shared/utils/save_errors.dart';
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
 class AssistedTransactionScreen extends ConsumerStatefulWidget {
   final String? initialType;
-  const AssistedTransactionScreen({super.key, this.initialType});
+  /// Starting date (the month being viewed on the Activity tab).
+  final DateTime? initialDate;
+  /// Title typed in the Activity tab's quick-add bar.
+  final String? initialTitle;
+  const AssistedTransactionScreen(
+      {super.key, this.initialType, this.initialDate, this.initialTitle});
 
   @override
   ConsumerState<AssistedTransactionScreen> createState() =>
@@ -54,6 +62,8 @@ class _AssistedTransactionScreenState
   late String _type;
   String _title = '';
   String? _accountId;
+  /// [_accountId] came from the last-used default — autofill may replace it.
+  bool _accountIsDefault = false;
   String? _destinationAccountId;
   double _transferExchangeRate = 1.0;
   double? _originalTransferRate; // stored before inversion to avoid precision loss
@@ -134,16 +144,43 @@ class _AssistedTransactionScreenState
 
   _LineItem get _activeLine => _lineItems[_activeLineIndex];
 
+  /// Start on the last used account (or transfer pair), like the classic form.
+  Future<void> _applyAccountDefaults() async {
+    try {
+      final accounts = await ref.read(accountsProvider.future);
+      if (!mounted || accounts.isEmpty) return;
+      if (_type == 'transfer') {
+        final pair = await LastUsedService.transferPair(accounts);
+        if (!mounted) return;
+        setState(() {
+          _accountIsDefault = true;
+          _setAccount(pair.from ?? accounts.first.id);
+          if (pair.to != null && pair.to != _accountId) {
+            _destinationAccountId = pair.to;
+          }
+        });
+      } else if (_accountId == null) {
+        final id = await LastUsedService.defaultAccount(accounts);
+        if (mounted && _accountId == null) {
+          setState(() {
+            _setAccount(id);
+            _accountIsDefault = true;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('[AssistedTx] Account defaults failed: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _type = widget.initialType ?? 'expense';
+    if (widget.initialDate != null) _selectedDate = widget.initialDate!;
     _lineItems.add(_LineItem());
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final accounts = ref.read(accountsProvider).value ?? [];
-      if (accounts.isNotEmpty) {
-        _setAccount(accounts.first.id);
-      }
+      _applyAccountDefaults();
       _showTitlePopup();
     });
   }
@@ -176,7 +213,8 @@ class _AssistedTransactionScreenState
   // ── Popup 1: Enter Title ──────────────────────────────────
 
   void _showTitlePopup() {
-    final ctrl = TextEditingController();
+    final ctrl = TextEditingController(
+        text: _title.isNotEmpty ? _title : (widget.initialTitle ?? ''));
     final entries =
         ref.read(transactionEntriesProvider).value ?? [];
     final previousTitles = <String>{};
@@ -189,6 +227,20 @@ class _AssistedTransactionScreenState
     }
     final suggestions = previousTitles.toList()..sort();
     var movedForward = false;
+    void proceed(BuildContext ctx, String localType) {
+      _title = ctrl.text.trim();
+      movedForward = true;
+      Navigator.pop(ctx);
+      // A typed title fills category/account like picking a suggestion.
+      if (_title.isNotEmpty) _applyAutofillFromTitle(_title);
+      if (localType == 'transfer') {
+        _showAmountScreen();
+      } else if (_activeLine.category == null) {
+        _showCategoryPopup();
+      } else {
+        _showAmountScreen();
+      }
+    }
     // Capture S + theme colors before opening sheet to avoid _dependents.isEmpty crash.
     // Using the outer widget's context inside a StatefulBuilder registers InheritedWidget
     // dependencies that break when the sheet is dismissed.
@@ -268,18 +320,9 @@ class _AssistedTransactionScreenState
                               .toList();
                     });
                   },
-                  onSubmitted: (_) {
-                    _title = ctrl.text.trim();
-                    movedForward = _title.isNotEmpty;
-                    Navigator.pop(ctx);
-                    if (_title.isNotEmpty) {
-                      if (localType == 'transfer') {
-                        _showAmountScreen();
-                      } else {
-                        _showCategoryPopup();
-                      }
-                    }
-                  },
+                  // Enter = the button below (the title is optional), never
+                  // a silent exit from the flow.
+                  onSubmitted: (_) => proceed(ctx, localType),
                 ),
                 // Inline suggestions (visible, tappable)
                 if (filteredSuggestions.isNotEmpty) ...[
@@ -330,16 +373,7 @@ class _AssistedTransactionScreenState
                 ],
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () {
-                    _title = ctrl.text.trim();
-                    movedForward = true;
-                    Navigator.pop(ctx);
-                    if (localType == 'transfer') {
-                      _showAmountScreen();
-                    } else {
-                      _showCategoryPopup();
-                    }
-                  },
+                  onPressed: () => proceed(ctx, localType),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -386,6 +420,9 @@ class _AssistedTransactionScreenState
     var localType = _type;
     String? expandedParentId;
     var searchQuery = '';
+    final recentIds = recentCategoryIds(
+        ref.read(transactionEntriesProvider).value ?? const []);
+    final catById = {for (final c in categories) c.id: c};
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -550,6 +587,51 @@ class _AssistedTransactionScreenState
                             isDense: true,
                           ),
                         ),
+                        // Recent categories of this type, one tap away.
+                        if (searchQuery.isEmpty)
+                          Builder(builder: (_) {
+                            final recent = [
+                              for (final id in recentIds)
+                                if (catById[id]?.transactionType == localType)
+                                  catById[id]!,
+                            ].take(4).toList();
+                            if (recent.isEmpty) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final c in recent)
+                                    ActionChip(
+                                      avatar: CategoryIcon(
+                                        categoryName: c.name,
+                                        emoji: c.icon.length <= 4 &&
+                                                c.icon != 'category'
+                                            ? c.icon
+                                            : null,
+                                        color: AppColors.fromHex(c.colorHex),
+                                        size: 22,
+                                        circular: true,
+                                      ),
+                                      label: Text(c.name),
+                                      shape: const StadiumBorder(),
+                                      side: BorderSide.none,
+                                      backgroundColor: catSurfaceVariant,
+                                      onPressed: () {
+                                        hapticLight();
+                                        _activeLine.category = c;
+                                        _activeLine.type = localType;
+                                        _type = localType;
+                                        _applyAutofill(c.id);
+                                        Navigator.pop(ctx);
+                                        _showAmountScreen();
+                                      },
+                                    ),
+                                ],
+                              ),
+                            );
+                          }),
                       ],
                     ),
                   ),
@@ -1002,18 +1084,31 @@ class _AssistedTransactionScreenState
       // Fallback to category's default account
       final categories = ref.read(categoriesProvider).value ?? [];
       final cat = categories.where((c) => c.id == categoryId).firstOrNull;
-      if (cat?.defaultAccountId != null && _accountId == null) {
+      if (cat?.defaultAccountId != null &&
+          (_accountId == null || _accountIsDefault)) {
         _setAccount(cat!.defaultAccountId);
       }
       return;
     }
     final canOverride = settings.overrideExisting;
-    if (fill.accountId != null && (_accountId == null || canOverride)) {
+    if (fill.accountId != null && (_accountId == null || canOverride || _accountIsDefault)) {
       _setAccount(fill.accountId);
     }
     if (fill.title != null && (_title.isEmpty || canOverride)) {
       _title = fill.title!;
     }
+    _applyAutofillAmount(fill.amount, canOverride);
+  }
+
+  /// Settings › Auto-fill › Amount: pre-enter the last amount.
+  void _applyAutofillAmount(double? amount, bool canOverride) {
+    if (amount == null || amount <= 0) return;
+    final line = _activeLine;
+    if (line.amount > 0 && !canOverride) return;
+    line.amount = amount;
+    line.calcDisplay = _fmtCalc(amount);
+    line.calcExpression = line.calcDisplay;
+    line.startNewOperand = false;
   }
 
   void _applyAutofillFromTitle(String title) {
@@ -1026,7 +1121,7 @@ class _AssistedTransactionScreenState
     );
     if (!fill.hasData) return;
     final canOverride = settings.overrideExisting;
-    if (fill.accountId != null && (_accountId == null || canOverride)) {
+    if (fill.accountId != null && (_accountId == null || canOverride || _accountIsDefault)) {
       _setAccount(fill.accountId);
     }
     if (fill.categoryId != null &&
@@ -1039,10 +1134,43 @@ class _AssistedTransactionScreenState
         _type = cat.transactionType;
       }
     }
+    _applyAutofillAmount(fill.amount, canOverride);
+  }
+
+  Future<void> _editTitle() async {
+    final tr = S.of(context);
+    final ctrl = TextEditingController(text: _title);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dCtx) => AlertDialog(
+        title: Text(tr.commonTitle),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          maxLength: InputLimits.nameMaxLength,
+          onSubmitted: (v) => Navigator.pop(dCtx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx),
+            child: Text(tr.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dCtx, ctrl.text),
+            child: Text(tr.commonSave),
+          ),
+        ],
+      ),
+    );
+    disposeAfterRouteAnimation(ctrl);
+    if (result != null && mounted) setState(() => _title = result.trim());
   }
 
   void _showAmountScreen() {
     setState(() {
+      // Keep an auto-filled amount; otherwise start from zero.
+      if (_activeLine.amount > 0) return;
       _activeLine.calcDisplay = '0';
       _activeLine.calcExpression = '';
       _activeLine.amount = 0;
@@ -1392,7 +1520,7 @@ class _AssistedTransactionScreenState
           note: _title,
           date: saveDate,
         );
-
+        LastUsedService.rememberTransfer(_accountId!, _destinationAccountId!);
       } else {
         // Group by type — each type becomes its own transaction
         final byType = <String, List<_LineItem>>{};
@@ -1421,6 +1549,7 @@ class _AssistedTransactionScreenState
             date: saveDate,
           );
         }
+        LastUsedService.rememberAccount(_accountId!);
       }
 
       if (mounted) {
@@ -1586,6 +1715,39 @@ class _AssistedTransactionScreenState
                 ],
               ),
             )),
+            // Title — editable without going back through the flow.
+            InkWell(
+              onTap: _editTitle,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.title_rounded,
+                        size: 18, color: AppColors.ts(context)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _title.isNotEmpty
+                            ? _title
+                            : S.of(context).txAfAddTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: _title.isNotEmpty
+                              ? AppColors.tp(context)
+                              : AppColors.th(context),
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.edit_outlined,
+                        size: 16, color: AppColors.th(context)),
+                  ],
+                ),
+              ),
+            ),
             // Date picker
             GestureDetector(
               onTap: () async {
@@ -1593,8 +1755,9 @@ class _AssistedTransactionScreenState
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: _selectedDate,
-                  firstDate: now.subtract(const Duration(days: 365)),
-                  lastDate: now,
+                  // Same range as the classic form.
+                  firstDate: DateTime(2000),
+                  lastDate: now.add(const Duration(days: 1)),
                 );
                 if (picked != null) {
                   setState(() => _selectedDate = picked);
@@ -1617,7 +1780,11 @@ class _AssistedTransactionScreenState
                       ),
                     ),
                     const Spacer(),
-                    const SizedBox(width: 12),
+                    DateQuickChip(
+                      selected: _selectedDate,
+                      onPick: (d) => setState(() => _selectedDate = d),
+                    ),
+                    const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () async {
                         final picked = await showTimePicker(
@@ -1660,7 +1827,10 @@ class _AssistedTransactionScreenState
               accounts: accounts,
               color: AppColors.accent,
               onSelected: (a) {
-                setState(() => _setAccount(a.id));
+                setState(() {
+                  _setAccount(a.id);
+                  _accountIsDefault = false; // picked by hand: keep it
+                });
               },
             ),
             // Destination account (transfers only)
@@ -2016,18 +2186,39 @@ class _AssistedTransactionScreenState
                       ? Border.all(color: typeColor, width: 1.5)
                       : null,
                 ),
-                child: Center(
-                  child: Text(
-                    '${item.category?.name ?? 'Item ${i + 1}'}: ${formatAmount(item.amount, currency: item.currency ?? _selectedCurrency)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.w400,
-                      color: isActive
-                          ? typeColor
-                          : AppColors.ts(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${item.category?.name ?? S.of(context).txAfItemN(i + 1)}: ${formatAmount(item.amount, currency: item.currency ?? _selectedCurrency)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isActive ? FontWeight.w600 : FontWeight.w400,
+                        color: isActive
+                            ? typeColor
+                            : AppColors.ts(context),
+                      ),
                     ),
-                  ),
+                    // The active item can be removed (another stays).
+                    if (isActive)
+                      Semantics(
+                        button: true,
+                        label: S.of(context).txAfRemoveItem,
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            _lineItems.removeAt(i);
+                            _activeLineIndex = _activeLineIndex
+                                .clamp(0, _lineItems.length - 1);
+                          }),
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(start: 6),
+                            child: Icon(Icons.close_rounded,
+                                size: 14, color: typeColor),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );

@@ -9,6 +9,41 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get tmplEditTitle => 'تعديل القالب';
+
+  @override
+  String get tmplSaved => 'تم حفظ القالب';
+
+  @override
+  String get txAfAddTitle => 'أضف عنواناً';
+
+  @override
+  String txAfItemN(int n) {
+    return 'البند $n';
+  }
+
+  @override
+  String get txAfRemoveItem => 'إزالة البند';
+
+  @override
+  String get shortcutAddTransaction => 'إضافة معاملة';
+
+  @override
+  String get shortcutFundEnvelopes => 'تمويل الأظرف';
+
+  @override
+  String get shortcutUpcomingBills => 'الفواتير القادمة';
+
+  @override
+  String get catSheetRecent => 'الأخيرة';
+
+  @override
+  String get txFormSwapAccounts => 'تبديل الحسابين';
+
+  @override
+  String get txFormSaveAndNew => 'حفظ وجديد';
+
+  @override
   String get allocEntryWithdrawn => 'مسحوب';
 
   @override

@@ -99,6 +99,72 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @tmplEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit template'**
+  String get tmplEditTitle;
+
+  /// No description provided for @tmplSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Template saved'**
+  String get tmplSaved;
+
+  /// No description provided for @txAfAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a title'**
+  String get txAfAddTitle;
+
+  /// No description provided for @txAfItemN.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {n}'**
+  String txAfItemN(int n);
+
+  /// No description provided for @txAfRemoveItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove item'**
+  String get txAfRemoveItem;
+
+  /// No description provided for @shortcutAddTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transaction'**
+  String get shortcutAddTransaction;
+
+  /// No description provided for @shortcutFundEnvelopes.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund envelopes'**
+  String get shortcutFundEnvelopes;
+
+  /// No description provided for @shortcutUpcomingBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming bills'**
+  String get shortcutUpcomingBills;
+
+  /// No description provided for @catSheetRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get catSheetRecent;
+
+  /// No description provided for @txFormSwapAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap accounts'**
+  String get txFormSwapAccounts;
+
+  /// No description provided for @txFormSaveAndNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & new'**
+  String get txFormSaveAndNew;
+
   /// No description provided for @allocEntryWithdrawn.
   ///
   /// In en, this message translates to:

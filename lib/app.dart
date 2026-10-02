@@ -15,6 +15,7 @@ import 'core/providers/currency_symbol_provider.dart';
 import 'core/providers/date_format_provider.dart';
 import 'core/providers/database_provider.dart';
 import 'core/services/auto_backup_service.dart';
+import 'core/services/app_shortcuts_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/providers/allocations_provider.dart';
 import 'core/providers/engine_provider.dart';
@@ -94,6 +95,9 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    NotificationService.openRoute.addListener(_openNotificationRoute);
+    // Launched by a notification tap (set before the app was built).
+    _openNotificationRoute();
     _router = GoRouter(
       redirect: (context, state) {
         final householdId = ref.read(currentHouseholdIdProvider);
@@ -366,6 +370,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    NotificationService.openRoute.removeListener(_openNotificationRoute);
     _router.dispose();
     super.dispose();
   }
@@ -393,6 +398,18 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
         setState(() => _showLock = true);
       }
     }
+  }
+
+  /// A tapped notification (or app shortcut) asked for a screen.
+  void _openNotificationRoute() {
+    final route = NotificationService.openRoute.value;
+    if (route == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (NotificationService.openRoute.value == null) return;
+      NotificationService.openRoute.value = null;
+      if (ref.read(currentHouseholdIdProvider) == null) return;
+      _router.push(route);
+    });
   }
 
   Future<void> _processDueWork() async {
@@ -495,7 +512,10 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     final locale = localeCode != null ? Locale(localeCode) : null;
     final resolvedLocale = localeCode ??
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-    Intl.defaultLocale = resolvedLocale;
+    if (Intl.defaultLocale != resolvedLocale) {
+      Intl.defaultLocale = resolvedLocale;
+      AppShortcutsService.refresh().catchError((_) {});
+    }
     // Arabic-Indic digits: only when locale is Arabic AND user opted in
     final useArabic = ref.watch(arabicDigitsProvider);
     setUseArabicDigits(resolvedLocale == 'ar' && useArabic);
@@ -627,10 +647,13 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
     if (mode == 'assisted') {
       return AssistedTransactionScreen(
         initialType: widget.extra?['editType'] as String?,
+        initialDate: widget.extra?['editDate'] as DateTime?,
+        initialTitle: widget.extra?['editNote'] as String?,
       );
     }
     return AddTransactionScreen(
       editType: widget.extra?['editType'] as String?,
+      editDate: widget.extra?['editDate'] as DateTime?,
       editNote: widget.extra?['editNote'] as String?,
       editLines: widget.extra?['editLines'] as List<Map<String, dynamic>>?,
     );

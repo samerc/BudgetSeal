@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/providers/transactions_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
@@ -18,6 +19,23 @@ const categoryPresetColors = [
   Color(0xFF90A4AE),
 ];
 
+/// Most recently used categories (newest first, distinct), for the
+/// "Recent" row at the top of [CategorySheet].
+List<String> recentCategoryIds(List<TransactionEntry> entries,
+    {int max = 8}) {
+  final sorted = [...entries]
+    ..sort((a, b) => b.tx.createdAt.compareTo(a.tx.createdAt));
+  final ids = <String>[];
+  for (final e in sorted) {
+    final lineIds = e.lines.map((l) => l.categoryId);
+    for (final id in [e.tx.categoryId, ...lineIds]) {
+      if (id != null && !ids.contains(id)) ids.add(id);
+      if (ids.length >= max) return ids;
+    }
+  }
+  return ids;
+}
+
 class CategorySheet extends StatefulWidget {
   final List<Category> categories;
   final String? selectedId;
@@ -27,6 +45,12 @@ class CategorySheet extends StatefulWidget {
   final void Function(String name) onCreated;
   final Map<String, String> envelopeInfo;
 
+  /// 'expense' or 'income' — the toggle the sheet opens on (the form's type).
+  final String initialType;
+
+  /// Category ids for the "Recent" row (see [recentCategoryIds]).
+  final List<String> recentIds;
+
   const CategorySheet({
     super.key,
     required this.categories,
@@ -35,6 +59,8 @@ class CategorySheet extends StatefulWidget {
     required this.onSelected,
     required this.onCreated,
     this.envelopeInfo = const {},
+    this.initialType = 'expense',
+    this.recentIds = const [],
   });
 
   @override
@@ -47,7 +73,8 @@ class _CategorySheetState extends State<CategorySheet>
   final _newCatCtrl = TextEditingController();
   final _sheetCtrl = DraggableScrollableController();
   String _search = '';
-  String _typeFilter = 'expense'; // 'expense' or 'income'
+  late String _typeFilter = // 'expense' or 'income'
+      widget.initialType == 'income' ? 'income' : 'expense';
   bool _keyboardVisible = false;
 
   /// Parent whose subcategories are shown (Cashew's subcategory step).
@@ -330,10 +357,52 @@ class _CategorySheetState extends State<CategorySheet>
       items = parents;
     }
 
+    // Recent row: top level, no search, this type only.
+    final byId = {for (final c in widget.categories) c.id: c};
+    final recent = _search.isEmpty && openParent == null
+        ? [
+            for (final id in widget.recentIds)
+              if (byId[id]?.transactionType == _typeFilter) byId[id]!,
+          ].take(4).toList()
+        : const <Category>[];
+
     return CustomScrollView(
       controller: scrollCtrl,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [
+        if (recent.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 4, 20, 0),
+              child: Text(S.of(context).catSheetRecent,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent)),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 6,
+                crossAxisSpacing: 4,
+                childAspectRatio: 0.74,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => _gridTile(recent[i], 0),
+                childCount: recent.length,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              child: Divider(height: 1, color: AppColors.bd(context)),
+            ),
+          ),
+        ],
         if (openParent != null && _search.isEmpty)
           SliverToBoxAdapter(
             child: Padding(

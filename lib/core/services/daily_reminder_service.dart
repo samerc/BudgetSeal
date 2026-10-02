@@ -173,6 +173,8 @@ class DailyReminderService {
         id: _baseNotificationId + i,
         title: currentS().notifReminderTitle,
         body: body,
+        // Tapping the reminder opens the add form (NotificationService).
+        payload: '/add-transaction',
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(

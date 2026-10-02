@@ -15,6 +15,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/services/autofill_service.dart';
+import '../../core/services/last_used_service.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -77,6 +78,53 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final List<LineState> _lines = [];
   String? _validationError;
   List<String> _receiptFilenames = [];
+
+  /// Line 0's account came from the last-used default, not the user — a
+  /// category/title autofill may still replace it.
+  bool _accountIsDefault = false;
+
+  /// Form state when it opened (after defaults) — leaving with changes asks
+  /// before discarding them.
+  String? _initialSignature;
+  bool _receiptsTouched = false;
+
+  String _signature() => [
+        _type.name,
+        _titleCtrl.text.trim(),
+        _noteCtrl.text.trim(),
+        _selectedDate.toIso8601String(),
+        _fromAccountId,
+        _destAccountId,
+        for (final l in _lines)
+          '${l.amount}/${l.categoryId}/${l.accountId}/${l.noteCtrl.text}',
+      ].join('|');
+
+  bool get _isDirty =>
+      _receiptsTouched ||
+      (_initialSignature != null && _signature() != _initialSignature);
+
+  Future<bool> _confirmDiscard() async {
+    final tr = S.of(context);
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (dCtx) => AlertDialog(
+        title: Text(tr.txAfDiscardTitle),
+        content: Text(tr.txAfDiscardContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx, false),
+            child: Text(tr.txAfKeepEditing),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
+            child: Text(tr.txAfDiscard),
+          ),
+        ],
+      ),
+    );
+    return discard ?? false;
+  }
   List<String> _resolvedReceiptPaths = [];
   Timer? _titleDebounce;
   bool _autoFilled = false; // tracks if category was auto-filled
@@ -96,6 +144,76 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } else {
       _addLine();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // A title from the quick-add bar fills category/account like typing it.
+      if (widget.editTransactionId == null &&
+          _titleCtrl.text.trim().isNotEmpty &&
+          _lines.every((l) => l.categoryId == null)) {
+        _autofillFromTitle(_titleCtrl.text.trim());
+      }
+      if (widget.editTransactionId == null) await _applyAccountDefaults();
+      // Prefilled foreign lines without a rate (templates, quick spend):
+      // fetch one, as picking the account would.
+      if (widget.editTransactionId == null && _type != _TxType.transfer) {
+        for (var i = 0; i < _lines.length; i++) {
+          final l = _lines[i];
+          if (l.currency != _baseCurrency && l.exchangeRateToBase == 1.0) {
+            await _fetchRate(i, l.currency);
+          }
+        }
+      }
+      if (mounted) setState(() => _initialSignature = _signature());
+    });
+  }
+
+  /// New transactions start on the last used account (or transfer pair).
+  Future<void> _applyAccountDefaults() async {
+    try {
+      final accounts = await ref.read(accountsProvider.future);
+      if (!mounted || accounts.isEmpty) return;
+      if (_type == _TxType.transfer) {
+        if (_fromAccountId == null && _destAccountId == null) {
+          final pair = await LastUsedService.transferPair(accounts);
+          if (!mounted) return;
+          if (pair.from != null) _setFromAccount(pair.from, accounts);
+          if (pair.to != null && pair.to != _fromAccountId) {
+            setState(() => _destAccountId = pair.to);
+          }
+          if (_destAccountId != null) _fetchTransferRate();
+        }
+      } else if (_lines.isNotEmpty && _lines.first.accountId == null) {
+        final id = await LastUsedService.defaultAccount(accounts);
+        if (mounted && id != null && _lines.first.accountId == null) {
+          await _onLineAccountChanged(0, id);
+          _accountIsDefault = true;
+        }
+      }
+    } catch (e) {
+      debugPrint('[AddTransaction] Account defaults failed: $e');
+    }
+  }
+
+  void _setFromAccount(String? v, List<Account> accounts) {
+    setState(() {
+      _fromAccountId = v;
+      if (v != null && _lines.isNotEmpty) {
+        final acc = accounts.firstWhere((a) => a.id == v);
+        _lines.first.currency = acc.currency;
+        _lines.first.accountId = v;
+        _validationError = null;
+      }
+    });
+  }
+
+  /// The swap button on the transfer card: exchange source and destination.
+  void _swapTransferAccounts(List<Account> accounts) {
+    final from = _fromAccountId;
+    final to = _destAccountId;
+    if (from == null && to == null) return;
+    hapticSelection();
+    _setFromAccount(to, accounts);
+    setState(() => _destAccountId = from);
+    _fetchTransferRate();
   }
 
   void _initFromEdit() {
@@ -201,7 +319,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final canOverride = afSettings.overrideExisting;
       bool didFill = false;
       if (fill.accountId != null &&
-          (line.accountId == null || canOverride)) {
+          (line.accountId == null || canOverride || _accountIsDefault)) {
         _onLineAccountChanged(0, fill.accountId!);
         didFill = true;
       }
@@ -458,6 +576,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         selectedId: _lines[lineIndex].categoryId,
         householdId: householdId,
         envelopeInfo: envelopeInfo,
+        initialType: _type == _TxType.income ? 'income' : 'expense',
+        recentIds: recentCategoryIds(
+            ref.read(transactionEntriesProvider).value ?? const []),
         onSelected: (id, name, color, txType) {
           if (!mounted || lineIndex >= _lines.length) return;
           setState(() {
@@ -485,7 +606,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               final line = _lines[lineIndex];
               final canOverride = afSettings.overrideExisting;
               if (fill.accountId != null &&
-                  (line.accountId == null || canOverride)) {
+                  (line.accountId == null || canOverride || _accountIsDefault)) {
                 _onLineAccountChanged(lineIndex, fill.accountId!);
               }
               if (fill.title != null &&
@@ -499,7 +620,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             });
           } else {
             // Fallback: auto-fill account from category's default
-            if (_lines[lineIndex].accountId == null && categories.isNotEmpty) {
+            if ((_lines[lineIndex].accountId == null || _accountIsDefault) &&
+                categories.isNotEmpty) {
               final cat = categories
                   .where((c) => c.id == id)
                   .firstOrNull;
@@ -648,7 +770,48 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return null;
   }
 
-  Future<void> _save() async {
+  /// Undo on the "Saved" SnackBar: deletes the new transaction. Built while
+  /// mounted - the SnackBar outlives this screen.
+  VoidCallback _undoSaveAction(String txId) {
+    final container = ProviderScope.containerOf(context);
+    return () async {
+      try {
+        await container.read(allocationEngineProvider).deleteTransaction(txId);
+        container.invalidate(transactionEntriesProvider);
+        container.invalidate(monthlyTransactionsProvider);
+      } catch (e) {
+        debugPrint('[AddTransaction] Undo save failed: $e');
+      }
+    };
+  }
+
+  /// "Save & add another": clear what belongs to the saved transaction but
+  /// keep type, date, account(s) and currency for the next one.
+  void _resetForNext() {
+    setState(() {
+      _titleCtrl.clear();
+      _noteCtrl.clear();
+      _receiptFilenames = [];
+      _receiptsTouched = false;
+      _autoFilled = false;
+      _validationError = null;
+      final keep = _lines.isNotEmpty ? _lines.first : null;
+      final next = LineState(currency: keep?.currency ?? _baseCurrency)
+        ..accountId = keep?.accountId
+        ..accountName = keep?.accountName
+        ..exchangeRateToBase = keep?.exchangeRateToBase ?? 1.0;
+      next.rateCtrl.text = keep?.rateCtrl.text ?? '';
+      for (final l in _lines) {
+        l.dispose();
+      }
+      _lines
+        ..clear()
+        ..add(next);
+      _initialSignature = _signature();
+    });
+  }
+
+  Future<void> _save({bool addAnother = false}) async {
     final error = _validate();
     if (error != null) {
       setState(() => _validationError = error);
@@ -808,6 +971,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       }
 
+      if (_type == _TxType.transfer) {
+        LastUsedService.rememberTransfer(_fromAccountId!, _destAccountId!);
+      } else if (_lines.first.accountId != null) {
+        LastUsedService.rememberAccount(_lines.first.accountId!);
+      }
+
       // Only delete the old transaction AFTER successful creation
       if (widget.editTransactionId != null) {
         await engine.deleteTransaction(widget.editTransactionId!);
@@ -862,6 +1031,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       // Capture navigator and messenger before any async/pop calls
       final nav = GoRouter.of(context);
       final messenger = ScaffoldMessenger.maybeOf(context);
+      final undoAction = widget.editTransactionId == null
+          ? SnackBarAction(
+              label: S.of(context).txUndoAction,
+              onPressed: _undoSaveAction(txId),
+            )
+          : null;
+      if (addAnother) {
+        _resetForNext();
+        messenger?.clearSnackBars();
+        messenger?.showSnackBar(SnackBar(
+          content: Text(snackText),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+          action: undoAction,
+        ));
+        setState(() => _loading = false);
+        return;
+      }
       // Pop first — this unmounts the widget
       nav.pop(txId);
       // Show snackbar via previously-captured messenger
@@ -869,8 +1056,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       messenger?.showSnackBar(SnackBar(
         content: Text(snackText),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
         dismissDirection: DismissDirection.horizontal,
+        action: undoAction,
       ));
       return; // skip finally setState since we're already popped
     } catch (e) {
@@ -896,7 +1084,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     ref.watch(categoriesProvider);
 
     final bandColor = _bandColor(context);
-    return Scaffold(
+    // Decided at pop time: typing doesn't rebuild, so canPop can't track it.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (!_isDirty || await _confirmDiscard()) {
+          if (context.mounted) context.pop();
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: bandColor,
         title: Text(_screenTitle(context)),
@@ -1005,7 +1202,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ---------------------------------------------------------------------------
@@ -1280,6 +1477,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           _type = types[i];
                           if (_lines.isEmpty) _addLine();
                         });
+                        if (widget.editTransactionId == null) {
+                          _applyAccountDefaults();
+                        }
                       },
                       child: Center(
                         child: Text(
@@ -1332,22 +1532,39 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-          child: FilledButton(
-            onPressed: _loading
-                ? null
-                : needsAmount
-                    ? _editHeaderAmount
-                    : _save,
-            child: _loading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2.5))
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: Text(label, key: ValueKey(label)),
+          child: Row(
+            children: [
+              // Save & add another (new transactions only).
+              if (!isEdit && !needsAmount) ...[
+                OutlinedButton(
+                  onPressed: _loading ? null : () => _save(addAnother: true),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  child: Text(S.of(context).txFormSaveAndNew),
+                ),
+                const SizedBox(width: 10),
+              ],
+              Expanded(
+                child: FilledButton(
+                  onPressed: _loading
+                      ? null
+                      : needsAmount
+                          ? _editHeaderAmount
+                          : _save,
+                  child: _loading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: AppColors.onAccent, strokeWidth: 2.5))
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          child: Text(label, key: ValueKey(label)),
+                        ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1379,6 +1596,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
               ),
             ),
+          ),
+          DateQuickChip(
+            selected: _selectedDate,
+            onPick: (d) => setState(() => _selectedDate = d),
           ),
           Container(
               width: 1, height: 24, color: AppColors.bd(context)),
@@ -1439,19 +1660,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             icon: Icons.arrow_upward_rounded,
             accounts: accounts,
             onChanged: (v) {
-              setState(() {
-                _fromAccountId = v;
-                if (v != null && _lines.isNotEmpty) {
-                  final acc = accounts.firstWhere((a) => a.id == v);
-                  _lines.first.currency = acc.currency;
-                  _lines.first.accountId = v;
-                  _validationError = null;
-                }
-              });
+              _setFromAccount(v, accounts);
               _fetchTransferRate();
             },
           ),
-          const TxDivider(),
+          Row(
+            children: [
+              const Expanded(child: TxDivider()),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: S.of(context).txFormSwapAccounts,
+                icon: Icon(Icons.swap_vert_rounded,
+                    size: 20, color: AppColors.accent),
+                onPressed: () => _swapTransferAccounts(accounts),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
           // To account
           _buildAccountDropdown(
             value: _destAccountId,
@@ -1686,7 +1911,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               onRemove: () => _removeLine(i),
               onPickCategory: () => _pickCategory(i),
               onPickCurrency: () => _pickCurrency(i),
-              onAccountChanged: (v) => _onLineAccountChanged(i, v),
+              onAccountChanged: (v) {
+                _accountIsDefault = false; // picked by hand: keep it
+                _onLineAccountChanged(i, v);
+              },
               onChanged: () => setState(() {}),
             ),
           );
@@ -1833,6 +2061,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final filenames = await pickAndSaveReceipts(context, fromCamera: camera);
       if (filenames.isNotEmpty && mounted) {
         _receiptFilenames = [..._receiptFilenames, ...filenames];
+        _receiptsTouched = true;
         _resolveReceiptPaths();
       }
     }
@@ -1882,6 +2111,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 onPressed: () => setState(() {
                   _receiptFilenames = [];
                   _resolvedReceiptPaths = [];
+                  _receiptsTouched = true;
                 }),
               ),
             ],

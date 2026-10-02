@@ -2105,3 +2105,17 @@ alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppe
 alloc_no_archived,,No archived envelopes.,لا توجد أظرف مؤرشفة.,Aucune enveloppe archivée.
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée
 tx_no_rate,,No rate,بلا سعر صرف,Pas de taux
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+tmpl_edit_title,,Edit template,تعديل القالب,Modifier le modèle
+tmpl_saved,,Template saved,تم حفظ القالب,Modèle enregistré
+tx_af_add_title,,Add a title,أضف عنواناً,Ajouter un titre
+tx_af_item_n,,Item {n},البند {n},Article {n}
+tx_af_remove_item,,Remove item,إزالة البند,Retirer l'article
+shortcut_add_transaction,,Add transaction,إضافة معاملة,Ajouter une transaction
+shortcut_fund_envelopes,,Fund envelopes,تمويل الأظرف,Alimenter les enveloppes
+shortcut_upcoming_bills,,Upcoming bills,الفواتير القادمة,Factures à venir
+cat_sheet_recent,,Recent,الأخيرة,Récentes
+tx_form_swap_accounts,,Swap accounts,تبديل الحسابين,Inverser les comptes
+tx_form_save_and_new,,Save & new,حفظ وجديد,Enregistrer + nouveau

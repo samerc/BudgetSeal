@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,12 +30,30 @@ class NotificationService {
   /// Threshold at which a budget warning notification is sent (80%).
   static const _budgetWarningThreshold = 0.80;
 
+  /// Route a tapped notification asks for (its payload). `app.dart` listens
+  /// and pushes it, then resets this to null.
+  static final openRoute = ValueNotifier<String?>(null);
+
+  static const routeAddTransaction = '/add-transaction';
+  static const routeUpcomingBills = '/upcoming-bills';
+  static const routeFunding = '/funding';
+
   static Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
     await _plugin.initialize(
       settings: const InitializationSettings(android: android, iOS: ios),
+      onDidReceiveNotificationResponse: (r) {
+        if (r.payload?.startsWith('/') ?? false) openRoute.value = r.payload;
+      },
     );
+    // Cold start from a notification tap.
+    final launch = await _plugin.getNotificationAppLaunchDetails();
+    final payload = launch?.notificationResponse?.payload;
+    if ((launch?.didNotificationLaunchApp ?? false) &&
+        (payload?.startsWith('/') ?? false)) {
+      openRoute.value = payload;
+    }
   }
 
   /// All alert checks (each has its own 24h cooldown) — at launch and on
@@ -114,6 +133,7 @@ class NotificationService {
       id: _envelopeNotifId,
       title: l.notifLowEnvelopesTitle,
       body: body,
+      payload: routeFunding,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
@@ -207,6 +227,7 @@ class NotificationService {
       id: _budgetWarningNotifId,
       title: l.notifBudgetWarningTitle,
       body: body,
+      payload: routeFunding,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
@@ -253,6 +274,7 @@ class NotificationService {
       id: _billNotifId,
       title: l.notifUpcomingBillsTitle,
       body: body,
+      payload: routeUpcomingBills,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,

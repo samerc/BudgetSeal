@@ -360,6 +360,7 @@ Notable additions:
 | wakelock_plus | ^1.8.0 | iOS screen-on (Web Companion) |
 | crypto | ^3.0.0 | SHA-256 PIN hashing (Web Companion) |
 | webview_flutter | ^4.14.0 | In-app help guide WebView |
+| quick_actions | ^1.1.1 | Launcher app shortcuts |
 
 ## Testing
 
@@ -838,6 +839,16 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 ## Onboarding
 
 3-page flow: Welcome (how-it-works + Restore/Join buttons) → Setup (household name, currency, period day, account + expandable "More options" for categories & entry mode) → Done. Setup uses `db.batch()` for atomic account + category creation. Field-level validation shows amber error text when household or account name is empty, cleared on typing.
+
+## Faster Logging
+
+- **Last used account**: `LastUsedService` (`core/services/last_used_service.dart`) stores the last account and transfer pair; both forms apply it to new transactions (`_applyAccountDefaults`). `_accountIsDefault` marks a defaulted account so category/title auto-fill may still replace it; picking an account by hand clears the flag.
+- **Classic form**: Save & new (`_save(addAnother: true)` → `_resetForNext()`), Undo action on the Saved SnackBar for new transactions (`_undoSaveAction`), ⇅ swap on the transfer card, `DateQuickChip` (Today/Yesterday, shared with assisted), discard guard (`PopScope(canPop: false)` + `_signature()` compared at pop time — typing doesn't rebuild), prefilled foreign lines fetch a rate after the first frame.
+- **CategorySheet** takes `initialType` and `recentIds` (`recentCategoryIds()`); the assisted picker shows the same recents as chips.
+- **Calculator**: a prefilled amount is highlighted (`_prefilled`) and replaced by the first digit.
+- **Assisted**: `initialDate`/`initialTitle` params (quick-add title, viewed month), Enter on the title step continues, editable title row on the amount step, × removes the active item chip, the autofilled amount survives `_showAmountScreen()`.
+- **Activity tab**: new transactions in a past month are dated its last day (`_newTxDate()`); quick add flashes the new row.
+- **Notification/shortcut routing**: payloads are routes; `NotificationService.openRoute` (ValueNotifier) is set by taps (and cold-start launch details) and by `AppShortcutsService` (quick_actions: add transaction, fund envelopes, upcoming bills); `app.dart` pushes it.
 
 ## Auto-fill
 

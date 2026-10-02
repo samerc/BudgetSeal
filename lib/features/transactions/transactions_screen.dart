@@ -210,6 +210,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             edit: false));
   }
 
+  /// New transactions start in the month being viewed: today in the
+  /// current month, the last day of a past month.
+  Map<String, dynamic> _newTxDate() {
+    final now = DateTime.now();
+    if (_selectedYear == now.year && _selectedMonth == now.month) return {};
+    final last = DateTime(_selectedYear, _selectedMonth + 1, 0);
+    return {
+      'editDate': DateTime(last.year, last.month, last.day, now.hour, now.minute)
+    };
+  }
+
   /// Opens the edit form straight away (selection bar Edit, swipe right).
   void _openEditForm(String id) {
     final entries = ref
@@ -511,7 +522,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   onTap: () async {
                     hapticLight();
                     final txId = await context.push<String?>('/add-transaction',
-                        extra: {'editType': 'expense'});
+                        extra: {'editType': 'expense', ..._newTxDate()});
                     _flashTx(txId);
                   },
                   onLongPress: () {
@@ -582,7 +593,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     onTap: () async {
                       Navigator.pop(ctx);
                       final txId = await context.push<String?>('/add-transaction',
-                          extra: {'editType': 'expense'});
+                          extra: {'editType': 'expense', ..._newTxDate()});
                       _flashTx(txId);
                     },
                   ),
@@ -594,7 +605,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     onTap: () async {
                       Navigator.pop(ctx);
                       final txId = await context.push<String?>('/add-transaction',
-                          extra: {'editType': 'income'});
+                          extra: {'editType': 'income', ..._newTxDate()});
                       _flashTx(txId);
                     },
                   ),
@@ -606,7 +617,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     onTap: () async {
                       Navigator.pop(ctx);
                       final txId = await context.push<String?>('/add-transaction',
-                          extra: {'editType': 'transfer'});
+                          extra: {'editType': 'transfer', ..._newTxDate()});
                       _flashTx(txId);
                     },
                   ),
@@ -765,7 +776,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     );
   }
 
-  void _submitQuickAdd(BuildContext context) {
+  Future<void> _submitQuickAdd(BuildContext context) async {
     final text = _quickAddCtrl.text.trim();
     if (text.isEmpty) return;
 
@@ -783,7 +794,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     _quickAddCtrl.clear();
 
-    context.push('/add-transaction', extra: {
+    final txId = await context.push<String?>('/add-transaction', extra: {
       'editType': 'expense',
       'editNote': note,
       if (amount != null)
@@ -791,6 +802,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           {'amount': amount, 'note': note},
         ],
     });
+    _flashTx(txId);
   }
 
   void _showYearPicker(BuildContext context) async {

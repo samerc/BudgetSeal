@@ -534,6 +534,18 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               },
             ),
             ListTile(
+              leading: Icon(Icons.edit_outlined, color: AppColors.ts(ctx)),
+              title: Text(S.of(ctx).commonEdit),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showAddSheet(
+                  ref.read(accountsProvider).value ?? const [],
+                  ref.read(categoriesProvider).value ?? const [],
+                  existing: t,
+                );
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.delete_outline,
                   color: AppColors.overspent),
               title: Text(S.of(ctx).commonDelete),
@@ -607,15 +619,22 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
 
   // ── Add template sheet ───────────────────────────────────────
 
+  /// Create a template, or edit [existing].
   Future<void> _showAddSheet(
-      List<Account> accounts, List<Category> categories) async {
-    final titleCtrl = TextEditingController();
-    double calcAmount = 0;
+      List<Account> accounts, List<Category> categories,
+      {TransactionTemplate? existing}) async {
+    final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    double calcAmount = existing?.amount ?? 0;
     final formKey = GlobalKey<FormState>();
-    String type = 'expense';
-    String? accountId;
-    String? categoryId;
-    String currency =
+    String type = existing?.type ?? 'expense';
+    // Only ids still in the dropdowns (an account may have been archived).
+    String? accountId = accounts.any((a) => a.id == existing?.accountId)
+        ? existing!.accountId
+        : null;
+    String? categoryId = categories.any((c) => c.id == existing?.categoryId)
+        ? existing!.categoryId
+        : null;
+    String currency = existing?.currency ??
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
     final tr = S.of(context);
@@ -656,7 +675,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(tr.tmplNewTitle,
+                  Text(existing != null ? tr.tmplEditTitle : tr.tmplNewTitle,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -670,7 +689,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: titleCtrl,
-                    autofocus: true,
+                    autofocus: existing == null,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(labelText: tr.commonTitle),
                     validator: (v) => (v == null || v.trim().isEmpty)
@@ -750,22 +769,38 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       if (householdId == null) return;
 
                       final db = ref.read(databaseProvider);
-                      await db.into(db.transactionTemplates).insert(
-                            TransactionTemplatesCompanion.insert(
-                              id: const Uuid().v4(),
-                              householdId: householdId,
-                              title: title,
-                              type: type,
-                              amount: calcAmount,
-                              currency: currency,
-                              accountId: Value(accountId),
-                              categoryId: Value(categoryId),
-                            ),
-                          );
+                      if (existing != null) {
+                        await (db.update(db.transactionTemplates)
+                              ..where((t) => t.id.equals(existing.id)))
+                            .write(TransactionTemplatesCompanion(
+                          title: Value(title),
+                          type: Value(type),
+                          amount: Value(calcAmount),
+                          currency: Value(currency),
+                          accountId: Value(accountId),
+                          categoryId: Value(categoryId),
+                          lastModified: Value(DateTime.now()),
+                        ));
+                      } else {
+                        await db.into(db.transactionTemplates).insert(
+                              TransactionTemplatesCompanion.insert(
+                                id: const Uuid().v4(),
+                                householdId: householdId,
+                                title: title,
+                                type: type,
+                                amount: calcAmount,
+                                currency: currency,
+                                accountId: Value(accountId),
+                                categoryId: Value(categoryId),
+                              ),
+                            );
+                      }
                       if (ctx.mounted) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
-                            content: Text(tr.tmplCreated),
+                            content: Text(existing != null
+                                ? tr.tmplSaved
+                                : tr.tmplCreated),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );

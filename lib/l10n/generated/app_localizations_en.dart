@@ -9,6 +9,41 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get tmplEditTitle => 'Edit template';
+
+  @override
+  String get tmplSaved => 'Template saved';
+
+  @override
+  String get txAfAddTitle => 'Add a title';
+
+  @override
+  String txAfItemN(int n) {
+    return 'Item $n';
+  }
+
+  @override
+  String get txAfRemoveItem => 'Remove item';
+
+  @override
+  String get shortcutAddTransaction => 'Add transaction';
+
+  @override
+  String get shortcutFundEnvelopes => 'Fund envelopes';
+
+  @override
+  String get shortcutUpcomingBills => 'Upcoming bills';
+
+  @override
+  String get catSheetRecent => 'Recent';
+
+  @override
+  String get txFormSwapAccounts => 'Swap accounts';
+
+  @override
+  String get txFormSaveAndNew => 'Save & new';
+
+  @override
   String get allocEntryWithdrawn => 'Withdrawn';
 
   @override

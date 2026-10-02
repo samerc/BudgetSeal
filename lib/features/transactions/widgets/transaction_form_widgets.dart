@@ -575,3 +575,45 @@ class LineCard extends StatelessWidget {
     );
   }
 }
+
+/// One-tap date shortcut beside the date field: "Yesterday" while the date
+/// is today, otherwise "Today".
+class DateQuickChip extends StatelessWidget {
+  final DateTime selected;
+  final ValueChanged<DateTime> onPick;
+
+  const DateQuickChip(
+      {super.key, required this.selected, required this.onPick});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final isToday = selected.year == now.year &&
+        selected.month == now.month &&
+        selected.day == now.day;
+    final target = isToday
+        ? DateTime(now.year, now.month, now.day - 1)
+        : DateTime(now.year, now.month, now.day);
+    final label =
+        isToday ? S.of(context).commonYesterday : S.of(context).commonToday;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 8),
+      child: Material(
+        color: AppColors.accentLight,
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(RadiusTokens.pill),
+          onTap: () => onPick(target),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent)),
+          ),
+        ),
+      ),
+    );
+  }
+}

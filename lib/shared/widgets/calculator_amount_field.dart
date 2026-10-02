@@ -143,6 +143,10 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   double _amount = 0;
   bool _startNewOperand = false;
 
+  /// The sheet opened on an existing amount: the first digit replaces it
+  /// (like a selected field), while an operator or backspace edits it.
+  bool _prefilled = false;
+
   /// True when the expression contains an operator (user is mid-calculation).
   bool get _hasOperator =>
       _calcExpression.contains('+') ||
@@ -157,6 +161,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     if (_amount > 0) {
       _calcDisplay = _fmtCalc(_amount);
       _calcExpression = _calcDisplay;
+      _prefilled = true;
     }
   }
 
@@ -165,9 +170,17 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   void _calcDigit(String d) {
     // Block a second decimal point in the same operand — "1.2." can't be
     // parsed and would silently evaluate to 0, showing the user a wrong total.
-    if (d == '.' && !_startNewOperand && _calcDisplay.contains('.')) return;
+    if (d == '.' && !_prefilled && !_startNewOperand &&
+        _calcDisplay.contains('.')) {
+      return;
+    }
     HapticFeedback.selectionClick();
     setState(() {
+      if (_prefilled) {
+        _prefilled = false;
+        _calcDisplay = '0';
+        _calcExpression = '';
+      }
       if (_startNewOperand) {
         // After an operator: reset display to new number, keep expression building
         _calcDisplay = (d == '.') ? '0.' : d;
@@ -191,6 +204,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   void _calcOp(String op) {
     HapticFeedback.mediumImpact();
     setState(() {
+      _prefilled = false;
       _amount = _evalExpr(_calcExpression);
       _calcDisplay = _fmtCalc(_amount);
       _calcExpression = '$_calcDisplay$op';
@@ -201,6 +215,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   void _calcBackspace() {
     HapticFeedback.lightImpact();
     setState(() {
+      _prefilled = false;
       if (_calcDisplay.length > 1) {
         _calcDisplay = _calcDisplay.substring(0, _calcDisplay.length - 1);
         if (_calcExpression.isNotEmpty) {
@@ -336,15 +351,27 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      display,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 38,
-                        fontFamily: TypographyTokens.displayFamily,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        color: AppColors.tp(context),
+                    // A prefilled amount looks selected: typing replaces it.
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _prefilled
+                            ? AppColors.accentLight
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          display,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 38,
+                            fontFamily: TypographyTokens.displayFamily,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: AppColors.tp(context),
+                          ),
+                        ),
                       ),
                     ),
                   ),

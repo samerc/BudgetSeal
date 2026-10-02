@@ -9,6 +9,41 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get tmplEditTitle => 'Modifier le modèle';
+
+  @override
+  String get tmplSaved => 'Modèle enregistré';
+
+  @override
+  String get txAfAddTitle => 'Ajouter un titre';
+
+  @override
+  String txAfItemN(int n) {
+    return 'Article $n';
+  }
+
+  @override
+  String get txAfRemoveItem => 'Retirer l\'article';
+
+  @override
+  String get shortcutAddTransaction => 'Ajouter une transaction';
+
+  @override
+  String get shortcutFundEnvelopes => 'Alimenter les enveloppes';
+
+  @override
+  String get shortcutUpcomingBills => 'Factures à venir';
+
+  @override
+  String get catSheetRecent => 'Récentes';
+
+  @override
+  String get txFormSwapAccounts => 'Inverser les comptes';
+
+  @override
+  String get txFormSaveAndNew => 'Enregistrer + nouveau';
+
+  @override
   String get allocEntryWithdrawn => 'Retiré';
 
   @override
