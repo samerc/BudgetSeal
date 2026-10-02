@@ -9,8 +9,15 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get notifAlertsChannel => 'Alertes BudgetSeal';
+
+  @override
+  String get notifAlertsChannelDesc =>
+      'Alertes enveloppes basses et factures à venir';
+
+  @override
   String widgetReadyToAssign(String amount) {
-    return 'Prêt à attribuer : $amount';
+    return 'Prêt à répartir : $amount';
   }
 
   @override
@@ -148,7 +155,7 @@ class SFr extends S {
   String get enginePeriodCovered => 'Dépassement couvert en fin de période';
 
   @override
-  String get periodCoverFromRta => 'Couvrir avec « Prêt à attribuer »';
+  String get periodCoverFromRta => 'Couvrir avec « Prêt à répartir »';
 
   @override
   String get periodCoverFromRtaDesc => 'Commencer la nouvelle période à zéro';
@@ -173,7 +180,7 @@ class SFr extends S {
   String get fundPresetLastPeriod => 'Comme la période précédente';
 
   @override
-  String get fundPresetSpent => 'Ce que j\'ai dépensé';
+  String get fundPresetSpent => 'Dépensé la période précédente';
 
   @override
   String get fundPresetClear => 'Effacer';
@@ -245,14 +252,14 @@ class SFr extends S {
 
   @override
   String get allocMoveDesc =>
-      'Déplacez de l\'argent entre enveloppes, ou vers « Prêt à attribuer ».';
+      'Déplacez de l\'argent entre enveloppes, ou vers « Prêt à répartir ».';
 
   @override
   String get allocCoverTitle => 'Couvrir le dépassement';
 
   @override
   String get allocCoverDesc =>
-      'Prenez de l\'argent d\'une autre enveloppe (ou de « Prêt à attribuer ») pour ramener celle-ci à zéro.';
+      'Prenez de l\'argent d\'une autre enveloppe (ou de « Prêt à répartir ») pour ramener celle-ci à zéro.';
 
   @override
   String get allocMoveFrom => 'De';
@@ -875,7 +882,7 @@ class SFr extends S {
   String get dashboardSectionYourMoney => 'Votre argent';
 
   @override
-  String get dashboardReadyToAssign => 'Prêt à affecter';
+  String get dashboardReadyToAssign => 'Prêt à répartir';
 
   @override
   String get dashboardMoneyNotInEnvelope =>
@@ -1036,7 +1043,7 @@ class SFr extends S {
   String get dashboardSectionMoneyDesc => 'Factures, patrimoine et non alloué';
 
   @override
-  String get dashboardSectionUnallocatedLabel => 'Prêt à affecter';
+  String get dashboardSectionUnallocatedLabel => 'Prêt à répartir';
 
   @override
   String get dashboardSectionUnallocatedDesc => 'Fonds non affectés';
@@ -4232,7 +4239,7 @@ class SFr extends S {
 
   @override
   String get termsNoWarrantyBody =>
-      'BudgetSeal est fourni \"tel quel\" sans garantie d\'aucune sorte. Bien que nous nous efforcions d\'assurer la fiabilité, nous ne pouvons pas garantir que l\'application sera exempte d\'erreurs. Des sauvegardes régulières sont fortement recommandées.';
+      'BudgetSeal est fourni « tel quel » sans garantie d\'aucune sorte. Bien que nous nous efforcions d\'assurer la fiabilité, nous ne pouvons pas garantir que l\'application sera exempte d\'erreurs. Des sauvegardes régulières sont fortement recommandées.';
 
   @override
   String get termsLiabilityTitle => '5. Limitation de responsabilité';
@@ -4415,10 +4422,10 @@ class SFr extends S {
   String get reportsNoSpending => 'Aucune dépense ce mois-ci';
 
   @override
-  String get reportsTopSpending => 'Top dépenses';
+  String get reportsTopSpending => 'Principales dépenses';
 
   @override
-  String get reportsTopTransactions => 'Top transactions';
+  String get reportsTopTransactions => 'Principales transactions';
 
   @override
   String get reportsNoExpenses => 'Aucune dépense pour cette période';
@@ -5936,7 +5943,7 @@ class SFr extends S {
 
   @override
   String wcPublicNetworkDescNamed(String wifiName) {
-    return 'Vous semblez être sur un réseau public (\"$wifiName\"). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d\'autres sur le même réseau.';
+    return 'Vous semblez être sur un réseau public (« $wifiName »). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d\'autres sur le même réseau.';
   }
 
   @override
@@ -5945,16 +5952,16 @@ class SFr extends S {
 
   @override
   String get wcNetworkSecurityDesc =>
-      'Web Companion utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n\'importe qui sur le même réseau pourrait voir vos données.';
+      'Le Compagnon Web utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n\'importe qui sur le même réseau pourrait voir vos données.';
 
   @override
   String wcSecurityWarningNamed(String wifiName) {
-    return 'Le réseau \"$wifiName\" peut être public. Le trafic n\'est pas chiffré — évitez d\'utiliser Web Companion sur les réseaux WiFi publics.';
+    return 'Le réseau « $wifiName » peut être public. Le trafic n\'est pas chiffré — évitez d\'utiliser le Compagnon Web sur un WiFi public, car d\'autres personnes sur le même réseau pourraient intercepter vos données.';
   }
 
   @override
   String get wcSecurityWarningUnnamed =>
-      'Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d\'utiliser Web Companion — le trafic n\'est pas chiffré et pourrait être intercepté.';
+      'Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d\'utiliser le Compagnon Web — le trafic n\'est pas chiffré et pourrait être intercepté.';
 
   @override
   String get tmplApplyError => 'Impossible d\'appliquer le modèle';

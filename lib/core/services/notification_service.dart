@@ -15,8 +15,22 @@ class NotificationService {
   static FlutterLocalNotificationsPlugin get plugin => _plugin;
 
   static const _channelId = 'budgetseal_alerts';
-  static const _channelName = 'BudgetSeal Alerts';
-  static const _channelDesc = 'Low envelope and upcoming bill alerts from BudgetSeal';
+
+  // Channel name/description show in Android's notification settings,
+  // so they follow the app language.
+  static NotificationDetails _alertDetails() {
+    final l = currentS();
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId,
+        l.notifAlertsChannel,
+        channelDescription: l.notifAlertsChannelDesc,
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
+  }
 
   static const _envelopeNotifId = 1001;
   static const _billNotifId = 1002;
@@ -134,16 +148,7 @@ class NotificationService {
       title: l.notifLowEnvelopesTitle,
       body: body,
       payload: routeFunding,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      notificationDetails: _alertDetails(),
     );
   }
 
@@ -228,16 +233,7 @@ class NotificationService {
       title: l.notifBudgetWarningTitle,
       body: body,
       payload: routeFunding,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      notificationDetails: _alertDetails(),
     );
   }
 
@@ -275,16 +271,7 @@ class NotificationService {
       title: l.notifUpcomingBillsTitle,
       body: body,
       payload: routeUpcomingBills,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      notificationDetails: _alertDetails(),
     );
   }
 }

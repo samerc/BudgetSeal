@@ -1,4 +1,6 @@
 {
+  "notifAlertsChannel": "BudgetSeal alerts",
+  "notifAlertsChannelDesc": "Low envelope and upcoming bill alerts",
   "widgetReadyToAssign": "Ready to assign: {amount}",
   "@widgetReadyToAssign": {"placeholders": {"amount": {"type": "String"}}},
   "widgetSpentToday": "{amount} spent today",

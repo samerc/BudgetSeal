@@ -27,8 +27,6 @@ class DailyReminderService {
   static const _baseNotificationId = 9900;
   static const _scheduleDays = 14;
   static const _channelId = 'budgetseal_daily_reminder';
-  static const _channelName = 'Daily Reminder';
-  static const _channelDesc = 'Daily reminder to log transactions';
 
   static const defaultHour = 19; // 7 PM
   static const defaultMinute = 0;
@@ -191,16 +189,16 @@ class DailyReminderService {
         // Tapping the reminder opens the add form (NotificationService).
         payload: '/add-transaction',
         scheduledDate: scheduledDate,
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
-            _channelName,
-            channelDescription: _channelDesc,
+            currentS().notifReminderChannel,
+            channelDescription: currentS().notifReminderChannelDesc,
             importance: Importance.max,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );

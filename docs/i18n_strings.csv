@@ -80,7 +80,7 @@ dashboard_quick_transfer,Quick action button,Transfer,تحويل,Virement
 dashboard_quick_fund,Quick action button,Fund,تمويل,Financer
 dashboard_quick_split,Quick action button,Split,تقسيم,Diviser
 dashboard_section_your_money,Section header,Your Money,أموالك,Votre argent
-dashboard_ready_to_assign,Unallocated label,Ready to assign,جاهز للتوزيع,Prêt à affecter
+dashboard_ready_to_assign,Unallocated label,Ready to assign,جاهز للتوزيع,Prêt à répartir
 dashboard_money_not_in_envelope,Unallocated subtitle,Money not yet in an envelope,أموال لم تُوزَّع بعد على ظرف,Argent pas encore dans une enveloppe
 dashboard_section_activity,Section header,Activity,النشاط,Activité
 dashboard_quick_templates,Section title,Quick Templates,قوالب سريعة,Modèles rapides
@@ -129,7 +129,7 @@ dashboard_section_quick_label,Section label,Quick Actions,إجراءات سري�
 dashboard_section_quick_desc,Section description,"Expense, income, transfer, fund",مصروف، دخل، تحويل، تمويل,"Dépense, revenu, virement, financement"
 dashboard_section_money_label,Section label,Your Money,أموالك,Votre argent
 dashboard_section_money_desc,Section description,"Bills, net worth and unallocated",الفواتير وصافي الثروة وغير المخصص,"Factures, patrimoine et non alloué"
-dashboard_section_unallocated_label,Section label,Ready to Assign,جاهز للتوزيع,Prêt à affecter
+dashboard_section_unallocated_label,Section label,Ready to Assign,جاهز للتوزيع,Prêt à répartir
 dashboard_section_unallocated_desc,Section description,Unallocated funds,أموال غير موزعة,Fonds non affectés
 dashboard_section_activity_label,Section label,Recent Activity,النشاط الأخير,Activité récente
 dashboard_section_activity_desc,Section description,Templates and recent transactions,القوالب والمعاملات الأخيرة,Modèles et transactions récentes
@@ -1007,8 +1007,8 @@ reports_heatmap_help,Help text,Each square is one day. Darker = higher amount. S
 reports_6_month_trend,Toggle / title,6-Month Trend,اتجاه 6 أشهر,Tendance sur 6 mois
 reports_daily_pace_toggle,Toggle,Daily Pace,السرعة اليومية,Rythme quotidien
 reports_no_spending,Empty state,No spending this month,لا إنفاق هذا الشهر,Aucune dépense ce mois-ci
-reports_top_spending,Toggle,Top spending,أعلى إنفاق,Top dépenses
-reports_top_transactions,Toggle,Top transactions,أعلى معاملات,Top transactions
+reports_top_spending,Toggle,Top spending,أعلى إنفاق,Principales dépenses
+reports_top_transactions,Toggle,Top transactions,أعلى معاملات,Principales transactions
 reports_no_expenses,Empty state,No expenses this period,لا مصاريف في هذه الفترة,Aucune dépense pour cette période
 reports_no_note,Fallback,No note,بدون ملاحظة,Aucune note
 reports_new_badge,Badge,NEW,جديد,NOUVEAU
@@ -1630,7 +1630,7 @@ alloc_fetch,,Fetch,جلب,Récupérer
 alloc_reval_applied,,Revaluation applied,تم تطبيق إعادة التقييم,Réévaluation appliquée
 alloc_reval_error,,Could not apply revaluation. Please try again.,تعذّر تطبيق إعادة التقييم. حاول مجدداً.,Impossible d'appliquer la réévaluation. Veuillez réessayer.
 alloc_fetch_rate_error,,Could not fetch rate for {currency},تعذّر جلب السعر لـ {currency},Impossible de récupérer le taux pour {currency}
-alloc_delete_linked_warning,,"{count,plural, =1{1 category is} other{{count} categories are}} linked to this envelope ({names})","{count,plural, =1{فئة واحدة مرتبطة} other{{count} فئات مرتبطة}} بهذا الظرف ({names})","{count,plural, =1{1 catégorie est liée} other{{count} catégories sont liées}} à cette enveloppe ({names})"
+alloc_delete_linked_warning,,"{count,plural, =1{1 category is} other{{count} categories are}} linked to this envelope ({names})","{count,plural, =1{فئة واحدة مرتبطة} =2{فئتان مرتبطتان} few{{count} فئات مرتبطة} many{{count} فئةً مرتبطة} other{{count} فئة مرتبطة}} بهذا الظرف ({names})","{count,plural, =1{1 catégorie est liée} other{{count} catégories sont liées}} à cette enveloppe ({names})"
 alloc_delete_and_more,,and {count} more,و{count} أخرى,et {count} autre(s)
 alloc_delete_consequences,,Deleting will:\n  • Unlink all categories from this envelope\n  • Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.,سيؤدي الحذف إلى:\n  • إلغاء ربط جميع الفئات من هذا الظرف\n  • حذف كل سجل الدفتر لهذا الظرف\n\nفكر في الأرشفة بدلاً من ذلك للحفاظ على السجل.,La suppression va :\n  • Délier toutes les catégories de cette enveloppe\n  • Supprimer tout l'historique du grand livre\n\nEnvisagez l'archivage pour préserver l'historique.
 alloc_delete_no_links_title,,Delete Envelope Permanently,حذف الظرف نهائياً,Supprimer l'enveloppe définitivement
@@ -1642,11 +1642,11 @@ alloc_got_it,,Got it,فهمت,Compris
 alloc_base_currency_only,,{currency} envelopes only · {count} in other currencies,أظرف {currency} فقط · {count} بعملات أخرى,Enveloppes en {currency} uniquement · {count} dans d'autres devises
 alloc_hide_other_currencies,,Hide other currencies,إخفاء العملات الأخرى,Masquer les autres devises
 alloc_daily_budget,,{amount}/day for {days} days,{amount}/يوم لمدة {days} أيام,{amount}/jour pendant {days} jours
-alloc_other_currencies,,"{count,plural, =1{+ 1 other currency} other{+ {count} other currencies}}","{count,plural, =1{+ عملة أخرى واحدة} other{+ {count} عملات أخرى}}","{count,plural, =1{+ 1 autre devise} other{+ {count} autres devises}}"
+alloc_other_currencies,,"{count,plural, =1{+ 1 other currency} other{+ {count} other currencies}}","{count,plural, =1{+ عملة أخرى واحدة} =2{+ عملتان أخريان} few{+ {count} عملات أخرى} many{+ {count} عملةً أخرى} other{+ {count} عملة أخرى}}","{count,plural, =1{+ 1 autre devise} other{+ {count} autres devises}}"
 alloc_goals_loans,,Goals & Loans,أهداف وقروض,Objectifs et prêts
-alloc_goals_count,,"{count,plural, =1{1 goal} other{{count} goals}}","{count,plural, =1{هدف واحد} other{{count} أهداف}}","{count,plural, =1{1 objectif} other{{count} objectifs}}"
-alloc_loans_count,,"{count,plural, =1{1 loan} other{{count} loans}}","{count,plural, =1{قرض واحد} other{{count} قروض}}","{count,plural, =1{1 prêt} other{{count} prêts}}"
-allocNEnvelopesNeedReset,,"{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}","{count,plural, =1{ظرف واحد يحتاج إعادة تعيين} other{{count} أظرف تحتاج إعادة تعيين}}","{count,plural, =1{1 enveloppe nécessite une réinitialisation} other{{count} enveloppes nécessitent une réinitialisation}}"
+alloc_goals_count,,"{count,plural, =1{1 goal} other{{count} goals}}","{count,plural, =1{هدف واحد} =2{هدفان} few{{count} أهداف} many{{count} هدفًا} other{{count} هدف}}","{count,plural, =1{1 objectif} other{{count} objectifs}}"
+alloc_loans_count,,"{count,plural, =1{1 loan} other{{count} loans}}","{count,plural, =1{قرض واحد} =2{قرضان} few{{count} قروض} many{{count} قرضًا} other{{count} قرض}}","{count,plural, =1{1 prêt} other{{count} prêts}}"
+allocNEnvelopesNeedReset,,"{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}","{count,plural, =1{ظرف واحد يحتاج إعادة تعيين} =2{ظرفان يحتاجان إعادة تعيين} few{{count} أظرف تحتاج إعادة تعيين} many{{count} ظرفًا تحتاج إعادة تعيين} other{{count} ظرف تحتاج إعادة تعيين}}","{count,plural, =1{1 enveloppe nécessite une réinitialisation} other{{count} enveloppes nécessitent une réinitialisation}}"
 fund_couldnt_load,,Couldn't load envelopes,تعذّر تحميل الأظرف,Impossible de charger les enveloppes
 fund_no_allocations,,No allocations to fund.\nCreate allocations first.,لا أظرف لتمويلها.\nأنشئ أظرفاً أولاً.,Aucune enveloppe à financer.\nCréez d'abord des enveloppes.
 fund_how_title,,How does funding work?,كيف يعمل التمويل؟,Comment fonctionne le financement ?
@@ -1656,7 +1656,7 @@ fund_step3,,"Tap ""Fund All"" to move the money into your envelopes.","اضغط 
 fund_available_to_distribute,,Available to distribute,متاح للتوزيع,Disponible à distribuer
 fund_exceeds_warning,,Total exceeds available unallocated funds,المجموع يتجاوز الأموال غير الموزعة المتاحة,Le total dépasse les fonds non alloués disponibles
 fund_quick_fill,,Quick Fill,ملء سريع,Remplissage rapide
-fund_quick_fill_desc,,"{count,plural, =1{Auto-fill 1 periodic envelope up to its target} other{Auto-fill {count} periodic envelopes up to their target}}","{count,plural, =1{ملء ظرف دوري واحد تلقائياً حتى هدفه} other{ملء {count} أظرف دورية تلقائياً حتى أهدافها}}","{count,plural, =1{Remplir automatiquement 1 enveloppe périodique jusqu'à son objectif} other{Remplir automatiquement {count} enveloppes périodiques jusqu'à leur objectif}}"
+fund_quick_fill_desc,,"{count,plural, =1{Auto-fill 1 periodic envelope up to its target} other{Auto-fill {count} periodic envelopes up to their target}}","{count,plural, =1{ملء ظرف دوري واحد تلقائياً حتى هدفه} =2{ملء ظرفين دوريين تلقائياً حتى هدفيهما} few{ملء {count} أظرف دورية تلقائياً حتى أهدافها} many{ملء {count} ظرفًا دوريًا تلقائياً حتى أهدافها} other{ملء {count} ظرف دوري تلقائياً حتى أهدافها}}","{count,plural, =1{Remplir automatiquement 1 enveloppe périodique jusqu'à son objectif} other{Remplir automatiquement {count} enveloppes périodiques jusqu'à leur objectif}}"
 fund_all_at_target,,All periodic envelopes are at their target,جميع الأظرف الدورية عند أهدافها,Toutes les enveloppes périodiques sont à leur objectif
 fund_funded,,Funded,موّل,Financé
 fund_balance,,Balance: {amount},الرصيد: {amount},Solde : {amount}
@@ -1709,7 +1709,7 @@ acct_something_wrong,,Something went wrong. Please try again.,حدث خطأ ما
 acct_archive_title,,Archive Account,أرشفة الحساب,Archiver le compte
 acct_archive_msg,,This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.,سيتم إخفاء هذا الحساب من جميع القوائم والقوائم المنسدلة. ستُحفظ معاملاتك.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.,Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nVous pouvez le désarchiver plus tard depuis les Paramètres.
 acct_cannot_delete_title,,Cannot Delete Account,لا يمكن حذف الحساب,Impossible de supprimer le compte
-acct_cannot_delete_msg,,"This account has {count} transaction reference{count,plural, =1{} other{s}}. You can't delete it while it has transactions.\n\nWould you like to archive it instead? Archived accounts are hidden from lists but preserve all transaction history.","هذا الحساب يحتوي على {count,plural, =1{مرجع معاملة واحد} other{{count} مراجع معاملات}}. لا يمكنك حذفه وهو يحتوي على معاملات.\n\nهل تريد أرشفته بدلاً من ذلك؟ الحسابات المؤرشفة مخفية من القوائم ولكنها تحافظ على كل سجل المعاملات.","Ce compte a {count,plural, =1{1 référence de transaction} other{{count} références de transactions}}. Vous ne pouvez pas le supprimer tant qu'il a des transactions.\n\nVoulez-vous l'archiver à la place ? Les comptes archivés sont masqués des listes mais préservent tout l'historique."
+acct_cannot_delete_msg,,"This account has {count} transaction reference{count,plural, =1{} other{s}}. You can't delete it while it has transactions.\n\nWould you like to archive it instead? Archived accounts are hidden from lists but preserve all transaction history.","هذا الحساب يحتوي على {count,plural, =1{مرجع معاملة واحد} =2{مرجعَي معاملة} few{{count} مراجع معاملات} many{{count} مرجعًا لمعاملات} other{{count} مرجع معاملة}}. لا يمكنك حذفه وهو يحتوي على معاملات.\n\nهل تريد أرشفته بدلاً من ذلك؟ الحسابات المؤرشفة مخفية من القوائم ولكنها تحافظ على كل سجل المعاملات.","Ce compte a {count,plural, =1{1 référence de transaction} other{{count} références de transactions}}. Vous ne pouvez pas le supprimer tant qu'il a des transactions.\n\nVoulez-vous l'archiver à la place ? Les comptes archivés sont masqués des listes mais préservent tout l'historique."
 acct_delete_title,,Delete Account Permanently,حذف الحساب نهائياً,Supprimer le compte définitivement
 acct_delete_msg,,This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.,هذا الحساب ليس له معاملات. هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع.,Ce compte n'a aucune transaction. Êtes-vous sûr de vouloir le supprimer définitivement ? Cette action est irréversible.
 acct_archive_instead,,Archive Instead,أرشفة بدلاً من ذلك,Archiver à la place
@@ -1722,7 +1722,7 @@ cat_no_yet,,No categories yet,لا فئات بعد,Aucune catégorie pour le mom
 cat_tap_plus,,Tap + to create one,اضغط + لإنشاء واحدة,Appuyez sur + pour en créer une
 cat_no_match,,No matching categories,لا فئات مطابقة,Aucune catégorie correspondante
 cat_couldnt_load,,Couldn't load categories,تعذّر تحميل الفئات,Impossible de charger les catégories
-cat_subcategories,,"{count,plural, =1{1 subcategory} other{{count} subcategories}}","{count,plural, =1{فئة فرعية واحدة} other{{count} فئات فرعية}}","{count,plural, =1{1 sous-catégorie} other{{count} sous-catégories}}"
+cat_subcategories,,"{count,plural, =1{1 subcategory} other{{count} subcategories}}","{count,plural, =1{فئة فرعية واحدة} =2{فئتان فرعيتان} few{{count} فئات فرعية} many{{count} فئةً فرعية} other{{count} فئة فرعية}}","{count,plural, =1{1 sous-catégorie} other{{count} sous-catégories}}"
 cat_section_expense,,Expense,مصروف,Dépense
 cat_section_income,,Income,دخل,Revenu
 cat_edit,,Edit,تعديل,Modifier
@@ -1869,7 +1869,7 @@ terms_intended_use_body,,"BudgetSeal is a personal finance management tool for i
 terms_data_accuracy_title,,3. Data Accuracy,3. دقة البيانات,3. Exactitude des données
 terms_data_accuracy_body,,"You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.",أنت مسؤول عن دقة البيانات التي تدخلها. يحسب BudgetSeal الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.,"Vous êtes responsable de l'exactitude des données que vous saisissez. BudgetSeal calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs."
 terms_no_warranty_title,,4. No Warranty,4. بدون ضمان,4. Sans garantie
-terms_no_warranty_body,,"BudgetSeal is provided ""as is"" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.","يتم توفير BudgetSeal ""كما هو"" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.","BudgetSeal est fourni ""tel quel"" sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées."
+terms_no_warranty_body,,"BudgetSeal is provided ""as is"" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.",يتم توفير BudgetSeal «كما هو» بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.,"BudgetSeal est fourni « tel quel » sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées."
 terms_liability_title,,5. Limitation of Liability,5. تحديد المسؤولية,5. Limitation de responsabilité
 terms_liability_body,,"The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.",لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام BudgetSeal.,"Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l'utilisation de BudgetSeal."
 termsIPTitle,,6. Intellectual Property,6. الملكية الفكرية,6. Propriété intellectuelle
@@ -1898,11 +1898,11 @@ leftover_resolve_failed,,Failed to resolve leftovers. Please try again.,فشل �
 common_try_again,,Try Again,حاول مجدداً,Réessayer
 common_error_desc,,An unexpected error occurred. Try going back or restarting the app.,حدث خطأ غير متوقع. حاول العودة أو إعادة تشغيل التطبيق.,Une erreur inattendue s'est produite. Essayez de revenir en arrière ou de redémarrer l'application.
 common_uncategorized,,Uncategorized,غير مصنف,Non classé
-wc_public_network_desc_named,,"You appear to be on a public network (""{wifiName}""). Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.","يبدو أنك على شبكة عامة (""{wifiName}""). لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.","Vous semblez être sur un réseau public (""{wifiName}""). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau."
+wc_public_network_desc_named,,"You appear to be on a public network (""{wifiName}""). Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.",يبدو أنك على شبكة عامة («{wifiName}»). لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.,Vous semblez être sur un réseau public (« {wifiName} »). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.
 wc_public_network_desc_unnamed,,You appear to be on a public network. Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.,يبدو أنك على شبكة عامة. لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.,Vous semblez être sur un réseau public. Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.
-wc_network_security_desc,,"Web Companion uses HTTP (unencrypted). Only use it on your private home or office WiFi. Never start the server on public networks (hotels, airports, cafes) — anyone on the same network could see your data.",يستخدم المرافق الإلكتروني بروتوكول HTTP (غير مشفر). استخدمه فقط على شبكة WiFi المنزلية أو المكتبية الخاصة. لا تشغّل الخادم على الشبكات العامة (الفنادق، المطارات، المقاهي) — يمكن لأي شخص على نفس الشبكة رؤية بياناتك.,"Web Companion utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n'importe qui sur le même réseau pourrait voir vos données."
-wc_security_warning_named,,"Network ""{wifiName}"" may be public. Traffic is unencrypted — avoid using Web Companion on public WiFi, as others on the same network could intercept your data.","شبكة ""{wifiName}"" قد تكون عامة. حركة البيانات غير مشفرة — تجنب استخدام المرافق الإلكتروني على شبكات WiFi العامة.","Le réseau ""{wifiName}"" peut être public. Le trafic n'est pas chiffré — évitez d'utiliser Web Companion sur les réseaux WiFi publics."
-wc_security_warning_unnamed,,"Could not detect your WiFi network name. If you're on a public network, avoid using Web Companion — traffic is unencrypted and could be intercepted.",تعذر اكتشاف اسم شبكة WiFi. إذا كنت على شبكة عامة، تجنب استخدام المرافق الإلكتروني — حركة البيانات غير مشفرة ويمكن اعتراضها.,"Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d'utiliser Web Companion — le trafic n'est pas chiffré et pourrait être intercepté."
+wc_network_security_desc,,"Web Companion uses HTTP (unencrypted). Only use it on your private home or office WiFi. Never start the server on public networks (hotels, airports, cafes) — anyone on the same network could see your data.",يستخدم المرافق الإلكتروني بروتوكول HTTP (غير مشفر). استخدمه فقط على شبكة WiFi المنزلية أو المكتبية الخاصة. لا تشغّل الخادم على الشبكات العامة (الفنادق، المطارات، المقاهي) — يمكن لأي شخص على نفس الشبكة رؤية بياناتك.,"Le Compagnon Web utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n'importe qui sur le même réseau pourrait voir vos données."
+wc_security_warning_named,,"Network ""{wifiName}"" may be public. Traffic is unencrypted — avoid using Web Companion on public WiFi, as others on the same network could intercept your data.",قد تكون شبكة «{wifiName}» عامة. حركة البيانات غير مشفرة — تجنب استخدام المرافق الإلكتروني على شبكات WiFi العامة، إذ يمكن لآخرين على نفس الشبكة اعتراض بياناتك.,"Le réseau « {wifiName} » peut être public. Le trafic n'est pas chiffré — évitez d'utiliser le Compagnon Web sur un WiFi public, car d'autres personnes sur le même réseau pourraient intercepter vos données."
+wc_security_warning_unnamed,,"Could not detect your WiFi network name. If you're on a public network, avoid using Web Companion — traffic is unencrypted and could be intercepted.",تعذر اكتشاف اسم شبكة WiFi. إذا كنت على شبكة عامة، تجنب استخدام المرافق الإلكتروني — حركة البيانات غير مشفرة ويمكن اعتراضها.,"Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d'utiliser le Compagnon Web — le trafic n'est pas chiffré et pourrait être intercepté."
 tmpl_apply_error,,Could not apply template,تعذر تطبيق القالب,Impossible d'appliquer le modèle
 tmpl_delete_error,,Could not delete template,تعذر حذف القالب,Impossible de supprimer le modèle
 tmpl_enter_amount,,Enter an amount,أدخل مبلغاً,Entrez un montant
@@ -2002,7 +2002,7 @@ language_system_desc,,Follow device settings,اتباع إعدادات الجه�
 dashboard_quick_actions_hint_title,,Quick Actions,إجراءات سريعة,Actions rapides
 dashboard_quick_actions_hint_body,,Fund assigns money to your envelopes. Split lets you divide a bill with others.,التمويل يوزع المال على أظرفك. التقسيم يتيح لك مشاركة فاتورة مع آخرين.,Financer affecte de l'argent à vos enveloppes. Diviser vous permet de partager une addition.
 fund_distributing,,Distributing {distributed} of {available},توزيع {distributed} من {available},Distribution de {distributed} sur {available}
-cat_delete_tx_count,,"{count, plural, =1{1 transaction uses this category} other{{count} transactions use this category}}","{count, plural, =1{معاملة واحدة تستخدم هذه الفئة} other{{count} معاملات تستخدم هذه الفئة}}","{count, plural, =1{1 transaction utilise cette catégorie} other{{count} transactions utilisent cette catégorie}}"
+cat_delete_tx_count,,"{count, plural, =1{1 transaction uses this category} other{{count} transactions use this category}}","{count, plural, =1{معاملة واحدة تستخدم هذه الفئة} =2{معاملتان تستخدمان هذه الفئة} few{{count} معاملات تستخدم هذه الفئة} many{{count} معاملةً تستخدم هذه الفئة} other{{count} معاملة تستخدم هذه الفئة}}","{count, plural, =1{1 transaction utilise cette catégorie} other{{count} transactions utilisent cette catégorie}}"
 cat_delete_linked_envelope,,"linked to envelope ""{name}""","مرتبطة بالظرف ""{name}""",liée à l'enveloppe « {name} »
 cat_delete_warning,,This category has {warnings}.\n\nDeleting will uncategorize those transactions and unlink it from the envelope.\n\nConsider archiving instead.,هذه الفئة {warnings}.\n\nسيؤدي الحذف إلى إزالة التصنيف من تلك المعاملات وإلغاء الربط بالظرف.\n\nفكّر في الأرشفة بدلاً من ذلك.,Cette catégorie {warnings}.\n\nLa suppression décatégorisera ces transactions et la déliera de l'enveloppe.\n\nEnvisagez plutôt l'archivage.
 sub_freq_day,,/day,/يوم,/jour
@@ -2013,7 +2013,7 @@ sub_freq_days,,/{n} days,/كل {n} أيام,/tous les {n} jours
 sub_freq_weeks,,/{n} weeks,/كل {n} أسابيع,/toutes les {n} semaines
 sub_freq_months,,/{n} months,/كل {n} أشهر,/tous les {n} mois
 sub_freq_years,,/{n} years,/كل {n} سنوات,/tous les {n} ans
-sub_cancel_body_with_tx,,"This will cancel future billing and remove {count, plural, =1{1 transaction} other{{count} transactions}} after {date}.","{count, plural, =1{سيتم إلغاء الفوترة المستقبلية وحذف معاملة واحدة} other{سيتم إلغاء الفوترة المستقبلية وحذف {count} معاملات}} بعد {date}.","Cela annulera la facturation future et supprimera {count, plural, =1{1 transaction} other{{count} transactions}} après le {date}."
+sub_cancel_body_with_tx,,"This will cancel future billing and remove {count, plural, =1{1 transaction} other{{count} transactions}} after {date}.","{count, plural, =1{سيتم إلغاء الفوترة المستقبلية وحذف معاملة واحدة} =2{سيتم إلغاء الفوترة المستقبلية وحذف معاملتين} few{سيتم إلغاء الفوترة المستقبلية وحذف {count} معاملات} many{سيتم إلغاء الفوترة المستقبلية وحذف {count} معاملةً} other{سيتم إلغاء الفوترة المستقبلية وحذف {count} معاملة}} بعد {date}.","Cela annulera la facturation future et supprimera {count, plural, =1{1 transaction} other{{count} transactions}} après le {date}."
 sub_cancel_body_no_tx,,This will set the cancellation date to {date}.,سيتم تعيين تاريخ الإلغاء إلى {date}.,Cela définira la date d'annulation au {date}.
 planned_post_all_content,,Post all {count} planned payments for {month}?,ترحيل جميع المدفوعات المخططة ({count}) لـ{month}؟,Enregistrer les {count} paiements planifiés pour {month} ?
 planned_post_all_result,,{count} payments posted,تم ترحيل {count} مدفوعات,{count} paiements enregistrés
@@ -2094,7 +2094,7 @@ alloc_entry_revaluation,,Revaluation,إعادة تقييم,Réévaluation
 alloc_entry_moved,,Moved,منقول,Déplacé
 fx_set_rate_title,,Rate for {currency},سعر {currency},Taux pour {currency}
 fx_set_rate_hint,,Your rate is used for new transactions and reports until you switch back to the live rate.,يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.,Votre taux sert aux nouvelles transactions et aux rapports jusqu'au retour au taux en direct.
-fx_use_live_rate,,Use live rate,السعر المباشر,Taux en direct
+fx_use_live_rate,,Use live rate,استخدام السعر المباشر,Taux en direct
 fx_base_label,,Base currency: {currency},العملة الأساسية: {currency},Devise de base : {currency}
 fx_no_currencies,,Your budget uses only one currency. Add an account in another currency to see its rate here.,ميزانيتك تستخدم عملة واحدة فقط. أضف حساباً بعملة أخرى لترى سعرها هنا.,Votre budget n'utilise qu'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.
 fx_no_rate_for,,No rate for {currency} yet — tap to set one,لا يوجد سعر لـ {currency} بعد — اضغط لتحديده,Pas encore de taux pour {currency} — touchez pour en définir un
@@ -2125,9 +2125,9 @@ tx_form_save_and_new,,Save & new,حفظ وجديد,Enregistrer + nouveau
 tx_saved_envelope_left,,Saved · {envelope}: {amount} left,تم الحفظ · {envelope}: متبقٍ {amount},Enregistrée · {envelope} : reste {amount}
 tx_saved_envelope_over,,Saved · {envelope} is over by {amount},تم الحفظ · {envelope} متجاوز بمقدار {amount},Enregistrée · {envelope} dépasse de {amount}
 alloc_move_title,,Move money,نقل المال,Déplacer de l'argent
-alloc_move_desc,,"Move money between envelopes, or back to Ready to assign.",انقل المال بين الأظرف، أو أعده إلى «جاهز للتوزيع».,"Déplacez de l'argent entre enveloppes, ou vers « Prêt à attribuer »."
+alloc_move_desc,,"Move money between envelopes, or back to Ready to assign.",انقل المال بين الأظرف، أو أعده إلى «جاهز للتوزيع».,"Déplacez de l'argent entre enveloppes, ou vers « Prêt à répartir »."
 alloc_cover_title,,Cover overspending,تغطية التجاوز,Couvrir le dépassement
-alloc_cover_desc,,Take money from another envelope (or Ready to assign) to bring this one back to zero.,خذ مالاً من ظرف آخر (أو من «جاهز للتوزيع») لإعادة هذا الظرف إلى الصفر.,Prenez de l'argent d'une autre enveloppe (ou de « Prêt à attribuer ») pour ramener celle-ci à zéro.
+alloc_cover_desc,,Take money from another envelope (or Ready to assign) to bring this one back to zero.,خذ مالاً من ظرف آخر (أو من «جاهز للتوزيع») لإعادة هذا الظرف إلى الصفر.,Prenez de l'argent d'une autre enveloppe (ou de « Prêt à répartir ») pour ramener celle-ci à zéro.
 alloc_move_from,,From,من,De
 alloc_move_to,,To,إلى,Vers
 alloc_move_button,,Move,نقل,Déplacer
@@ -2170,19 +2170,19 @@ period_summary_under,,{amount} under budget,أقل من الميزانية بـ 
 period_summary_over,,{amount} over budget,فوق الميزانية بـ {amount},{amount} au-dessus du budget
 period_summary_fund,,Fund this period,موّل هذه الفترة,Alimenter cette période
 engine_period_covered,,Overspending covered at period end,تمت تغطية التجاوز في نهاية الفترة,Dépassement couvert en fin de période
-period_cover_from_rta,,Cover from Ready to assign,غطِّه من «جاهز للتوزيع»,Couvrir avec « Prêt à attribuer »
+period_cover_from_rta,,Cover from Ready to assign,غطِّه من «جاهز للتوزيع»,Couvrir avec « Prêt à répartir »
 period_cover_from_rta_desc,,Start the new period at zero,ابدأ الفترة الجديدة من الصفر,Commencer la nouvelle période à zéro
 period_carry_debt,,Carry the overspending,ترحيل التجاوز,Reporter le dépassement
 period_carry_debt_desc,,The new period starts below zero,تبدأ الفترة الجديدة تحت الصفر,La nouvelle période commence sous zéro
 alloc_fund_to_target,,To target · {amount},حتى الهدف · {amount},Jusqu'à l'objectif · {amount}
 alloc_fund_all_available,,All available · {amount},كل المتاح · {amount},Tout le disponible · {amount}
 fund_preset_last_period,,Same as last period,مثل الفترة السابقة,Comme la période précédente
-fund_preset_spent,,What I spent last period,ما أنفقته في الفترة السابقة,Ce que j'ai dépensé
+fund_preset_spent,,What I spent last period,ما أنفقته في الفترة السابقة,Dépensé la période précédente
 fund_preset_clear,,Clear,مسح,Effacer
 
 # ──────────────────────────────────────────────,,,,
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
-widget_ready_to_assign,,Ready to assign: {amount},جاهز للتوزيع: {amount},Prêt à attribuer : {amount}
+widget_ready_to_assign,,Ready to assign: {amount},جاهز للتوزيع: {amount},Prêt à répartir : {amount}
 widget_spent_today,,{amount} spent today,أُنفق اليوم {amount},{amount} dépensés aujourd'hui
 sync_status_syncing,,Syncing…,جارٍ المزامنة…,Synchronisation…
 sync_status_failed,,Last sync failed — tap to check,فشلت آخر مزامنة — اضغط للتحقق,Échec de la dernière synchro — touchez pour vérifier
@@ -2192,9 +2192,9 @@ import_col_credit,,Credit (money in),دائن (داخل),Crédit (entrées)
 import_duplicates_skipped,,{n} already in the app,{n} موجودة مسبقاً,{n} déjà dans l'app
 acct_reconcile_matches,,Matches — nothing to adjust,مطابق — لا شيء للتسوية,Concorde — rien à ajuster
 acct_reconcile_diff,,Difference {amount} — an adjustment will be recorded,الفرق {amount} — ستُسجَّل تسوية,Différence {amount} — un ajustement sera enregistré
-acct_reconcile_confirm,,Mark as reconciled,وضع علامة «مطابق»,Marquer comme rapproché
+acct_reconcile_confirm,,Mark as reconciled,تأكيد المطابقة,Marquer comme rapproché
 acct_reconciled_match,,Balance matches — reconciled,الرصيد مطابق — تمت المطابقة,Le solde concorde — rapproché
-acct_last_reconciled,,Reconciled {date},طوبق في {date},Rapproché le {date}
+acct_last_reconciled,,Reconciled {date},تمت المطابقة في {date},Rapproché le {date}
 reports_calendar_months,,Calendar months,الأشهر الميلادية,Mois civils
 reports_budget_periods,,Budget periods,فترات الميزانية,Périodes budgétaires
 upcoming_post_now,,Post now,سجّل الآن,Enregistrer maintenant
@@ -2204,3 +2204,8 @@ upcoming_skip_desc,,Move to the next date without recording it,انتقل إلى
 upcoming_posted,,Bill posted,تم تسجيل الفاتورة,Facture enregistrée
 upcoming_skipped,,Skipped — next date updated,تم التخطي — حُدّث الموعد التالي,Ignorée — prochaine date mise à jour
 recurring_posted_n,,"{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}","{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}","{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}"
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+notif_alerts_channel,,BudgetSeal alerts,تنبيهات BudgetSeal,Alertes BudgetSeal
+notif_alerts_channel_desc,,Low envelope and upcoming bill alerts,تنبيهات الأظرف المنخفضة والفواتير القادمة,Alertes enveloppes basses et factures à venir

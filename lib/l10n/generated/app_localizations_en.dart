@@ -9,6 +9,12 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get notifAlertsChannel => 'BudgetSeal alerts';
+
+  @override
+  String get notifAlertsChannelDesc => 'Low envelope and upcoming bill alerts';
+
+  @override
   String widgetReadyToAssign(String amount) {
     return 'Ready to assign: $amount';
   }

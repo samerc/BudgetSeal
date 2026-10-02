@@ -99,6 +99,18 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @notifAlertsChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'BudgetSeal alerts'**
+  String get notifAlertsChannel;
+
+  /// No description provided for @notifAlertsChannelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Low envelope and upcoming bill alerts'**
+  String get notifAlertsChannelDesc;
+
   /// No description provided for @widgetReadyToAssign.
   ///
   /// In en, this message translates to:

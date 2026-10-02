@@ -1,5 +1,7 @@
 {
-  "widgetReadyToAssign": "Prêt à attribuer : {amount}",
+  "notifAlertsChannel": "Alertes BudgetSeal",
+  "notifAlertsChannelDesc": "Alertes enveloppes basses et factures à venir",
+  "widgetReadyToAssign": "Prêt à répartir : {amount}",
   "widgetSpentToday": "{amount} dépensés aujourd'hui",
   "syncStatusSyncing": "Synchronisation…",
   "syncStatusFailed": "Échec de la dernière synchro — touchez pour vérifier",
@@ -34,14 +36,14 @@
   "periodSummaryOver": "{amount} au-dessus du budget",
   "periodSummaryFund": "Alimenter cette période",
   "enginePeriodCovered": "Dépassement couvert en fin de période",
-  "periodCoverFromRta": "Couvrir avec « Prêt à attribuer »",
+  "periodCoverFromRta": "Couvrir avec « Prêt à répartir »",
   "periodCoverFromRtaDesc": "Commencer la nouvelle période à zéro",
   "periodCarryDebt": "Reporter le dépassement",
   "periodCarryDebtDesc": "La nouvelle période commence sous zéro",
   "allocFundToTarget": "Jusqu'à l'objectif · {amount}",
   "allocFundAllAvailable": "Tout le disponible · {amount}",
   "fundPresetLastPeriod": "Comme la période précédente",
-  "fundPresetSpent": "Ce que j'ai dépensé",
+  "fundPresetSpent": "Dépensé la période précédente",
   "fundPresetClear": "Effacer",
   "txExportSelected": "Exporter en CSV",
   "commonSeeAll": "Tout voir",
@@ -60,9 +62,9 @@
   "txSavedEnvelopeLeft": "Enregistrée · {envelope} : reste {amount}",
   "txSavedEnvelopeOver": "Enregistrée · {envelope} dépasse de {amount}",
   "allocMoveTitle": "Déplacer de l'argent",
-  "allocMoveDesc": "Déplacez de l'argent entre enveloppes, ou vers « Prêt à attribuer ».",
+  "allocMoveDesc": "Déplacez de l'argent entre enveloppes, ou vers « Prêt à répartir ».",
   "allocCoverTitle": "Couvrir le dépassement",
-  "allocCoverDesc": "Prenez de l'argent d'une autre enveloppe (ou de « Prêt à attribuer ») pour ramener celle-ci à zéro.",
+  "allocCoverDesc": "Prenez de l'argent d'une autre enveloppe (ou de « Prêt à répartir ») pour ramener celle-ci à zéro.",
   "allocMoveFrom": "De",
   "allocMoveTo": "Vers",
   "allocMoveButton": "Déplacer",
@@ -431,7 +433,7 @@
   "@dashboardSectionYourMoney": {
     "description": "Section header"
   },
-  "dashboardReadyToAssign": "Prêt à affecter",
+  "dashboardReadyToAssign": "Prêt à répartir",
   "@dashboardReadyToAssign": {
     "description": "Unallocated label"
   },
@@ -659,7 +661,7 @@
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
-  "dashboardSectionUnallocatedLabel": "Prêt à affecter",
+  "dashboardSectionUnallocatedLabel": "Prêt à répartir",
   "@dashboardSectionUnallocatedLabel": {
     "description": "Section label"
   },
@@ -3713,7 +3715,7 @@
   "@termsDataAccuracyBody": { "description": "Body" },
   "termsNoWarrantyTitle": "4. Sans garantie",
   "@termsNoWarrantyTitle": { "description": "Heading" },
-  "termsNoWarrantyBody": "BudgetSeal est fourni \"tel quel\" sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées.",
+  "termsNoWarrantyBody": "BudgetSeal est fourni « tel quel » sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées.",
   "@termsNoWarrantyBody": { "description": "Body" },
   "termsLiabilityTitle": "5. Limitation de responsabilité",
   "@termsLiabilityTitle": { "description": "Heading" },
@@ -4138,11 +4140,11 @@
   "@reportsNoSpending": {
     "description": "Empty state"
   },
-  "reportsTopSpending": "Top dépenses",
+  "reportsTopSpending": "Principales dépenses",
   "@reportsTopSpending": {
     "description": "Toggle"
   },
-  "reportsTopTransactions": "Top transactions",
+  "reportsTopTransactions": "Principales transactions",
   "@reportsTopTransactions": {
     "description": "Toggle"
   },
@@ -5700,11 +5702,11 @@
   "commonTryAgain": "Réessayer",
   "commonErrorDesc": "Une erreur inattendue s'est produite. Essayez de revenir en arrière ou de redémarrer l'application.",
   "commonUncategorized": "Non classé",
-  "wcPublicNetworkDescNamed": "Vous semblez être sur un réseau public (\"{wifiName}\"). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.",
+  "wcPublicNetworkDescNamed": "Vous semblez être sur un réseau public (« {wifiName} »). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.",
   "wcPublicNetworkDescUnnamed": "Vous semblez être sur un réseau public. Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.",
-  "wcNetworkSecurityDesc": "Web Companion utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n'importe qui sur le même réseau pourrait voir vos données.",
-  "wcSecurityWarningNamed": "Le réseau \"{wifiName}\" peut être public. Le trafic n'est pas chiffré — évitez d'utiliser Web Companion sur les réseaux WiFi publics.",
-  "wcSecurityWarningUnnamed": "Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d'utiliser Web Companion — le trafic n'est pas chiffré et pourrait être intercepté.",
+  "wcNetworkSecurityDesc": "Le Compagnon Web utilise HTTP (non chiffré). Utilisez-le uniquement sur votre WiFi privé domestique ou de bureau. Ne démarrez jamais le serveur sur des réseaux publics (hôtels, aéroports, cafés) — n'importe qui sur le même réseau pourrait voir vos données.",
+  "wcSecurityWarningNamed": "Le réseau « {wifiName} » peut être public. Le trafic n'est pas chiffré — évitez d'utiliser le Compagnon Web sur un WiFi public, car d'autres personnes sur le même réseau pourraient intercepter vos données.",
+  "wcSecurityWarningUnnamed": "Impossible de détecter le nom de votre réseau WiFi. Si vous êtes sur un réseau public, évitez d'utiliser le Compagnon Web — le trafic n'est pas chiffré et pourrait être intercepté.",
   "tmplApplyError": "Impossible d'appliquer le modèle",
   "tmplDeleteError": "Impossible de supprimer le modèle",
   "tmplEnterAmount": "Entrez un montant",

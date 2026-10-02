@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../l10n/s_lookup.dart';
 import 'cloud_provider.dart';
 
 const _syncFileName = 'BudgetSeal_Sync.json';
@@ -34,7 +35,7 @@ class FilePickerProvider implements CloudProvider {
     // Let user pick or create a file
     final file = await FilePicker.pickFile(
       type: FileType.any,
-      dialogTitle: 'Select BudgetSeal Sync File',
+      dialogTitle: currentS().filePickerTitle,
     );
 
     if (file?.path != null) {

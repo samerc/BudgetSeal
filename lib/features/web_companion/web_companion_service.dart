@@ -137,8 +137,8 @@ class WebCompanionService {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'web_companion',
-        channelName: 'Web Companion',
-        channelDescription: 'Keeps the local budget server running',
+        channelName: currentS().wcForegroundChannel,
+        channelDescription: currentS().wcForegroundChannelDesc,
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
       ),

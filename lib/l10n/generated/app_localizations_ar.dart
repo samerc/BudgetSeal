@@ -9,6 +9,13 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get notifAlertsChannel => 'تنبيهات BudgetSeal';
+
+  @override
+  String get notifAlertsChannelDesc =>
+      'تنبيهات الأظرف المنخفضة والفواتير القادمة';
+
+  @override
   String widgetReadyToAssign(String amount) {
     return 'جاهز للتوزيع: $amount';
   }
@@ -49,14 +56,14 @@ class SAr extends S {
   }
 
   @override
-  String get acctReconcileConfirm => 'وضع علامة «مطابق»';
+  String get acctReconcileConfirm => 'تأكيد المطابقة';
 
   @override
   String get acctReconciledMatch => 'الرصيد مطابق — تمت المطابقة';
 
   @override
   String acctLastReconciled(String date) {
-    return 'طوبق في $date';
+    return 'تمت المطابقة في $date';
   }
 
   @override
@@ -347,7 +354,7 @@ class SAr extends S {
       'يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.';
 
   @override
-  String get fxUseLiveRate => 'السعر المباشر';
+  String get fxUseLiveRate => 'استخدام السعر المباشر';
 
   @override
   String fxBaseLabel(String currency) {
@@ -2297,7 +2304,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count فئات مرتبطة',
+      other: '$count فئة مرتبطة',
+      many: '$count فئةً مرتبطة',
+      few: '$count فئات مرتبطة',
+      two: 'فئتان مرتبطتان',
       one: 'فئة واحدة مرتبطة',
     );
     return '$_temp0 بهذا الظرف ($names)';
@@ -2349,7 +2359,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '+ $count عملات أخرى',
+      other: '+ $count عملة أخرى',
+      many: '+ $count عملةً أخرى',
+      few: '+ $count عملات أخرى',
+      two: '+ عملتان أخريان',
       one: '+ عملة أخرى واحدة',
     );
     return '$_temp0';
@@ -2363,7 +2376,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count أهداف',
+      other: '$count هدف',
+      many: '$count هدفًا',
+      few: '$count أهداف',
+      two: 'هدفان',
       one: 'هدف واحد',
     );
     return '$_temp0';
@@ -2374,7 +2390,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count قروض',
+      other: '$count قرض',
+      many: '$count قرضًا',
+      few: '$count قروض',
+      two: 'قرضان',
       one: 'قرض واحد',
     );
     return '$_temp0';
@@ -2393,7 +2412,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count أظرف تحتاج إعادة تعيين',
+      other: '$count ظرف تحتاج إعادة تعيين',
+      many: '$count ظرفًا تحتاج إعادة تعيين',
+      few: '$count أظرف تحتاج إعادة تعيين',
+      two: 'ظرفان يحتاجان إعادة تعيين',
       one: 'ظرف واحد يحتاج إعادة تعيين',
     );
     return '$_temp0';
@@ -2439,7 +2461,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'ملء $count أظرف دورية تلقائياً حتى أهدافها',
+      other: 'ملء $count ظرف دوري تلقائياً حتى أهدافها',
+      many: 'ملء $count ظرفًا دوريًا تلقائياً حتى أهدافها',
+      few: 'ملء $count أظرف دورية تلقائياً حتى أهدافها',
+      two: 'ملء ظرفين دوريين تلقائياً حتى هدفيهما',
       one: 'ملء ظرف دوري واحد تلقائياً حتى هدفه',
     );
     return '$_temp0';
@@ -2696,7 +2721,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count مراجع معاملات',
+      other: '$count مرجع معاملة',
+      many: '$count مرجعًا لمعاملات',
+      few: '$count مراجع معاملات',
+      two: 'مرجعَي معاملة',
       one: 'مرجع معاملة واحد',
     );
     return 'هذا الحساب يحتوي على $_temp0. لا يمكنك حذفه وهو يحتوي على معاملات.\n\nهل تريد أرشفته بدلاً من ذلك؟ الحسابات المؤرشفة مخفية من القوائم ولكنها تحافظ على كل سجل المعاملات.';
@@ -2774,7 +2802,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count فئات فرعية',
+      other: '$count فئة فرعية',
+      many: '$count فئةً فرعية',
+      few: '$count فئات فرعية',
+      two: 'فئتان فرعيتان',
       one: 'فئة فرعية واحدة',
     );
     return '$_temp0';
@@ -4159,7 +4190,7 @@ class SAr extends S {
 
   @override
   String get termsNoWarrantyBody =>
-      'يتم توفير BudgetSeal \"كما هو\" بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.';
+      'يتم توفير BudgetSeal «كما هو» بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.';
 
   @override
   String get termsLiabilityTitle => '5. تحديد المسؤولية';
@@ -5829,7 +5860,7 @@ class SAr extends S {
 
   @override
   String wcPublicNetworkDescNamed(String wifiName) {
-    return 'يبدو أنك على شبكة عامة (\"$wifiName\"). لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.';
+    return 'يبدو أنك على شبكة عامة («$wifiName»). لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.';
   }
 
   @override
@@ -5842,7 +5873,7 @@ class SAr extends S {
 
   @override
   String wcSecurityWarningNamed(String wifiName) {
-    return 'شبكة \"$wifiName\" قد تكون عامة. حركة البيانات غير مشفرة — تجنب استخدام المرافق الإلكتروني على شبكات WiFi العامة.';
+    return 'قد تكون شبكة «$wifiName» عامة. حركة البيانات غير مشفرة — تجنب استخدام المرافق الإلكتروني على شبكات WiFi العامة، إذ يمكن لآخرين على نفس الشبكة اعتراض بياناتك.';
   }
 
   @override
@@ -6263,7 +6294,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count معاملات تستخدم هذه الفئة',
+      other: '$count معاملة تستخدم هذه الفئة',
+      many: '$count معاملةً تستخدم هذه الفئة',
+      few: '$count معاملات تستخدم هذه الفئة',
+      two: 'معاملتان تستخدمان هذه الفئة',
       one: 'معاملة واحدة تستخدم هذه الفئة',
     );
     return '$_temp0';
@@ -6316,7 +6350,10 @@ class SAr extends S {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'سيتم إلغاء الفوترة المستقبلية وحذف $count معاملات',
+      other: 'سيتم إلغاء الفوترة المستقبلية وحذف $count معاملة',
+      many: 'سيتم إلغاء الفوترة المستقبلية وحذف $count معاملةً',
+      few: 'سيتم إلغاء الفوترة المستقبلية وحذف $count معاملات',
+      two: 'سيتم إلغاء الفوترة المستقبلية وحذف معاملتين',
       one: 'سيتم إلغاء الفوترة المستقبلية وحذف معاملة واحدة',
     );
     return '$_temp0 بعد $date.';
