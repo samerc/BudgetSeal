@@ -133,6 +133,24 @@ const _emojiIconMap = <String, String>{
   '📦': 'box.png',
 };
 
+/// The PNG (in `assets/categories/`) drawn for a category, or null when it
+/// falls back to its emoji or first letter. Also used by the Web Companion.
+String? categoryIconFile(String categoryName, String? emoji) {
+  // 1. Locale-independent: map the stored emoji straight to a PNG. Strip
+  //    the U+FE0F variation selector so '✈️' and '✈' both match.
+  if (emoji != null && emoji.isNotEmpty) {
+    final file = _emojiIconMap[emoji] ??
+        _emojiIconMap[emoji.replaceAll('\u{FE0F}', '')];
+    if (file != null) return file;
+  }
+  // 2. Fallback: match the (possibly translated) name against English keywords.
+  final lowerName = categoryName.toLowerCase();
+  for (final entry in _categoryIconMap.entries) {
+    if (lowerName.contains(entry.key)) return entry.value;
+  }
+  return null;
+}
+
 /// Widget that displays a category icon from the Cashew icon pack.
 /// Falls back to emoji or generic icon.
 class CategoryIcon extends StatelessWidget {
@@ -153,26 +171,7 @@ class CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? pngFile;
-
-    // 1. Locale-independent: map the stored emoji straight to a PNG. Strip
-    //    the U+FE0F variation selector so '✈️' and '✈' both match.
-    final em = emoji;
-    if (em != null && em.isNotEmpty) {
-      pngFile = _emojiIconMap[em] ??
-          _emojiIconMap[em.replaceAll('\u{FE0F}', '')];
-    }
-
-    // 2. Fallback: match the (possibly translated) name against English keywords.
-    if (pngFile == null) {
-      final lowerName = categoryName.toLowerCase();
-      for (final entry in _categoryIconMap.entries) {
-        if (lowerName.contains(entry.key)) {
-          pngFile = entry.value;
-          break;
-        }
-      }
-    }
+    final pngFile = categoryIconFile(categoryName, emoji);
 
     return Container(
       width: size,

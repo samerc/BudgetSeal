@@ -9,6 +9,418 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webNavHome => 'Home';
+
+  @override
+  String get webNavBudget => 'Budget';
+
+  @override
+  String get webMenu => 'Menu';
+
+  @override
+  String get webShortcuts => 'Shortcuts';
+
+  @override
+  String get webSignOut => 'Sign out';
+
+  @override
+  String get webConnChecking => 'Connecting…';
+
+  @override
+  String get webConnOk => 'Connected to phone';
+
+  @override
+  String get webConnLost => 'Phone not reachable';
+
+  @override
+  String get webOffline =>
+      'Can\'t reach your phone. Keep BudgetSeal open with the Web Companion running, on the same Wi‑Fi.';
+
+  @override
+  String get webOfflineShort => 'Can\'t reach your phone';
+
+  @override
+  String get webAuthSubtitle => 'Enter the PIN you set on your phone';
+
+  @override
+  String get webAuthFoot =>
+      'Your data stays on your phone. This page reads it over your Wi‑Fi.';
+
+  @override
+  String get webAuthDelete => 'Delete digit';
+
+  @override
+  String webAuthWrongLeft(int n) {
+    return 'Wrong PIN · $n attempts left';
+  }
+
+  @override
+  String webAuthLocked(int n) {
+    return 'Too many attempts. Try again in $n min.';
+  }
+
+  @override
+  String get webAuthExpired => 'Your session ended. Enter your PIN again.';
+
+  @override
+  String get webErrRequest => 'Couldn\'t save. Check the values and try again.';
+
+  @override
+  String get webErrTooMany => 'Too many changes at once. Wait a moment.';
+
+  @override
+  String get webErrNoRate =>
+      'No exchange rate for this currency yet. Enter one.';
+
+  @override
+  String get webNeedAccount => 'Add an account first.';
+
+  @override
+  String get webSeeAll => 'See all';
+
+  @override
+  String get webRecent => 'Recent';
+
+  @override
+  String get webLoadMore => 'Load more';
+
+  @override
+  String get webDuplicate => 'Duplicate';
+
+  @override
+  String get webCsv => 'Export CSV';
+
+  @override
+  String get webCsvPreparing => 'Preparing the export…';
+
+  @override
+  String webCsvDone(int n) {
+    return '$n rows exported';
+  }
+
+  @override
+  String get webWholeYear => 'Whole year';
+
+  @override
+  String get webPrevYear => 'Previous year';
+
+  @override
+  String get webNextYear => 'Next year';
+
+  @override
+  String get webPrevMonth => 'Previous month';
+
+  @override
+  String get webNextMonth => 'Next month';
+
+  @override
+  String get webRta => 'Ready to assign';
+
+  @override
+  String get webRtaAssign => 'Assign';
+
+  @override
+  String get webNetWorth => 'Net worth';
+
+  @override
+  String webNetWorthCur(String cur) {
+    return 'Net worth · $cur';
+  }
+
+  @override
+  String get webEnvSpending => 'Spending';
+
+  @override
+  String get webEnvFlexible => 'Rollover';
+
+  @override
+  String get webEnvAvailable => 'Available';
+
+  @override
+  String get webEnvOverspent => 'Overspent';
+
+  @override
+  String webEnvSpent(String amount) {
+    return '$amount spent';
+  }
+
+  @override
+  String webEnvOf(String amount) {
+    return 'of $amount';
+  }
+
+  @override
+  String webEnvToGo(String amount) {
+    return '$amount to go';
+  }
+
+  @override
+  String get webEnvReached => 'Target reached';
+
+  @override
+  String webFundTitle(String name) {
+    return 'Fund $name';
+  }
+
+  @override
+  String get webFundToTarget => 'To target';
+
+  @override
+  String get webFundAll => 'All available';
+
+  @override
+  String webFundAvailable(String amount) {
+    return 'Ready to assign: $amount';
+  }
+
+  @override
+  String webFundOver(String amount) {
+    return 'Ready to assign would go to $amount';
+  }
+
+  @override
+  String get webFundOverMsg =>
+      'This is more than you have ready to assign. Fund anyway?';
+
+  @override
+  String get webFundAnyway => 'Fund anyway';
+
+  @override
+  String get webTxAddShort => 'Add';
+
+  @override
+  String get webTxNewExpense => 'New expense';
+
+  @override
+  String get webTxNewIncome => 'New income';
+
+  @override
+  String get webTxNewTransfer => 'New transfer';
+
+  @override
+  String get webTxEditExpense => 'Edit expense';
+
+  @override
+  String get webTxEditIncome => 'Edit income';
+
+  @override
+  String get webTxEditTransfer => 'Edit transfer';
+
+  @override
+  String get webTxEmptyTitle => 'No transactions here';
+
+  @override
+  String get webTxEmptySub => 'Add one, or pick another month.';
+
+  @override
+  String get webTxNoMatch => 'Nothing matches your search';
+
+  @override
+  String webTxSplit(int n) {
+    return 'Split · $n';
+  }
+
+  @override
+  String get webTxSplitHint => 'Items of a split are edited on your phone.';
+
+  @override
+  String get webSaveAddAnother => 'Save & add another';
+
+  @override
+  String get webFormTitle => 'Title';
+
+  @override
+  String get webFormName => 'Name';
+
+  @override
+  String get webFormNoCategory => 'No category';
+
+  @override
+  String webFormInCurrency(String cur) {
+    return 'In $cur, the source account’s currency';
+  }
+
+  @override
+  String webFormRateLabel(String cur, String base) {
+    return 'Rate: 1 $cur = ? $base';
+  }
+
+  @override
+  String get webFormRateAuto => 'Leave empty to use the phone\'s latest rate';
+
+  @override
+  String webFormReceived(String cur) {
+    return 'Amount received in $cur';
+  }
+
+  @override
+  String get webFormRepeats => 'Repeats';
+
+  @override
+  String get webFormNextDue => 'Next date';
+
+  @override
+  String get webFormFirstDate => 'First date';
+
+  @override
+  String get webValReceived => 'Enter the amount received';
+
+  @override
+  String get webValRate => 'Enter a valid rate';
+
+  @override
+  String get webValCurrency => 'Use a 3-letter currency code, like USD';
+
+  @override
+  String get webAcctAdd => 'Add account';
+
+  @override
+  String get webAcctNew => 'New account';
+
+  @override
+  String get webAcctNameHint => 'e.g. Main bank';
+
+  @override
+  String get webAcctOpening => 'Current balance';
+
+  @override
+  String get webAcctOpeningHint => 'Negative for a card you owe on';
+
+  @override
+  String get webAcctTravel => 'Travel wallet';
+
+  @override
+  String get webAcctGroupBank => 'Bank accounts';
+
+  @override
+  String get webAcctGroupCash => 'Cash';
+
+  @override
+  String get webAcctGroupCredit => 'Credit cards';
+
+  @override
+  String get webAcctGroupWallet => 'Digital wallets';
+
+  @override
+  String get webCatAdd => 'Add category';
+
+  @override
+  String get webCatNew => 'New category';
+
+  @override
+  String get webCatEdit => 'Edit category';
+
+  @override
+  String get webCatNameHint => 'e.g. Groceries';
+
+  @override
+  String get webCatParent => 'Inside';
+
+  @override
+  String get webCatTopLevel => 'Main category';
+
+  @override
+  String get webCatParentLocked =>
+      'It has subcategories, so it stays a main category.';
+
+  @override
+  String get webCatIcon => 'Emoji';
+
+  @override
+  String get webCatColor => 'Color';
+
+  @override
+  String get webCatCustomColor => 'Custom color';
+
+  @override
+  String webCatSubs(int n) {
+    return '$n subcategories';
+  }
+
+  @override
+  String get webCatNoSubs => 'No subcategories';
+
+  @override
+  String get webRecAdd => 'Add recurring';
+
+  @override
+  String get webRecNew => 'New recurring item';
+
+  @override
+  String get webRecEdit => 'Edit recurring item';
+
+  @override
+  String get webRecEmpty => 'No recurring items yet';
+
+  @override
+  String get webRecEmptySub =>
+      'Rent, salary, savings transfers: they post on their own.';
+
+  @override
+  String get webRecTitleHint => 'e.g. Rent';
+
+  @override
+  String webRecNext(String date) {
+    return 'next $date';
+  }
+
+  @override
+  String get webRecOn => 'Active';
+
+  @override
+  String get webRecOff => 'Paused';
+
+  @override
+  String get webRecPaused => 'Paused';
+
+  @override
+  String get webRecPausedToast => 'Paused';
+
+  @override
+  String get webRecResumed => 'Active again';
+
+  @override
+  String get webRecPastHint =>
+      'A past date posts the missed occurrences the next time the app opens.';
+
+  @override
+  String get webSubAdd => 'Add subscription';
+
+  @override
+  String get webSubNew => 'New subscription';
+
+  @override
+  String get webSubEdit => 'Edit subscription';
+
+  @override
+  String get webSubEmptySub =>
+      'Track streaming, apps and memberships, with their price changes.';
+
+  @override
+  String get webSubTitleHint => 'e.g. Netflix';
+
+  @override
+  String get webSubMonthly => 'Per month';
+
+  @override
+  String webSubYearly(String amount) {
+    return '$amount per year';
+  }
+
+  @override
+  String get webRepEmpty => 'Nothing recorded this month';
+
+  @override
+  String get webRepEmptySub => 'Pick another month with the arrows.';
+
+  @override
+  String get webShortcutPages => 'Go to a page in the menu';
+
+  @override
+  String get wcStartFailed =>
+      'Couldn\'t start. Turn Wi‑Fi off and on, then try again.';
+
+  @override
   String billItemN(int n) {
     return 'Item $n';
   }
@@ -103,12 +515,7 @@ class SEn extends S {
   }
 
   @override
-  String webEnvBalanceOfTarget(String balance, String target) {
-    return '$balance of $target';
-  }
-
-  @override
-  String get webShortcutRefresh => 'Refresh current page';
+  String get webShortcutRefresh => 'Reload from the phone';
 
   @override
   String get currencyNameUsd => 'US Dollar';
@@ -4339,161 +4746,46 @@ class SEn extends S {
       'BudgetSeal Web Companion server is running';
 
   @override
-  String get webAuthLockout => 'Too many attempts. Try again later.';
-
-  @override
   String get webAuthIncorrect => 'Incorrect PIN';
-
-  @override
-  String get webServerUnreachable => 'Server unreachable';
-
-  @override
-  String get webUnexpectedResponse => 'Unexpected server response';
-
-  @override
-  String get webUnexpectedError => 'Unexpected error';
 
   @override
   String get webUndo => 'Undo';
 
   @override
-  String get webSaving => 'Saving…';
-
-  @override
-  String get webDashNoAccounts => 'No accounts yet.';
-
-  @override
-  String get webDashUnallocated => 'Unallocated';
-
-  @override
-  String get webDashNoEnvelopes => 'No envelopes yet.';
-
-  @override
-  String get webDashFallbackTx => 'Transaction';
-
-  @override
-  String get webDashNoTxTitle => 'No transactions yet';
-
-  @override
-  String get webDashNoTxSub => 'Add your first transaction to get started';
-
-  @override
-  String get webDashSeeAll => 'See all';
-
-  @override
-  String get webDashRecent => 'Recent Transactions';
-
-  @override
-  String get webDashViewAll => 'View all';
-
-  @override
   String get webTxNoRate => 'No rate';
 
   @override
-  String get webTxNoFound => 'No transactions found';
+  String get webTxAdd => 'Add transaction';
 
   @override
-  String get webTxCsv => 'CSV';
-
-  @override
-  String get webTxCsvTooltip => 'Export CSV';
-
-  @override
-  String get webTxAdd => '+ Add';
-
-  @override
-  String get webTxSearch => 'Search by title…';
-
-  @override
-  String get webTxThDate => 'Date';
-
-  @override
-  String get webTxThType => 'Type';
-
-  @override
-  String get webTxThTitle => 'Title';
-
-  @override
-  String get webTxThAccount => 'Account';
-
-  @override
-  String get webTxThCategory => 'Category';
-
-  @override
-  String get webTxThAmount => 'Amount';
-
-  @override
-  String get webTxPrev => '← Prev';
-
-  @override
-  String webTxPageN(int page) {
-    return 'Page $page';
-  }
-
-  @override
-  String get webTxNext => 'Next →';
-
-  @override
-  String get webTxCsvExported => 'CSV exported';
-
-  @override
-  String get webTxEdit => 'Edit';
-
-  @override
-  String get webTxDel => 'Del';
+  String get webTxSearch => 'Search titles and notes';
 
   @override
   String get webFormType => 'Type';
 
   @override
-  String get webFormFromAccount => 'From Account';
+  String get webFormFromAccount => 'From account';
 
   @override
   String get webFormAccount => 'Account';
 
   @override
-  String get webFormSelectAccount => 'Select account';
-
-  @override
-  String get webFormToAccount => 'To Account';
+  String get webFormToAccount => 'To account';
 
   @override
   String get webFormCategory => 'Category';
 
   @override
-  String get webFormNone => '— None —';
-
-  @override
   String get webFormAmount => 'Amount';
-
-  @override
-  String get webFormAmountPlaceholder => '0.00';
 
   @override
   String get webFormCurrency => 'Currency';
 
   @override
-  String get webFormCurrencyPlaceholder => 'USD';
-
-  @override
-  String get webFormExchangeRate => 'Exchange Rate';
-
-  @override
-  String get webFormRatePlaceholder => 'Rate to base currency';
-
-  @override
   String get webFormDate => 'Date';
 
   @override
-  String get webFormTitleNote => 'Title / Note';
-
-  @override
   String get webFormOptional => 'Optional';
-
-  @override
-  String webFormRateHint(String txCur, String baseCur) {
-    return '1 $txCur = ? $baseCur';
-  }
 
   @override
   String get webValSelectAccount => 'Select an account';
@@ -4505,16 +4797,10 @@ class SEn extends S {
   String get webValSelectDest => 'Select destination account';
 
   @override
-  String get webValAccountsDiffer => 'From and To accounts must differ';
-
-  @override
-  String get webModalAddTx => 'Add Transaction';
+  String get webValAccountsDiffer => 'Pick two different accounts';
 
   @override
   String get webToastTxAdded => 'Transaction added';
-
-  @override
-  String get webModalEditTx => 'Edit Transaction';
 
   @override
   String get webToastTxUpdated => 'Transaction updated';
@@ -4523,74 +4809,10 @@ class SEn extends S {
   String get webToastTxDeleted => 'Transaction deleted';
 
   @override
-  String get webToastNoLines => 'No line details available';
+  String get webCatEmptyTitle => 'No categories here';
 
   @override
-  String webTxLinesHeader(int count) {
-    return 'Transaction Lines ($count)';
-  }
-
-  @override
-  String get webThLineAmount => 'Amount';
-
-  @override
-  String get webThLineCurrency => 'Currency';
-
-  @override
-  String get webThLineCategory => 'Category';
-
-  @override
-  String get webThLineAccount => 'Account';
-
-  @override
-  String get webThLineNote => 'Note';
-
-  @override
-  String get webThLineRate => 'Rate';
-
-  @override
-  String get webCatSubSingular => '1 sub-category';
-
-  @override
-  String webCatSubPlural(int count) {
-    return '$count sub-categories';
-  }
-
-  @override
-  String get webCatSectionExpense => 'Expense';
-
-  @override
-  String get webCatSectionIncome => 'Income';
-
-  @override
-  String get webCatEmptyTitle => 'No categories yet';
-
-  @override
-  String get webCatEmptySub => 'Add your first category to get started';
-
-  @override
-  String get webCatFormName => 'Name';
-
-  @override
-  String get webCatFormNameHint => 'e.g. Groceries';
-
-  @override
-  String get webCatFormParent => 'Parent Category';
-
-  @override
-  String get webCatFormNone => '— None (top-level) —';
-
-  @override
-  String get webCatFormIcon => 'Icon (emoji)';
-
-  @override
-  String get webCatFormColor => 'Color';
-
-  @override
-  String get webCatFormType => 'Transaction Type';
-
-  @override
-  String get webModalAddCat => 'Add Category';
+  String get webCatEmptySub => 'Categories group your spending and income.';
 
   @override
   String get webValNameRequired => 'Name is required';
@@ -4599,95 +4821,39 @@ class SEn extends S {
   String get webToastCatAdded => 'Category added';
 
   @override
-  String get webToastCatNotFound => 'Category not found';
-
-  @override
-  String get webModalEditCat => 'Edit Category';
-
-  @override
-  String get webToastCatUpdated => 'Category updated';
+  String get webToastCatUpdated => 'Category saved';
 
   @override
   String get webAcctEmptyTitle => 'No accounts yet';
 
   @override
-  String get webAcctEmptySub => 'Add your first account to get started';
+  String get webAcctEmptySub =>
+      'Add the accounts you pay from to start tracking.';
 
   @override
-  String get webAcctTypeBank => 'Bank Accounts';
+  String get webAcctTypeBank => 'Bank';
 
   @override
   String get webAcctTypeCash => 'Cash';
 
   @override
-  String get webAcctTypeCredit => 'Credit Cards';
+  String get webAcctTypeCredit => 'Credit';
 
   @override
-  String get webAcctTypeWallet => 'Wallets';
-
-  @override
-  String webAcctNetWorth(String cur) {
-    return 'Net Worth · $cur';
-  }
-
-  @override
-  String get webAcctCountSingular => '1 account';
-
-  @override
-  String webAcctCountPlural(int count) {
-    return '$count accounts';
-  }
-
-  @override
-  String get webAcctTxEmpty => 'No transactions for this account';
-
-  @override
-  String get webAcctBack => '← Back';
-
-  @override
-  String get webAcctFormNameHint => 'e.g. Checking';
-
-  @override
-  String get webAcctFormType => 'Type';
-
-  @override
-  String get webAcctFormTypeBank => 'Bank';
-
-  @override
-  String get webAcctFormTypeCash => 'Cash';
-
-  @override
-  String get webAcctFormTypeCredit => 'Credit';
-
-  @override
-  String get webAcctFormTypeWallet => 'Wallet';
-
-  @override
-  String get webAcctFormOpening => 'Opening Balance';
-
-  @override
-  String get webModalAddAcct => 'Add Account';
+  String get webAcctTypeWallet => 'Wallet';
 
   @override
   String get webToastAcctAdded => 'Account added';
 
   @override
-  String get webEnvEmptyTitle => 'No envelopes';
+  String get webEnvEmptyTitle => 'No envelopes yet';
 
   @override
-  String get webEnvEmptySub => 'Envelopes are managed in the BudgetSeal app.';
+  String get webEnvEmptySub =>
+      'Create envelopes in the app\'s Budget tab, then fund them from here.';
 
   @override
-  String get webEnvUnallocated => 'Unallocated:';
-
-  @override
-  String get webEnvFund => '+ Fund';
-
-  @override
-  String get webModalFund => 'Fund Envelope';
-
-  @override
-  String get webFormAmountToFund => 'Amount to Fund';
+  String get webEnvFund => 'Fund';
 
   @override
   String get webFormNote => 'Note';
@@ -4696,68 +4862,23 @@ class SEn extends S {
   String get webToastEnvFunded => 'Envelope funded';
 
   @override
-  String get webBtnFundConfirm => 'Fund';
-
-  @override
-  String get webRecurringEmpty => 'No recurring transactions';
-
-  @override
-  String get webThService => 'Service';
-
-  @override
-  String get webThFrequency => 'Frequency';
-
-  @override
-  String get webThNextDue => 'Next Due';
-
-  @override
-  String get webThOn => 'On';
-
-  @override
-  String get webToggleEnabled => 'Enabled';
-
-  @override
-  String get webToggleDisabled => 'Disabled';
-
-  @override
-  String get webFormTitleLabel => 'Title';
-
-  @override
-  String get webFormTitleHint => 'e.g. Netflix';
-
-  @override
-  String get webFormFrequency => 'Frequency';
-
-  @override
   String get webFormEvery => 'Every';
-
-  @override
-  String get webFormStartDate => 'Start Date';
-
-  @override
-  String get webModalAddRecurring => 'Add Recurring';
 
   @override
   String get webToastRecurringAdded => 'Recurring added';
 
   @override
-  String get webModalEditRecurring => 'Edit Recurring';
-
-  @override
   String get webToastUpdated => 'Updated';
 
   @override
-  String get webToastNotFound => 'Not found';
+  String get webValSelectStartDate => 'Pick a date';
 
   @override
-  String get webValSelectStartDate => 'Select a start date';
-
-  @override
-  String get webConfirmDeleteRecurring => 'Delete Recurring';
+  String get webConfirmDeleteRecurring => 'Delete this recurring item?';
 
   @override
   String get webConfirmDeleteRecurringMsg =>
-      'This recurring transaction will be permanently deleted.';
+      'It stops posting. Transactions it already posted stay.';
 
   @override
   String get webToastDeleted => 'Deleted';
@@ -4766,39 +4887,17 @@ class SEn extends S {
   String get webSubEmpty => 'No subscriptions yet';
 
   @override
-  String get webModalAddSub => 'Add Subscription';
-
-  @override
   String get webToastSubAdded => 'Subscription added';
 
   @override
-  String get webModalEditSub => 'Edit Subscription';
+  String get webSubPriceHint => 'A new amount is added to the price history.';
 
   @override
-  String get webFormNewAmount => 'New Amount';
-
-  @override
-  String get webSubPriceHint =>
-      'Changing the amount will add a price history entry.';
-
-  @override
-  String get webConfirmDeleteSub => 'Delete Subscription';
+  String get webConfirmDeleteSub => 'Delete this subscription?';
 
   @override
   String get webConfirmDeleteSubMsg =>
-      'This subscription will be permanently deleted.';
-
-  @override
-  String get webReportsYear => 'Year';
-
-  @override
-  String get webReportsMonth => 'Month';
-
-  @override
-  String get webReportsLoad => 'Load';
-
-  @override
-  String get webReportsSelectPrompt => 'Select a period and click Load.';
+      'It stops posting. Payments already recorded stay.';
 
   @override
   String get webStatIncome => 'Income';
@@ -4810,31 +4909,31 @@ class SEn extends S {
   String get webStatNet => 'Net';
 
   @override
-  String get webStatSavingsRate => 'Savings Rate';
+  String get webStatSavingsRate => 'Savings rate';
 
   @override
-  String get webStatAvgDaily => 'Avg. Daily Spend';
+  String get webStatAvgDaily => 'Average per day';
 
   @override
   String get webStatTransactions => 'Transactions';
 
   @override
-  String get webReportDailyCashflow => 'Daily Cashflow';
+  String get webReportDailyCashflow => 'Day by day';
 
   @override
-  String get webReportSpendingCat => 'Spending by Category';
+  String get webReportSpendingCat => 'Spending by category';
 
   @override
-  String get webReportNoExpense => 'No expense data';
+  String get webReportNoExpense => 'No spending this month';
 
   @override
-  String get webReportIncomeCat => 'Income by Category';
+  String get webReportIncomeCat => 'Income by category';
 
   @override
-  String get webReportNoIncome => 'No income data';
+  String get webReportNoIncome => 'No income this month';
 
   @override
-  String get webReportTopExpenses => 'Top Expenses';
+  String get webReportTopExpenses => 'Biggest expenses';
 
   @override
   String get webChartIncome => 'Income';
@@ -4843,7 +4942,7 @@ class SEn extends S {
   String get webChartExpense => 'Expense';
 
   @override
-  String get webShortcutsTitle => 'Keyboard Shortcuts';
+  String get webShortcutsTitle => 'Keyboard shortcuts';
 
   @override
   String get webShortcutNewTx => 'New transaction';
@@ -4852,7 +4951,7 @@ class SEn extends S {
   String get webShortcutSearch => 'Search transactions';
 
   @override
-  String get webShortcutClose => 'Close modal / unfocus';
+  String get webShortcutClose => 'Close the dialog';
 
   @override
   String get webShortcutHelp => 'Show this help';

@@ -36,6 +36,16 @@ void setNumberFormatPrefs(NumberFormatPrefs prefs) {
   _numberFormat = prefs;
 }
 
+/// The current amount-format settings, for clients that format amounts
+/// themselves (the Web Companion mirrors [formatAmount] in JavaScript).
+Map<String, Object> numberFormatSpec() => {
+      'thousands': _numberFormat.thousands.char,
+      'decimal': _numberFormat.decimal.char,
+      'parens': _numberFormat.negative == NegativeFormat.parentheses,
+      'arabicDigits': _useArabicDigits,
+      'symbols': {...defaultCurrencySymbols, ..._userOverrides},
+    };
+
 /// The user's preferred decimal separator ('.' or ','), for display only
 /// (e.g. the calculator's decimal key). Parsing always uses '.'.
 String get decimalSeparatorChar =>

@@ -1,1455 +1,1939 @@
 'use strict';
+// BudgetSeal Web Companion — single-page app served by the phone.
+// No inline handlers anywhere (the CSP forbids inline scripts): clicks are
+// routed through data-action attributes, forms wire their own listeners.
+
+(() => {
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
-let _strings = {};
-let _locale = localStorage.getItem('pp_locale') || 'en';
 
-/** Lookup a translated string. Supports {param} substitution.
- *  t('web_tx_page_n', { page: 3 }) → "Page 3"
- */
+let STR = {};
+let LOCALE = 'en';
+
+/** Translated string with {param} substitution; the key itself when missing. */
 function t(key, params) {
-  let s = _strings[key] || key;
-  if (params) {
-    for (const [k, v] of Object.entries(params)) {
-      s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
-    }
-  }
+  let s = STR[key] ?? key;
+  if (params) for (const [k, v] of Object.entries(params)) s = s.split(`{${k}}`).join(String(v));
   return s;
 }
 
-async function loadLocale(lang) {
+async function loadStrings(lang) {
   try {
-    const res = await fetch(`/assets/locale_${lang}.json`);
-    if (res.ok) {
-      _strings = await res.json();
-      _locale = lang;
-      localStorage.setItem('pp_locale', lang);
-    }
-  } catch (_) {
-    // fallback: keep current strings
-  }
+    const r = await fetch(`/assets/locale_${lang}.json`);
+    if (r.ok) STR = await r.json();
+  } catch (_) { /* keep English fallbacks in the markup */ }
 }
 
-// ── State ─────────────────────────────────────────────────────────────────────
-const state = {
-  token: sessionStorage.getItem('pp_token') || null,
-  currentRoute: location.hash || '#/',
-  theme: localStorage.getItem('pp_theme') || 'system',
+function applyI18n(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll('[data-i18n-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nLabel));
+    el.title = t(el.dataset.i18nLabel);
+  });
+}
+
+/** Intl locale: Western digits unless the phone uses Arabic-Indic ones. */
+function intlLocale() {
+  return LOCALE === 'ar' && !NUM.arabicDigits ? 'ar-u-nu-latn' : LOCALE;
+}
+
+// ── Config from the phone (language, accent, number format) ──────────────────
+
+const NUM = {
+  thousands: ',', decimal: '.', parens: false, arabicDigits: false,
+  symbols: { USD: '$', EUR: '€', GBP: '£', JPY: '¥' },
 };
-const cache = {};
-let _txPage = 1;
-let _txFilter = '';
-let _txSearch = '';
-let _txYear = new Date().getFullYear();
-let _txMonth = new Date().getMonth(); // 0-indexed; -1 = all
-let _reportChart = null;
-let _reportCatChart = null;
-let _connInterval = null;
+
+async function loadConfig() {
+  let cfg = null;
+  try {
+    const r = await fetch('/auth/config');
+    if (r.ok) cfg = await r.json();
+  } catch (_) { /* offline: defaults */ }
+  LOCALE = cfg?.locale || 'en';
+  document.documentElement.lang = LOCALE;
+  document.documentElement.dir = LOCALE === 'ar' ? 'rtl' : 'ltr';
+  if (cfg?.accent) {
+    const s = document.documentElement.style;
+    s.setProperty('--acc-deep', safeHex(cfg.accent.deep));
+    s.setProperty('--acc-bright', safeHex(cfg.accent.bright));
+    s.setProperty('--acc-lfill', safeHex(cfg.accent.lightFill));
+    s.setProperty('--acc-dfill', safeHex(cfg.accent.darkFill));
+  }
+  if (cfg?.number) Object.assign(NUM, cfg.number);
+  await loadStrings(LOCALE);
+  applyI18n();
+}
+
+// ── Formatting (mirrors formatAmount() in the app) ───────────────────────────
+
+const ZERO_DEC = new Set(['BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF']);
+const THREE_DEC = new Set(['BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND']);
+const SPACED = new Set(['ل.ل', 'د.إ', 'CHF', '﷼']);
+
+function decimalsFor(cur) {
+  const c = (cur || '').toUpperCase();
+  return ZERO_DEC.has(c) ? 0 : THREE_DEC.has(c) ? 3 : 2;
+}
+
+function numStr(abs, d) {
+  const [i, f] = abs.toFixed(d).split('.');
+  let s = i.replace(/\B(?=(\d{3})+(?!\d))/g, NUM.thousands) + (f ? NUM.decimal + f : '');
+  if (NUM.arabicDigits) s = s.replace(/[0-9]/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
+  return s;
+}
+function wrapNeg(s, neg) { return !neg ? s : NUM.parens ? `(${s})` : `-${s}`; }
+function needsSpace(sym) {
+  return SPACED.has(sym) || (sym.length > 2 && !sym.startsWith('$') && !sym.startsWith('€'));
+}
+
+/**
+ * "$1,234.50", "ل.ل -1,200,000", "(€5.00)" — the user's separators. The
+ * result is a left-to-right isolate (LRI…PDI), with a mark after an Arabic
+ * symbol, so the sign and digits never get reordered on an Arabic page or
+ * next to an Arabic currency symbol.
+ */
+function fmt(value, cur) {
+  const v = Number(value) || 0;
+  const d = decimalsFor(cur);
+  const neg = v < 0 && Math.abs(v) >= 0.5 * 10 ** -d;
+  const s = numStr(Math.abs(v), d);
+  let out;
+  if (!cur) out = wrapNeg(s, neg);
+  else {
+    const sym = NUM.symbols?.[cur];
+    const mark = sym && /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/.test(sym) ? '\u200E' : '';
+    if (sym) out = needsSpace(sym) ? `${sym}${mark} ${wrapNeg(s, neg)}` : wrapNeg(sym + mark + s, neg);
+    else out = `${cur} ${wrapNeg(s, neg)}`;
+  }
+  return `\u2066${out}\u2069`;
+}
+
+/** Signed by type: income "+$5", expense "-$5", transfer "$5". */
+function fmtSigned(amount, cur, type) {
+  const abs = Math.abs(Number(amount) || 0);
+  if (type === 'expense') return fmt(-abs, cur);
+  if (type === 'income') return `\u2066+${fmt(abs, cur)}\u2069`;
+  return fmt(abs, cur);
+}
+
+function fmtPlain(v, d = 2) { return wrapNeg(numStr(Math.abs(v), d), v < 0); }
+
+function toDate(iso) { return iso instanceof Date ? iso : new Date(iso); }
+
+function fmtDate(iso, withYear) {
+  const d = toDate(iso);
+  if (isNaN(d)) return '';
+  const now = new Date();
+  return d.toLocaleDateString(intlLocale(), {
+    day: 'numeric', month: 'short',
+    year: withYear || d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  });
+}
+
+/** Day header: Today / Yesterday / "Monday 28 September". */
+function fmtDay(iso) {
+  const d = toDate(iso);
+  const today = dayKey(new Date());
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (dayKey(d) === today) return t('common_today');
+  if (dayKey(d) === dayKey(y)) return t('common_yesterday');
+  return d.toLocaleDateString(intlLocale(), {
+    weekday: 'long', day: 'numeric', month: 'long',
+    year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+  });
+}
+
+/** Local calendar day "YYYY-MM-DD" (never UTC: toISOString shifts the day). */
+function dayKey(d = new Date()) {
+  d = toDate(d);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function monthLabel(y, m) {
+  return new Date(y, m, 1).toLocaleDateString(intlLocale(), { month: 'long', year: 'numeric' });
+}
+function monthShort(m) {
+  return new Date(2024, m, 1).toLocaleDateString(intlLocale(), { month: 'short' });
+}
+
+function freqLabel(f, n) {
+  n = Number(n) || 1;
+  if (n === 1) return t(`freq_${f}`);
+  const k = { daily: 'freq_every_n_days', weekly: 'freq_every_n_weeks', monthly: 'freq_every_n_months', yearly: 'freq_every_n_years' }[f];
+  return k ? t(k, { n }) : f;
+}
+
+/** Monthly equivalent of a recurring amount (for subscription totals). */
+function perMonth(r) {
+  const n = Math.max(1, Number(r.interval) || 1);
+  const a = Number(r.amount) || 0;
+  return { daily: a * 30.44, weekly: a * 4.345, monthly: a, yearly: a / 12 }[r.frequency] / n || 0;
+}
+
+/** Parses "1,234.56", "1.234,56", "12,50" like parseLooseAmount() in the app. */
+function parseAmount(s) {
+  s = String(s ?? '').trim().replace(/\s/g, '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  if (!s) return NaN;
+  const lastComma = s.lastIndexOf(','), lastDot = s.lastIndexOf('.');
+  if (lastComma > -1 && lastDot > -1) {
+    s = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  } else if (lastComma > -1) {
+    const tail = s.length - lastComma - 1;
+    s = (tail === 3 && s.indexOf(',') === lastComma && s.length > 4) ? s.replace(',', '') : s.replace(',', '.');
+  }
+  const v = Number(s);
+  return Number.isFinite(v) ? v : NaN;
+}
+
+function amountInputValue(v, cur) {
+  if (v == null || v === '') return '';
+  return Number(v).toFixed(decimalsFor(cur)).replace(/\.?0+$/, m => (m.startsWith('.') ? '' : m)).replace('.', NUM.decimal);
+}
+
+// ── Escaping & colors ─────────────────────────────────────────────────────────
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeHex(v) { return /^#[0-9A-Fa-f]{6}$/.test(v || '') ? v : /^#[0-9A-Fa-f]{3}$/.test(v || '') ? '#' + v.slice(1).split('').map(c => c + c).join('') : '#90A4AE'; }
+
+function isDark() {
+  const th = document.documentElement.dataset.theme;
+  return th === 'dark' || (th !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+function mix(hex, target, a) {
+  const n = parseInt(safeHex(hex).slice(1), 16);
+  const r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const m = c => Math.round(c * (1 - a) + target * a);
+  return `rgb(${m(r)},${m(g)},${m(b)})`;
+}
+/** AppColors.pastel(): lighten in light mode, darken in dark mode. */
+function pastel(hex, light = 0.55, dark = 0.35) { return isDark() ? mix(hex, 0, dark) : mix(hex, 255, light); }
+/** Glyph color on a pastel fill (the inverse direction). */
+function pastelInk(hex) { return isDark() ? mix(hex, 255, 0.5) : mix(hex, 0, 0.6); }
+
+function isEmoji(s) { return !!s && s !== 'category' && [...s].length <= 3 && /[^\x00-\x7F]/.test(s); }
+
+/** The app's category icon: its PNG, else the emoji, else the first letter. */
+function catChip(c, cls = '') {
+  if (!c || (!c.name && !c.categoryName)) {
+    return `<span class="chip-icon ${cls}" style="background:var(--container);color:var(--text-2)">${IC.tag}</span>`;
+  }
+  const name = c.name ?? c.categoryName;
+  const icon = c.icon ?? c.categoryIcon;
+  const file = c.iconFile ?? c.categoryIconFile;
+  const color = safeHex(c.colorHex ?? c.categoryColor);
+  let inner;
+  if (file) inner = `<img src="/icons/${encodeURIComponent(file)}" alt="" loading="lazy">`;
+  else if (isEmoji(icon)) inner = esc(icon);
+  else inner = `<span style="color:${pastelInk(color)}">${esc((name || '?').charAt(0).toUpperCase())}</span>`;
+  return `<span class="chip-icon ${cls}" style="background:${pastel(color)}">${inner}</span>`;
+}
+
+function transferChip(cls = '') {
+  return `<span class="chip-icon ${cls}" style="background:var(--accent-fill);color:var(--accent)">${IC.transfer}</span>`;
+}
+
+// ── Icons (inline SVG, stroke = currentColor) ────────────────────────────────
+
+const svg = (p, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const IC = {
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  edit: svg('<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
+  trash: svg('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'),
+  copy: svg('<rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
+  download: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'),
+  search: svg('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'),
+  left: svg('<path d="m15 18-6-6 6-6"/>'),
+  right: svg('<path d="m9 18 6-6-6-6"/>'),
+  back: svg('<path d="M19 12H5M12 19l-7-7 7-7"/>'),
+  transfer: svg('<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>'),
+  tag: svg('<path d="M12 2H2v10l9.3 9.3a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><path d="M7 7h.01"/>'),
+  check: svg('<path d="M20 6 9 17l-5-5"/>'),
+  alert: svg('<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>'),
+  envelope: svg('<rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>'),
+  wallet: svg('<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>'),
+  bank: svg('<path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/>'),
+  cash: svg('<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>'),
+  card: svg('<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>'),
+  plane: svg('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'),
+  repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+  receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
+  chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
+};
+const TYPE_ICON = { bank: IC.bank, cash: IC.cash, credit: IC.card, wallet: IC.wallet };
 
 // ── API ───────────────────────────────────────────────────────────────────────
+
+const state = {
+  token: sessionStorage.getItem('bs_token'),
+  route: location.hash || '#/',
+  theme: lsGet('bs_theme') || 'system',
+  baseCurrency: 'USD',
+  lastRender: 0,
+};
+const cache = {};
+
+function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) { /* private mode */ } }
+
+/** JSON request; shows a localized toast and returns null on any failure. */
 async function api(path, opts = {}) {
   const hasBody = opts.body != null;
   const headers = {
     ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
-    ...(opts.headers || {}),
   };
-
   let res;
   try {
-    res = await fetch(path, { ...opts, headers });
+    res = await fetch(path, { ...opts, headers, body: hasBody ? JSON.stringify(opts.body) : undefined });
   } catch (_) {
-    toast(t('web_server_unreachable'), true);
+    setConnection(false);
+    if (!opts.quiet) toast(t('web_offline_short'), true);
     return null;
   }
-
-  if (res.status === 401) {
-    state.token = null;
-    sessionStorage.removeItem('pp_token');
-    showAuthScreen();
-    return null;
-  }
+  setConnection(true);
+  if (res.status === 401) { sessionExpired(); return null; }
   if (!res.ok) {
+    if (opts.quiet) return null;
     const err = await res.json().catch(() => ({}));
-    // Show user-friendly message; log technical details to console only
-    const msg = err.error || '';
-    if (res.status >= 500) {
-      toast(t('common_something_went_wrong'), true);
-    } else if (res.status === 429) {
-      toast('Too many requests. Please wait a moment.', true);
-    } else if (res.status === 413) {
-      toast('Request too large. Try reducing the data.', true);
-    } else {
-      toast(msg || 'Request failed', true);
-    }
+    if (res.status === 429) toast(t('web_err_too_many'), true);
+    else if (res.status >= 500) toast(t('common_something_went_wrong'), true);
+    else if (/exchange rate/i.test(err.error || '')) toast(t('web_err_no_rate'), true);
+    else toast(LOCALE === 'en' && err.error ? err.error : t('web_err_request'), true);
     return null;
   }
+  try { return await res.json(); } catch (_) { return {}; }
+}
 
-  try {
-    return await res.json();
-  } catch (_) {
-    toast(t('web_unexpected_response'), true);
-    return null;
+async function refs(force) {
+  if (force || !cache.accounts || !cache.categories) {
+    const [a, c] = await Promise.all([api('/api/accounts', { quiet: true }), api('/api/categories', { quiet: true })]);
+    if (a) cache.accounts = a.items || [];
+    if (c) cache.categories = c.items || [];
   }
+  return { accounts: cache.accounts || [], categories: cache.categories || [] };
 }
+function invalidate() { for (const k of Object.keys(cache)) delete cache[k]; }
 
-// ── Formatters ────────────────────────────────────────────────────────────────
-function fmt(amount, currency) {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return `${currency || ''} ${Number(amount).toFixed(2)}`;
-  }
-}
+// ── Toast & dialogs ───────────────────────────────────────────────────────────
 
-function fmtDate(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleDateString(_locale || 'en', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function todayISO() { return new Date().toISOString().slice(0, 10); }
-
-function fmtFreq(f, interval) {
-  const map = { daily: t('freq_daily'), weekly: t('freq_weekly'), monthly: t('freq_monthly'), yearly: t('freq_yearly') };
-  if (!interval || interval === 1) return map[f] || f;
-  const pluralKeys = { daily: 'freq_every_n_days', weekly: 'freq_every_n_weeks', monthly: 'freq_every_n_months', yearly: 'freq_every_n_years' };
-  return pluralKeys[f] ? t(pluralKeys[f], { n: interval }) : `${interval} ${f}`;
-}
-
-function _monthNames() { return [t('month_jan'),t('month_feb'),t('month_mar'),t('month_apr'),t('month_may'),t('month_jun'),t('month_jul'),t('month_aug'),t('month_sep'),t('month_oct'),t('month_nov'),t('month_dec')]; }
-
-// ── Escape / helpers ──────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-function safeHex(v) {
-  return /^#[0-9A-Fa-f]{3,8}$/.test(v) ? v : '#607D8B';
-}
-// Safe array accessor — prevents crash if API response is missing 'items'
-function items(d) { return d?.items ?? []; }
-
-function setContent(html) { document.getElementById('content').innerHTML = html; }
-
-function skeleton(rows = 5) {
-  const lines = Array.from({ length: rows }, () =>
-    `<div class="skel-row"><div class="skel-cell" style="width:${60 + Math.random() * 30}%"></div><div class="skel-cell" style="width:${15 + Math.random() * 15}%"></div></div>`
-  ).join('');
-  return `<div class="skeleton-wrap">${lines}</div>`;
-}
-
-function loading() {
-  return `<div class="loading"><div class="spinner"></div>${esc(t('common_loading'))}</div>`;
-}
-
-function empty(title, sub) {
-  return `<div class="empty-state">
-    <div class="empty-state-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" x2="12" y1="12" y2="16"/><line x1="10" x2="14" y1="14" y2="14"/></svg></div>
-    <div class="empty-state-title">${esc(title)}</div>
-    ${sub ? `<p class="text-secondary text-sm">${esc(sub)}</p>` : ''}
-  </div>`;
-}
-
-function typeBadge(type) {
-  return ({
-    income: `<span class="badge badge-income">${esc(t('type_income'))}</span>`,
-    expense: `<span class="badge badge-expense">${esc(t('type_expense'))}</span>`,
-    transfer: `<span class="badge badge-transfer">${esc(t('type_transfer'))}</span>`,
-  })[type] || `<span class="badge">${esc(type)}</span>`;
-}
-
-function amtEl(amount, currency, type) {
-  const cls = type === 'income' ? 'amount-income' : type === 'expense' ? 'amount-expense' : 'amount-neutral';
-  const sign = type === 'income' ? '+' : type === 'expense' ? '−' : '';
-  return `<span class="${cls}">${sign}${fmt(amount, currency)}</span>`;
-}
-
-function invalidate(...keys) { keys.forEach(k => delete cache[k]); }
-function invalidateAll() { Object.keys(cache).forEach(k => delete cache[k]); }
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function toast(msg, isErr = false, undoFn = null) {
-  document.querySelectorAll('.toast').forEach(t => t.remove());
+let toastTimer = null;
+function toast(msg, isErr = false, action = null) {
+  document.querySelectorAll('.toast').forEach(el => el.remove());
+  clearTimeout(toastTimer);
   const el = document.createElement('div');
-  el.className = `toast${isErr ? ' toast-error' : ''}`;
-  if (undoFn) {
-    el.innerHTML = `<span>${esc(msg)}</span><button class="toast-undo">${esc(t('web_undo'))}</button>`;
-    el.querySelector('.toast-undo').onclick = () => { undoFn(); el.remove(); };
-  } else {
-    el.textContent = msg;
+  el.className = `toast${isErr ? ' error' : ''}`;
+  el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="t-icon">${isErr ? IC.alert : IC.check}</span><span>${esc(msg)}</span>`;
+  if (action) {
+    const b = document.createElement('button');
+    b.className = 'btn btn-sm btn-ghost';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { action.run(); el.remove(); });
+    el.appendChild(b);
   }
   document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('toast-show'));
-  const dur = undoFn ? 5000 : 2400;
-  setTimeout(() => { el.classList.remove('toast-show'); setTimeout(() => el.remove(), 300); }, dur);
+  requestAnimationFrame(() => el.classList.add('show'));
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+    action?.expire?.();
+  }, action ? 5000 : 2600);
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal(title, bodyHtml, onConfirm, confirmLabel) {
-  if (!confirmLabel) confirmLabel = t('common_save');
+let modalReturnFocus = null;
+
+/**
+ * Opens a dialog. `onSubmit` returns true (or a promise of true) to close.
+ * Enter submits (except in textareas), Esc cancels, Tab stays inside.
+ */
+function openModal({ title, body, submit, onSubmit, danger = false, narrow = false, extra = null, onOpen = null }) {
   closeModal();
+  modalReturnFocus = document.activeElement;
   const o = document.createElement('div');
   o.className = 'modal-overlay';
   o.id = 'modal-overlay';
   o.innerHTML = `
-    <div class="modal" role="dialog" aria-modal="true">
-      <h2 class="modal-title">${esc(title)}</h2>
-      ${bodyHtml}
-      <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="hp-website" name="website" autocomplete="off" tabindex="-1"></label></div>
+    <form class="modal${narrow ? ' narrow' : ''}" role="dialog" aria-modal="true" aria-labelledby="modal-title" novalidate>
+      <h2 class="modal-title" id="modal-title">${esc(title)}</h2>
+      ${body}
+      <div class="hp-field" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
       <div class="modal-actions">
-        <button class="btn btn-outline" id="modal-cancel">${esc(t('common_cancel'))}</button>
-        <button class="btn btn-primary" id="modal-confirm">${esc(confirmLabel)}</button>
+        ${extra ? `<button type="button" class="btn btn-ghost" data-modal="extra">${esc(extra.label)}</button><span class="spacer"></span>` : ''}
+        <button type="button" class="btn btn-ghost" data-modal="cancel">${esc(t('common_cancel'))}</button>
+        ${submit ? `<button type="submit" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-modal="ok">${esc(submit)}</button>` : ''}
       </div>
-    </div>`;
+    </form>`;
   document.body.appendChild(o);
-  o.querySelector('#modal-cancel').onclick = closeModal;
-  const btn = o.querySelector('#modal-confirm');
-  btn.onclick = async () => {
-    btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px"></span>' + esc(t('web_saving'));
-    try { await onConfirm(); } catch (err) { toast(t('web_unexpected_error'), true); }
-    finally { if (btn.isConnected) { btn.disabled = false; btn.textContent = confirmLabel; } }
-  };
-  // Focus trap: Tab cycles within modal
-  const modal = o.querySelector('.modal');
-  modal.addEventListener('keydown', e => {
+  const form = o.querySelector('form');
+  const ok = o.querySelector('[data-modal="ok"]');
+  o.querySelector('[data-modal="cancel"]').addEventListener('click', closeModal);
+  o.addEventListener('mousedown', e => { if (e.target === o && !form.dataset.dirty) closeModal(); });
+  form.addEventListener('input', () => { form.dataset.dirty = '1'; });
+  if (extra) o.querySelector('[data-modal="extra"]').addEventListener('click', () => extra.run(form));
+
+  let busy = false;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (busy || !onSubmit) return;
+    busy = true;
+    const label = ok?.innerHTML;
+    if (ok) { ok.disabled = true; ok.innerHTML = `<span class="spinner"></span>`; }
+    let close = false;
+    try { close = await onSubmit(form); } catch (err) { toast(t('common_something_went_wrong'), true); }
+    busy = false;
+    if (close) closeModal();
+    else if (ok?.isConnected) { ok.disabled = false; ok.innerHTML = form.dataset.okLabel || label; }
+  });
+  form.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+    if (e.key === 'Enter' && e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'Enter' && e.target.tagName === 'BUTTON') return;
     if (e.key !== 'Tab') return;
-    const focusable = modal.querySelectorAll('input:not([tabindex="-1"]),select,textarea,button:not([disabled])');
-    if (!focusable.length) return;
-    const first = focusable[0], last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    const f = [...form.querySelectorAll('input:not([tabindex="-1"]):not([type=hidden]):not(:disabled),select:not(:disabled),textarea,button:not(:disabled)')]
+      .filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
   });
-  // Auto-focus first input
-  setTimeout(() => { const fi = modal.querySelector('input:not([type=hidden]):not([tabindex="-1"]),select'); if (fi) fi.focus(); }, 50);
+  onOpen?.(form);
+  setTimeout(() => {
+    const first = form.querySelector('[autofocus], .input:not(:disabled)');
+    (first || ok)?.focus();
+  }, 30);
+  return form;
 }
 
-function closeModal() { document.getElementById('modal-overlay')?.remove(); }
+function closeModal() {
+  const o = document.getElementById('modal-overlay');
+  if (!o) return;
+  o.remove();
+  modalReturnFocus?.focus?.();
+}
 
-function confirmDialog(title, msg, confirmLabel, isDanger = true) {
-  if (!confirmLabel) confirmLabel = t('common_delete');
+function confirmDialog(title, msg, label, danger = true) {
   return new Promise(resolve => {
-    closeModal();
-    const o = document.createElement('div');
-    o.className = 'modal-overlay';
-    o.id = 'modal-overlay';
-    o.innerHTML = `
-      <div class="modal" role="dialog" aria-modal="true" style="max-width:400px">
-        <h2 class="modal-title">${esc(title)}</h2>
-        <p style="color:var(--text-secondary);font-size:14px;line-height:1.6;margin-bottom:4px">${esc(msg)}</p>
-        <div class="modal-actions">
-          <button class="btn btn-outline" id="modal-cancel">${esc(t('common_cancel'))}</button>
-          <button class="btn ${isDanger ? 'btn-danger' : 'btn-primary'}" id="modal-confirm">${esc(confirmLabel)}</button>
-        </div>
-      </div>`;
-    document.body.appendChild(o);
-    o.querySelector('#modal-cancel').onclick = () => { closeModal(); resolve(false); };
-    o.querySelector('#modal-confirm').onclick = () => { closeModal(); resolve(true); };
-    // Don't close on overlay click — require explicit Cancel/Confirm
+    let done = false;
+    openModal({
+      title, narrow: true, danger, submit: label || t('common_delete'),
+      body: `<p class="modal-text">${esc(msg)}</p>`,
+      onSubmit: () => { done = true; resolve(true); return true; },
+    });
+    const o = document.getElementById('modal-overlay');
+    new MutationObserver((_, obs) => {
+      if (!document.body.contains(o)) { obs.disconnect(); if (!done) resolve(false); }
+    }).observe(document.body, { childList: true });
   });
 }
 
-// ── Data loaders (cached) ─────────────────────────────────────────────────────
-async function getAccounts() {
-  if (!('accounts' in cache)) {
-    const d = await api('/api/accounts');
-    if (d) cache.accounts = d.items ?? [];
-  }
-  return cache.accounts ?? [];
+// ── Shared bits of markup ─────────────────────────────────────────────────────
+
+function setContent(html) {
+  const el = document.getElementById('content');
+  el.innerHTML = html;
+  state.lastRender = Date.now();
 }
-async function getCategories() {
-  if (!('categories' in cache)) {
-    const d = await api('/api/categories');
-    if (d) cache.categories = d.items ?? [];
+
+function skeleton(rows = 6) {
+  return `<div class="card skel">${Array.from({ length: rows }, (_, i) => `
+    <div class="skel-row"><span class="skel-circle"></span><div style="flex:1;display:flex;flex-direction:column;gap:8px">
+      <span class="skel-bar" style="width:${46 + ((i * 37) % 30)}%"></span><span class="skel-bar" style="width:${22 + ((i * 23) % 18)}%"></span>
+    </div><span class="skel-bar" style="width:70px"></span></div>`).join('')}</div>`;
+}
+
+function emptyState(icon, title, sub, action) {
+  return `<div class="empty">
+    <div class="empty-icon">${icon}</div>
+    <div class="empty-title">${esc(title)}</div>
+    ${sub ? `<p class="empty-sub">${esc(sub)}</p>` : ''}
+    ${action ? `<button class="btn btn-tonal" data-action="${action.action}">${IC.plus}${esc(action.label)}</button>` : ''}
+  </div>`;
+}
+
+function pageHead(title, sub, actions = '') {
+  return `<div class="page-head">
+    <div><h1 class="page-title">${esc(title)}</h1>${sub ? `<div class="page-sub">${sub}</div>` : ''}</div>
+    <div class="page-actions">${actions}</div>
+  </div>`;
+}
+
+/** Ready-to-assign banner (the brand element): base currency big, others as chips. */
+function rtaBanner(unallocated, base, withButton) {
+  const entries = Object.entries(unallocated || {}).filter(([c, v]) => c === base || Math.abs(v) >= 0.005);
+  const main = unallocated?.[base] ?? 0;
+  const others = entries.filter(([c]) => c !== base);
+  return `<div class="rta">
+    <div class="rta-body">
+      <div class="rta-label">${esc(t('web_rta'))}</div>
+      <div class="rta-amount num${main < 0 ? ' neg' : ''}">${esc(fmt(main, base))}</div>
+      ${others.length ? `<div class="rta-more">${others.map(([c, v]) => `<span class="rta-chip num">${esc(fmt(v, c))}</span>`).join('')}</div>` : ''}
+    </div>
+    ${withButton ? `<a class="btn btn-ink" href="#/envelopes">${esc(t('web_rta_assign'))}</a>` : ''}
+  </div>`;
+}
+
+/** One transaction row, like the app's TxTile. */
+function txRow(tx, base, opts = {}) {
+  const isTransfer = tx.type === 'transfer';
+  const chip = isTransfer ? transferChip() : catChip(tx);
+  const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
+  const title = tx.note || (isTransfer ? `${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}` : tx.categoryName) || t(`type_${tx.type}`);
+  const subParts = [];
+  if (opts.showDate) subParts.push(fmtDate(tx.date));
+  if (!isTransfer && tx.note && tx.categoryName) subParts.push(tx.categoryName);
+  if (isTransfer && tx.note) subParts.push(`${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}`);
+  else if (!isTransfer) subParts.push(tx.accountName || '');
+  const cur = tx.lineCurrency || tx.accountCurrency || tx.currency;
+  const amt = tx.lineCount > 1 ? tx.amount : (tx.lineAmount ?? tx.amount);
+  const shownCur = tx.lineCount > 1 ? tx.currency : cur;
+  let amountSub = '';
+  if (isTransfer && tx.destinationCurrency && tx.destinationCurrency !== tx.currency) {
+    amountSub = `<div class="row-amount-sub num">${arrow} ${esc(fmt(tx.amount * tx.exchangeRateToBase, tx.destinationCurrency))}</div>`;
+  } else if (shownCur !== base) {
+    const rate = tx.lineExchangeRate ?? tx.exchangeRateToBase;
+    amountSub = rate && Math.abs(rate - 1) > 0.001
+      ? `<div class="row-amount-sub num">${esc(fmt(amt * rate, base))}</div>`
+      : `<div class="row-amount-sub"><span class="tag warn">${esc(t('web_tx_no_rate'))}</span></div>`;
   }
-  return cache.categories ?? [];
+  const cls = tx.type === 'income' ? 'income' : tx.type === 'expense' ? 'expense' : '';
+  return `<div class="row clickable" data-action="edit-tx" data-id="${esc(tx.id)}" tabindex="0">
+    ${chip}
+    <div class="row-main">
+      <div class="row-title">${esc(title)}${tx.lineCount > 1 ? ` <span class="tag">${esc(t('web_tx_split', { n: tx.lineCount }))}</span>` : ''}</div>
+      <div class="row-sub">${esc(subParts.filter(Boolean).join(' · '))}</div>
+    </div>
+    ${opts.actions ? `<div class="row-actions">
+      <button class="icon-btn" data-action="dup-tx" data-id="${esc(tx.id)}" title="${esc(t('web_duplicate'))}" aria-label="${esc(t('web_duplicate'))}">${IC.copy}</button>
+      <button class="icon-btn danger" data-action="del-tx" data-id="${esc(tx.id)}" title="${esc(t('common_delete'))}" aria-label="${esc(t('common_delete'))}">${IC.trash}</button>
+    </div>` : ''}
+    <div class="row-end">
+      <div class="row-amount ${cls}">${esc(fmtSigned(amt, shownCur, tx.type))}</div>
+      ${amountSub}
+    </div>
+  </div>`;
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-let _pin = '';
+
+let pin = '';
+let pinBusy = false;
 
 function initAuth() {
-  function dots() { return document.querySelectorAll('.pin-dot'); }
-  function errEl() { return document.getElementById('auth-error'); }
-
-  function updateDots() {
-    dots().forEach((d, i) => { d.classList.toggle('filled', i < _pin.length); d.classList.remove('error'); });
-    if (_pin.length === 4) submitPin();
-  }
-
-  document.querySelectorAll('.num-btn[data-num]').forEach(btn =>
-    btn.addEventListener('click', () => { if (_pin.length < 4) { _pin += btn.dataset.num; updateDots(); } })
-  );
-  document.getElementById('del-btn').addEventListener('click', () => { _pin = _pin.slice(0, -1); updateDots(); });
-
+  const dots = () => document.querySelectorAll('.pin-dot');
+  const update = () => {
+    dots().forEach((d, i) => d.classList.toggle('filled', i < pin.length));
+    if (pin.length === 4) submitPin();
+  };
+  const press = n => { if (!pinBusy && pin.length < 4) { pin += n; update(); } };
+  document.querySelectorAll('.num-btn[data-num]').forEach(b => b.addEventListener('click', () => press(b.dataset.num)));
+  document.getElementById('del-btn').addEventListener('click', () => { pin = pin.slice(0, -1); update(); });
   document.addEventListener('keydown', e => {
     if (document.getElementById('auth-screen').classList.contains('hidden')) return;
-    if (e.key >= '0' && e.key <= '9' && _pin.length < 4) { _pin += e.key; updateDots(); }
-    else if (e.key === 'Backspace') { _pin = _pin.slice(0, -1); updateDots(); }
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') { pin = pin.slice(0, -1); update(); }
   });
 
   async function submitPin() {
-    const pin = _pin; _pin = ''; updateDots();
-    const data = await fetch('/auth/pin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin }),
-    }).then(r => r.json()).catch(() => null);
-
-    if (!data?.token) {
-      const msg = data?.isLockout
-        ? (data.error || t('web_auth_lockout'))
-        : (data?.error || t('web_auth_incorrect'));
-      dots().forEach(d => d.classList.add('error'));
-      const el = errEl(); if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-      setTimeout(() => { dots().forEach(d => d.classList.remove('error', 'filled')); errEl()?.classList.add('hidden'); }, 2000);
+    pinBusy = true;
+    const entered = pin;
+    let data = null, status = 0;
+    try {
+      const r = await fetch('/auth/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: entered }) });
+      status = r.status;
+      data = await r.json().catch(() => null);
+    } catch (_) { /* unreachable */ }
+    pin = '';
+    pinBusy = false;
+    if (data?.token) {
+      state.token = data.token;
+      sessionStorage.setItem('bs_token', data.token);
+      document.getElementById('auth-error').textContent = '';
+      update();
+      enterApp();
       return;
     }
-    state.token = data.token;
-    sessionStorage.setItem('pp_token', data.token);
-    showMainLayout();
-    navigate(state.currentRoute);
-    getCategories();
-    getAccounts();
-    startConnectionCheck();
+    const box = document.getElementById('pin-dots');
+    box.classList.add('error');
+    let msg;
+    if (!status) msg = t('web_offline_short');
+    else if (data?.isLockout) msg = t('web_auth_locked', { n: data.retryInMinutes ?? 30 });
+    else if (data?.attemptsLeft != null) msg = t('web_auth_wrong_left', { n: data.attemptsLeft });
+    else msg = t('web_auth_incorrect');
+    document.getElementById('auth-error').textContent = msg;
+    setTimeout(() => { box.classList.remove('error'); update(); }, 700);
   }
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+function showAuth(message) {
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('main-layout').classList.add('hidden');
+  document.getElementById('auth-error').textContent = message || '';
+  stopConnectionCheck();
+  closeModal();
+}
+
+function sessionExpired() {
+  state.token = null;
+  sessionStorage.removeItem('bs_token');
+  invalidate();
+  showAuth(t('web_auth_expired'));
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('main-layout').classList.remove('hidden');
+  navigate(location.hash || '#/');
+  refs();
+  startConnectionCheck();
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+
 const routes = {
-  '#/': renderDashboard,
+  '#/': renderHome,
   '#/transactions': () => renderTransactions(),
-  '#/categories': renderCategories,
+  '#/envelopes': renderBudget,
   '#/accounts': renderAccounts,
-  '#/envelopes': renderEnvelopes,
-  '#/recurring': renderRecurring,
-  '#/subscriptions': renderSubscriptions,
+  '#/categories': renderCategories,
+  '#/recurring': () => renderRecurring(false),
+  '#/subscriptions': () => renderRecurring(true),
   '#/reports': renderReports,
 };
 
-function navigate(hash) {
+function navigate(hash, quiet = false) {
   const route = hash || '#/';
-  state.currentRoute = route;
-  if (route !== '#/transactions') { _txPage = 1; _txFilter = ''; _txSearch = ''; _txMonth = new Date().getMonth(); _txYear = new Date().getFullYear(); }
-  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === route));
-  (routes[route] || renderDashboard)();
+  const changed = route !== state.route;
+  state.route = route;
+  const acct = route.match(/^#\/accounts\/([\w-]+)$/);
+  const base = acct ? '#/accounts' : route;
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === base));
+  toggleSidebar(false);
+  if (changed && !quiet) window.scrollTo(0, 0);
+  if (acct) return renderTransactions({ accountId: acct[1], quiet });
+  if (base !== '#/transactions') txView = null;
+  return (routes[base] || renderHome)(quiet);
 }
-function refreshPage() { invalidateAll(); navigate(state.currentRoute); }
+
+function refresh(quiet = false) { invalidate(); navigate(state.route, quiet); }
 
 window.addEventListener('hashchange', () => navigate(location.hash));
 
-function showAuthScreen() {
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('main-layout').classList.add('hidden');
-  stopConnectionCheck();
-}
-function showMainLayout() {
-  document.getElementById('auth-screen').classList.add('hidden');
-  document.getElementById('main-layout').classList.remove('hidden');
-}
+// ── Home ──────────────────────────────────────────────────────────────────────
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
-async function renderDashboard() {
-  setContent(skeleton(6));
-  const data = await api('/api/dashboard');
-  if (!data) return;
-  const { household = {}, accounts = [], envelopes = [], unallocated = {}, recentTransactions = [] } = data;
-  if (!cache.accounts) cache.accounts = accounts;
-  if (household.baseCurrency) cache.baseCurrency = household.baseCurrency;
+async function renderHome(quiet) {
+  if (!quiet) setContent(pageHead(t('web_nav_home'), '') + skeleton(5));
+  const d = await api('/api/dashboard');
+  if (!d || state.route !== '#/' && state.route !== '') return;
+  const { household = {}, accounts = [], envelopes = [], unallocated = {}, recentTransactions = [] } = d;
+  const base = household.baseCurrency || 'USD';
+  state.baseCurrency = base;
+  cache.accounts = cache.accounts || accounts;
 
-  // ── Accounts: horizontal scroll cards ──
+  // Net worth per currency — never summed across currencies.
+  const worth = {};
+  accounts.forEach(a => { worth[a.currency] = (worth[a.currency] || 0) + a.balance; });
+  const worthOthers = Object.entries(worth).filter(([c]) => c !== base);
+
   const acctHtml = accounts.length
-    ? `<div class="acct-scroll">${accounts.map(a => `
-        <div class="acct-card">
-          <div class="acct-name">${esc(a.name)}</div>
-          <div class="acct-balance${a.balance < 0 ? ' negative' : ''}">${fmt(a.balance, a.currency)}</div>
-          <span class="acct-type">${esc(a.type)}</span>
-        </div>`).join('')}</div>`
-    : `<p class="text-secondary text-sm" style="margin-bottom:16px">${esc(t('web_dash_no_accounts'))}</p>`;
+    ? `<div class="acct-strip">${accounts.map(a => `
+        <a class="card acct-card" href="#/accounts/${esc(a.id)}">
+          <div class="acct-card-top">${a.isTravel ? IC.plane : (TYPE_ICON[a.type] || IC.wallet)}<span>${esc(a.name)}</span></div>
+          <div class="acct-bal num${a.balance < 0 ? ' neg' : ''}">${esc(fmt(a.balance, a.currency))}</div>
+        </a>`).join('')}</div>`
+    : `<div class="card">${emptyState(IC.wallet, t('web_acct_empty_title'), t('web_acct_empty_sub'), { action: 'add-account', label: t('web_acct_add') })}</div>`;
 
-  // ── Unallocated: compact banner ──
-  const unallocEntries = Object.entries(unallocated);
-  const unallocPills = unallocEntries.length
-    ? unallocEntries.map(([cur, amt]) =>
-        `<span class="unalloc-pill ${amt < 0 ? 'unalloc-pill-warn' : ''}">${fmt(amt, cur)}</span>`).join('')
-    : '<span class="text-secondary text-sm">—</span>';
+  const envHtml = envelopes.length
+    ? `<div class="card card-flush">${envelopes.slice(0, 6).map(e => envMini(e)).join('')}</div>`
+    : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`;
 
-  const unallocHtml = `<div class="unalloc-banner">
-    <span class="unalloc-label">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-      ${esc(t('web_dash_unallocated'))}
-    </span>
-    <span class="unalloc-amounts">${unallocPills}</span>
-  </div>`;
-
-  // ── Envelopes: rich cards with target + color-coded progress ──
-  const envsHtml = envelopes.slice(0, 6).length
-    ? envelopes.slice(0, 6).map(e => {
-        const tCur = e.targetCurrency || Object.keys(e.balanceByCurrency || {})[0] || 'USD';
-        const bal = (e.balanceByCurrency || {})[tCur] || 0;
-        const target = e.targetAmount || 0;
-        const pct = target > 0 ? Math.min(100, Math.max(0, (bal / target) * 100)) : null;
-        const isOver = bal < 0;
-
-        // Color: green > 50%, amber 20-50%, red < 20% or negative
-        let barColor = 'accent';
-        if (target > 0) {
-          const ratio = bal / target;
-          if (isOver) barColor = 'red';
-          else if (ratio >= 0.5) barColor = 'green';
-          else if (ratio >= 0.2) barColor = 'amber';
-          else barColor = 'red';
-        }
-        if (isOver) barColor = 'red';
-
-        // Amount color class
-        const amtClass = isOver ? 'amount-expense' : bal > 0 ? 'amount-income' : '';
-
-        // Meta line: "X / Y" or periodicity
-        const metaText = target > 0
-          ? t('web_env_balance_of_target', { balance: fmt(bal, tCur), target: fmt(target, tCur) })
-          : e.periodicity ? e.periodicity.charAt(0).toUpperCase() + e.periodicity.slice(1) : '';
-
-        return `<div class="dash-env-item">
-          <div class="dash-env-row">
-            <div class="dash-env-icon">${esc(e.icon || '📁')}</div>
-            <div class="dash-env-info">
-              <div class="dash-env-name">${esc(e.name)}</div>
-              ${metaText ? `<div class="dash-env-meta">${esc(metaText)}</div>` : ''}
-            </div>
-            <div class="dash-env-amount ${amtClass}">${fmt(bal, tCur)}</div>
-          </div>
-          ${pct !== null ? `<div class="dash-env-progress"><div class="dash-env-progress-fill ${barColor}" style="width:${pct.toFixed(1)}%"></div></div>` : ''}
-        </div>`;
-      }).join('')
-    : `<p class="text-secondary text-sm" style="padding:8px 0">${esc(t('web_dash_no_envelopes'))}</p>`;
-
-  // ── Recent transactions: compact list ──
-  const recHtml = recentTransactions.length
-    ? recentTransactions.map(tx => {
-        const icon = _isEmoji(tx.categoryIcon) ? tx.categoryIcon + ' ' : '';
-        const title = tx.note
-          ? esc(tx.note)
-          : tx.categoryName
-            ? `${esc(icon)}${esc(tx.categoryName)}`
-            : esc(t('web_dash_fallback_tx'));
-        const sub = [fmtDate(tx.date), tx.accountName].filter(Boolean).map(esc).join(' · ');
-        // Show the transaction's native currency/amount, not the base header
-        // amount (tx.amount/currency is always base currency).
-        const lineCur = tx.lineCurrency || tx.currency;
-        const lineAmt = tx.lineAmount ?? tx.amount;
-        return `<div class="dash-tx-item">
-          <div class="dash-tx-dot ${esc(tx.type)}"></div>
-          <div class="dash-tx-info">
-            <div class="dash-tx-title">${title}</div>
-            <div class="dash-tx-sub">${sub}</div>
-          </div>
-          <div class="dash-tx-amount ${tx.type === 'income' ? 'amount-income' : tx.type === 'expense' ? 'amount-expense' : ''}">${amtEl(lineAmt, lineCur, tx.type)}</div>
-        </div>`;
-      }).join('')
-    : empty(t('web_dash_no_tx_title'), t('web_dash_no_tx_sub'));
+  const recentHtml = recentTransactions.length
+    ? `<div class="card card-flush list">${recentTransactions.map(tx => txRow(tx, base, { showDate: true })).join('')}</div>`
+    : `<div class="card">${emptyState(IC.receipt, t('web_tx_empty_title'), t('web_tx_empty_sub'), { action: 'add-tx', label: t('web_tx_add') })}</div>`;
 
   setContent(`
-    <div class="page-header">
-      <h1 class="page-title">${esc(t('nav_dashboard'))}</h1>
-      <span class="text-secondary text-sm">${esc(household.name || '')}${household.baseCurrency ? ` · ${esc(household.baseCurrency)}` : ''}</span>
+    ${pageHead(t('web_nav_home'), esc([household.name, base].filter(Boolean).join(' · ')),
+      `<button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`)}
+    <div class="hero-row">
+      ${rtaBanner(unallocated, base, true)}
+      <div class="card stat-hero">
+        <div class="label">${esc(t('web_net_worth'))}</div>
+        <div class="value num">${esc(fmt(worth[base] || 0, base))}</div>
+        ${worthOthers.length ? `<div class="extra num">${worthOthers.map(([c, v]) => esc(fmt(v, c))).join(' · ')}</div>` : ''}
+      </div>
     </div>
-    <div class="section-title">${esc(t('nav_accounts'))}</div>
+    <div class="section-head"><span class="section-title">${esc(t('nav_accounts'))}</span><a class="section-link" href="#/accounts">${esc(t('web_see_all'))}</a></div>
     ${acctHtml}
-    ${unallocHtml}
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span class="card-title" style="margin-bottom:0">${esc(t('nav_envelopes'))}</span>
-        <a href="#/envelopes" class="btn btn-sm btn-outline">${esc(t('web_dash_see_all'))}</a>
+    <div class="grid-2" style="margin-top:8px">
+      <div>
+        <div class="section-head"><span class="section-title">${esc(t('web_nav_budget'))}</span><a class="section-link" href="#/envelopes">${esc(t('web_see_all'))}</a></div>
+        ${envHtml}
       </div>
-      ${envsHtml}
-    </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span class="card-title" style="margin-bottom:0">${esc(t('web_dash_recent'))}</span>
-        <a href="#/transactions" class="btn btn-sm btn-outline">${esc(t('web_dash_view_all'))}</a>
+      <div>
+        <div class="section-head"><span class="section-title">${esc(t('web_recent'))}</span><a class="section-link" href="#/transactions">${esc(t('web_see_all'))}</a></div>
+        ${recentHtml}
       </div>
-      ${recHtml}
-    </div>
-  `);
-}
-
-// ── Transactions ──────────────────────────────────────────────────────────────
-async function renderTransactions(page, typeFilter, search) {
-  page = page ?? _txPage; typeFilter = typeFilter ?? _txFilter; search = search ?? _txSearch;
-  _txPage = page; _txFilter = typeFilter; _txSearch = search;
-  setContent(skeleton(8));
-
-  let dateParams = '';
-  if (_txMonth >= 0) {
-    const from = `${_txYear}-${String(_txMonth + 1).padStart(2, '0')}-01`;
-    const toM = _txMonth === 11 ? 0 : _txMonth + 1;
-    const toY = _txMonth === 11 ? _txYear + 1 : _txYear;
-    const to = `${toY}-${String(toM + 1).padStart(2, '0')}-01`;
-    dateParams = `&from=${from}&to=${to}`;
-  }
-
-  const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
-
-  const [txData, accounts, cats] = await Promise.all([
-    api(`/api/transactions?page=${page}&limit=25${typeFilter ? '&type=' + typeFilter : ''}${dateParams}${searchParam}`),
-    getAccounts(),
-    getCategories(),
-  ]);
-  if (!txData) return;
-
-  // Type filter — segmented control style
-  const filterBtns = [['', t('type_all')], ['income', t('type_income')], ['expense', t('type_expense')], ['transfer', t('type_transfer')]]
-    .map(([f, l]) => `<button class="type-tab${f === typeFilter ? ' active' : ''}" onclick="renderTransactions(1,'${f}')">${l}</button>`)
-    .join('');
-
-  // Month tabs — inline with year nav
-  const now = new Date();
-  const monthTabs = [
-    `<button class="month-tab${_txMonth < 0 ? ' active' : ''}" onclick="_txMonth=-1;renderTransactions(1)">${esc(t('type_all'))}</button>`,
-    ..._monthNames().map((m, i) => {
-      if (_txYear === now.getFullYear() && i > now.getMonth()) return '';
-      return `<button class="month-tab${_txMonth === i ? ' active' : ''}" onclick="_txMonth=${i};renderTransactions(1)">${m}</button>`;
-    }).filter(Boolean),
-  ].join('');
-
-  const baseCur = txData.baseCurrency || cache.baseCurrency || 'USD';
-
-  const rows = items(txData).length
-    ? items(txData).map(tx => {
-        const lineCur = tx.lineCurrency || tx.currency;
-        const lineAmt = tx.lineAmount ?? tx.amount;
-        const isForeign = lineCur !== baseCur;
-        const hasRealRate = isForeign && tx.lineExchangeRate && Math.abs(tx.lineExchangeRate - 1) > 0.001;
-        const missingRate = isForeign && !hasRealRate;
-
-        let amountHtml;
-        if (isForeign) {
-          amountHtml = `${amtEl(lineAmt, lineCur, tx.type)}`;
-          if (hasRealRate) {
-            amountHtml += `<div class="text-secondary" style="font-size:11px">${fmt(lineAmt * tx.lineExchangeRate, baseCur)}</div>`;
-          } else {
-            amountHtml += `<div style="font-size:11px;color:var(--caution)">⚠ ${esc(t('web_tx_no_rate'))}</div>`;
-          }
-        } else {
-          amountHtml = amtEl(tx.amount, tx.currency, tx.type);
-        }
-
-        return `
-        <tr class="tx-row${missingRate ? ' tx-warn' : ''}" onclick="toggleTxDetail('${esc(tx.id)}', this)">
-          <td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(tx.date)}</td>
-          <td>${typeBadge(tx.type)}</td>
-          <td class="text-sm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(tx.note || '—')}</td>
-          <td class="text-sm">${esc(tx.accountName || '')}${tx.destinationAccountName ? `<span class="text-secondary"> → ${esc(tx.destinationAccountName)}</span>` : ''}</td>
-          <td class="text-sm">
-            ${tx.categoryName
-              ? `<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${safeHex(tx.categoryColor || '#607D8B')};flex-shrink:0"></span>${_isEmoji(tx.categoryIcon) ? esc(tx.categoryIcon) + ' ' : ''}${esc(tx.categoryName)}</div>`
-              : '<span class="text-secondary">—</span>'}
-          </td>
-          <td style="text-align:right;white-space:nowrap">${amountHtml}</td>
-          <td style="white-space:nowrap" onclick="event.stopPropagation()">
-            <button class="btn btn-sm btn-outline" onclick="editTransaction('${esc(tx.id)}')">${esc(t('web_tx_edit'))}</button>
-            <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteTransaction('${esc(tx.id)}')">${esc(t('web_tx_del'))}</button>
-          </td>
-        </tr>`;
-      }).join('')
-    : `<tr><td colspan="7" style="padding:32px;text-align:center;color:var(--text-secondary)">${esc(t('web_tx_no_found'))}</td></tr>`;
-
-  setContent(`
-    <div class="page-header">
-      <h1 class="page-title">${esc(t('nav_transactions'))}</h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()" title="${esc(t('web_tx_csv_tooltip'))}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-          ${esc(t('web_tx_csv'))}
-        </button>
-        <button class="btn btn-primary" onclick="addTransaction()">${esc(t('web_tx_add'))}</button>
-      </div>
-    </div>
-    <div style="position:relative;margin-bottom:14px">
-      <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-hint)" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-      <input type="text" id="tx-search" class="form-control" style="padding-left:32px;font-size:13px" placeholder="${esc(t('web_tx_search'))}" value="${esc(search)}" oninput="clearTimeout(window._searchTimer);window._searchTimer=setTimeout(()=>{_txSearch=this.value;renderTransactions(1)},400)">
-    </div>
-    <div class="date-bar">
-      <div class="date-bar-year">
-        <button class="year-arrow" onclick="_txYear--;renderTransactions(1)">‹</button>
-        <span class="year-label">${_txYear}</span>
-        <button class="year-arrow" onclick="_txYear++;renderTransactions(1)" ${_txYear >= now.getFullYear() ? 'disabled' : ''}>›</button>
-      </div>
-      <div class="month-tabs-scroll">${monthTabs}</div>
-    </div>
-    <div style="margin-bottom:16px">
-      <div class="type-tabs" style="max-width:360px">${filterBtns}</div>
-    </div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table class="data-table">
-        <thead><tr><th>${esc(t('web_tx_th_date'))}</th><th>${esc(t('web_tx_th_type'))}</th><th>${esc(t('web_tx_th_title'))}</th><th>${esc(t('web_tx_th_account'))}</th><th>${esc(t('web_tx_th_category'))}</th><th style="text-align:right">${esc(t('web_tx_th_amount'))}</th><th></th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div class="pagination">
-      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="renderTransactions(${page - 1})">${esc(t('web_tx_prev'))}</button>
-      <span class="text-secondary text-sm">${esc(t('web_tx_page_n', { page }))}</span>
-      <button class="btn btn-outline btn-sm" ${items(txData).length < 25 ? 'disabled' : ''} onclick="renderTransactions(${page + 1})">${esc(t('web_tx_next'))}</button>
-    </div>
-  `);
-
-  // Focus search if user was searching
-  if (search) { const el = document.getElementById('tx-search'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
-}
-
-// CSV export
-function exportCSV() {
-  const table = document.querySelector('.data-table');
-  if (!table) return;
-  // Skip expanded detail rows (tx-lines-*) which have different column structure
-  const rows = [...table.querySelectorAll('tr')].filter(r => !r.id?.startsWith('tx-lines-'));
-  const csv = rows.map(r => {
-    const cells = [...r.querySelectorAll(':scope > th, :scope > td')];
-    return cells.slice(0, -1).map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`).join(',');
-  }).join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `budgetseal-transactions-${todayISO()}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast(t('web_tx_csv_exported'));
-}
-
-function _txFormHtml(accounts, cats, pre = null) {
-  const type = pre?.type || 'expense';
-  const acctOpts = accounts.map(a =>
-    `<option value="${a.id}" data-currency="${esc(a.currency)}" ${pre?.accountId === a.id ? 'selected' : ''}>${esc(a.name)} (${esc(a.currency)})</option>`).join('');
-  const destOpts = accounts.map(a =>
-    `<option value="${a.id}" ${pre?.destinationAccountId === a.id ? 'selected' : ''}>${esc(a.name)} (${esc(a.currency)})</option>`).join('');
-  const catOpts = `<option value="">${esc(t('web_form_none'))}</option>` + cats.map(c =>
-    `<option value="${c.id}" data-txtype="${esc(c.transactionType)}" ${pre?.categoryId === c.id ? 'selected' : ''}>${_isEmoji(c.icon) ? esc(c.icon) + ' ' : ''}${esc(c.name)}</option>`).join('');
-
-  return `
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_form_type'))}</label>
-      <div class="type-tabs">
-        <button type="button" class="type-tab${type === 'expense' ? ' active' : ''}" data-type="expense">${esc(t('type_expense'))}</button>
-        <button type="button" class="type-tab${type === 'income' ? ' active' : ''}" data-type="income">${esc(t('type_income'))}</button>
-        <button type="button" class="type-tab${type === 'transfer' ? ' active' : ''}" data-type="transfer">${esc(t('type_transfer'))}</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label" id="lbl-account">${type === 'transfer' ? esc(t('web_form_from_account')) : esc(t('web_form_account'))}</label>
-      <select id="tx-account" class="form-control"><option value="">${esc(t('web_form_select_account'))}</option>${acctOpts}</select>
-    </div>
-    <div class="form-group" id="fg-dest" style="${type !== 'transfer' ? 'display:none' : ''}">
-      <label class="form-label">${esc(t('web_form_to_account'))}</label>
-      <select id="tx-dest" class="form-control">${destOpts}</select>
-    </div>
-    <div class="form-group" id="fg-cat" style="${type === 'transfer' ? 'display:none' : ''}">
-      <label class="form-label">${esc(t('web_form_category'))}</label>
-      <select id="tx-cat" class="form-control">${catOpts}</select>
-    </div>
-    <div style="display:flex;gap:12px">
-      <div class="form-group" style="flex:1">
-        <label class="form-label">${esc(t('web_form_amount'))}</label>
-        <input type="number" id="tx-amount" class="form-control" min="0.01" step="0.01" value="${esc(pre?.amount || '')}" placeholder="${esc(t('web_form_amount_placeholder'))}">
-      </div>
-      <div class="form-group" style="width:80px">
-        <label class="form-label">${esc(t('web_form_currency'))}</label>
-        <input type="text" id="tx-currency" class="form-control" maxlength="3" placeholder="${esc(t('web_form_currency_placeholder'))}" value="${esc(pre?.currency || '')}">
-      </div>
-    </div>
-    <div class="form-group" id="fg-rate" style="display:none">
-      <label class="form-label">${esc(t('web_form_exchange_rate'))}</label>
-      <input type="number" id="tx-rate" class="form-control" min="0.000001" step="any" value="${esc(pre?.exchangeRateToBase && pre.exchangeRateToBase !== 1 ? pre.exchangeRateToBase : '')}" placeholder="${esc(t('web_form_rate_placeholder'))}">
-      <div class="text-secondary text-sm" id="rate-hint" style="margin-top:4px"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_form_date'))}</label>
-      <input type="date" id="tx-date" class="form-control" value="${pre?.date ? pre.date.slice(0, 10) : todayISO()}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_form_title_note'))}</label>
-      <input type="text" id="tx-note" class="form-control" placeholder="${esc(t('web_form_optional'))}" value="${esc(pre?.note || '')}">
-    </div>`;
-}
-
-function _setupTxForm() {
-  const tabs = document.querySelectorAll('.type-tab');
-  const fgDest = document.getElementById('fg-dest');
-  const fgCat = document.getElementById('fg-cat');
-  const lblAcct = document.getElementById('lbl-account');
-  const acctSel = document.getElementById('tx-account');
-  const curInput = document.getElementById('tx-currency');
-
-  function applyType(tp) {
-    tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.type === tp));
-    fgDest.style.display = tp === 'transfer' ? '' : 'none';
-    fgCat.style.display = tp === 'transfer' ? 'none' : '';
-    lblAcct.textContent = tp === 'transfer' ? t('web_form_from_account') : t('web_form_account');
-  }
-
-  tabs.forEach(tab => tab.addEventListener('click', () => applyType(tab.dataset.type)));
-
-  const rateGroup = document.getElementById('fg-rate');
-  const rateHint = document.getElementById('rate-hint');
-
-  function updateRateVisibility() {
-    const baseCur = cache.baseCurrency || 'USD';
-    const txCur = curInput.value.trim().toUpperCase();
-    if (txCur && txCur !== baseCur) {
-      rateGroup.style.display = '';
-      rateHint.textContent = t('web_form_rate_hint', { txCur, baseCur });
-    } else {
-      rateGroup.style.display = 'none';
-    }
-  }
-
-  curInput.addEventListener('input', updateRateVisibility);
-
-  acctSel.addEventListener('change', () => {
-    const opt = acctSel.selectedOptions[0];
-    if (opt?.dataset.currency && !curInput.value) curInput.value = opt.dataset.currency;
-    updateRateVisibility();
-  });
-  if (acctSel.value && !curInput.value) {
-    const opt = acctSel.selectedOptions[0];
-    if (opt?.dataset.currency) curInput.value = opt.dataset.currency;
-  }
-  updateRateVisibility();
-}
-
-function _readTxForm() {
-  const type = document.querySelector('.type-tab.active')?.dataset.type || 'expense';
-  const accountId = document.getElementById('tx-account').value;
-  const amount = parseFloat(document.getElementById('tx-amount').value);
-  const currency = (document.getElementById('tx-currency').value.trim() || 'USD').toUpperCase();
-  const date = document.getElementById('tx-date').value;
-  const note = document.getElementById('tx-note').value.trim();
-
-  if (!accountId) { toast(t('web_val_select_account'), true); return null; }
-  if (!amount || amount <= 0) { toast(t('web_val_valid_amount'), true); return null; }
-
-  const body = { type, accountId, amount, currency, note };
-  const rateVal = parseFloat(document.getElementById('tx-rate')?.value);
-  const baseCur = cache.baseCurrency || 'USD';
-  if (currency !== baseCur && rateVal && rateVal > 0) {
-    body.exchangeRateToBase = rateVal;
-  }
-  if (date) body.date = date + 'T12:00:00.000Z';
-
-  if (type === 'transfer') {
-    const destId = document.getElementById('tx-dest').value;
-    if (!destId) { toast(t('web_val_select_dest'), true); return null; }
-    if (destId === accountId) { toast(t('web_val_accounts_differ'), true); return null; }
-    body.destinationAccountId = destId;
-  } else {
-    const catId = document.getElementById('tx-cat').value;
-    if (catId) body.categoryId = catId;
-  }
-  return body;
-}
-
-async function addTransaction() {
-  const [accounts, cats] = await Promise.all([getAccounts(), getCategories()]);
-  openModal(t('web_modal_add_tx'), _txFormHtml(accounts, cats), async () => {
-    const body = _readTxForm();
-    if (!body) return;
-    const res = await api('/api/transactions', { method: 'POST', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_tx_added')); invalidateAll(); closeModal(); renderTransactions(_txPage, _txFilter, _txSearch); }
-  });
-  _setupTxForm();
-}
-
-async function editTransaction(id) {
-  const [detail, accounts, cats] = await Promise.all([
-    api(`/api/transactions/${id}`),
-    getAccounts(),
-    getCategories(),
-  ]);
-  if (!detail) return;
-  openModal(t('web_modal_edit_tx'), _txFormHtml(accounts, cats, detail), async () => {
-    const body = _readTxForm();
-    if (!body) return;
-    const res = await api(`/api/transactions/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_tx_updated')); invalidateAll(); closeModal(); renderTransactions(_txPage, _txFilter, _txSearch); }
-  });
-  _setupTxForm();
-}
-
-async function deleteTransaction(id) {
-  // Delete immediately, offer undo via toast
-  const res = await api(`/api/transactions/${id}`, { method: 'DELETE' });
-  if (res) {
-    invalidateAll();
-    renderTransactions(_txPage, _txFilter, _txSearch);
-    toast(t('web_toast_tx_deleted'), false);
-  }
-}
-
-async function toggleTxDetail(id, rowEl) {
-  const existing = document.getElementById(`tx-lines-${id}`);
-  if (existing) { existing.remove(); return; }
-
-  const detail = await api(`/api/transactions/${id}`);
-  if (!detail?.lines?.length) { toast(t('web_toast_no_lines')); return; }
-
-  const linesHtml = detail.lines.map(l => {
-    const hasRate = l.exchangeRateToBase && Math.abs(l.exchangeRateToBase - 1) > 0.001;
-    return `<tr>
-      <td>${fmt(l.amount, l.currency)}</td>
-      <td>${esc(l.currency)}</td>
-      <td>${l.categoryName ? `${_isEmoji(l.categoryIcon) ? esc(l.categoryIcon) + ' ' : ''}${esc(l.categoryName)}` : '<span class="text-secondary">—</span>'}</td>
-      <td>${esc(l.accountName || '—')}</td>
-      <td class="text-secondary">${esc(l.note || '')}</td>
-      <td class="text-secondary">${hasRate ? l.exchangeRateToBase.toFixed(4) : ''}</td>
-    </tr>`;
-  }).join('');
-
-  const detailRow = document.createElement('tr');
-  detailRow.id = `tx-lines-${id}`;
-  detailRow.innerHTML = `<td colspan="7" class="tx-detail-cell">
-    <div class="tx-detail-inner">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);margin-bottom:8px">${esc(t('web_tx_lines_header', { count: detail.lines.length }))}</div>
-      <table class="data-table">
-        <thead><tr><th>${esc(t('web_th_line_amount'))}</th><th>${esc(t('web_th_line_currency'))}</th><th>${esc(t('web_th_line_category'))}</th><th>${esc(t('web_th_line_account'))}</th><th>${esc(t('web_th_line_note'))}</th><th>${esc(t('web_th_line_rate'))}</th></tr></thead>
-        <tbody>${linesHtml}</tbody>
-      </table>
-    </div>
-  </td>`;
-  rowEl.after(detailRow);
-}
-
-// Returns true if str starts with a non-ASCII codepoint (i.e. is an emoji, not a keyword like "category")
-function _isEmoji(str) {
-  return !!str && str.codePointAt(0) > 255;
-}
-
-// ── Categories ────────────────────────────────────────────────────────────────
-async function renderCategories() {
-  setContent(skeleton(6));
-  const d = await api('/api/categories');
-  if (!d) return;
-  cache.categories = d.items || [];
-
-  const expense = d.items.filter(c => c.transactionType !== 'income');
-  const income  = d.items.filter(c => c.transactionType === 'income');
-
-  function buildGroups(items) {
-    const idSet = new Set(items.map(c => c.id));
-    const roots = items.filter(c => !c.parentId || !idSet.has(c.parentId));
-    const childrenOf = {};
-    items.filter(c => c.parentId && idSet.has(c.parentId)).forEach(c => {
-      if (!childrenOf[c.parentId]) childrenOf[c.parentId] = [];
-      childrenOf[c.parentId].push(c);
-    });
-    return roots.map(r => ({ parent: r, children: childrenOf[r.id] || [] }));
-  }
-
-  function catIcon(icon, name) {
-    // Show emoji icon if present, otherwise first letter of name
-    if (_isEmoji(icon)) return icon;
-    return name ? name.charAt(0).toUpperCase() : '?';
-  }
-
-  function catCard(group) {
-    const p = group.parent;
-    const childCount = group.children.length;
-    const childHtml = group.children.map(ch => {
-      return `<div class="cat-child">
-        <span class="cat-child-icon" style="background:${safeHex(ch.colorHex)}">${esc(catIcon(ch.icon, ch.name))}</span>
-        <span class="cat-child-name">${esc(ch.name)}</span>
-        <button class="cat-edit-btn" onclick="event.stopPropagation();openEditCategory('${esc(ch.id)}')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </button>
-      </div>`;
-    }).join('');
-
-    return `<div class="cat-card">
-      <div class="cat-card-header">
-        <span class="cat-card-icon" style="background:${safeHex(p.colorHex)}">${esc(catIcon(p.icon, p.name))}</span>
-        <div class="cat-card-info">
-          <div class="cat-card-name">${esc(p.name)}</div>
-          ${childCount > 0 ? `<div class="cat-card-count">${childCount === 1 ? esc(t('web_cat_sub_singular')) : esc(t('web_cat_sub_plural', { count: childCount }))}</div>` : ''}
-        </div>
-        <button class="cat-edit-btn" onclick="openEditCategory('${esc(p.id)}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </button>
-      </div>
-      ${childCount > 0 ? `<div class="cat-children">${childHtml}</div>` : ''}
-    </div>`;
-  }
-
-  function section(label, badgeCls, items) {
-    if (!items.length) return '';
-    const groups = buildGroups(items);
-    return `
-      <div style="margin-bottom:24px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <span class="section-title" style="margin-bottom:0">${label}</span>
-          <span class="badge ${badgeCls}" style="font-size:10px">${items.length}</span>
-        </div>
-        <div class="cat-grid">${groups.map(catCard).join('')}</div>
-      </div>`;
-  }
-
-  const content = items(d).length
-    ? section(t('web_cat_section_expense'), 'badge-expense', expense) + section(t('web_cat_section_income'), 'badge-income', income)
-    : empty(t('web_cat_empty_title'), t('web_cat_empty_sub'));
-
-  setContent(`
-    <div class="page-header">
-      <h1 class="page-title">${esc(t('nav_categories'))}</h1>
-      <button class="btn btn-primary" onclick="openAddCategory()">${esc(t('web_tx_add'))}</button>
-    </div>
-    ${content}`);
-}
-
-function _catFormHtml(pre = null) {
-  const cats = cache.categories || [];
-  const parentOpts = cats.filter(c => !c.parentId).map(c =>
-    `<option value="${c.id}" ${pre?.parentId === c.id ? 'selected' : ''}>${_isEmoji(c.icon) ? c.icon + ' ' : ''}${esc(c.name)}</option>`).join('');
-  return `
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_cat_form_name'))}</label>
-      <input type="text" id="cat-name" class="form-control" value="${esc(pre?.name || '')}" placeholder="${esc(t('web_cat_form_name_hint'))}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_cat_form_parent'))}</label>
-      <select id="cat-parent" class="form-control">
-        <option value="">${esc(t('web_cat_form_none'))}</option>
-        ${parentOpts}
-      </select>
-    </div>
-    <div style="display:flex;gap:12px">
-      <div class="form-group" style="flex:1">
-        <label class="form-label">${esc(t('web_cat_form_icon'))}</label>
-        <input type="text" id="cat-icon" class="form-control" value="${esc(pre?.icon || '')}" placeholder="🛒">
-      </div>
-      <div class="form-group" style="flex:1">
-        <label class="form-label">${esc(t('web_cat_form_color'))}</label>
-        <input type="color" id="cat-color" class="form-control" value="${esc(pre?.colorHex || '#607D8B')}" style="height:42px;padding:4px;cursor:pointer">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">${esc(t('web_cat_form_type'))}</label>
-      <select id="cat-type" class="form-control">
-        <option value="expense" ${pre?.transactionType !== 'income' ? 'selected' : ''}>${esc(t('type_expense'))}</option>
-        <option value="income" ${pre?.transactionType === 'income' ? 'selected' : ''}>${esc(t('type_income'))}</option>
-      </select>
-    </div>`;
-}
-
-async function openAddCategory() {
-  if (!cache.categories) await getCategories();
-  openModal(t('web_modal_add_cat'), _catFormHtml(), async () => {
-    const name = document.getElementById('cat-name').value.trim();
-    if (!name) { toast(t('web_val_name_required'), true); return; }
-    const parentId = document.getElementById('cat-parent').value || undefined;
-    const body = {
-      name,
-      icon: document.getElementById('cat-icon').value.trim() || 'category',
-      colorHex: document.getElementById('cat-color').value,
-      transactionType: document.getElementById('cat-type').value,
-      parentId,
-    };
-    const res = await api('/api/categories', { method: 'POST', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_cat_added')); invalidate('categories'); closeModal(); renderCategories(); }
-  });
-}
-
-function openEditCategory(id) {
-  const c = (cache.categories || []).find(x => x.id === id);
-  if (!c) { toast(t('web_toast_cat_not_found'), true); return; }
-  openModal(t('web_modal_edit_cat'), _catFormHtml(c), async () => {
-    const name = document.getElementById('cat-name').value.trim();
-    if (!name) { toast(t('web_val_name_required'), true); return; }
-    const body = {
-      name,
-      icon: document.getElementById('cat-icon').value.trim() || c.icon,
-      colorHex: document.getElementById('cat-color').value,
-      transactionType: document.getElementById('cat-type').value,
-    };
-    const res = await api(`/api/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_cat_updated')); invalidate('categories'); closeModal(); renderCategories(); }
-  });
-}
-
-// ── Accounts ──────────────────────────────────────────────────────────────────
-async function renderAccounts() {
-  setContent(skeleton(5));
-  const d = await api('/api/accounts');
-  if (!d) return;
-  cache.accounts = d.items || [];
-
-  if (!items(d).length) {
-    setContent(`
-      <div class="page-header">
-        <h1 class="page-title">${esc(t('nav_accounts'))}</h1>
-        <button class="btn btn-primary" onclick="openAddAccount()">${esc(t('web_tx_add'))}</button>
-      </div>
-      ${empty(t('web_acct_empty_title'), t('web_acct_empty_sub'))}`);
-    return;
-  }
-
-  const typeOrder = ['bank', 'cash', 'credit', 'wallet'];
-  const typeLabels = { bank: t('web_acct_type_bank'), cash: t('web_acct_type_cash'), credit: t('web_acct_type_credit'), wallet: t('web_acct_type_wallet') };
-  const typeIcons = {
-    bank: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>',
-    cash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>',
-    credit: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>',
-    wallet: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
-  };
-  const grouped = {};
-  d.items.forEach(a => { const tp = a.type || 'bank'; if (!grouped[tp]) grouped[tp] = []; grouped[tp].push(a); });
-
-  // Net worth — horizontal scroll cards (same as dashboard)
-  const byCurrency = {};
-  d.items.forEach(a => { byCurrency[a.currency] = (byCurrency[a.currency] || 0) + a.balance; });
-  const netWorthHtml = `<div class="acct-scroll" style="margin-bottom:20px">${Object.entries(byCurrency).map(([cur, total]) => {
-    const count = d.items.filter(a => a.currency === cur).length;
-    return `<div class="acct-card">
-      <div class="acct-name">${esc(t('web_acct_net_worth', { cur }))}</div>
-      <div class="acct-balance${total < 0 ? ' negative' : ''}">${fmt(total, cur)}</div>
-      <span class="acct-type">${count === 1 ? esc(t('web_acct_count_singular')) : esc(t('web_acct_count_plural', { count }))}</span>
-    </div>`;
-  }).join('')}</div>`;
-
-  // Account groups — card rows, clickable
-  let sectionsHtml = '';
-  typeOrder.forEach(type => {
-    const accts = grouped[type]; if (!accts?.length) return;
-    const groupTotal = {}; accts.forEach(a => { groupTotal[a.currency] = (groupTotal[a.currency] || 0) + a.balance; });
-    const totalStr = Object.entries(groupTotal).map(([c, amt]) => fmt(amt, c)).join(' + ');
-
-    const rows = accts.map(a => `
-      <div class="acct-row" onclick="viewAccountTransactions('${esc(a.id)}','${esc(a.name)}')">
-        <div class="acct-row-left">
-          <div class="acct-row-name">${esc(a.name)}</div>
-          <span class="acct-row-cur">${esc(a.currency)}</span>
-        </div>
-        <div class="acct-row-bal${a.balance < 0 ? ' negative' : ''}">${fmt(a.balance, a.currency)}</div>
-        <svg class="acct-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>`).join('');
-
-    sectionsHtml += `
-      <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden">
-        <div class="acct-group-header">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="color:var(--text-secondary)">${typeIcons[type] || ''}</span>
-            <span class="acct-group-label">${typeLabels[type] || type}</span>
-          </div>
-          <span class="acct-group-total">${totalStr}</span>
-        </div>
-        ${rows}
-      </div>`;
-  });
-
-  setContent(`
-    <div class="page-header"><h1 class="page-title">${esc(t('nav_accounts'))}</h1><button class="btn btn-primary" onclick="openAddAccount()">${esc(t('web_tx_add'))}</button></div>
-    ${netWorthHtml}
-    ${sectionsHtml}`);
-}
-
-let _acctTxPage = 1;
-async function viewAccountTransactions(accountId, accountName, page) {
-  page = page || 1; _acctTxPage = page;
-  setContent(skeleton(6));
-  const txData = await api(`/api/transactions?page=${page}&limit=25&accountId=${accountId}`);
-  if (!txData) return;
-  const baseCur = txData.baseCurrency || cache.baseCurrency || 'USD';
-  const rows = items(txData).length
-    ? items(txData).map(tx => {
-        const lineCur = tx.lineCurrency || tx.currency;
-        const lineAmt = tx.lineAmount ?? tx.amount;
-        const isForeign = lineCur !== baseCur;
-        const hasRealRate = isForeign && tx.lineExchangeRate && Math.abs(tx.lineExchangeRate - 1) > 0.001;
-        let amountHtml = isForeign
-          ? `${amtEl(lineAmt, lineCur, tx.type)}${hasRealRate ? `<div class="text-secondary" style="font-size:11px">${fmt(lineAmt * tx.lineExchangeRate, baseCur)}</div>` : `<div style="font-size:11px;color:var(--caution)">⚠ ${esc(t('web_tx_no_rate'))}</div>`}`
-          : amtEl(tx.amount, tx.currency, tx.type);
-        return `<tr>
-          <td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(tx.date)}</td>
-          <td>${typeBadge(tx.type)}</td>
-          <td class="text-sm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(tx.note || '—')}</td>
-          <td class="text-sm">${tx.categoryName ? `<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${safeHex(tx.categoryColor || '#607D8B')};flex-shrink:0"></span>${_isEmoji(tx.categoryIcon) ? esc(tx.categoryIcon) + ' ' : ''}${esc(tx.categoryName)}</div>` : '<span class="text-secondary">—</span>'}</td>
-          <td class="text-sm">${tx.type === 'transfer' ? `${esc(tx.accountName || '')} <span class="text-secondary">→</span> ${esc(tx.destinationAccountName || '')}` : esc(tx.accountName || '')}</td>
-          <td style="text-align:right;white-space:nowrap">${amountHtml}</td>
-        </tr>`;
-      }).join('')
-    : `<tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-secondary)">${esc(t('web_acct_tx_empty'))}</td></tr>`;
-  setContent(`
-    <div class="page-header"><div style="display:flex;align-items:center;gap:12px"><button class="btn btn-outline btn-sm" onclick="renderAccounts()">${esc(t('web_acct_back'))}</button><h1 class="page-title">${esc(accountName)}</h1></div></div>
-    <div class="card" style="padding:0;overflow:auto"><table class="data-table">
-      <thead><tr><th>${esc(t('web_tx_th_date'))}</th><th>${esc(t('web_tx_th_type'))}</th><th>${esc(t('web_tx_th_title'))}</th><th>${esc(t('web_tx_th_category'))}</th><th>${esc(t('web_tx_th_account'))}</th><th style="text-align:right">${esc(t('web_tx_th_amount'))}</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    <div class="pagination">
-      <button class="btn btn-outline btn-sm" ${page <= 1 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page - 1})">${esc(t('web_tx_prev'))}</button>
-      <span class="text-secondary text-sm">${esc(t('web_tx_page_n', { page }))}</span>
-      <button class="btn btn-outline btn-sm" ${items(txData).length < 25 ? 'disabled' : ''} onclick="viewAccountTransactions('${esc(accountId)}','${esc(accountName)}',${page + 1})">${esc(t('web_tx_next'))}</button>
     </div>`);
 }
 
-function openAddAccount() {
-  const html = `
-    <div class="form-group"><label class="form-label">${esc(t('web_cat_form_name'))}</label><input type="text" id="acct-name" class="form-control" placeholder="${esc(t('web_acct_form_name_hint'))}"></div>
-    <div style="display:flex;gap:12px">
-      <div class="form-group" style="flex:1"><label class="form-label">${esc(t('web_acct_form_type'))}</label><select id="acct-type" class="form-control"><option value="bank">${esc(t('web_acct_form_type_bank'))}</option><option value="cash">${esc(t('web_acct_form_type_cash'))}</option><option value="credit">${esc(t('web_acct_form_type_credit'))}</option><option value="wallet">${esc(t('web_acct_form_type_wallet'))}</option></select></div>
-      <div class="form-group" style="flex:1"><label class="form-label">${esc(t('web_form_currency'))}</label><input type="text" id="acct-currency" class="form-control" maxlength="3" placeholder="${esc(t('web_form_currency_placeholder'))}" value="USD"></div>
-    </div>
-    <div class="form-group"><label class="form-label">${esc(t('web_acct_form_opening'))}</label><input type="number" id="acct-balance" class="form-control" value="0" min="0" step="0.01"></div>`;
-  openModal(t('web_modal_add_acct'), html, async () => {
-    const name = document.getElementById('acct-name').value.trim();
-    if (!name) { toast(t('web_val_name_required'), true); return; }
-    const body = { name, type: document.getElementById('acct-type').value, currency: (document.getElementById('acct-currency').value.trim() || 'USD').toUpperCase(), initialBalance: parseFloat(document.getElementById('acct-balance').value) || 0 };
-    const res = await api('/api/accounts', { method: 'POST', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_acct_added')); invalidateAll(); closeModal(); renderAccounts(); }
-  });
-}
-
 // ── Envelopes ─────────────────────────────────────────────────────────────────
-async function renderEnvelopes() {
-  setContent(skeleton(4));
+
+/** What an envelope card shows, in its target currency. */
+function envFigures(e) {
+  const balances = e.balanceByCurrency || {};
+  const cur = e.targetCurrency || Object.keys(balances)[0] || state.baseCurrency;
+  const bal = balances[cur] || 0;
+  const spent = (e.spentByCurrency || {})[cur] || 0;
+  const target = Number(e.targetAmount) || 0;
+  const flexible = e.type !== 'spending';
+  let pct = null, meta = '', metaEnd = '';
+  if (target > 0) {
+    if (flexible) {
+      pct = Math.max(0, Math.min(100, (bal / target) * 100));
+      meta = bal >= target ? t('web_env_reached') : t('web_env_to_go', { amount: fmt(target - bal, cur) });
+      metaEnd = t('web_env_of', { amount: fmt(target, cur) });
+    } else {
+      pct = Math.max(0, Math.min(100, (spent / target) * 100));
+      meta = t('web_env_spent', { amount: fmt(spent, cur) });
+      metaEnd = t('web_env_of', { amount: fmt(target, cur) });
+    }
+  } else if (!flexible && spent > 0) {
+    meta = t('web_env_spent', { amount: fmt(spent, cur) });
+  }
+  const others = Object.entries(balances).filter(([c, v]) => c !== cur && Math.abs(v) >= 0.005);
+  return { cur, bal, spent, target, pct, meta, metaEnd, others, over: bal < 0, flexible };
+}
+
+function envChip(e, cls = '') {
+  const color = safeHex(e.colorHex || getComputedStyle(document.documentElement).getPropertyValue('--acc-bright').trim());
+  const inner = isEmoji(e.icon) ? esc(e.icon) : `<span style="color:${pastelInk(color)}">${esc((e.name || '?').charAt(0).toUpperCase())}</span>`;
+  return `<span class="chip-icon ${cls}" style="background:${pastel(color)}">${inner}</span>`;
+}
+
+function barColor(f) {
+  if (f.over) return 'var(--expense)';
+  if (!f.flexible && f.pct >= 100) return 'var(--expense)';
+  if (!f.flexible && f.pct >= 85) return 'var(--caution)';
+  return f.flexible ? 'var(--income)' : 'var(--accent)';
+}
+
+function envMini(e) {
+  const f = envFigures(e);
+  return `<a class="env-mini row clickable" href="#/envelopes">
+    ${envChip(e, 'sm')}
+    <div class="row-main">
+      <div class="env-mini-top"><span class="row-title">${esc(e.name)}</span><span class="row-amount ${f.over ? 'expense' : ''}">${esc(fmt(f.bal, f.cur))}</span></div>
+      ${f.pct != null ? `<div class="bar thin"><span style="width:${f.pct.toFixed(1)}%;background:${barColor(f)}"></span></div>` : ''}
+      ${f.meta ? `<div class="row-sub">${esc(f.meta)}${f.metaEnd ? ` · ${esc(f.metaEnd)}` : ''}</div>` : ''}
+    </div>
+  </a>`;
+}
+
+async function renderBudget(quiet) {
+  if (!quiet) setContent(pageHead(t('web_nav_budget'), '') + skeleton(4));
   const d = await api('/api/envelopes');
-  if (!d) return;
+  if (!d || state.route !== '#/envelopes') return;
+  const base = d.baseCurrency || state.baseCurrency;
+  state.baseCurrency = base;
   cache.envelopes = d.items || [];
-  const unallocEntries = Object.entries(d.unallocated || {});
-  const unallocHtml = unallocEntries.length
-    ? unallocEntries.map(([cur, amt]) => `<span class="unalloc-pill ${amt < 0 ? 'unalloc-pill-warn' : ''}">${fmt(amt, cur)}</span>`).join(' ')
-    : '<span class="text-secondary">—</span>';
-  const envsHtml = items(d).length
-    ? `<div class="env-grid">${items(d).map(e => {
-        const entries = Object.entries(e.balanceByCurrency || {});
-        const [cur, bal] = entries[0] ?? ['USD', 0];
-        const pct = e.targetAmount ? Math.min(100, Math.max(0, (bal / e.targetAmount) * 100)) : null;
-        const isOver = bal < 0;
-        return `<div class="envelope-card"><div class="envelope-header"><div><div class="envelope-name">${esc(e.icon || '📁')} ${esc(e.name)}</div><div class="text-secondary text-sm" style="margin-top:2px">${esc(e.type)} · ${esc(e.periodicity)}</div></div><div style="text-align:right;flex-shrink:0"><div class="${bal < 0 ? 'amount-expense' : bal > 0 ? 'amount-income' : ''}" style="font-weight:700;font-size:15px">${fmt(bal, cur)}</div>${e.targetAmount ? `<div class="text-secondary text-sm">${esc(t('web_env_balance_of_target', { balance: fmt(bal, cur), target: fmt(e.targetAmount, e.targetCurrency || cur) }))}</div>` : ''}</div></div>${pct !== null ? `<div class="progress-bar" style="margin-bottom:12px"><div class="progress-fill ${isOver ? 'over' : ''}" style="width:${pct.toFixed(1)}%"></div></div>` : '<div style="margin-bottom:12px"></div>'}<button class="btn btn-sm btn-outline" onclick="openFundEnvelope('${esc(e.id)}','${esc(cur)}')">${esc(t('web_env_fund'))}</button></div>`;
-      }).join('')}</div>`
-    : empty(t('web_env_empty_title'), t('web_env_empty_sub'));
-  setContent(`<div class="page-header"><h1 class="page-title">${esc(t('nav_envelopes'))}</h1><div style="display:flex;align-items:center;gap:12px"><span class="text-secondary text-sm">${esc(t('web_env_unallocated'))} ${unallocHtml}</span></div></div>${envsHtml}`);
+  cache.unallocated = d.unallocated || {};
+  const period = d.period ? `${fmtDate(d.period.start)} – ${fmtDate(new Date(new Date(d.period.end) - 1))}` : '';
+
+  const cards = cache.envelopes.map(e => {
+    const f = envFigures(e);
+    const kind = f.flexible ? t('web_env_flexible') : t('web_env_spending');
+    return `<div class="card env-card${f.over ? ' over' : ''}">
+      <div class="env-top">
+        ${envChip(e)}
+        <div class="row-main"><div class="env-name">${esc(e.name)}</div><div class="env-kind">${esc(kind)}</div></div>
+      </div>
+      <div>
+        <div class="env-amount num">${esc(fmt(f.bal, f.cur))}</div>
+        <div class="env-kind">${esc(f.over ? t('web_env_overspent') : t('web_env_available'))}</div>
+      </div>
+      ${f.pct != null ? `<div class="bar"><span style="width:${f.pct.toFixed(1)}%;background:${barColor(f)}"></span></div>` : ''}
+      ${f.meta || f.metaEnd ? `<div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
+      <div class="env-foot">
+        <span class="env-cross num">${f.others.map(([c, v]) => esc((v < 0 ? '' : '+ ') + fmt(v, c))).join(' · ')}</span>
+        <button class="btn btn-sm btn-tonal" data-action="fund" data-id="${esc(e.id)}">${IC.plus}${esc(t('web_env_fund'))}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  setContent(`
+    ${pageHead(t('web_nav_budget'), esc(period))}
+    ${rtaBanner(d.unallocated, base, false)}
+    <div class="section-head"><span class="section-title">${esc(t('nav_envelopes'))}</span></div>
+    ${cache.envelopes.length ? `<div class="grid-auto">${cards}</div>` : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`}`);
 }
 
-function openFundEnvelope(id, defaultCurrency) {
-  openModal(t('web_modal_fund'), `
-    <div class="form-group"><label class="form-label">${esc(t('web_form_amount_to_fund'))}</label><input type="number" id="fund-amount" class="form-control" min="0.01" step="0.01" placeholder="${esc(t('web_form_amount_placeholder'))}"></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_currency'))}</label><input type="text" id="fund-currency" class="form-control" maxlength="3" value="${esc(defaultCurrency)}"></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_note'))}</label><input type="text" id="fund-note" class="form-control" placeholder="${esc(t('web_form_optional'))}"></div>`, async () => {
-    const amount = parseFloat(document.getElementById('fund-amount').value);
-    const currency = (document.getElementById('fund-currency').value.trim() || 'USD').toUpperCase();
-    const note = document.getElementById('fund-note').value.trim();
-    if (!amount || amount <= 0) { toast(t('web_val_valid_amount'), true); return; }
-    const res = await api(`/api/envelopes/${id}/fund`, { method: 'POST', body: JSON.stringify({ amount, currency, note }) });
-    if (res) { toast(t('web_toast_env_funded')); invalidateAll(); closeModal(); renderEnvelopes(); }
-  }, t('web_btn_fund_confirm'));
+function openFund(id) {
+  const e = (cache.envelopes || []).find(x => x.id === id);
+  if (!e) return;
+  const f = envFigures(e);
+  const unalloc = cache.unallocated || {};
+  const currencies = [...new Set([f.cur, ...Object.keys(unalloc)])];
+  const available = c => unalloc[c] ?? 0;
+  const toTarget = f.target > 0 ? Math.max(0, f.target - f.bal) : 0;
+
+  openModal({
+    title: t('web_fund_title', { name: e.name }),
+    submit: t('web_env_fund'),
+    body: `
+      <div class="field">
+        <label class="label" for="fund-amount">${esc(t('web_form_amount'))}</label>
+        <div class="input-cur"><input id="fund-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" autofocus><span class="cur" id="fund-cur-badge">${esc(f.cur)}</span></div>
+        <div class="chips">
+          ${toTarget > 0 ? `<button type="button" class="pill" data-fill="${toTarget}">${esc(t('web_fund_to_target'))}</button>` : ''}
+          <button type="button" class="pill" data-fill="all">${esc(t('web_fund_all'))}</button>
+        </div>
+        <div class="help" id="fund-help"></div>
+      </div>
+      ${currencies.length > 1 ? `<div class="field"><label class="label" for="fund-cur">${esc(t('web_form_currency'))}</label>
+        <select id="fund-cur" class="input">${currencies.map(c => `<option value="${esc(c)}"${c === f.cur ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>` : ''}
+      <div class="field"><label class="label" for="fund-note">${esc(t('web_form_note'))}</label><input id="fund-note" class="input" placeholder="${esc(t('web_form_optional'))}" maxlength="500"></div>`,
+    onOpen: form => {
+      const amount = form.querySelector('#fund-amount');
+      const curSel = form.querySelector('#fund-cur');
+      const help = form.querySelector('#fund-help');
+      const cur = () => curSel?.value || f.cur;
+      const update = () => {
+        const v = parseAmount(amount.value);
+        const left = available(cur()) - (Number.isFinite(v) ? v : 0);
+        help.textContent = t('web_fund_available', { amount: fmt(available(cur()), cur()) });
+        help.classList.toggle('warn', left < -0.004);
+        if (left < -0.004) help.textContent = t('web_fund_over', { amount: fmt(left, cur()) });
+        form.querySelector('#fund-cur-badge').textContent = cur();
+      };
+      form.querySelectorAll('[data-fill]').forEach(b => b.addEventListener('click', () => {
+        const v = b.dataset.fill === 'all' ? Math.max(0, available(cur())) : Number(b.dataset.fill);
+        amount.value = amountInputValue(v, cur());
+        update();
+      }));
+      amount.addEventListener('input', update);
+      curSel?.addEventListener('change', update);
+      update();
+    },
+    onSubmit: async form => {
+      const amount = parseAmount(form.querySelector('#fund-amount').value);
+      const currency = form.querySelector('#fund-cur')?.value || f.cur;
+      if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      // Over-funding: the first submit warns and relabels the button; the
+      // second one goes ahead (the app asks the same question).
+      if (amount > available(currency) + 0.004 && form.dataset.confirmedFor !== String(amount)) {
+        form.dataset.confirmedFor = String(amount);
+        form.dataset.okLabel = esc(t('web_fund_anyway'));
+        const help = form.querySelector('#fund-help');
+        help.textContent = t('web_fund_over_msg');
+        help.classList.add('warn');
+        return false;
+      }
+      const r = await api(`/api/envelopes/${encodeURIComponent(id)}/fund`, { method: 'POST', body: { amount, currency, note: form.querySelector('#fund-note').value.trim() } });
+      if (!r) return false;
+      toast(t('web_toast_env_funded'));
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
 }
 
-// ── Recurring ─────────────────────────────────────────────────────────────────
-async function renderRecurring() {
-  setContent(skeleton(5));
-  const [d, accounts, cats] = await Promise.all([api('/api/recurring'), getAccounts(), getCategories()]);
+// ── Transactions ──────────────────────────────────────────────────────────────
+
+let txView = null;
+const PAGE = 40;
+
+function newTxView(accountId = null) {
+  const now = new Date();
+  return { accountId, type: lsGet('bs_tx_type') || '', search: '', year: now.getFullYear(), month: accountId ? -1 : now.getMonth(), page: 1, items: [], hasMore: false, flash: null };
+}
+
+async function renderTransactions(opts = {}) {
+  const accountId = opts.accountId || null;
+  if (!txView || txView.accountId !== accountId) txView = newTxView(accountId);
+  const v = txView;
+  const { accounts } = await refs();
+  if (txView !== v) return;
+  const account = accountId ? accounts.find(a => a.id === accountId) : null;
+
+  const now = new Date();
+  const monthPills = [`<button class="pill${v.month < 0 ? ' active' : ''}" data-month="-1">${esc(t('web_whole_year'))}</button>`]
+    .concat(Array.from({ length: 12 }, (_, i) => i)
+      .filter(i => v.year < now.getFullYear() || i <= now.getMonth())
+      .map(i => `<button class="pill${v.month === i ? ' active' : ''}" data-month="${i}">${esc(monthShort(i))}</button>`));
+
+  const head = account
+    ? `<a class="back-link" href="#/accounts">${IC.back}${esc(t('nav_accounts'))}</a>
+       ${pageHead(account.name, `<span class="num">${esc(fmt(account.balance, account.currency))}</span>`,
+         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`)}`
+    : pageHead(t('nav_transactions'), '',
+        `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+         <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`);
+
+  setContent(`
+    ${head}
+    <div class="toolbar">
+      <label class="search">${IC.search}<span class="sr-only">${esc(t('web_tx_search'))}</span>
+        <input id="tx-search" class="input" type="search" placeholder="${esc(t('web_tx_search'))}" value="${esc(v.search)}" autocomplete="off"></label>
+      <div class="seg" id="tx-type">
+        ${[['', 'type_all'], ['expense', 'type_expense'], ['income', 'type_income'], ['transfer', 'type_transfer']]
+          .map(([k, l]) => `<button type="button" data-type="${k}" class="${v.type === k ? 'active' : ''}">${esc(t(l))}</button>`).join('')}
+      </div>
+    </div>
+    ${account ? '' : `<div class="month-bar">
+      <button class="icon-btn" data-year="-1" aria-label="${esc(t('web_prev_year'))}"><span class="flip-rtl" style="display:inline-grid">${IC.left}</span></button>
+      <span class="year num">${v.year}</span>
+      <button class="icon-btn" data-year="1" aria-label="${esc(t('web_next_year'))}" ${v.year >= now.getFullYear() ? 'disabled style="opacity:.3"' : ''}><span class="flip-rtl" style="display:inline-grid">${IC.right}</span></button>
+      <div class="months">${monthPills.join('')}</div>
+    </div>`}
+    <div id="tx-results">${skeleton(7)}</div>`);
+
+  const search = document.getElementById('tx-search');
+  let timer;
+  search.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { v.search = search.value.trim(); loadTx(true); }, 350);
+  });
+  document.getElementById('tx-type').addEventListener('click', e => {
+    const b = e.target.closest('[data-type]'); if (!b) return;
+    v.type = b.dataset.type; lsSet('bs_tx_type', v.type);
+    document.querySelectorAll('#tx-type button').forEach(x => x.classList.toggle('active', x === b));
+    loadTx(true);
+  });
+  document.querySelector('.month-bar')?.addEventListener('click', e => {
+    const m = e.target.closest('[data-month]');
+    const y = e.target.closest('[data-year]');
+    if (m) { v.month = Number(m.dataset.month); }
+    else if (y && !y.disabled) {
+      v.year += Number(y.dataset.year);
+      if (v.year === now.getFullYear() && v.month > now.getMonth()) v.month = now.getMonth();
+    } else return;
+    renderTransactions({ accountId });
+  });
+  if (opts.focusSearch) search.focus();
+  loadTx(true);
+}
+
+function txQuery(page, limit = PAGE) {
+  const v = txView;
+  const p = new URLSearchParams({ page, limit });
+  if (v.type) p.set('type', v.type);
+  if (v.search) p.set('search', v.search);
+  if (v.accountId) p.set('accountId', v.accountId);
+  if (v.month >= 0) {
+    p.set('from', dayKey(new Date(v.year, v.month, 1)));
+    p.set('to', dayKey(new Date(v.year, v.month + 1, 1)));
+  } else if (!v.accountId) {
+    p.set('from', dayKey(new Date(v.year, 0, 1)));
+    p.set('to', dayKey(new Date(v.year + 1, 0, 1)));
+  }
+  return p.toString();
+}
+
+async function loadTx(reset) {
+  const v = txView;
+  if (!v) return;
+  if (reset) { v.page = 1; v.items = []; }
+  const d = await api(`/api/transactions?${txQuery(v.page)}`);
+  if (!d || txView !== v) return;
+  state.baseCurrency = d.baseCurrency || state.baseCurrency;
+  v.items = reset ? d.items : v.items.concat(d.items);
+  v.hasMore = !!d.hasMore;
+  drawTx();
+}
+
+function drawTx() {
+  const v = txView;
+  const box = document.getElementById('tx-results');
+  if (!box) return;
+  const visible = v.items.filter(tx => !pendingDeletes.has(tx.id));
+  if (!visible.length) {
+    box.innerHTML = `<div class="card">${emptyState(IC.receipt, v.search ? t('web_tx_no_match') : t('web_tx_empty_title'), v.search ? '' : t('web_tx_empty_sub'), v.search ? null : { action: 'add-tx', label: t('web_tx_add') })}</div>`;
+    return;
+  }
+  const groups = [];
+  for (const tx of visible) {
+    const k = dayKey(tx.date);
+    if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, date: tx.date, items: [] });
+    groups[groups.length - 1].items.push(tx);
+  }
+  box.innerHTML = `<div class="card card-flush list">
+    ${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.date))}</span></div>${g.items.map(tx => txRow(tx, state.baseCurrency, { actions: true })).join('')}`).join('')}
+    ${v.hasMore ? `<div class="load-more"><button class="btn btn-tonal" data-action="more-tx">${esc(t('web_load_more'))}</button></div>` : ''}
+  </div>`;
+  if (v.flash) {
+    const row = box.querySelector(`[data-id="${CSS.escape(v.flash)}"]`);
+    row?.classList.add('flash');
+    v.flash = null;
+  }
+}
+
+// Deleting waits 5 s so Undo can cancel it (like the app's SnackBar).
+const pendingDeletes = new Map();
+
+function deleteTx(id) {
+  if (pendingDeletes.has(id)) return;
+  const timer = setTimeout(() => commitDelete(id), 5200);
+  pendingDeletes.set(id, timer);
+  if (txView) drawTx();
+  else document.querySelectorAll(`[data-action="edit-tx"][data-id="${CSS.escape(id)}"]`).forEach(r => r.classList.add('hidden'));
+  toast(t('web_toast_tx_deleted'), false, {
+    label: t('web_undo'),
+    run: () => {
+      clearTimeout(pendingDeletes.get(id));
+      pendingDeletes.delete(id);
+      if (txView) drawTx(); else refresh(true);
+    },
+  });
+}
+
+async function commitDelete(id, keepalive = false) {
+  if (!pendingDeletes.has(id)) return;
+  clearTimeout(pendingDeletes.get(id));
+  pendingDeletes.delete(id);
+  if (keepalive) {
+    fetch(`/api/transactions/${encodeURIComponent(id)}`, { method: 'DELETE', keepalive: true, headers: { Authorization: `Bearer ${state.token}` } }).catch(() => {});
+    return;
+  }
+  const r = await api(`/api/transactions/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  if (!r) { refresh(true); return; }
+  if (txView) txView.items = txView.items.filter(x => x.id !== id);
+  delete cache.accounts;
+}
+
+window.addEventListener('pagehide', () => { for (const id of [...pendingDeletes.keys()]) commitDelete(id, true); });
+
+async function exportTx() {
+  if (!txView) txView = newTxView();
+  toast(t('web_csv_preparing'));
+  const rows = [];
+  for (let page = 1; page <= 25; page++) {
+    const d = await api(`/api/transactions?${txQuery(page, 200)}`);
+    if (!d) return;
+    rows.push(...d.items);
+    if (!d.hasMore) break;
+  }
+  const head = ['date', 'type', 'title', 'category', 'account', 'to_account', 'amount', 'currency', `amount_${state.baseCurrency}`];
+  const lines = rows.map(tx => {
+    const cur = tx.lineCount > 1 ? tx.currency : (tx.lineCurrency || tx.currency);
+    const amt = tx.lineCount > 1 ? tx.amount : (tx.lineAmount ?? tx.amount);
+    const rate = tx.type === 'transfer' ? null : (tx.lineExchangeRate ?? tx.exchangeRateToBase);
+    const inBase = cur === state.baseCurrency ? amt : rate && Math.abs(rate - 1) > 0.001 ? amt * rate : '';
+    const sign = tx.type === 'expense' ? -1 : 1;
+    return [dayKey(tx.date), tx.type, tx.note, tx.categoryName, tx.accountName, tx.destinationAccountName,
+      (sign * amt).toFixed(decimalsFor(cur)), cur, inBase === '' ? '' : (sign * inBase).toFixed(2)];
+  });
+  downloadCsv(`budgetseal-transactions-${dayKey()}.csv`, [head, ...lines]);
+}
+
+function downloadCsv(name, rows) {
+  const csv = rows.map(r => r.map(c => {
+    const s = String(c ?? '');
+    return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }).join(',')).join('\r\n');
+  // BOM so Excel opens UTF-8 (Arabic, €) correctly.
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(t('web_csv_done', { n: rows.length - 1 }));
+}
+
+// ── Transaction form ──────────────────────────────────────────────────────────
+
+function categoryOptions(cats, type, selected) {
+  const ofType = cats.filter(c => (type === 'income') === (c.transactionType === 'income'));
+  const ids = new Set(ofType.map(c => c.id));
+  const roots = ofType.filter(c => !c.parentId || !ids.has(c.parentId));
+  const kids = id => ofType.filter(c => c.parentId === id);
+  const label = c => `${isEmoji(c.icon) ? c.icon + '  ' : ''}${c.name}`;
+  let html = `<option value="">${esc(t('web_form_no_category'))}</option>`;
+  for (const r of roots) {
+    html += `<option value="${esc(r.id)}"${r.id === selected ? ' selected' : ''}>${esc(label(r))}</option>`;
+    for (const k of kids(r.id)) html += `<option value="${esc(k.id)}"${k.id === selected ? ' selected' : ''}>&nbsp;&nbsp;&nbsp;&nbsp;${esc(label(k))}</option>`;
+  }
+  return html;
+}
+
+function accountOptions(accounts, selected, exclude) {
+  return accounts.filter(a => a.id !== exclude)
+    .map(a => `<option value="${esc(a.id)}"${a.id === selected ? ' selected' : ''}>${esc(a.name)} · ${esc(a.currency)}</option>`).join('');
+}
+
+/** Add / edit / duplicate. `pre` is a transaction from GET /api/transactions/:id. */
+async function openTxForm(pre = null, mode = 'add') {
+  const { accounts, categories } = await refs();
+  if (!accounts.length) {
+    toast(t('web_need_account'), true);
+    return;
+  }
+  const base = state.baseCurrency;
+  const editing = mode === 'edit';
+  const split = editing && pre?.lineCount > 1;
+  let type = pre?.type || lsGet('bs_last_type') || 'expense';
+  if (!['expense', 'income', 'transfer'].includes(type)) type = 'expense';
+  const lastAcct = lsGet('bs_last_account');
+  const acctId = pre?.accountId || (accounts.some(a => a.id === lastAcct) ? lastAcct : accounts[0].id);
+  const destId = pre?.destinationAccountId || accounts.find(a => a.id !== acctId)?.id || '';
+  const amount = pre ? (pre.type === 'transfer' || split ? pre.amount : (pre.lineAmount ?? pre.amount)) : '';
+  const cur = pre ? (pre.type === 'transfer' ? pre.currency : (pre.lineCurrency || pre.currency)) : null;
+  const rate = pre && pre.type !== 'transfer' ? (pre.lineExchangeRate ?? pre.exchangeRateToBase) : null;
+  const received = pre?.type === 'transfer' && pre.destinationCurrency && pre.destinationCurrency !== pre.currency ? pre.amount * pre.exchangeRateToBase : '';
+  const date = mode === 'dup' || !pre ? dayKey() : dayKey(pre.date);
+  const currencies = [...new Set([base, ...accounts.map(a => a.currency)])];
+
+  const linesBox = split ? `<div class="lines-box">${pre.lines.map(l => `
+      <div class="row">${catChip(l, 'sm')}<div class="row-main"><div class="row-title">${esc(l.categoryName || t('web_form_no_category'))}</div><div class="row-sub">${esc([l.note, l.accountName].filter(Boolean).join(' · '))}</div></div>
+      <div class="row-amount num">${esc(fmt(l.amount, l.currency))}</div></div>`).join('')}</div>
+      <p class="help" style="margin:-6px 0 14px">${esc(t('web_tx_split_hint'))}</p>` : '';
+
+  const title = editing ? t(`web_tx_edit_${type}`) : t(`web_tx_new_${type}`);
+  const form = openModal({
+    title,
+    submit: editing ? t('common_save') : t('web_tx_add_short'),
+    extra: editing ? { label: t('common_delete'), run: () => { closeModal(); deleteTx(pre.id); } }
+      : { label: t('web_save_add_another'), run: f => f.dispatchEvent(new CustomEvent('submit-another', { cancelable: true })) },
+    body: `
+      <div class="field"><div class="seg full" id="f-type" role="tablist">
+        ${['expense', 'income', 'transfer'].map(k => `<button type="button" data-type="${k}" class="${type === k ? 'active' : ''}"${split && k === 'transfer' ? ' disabled' : ''}>${esc(t(`type_${k}`))}</button>`).join('')}
+      </div></div>
+      ${linesBox}
+      <div class="field${split ? ' hidden' : ''}">
+        <label class="label" for="f-amount">${esc(t('web_form_amount'))}</label>
+        <div class="field-row keep" style="gap:10px">
+          <div class="field" style="margin:0;flex:3"><input id="f-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" value="${esc(amountInputValue(amount, cur))}" ${split ? 'disabled' : 'autofocus'}></div>
+          <div class="field" style="margin:0;flex:1;min-width:96px" id="fg-cur"><select id="f-cur" class="input" aria-label="${esc(t('web_form_currency'))}" ${split ? 'disabled' : ''}>${currencies.map(c => `<option${c === cur ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+        </div>
+        <div class="help" id="f-amount-help"></div>
+      </div>
+      <div class="field" id="fg-rate">
+        <label class="label" for="f-rate" id="f-rate-label"></label>
+        <input id="f-rate" class="input num" inputmode="decimal" autocomplete="off" value="${esc(rate && Math.abs(rate - 1) > 0.000001 ? String(rate).replace('.', NUM.decimal) : '')}" placeholder="${esc(t('web_form_rate_auto'))}">
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="f-account" id="f-account-label"></label><select id="f-account" class="input">${accountOptions(accounts, acctId)}</select></div>
+        <div class="field" id="fg-dest"><label class="label" for="f-dest">${esc(t('web_form_to_account'))}</label><select id="f-dest" class="input">${accountOptions(accounts, destId)}</select></div>
+        <div class="field" id="fg-cat"><label class="label" for="f-cat">${esc(t('web_form_category'))}</label><select id="f-cat" class="input" ${split ? 'disabled' : ''}></select></div>
+      </div>
+      <div class="field" id="fg-received">
+        <label class="label" for="f-received" id="f-received-label"></label>
+        <input id="f-received" class="input num" inputmode="decimal" autocomplete="off" value="${esc(amountInputValue(received, pre?.destinationCurrency))}">
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="f-date">${esc(t('web_form_date'))}</label><input id="f-date" type="date" class="input" value="${esc(date)}" max="${esc(dayKey(new Date(Date.now() + 366 * 864e5)))}">
+          <div class="chips"><button type="button" class="pill" data-day="0">${esc(t('common_today'))}</button><button type="button" class="pill" data-day="1">${esc(t('common_yesterday'))}</button></div></div>
+        <div class="field"><label class="label" for="f-note">${esc(t('web_form_title'))}</label><input id="f-note" class="input" maxlength="500" value="${esc(pre?.note || '')}" placeholder="${esc(t('web_form_optional'))}"></div>
+      </div>`,
+    onOpen: f => wireTxForm(f, { accounts, categories, pre, split, type, cur, mode }),
+    onSubmit: f => saveTx(f, { pre, mode, split }),
+  });
+  form.addEventListener('submit-another', () => saveTx(form, { pre, mode, split, again: true }));
+}
+
+function wireTxForm(f, ctx) {
+  const $ = s => f.querySelector(s);
+  let type = ctx.type;
+  let curTouched = !!ctx.cur;
+  const acct = () => ctx.accounts.find(a => a.id === $('#f-account').value);
+  const dest = () => ctx.accounts.find(a => a.id === $('#f-dest').value);
+
+  function sync() {
+    const isT = type === 'transfer';
+    f.querySelectorAll('#f-type button').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+    $('#modal-title').textContent = t(`web_tx_${ctx.mode === 'edit' ? 'edit' : 'new'}_${type}`);
+    $('#fg-dest').classList.toggle('hidden', !isT);
+    $('#fg-cat').classList.toggle('hidden', isT || ctx.split);
+    $('#fg-cur').classList.toggle('hidden', isT);
+    $('#f-account-label').textContent = isT ? t('web_form_from_account') : t('web_form_account');
+    if (!isT) {
+      const sel = $('#f-cat').value || ctx.pre?.categoryId || '';
+      $('#f-cat').innerHTML = categoryOptions(ctx.categories, type, sel);
+    }
+    const a = acct();
+    // The amount is in the account's currency unless the user picked another.
+    if (!curTouched && a && !isT) $('#f-cur').value = a.currency;
+    const cur = isT ? a?.currency : $('#f-cur').value;
+    $('#f-amount-help').textContent = isT && a ? t('web_form_in_currency', { cur: a.currency }) : '';
+    const showRate = !isT && cur && cur !== state.baseCurrency;
+    $('#fg-rate').classList.toggle('hidden', !showRate);
+    if (showRate) $('#f-rate-label').textContent = t('web_form_rate_label', { cur, base: state.baseCurrency });
+    const d = dest();
+    const showReceived = isT && a && d && a.currency !== d.currency;
+    $('#fg-received').classList.toggle('hidden', !showReceived);
+    if (showReceived) $('#f-received-label').textContent = t('web_form_received', { cur: d.currency });
+  }
+
+  f.querySelector('#f-type').addEventListener('click', e => {
+    const b = e.target.closest('[data-type]');
+    if (!b || b.disabled) return;
+    type = b.dataset.type;
+    f.dataset.type = type;
+    sync();
+  });
+  $('#f-cur').addEventListener('change', () => { curTouched = true; sync(); });
+  $('#f-account').addEventListener('change', () => {
+    if ($('#f-dest').value === $('#f-account').value) {
+      const other = ctx.accounts.find(a => a.id !== $('#f-account').value);
+      if (other) $('#f-dest').value = other.id;
+    }
+    curTouched = false;
+    sync();
+  });
+  $('#f-dest').addEventListener('change', sync);
+  f.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
+    const d = new Date(); d.setDate(d.getDate() - Number(b.dataset.day));
+    $('#f-date').value = dayKey(d);
+  }));
+  f.dataset.type = type;
+  sync();
+}
+
+async function saveTx(f, { pre, mode, split, again = false }) {
+  const $ = s => f.querySelector(s);
+  const type = f.dataset.type;
+  const editing = mode === 'edit';
+  const body = { type, accountId: $('#f-account').value, note: $('#f-note').value.trim(), date: $('#f-date').value || dayKey() };
+  if (!body.accountId) { toast(t('web_val_select_account'), true); return false; }
+  if (!split) {
+    const amount = parseAmount($('#f-amount').value);
+    if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); $('#f-amount').focus(); return false; }
+    body.amount = amount;
+  }
+  if (type === 'transfer') {
+    body.destinationAccountId = $('#f-dest').value;
+    if (!body.destinationAccountId) { toast(t('web_val_select_dest'), true); return false; }
+    if (body.destinationAccountId === body.accountId) { toast(t('web_val_accounts_differ'), true); return false; }
+    if (!$('#fg-received').classList.contains('hidden')) {
+      const received = parseAmount($('#f-received').value);
+      if (!(received > 0)) { toast(t('web_val_received'), true); $('#f-received').focus(); return false; }
+      body.exchangeRateToBase = received / body.amount;
+    }
+  } else if (!split) {
+    body.currency = $('#f-cur').value;
+    body.categoryId = $('#f-cat').value || null;
+    if (!$('#fg-rate').classList.contains('hidden')) {
+      const rate = parseAmount($('#f-rate').value);
+      if ($('#f-rate').value.trim() && !(rate > 0)) { toast(t('web_val_rate'), true); return false; }
+      if (rate > 0) body.exchangeRateToBase = rate;
+    } else {
+      body.exchangeRateToBase = 1;
+    }
+  }
+  const r = editing
+    ? await api(`/api/transactions/${encodeURIComponent(pre.id)}`, { method: 'PUT', body })
+    : await api('/api/transactions', { method: 'POST', body });
+  if (!r) return false;
+  lsSet('bs_last_account', body.accountId);
+  lsSet('bs_last_type', type);
+  toast(editing ? t('web_toast_tx_updated') : t('web_toast_tx_added'));
+  delete cache.accounts;
+  if (txView) { txView.flash = r.id; loadTx(true); }
+  else refresh(true);
+  if (again) {
+    // Keep type, account and date; clear the rest for the next entry.
+    $('#f-amount').value = '';
+    $('#f-note').value = '';
+    $('#f-received').value = '';
+    delete f.dataset.dirty;
+    $('#f-amount').focus();
+    return false;
+  }
+  return true;
+}
+
+async function editTx(id, dup = false) {
+  const d = await api(`/api/transactions/${encodeURIComponent(id)}`);
   if (!d) return;
-  cache._recurringItems = d.items;
-  const rows = items(d).length
-    ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td>${esc(r.title || '—')}</td><td>${typeBadge(r.type)}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap" title="${r.enabled ? t('web_toggle_enabled') : t('web_toggle_disabled')}"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleRecurring('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditRecurring('${esc(r.id)}')">${esc(t('common_edit'))}</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteRecurring('${esc(r.id)}')">${esc(t('web_tx_del'))}</button></td></tr>`; }).join('')
-    : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-secondary)">${esc(t('web_recurring_empty'))}<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddRecurring()">${esc(t('web_tx_add'))}</button></td></tr>`;
-  setContent(`<div class="page-header"><h1 class="page-title">${esc(t('nav_recurring'))}</h1><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="exportCSV()" title="${esc(t('web_tx_csv_tooltip'))}">${esc(t('web_tx_csv'))}</button><button class="btn btn-primary" onclick="openAddRecurring()">${esc(t('web_tx_add'))}</button></div></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>${esc(t('web_tx_th_title'))}</th><th>${esc(t('web_tx_th_type'))}</th><th>${esc(t('web_tx_th_account'))}</th><th>${esc(t('web_tx_th_category'))}</th><th>${esc(t('web_th_frequency'))}</th><th>${esc(t('web_tx_th_amount'))}</th><th>${esc(t('web_th_next_due'))}</th><th>${esc(t('web_th_on'))}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  openTxForm(d, dup ? 'dup' : 'edit');
 }
 
-function _recurFormHtml(pre = null, isSub = false) {
-  const accounts = cache.accounts || []; const cats = cache.categories || []; const type = pre?.type || 'expense';
-  const acctOpts = accounts.map(a => `<option value="${a.id}" ${pre?.accountId === a.id ? 'selected' : ''}>${esc(a.name)} (${esc(a.currency)})</option>`).join('');
-  const catOpts = `<option value="">${esc(t('web_form_none'))}</option>` + cats.map(c => `<option value="${c.id}" ${pre?.categoryId === c.id ? 'selected' : ''}>${_isEmoji(c.icon) ? esc(c.icon) + ' ' : ''}${esc(c.name)}</option>`).join('');
-  return `${!isSub ? `<div class="form-group"><label class="form-label">${esc(t('web_form_type'))}</label><div class="type-tabs"><button type="button" class="type-tab${type === 'expense' ? ' active' : ''}" data-type="expense">${esc(t('type_expense'))}</button><button type="button" class="type-tab${type === 'income' ? ' active' : ''}" data-type="income">${esc(t('type_income'))}</button><button type="button" class="type-tab${type === 'transfer' ? ' active' : ''}" data-type="transfer">${esc(t('type_transfer'))}</button></div></div>` : ''}
-    <div class="form-group"><label class="form-label">${esc(t('web_form_title_label'))}</label><input type="text" id="rec-title" class="form-control" value="${esc(pre?.title || '')}" placeholder="${esc(t('web_form_title_hint'))}"></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_account'))}</label><select id="rec-account" class="form-control">${acctOpts}</select></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_category'))}</label><select id="rec-cat" class="form-control">${catOpts}</select></div>
-    <div style="display:flex;gap:12px"><div class="form-group" style="flex:1"><label class="form-label">${esc(t('web_form_amount'))}</label><input type="number" id="rec-amount" class="form-control" min="0.01" step="0.01" value="${esc(pre?.amount || '')}" placeholder="${esc(t('web_form_amount_placeholder'))}"></div><div class="form-group" style="width:80px"><label class="form-label">${esc(t('web_form_currency'))}</label><input type="text" id="rec-currency" class="form-control" maxlength="3" value="${esc(pre?.currency || 'USD')}"></div></div>
-    <div style="display:flex;gap:12px"><div class="form-group" style="flex:1"><label class="form-label">${esc(t('web_form_frequency'))}</label><select id="rec-freq" class="form-control">${['daily','weekly','monthly','yearly'].map(f => `<option value="${f}" ${pre?.frequency === f ? 'selected' : ''}>${{daily:t('freq_daily'),weekly:t('freq_weekly'),monthly:t('freq_monthly'),yearly:t('freq_yearly')}[f]}</option>`).join('')}</select></div><div class="form-group" style="width:70px"><label class="form-label">${esc(t('web_form_every'))}</label><input type="number" id="rec-interval" class="form-control" value="${esc(pre?.interval || '1')}" min="1" max="99"></div></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_start_date'))}</label><input type="date" id="rec-start" class="form-control" value="${pre?.nextDueDate ? pre.nextDueDate.slice(0,10) : todayISO()}"></div>
-    <div class="form-group"><label class="form-label">${esc(t('web_form_note'))}</label><input type="text" id="rec-note" class="form-control" value="${esc(pre?.note || '')}" placeholder="${esc(t('web_form_optional'))}"></div>`;
+// ── Accounts ──────────────────────────────────────────────────────────────────
+
+async function renderAccounts(quiet) {
+  if (!quiet) setContent(pageHead(t('nav_accounts'), '') + skeleton(5));
+  const d = await api('/api/accounts');
+  if (!d || state.route !== '#/accounts') return;
+  cache.accounts = d.items || [];
+  const add = `<button class="btn btn-primary" data-action="add-account">${IC.plus}${esc(t('web_acct_add'))}</button>`;
+  if (!cache.accounts.length) {
+    setContent(pageHead(t('nav_accounts'), '', add) + `<div class="card">${emptyState(IC.wallet, t('web_acct_empty_title'), t('web_acct_empty_sub'), { action: 'add-account', label: t('web_acct_add') })}</div>`);
+    return;
+  }
+  const worth = {};
+  cache.accounts.forEach(a => { worth[a.currency] = (worth[a.currency] || 0) + a.balance; });
+  const order = ['bank', 'cash', 'credit', 'wallet'];
+  const groups = {};
+  cache.accounts.forEach(a => { (groups[order.includes(a.type) ? a.type : 'wallet'] ||= []).push(a); });
+
+  setContent(`
+    ${pageHead(t('nav_accounts'), '', add)}
+    <div class="stats">${Object.entries(worth).map(([c, v]) => `
+      <div class="card stat"><div class="label">${esc(t('web_net_worth_cur', { cur: c }))}</div><div class="value num${v < 0 ? ' expense' : ''}">${esc(fmt(v, c))}</div></div>`).join('')}</div>
+    ${order.filter(k => groups[k]).map(k => `
+      <div class="section-head"><span class="section-title">${esc(t(`web_acct_group_${k}`))}</span></div>
+      <div class="card card-flush list">${groups[k].map(a => `
+        <a class="row clickable" href="#/accounts/${esc(a.id)}">
+          <span class="type-icon">${a.isTravel ? IC.plane : TYPE_ICON[a.type] || IC.wallet}</span>
+          <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${esc(a.currency)}${a.isTravel ? ` · ${esc(t('web_acct_travel'))}` : ''}</div></div>
+          <div class="row-end"><div class="row-amount${a.balance < 0 ? ' expense' : ''}">${esc(fmt(a.balance, a.currency))}</div></div>
+          <span class="chev hint" style="display:inline-grid">${IC.right}</span>
+        </a>`).join('')}</div>`).join('')}`);
 }
 
-async function openAddRecurring() {
-  await Promise.all([getAccounts(), getCategories()]);
-  openModal(t('web_modal_add_recurring'), _recurFormHtml(), async () => {
-    const type = document.querySelector('.type-tab.active')?.dataset.type || 'expense';
-    const body = _readRecurForm(type, false); if (!body) return;
-    const res = await api('/api/recurring', { method: 'POST', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_recurring_added')); closeModal(); renderRecurring(); }
+function openAddAccount() {
+  const currencies = [...new Set([state.baseCurrency, ...(cache.accounts || []).map(a => a.currency)])];
+  openModal({
+    title: t('web_acct_new'),
+    submit: t('web_acct_add'),
+    body: `
+      <div class="field"><label class="label" for="a-name">${esc(t('web_form_name'))}</label><input id="a-name" class="input" maxlength="100" placeholder="${esc(t('web_acct_name_hint'))}" autofocus></div>
+      <div class="field"><label class="label">${esc(t('web_form_type'))}</label><div class="seg full" id="a-type">
+        ${['bank', 'cash', 'credit', 'wallet'].map((k, i) => `<button type="button" data-type="${k}" class="${i === 0 ? 'active' : ''}">${esc(t(`web_acct_type_${k}`))}</button>`).join('')}
+      </div></div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="a-cur">${esc(t('web_form_currency'))}</label>
+          <input id="a-cur" class="input" maxlength="3" list="a-cur-list" value="${esc(state.baseCurrency)}" style="text-transform:uppercase" autocomplete="off">
+          <datalist id="a-cur-list">${currencies.concat(['USD', 'EUR', 'GBP', 'LBP', 'AED', 'SAR', 'EGP', 'TRY', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'BRL']).filter((c, i, l) => l.indexOf(c) === i).map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
+        <div class="field"><label class="label" for="a-bal">${esc(t('web_acct_opening'))}</label><input id="a-bal" class="input num" inputmode="decimal" placeholder="0" autocomplete="off">
+          <div class="help">${esc(t('web_acct_opening_hint'))}</div></div>
+      </div>`,
+    onOpen: f => f.querySelector('#a-type').addEventListener('click', e => {
+      const b = e.target.closest('[data-type]'); if (!b) return;
+      f.querySelectorAll('#a-type button').forEach(x => x.classList.toggle('active', x === b));
+    }),
+    onSubmit: async f => {
+      const name = f.querySelector('#a-name').value.trim();
+      const currency = f.querySelector('#a-cur').value.trim().toUpperCase();
+      if (!name) { toast(t('web_val_name_required'), true); return false; }
+      if (!/^[A-Z]{3}$/.test(currency)) { toast(t('web_val_currency'), true); return false; }
+      const raw = f.querySelector('#a-bal').value.trim();
+      const initialBalance = raw ? parseAmount(raw) : 0;
+      if (!Number.isFinite(initialBalance)) { toast(t('web_val_valid_amount'), true); return false; }
+      const type = f.querySelector('#a-type .active').dataset.type;
+      const r = await api('/api/accounts', { method: 'POST', body: { name, type, currency, initialBalance } });
+      if (!r) return false;
+      toast(t('web_toast_acct_added'));
+      refresh(true);
+      return true;
+    },
   });
-  document.querySelectorAll('.type-tab').forEach(tab => tab.addEventListener('click', () => document.querySelectorAll('.type-tab').forEach(tt => tt.classList.toggle('active', tt === tab))));
 }
 
-function openEditRecurring(id) {
-  const r = (cache._recurringItems || []).find(x => x.id === id); if (!r) { toast(t('web_toast_not_found'), true); return; }
-  openModal(t('web_modal_edit_recurring'), `<div class="form-group"><label class="form-label">${esc(t('web_form_title_label'))}</label><input type="text" id="rec-title" class="form-control" value="${esc(r.title || '')}"></div><div class="form-group"><label class="form-label">${esc(t('web_form_amount'))}</label><input type="number" id="rec-amount" class="form-control" value="${esc(r.amount)}" min="0.01" step="0.01"></div><div class="form-group"><label class="form-label">${esc(t('web_form_note'))}</label><input type="text" id="rec-note" class="form-control" value="${esc(r.note || '')}"></div>`, async () => {
-    const body = { title: document.getElementById('rec-title').value.trim(), amount: parseFloat(document.getElementById('rec-amount').value), note: document.getElementById('rec-note').value.trim() };
-    const res = await api(`/api/recurring/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_updated')); closeModal(); renderRecurring(); }
+// ── Categories ────────────────────────────────────────────────────────────────
+
+const CAT_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#F97316', '#14B8A6', '#64748B',
+  '#84CC16', '#78716C', '#D946EF', '#0EA5E9', '#E11D48', '#22C55E', '#EAB308', '#3B82F6', '#9333EA', '#90A4AE'];
+let catType = 'expense';
+
+async function renderCategories(quiet) {
+  if (!quiet) setContent(pageHead(t('nav_categories'), '') + skeleton(6));
+  const d = await api('/api/categories');
+  if (!d || state.route !== '#/categories') return;
+  cache.categories = d.items || [];
+  const all = cache.categories;
+  const ofType = all.filter(c => (catType === 'income') === (c.transactionType === 'income'));
+  const ids = new Set(ofType.map(c => c.id));
+  const roots = ofType.filter(c => !c.parentId || !ids.has(c.parentId));
+  const kids = id => ofType.filter(c => c.parentId === id);
+
+  const cards = roots.map(r => {
+    const children = kids(r.id);
+    return `<div class="card cat-card">
+      <div class="row clickable" data-action="edit-cat" data-id="${esc(r.id)}" tabindex="0">
+        ${catChip(r)}
+        <div class="row-main"><div class="row-title">${esc(r.name)}</div>
+          <div class="row-sub">${children.length ? esc(t('web_cat_subs', { n: children.length })) : esc(t('web_cat_no_subs'))}</div></div>
+        <span class="icon-btn" aria-hidden="true">${IC.edit}</span>
+      </div>
+      ${children.length ? `<div class="cat-children">${children.map(c => `
+        <div class="row clickable" data-action="edit-cat" data-id="${esc(c.id)}" tabindex="0">${catChip(c, 'sm')}<div class="row-main"><div class="row-title" style="font-weight:600">${esc(c.name)}</div></div></div>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  setContent(`
+    ${pageHead(t('nav_categories'), '', `<button class="btn btn-primary" data-action="add-cat">${IC.plus}${esc(t('web_cat_add'))}</button>`)}
+    <div class="toolbar"><div class="seg" id="cat-type">
+      <button type="button" data-type="expense" class="${catType === 'expense' ? 'active' : ''}">${esc(t('type_expense'))}</button>
+      <button type="button" data-type="income" class="${catType === 'income' ? 'active' : ''}">${esc(t('type_income'))}</button>
+    </div></div>
+    ${roots.length ? `<div class="grid-auto">${cards}</div>` : `<div class="card">${emptyState(IC.tag, t('web_cat_empty_title'), t('web_cat_empty_sub'), { action: 'add-cat', label: t('web_cat_add') })}</div>`}`);
+  document.getElementById('cat-type').addEventListener('click', e => {
+    const b = e.target.closest('[data-type]'); if (!b) return;
+    catType = b.dataset.type;
+    renderCategories(true);
   });
 }
 
-function _readRecurForm(type, isSub) {
-  const accountId = document.getElementById('rec-account')?.value;
-  const amount = parseFloat(document.getElementById('rec-amount').value);
-  const currency = (document.getElementById('rec-currency').value.trim() || 'USD').toUpperCase();
-  const startDate = document.getElementById('rec-start').value;
-  if (!accountId) { toast(t('web_val_select_account'), true); return null; }
-  if (!amount || amount <= 0) { toast(t('web_val_valid_amount'), true); return null; }
-  if (!startDate) { toast(t('web_val_select_start_date'), true); return null; }
-  return { type: isSub ? 'expense' : type, title: document.getElementById('rec-title').value.trim(), accountId, categoryId: document.getElementById('rec-cat')?.value || undefined, amount, currency, frequency: document.getElementById('rec-freq').value, interval: parseInt(document.getElementById('rec-interval').value) || 1, startDate, note: document.getElementById('rec-note').value.trim(), isSubscription: isSub };
+function openCategoryForm(c = null) {
+  const all = cache.categories || [];
+  const hasKids = c && all.some(x => x.parentId === c.id);
+  let type = c?.transactionType === 'income' ? 'income' : c ? 'expense' : catType;
+  let color = c?.colorHex ? safeHex(c.colorHex) : CAT_COLORS[0];
+  const parents = tp => all.filter(x => !x.parentId && x.id !== c?.id && (tp === 'income') === (x.transactionType === 'income'));
+  const parentOpts = tp => `<option value="">${esc(t('web_cat_top_level'))}</option>` + parents(tp)
+    .map(p => `<option value="${esc(p.id)}"${p.id === c?.parentId ? ' selected' : ''}>${esc((isEmoji(p.icon) ? p.icon + '  ' : '') + p.name)}</option>`).join('');
+
+  openModal({
+    title: c ? t('web_cat_edit') : t('web_cat_new'),
+    submit: c ? t('common_save') : t('web_cat_add'),
+    body: `
+      <div class="field" style="display:flex;justify-content:center"><span id="c-preview"></span></div>
+      <div class="field"><label class="label" for="c-name">${esc(t('web_form_name'))}</label><input id="c-name" class="input" maxlength="100" value="${esc(c?.name || '')}" placeholder="${esc(t('web_cat_name_hint'))}" autofocus></div>
+      <div class="field"><div class="seg full" id="c-type">
+        <button type="button" data-type="expense" class="${type === 'expense' ? 'active' : ''}">${esc(t('type_expense'))}</button>
+        <button type="button" data-type="income" class="${type === 'income' ? 'active' : ''}">${esc(t('type_income'))}</button>
+      </div></div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="c-parent">${esc(t('web_cat_parent'))}</label><select id="c-parent" class="input" ${hasKids ? 'disabled' : ''}>${parentOpts(type)}</select>
+          ${hasKids ? `<div class="help">${esc(t('web_cat_parent_locked'))}</div>` : ''}</div>
+        <div class="field" style="max-width:130px"><label class="label" for="c-icon">${esc(t('web_cat_icon'))}</label><input id="c-icon" class="input" maxlength="8" value="${esc(isEmoji(c?.icon) ? c.icon : '')}" placeholder="🛒" style="text-align:center;font-size:20px"></div>
+      </div>
+      <div class="field"><label class="label">${esc(t('web_cat_color'))}</label><div class="swatches" id="c-colors">
+        ${CAT_COLORS.map(x => `<button type="button" class="swatch${x.toLowerCase() === color.toLowerCase() ? ' active' : ''}" data-color="${x}" style="background:${x}" aria-label="${x}"></button>`).join('')}
+        <label class="swatch swatch-custom" title="${esc(t('web_cat_custom_color'))}"><input type="color" id="c-custom" value="${esc(color)}"></label>
+      </div></div>`,
+    onOpen: f => {
+      const preview = () => {
+        const icon = f.querySelector('#c-icon').value.trim();
+        // The app's PNG icon stays while the emoji is the one it was saved with.
+        const iconFile = c?.iconFile && (icon === (isEmoji(c.icon) ? c.icon : '')) ? c.iconFile : null;
+        f.querySelector('#c-preview').innerHTML = catChip({ name: f.querySelector('#c-name').value || '?', icon, colorHex: color, iconFile }, 'lg');
+      };
+      f.querySelector('#c-type').addEventListener('click', e => {
+        const b = e.target.closest('[data-type]'); if (!b) return;
+        type = b.dataset.type;
+        f.querySelectorAll('#c-type button').forEach(x => x.classList.toggle('active', x === b));
+        f.querySelector('#c-parent').innerHTML = parentOpts(type);
+      });
+      f.querySelector('#c-colors').addEventListener('click', e => {
+        const b = e.target.closest('[data-color]'); if (!b) return;
+        color = b.dataset.color;
+        f.querySelectorAll('.swatch').forEach(x => x.classList.toggle('active', x === b));
+        preview();
+      });
+      f.querySelector('#c-custom').addEventListener('input', e => {
+        color = e.target.value;
+        f.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
+        preview();
+      });
+      f.querySelector('#c-name').addEventListener('input', preview);
+      f.querySelector('#c-icon').addEventListener('input', preview);
+      preview();
+    },
+    onSubmit: async f => {
+      const name = f.querySelector('#c-name').value.trim();
+      if (!name) { toast(t('web_val_name_required'), true); return false; }
+      const icon = f.querySelector('#c-icon').value.trim();
+      const body = { name, colorHex: color, transactionType: type };
+      if (icon) body.icon = icon; else if (!c) body.icon = 'category';
+      if (!hasKids) body.parentId = f.querySelector('#c-parent').value || null;
+      const r = c
+        ? await api(`/api/categories/${encodeURIComponent(c.id)}`, { method: 'PUT', body })
+        : await api('/api/categories', { method: 'POST', body });
+      if (!r) return false;
+      toast(c ? t('web_toast_cat_updated') : t('web_toast_cat_added'));
+      catType = type;
+      refresh(true);
+      return true;
+    },
+  });
 }
 
-async function toggleRecurring(id, enabled) {
-  const res = await api(`/api/recurring/${id}`, { method: 'PUT', body: JSON.stringify({ enabled }) });
-  if (res) { toast(t('web_toast_updated')); invalidate('_recurringItems'); }
-  else renderRecurring();
+// ── Recurring & subscriptions ─────────────────────────────────────────────────
+
+async function renderRecurring(subs, quiet) {
+  const route = subs ? '#/subscriptions' : '#/recurring';
+  const title = subs ? t('nav_subscriptions') : t('nav_recurring');
+  if (!quiet) setContent(pageHead(title, '') + skeleton(5));
+  const [d] = await Promise.all([api(subs ? '/api/subscriptions' : '/api/recurring'), refs()]);
+  if (!d || state.route !== route) return;
+  const items = d.items || [];
+  cache[subs ? 'subs' : 'recurring'] = items;
+
+  const addAction = subs ? 'add-sub' : 'add-rec';
+  const actions = `${items.length ? `<button class="btn btn-ghost" data-action="export-rec" data-subs="${subs ? 1 : 0}">${IC.download}${esc(t('web_csv'))}</button>` : ''}
+    <button class="btn btn-primary" data-action="${addAction}">${IC.plus}${esc(subs ? t('web_sub_add') : t('web_rec_add'))}</button>`;
+
+  if (!items.length) {
+    setContent(pageHead(title, '', actions) + `<div class="card">${emptyState(subs ? IC.receipt : IC.repeat,
+      subs ? t('web_sub_empty') : t('web_rec_empty'), subs ? t('web_sub_empty_sub') : t('web_rec_empty_sub'),
+      { action: addAction, label: subs ? t('web_sub_add') : t('web_rec_add') })}</div>`);
+    return;
+  }
+
+  // Subscriptions: what they cost per month and per year, per currency.
+  let summary = '';
+  if (subs) {
+    const monthly = {};
+    items.filter(r => r.enabled).forEach(r => { monthly[r.currency] = (monthly[r.currency] || 0) + perMonth(r); });
+    summary = `<div class="stats">${Object.entries(monthly).map(([c, v]) => `
+      <div class="card stat"><div class="label">${esc(t('web_sub_monthly'))}</div><div class="value num">${esc(fmt(v, c))}</div><div class="help">${esc(t('web_sub_yearly', { amount: fmt(v * 12, c) }))}</div></div>`).join('')}</div>`;
+  }
+
+  const row = r => {
+    const isT = r.type === 'transfer';
+    const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
+    const sub = [freqLabel(r.frequency, r.interval), t('web_rec_next', { date: fmtDate(r.nextDueDate) }),
+      isT ? `${r.accountName || ''} ${arrow} ${r.destinationAccountName || ''}` : r.accountName].filter(Boolean).join(' · ');
+    const cls = r.type === 'income' ? 'income' : r.type === 'expense' ? 'expense' : '';
+    return `<div class="row clickable${r.enabled ? '' : ' dim'}" data-action="edit-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" tabindex="0">
+      ${isT ? transferChip() : catChip(r)}
+      <div class="row-main"><div class="row-title">${esc(r.title || r.categoryName || t(`type_${r.type}`))}</div><div class="row-sub">${esc(sub)}</div></div>
+      <div class="row-actions"><button class="icon-btn danger" data-action="del-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" aria-label="${esc(t('common_delete'))}" title="${esc(t('common_delete'))}">${IC.trash}</button></div>
+      <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(r.amount, r.currency, r.type))}</div></div>
+      <label class="toggle" title="${esc(r.enabled ? t('web_rec_on') : t('web_rec_off'))}" data-stop><input type="checkbox" data-action="toggle-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" ${r.enabled ? 'checked' : ''} aria-label="${esc(t('web_rec_on'))}"><span></span></label>
+    </div>`;
+  };
+
+  const active = items.filter(r => r.enabled), paused = items.filter(r => !r.enabled);
+  setContent(`
+    ${pageHead(title, '', actions)}
+    ${summary}
+    ${active.length ? `<div class="card card-flush list">${active.map(row).join('')}</div>` : ''}
+    ${paused.length ? `<div class="section-head"><span class="section-title">${esc(t('web_rec_paused'))}</span></div><div class="card card-flush list">${paused.map(row).join('')}</div>` : ''}`);
 }
 
-async function deleteRecurring(id) {
-  const ok = await confirmDialog(t('web_confirm_delete_recurring'), t('web_confirm_delete_recurring_msg'));
+function openRecurringForm(subs, r = null) {
+  const { accounts, categories } = { accounts: cache.accounts || [], categories: cache.categories || [] };
+  if (!accounts.length) { toast(t('web_need_account'), true); return; }
+  let type = subs ? 'expense' : (r?.type || 'expense');
+  const acctId = r?.accountId || lsGet('bs_last_account') || accounts[0].id;
+  const validAcct = accounts.some(a => a.id === acctId) ? acctId : accounts[0].id;
+  const destId = r?.destinationAccountId || accounts.find(a => a.id !== validAcct)?.id || '';
+  const title = r ? (subs ? t('web_sub_edit') : t('web_rec_edit')) : (subs ? t('web_sub_new') : t('web_rec_new'));
+
+  openModal({
+    title,
+    submit: r ? t('common_save') : (subs ? t('web_sub_add') : t('web_rec_add')),
+    extra: r ? { label: t('common_delete'), run: () => { closeModal(); deleteRecurring(r.id, subs); } } : null,
+    body: `
+      ${subs ? '' : `<div class="field"><div class="seg full" id="r-type">
+        ${['expense', 'income', 'transfer'].map(k => `<button type="button" data-type="${k}" class="${type === k ? 'active' : ''}"${r ? ' disabled' : ''}>${esc(t(`type_${k}`))}</button>`).join('')}
+      </div></div>`}
+      <div class="field"><label class="label" for="r-title">${esc(t('web_form_title'))}</label><input id="r-title" class="input" maxlength="100" value="${esc(r?.title || '')}" placeholder="${esc(subs ? t('web_sub_title_hint') : t('web_rec_title_hint'))}" autofocus></div>
+      <div class="field"><label class="label" for="r-amount">${esc(t('web_form_amount'))}</label>
+        <div class="input-cur"><input id="r-amount" class="input amount num" inputmode="decimal" autocomplete="off" placeholder="0" value="${esc(amountInputValue(r?.amount, r?.currency))}"><span class="cur" id="r-cur"></span></div>
+        ${subs && r ? `<div class="help">${esc(t('web_sub_price_hint'))}</div>` : ''}</div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="r-account" id="r-account-label">${esc(t('web_form_account'))}</label><select id="r-account" class="input">${accountOptions(accounts, validAcct)}</select></div>
+        <div class="field" id="rg-dest"><label class="label" for="r-dest">${esc(t('web_form_to_account'))}</label><select id="r-dest" class="input">${accountOptions(accounts, destId)}</select></div>
+        <div class="field" id="rg-cat"><label class="label" for="r-cat">${esc(t('web_form_category'))}</label><select id="r-cat" class="input"></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="r-freq">${esc(t('web_form_repeats'))}</label><select id="r-freq" class="input">
+          ${['daily', 'weekly', 'monthly', 'yearly'].map(fq => `<option value="${fq}"${(r?.frequency || 'monthly') === fq ? ' selected' : ''}>${esc(t(`freq_${fq}`))}</option>`).join('')}</select></div>
+        <div class="field" style="max-width:110px"><label class="label" for="r-interval">${esc(t('web_form_every'))}</label><input id="r-interval" class="input num" type="number" min="1" max="365" value="${esc(r?.interval || 1)}"></div>
+        <div class="field"><label class="label" for="r-date">${esc(r ? t('web_form_next_due') : t('web_form_first_date'))}</label><input id="r-date" type="date" class="input" value="${esc(r ? dayKey(r.nextDueDate) : dayKey())}"></div>
+      </div>
+      <div class="field"><label class="label" for="r-note">${esc(t('web_form_note'))}</label><input id="r-note" class="input" maxlength="500" value="${esc(r?.note || '')}" placeholder="${esc(t('web_form_optional'))}"></div>
+      ${!r ? `<p class="help" id="r-past"></p>` : ''}`,
+    onOpen: f => {
+      const $ = s => f.querySelector(s);
+      const sync = () => {
+        const isT = type === 'transfer';
+        $('#rg-dest').classList.toggle('hidden', !isT);
+        $('#rg-cat').classList.toggle('hidden', isT);
+        $('#r-account-label').textContent = isT ? t('web_form_from_account') : t('web_form_account');
+        if (!isT) $('#r-cat').innerHTML = categoryOptions(categories, type, $('#r-cat').value || r?.categoryId || '');
+        const a = accounts.find(x => x.id === $('#r-account').value);
+        $('#r-cur').textContent = r?.currency || a?.currency || '';
+        const past = $('#r-past');
+        if (past) {
+          const isPast = $('#r-date').value && $('#r-date').value < dayKey();
+          past.textContent = isPast ? t('web_rec_past_hint') : '';
+          past.classList.toggle('warn', !!isPast);
+        }
+      };
+      $('#r-type')?.addEventListener('click', e => {
+        const b = e.target.closest('[data-type]'); if (!b || b.disabled) return;
+        type = b.dataset.type;
+        f.querySelectorAll('#r-type button').forEach(x => x.classList.toggle('active', x === b));
+        sync();
+      });
+      $('#r-account').addEventListener('change', sync);
+      $('#r-date').addEventListener('change', sync);
+      sync();
+    },
+    onSubmit: async f => {
+      const $ = s => f.querySelector(s);
+      const amount = parseAmount($('#r-amount').value);
+      if (!(amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+      const date = $('#r-date').value;
+      if (!date) { toast(t('web_val_select_start_date'), true); return false; }
+      const body = {
+        title: $('#r-title').value.trim(), amount, accountId: $('#r-account').value,
+        frequency: $('#r-freq').value, interval: Math.max(1, Math.min(365, parseInt($('#r-interval').value, 10) || 1)),
+        note: $('#r-note').value.trim(),
+      };
+      if (type === 'transfer') {
+        body.destinationAccountId = $('#r-dest').value;
+        if (body.destinationAccountId === body.accountId) { toast(t('web_val_accounts_differ'), true); return false; }
+      } else {
+        body.categoryId = $('#r-cat').value || null;
+      }
+      let res;
+      const path = subs ? '/api/subscriptions' : '/api/recurring';
+      if (r) {
+        body.nextDueDate = date;
+        res = await api(`${path}/${encodeURIComponent(r.id)}`, { method: 'PUT', body });
+      } else {
+        const a = accounts.find(x => x.id === body.accountId);
+        Object.assign(body, { type, startDate: date, currency: a?.currency });
+        res = await api(path, { method: 'POST', body });
+      }
+      if (!res) return false;
+      lsSet('bs_last_account', body.accountId);
+      toast(r ? t('web_toast_updated') : (subs ? t('web_toast_sub_added') : t('web_toast_recurring_added')));
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+async function deleteRecurring(id, subs) {
+  const ok = await confirmDialog(subs ? t('web_confirm_delete_sub') : t('web_confirm_delete_recurring'),
+    subs ? t('web_confirm_delete_sub_msg') : t('web_confirm_delete_recurring_msg'));
   if (!ok) return;
-  const res = await api(`/api/recurring/${id}`, { method: 'DELETE' });
-  if (res) { toast(t('web_toast_deleted')); renderRecurring(); }
+  const r = await api(`${subs ? '/api/subscriptions' : '/api/recurring'}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  if (r) { toast(t('web_toast_deleted')); refresh(true); }
 }
 
-// ── Subscriptions ─────────────────────────────────────────────────────────────
-async function renderSubscriptions() {
-  setContent(skeleton(5));
-  const [d, accounts, cats] = await Promise.all([api('/api/subscriptions'), getAccounts(), getCategories()]);
-  if (!d) return;
-  cache._subItems = d.items;
-  const rows = items(d).length
-    ? items(d).map(r => { const acct = accounts.find(a => a.id === r.accountId); const cat = cats.find(c => c.id === r.categoryId); return `<tr><td style="font-weight:600">${esc(r.title || '—')}</td><td>${esc(acct?.name || r.accountId)}</td><td>${cat ? `${esc(cat.icon)} ${esc(cat.name)}` : '<span class="text-secondary">—</span>'}</td><td class="text-sm">${fmtFreq(r.frequency, r.interval)}</td><td style="white-space:nowrap;font-weight:600">${fmt(r.amount, r.currency)}</td><td class="text-secondary text-sm">${fmtDate(r.nextDueDate)}</td><td><label class="toggle-wrap"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleSubscription('${esc(r.id)}', this.checked)"><span class="toggle-slider"></span></label></td><td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="openEditSubscription('${esc(r.id)}')">${esc(t('common_edit'))}</button> <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteSubscription('${esc(r.id)}')">${esc(t('web_tx_del'))}</button></td></tr>`; }).join('')
-    : `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-secondary)">${esc(t('web_sub_empty'))}<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddSubscription()">${esc(t('web_tx_add'))}</button></td></tr>`;
-  setContent(`<div class="page-header"><h1 class="page-title">${esc(t('nav_subscriptions'))}</h1><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="exportCSV()" title="${esc(t('web_tx_csv_tooltip'))}">${esc(t('web_tx_csv'))}</button><button class="btn btn-primary" onclick="openAddSubscription()">${esc(t('web_tx_add'))}</button></div></div><div class="card" style="padding:0;overflow:auto"><table class="data-table"><thead><tr><th>${esc(t('web_th_service'))}</th><th>${esc(t('web_tx_th_account'))}</th><th>${esc(t('web_tx_th_category'))}</th><th>${esc(t('web_th_frequency'))}</th><th>${esc(t('web_tx_th_amount'))}</th><th>${esc(t('web_th_next_due'))}</th><th>${esc(t('web_th_on'))}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`);
+async function toggleRecurring(input) {
+  const subs = input.dataset.subs === '1';
+  const r = await api(`${subs ? '/api/subscriptions' : '/api/recurring'}/${encodeURIComponent(input.dataset.id)}`,
+    { method: 'PUT', body: { enabled: input.checked } });
+  if (!r) { input.checked = !input.checked; return; }
+  toast(input.checked ? t('web_rec_resumed') : t('web_rec_paused_toast'));
+  refresh(true);
 }
 
-async function openAddSubscription() {
-  await Promise.all([getAccounts(), getCategories()]);
-  openModal(t('web_modal_add_sub'), _recurFormHtml(null, true), async () => {
-    const body = _readRecurForm('expense', true); if (!body) return;
-    const res = await api('/api/subscriptions', { method: 'POST', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_sub_added')); closeModal(); renderSubscriptions(); }
-  });
-}
-
-function openEditSubscription(id) {
-  const r = (cache._subItems || []).find(x => x.id === id); if (!r) { toast(t('web_toast_not_found'), true); return; }
-  openModal(t('web_modal_edit_sub'), `<div class="form-group"><label class="form-label">${esc(t('web_form_title_label'))}</label><input type="text" id="sub-title" class="form-control" value="${esc(r.title || '')}"></div><div style="display:flex;gap:12px"><div class="form-group" style="flex:1"><label class="form-label">${esc(t('web_form_new_amount'))}</label><input type="number" id="sub-amount" class="form-control" value="${esc(r.amount)}" min="0.01" step="0.01"></div><div class="form-group" style="width:80px"><label class="form-label">${esc(t('web_form_currency'))}</label><input type="text" class="form-control" value="${esc(r.currency)}" disabled></div></div><p class="text-secondary text-sm" style="margin-top:-8px">${esc(t('web_sub_price_hint'))}</p>`, async () => {
-    const body = { title: document.getElementById('sub-title').value.trim(), amount: parseFloat(document.getElementById('sub-amount').value) };
-    const res = await api(`/api/subscriptions/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    if (res) { toast(t('web_toast_updated')); closeModal(); renderSubscriptions(); }
-  });
-}
-
-async function toggleSubscription(id, enabled) {
-  const res = await api(`/api/subscriptions/${id}`, { method: 'PUT', body: JSON.stringify({ enabled }) });
-  if (res) { toast(t('web_toast_updated')); invalidate('_subItems'); }
-  else renderSubscriptions();
-}
-
-async function deleteSubscription(id) {
-  const ok = await confirmDialog(t('web_confirm_delete_sub'), t('web_confirm_delete_sub_msg'));
-  if (!ok) return;
-  const res = await api(`/api/subscriptions/${id}`, { method: 'DELETE' });
-  if (res) { toast(t('web_toast_deleted')); renderSubscriptions(); }
+function exportRecurring(subs) {
+  const items = cache[subs ? 'subs' : 'recurring'] || [];
+  downloadCsv(`budgetseal-${subs ? 'subscriptions' : 'recurring'}-${dayKey()}.csv`, [
+    ['title', 'type', 'amount', 'currency', 'frequency', 'interval', 'next_due', 'account', 'category', 'enabled'],
+    ...items.map(r => [r.title, r.type, r.amount, r.currency, r.frequency, r.interval, dayKey(r.nextDueDate), r.accountName, r.categoryName, r.enabled ? 'yes' : 'no']),
+  ]);
 }
 
 // ── Reports ───────────────────────────────────────────────────────────────────
-function renderReports() {
+
+const rep = { year: new Date().getFullYear(), month: new Date().getMonth() };
+let charts = [];
+
+async function renderReports(quiet) {
   const now = new Date();
-  const mNames = _monthNames();
-  const monthOpts = Array.from({ length: 12 }, (_, i) =>
-    `<option value="${i + 1}" ${i + 1 === now.getMonth() + 1 ? 'selected' : ''}>${esc(mNames[i])}</option>`
-  ).join('');
+  const atNow = rep.year === now.getFullYear() && rep.month === now.getMonth();
+  const head = pageHead(t('nav_reports'), '', `
+    <div class="month-nav">
+      <button class="icon-btn" data-action="rep-month" data-step="-1" aria-label="${esc(t('web_prev_month'))}"><span class="flip-rtl" style="display:inline-grid">${IC.left}</span></button>
+      <span class="label">${esc(monthLabel(rep.year, rep.month))}</span>
+      <button class="icon-btn" data-action="rep-month" data-step="1" aria-label="${esc(t('web_next_month'))}" ${atNow ? 'disabled style="opacity:.3"' : ''}><span class="flip-rtl" style="display:inline-grid">${IC.right}</span></button>
+    </div>`);
+  if (!quiet) setContent(head + skeleton(4));
+  const q = `year=${rep.year}&month=${rep.month + 1}`;
+  const [cf, exp, inc] = await Promise.all([
+    api(`/api/reports/cashflow?${q}`),
+    api(`/api/reports/by-category?${q}`),
+    api(`/api/reports/by-category?${q}&type=income`),
+  ]);
+  if (!cf || state.route !== '#/reports') return;
+  charts.forEach(c => c.destroy());
+  charts = [];
+
+  const cur = cf.currency || state.baseCurrency;
+  const days = cf.daily?.length || 30;
+  const elapsed = atNow ? now.getDate() : days;
+  const rate = cf.income > 0 ? (cf.net / cf.income) * 100 : null;
+  const expItems = exp?.items || [];
+  const incItems = inc?.items || [];
+  const incTotal = incItems.reduce((s, i) => s + i.total, 0);
+
+  const shareRows = (list, total, cls) => list.map(i => {
+    const pct = total > 0 ? (i.total / total) * 100 : 0;
+    return `<div class="share-row">${catChip(i, 'sm')}<div class="row-main">
+      <div class="share-top"><span class="row-title">${esc(i.name || t('web_form_no_category'))}</span><span class="num ${cls}">${esc(fmt(i.total, cur))}</span></div>
+      <div class="bar thin"><span style="width:${pct.toFixed(1)}%;background:${safeHex(i.colorHex)}"></span></div>
+      <div class="share-top"><span class="pct">${esc(fmtPlain(pct, 1))}%</span></div>
+    </div></div>`;
+  }).join('');
+
+  if (!cf.transactionCount) {
+    setContent(head + `<div class="card">${emptyState(IC.chart, t('web_rep_empty'), t('web_rep_empty_sub'))}</div>`);
+    return;
+  }
+
   setContent(`
-    <div class="page-header"><h1 class="page-title">${esc(t('nav_reports'))}</h1></div>
-    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px">
-      <div><label class="form-label">${esc(t('web_reports_year'))}</label><input type="number" id="rep-year" class="form-control" style="width:90px" value="${now.getFullYear()}" min="2020" max="2040"></div>
-      <div><label class="form-label">${esc(t('web_reports_month'))}</label><select id="rep-month" class="form-control" style="width:130px">${monthOpts}</select></div>
-      <button class="btn btn-primary" onclick="loadReports()">${esc(t('web_reports_load'))}</button>
+    ${head}
+    <div class="stats">
+      <div class="card stat"><div class="label">${esc(t('web_stat_income'))}</div><div class="value num income">${esc(fmt(cf.income, cur))}</div></div>
+      <div class="card stat"><div class="label">${esc(t('web_stat_expenses'))}</div><div class="value num expense">${esc(fmt(cf.expense, cur))}</div></div>
+      <div class="card stat"><div class="label">${esc(t('web_stat_net'))}</div><div class="value num ${cf.net >= 0 ? 'income' : 'expense'}">${esc(fmt(cf.net, cur))}</div></div>
+      <div class="card stat"><div class="label">${esc(t('web_stat_savings_rate'))}</div><div class="value num">${rate == null ? '—' : esc(fmtPlain(rate, 1)) + '%'}</div></div>
+      <div class="card stat"><div class="label">${esc(t('web_stat_avg_daily'))}</div><div class="value num">${esc(fmt(cf.expense / Math.max(1, elapsed), cur))}</div></div>
+      <div class="card stat"><div class="label">${esc(t('web_stat_transactions'))}</div><div class="value num">${esc(fmtPlain(cf.transactionCount, 0))}</div></div>
     </div>
-    <div id="reports-content"><p class="text-secondary">${esc(t('web_reports_select_prompt'))}</p></div>`);
+    <div class="card card-pad"><div class="section-head"><span class="section-title">${esc(t('web_report_daily_cashflow'))}</span></div>
+      <div class="chart-box"><canvas id="ch-daily"></canvas></div></div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card card-pad">
+        <div class="section-head"><span class="section-title">${esc(t('web_report_spending_cat'))}</span></div>
+        ${expItems.length ? `<div class="donut-box"><canvas id="ch-donut"></canvas><div class="donut-center"><div><div class="value num">${esc(fmt(cf.expense, cur))}</div><div class="label">${esc(t('web_stat_expenses'))}</div></div></div></div>
+          <div style="margin:0 -16px">${shareRows(expItems, expItems.reduce((s, i) => s + i.total, 0), '')}</div>`
+          : `<p class="muted">${esc(t('web_report_no_expense'))}</p>`}
+      </div>
+      <div>
+        <div class="card card-pad">
+          <div class="section-head"><span class="section-title">${esc(t('web_report_income_cat'))}</span></div>
+          ${incItems.length ? `<div style="margin:0 -16px">${shareRows(incItems, incTotal, 'income')}</div>` : `<p class="muted">${esc(t('web_report_no_income'))}</p>`}
+        </div>
+        ${cf.topExpenses?.length ? `<div class="card card-pad" style="margin-top:16px">
+          <div class="section-head"><span class="section-title">${esc(t('web_report_top_expenses'))}</span></div>
+          <div class="list" style="margin:0 -16px">${cf.topExpenses.map(x => `
+            <div class="row clickable" data-action="edit-tx" data-id="${esc(x.id)}" tabindex="0">${catChip(x, 'sm')}
+              <div class="row-main"><div class="row-title">${esc(x.note || x.categoryName || t('type_expense'))}</div><div class="row-sub">${esc([fmtDate(x.date), x.accountName].filter(Boolean).join(' · '))}</div></div>
+              <div class="row-amount expense">${esc(fmt(-x.amount, cur))}</div></div>`).join('')}</div></div>` : ''}
+      </div>
+    </div>`);
+
+  drawCharts(cf, expItems, cur);
 }
 
-async function loadReports() {
-  const year = document.getElementById('rep-year').value;
-  const month = document.getElementById('rep-month').value;
-  const content = document.getElementById('reports-content');
-  if (!content) return;
-  content.innerHTML = skeleton(4);
-  if (_reportChart) { _reportChart.destroy(); _reportChart = null; }
-  if (_reportCatChart) { _reportCatChart.destroy(); _reportCatChart = null; }
-
-  const [cashflow, byCategory, byIncome] = await Promise.all([
-    api(`/api/reports/cashflow?year=${year}&month=${month}`),
-    api(`/api/reports/by-category?year=${year}&month=${month}`),
-    api(`/api/reports/by-category?year=${year}&month=${month}&type=income`),
-  ]);
-  if (!cashflow) return;
-
-  const cur = cashflow.currency || 'USD';
-  const daysInMonth = cashflow.daily?.length || 30;
-  const savingsRate = cashflow.income > 0 ? ((cashflow.net / cashflow.income) * 100).toFixed(1) : '0.0';
-  const avgDaily = cashflow.expense > 0 ? (cashflow.expense / daysInMonth) : 0;
-  const txCount = cashflow.transactionCount || 0;
-  const expenseCatItems = byCategory?.items || [];
-  const incomeCatItems = byIncome?.items || [];
-  const incomeTotal = incomeCatItems.reduce((s, i) => s + i.total, 0);
-  const topExpenses = cashflow.topExpenses || [];
-
-  const catRows = expenseCatItems.map(item => { const pct = cashflow.expense > 0 ? Math.min(100, (item.total / cashflow.expense) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${safeHex(item.colorHex || '#607D8B')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-expense">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td><td style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${safeHex(item.colorHex || '#607D8B')}"></div></div></td></tr>`; }).join('');
-  const incomeCatRows = incomeCatItems.map(item => { const pct = incomeTotal > 0 ? Math.min(100, (item.total / incomeTotal) * 100).toFixed(1) : 0; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${safeHex(item.colorHex || '#059669')};flex-shrink:0"></span>${esc(item.icon)} ${esc(item.name)}</div></td><td style="text-align:right;white-space:nowrap" class="amount-income">${fmt(item.total, cur)}</td><td class="text-secondary text-sm" style="text-align:right">${pct}%</td></tr>`; }).join('');
-  const topExpHtml = topExpenses.length ? topExpenses.map(tx => `<tr><td class="text-secondary text-sm" style="white-space:nowrap">${fmtDate(tx.date)}</td><td class="text-sm">${tx.categoryIcon ? esc(tx.categoryIcon) + ' ' : ''}${esc(tx.categoryName || '—')}</td><td class="text-sm">${esc(tx.accountName || '')}</td><td class="text-sm text-secondary" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(tx.note || '')}</td><td style="text-align:right;white-space:nowrap" class="amount-expense">${fmt(tx.amount, cur)}</td></tr>`).join('') : '';
-
-  content.innerHTML = `
-    <div class="stat-grid" style="margin-bottom:16px">
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_income'))}</div><div class="stat-value amount-income">${fmt(cashflow.income, cur)}</div></div>
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_expenses'))}</div><div class="stat-value amount-expense">${fmt(cashflow.expense, cur)}</div></div>
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_net'))}</div><div class="stat-value ${cashflow.net >= 0 ? 'amount-income' : 'amount-expense'}">${fmt(cashflow.net, cur)}</div></div>
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_savings_rate'))}</div><div class="stat-value ${Number(savingsRate) >= 0 ? 'amount-income' : 'amount-expense'}">${savingsRate}%</div></div>
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_avg_daily'))}</div><div class="stat-value">${fmt(avgDaily, cur)}</div></div>
-      <div class="stat-card"><div class="stat-label">${esc(t('web_stat_transactions'))}</div><div class="stat-value">${txCount}</div></div>
-    </div>
-    <div class="card" style="margin-bottom:16px"><div class="report-section-title">${esc(t('web_report_daily_cashflow'))}</div><div style="max-height:280px"><canvas id="cashflow-chart"></canvas></div></div>
-    <div class="report-two-col">
-      <div class="card" style="margin-bottom:0"><div class="report-section-title">${esc(t('web_report_spending_cat'))}</div>${expenseCatItems.length > 1 ? '<div style="max-height:220px;margin-bottom:16px"><canvas id="cat-doughnut"></canvas></div>' : ''}${expenseCatItems.length ? `<table class="data-table"><tbody>${catRows}</tbody></table>` : `<p class="text-secondary text-sm">${esc(t('web_report_no_expense'))}</p>`}</div>
-      <div class="card" style="margin-bottom:0"><div class="report-section-title">${esc(t('web_report_income_cat'))}</div>${incomeCatItems.length ? `<table class="data-table"><tbody>${incomeCatRows}</tbody></table>` : `<p class="text-secondary text-sm">${esc(t('web_report_no_income'))}</p>`}</div>
-    </div>
-    ${topExpHtml ? `<div class="card" style="padding:0;margin-top:16px"><div style="padding:16px 20px 0"><div class="report-section-title">${esc(t('web_report_top_expenses'))}</div></div><table class="data-table"><thead><tr><th>${esc(t('web_tx_th_date'))}</th><th>${esc(t('web_tx_th_category'))}</th><th>${esc(t('web_tx_th_account'))}</th><th>${esc(t('web_form_note'))}</th><th style="text-align:right">${esc(t('web_tx_th_amount'))}</th></tr></thead><tbody>${topExpHtml}</tbody></table></div>` : ''}`;
-
-  const hasDark = document.documentElement.dataset.theme === 'dark' || (document.documentElement.dataset.theme !== 'light' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-  const gridColor = hasDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.07)';
-  const textColor = hasDark ? '#94A3B8' : '#64748B';
-
-  const barCtx = document.getElementById('cashflow-chart');
-  if (barCtx && window.Chart && cashflow.daily?.length) {
-    _reportChart = new Chart(barCtx, { type: 'bar', data: { labels: cashflow.daily.map(d => d.day), datasets: [{ label: t('web_chart_income'), data: cashflow.daily.map(d => d.income), backgroundColor: 'rgba(5,150,105,.75)', borderRadius: 4 }, { label: t('web_chart_expense'), data: cashflow.daily.map(d => d.expense), backgroundColor: 'rgba(220,38,38,.75)', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", size: 12 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmt(c.parsed.y, cur)}` } } }, scales: { x: { grid: { color: gridColor }, ticks: { color: textColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: v => fmt(v, cur) } } } } });
+function drawCharts(cf, expItems, cur) {
+  if (!window.Chart) return;
+  const css = getComputedStyle(document.documentElement);
+  const v = n => css.getPropertyValue(n).trim();
+  const text = v('--text-2'), grid = v('--line');
+  Chart.defaults.font.family = "'Nunito Sans', system-ui, sans-serif";
+  Chart.defaults.font.weight = 600;
+  Chart.defaults.color = text;
+  const rtl = document.documentElement.dir === 'rtl';
+  const tooltip = { rtl, backgroundColor: v('--popup'), titleColor: v('--text'), bodyColor: v('--text'), borderColor: grid, borderWidth: 1, padding: 10, cornerRadius: 12, boxPadding: 4 };
+  const daily = document.getElementById('ch-daily');
+  if (daily) {
+    charts.push(new Chart(daily, {
+      type: 'bar',
+      data: {
+        labels: cf.daily.map(d => fmtPlain(d.day, 0)),
+        datasets: [
+          { label: t('web_chart_income'), data: cf.daily.map(d => d.income), backgroundColor: v('--income'), borderRadius: 6, maxBarThickness: 14 },
+          { label: t('web_chart_expense'), data: cf.daily.map(d => d.expense), backgroundColor: v('--expense'), borderRadius: 6, maxBarThickness: 14 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { rtl, labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8 } }, tooltip: { ...tooltip, callbacks: { label: c => ` ${c.dataset.label}: ${fmt(c.parsed.y, cur)}` } } },
+        scales: {
+          x: { reverse: rtl, grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 8 } },
+          y: { position: rtl ? 'right' : 'left', beginAtZero: true, grid: { color: grid }, border: { display: false }, ticks: { callback: x => fmt(x, cur), maxTicksLimit: 5 } },
+        },
+      },
+    }));
   }
-  const doughCtx = document.getElementById('cat-doughnut');
-  if (doughCtx && window.Chart && expenseCatItems.length > 1) {
-    _reportCatChart = new Chart(doughCtx, { type: 'doughnut', data: { labels: expenseCatItems.map(i => i.name), datasets: [{ data: expenseCatItems.map(i => i.total), backgroundColor: expenseCatItems.map(i => i.colorHex || '#607D8B'), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { position: 'right', labels: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, boxWidth: 10, padding: 8 } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.parsed, cur)}` } } } } });
+  const donut = document.getElementById('ch-donut');
+  if (donut) {
+    charts.push(new Chart(donut, {
+      type: 'doughnut',
+      data: { labels: expItems.map(i => i.name), datasets: [{ data: expItems.map(i => i.total), backgroundColor: expItems.map(i => safeHex(i.colorHex)), borderWidth: 3, borderColor: v('--card'), hoverOffset: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: { label: c => ` ${c.label}: ${fmt(c.parsed, cur)}` } } } },
+    }));
   }
 }
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
+
 function applyTheme(th) {
   state.theme = th;
-  localStorage.setItem('pp_theme', th);
-  if (th === 'system') { document.documentElement.removeAttribute('data-theme'); }
-  else { document.documentElement.dataset.theme = th; }
+  lsSet('bs_theme', th);
+  if (th === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = th;
   const el = document.getElementById('theme-label');
-  if (el) el.textContent = { system: t('theme_auto'), dark: t('theme_dark'), light: t('theme_light') }[th] || th;
+  if (el) el.textContent = { system: t('theme_auto'), dark: t('theme_dark'), light: t('theme_light') }[th];
 }
-
 function cycleTheme() {
   const order = ['system', 'light', 'dark'];
   applyTheme(order[(order.indexOf(state.theme) + 1) % 3]);
+  navigate(state.route, true); // pastel fills and charts depend on the mode
 }
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+  if (state.theme === 'system' && state.token) navigate(state.route, true);
+});
 
-// ── Connection Status ─────────────────────────────────────────────────────────
-function startConnectionCheck() {
-  stopConnectionCheck();
-  checkConnection();
-  _connInterval = setInterval(checkConnection, 15000);
+// ── Connection status ─────────────────────────────────────────────────────────
+
+let connTimer = null;
+let online = true;
+
+function setConnection(ok) {
+  online = ok;
+  const dot = document.getElementById('conn-dot');
+  if (dot) dot.className = `conn-dot ${ok ? 'ok' : 'err'}`;
+  const label = document.getElementById('conn-label');
+  if (label) label.textContent = ok ? t('web_conn_ok') : t('web_conn_lost');
+  document.getElementById('offline-banner')?.classList.toggle('hidden', ok);
 }
-function stopConnectionCheck() { clearInterval(_connInterval); _connInterval = null; }
 
 async function checkConnection() {
-  const dot = document.getElementById('conn-dot');
-  if (!dot) return;
   try {
     const r = await fetch('/auth/status', { headers: state.token ? { Authorization: `Bearer ${state.token}` } : {} });
-    dot.className = r.ok ? 'conn-dot conn-ok' : 'conn-dot conn-err';
-  } catch {
-    dot.className = 'conn-dot conn-err';
+    const d = await r.json().catch(() => ({}));
+    const wasOffline = !online;
+    setConnection(r.ok);
+    if (r.ok && !d.authenticated) { sessionExpired(); return; }
+    if (wasOffline && r.ok) refresh(true);
+  } catch (_) {
+    setConnection(false);
   }
 }
+function startConnectionCheck() { stopConnectionCheck(); checkConnection(); connTimer = setInterval(checkConnection, 15000); }
+function stopConnectionCheck() { clearInterval(connTimer); connTimer = null; }
 
-// ── Keyboard Shortcuts ────────────────────────────────────────────────────────
-function initKeyboardShortcuts() {
+// Coming back to the tab: show what changed on the phone meanwhile.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !state.token) return;
+  checkConnection();
+  if (Date.now() - state.lastRender > 30000 && !document.getElementById('modal-overlay')) refresh(true);
+});
+
+// ── Sidebar (narrow screens) ──────────────────────────────────────────────────
+
+function toggleSidebar(open) {
+  const sb = document.getElementById('sidebar');
+  const isOpen = open ?? !sb.classList.contains('open');
+  sb.classList.toggle('open', isOpen);
+  document.getElementById('scrim').classList.toggle('open', isOpen);
+}
+
+// ── Actions (event delegation) ────────────────────────────────────────────────
+
+const actions = {
+  'menu': () => toggleSidebar(),
+  'menu-close': () => toggleSidebar(false),
+  'theme': cycleTheme,
+  'shortcuts': showShortcuts,
+  'retry-conn': () => checkConnection(),
+  'sign-out': signOut,
+  'add-tx': () => openTxForm(null, 'add').then(() => {
+    // From an account page, default the form to that account.
+    if (txView?.accountId) { const s = document.getElementById('f-account'); if (s) { s.value = txView.accountId; s.dispatchEvent(new Event('change')); } }
+  }),
+  'edit-tx': el => editTx(el.dataset.id),
+  'dup-tx': el => editTx(el.dataset.id, true),
+  'del-tx': el => deleteTx(el.dataset.id),
+  'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
+  'export-tx': exportTx,
+  'fund': el => openFund(el.dataset.id),
+  'add-account': openAddAccount,
+  'add-cat': () => refs().then(() => openCategoryForm()),
+  'edit-cat': el => openCategoryForm((cache.categories || []).find(c => c.id === el.dataset.id)),
+  'add-rec': () => refs().then(() => openRecurringForm(false)),
+  'add-sub': () => refs().then(() => openRecurringForm(true)),
+  'edit-rec': el => {
+    const subs = el.dataset.subs === '1';
+    const r = (cache[subs ? 'subs' : 'recurring'] || []).find(x => x.id === el.dataset.id);
+    if (r) openRecurringForm(subs, r);
+  },
+  'del-rec': el => deleteRecurring(el.dataset.id, el.dataset.subs === '1'),
+  'export-rec': el => exportRecurring(el.dataset.subs === '1'),
+  'rep-month': el => {
+    const step = Number(el.dataset.step);
+    const d = new Date(rep.year, rep.month + step, 1);
+    if (d > new Date()) return;
+    rep.year = d.getFullYear(); rep.month = d.getMonth();
+    renderReports(true);
+  },
+};
+
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-stop]') && !e.target.matches('input')) return;
+  const toggle = e.target.closest('input[data-action="toggle-rec"]');
+  if (toggle) return; // handled on change
+  const el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  const fn = actions[el.dataset.action];
+  if (!fn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  fn(el);
+});
+document.addEventListener('change', e => {
+  if (e.target.matches('input[data-action="toggle-rec"]')) toggleRecurring(e.target);
+});
+document.addEventListener('keydown', e => {
+  // Rows are focusable: Enter opens them like a click.
+  if (e.key === 'Enter' && e.target.matches('.row[data-action]')) { e.preventDefault(); e.target.click(); }
+});
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+
+function initShortcuts() {
   document.addEventListener('keydown', e => {
-    // Don't trigger when typing in inputs
+    if (!state.token || !document.getElementById('auth-screen').classList.contains('hidden')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-      if (e.key === 'Escape') document.activeElement.blur();
+      if (e.key === 'Escape' && !document.getElementById('modal-overlay')) document.activeElement.blur();
       return;
     }
-    // Don't trigger on auth screen
-    if (!document.getElementById('auth-screen').classList.contains('hidden')) return;
-
-    const modalOpen = !!document.getElementById('modal-overlay');
-    if (e.key === 'Escape') { closeModal(); return; }
-    if (modalOpen) return; // Don't fire action shortcuts while a modal is open
-    if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addTransaction(); return; }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); refreshPage(); return; }
-    if (e.key === '/') { e.preventDefault(); location.hash = '#/transactions'; setTimeout(() => { const el = document.getElementById('tx-search'); if (el) el.focus(); }, 100); return; }
-    if (e.key === '?') { showShortcutsHelp(); return; }
+    if (e.key === 'Escape') { closeModal(); toggleSidebar(false); return; }
+    if (document.getElementById('modal-overlay')) return;
+    const k = e.key.toLowerCase();
+    if (k === 'n') { e.preventDefault(); openTxForm(null, 'add'); }
+    else if (k === 'r') { e.preventDefault(); refresh(); }
+    else if (e.key === '/') {
+      e.preventDefault();
+      if (state.route === '#/transactions') document.getElementById('tx-search')?.focus();
+      else { location.hash = '#/transactions'; setTimeout(() => document.getElementById('tx-search')?.focus(), 150); }
+    }
+    else if (e.key === '?') showShortcuts();
+    else if (/^[1-8]$/.test(e.key)) {
+      const links = [...document.querySelectorAll('.nav-link')];
+      links[Number(e.key) - 1]?.click();
+    }
   });
 }
 
-function showShortcutsHelp() {
-  openModal(t('web_shortcuts_title'), `
-    <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:13.5px">
-      <kbd class="kbd">N</kbd><span>${esc(t('web_shortcut_new_tx'))}</span>
-      <kbd class="kbd">R</kbd><span>${esc(t('web_shortcut_refresh'))}</span>
-      <kbd class="kbd">/</kbd><span>${esc(t('web_shortcut_search'))}</span>
-      <kbd class="kbd">Esc</kbd><span>${esc(t('web_shortcut_close'))}</span>
-      <kbd class="kbd">?</kbd><span>${esc(t('web_shortcut_help'))}</span>
-    </div>`, () => closeModal(), t('common_close'));
+function showShortcuts() {
+  const rows = [['N', 'web_shortcut_new_tx'], ['/', 'web_shortcut_search'], ['R', 'web_shortcut_refresh'], ['1–8', 'web_shortcut_pages'], ['Esc', 'web_shortcut_close'], ['?', 'web_shortcut_help']];
+  openModal({
+    title: t('web_shortcuts_title'), narrow: true,
+    body: `<div class="kbd-grid">${rows.map(([k, l]) => `<kbd>${esc(k)}</kbd><span>${esc(t(l))}</span>`).join('')}</div>`,
+  });
 }
 
 // ── Sign out ──────────────────────────────────────────────────────────────────
-document.getElementById('sign-out-btn').addEventListener('click', () => {
-  fetch('/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + state.token } }).catch(() => {});
+
+function signOut() {
+  for (const id of [...pendingDeletes.keys()]) commitDelete(id, true);
+  fetch('/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${state.token}` } }).catch(() => {});
   state.token = null;
-  sessionStorage.removeItem('pp_token');
-  Object.keys(cache).forEach(k => delete cache[k]);
-  showAuthScreen();
-});
-
-// ── Mobile sidebar toggle ────────────────────────────────────────────────────
-const _hamburger = document.getElementById('hamburger-btn');
-const _sidebarOverlay = document.getElementById('sidebar-overlay');
-const _sidebar = document.getElementById('sidebar');
-function toggleSidebar(open) {
-  const isOpen = open ?? !_sidebar.classList.contains('open');
-  _sidebar.classList.toggle('open', isOpen);
-  _sidebarOverlay.classList.toggle('open', isOpen);
+  sessionStorage.removeItem('bs_token');
+  invalidate();
+  txView = null;
+  showAuth('');
 }
-_hamburger?.addEventListener('click', () => toggleSidebar());
-_sidebarOverlay?.addEventListener('click', () => toggleSidebar(false));
-// Close sidebar when a nav link is clicked (mobile)
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => { if (window.innerWidth <= 768) toggleSidebar(false); });
-});
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-applyTheme(state.theme);
-initAuth();
-initKeyboardShortcuts();
+// ── Start ─────────────────────────────────────────────────────────────────────
 
 (async () => {
-  await loadLocale(_locale);
-  // Re-apply theme to update label with translated text
   applyTheme(state.theme);
-
+  initAuth();
+  initShortcuts();
+  await loadConfig();
+  applyTheme(state.theme);
   if (state.token) {
-    const data = await fetch('/auth/status', {
-      headers: { Authorization: `Bearer ${state.token}` },
-    }).then(r => r.json()).catch(() => null);
-
-    if (data?.authenticated) {
-      showMainLayout();
-      navigate(state.currentRoute);
-      getCategories();
-      getAccounts();
-      startConnectionCheck();
-      return;
-    }
+    const d = await fetch('/auth/status', { headers: { Authorization: `Bearer ${state.token}` } }).then(r => r.json()).catch(() => null);
+    if (d?.authenticated) { enterApp(); return; }
     state.token = null;
-    sessionStorage.removeItem('pp_token');
+    sessionStorage.removeItem('bs_token');
   }
-  showAuthScreen();
+  showAuth('');
+})();
+
 })();

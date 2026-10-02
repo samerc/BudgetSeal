@@ -9,6 +9,416 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get webNavHome => 'الرئيسية';
+
+  @override
+  String get webNavBudget => 'الميزانية';
+
+  @override
+  String get webMenu => 'القائمة';
+
+  @override
+  String get webShortcuts => 'الاختصارات';
+
+  @override
+  String get webSignOut => 'تسجيل الخروج';
+
+  @override
+  String get webConnChecking => 'جارٍ الاتصال…';
+
+  @override
+  String get webConnOk => 'متصل بالهاتف';
+
+  @override
+  String get webConnLost => 'تعذّر الوصول إلى الهاتف';
+
+  @override
+  String get webOffline =>
+      'تعذّر الوصول إلى هاتفك. أبقِ BudgetSeal مفتوحًا والمرافق الإلكتروني قيد التشغيل، على شبكة Wi‑Fi نفسها.';
+
+  @override
+  String get webOfflineShort => 'تعذّر الوصول إلى هاتفك';
+
+  @override
+  String get webAuthSubtitle => 'أدخل الرمز الذي عيّنته على هاتفك';
+
+  @override
+  String get webAuthFoot =>
+      'تبقى بياناتك على هاتفك. هذه الصفحة تقرؤها عبر شبكة Wi‑Fi.';
+
+  @override
+  String get webAuthDelete => 'حذف الرقم';
+
+  @override
+  String webAuthWrongLeft(int n) {
+    return 'رمز خاطئ · المحاولات المتبقية: $n';
+  }
+
+  @override
+  String webAuthLocked(int n) {
+    return 'محاولات كثيرة. حاول مجددًا بعد $n د.';
+  }
+
+  @override
+  String get webAuthExpired => 'انتهت جلستك. أدخل الرمز مرة أخرى.';
+
+  @override
+  String get webErrRequest => 'تعذّر الحفظ. تحقّق من القيم وحاول مجددًا.';
+
+  @override
+  String get webErrTooMany => 'تغييرات كثيرة دفعة واحدة. انتظر قليلًا.';
+
+  @override
+  String get webErrNoRate => 'لا يوجد سعر صرف لهذه العملة بعد. أدخل سعرًا.';
+
+  @override
+  String get webNeedAccount => 'أضف حسابًا أولًا.';
+
+  @override
+  String get webSeeAll => 'عرض الكل';
+
+  @override
+  String get webRecent => 'الأحدث';
+
+  @override
+  String get webLoadMore => 'عرض المزيد';
+
+  @override
+  String get webDuplicate => 'تكرار';
+
+  @override
+  String get webCsv => 'تصدير CSV';
+
+  @override
+  String get webCsvPreparing => 'جارٍ تجهيز التصدير…';
+
+  @override
+  String webCsvDone(int n) {
+    return 'تم تصدير الصفوف: $n';
+  }
+
+  @override
+  String get webWholeYear => 'السنة كاملة';
+
+  @override
+  String get webPrevYear => 'السنة السابقة';
+
+  @override
+  String get webNextYear => 'السنة التالية';
+
+  @override
+  String get webPrevMonth => 'الشهر السابق';
+
+  @override
+  String get webNextMonth => 'الشهر التالي';
+
+  @override
+  String get webRta => 'جاهز للتوزيع';
+
+  @override
+  String get webRtaAssign => 'وزّع';
+
+  @override
+  String get webNetWorth => 'صافي الثروة';
+
+  @override
+  String webNetWorthCur(String cur) {
+    return 'صافي الثروة · $cur';
+  }
+
+  @override
+  String get webEnvSpending => 'إنفاق';
+
+  @override
+  String get webEnvFlexible => 'مُرحَّل';
+
+  @override
+  String get webEnvAvailable => 'متاح';
+
+  @override
+  String get webEnvOverspent => 'تجاوز الميزانية';
+
+  @override
+  String webEnvSpent(String amount) {
+    return 'تم إنفاق $amount';
+  }
+
+  @override
+  String webEnvOf(String amount) {
+    return 'من $amount';
+  }
+
+  @override
+  String webEnvToGo(String amount) {
+    return '$amount للوصول إلى الهدف';
+  }
+
+  @override
+  String get webEnvReached => 'تم بلوغ الهدف';
+
+  @override
+  String webFundTitle(String name) {
+    return 'تمويل $name';
+  }
+
+  @override
+  String get webFundToTarget => 'حتى الهدف';
+
+  @override
+  String get webFundAll => 'كل المتاح';
+
+  @override
+  String webFundAvailable(String amount) {
+    return 'جاهز للتوزيع: $amount';
+  }
+
+  @override
+  String webFundOver(String amount) {
+    return 'سيصبح المبلغ الجاهز للتوزيع $amount';
+  }
+
+  @override
+  String get webFundOverMsg =>
+      'هذا أكثر من المبلغ الجاهز للتوزيع. هل تريد التمويل على أي حال؟';
+
+  @override
+  String get webFundAnyway => 'موّل على أي حال';
+
+  @override
+  String get webTxAddShort => 'إضافة';
+
+  @override
+  String get webTxNewExpense => 'مصروف جديد';
+
+  @override
+  String get webTxNewIncome => 'دخل جديد';
+
+  @override
+  String get webTxNewTransfer => 'تحويل جديد';
+
+  @override
+  String get webTxEditExpense => 'تعديل المصروف';
+
+  @override
+  String get webTxEditIncome => 'تعديل الدخل';
+
+  @override
+  String get webTxEditTransfer => 'تعديل التحويل';
+
+  @override
+  String get webTxEmptyTitle => 'لا معاملات هنا';
+
+  @override
+  String get webTxEmptySub => 'أضف معاملة أو اختر شهرًا آخر.';
+
+  @override
+  String get webTxNoMatch => 'لا نتائج مطابقة لبحثك';
+
+  @override
+  String webTxSplit(int n) {
+    return 'مقسّمة · $n';
+  }
+
+  @override
+  String get webTxSplitHint => 'تُعدَّل عناصر المعاملة المقسّمة من هاتفك.';
+
+  @override
+  String get webSaveAddAnother => 'حفظ وإضافة أخرى';
+
+  @override
+  String get webFormTitle => 'العنوان';
+
+  @override
+  String get webFormName => 'الاسم';
+
+  @override
+  String get webFormNoCategory => 'بلا فئة';
+
+  @override
+  String webFormInCurrency(String cur) {
+    return 'بعملة الحساب المصدر: $cur';
+  }
+
+  @override
+  String webFormRateLabel(String cur, String base) {
+    return 'السعر: 1 $cur = ? $base';
+  }
+
+  @override
+  String get webFormRateAuto => 'اتركه فارغًا لاستخدام آخر سعر على الهاتف';
+
+  @override
+  String webFormReceived(String cur) {
+    return 'المبلغ المستلم بـ $cur';
+  }
+
+  @override
+  String get webFormRepeats => 'التكرار';
+
+  @override
+  String get webFormNextDue => 'التاريخ التالي';
+
+  @override
+  String get webFormFirstDate => 'التاريخ الأول';
+
+  @override
+  String get webValReceived => 'أدخل المبلغ المستلم';
+
+  @override
+  String get webValRate => 'أدخل سعرًا صالحًا';
+
+  @override
+  String get webValCurrency => 'استخدم رمز عملة من 3 أحرف، مثل USD';
+
+  @override
+  String get webAcctAdd => 'إضافة حساب';
+
+  @override
+  String get webAcctNew => 'حساب جديد';
+
+  @override
+  String get webAcctNameHint => 'مثال: البنك الرئيسي';
+
+  @override
+  String get webAcctOpening => 'الرصيد الحالي';
+
+  @override
+  String get webAcctOpeningHint => 'بالسالب لبطاقة عليها دين';
+
+  @override
+  String get webAcctTravel => 'محفظة سفر';
+
+  @override
+  String get webAcctGroupBank => 'حسابات بنكية';
+
+  @override
+  String get webAcctGroupCash => 'نقدًا';
+
+  @override
+  String get webAcctGroupCredit => 'بطاقات ائتمان';
+
+  @override
+  String get webAcctGroupWallet => 'محافظ رقمية';
+
+  @override
+  String get webCatAdd => 'إضافة فئة';
+
+  @override
+  String get webCatNew => 'فئة جديدة';
+
+  @override
+  String get webCatEdit => 'تعديل الفئة';
+
+  @override
+  String get webCatNameHint => 'مثال: البقالة';
+
+  @override
+  String get webCatParent => 'ضمن';
+
+  @override
+  String get webCatTopLevel => 'فئة رئيسية';
+
+  @override
+  String get webCatParentLocked => 'لديها فئات فرعية، لذا تبقى فئة رئيسية.';
+
+  @override
+  String get webCatIcon => 'رمز تعبيري';
+
+  @override
+  String get webCatColor => 'اللون';
+
+  @override
+  String get webCatCustomColor => 'لون مخصص';
+
+  @override
+  String webCatSubs(int n) {
+    return 'فئات فرعية: $n';
+  }
+
+  @override
+  String get webCatNoSubs => 'بلا فئات فرعية';
+
+  @override
+  String get webRecAdd => 'إضافة متكررة';
+
+  @override
+  String get webRecNew => 'عنصر متكرر جديد';
+
+  @override
+  String get webRecEdit => 'تعديل العنصر المتكرر';
+
+  @override
+  String get webRecEmpty => 'لا عناصر متكررة بعد';
+
+  @override
+  String get webRecEmptySub =>
+      'الإيجار، الراتب، تحويلات الادخار: تُسجَّل تلقائيًا.';
+
+  @override
+  String get webRecTitleHint => 'مثال: الإيجار';
+
+  @override
+  String webRecNext(String date) {
+    return 'التالي $date';
+  }
+
+  @override
+  String get webRecOn => 'نشط';
+
+  @override
+  String get webRecOff => 'متوقف مؤقتًا';
+
+  @override
+  String get webRecPaused => 'متوقفة مؤقتًا';
+
+  @override
+  String get webRecPausedToast => 'تم الإيقاف المؤقت';
+
+  @override
+  String get webRecResumed => 'تم الاستئناف';
+
+  @override
+  String get webRecPastHint =>
+      'التاريخ الماضي يسجّل المرات الفائتة عند فتح التطبيق في المرة التالية.';
+
+  @override
+  String get webSubAdd => 'إضافة اشتراك';
+
+  @override
+  String get webSubNew => 'اشتراك جديد';
+
+  @override
+  String get webSubEdit => 'تعديل الاشتراك';
+
+  @override
+  String get webSubEmptySub =>
+      'تابع البث والتطبيقات والعضويات، مع تغيّرات أسعارها.';
+
+  @override
+  String get webSubTitleHint => 'مثال: Netflix';
+
+  @override
+  String get webSubMonthly => 'شهريًا';
+
+  @override
+  String webSubYearly(String amount) {
+    return '$amount سنويًا';
+  }
+
+  @override
+  String get webRepEmpty => 'لا شيء مسجّل هذا الشهر';
+
+  @override
+  String get webRepEmptySub => 'اختر شهرًا آخر بالأسهم.';
+
+  @override
+  String get webShortcutPages => 'الانتقال إلى صفحة في القائمة';
+
+  @override
+  String get wcStartFailed =>
+      'تعذّر التشغيل. أوقف Wi‑Fi وشغّله، ثم حاول مجددًا.';
+
+  @override
   String billItemN(int n) {
     return 'البند $n';
   }
@@ -105,12 +515,7 @@ class SAr extends S {
   }
 
   @override
-  String webEnvBalanceOfTarget(String balance, String target) {
-    return '$balance من $target';
-  }
-
-  @override
-  String get webShortcutRefresh => 'تحديث الصفحة الحالية';
+  String get webShortcutRefresh => 'إعادة التحميل من الهاتف';
 
   @override
   String get currencyNameUsd => 'دولار أمريكي';
@@ -4355,161 +4760,46 @@ class SAr extends S {
       'خادم المرافق الإلكتروني BudgetSeal يعمل';
 
   @override
-  String get webAuthLockout => 'محاولات كثيرة جداً. أعد المحاولة لاحقاً.';
-
-  @override
   String get webAuthIncorrect => 'رمز PIN غير صحيح';
-
-  @override
-  String get webServerUnreachable => 'الخادم غير قابل للوصول';
-
-  @override
-  String get webUnexpectedResponse => 'استجابة غير متوقعة من الخادم';
-
-  @override
-  String get webUnexpectedError => 'خطأ غير متوقع';
 
   @override
   String get webUndo => 'تراجع';
 
   @override
-  String get webSaving => 'جارٍ الحفظ…';
-
-  @override
-  String get webDashNoAccounts => 'لا حسابات بعد.';
-
-  @override
-  String get webDashUnallocated => 'غير موزع';
-
-  @override
-  String get webDashNoEnvelopes => 'لا أظرف بعد.';
-
-  @override
-  String get webDashFallbackTx => 'معاملة';
-
-  @override
-  String get webDashNoTxTitle => 'لا توجد معاملات بعد';
-
-  @override
-  String get webDashNoTxSub => 'أضف أول معاملة للبدء';
-
-  @override
-  String get webDashSeeAll => 'عرض الكل';
-
-  @override
-  String get webDashRecent => 'المعاملات الأخيرة';
-
-  @override
-  String get webDashViewAll => 'عرض الكل';
-
-  @override
   String get webTxNoRate => 'بدون سعر';
 
   @override
-  String get webTxNoFound => 'لا معاملات موجودة';
+  String get webTxAdd => 'إضافة معاملة';
 
   @override
-  String get webTxCsv => 'CSV';
-
-  @override
-  String get webTxCsvTooltip => 'تصدير CSV';
-
-  @override
-  String get webTxAdd => '+ إضافة';
-
-  @override
-  String get webTxSearch => 'البحث بالعنوان…';
-
-  @override
-  String get webTxThDate => 'التاريخ';
-
-  @override
-  String get webTxThType => 'النوع';
-
-  @override
-  String get webTxThTitle => 'العنوان';
-
-  @override
-  String get webTxThAccount => 'الحساب';
-
-  @override
-  String get webTxThCategory => 'الفئة';
-
-  @override
-  String get webTxThAmount => 'المبلغ';
-
-  @override
-  String get webTxPrev => '→ السابق';
-
-  @override
-  String webTxPageN(int page) {
-    return 'صفحة $page';
-  }
-
-  @override
-  String get webTxNext => 'التالي ←';
-
-  @override
-  String get webTxCsvExported => 'تم تصدير CSV';
-
-  @override
-  String get webTxEdit => 'تعديل';
-
-  @override
-  String get webTxDel => 'حذف';
+  String get webTxSearch => 'ابحث في العناوين والملاحظات';
 
   @override
   String get webFormType => 'النوع';
 
   @override
-  String get webFormFromAccount => 'من حساب';
+  String get webFormFromAccount => 'من الحساب';
 
   @override
   String get webFormAccount => 'الحساب';
 
   @override
-  String get webFormSelectAccount => 'اختر حساباً';
-
-  @override
-  String get webFormToAccount => 'إلى حساب';
+  String get webFormToAccount => 'إلى الحساب';
 
   @override
   String get webFormCategory => 'الفئة';
 
   @override
-  String get webFormNone => '— لا شيء —';
-
-  @override
   String get webFormAmount => 'المبلغ';
-
-  @override
-  String get webFormAmountPlaceholder => '0.00';
 
   @override
   String get webFormCurrency => 'العملة';
 
   @override
-  String get webFormCurrencyPlaceholder => 'USD';
-
-  @override
-  String get webFormExchangeRate => 'سعر الصرف';
-
-  @override
-  String get webFormRatePlaceholder => 'سعر الصرف للعملة الأساسية';
-
-  @override
   String get webFormDate => 'التاريخ';
 
   @override
-  String get webFormTitleNote => 'العنوان / الملاحظة';
-
-  @override
   String get webFormOptional => 'اختياري';
-
-  @override
-  String webFormRateHint(String txCur, String baseCur) {
-    return '1 $txCur = ؟ $baseCur';
-  }
 
   @override
   String get webValSelectAccount => 'اختر حساباً';
@@ -4521,16 +4811,10 @@ class SAr extends S {
   String get webValSelectDest => 'اختر حساب الوجهة';
 
   @override
-  String get webValAccountsDiffer => 'يجب أن يختلف حساب المصدر عن الوجهة';
-
-  @override
-  String get webModalAddTx => 'إضافة معاملة';
+  String get webValAccountsDiffer => 'اختر حسابين مختلفين';
 
   @override
   String get webToastTxAdded => 'تمت إضافة المعاملة';
-
-  @override
-  String get webModalEditTx => 'تعديل المعاملة';
 
   @override
   String get webToastTxUpdated => 'تم تحديث المعاملة';
@@ -4539,74 +4823,10 @@ class SAr extends S {
   String get webToastTxDeleted => 'تم حذف المعاملة';
 
   @override
-  String get webToastNoLines => 'لا تفاصيل خطوط متاحة';
+  String get webCatEmptyTitle => 'لا فئات هنا';
 
   @override
-  String webTxLinesHeader(int count) {
-    return 'سطور المعاملة ($count)';
-  }
-
-  @override
-  String get webThLineAmount => 'المبلغ';
-
-  @override
-  String get webThLineCurrency => 'العملة';
-
-  @override
-  String get webThLineCategory => 'الفئة';
-
-  @override
-  String get webThLineAccount => 'الحساب';
-
-  @override
-  String get webThLineNote => 'ملاحظة';
-
-  @override
-  String get webThLineRate => 'السعر';
-
-  @override
-  String get webCatSubSingular => 'فئة فرعية واحدة';
-
-  @override
-  String webCatSubPlural(int count) {
-    return '$count فئات فرعية';
-  }
-
-  @override
-  String get webCatSectionExpense => 'مصروف';
-
-  @override
-  String get webCatSectionIncome => 'الدخل';
-
-  @override
-  String get webCatEmptyTitle => 'لا فئات بعد';
-
-  @override
-  String get webCatEmptySub => 'أضف أول فئة للبدء';
-
-  @override
-  String get webCatFormName => 'الاسم';
-
-  @override
-  String get webCatFormNameHint => 'مثل: بقالة';
-
-  @override
-  String get webCatFormParent => 'الفئة الأم';
-
-  @override
-  String get webCatFormNone => '— لا شيء (مستوى أعلى) —';
-
-  @override
-  String get webCatFormIcon => 'الأيقونة (إيموجي)';
-
-  @override
-  String get webCatFormColor => 'اللون';
-
-  @override
-  String get webCatFormType => 'نوع المعاملة';
-
-  @override
-  String get webModalAddCat => 'إضافة فئة';
+  String get webCatEmptySub => 'تجمع الفئات مصاريفك ودخلك.';
 
   @override
   String get webValNameRequired => 'الاسم مطلوب';
@@ -4615,95 +4835,38 @@ class SAr extends S {
   String get webToastCatAdded => 'تمت إضافة الفئة';
 
   @override
-  String get webToastCatNotFound => 'الفئة غير موجودة';
+  String get webToastCatUpdated => 'تم حفظ الفئة';
 
   @override
-  String get webModalEditCat => 'تعديل الفئة';
+  String get webAcctEmptyTitle => 'لا حسابات بعد';
 
   @override
-  String get webToastCatUpdated => 'تم تحديث الفئة';
+  String get webAcctEmptySub => 'أضف الحسابات التي تدفع منها لتبدأ المتابعة.';
 
   @override
-  String get webAcctEmptyTitle => 'لا توجد حسابات بعد';
+  String get webAcctTypeBank => 'بنك';
 
   @override
-  String get webAcctEmptySub => 'أضف أول حساب للبدء';
+  String get webAcctTypeCash => 'نقدًا';
 
   @override
-  String get webAcctTypeBank => 'حسابات بنكية';
+  String get webAcctTypeCredit => 'ائتمان';
 
   @override
-  String get webAcctTypeCash => 'نقدي';
-
-  @override
-  String get webAcctTypeCredit => 'بطاقات ائتمان';
-
-  @override
-  String get webAcctTypeWallet => 'محافظ';
-
-  @override
-  String webAcctNetWorth(String cur) {
-    return 'صافي الثروة · $cur';
-  }
-
-  @override
-  String get webAcctCountSingular => 'حساب واحد';
-
-  @override
-  String webAcctCountPlural(int count) {
-    return '$count حسابات';
-  }
-
-  @override
-  String get webAcctTxEmpty => 'لا معاملات لهذا الحساب';
-
-  @override
-  String get webAcctBack => '→ رجوع';
-
-  @override
-  String get webAcctFormNameHint => 'مثل: حساب جاري';
-
-  @override
-  String get webAcctFormType => 'النوع';
-
-  @override
-  String get webAcctFormTypeBank => 'بنك';
-
-  @override
-  String get webAcctFormTypeCash => 'نقدي';
-
-  @override
-  String get webAcctFormTypeCredit => 'ائتمان';
-
-  @override
-  String get webAcctFormTypeWallet => 'محفظة';
-
-  @override
-  String get webAcctFormOpening => 'الرصيد الافتتاحي';
-
-  @override
-  String get webModalAddAcct => 'إضافة حساب';
+  String get webAcctTypeWallet => 'محفظة';
 
   @override
   String get webToastAcctAdded => 'تمت إضافة الحساب';
 
   @override
-  String get webEnvEmptyTitle => 'لا أظرف';
+  String get webEnvEmptyTitle => 'لا أظرف بعد';
 
   @override
-  String get webEnvEmptySub => 'الأظرف تُدار من تطبيق BudgetSeal.';
+  String get webEnvEmptySub =>
+      'أنشئ الأظرف من تبويب الميزانية في التطبيق، ثم موّلها من هنا.';
 
   @override
-  String get webEnvUnallocated => 'غير موزع:';
-
-  @override
-  String get webEnvFund => '+ تمويل';
-
-  @override
-  String get webModalFund => 'تمويل الظرف';
-
-  @override
-  String get webFormAmountToFund => 'المبلغ للتمويل';
+  String get webEnvFund => 'تمويل';
 
   @override
   String get webFormNote => 'ملاحظة';
@@ -4712,68 +4875,23 @@ class SAr extends S {
   String get webToastEnvFunded => 'تم تمويل الظرف';
 
   @override
-  String get webBtnFundConfirm => 'تمويل';
-
-  @override
-  String get webRecurringEmpty => 'لا معاملات متكررة';
-
-  @override
-  String get webThService => 'الخدمة';
-
-  @override
-  String get webThFrequency => 'التكرار';
-
-  @override
-  String get webThNextDue => 'الاستحقاق التالي';
-
-  @override
-  String get webThOn => 'مفعّل';
-
-  @override
-  String get webToggleEnabled => 'مفعّل';
-
-  @override
-  String get webToggleDisabled => 'معطل';
-
-  @override
-  String get webFormTitleLabel => 'العنوان';
-
-  @override
-  String get webFormTitleHint => 'مثل: Netflix';
-
-  @override
-  String get webFormFrequency => 'التكرار';
-
-  @override
   String get webFormEvery => 'كل';
-
-  @override
-  String get webFormStartDate => 'تاريخ البدء';
-
-  @override
-  String get webModalAddRecurring => 'إضافة متكررة';
 
   @override
   String get webToastRecurringAdded => 'تمت إضافة المتكررة';
 
   @override
-  String get webModalEditRecurring => 'تعديل المتكررة';
-
-  @override
   String get webToastUpdated => 'تم التحديث';
 
   @override
-  String get webToastNotFound => 'غير موجود';
+  String get webValSelectStartDate => 'اختر تاريخًا';
 
   @override
-  String get webValSelectStartDate => 'اختر تاريخ البدء';
-
-  @override
-  String get webConfirmDeleteRecurring => 'حذف المتكررة';
+  String get webConfirmDeleteRecurring => 'حذف هذا العنصر المتكرر؟';
 
   @override
   String get webConfirmDeleteRecurringMsg =>
-      'سيتم حذف هذه المعاملة المتكررة نهائياً.';
+      'سيتوقف تسجيله. تبقى المعاملات التي سُجّلت سابقًا.';
 
   @override
   String get webToastDeleted => 'تم الحذف';
@@ -4782,37 +4900,17 @@ class SAr extends S {
   String get webSubEmpty => 'لا اشتراكات بعد';
 
   @override
-  String get webModalAddSub => 'إضافة اشتراك';
-
-  @override
   String get webToastSubAdded => 'تمت إضافة الاشتراك';
 
   @override
-  String get webModalEditSub => 'تعديل الاشتراك';
+  String get webSubPriceHint => 'يُضاف المبلغ الجديد إلى سجل الأسعار.';
 
   @override
-  String get webFormNewAmount => 'المبلغ الجديد';
+  String get webConfirmDeleteSub => 'حذف هذا الاشتراك؟';
 
   @override
-  String get webSubPriceHint => 'تغيير المبلغ سيضيف إدخالاً في تاريخ الأسعار.';
-
-  @override
-  String get webConfirmDeleteSub => 'حذف الاشتراك';
-
-  @override
-  String get webConfirmDeleteSubMsg => 'سيتم حذف هذا الاشتراك نهائياً.';
-
-  @override
-  String get webReportsYear => 'السنة';
-
-  @override
-  String get webReportsMonth => 'الشهر';
-
-  @override
-  String get webReportsLoad => 'تحميل';
-
-  @override
-  String get webReportsSelectPrompt => 'اختر فترة واضغط تحميل.';
+  String get webConfirmDeleteSubMsg =>
+      'سيتوقف تسجيله. تبقى الدفعات المسجّلة سابقًا.';
 
   @override
   String get webStatIncome => 'الدخل';
@@ -4827,28 +4925,28 @@ class SAr extends S {
   String get webStatSavingsRate => 'معدل الادخار';
 
   @override
-  String get webStatAvgDaily => 'متوسط الإنفاق اليومي';
+  String get webStatAvgDaily => 'المتوسط اليومي';
 
   @override
   String get webStatTransactions => 'المعاملات';
 
   @override
-  String get webReportDailyCashflow => 'التدفق النقدي اليومي';
+  String get webReportDailyCashflow => 'يومًا بيوم';
 
   @override
   String get webReportSpendingCat => 'الإنفاق حسب الفئة';
 
   @override
-  String get webReportNoExpense => 'لا بيانات مصاريف';
+  String get webReportNoExpense => 'لا إنفاق هذا الشهر';
 
   @override
   String get webReportIncomeCat => 'الدخل حسب الفئة';
 
   @override
-  String get webReportNoIncome => 'لا بيانات دخل';
+  String get webReportNoIncome => 'لا دخل هذا الشهر';
 
   @override
-  String get webReportTopExpenses => 'أعلى المصاريف';
+  String get webReportTopExpenses => 'أكبر المصاريف';
 
   @override
   String get webChartIncome => 'الدخل';
@@ -4866,7 +4964,7 @@ class SAr extends S {
   String get webShortcutSearch => 'البحث في المعاملات';
 
   @override
-  String get webShortcutClose => 'إغلاق النافذة / إلغاء التركيز';
+  String get webShortcutClose => 'إغلاق النافذة';
 
   @override
   String get webShortcutHelp => 'إظهار هذه المساعدة';

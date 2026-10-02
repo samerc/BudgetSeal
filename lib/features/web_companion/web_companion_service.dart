@@ -82,7 +82,10 @@ class WebCompanionService {
         auth.pruneExpiredSessions();
       });
     } catch (e) {
-      notifier.setError('Failed to start server: $e');
+      // Usually the port is still held by a previous run; details stay in
+      // the log, the user gets a sentence.
+      debugPrint('[WebCompanion] Start failed: $e');
+      notifier.setError(currentS().wcStartFailed);
       _server = null;
     }
   }
@@ -155,8 +158,8 @@ class WebCompanionService {
     final result = await FlutterForegroundTask.startService(
       serviceId: 7432,
       serviceTypes: [ForegroundServiceTypes.dataSync],
-      notificationTitle: 'BudgetSeal Web Companion',
-      notificationText: 'Running at http://$ip:7432',
+      notificationTitle: currentS().wcTitle,
+      notificationText: 'http://$ip:7432',
       callback: startCallback,
     );
 
@@ -284,8 +287,9 @@ class WebCompanionService {
   }
 
   /// Stricter rate limit for write operations (POST/PUT/DELETE).
-  /// 10 submissions per minute per IP — blocks rapid-fire form abuse.
-  static Middleware _writeRateLimitMiddleware({int maxPerMinute = 10}) {
+  /// 40 per minute per IP — room for fast bulk entry from a keyboard, still
+  /// blocks scripted floods.
+  static Middleware _writeRateLimitMiddleware({int maxPerMinute = 40}) {
     final tracker = <String, List<DateTime>>{};
     const writeMethods = {'POST', 'PUT', 'DELETE'};
     return (Handler inner) {
@@ -328,9 +332,11 @@ class WebCompanionService {
   /// Logs the attempt and returns 400.
   static Middleware _abuseDetectionMiddleware() {
     // Patterns that should never appear in legitimate financial data
+    // No "--" or "UPDATE x SET": they match ordinary notes ("Dinner -- with
+    // Sam"). Queries are parameterized anyway; this only stops probes.
     final sqlPattern = RegExp(
       r"(\bDROP\s+TABLE\b|\bUNION\s+SELECT\b|\bINSERT\s+INTO\b"
-      r"|\bDELETE\s+FROM\b|\bUPDATE\s+\w+\s+SET\b|--\s|;\s*DROP"
+      r"|\bDELETE\s+FROM\b|;\s*DROP"
       r"|\bOR\s+1\s*=\s*1\b|\bAND\s+1\s*=\s*1\b)",
       caseSensitive: false,
     );
@@ -447,9 +453,13 @@ class WebCompanionService {
         return null;
       },
       responseHandler: (Response response) {
+        // Security headers win, except a long cache a static route asked for.
+        final cache = response.headers['cache-control'];
         return response.change(headers: {
           ...response.headers,
           ..._buildCorsHeaders(allowedOrigin),
+          if (cache != null && cache.startsWith('public'))
+            'Cache-Control': cache,
         });
       },
     );
@@ -472,10 +482,12 @@ class WebCompanionService {
     'Referrer-Policy': 'no-referrer',
     'Cache-Control': 'no-store',
     'Content-Security-Policy':
+        // Everything is served by the phone (fonts and Chart.js are
+        // bundled) and the SPA has no inline scripts.
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        "font-src https://fonts.gstatic.com; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "font-src 'self'; "
         "img-src 'self' data:; "
         "connect-src 'self'; "
         "frame-ancestors 'none'",
@@ -500,10 +512,9 @@ class _NoOpTaskHandler extends TaskHandler {
   void onRepeatEvent(DateTime timestamp) {
     // Refresh the notification periodically so Android knows the service
     // is still active and doesn't kill it when the screen is off.
-    FlutterForegroundTask.updateService(
-      notificationTitle: 'BudgetSeal Web Companion',
-      notificationText: 'Running · ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
-    );
+    // The text stays the localized title + URL set at start (this handler
+    // has no localization context).
+    FlutterForegroundTask.updateService();
   }
 
   @override

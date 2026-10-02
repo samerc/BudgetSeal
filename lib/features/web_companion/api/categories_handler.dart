@@ -63,8 +63,9 @@ Handler createCategoryHandler(Ref ref) {
 
     // Validate FK references
     final parentId = optString(body, 'parentId');
-    if (parentId != null && await validateIdExists(db, 'categories', parentId, householdId) == null) {
-      return badRequest('parentId does not exist');
+    if (parentId != null) {
+      final parentError = await _checkParent(db, householdId, parentId);
+      if (parentError != null) return badRequest(parentError);
     }
     final allocationId = optString(body, 'allocationId');
     if (allocationId != null && await validateIdExists(db, 'allocations', allocationId, householdId) == null) {
@@ -136,6 +137,24 @@ Handler updateCategoryHandler(Ref ref) {
         txTypeValue = Value(t);
       }
 
+      // Moving under another parent: one level only, never under itself.
+      Value<String?> parentValue = const Value.absent();
+      if (body.containsKey('parentId')) {
+        final parentId = optString(body, 'parentId');
+        if (parentId != null) {
+          if (parentId == id) return badRequest('A category cannot be its own parent');
+          final parentError = await _checkParent(db, householdId, parentId);
+          if (parentError != null) return badRequest(parentError);
+          final children = await (db.select(db.categories)
+                ..where((c) => c.parentId.equals(id) & c.deleted.equals(false)))
+              .get();
+          if (children.isNotEmpty) {
+            return badRequest('A category with subcategories cannot become a subcategory');
+          }
+        }
+        parentValue = Value(parentId);
+      }
+
       // Validate FK references
       final allocId = body.containsKey('allocationId')
           ? optString(body, 'allocationId') : null;
@@ -154,6 +173,7 @@ Handler updateCategoryHandler(Ref ref) {
               : const Value.absent(),
           colorHex: colorHexValue,
           transactionType: txTypeValue,
+          parentId: parentValue,
           allocationId: body.containsKey('allocationId')
               ? Value(allocId)
               : const Value.absent(),
@@ -168,4 +188,18 @@ Handler updateCategoryHandler(Ref ref) {
       return serverError(e);
     }
   };
+}
+
+/// A parent must exist in this household and be a top-level category.
+Future<String?> _checkParent(
+    AppDatabase db, String householdId, String parentId) async {
+  final parent = await (db.select(db.categories)
+        ..where((c) =>
+            c.id.equals(parentId) &
+            c.householdId.equals(householdId) &
+            c.deleted.equals(false)))
+      .getSingleOrNull();
+  if (parent == null) return 'parentId does not exist';
+  if (parent.parentId != null) return 'Subcategories cannot have subcategories';
+  return null;
 }

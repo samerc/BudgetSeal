@@ -5,6 +5,8 @@ import 'package:shelf/shelf.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/household_provider.dart';
+import '../../../shared/utils/note_text.dart';
+import '_serializers.dart';
 import '_validation.dart';
 
 /// Same logic as `isRealRate()` in format_number.dart:
@@ -135,17 +137,16 @@ Handler cashflowReportHandler(Ref ref) {
         'net': totalIncome - totalExpense,
         'transactionCount': txs.length,
         'topExpenses': expenseTxsSorted.take(5).map((t) {
-          final amt =
-              _safeBaseAmount(t, linesByTx[t.id] ?? [], baseCurrency);
+          final lines = linesByTx[t.id] ?? const <TransactionLine>[];
+          final amt = _safeBaseAmount(t, lines, baseCurrency);
+          final catId = t.categoryId ?? lines.firstOrNull?.categoryId;
           return <String, dynamic>{
+            'id': t.id,
             'amount': amt,
-            'note': t.note,
+            'note': visibleNote(t.note),
             'date': t.createdAt.toIso8601String(),
             'accountName': acctMap[t.accountId]?.name,
-            'categoryName':
-                t.categoryId != null ? catMap[t.categoryId]?.name : null,
-            'categoryIcon':
-                t.categoryId != null ? catMap[t.categoryId]?.icon : null,
+            ...categoryFields(catId != null ? catMap[catId] : null),
           };
         }).toList(),
         'daily': List.generate(
@@ -250,8 +251,9 @@ Handler byCategoryReportHandler(Ref ref) {
           final cat = catMap[e.key];
           return {
             'categoryId': e.key,
-            'name': cat?.name ?? 'Unknown',
+            'name': cat?.name ?? '',
             'icon': cat?.icon ?? 'category',
+            'iconFile': categoryFields(cat)['categoryIconFile'],
             'colorHex': cat?.colorHex ?? '#607D8B',
             'total': e.value,
           };

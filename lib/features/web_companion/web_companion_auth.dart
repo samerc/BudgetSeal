@@ -61,7 +61,8 @@ class WebCompanionAuth {
           isLockout: true,
         );
       }
-      throw const AuthException('Incorrect PIN. Please try again.');
+      throw AuthException('Incorrect PIN. Please try again.',
+          attemptsLeft: _maxAttempts - _failedAttempts);
     }
 
     _failedAttempts = 0;
@@ -150,7 +151,11 @@ class _Session {
 class AuthException implements Exception {
   final String message;
   final bool isLockout;
-  const AuthException(this.message, {this.isLockout = false});
+
+  /// Wrong PINs still allowed before the lockout (wrong-PIN errors only).
+  final int? attemptsLeft;
+  const AuthException(this.message,
+      {this.isLockout = false, this.attemptsLeft});
 
   @override
   String toString() => message;

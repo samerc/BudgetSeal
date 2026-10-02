@@ -1,13 +1,11 @@
-import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-import '../../../core/engine/balance_calculator.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
-import '_serializers.dart';
+import '_budget.dart';
 import '_validation.dart';
 
 // ── GET /api/envelopes ────────────────────────────────────────────────────────
@@ -19,52 +17,13 @@ Handler listEnvelopesHandler(Ref ref) {
     if (householdId == null) return forbidden();
 
     try {
-      final allocs = await (db.select(db.allocations)
-            ..where((a) =>
-                a.householdId.equals(householdId) &
-                a.archived.equals(false) &
-                a.deleted.equals(false))
-            ..orderBy([(a) => OrderingTerm.asc(a.name)]))
-          .get();
-
-      final calculator = BalanceCalculator(db);
-      final accountBalances = await calculator.allAccountBalances(householdId);
-      final allocBalances =
-          await calculator.allAllocationBalancesByCurrency(householdId);
-
-      // Compute unallocated from already-fetched data instead of
-      // calling unallocatedByCurrency() which re-queries both.
-      final accounts = await (db.select(db.accounts)
-            ..where((a) =>
-                a.householdId.equals(householdId) &
-                a.archived.equals(false) &
-                a.deleted.equals(false)))
-          .get();
-      final accountTotals = <String, double>{};
-      for (final acc in accounts) {
-        final bal = accountBalances[acc.id] ?? 0;
-        accountTotals[acc.currency] =
-            (accountTotals[acc.currency] ?? 0.0) + bal;
-      }
-      final allocTotals = <String, double>{};
-      for (final allocEntry in allocBalances.values) {
-        for (final entry in allocEntry.entries) {
-          allocTotals[entry.key] =
-              (allocTotals[entry.key] ?? 0.0) + entry.value;
-        }
-      }
-      final unallocated = <String, double>{};
-      final allCurrencies = {...accountTotals.keys, ...allocTotals.keys};
-      for (final currency in allCurrencies) {
-        unallocated[currency] =
-            (accountTotals[currency] ?? 0.0) - (allocTotals[currency] ?? 0.0);
-      }
-
+      final snapshot = await budgetSnapshot(db, householdId);
       return ok({
-        'items': allocs
-            .map((a) => allocationToJson(a, allocBalances[a.id] ?? {}))
-            .toList(),
-        'unallocated': unallocated,
+        'items': snapshot['envelopes'],
+        'unallocated': snapshot['unallocated'],
+        'period': snapshot['period'],
+        'baseCurrency':
+            (snapshot['household'] as Map<String, dynamic>)['baseCurrency'],
       });
     } catch (e) {
       return serverError(e);
@@ -111,7 +70,7 @@ Handler fundEnvelopeHandler(Ref ref) {
       await engine.fundAllocation(
         allocationId: id,
         amount: amount,
-        currency: currency,
+        currency: currency.toUpperCase(),
         deviceId: 'web',
         note: truncate(optString(body, 'note') ?? '', kMaxNoteLength),
       );

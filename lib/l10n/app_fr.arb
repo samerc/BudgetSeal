@@ -1,4 +1,127 @@
 {
+  "webNavHome": "Accueil",
+  "webNavBudget": "Budget",
+  "webMenu": "Menu",
+  "webShortcuts": "Raccourcis",
+  "webSignOut": "Se déconnecter",
+  "webConnChecking": "Connexion…",
+  "webConnOk": "Connecté au téléphone",
+  "webConnLost": "Téléphone injoignable",
+  "webOffline": "Impossible de joindre votre téléphone. Gardez BudgetSeal ouvert avec le Compagnon Web actif, sur le même Wi‑Fi.",
+  "webOfflineShort": "Téléphone injoignable",
+  "webAuthSubtitle": "Saisissez le code PIN défini sur votre téléphone",
+  "webAuthFoot": "Vos données restent sur votre téléphone. Cette page les lit via votre Wi‑Fi.",
+  "webAuthDelete": "Effacer le chiffre",
+  "webAuthWrongLeft": "Code PIN incorrect · {n} essais restants",
+  "webAuthLocked": "Trop de tentatives. Réessayez dans {n} min.",
+  "webAuthExpired": "Votre session a expiré. Saisissez à nouveau votre code PIN.",
+  "webErrRequest": "Enregistrement impossible. Vérifiez les valeurs et réessayez.",
+  "webErrTooMany": "Trop de modifications à la fois. Patientez un instant.",
+  "webErrNoRate": "Pas encore de taux de change pour cette devise. Saisissez-en un.",
+  "webNeedAccount": "Ajoutez d'abord un compte.",
+  "webSeeAll": "Tout voir",
+  "webRecent": "Récentes",
+  "webLoadMore": "Charger plus",
+  "webDuplicate": "Dupliquer",
+  "webCsv": "Exporter en CSV",
+  "webCsvPreparing": "Préparation de l'export…",
+  "webCsvDone": "{n} lignes exportées",
+  "webWholeYear": "Toute l'année",
+  "webPrevYear": "Année précédente",
+  "webNextYear": "Année suivante",
+  "webPrevMonth": "Mois précédent",
+  "webNextMonth": "Mois suivant",
+  "webRta": "Prêt à répartir",
+  "webRtaAssign": "Répartir",
+  "webNetWorth": "Patrimoine net",
+  "webNetWorthCur": "Patrimoine net · {cur}",
+  "webEnvSpending": "Dépenses",
+  "webEnvFlexible": "Cumulatif",
+  "webEnvAvailable": "Disponible",
+  "webEnvOverspent": "Dépassé",
+  "webEnvSpent": "{amount} dépensés",
+  "webEnvOf": "sur {amount}",
+  "webEnvToGo": "encore {amount}",
+  "webEnvReached": "Objectif atteint",
+  "webFundTitle": "Financer {name}",
+  "webFundToTarget": "Jusqu'à l'objectif",
+  "webFundAll": "Tout le disponible",
+  "webFundAvailable": "Prêt à répartir : {amount}",
+  "webFundOver": "Le montant prêt à répartir passerait à {amount}",
+  "webFundOverMsg": "C’est plus que votre montant prêt à répartir. Financer quand même ?",
+  "webFundAnyway": "Financer quand même",
+  "webTxAddShort": "Ajouter",
+  "webTxNewExpense": "Nouvelle dépense",
+  "webTxNewIncome": "Nouveau revenu",
+  "webTxNewTransfer": "Nouveau virement",
+  "webTxEditExpense": "Modifier la dépense",
+  "webTxEditIncome": "Modifier le revenu",
+  "webTxEditTransfer": "Modifier le virement",
+  "webTxEmptyTitle": "Aucune transaction ici",
+  "webTxEmptySub": "Ajoutez-en une ou choisissez un autre mois.",
+  "webTxNoMatch": "Aucun résultat pour cette recherche",
+  "webTxSplit": "Divisée · {n}",
+  "webTxSplitHint": "Les éléments d'une transaction divisée se modifient sur votre téléphone.",
+  "webSaveAddAnother": "Enregistrer et ajouter",
+  "webFormTitle": "Titre",
+  "webFormName": "Nom",
+  "webFormNoCategory": "Sans catégorie",
+  "webFormInCurrency": "En {cur}, la devise du compte source",
+  "webFormRateLabel": "Taux : 1 {cur} = ? {base}",
+  "webFormRateAuto": "Laissez vide pour utiliser le dernier taux du téléphone",
+  "webFormReceived": "Montant reçu en {cur}",
+  "webFormRepeats": "Répétition",
+  "webFormNextDue": "Prochaine date",
+  "webFormFirstDate": "Première date",
+  "webValReceived": "Saisissez le montant reçu",
+  "webValRate": "Saisissez un taux valide",
+  "webValCurrency": "Utilisez un code devise de 3 lettres, comme EUR",
+  "webAcctAdd": "Ajouter un compte",
+  "webAcctNew": "Nouveau compte",
+  "webAcctNameHint": "ex. Banque principale",
+  "webAcctOpening": "Solde actuel",
+  "webAcctOpeningHint": "Négatif pour une carte à rembourser",
+  "webAcctTravel": "Portefeuille de voyage",
+  "webAcctGroupBank": "Comptes bancaires",
+  "webAcctGroupCash": "Espèces",
+  "webAcctGroupCredit": "Cartes de crédit",
+  "webAcctGroupWallet": "Portefeuilles numériques",
+  "webCatAdd": "Ajouter une catégorie",
+  "webCatNew": "Nouvelle catégorie",
+  "webCatEdit": "Modifier la catégorie",
+  "webCatNameHint": "ex. Courses",
+  "webCatParent": "Dans",
+  "webCatTopLevel": "Catégorie principale",
+  "webCatParentLocked": "Elle a des sous-catégories, elle reste donc principale.",
+  "webCatIcon": "Emoji",
+  "webCatColor": "Couleur",
+  "webCatCustomColor": "Couleur personnalisée",
+  "webCatSubs": "{n} sous-catégories",
+  "webCatNoSubs": "Aucune sous-catégorie",
+  "webRecAdd": "Ajouter un récurrent",
+  "webRecNew": "Nouvel élément récurrent",
+  "webRecEdit": "Modifier l'élément récurrent",
+  "webRecEmpty": "Pas encore d'éléments récurrents",
+  "webRecEmptySub": "Loyer, salaire, virements d’épargne : ils sont enregistrés automatiquement.",
+  "webRecTitleHint": "ex. Loyer",
+  "webRecNext": "prochain le {date}",
+  "webRecOn": "Actif",
+  "webRecOff": "En pause",
+  "webRecPaused": "En pause",
+  "webRecPausedToast": "Mis en pause",
+  "webRecResumed": "Réactivé",
+  "webRecPastHint": "Une date passée enregistre les occurrences manquées à la prochaine ouverture de l'app.",
+  "webSubAdd": "Ajouter un abonnement",
+  "webSubNew": "Nouvel abonnement",
+  "webSubEdit": "Modifier l'abonnement",
+  "webSubEmptySub": "Suivez streaming, apps et abonnements, avec leurs changements de prix.",
+  "webSubTitleHint": "ex. Netflix",
+  "webSubMonthly": "Par mois",
+  "webSubYearly": "{amount} par an",
+  "webRepEmpty": "Rien d’enregistré ce mois-ci",
+  "webRepEmptySub": "Choisissez un autre mois avec les flèches.",
+  "webShortcutPages": "Aller à une page du menu",
+  "wcStartFailed": "Démarrage impossible. Désactivez puis réactivez le Wi‑Fi et réessayez.",
   "billItemN": "Article {n}",
   "billDiscardTitle": "Abandonner cette addition ?",
   "billDiscardBody": "Les articles et la répartition saisis seront perdus.",
@@ -21,8 +144,7 @@
   "billTaxHint": "Réparti selon ce que chacun a commandé.",
   "billReceiptMatch": "Correspond au total du ticket ({total})",
   "billReceiptDiff": "Les articles font {items} · total du ticket {total}",
-  "webEnvBalanceOfTarget": "{balance} sur {target}",
-  "webShortcutRefresh": "Rafraîchir la page actuelle",
+  "webShortcutRefresh": "Recharger depuis le téléphone",
   "currencyNameUsd": "Dollar américain",
   "currencyNameEur": "Euro",
   "currencyNameGbp": "Livre sterling",
@@ -3925,152 +4047,31 @@
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
   },
-  "webAuthLockout": "Trop de tentatives. Réessayez plus tard.",
-  "@webAuthLockout": {
-    "description": "Auth error"
-  },
   "webAuthIncorrect": "PIN incorrect",
   "@webAuthIncorrect": {
     "description": "Auth error"
-  },
-  "webServerUnreachable": "Serveur injoignable",
-  "@webServerUnreachable": {
-    "description": "Toast error"
-  },
-  "webUnexpectedResponse": "Réponse inattendue du serveur",
-  "@webUnexpectedResponse": {
-    "description": "Toast error"
-  },
-  "webUnexpectedError": "Erreur inattendue",
-  "@webUnexpectedError": {
-    "description": "Toast error"
   },
   "webUndo": "Annuler",
   "@webUndo": {
     "description": "Toast button"
   },
-  "webSaving": "Enregistrement…",
-  "@webSaving": {
-    "description": "Modal button"
-  },
-  "webDashNoAccounts": "Aucun compte pour le moment.",
-  "@webDashNoAccounts": {
-    "description": "Empty state"
-  },
-  "webDashUnallocated": "Non affecté",
-  "@webDashUnallocated": {
-    "description": "Banner label"
-  },
-  "webDashNoEnvelopes": "Aucune enveloppe pour le moment.",
-  "@webDashNoEnvelopes": {
-    "description": "Empty state"
-  },
-  "webDashFallbackTx": "Transaction",
-  "@webDashFallbackTx": {
-    "description": "Fallback title"
-  },
-  "webDashNoTxTitle": "Aucune transaction pour le moment",
-  "@webDashNoTxTitle": {
-    "description": "Empty title"
-  },
-  "webDashNoTxSub": "Ajoutez votre première transaction pour commencer",
-  "@webDashNoTxSub": {
-    "description": "Empty subtitle"
-  },
-  "webDashSeeAll": "Voir tout",
-  "@webDashSeeAll": {
-    "description": "Button"
-  },
-  "webDashRecent": "Transactions récentes",
-  "@webDashRecent": {
-    "description": "Card title"
-  },
-  "webDashViewAll": "Voir tout",
-  "@webDashViewAll": {
-    "description": "Button"
-  },
   "webTxNoRate": "Pas de taux",
   "@webTxNoRate": {
     "description": "Warning"
   },
-  "webTxNoFound": "Aucune transaction trouvée",
-  "@webTxNoFound": {
-    "description": "Empty state"
-  },
-  "webTxCsv": "CSV",
-  "@webTxCsv": {
-    "description": "Button"
-  },
-  "webTxCsvTooltip": "Exporter CSV",
-  "@webTxCsvTooltip": {
-    "description": "Tooltip"
-  },
-  "webTxAdd": "+ Ajouter",
+  "webTxAdd": "Ajouter une transaction",
   "@webTxAdd": {
     "description": "Button"
   },
-  "webTxSearch": "Rechercher par titre…",
+  "webTxSearch": "Rechercher dans les titres et notes",
   "@webTxSearch": {
     "description": "Placeholder"
-  },
-  "webTxThDate": "Date",
-  "@webTxThDate": {
-    "description": "Table header"
-  },
-  "webTxThType": "Type",
-  "@webTxThType": {
-    "description": "Table header"
-  },
-  "webTxThTitle": "Titre",
-  "@webTxThTitle": {
-    "description": "Table header"
-  },
-  "webTxThAccount": "Compte",
-  "@webTxThAccount": {
-    "description": "Table header"
-  },
-  "webTxThCategory": "Catégorie",
-  "@webTxThCategory": {
-    "description": "Table header"
-  },
-  "webTxThAmount": "Montant",
-  "@webTxThAmount": {
-    "description": "Table header"
-  },
-  "webTxPrev": "← Préc.",
-  "@webTxPrev": {
-    "description": "Pagination"
-  },
-  "webTxPageN": "Page {page}",
-  "@webTxPageN": {
-    "description": "Pagination",
-    "placeholders": {
-      "page": {
-        "type": "int"
-      }
-    }
-  },
-  "webTxNext": "Suiv. →",
-  "@webTxNext": {
-    "description": "Pagination"
-  },
-  "webTxCsvExported": "CSV exporté",
-  "@webTxCsvExported": {
-    "description": "Toast"
-  },
-  "webTxEdit": "Modifier",
-  "@webTxEdit": {
-    "description": "Button"
-  },
-  "webTxDel": "Suppr.",
-  "@webTxDel": {
-    "description": "Button"
   },
   "webFormType": "Type",
   "@webFormType": {
     "description": "Label"
   },
-  "webFormFromAccount": "Compte source",
+  "webFormFromAccount": "Depuis le compte",
   "@webFormFromAccount": {
     "description": "Label"
   },
@@ -4078,11 +4079,7 @@
   "@webFormAccount": {
     "description": "Label"
   },
-  "webFormSelectAccount": "Sélectionner un compte",
-  "@webFormSelectAccount": {
-    "description": "Default option"
-  },
-  "webFormToAccount": "Compte destination",
+  "webFormToAccount": "Vers le compte",
   "@webFormToAccount": {
     "description": "Label"
   },
@@ -4090,57 +4087,21 @@
   "@webFormCategory": {
     "description": "Label"
   },
-  "webFormNone": "— Aucun —",
-  "@webFormNone": {
-    "description": "Default option"
-  },
   "webFormAmount": "Montant",
   "@webFormAmount": {
     "description": "Label"
-  },
-  "webFormAmountPlaceholder": "0.00",
-  "@webFormAmountPlaceholder": {
-    "description": "Placeholder"
   },
   "webFormCurrency": "Devise",
   "@webFormCurrency": {
     "description": "Label"
   },
-  "webFormCurrencyPlaceholder": "USD",
-  "@webFormCurrencyPlaceholder": {
-    "description": "Placeholder"
-  },
-  "webFormExchangeRate": "Taux de change",
-  "@webFormExchangeRate": {
-    "description": "Label"
-  },
-  "webFormRatePlaceholder": "Taux vers la devise de base",
-  "@webFormRatePlaceholder": {
-    "description": "Placeholder"
-  },
   "webFormDate": "Date",
   "@webFormDate": {
-    "description": "Label"
-  },
-  "webFormTitleNote": "Titre / Note",
-  "@webFormTitleNote": {
     "description": "Label"
   },
   "webFormOptional": "Optionnel",
   "@webFormOptional": {
     "description": "Placeholder"
-  },
-  "webFormRateHint": "1 {txCur} = ? {baseCur}",
-  "@webFormRateHint": {
-    "description": "Hint",
-    "placeholders": {
-      "txCur": {
-        "type": "String"
-      },
-      "baseCur": {
-        "type": "String"
-      }
-    }
   },
   "webValSelectAccount": "Sélectionnez un compte",
   "@webValSelectAccount": {
@@ -4154,21 +4115,13 @@
   "@webValSelectDest": {
     "description": "Validation"
   },
-  "webValAccountsDiffer": "Les comptes source et destination doivent différer",
+  "webValAccountsDiffer": "Choisissez deux comptes différents",
   "@webValAccountsDiffer": {
     "description": "Validation"
-  },
-  "webModalAddTx": "Ajouter une transaction",
-  "@webModalAddTx": {
-    "description": "Modal title"
   },
   "webToastTxAdded": "Transaction ajoutée",
   "@webToastTxAdded": {
     "description": "Toast"
-  },
-  "webModalEditTx": "Modifier la transaction",
-  "@webModalEditTx": {
-    "description": "Modal title"
   },
   "webToastTxUpdated": "Transaction mise à jour",
   "@webToastTxUpdated": {
@@ -4178,103 +4131,13 @@
   "@webToastTxDeleted": {
     "description": "Toast"
   },
-  "webToastNoLines": "Aucun détail de ligne disponible",
-  "@webToastNoLines": {
-    "description": "Toast"
-  },
-  "webTxLinesHeader": "Lignes de transaction ({count})",
-  "@webTxLinesHeader": {
-    "description": "Section header",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webThLineAmount": "Montant",
-  "@webThLineAmount": {
-    "description": "Table header"
-  },
-  "webThLineCurrency": "Devise",
-  "@webThLineCurrency": {
-    "description": "Table header"
-  },
-  "webThLineCategory": "Catégorie",
-  "@webThLineCategory": {
-    "description": "Table header"
-  },
-  "webThLineAccount": "Compte",
-  "@webThLineAccount": {
-    "description": "Table header"
-  },
-  "webThLineNote": "Note",
-  "@webThLineNote": {
-    "description": "Table header"
-  },
-  "webThLineRate": "Taux",
-  "@webThLineRate": {
-    "description": "Table header"
-  },
-  "webCatSubSingular": "1 sous-catégorie",
-  "@webCatSubSingular": {
-    "description": "Count"
-  },
-  "webCatSubPlural": "{count} sous-catégories",
-  "@webCatSubPlural": {
-    "description": "Count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webCatSectionExpense": "Dépense",
-  "@webCatSectionExpense": {
-    "description": "Section"
-  },
-  "webCatSectionIncome": "Revenu",
-  "@webCatSectionIncome": {
-    "description": "Section"
-  },
-  "webCatEmptyTitle": "Aucune catégorie",
+  "webCatEmptyTitle": "Aucune catégorie ici",
   "@webCatEmptyTitle": {
     "description": "Empty title"
   },
-  "webCatEmptySub": "Ajoutez votre première catégorie pour commencer",
+  "webCatEmptySub": "Les catégories regroupent vos dépenses et revenus.",
   "@webCatEmptySub": {
     "description": "Empty subtitle"
-  },
-  "webCatFormName": "Nom",
-  "@webCatFormName": {
-    "description": "Label"
-  },
-  "webCatFormNameHint": "ex. Courses",
-  "@webCatFormNameHint": {
-    "description": "Placeholder"
-  },
-  "webCatFormParent": "Catégorie parente",
-  "@webCatFormParent": {
-    "description": "Label"
-  },
-  "webCatFormNone": "— Aucune (niveau supérieur) —",
-  "@webCatFormNone": {
-    "description": "Default option"
-  },
-  "webCatFormIcon": "Icône (émoji)",
-  "@webCatFormIcon": {
-    "description": "Label"
-  },
-  "webCatFormColor": "Couleur",
-  "@webCatFormColor": {
-    "description": "Label"
-  },
-  "webCatFormType": "Type de transaction",
-  "@webCatFormType": {
-    "description": "Label"
-  },
-  "webModalAddCat": "Ajouter une catégorie",
-  "@webModalAddCat": {
-    "description": "Modal title"
   },
   "webValNameRequired": "Le nom est requis",
   "@webValNameRequired": {
@@ -4284,27 +4147,19 @@
   "@webToastCatAdded": {
     "description": "Toast"
   },
-  "webToastCatNotFound": "Catégorie introuvable",
-  "@webToastCatNotFound": {
-    "description": "Toast"
-  },
-  "webModalEditCat": "Modifier la catégorie",
-  "@webModalEditCat": {
-    "description": "Modal title"
-  },
-  "webToastCatUpdated": "Catégorie mise à jour",
+  "webToastCatUpdated": "Catégorie enregistrée",
   "@webToastCatUpdated": {
     "description": "Toast"
   },
-  "webAcctEmptyTitle": "Aucun compte pour le moment",
+  "webAcctEmptyTitle": "Aucun compte",
   "@webAcctEmptyTitle": {
     "description": "Empty title"
   },
-  "webAcctEmptySub": "Ajoutez votre premier compte pour commencer",
+  "webAcctEmptySub": "Ajoutez les comptes avec lesquels vous payez pour commencer.",
   "@webAcctEmptySub": {
     "description": "Empty subtitle"
   },
-  "webAcctTypeBank": "Comptes bancaires",
+  "webAcctTypeBank": "Banque",
   "@webAcctTypeBank": {
     "description": "Group label"
   },
@@ -4312,103 +4167,29 @@
   "@webAcctTypeCash": {
     "description": "Group label"
   },
-  "webAcctTypeCredit": "Cartes de crédit",
+  "webAcctTypeCredit": "Crédit",
   "@webAcctTypeCredit": {
     "description": "Group label"
   },
-  "webAcctTypeWallet": "Portefeuilles",
+  "webAcctTypeWallet": "Portefeuille",
   "@webAcctTypeWallet": {
     "description": "Group label"
-  },
-  "webAcctNetWorth": "Patrimoine net · {cur}",
-  "@webAcctNetWorth": {
-    "description": "Card title",
-    "placeholders": {
-      "cur": {
-        "type": "String"
-      }
-    }
-  },
-  "webAcctCountSingular": "1 compte",
-  "@webAcctCountSingular": {
-    "description": "Count"
-  },
-  "webAcctCountPlural": "{count} comptes",
-  "@webAcctCountPlural": {
-    "description": "Count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webAcctTxEmpty": "Aucune transaction pour ce compte",
-  "@webAcctTxEmpty": {
-    "description": "Empty state"
-  },
-  "webAcctBack": "← Retour",
-  "@webAcctBack": {
-    "description": "Button"
-  },
-  "webAcctFormNameHint": "ex. Compte courant",
-  "@webAcctFormNameHint": {
-    "description": "Placeholder"
-  },
-  "webAcctFormType": "Type",
-  "@webAcctFormType": {
-    "description": "Label"
-  },
-  "webAcctFormTypeBank": "Banque",
-  "@webAcctFormTypeBank": {
-    "description": "Option"
-  },
-  "webAcctFormTypeCash": "Espèces",
-  "@webAcctFormTypeCash": {
-    "description": "Option"
-  },
-  "webAcctFormTypeCredit": "Crédit",
-  "@webAcctFormTypeCredit": {
-    "description": "Option"
-  },
-  "webAcctFormTypeWallet": "Portefeuille",
-  "@webAcctFormTypeWallet": {
-    "description": "Option"
-  },
-  "webAcctFormOpening": "Solde d'ouverture",
-  "@webAcctFormOpening": {
-    "description": "Label"
-  },
-  "webModalAddAcct": "Ajouter un compte",
-  "@webModalAddAcct": {
-    "description": "Modal title"
   },
   "webToastAcctAdded": "Compte ajouté",
   "@webToastAcctAdded": {
     "description": "Toast"
   },
-  "webEnvEmptyTitle": "Aucune enveloppe",
+  "webEnvEmptyTitle": "Pas encore d'enveloppes",
   "@webEnvEmptyTitle": {
     "description": "Empty title"
   },
-  "webEnvEmptySub": "Les enveloppes sont gérées dans l'application BudgetSeal.",
+  "webEnvEmptySub": "Créez des enveloppes dans l'onglet Budget de l'app, puis financez-les d'ici.",
   "@webEnvEmptySub": {
     "description": "Empty subtitle"
   },
-  "webEnvUnallocated": "Non affecté :",
-  "@webEnvUnallocated": {
-    "description": "Label"
-  },
-  "webEnvFund": "+ Financer",
+  "webEnvFund": "Financer",
   "@webEnvFund": {
     "description": "Button"
-  },
-  "webModalFund": "Financer l'enveloppe",
-  "@webModalFund": {
-    "description": "Modal title"
-  },
-  "webFormAmountToFund": "Montant à financer",
-  "@webFormAmountToFund": {
-    "description": "Label"
   },
   "webFormNote": "Note",
   "@webFormNote": {
@@ -4418,87 +4199,27 @@
   "@webToastEnvFunded": {
     "description": "Toast"
   },
-  "webBtnFundConfirm": "Financer",
-  "@webBtnFundConfirm": {
-    "description": "Button"
-  },
-  "webRecurringEmpty": "Aucune transaction récurrente",
-  "@webRecurringEmpty": {
-    "description": "Empty state"
-  },
-  "webThService": "Service",
-  "@webThService": {
-    "description": "Table header"
-  },
-  "webThFrequency": "Fréquence",
-  "@webThFrequency": {
-    "description": "Table header"
-  },
-  "webThNextDue": "Prochaine échéance",
-  "@webThNextDue": {
-    "description": "Table header"
-  },
-  "webThOn": "Actif",
-  "@webThOn": {
-    "description": "Table header"
-  },
-  "webToggleEnabled": "Activé",
-  "@webToggleEnabled": {
-    "description": "Toggle title"
-  },
-  "webToggleDisabled": "Désactivé",
-  "@webToggleDisabled": {
-    "description": "Toggle title"
-  },
-  "webFormTitleLabel": "Titre",
-  "@webFormTitleLabel": {
-    "description": "Label"
-  },
-  "webFormTitleHint": "ex. Netflix",
-  "@webFormTitleHint": {
-    "description": "Placeholder"
-  },
-  "webFormFrequency": "Fréquence",
-  "@webFormFrequency": {
-    "description": "Label"
-  },
   "webFormEvery": "Chaque",
   "@webFormEvery": {
     "description": "Label"
-  },
-  "webFormStartDate": "Date de début",
-  "@webFormStartDate": {
-    "description": "Label"
-  },
-  "webModalAddRecurring": "Ajouter un récurrent",
-  "@webModalAddRecurring": {
-    "description": "Modal title"
   },
   "webToastRecurringAdded": "Récurrent ajouté",
   "@webToastRecurringAdded": {
     "description": "Toast"
   },
-  "webModalEditRecurring": "Modifier le récurrent",
-  "@webModalEditRecurring": {
-    "description": "Modal title"
-  },
   "webToastUpdated": "Mis à jour",
   "@webToastUpdated": {
     "description": "Toast"
   },
-  "webToastNotFound": "Introuvable",
-  "@webToastNotFound": {
-    "description": "Toast"
-  },
-  "webValSelectStartDate": "Sélectionnez une date de début",
+  "webValSelectStartDate": "Choisissez une date",
   "@webValSelectStartDate": {
     "description": "Validation"
   },
-  "webConfirmDeleteRecurring": "Supprimer le récurrent",
+  "webConfirmDeleteRecurring": "Supprimer cet élément récurrent ?",
   "@webConfirmDeleteRecurring": {
     "description": "Dialog title"
   },
-  "webConfirmDeleteRecurringMsg": "Cette transaction récurrente sera supprimée définitivement.",
+  "webConfirmDeleteRecurringMsg": "Il ne sera plus enregistré. Les transactions déjà créées restent.",
   "@webConfirmDeleteRecurringMsg": {
     "description": "Dialog content"
   },
@@ -4510,49 +4231,21 @@
   "@webSubEmpty": {
     "description": "Empty state"
   },
-  "webModalAddSub": "Ajouter un abonnement",
-  "@webModalAddSub": {
-    "description": "Modal title"
-  },
   "webToastSubAdded": "Abonnement ajouté",
   "@webToastSubAdded": {
     "description": "Toast"
   },
-  "webModalEditSub": "Modifier l'abonnement",
-  "@webModalEditSub": {
-    "description": "Modal title"
-  },
-  "webFormNewAmount": "Nouveau montant",
-  "@webFormNewAmount": {
-    "description": "Label"
-  },
-  "webSubPriceHint": "Modifier le montant ajoutera une entrée dans l'historique des prix.",
+  "webSubPriceHint": "Un nouveau montant s'ajoute à l'historique des prix.",
   "@webSubPriceHint": {
     "description": "Hint"
   },
-  "webConfirmDeleteSub": "Supprimer l'abonnement",
+  "webConfirmDeleteSub": "Supprimer cet abonnement ?",
   "@webConfirmDeleteSub": {
     "description": "Dialog title"
   },
-  "webConfirmDeleteSubMsg": "Cet abonnement sera supprimé définitivement.",
+  "webConfirmDeleteSubMsg": "Il ne sera plus enregistré. Les paiements déjà créés restent.",
   "@webConfirmDeleteSubMsg": {
     "description": "Dialog content"
-  },
-  "webReportsYear": "Année",
-  "@webReportsYear": {
-    "description": "Label"
-  },
-  "webReportsMonth": "Mois",
-  "@webReportsMonth": {
-    "description": "Label"
-  },
-  "webReportsLoad": "Charger",
-  "@webReportsLoad": {
-    "description": "Button"
-  },
-  "webReportsSelectPrompt": "Sélectionnez une période et cliquez sur Charger.",
-  "@webReportsSelectPrompt": {
-    "description": "Prompt"
   },
   "webStatIncome": "Revenu",
   "@webStatIncome": {
@@ -4570,7 +4263,7 @@
   "@webStatSavingsRate": {
     "description": "Stat label"
   },
-  "webStatAvgDaily": "Dépense quotidienne moy.",
+  "webStatAvgDaily": "Moyenne par jour",
   "@webStatAvgDaily": {
     "description": "Stat label"
   },
@@ -4578,7 +4271,7 @@
   "@webStatTransactions": {
     "description": "Stat label"
   },
-  "webReportDailyCashflow": "Flux de trésorerie quotidien",
+  "webReportDailyCashflow": "Jour par jour",
   "@webReportDailyCashflow": {
     "description": "Section title"
   },
@@ -4586,7 +4279,7 @@
   "@webReportSpendingCat": {
     "description": "Section title"
   },
-  "webReportNoExpense": "Aucune donnée de dépense",
+  "webReportNoExpense": "Aucune dépense ce mois-ci",
   "@webReportNoExpense": {
     "description": "Empty state"
   },
@@ -4594,11 +4287,11 @@
   "@webReportIncomeCat": {
     "description": "Section title"
   },
-  "webReportNoIncome": "Aucune donnée de revenu",
+  "webReportNoIncome": "Aucun revenu ce mois-ci",
   "@webReportNoIncome": {
     "description": "Empty state"
   },
-  "webReportTopExpenses": "Principales dépenses",
+  "webReportTopExpenses": "Plus grosses dépenses",
   "@webReportTopExpenses": {
     "description": "Section title"
   },
@@ -4622,7 +4315,7 @@
   "@webShortcutSearch": {
     "description": "Description"
   },
-  "webShortcutClose": "Fermer la modale / défocaliser",
+  "webShortcutClose": "Fermer la fenêtre",
   "@webShortcutClose": {
     "description": "Description"
   },

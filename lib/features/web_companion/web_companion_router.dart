@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
@@ -13,6 +14,9 @@ import 'api/recurring_handler.dart';
 import 'api/reports_handler.dart';
 import 'api/subscriptions_handler.dart';
 import 'api/transactions_handler.dart';
+import '../../core/providers/accent_color_provider.dart';
+import '../../shared/theme/brand_palette.dart';
+import '../../shared/utils/format_number.dart';
 import 'web_companion_auth.dart';
 
 /// Assembles the full shelf request handler.
@@ -24,10 +28,16 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
   router.post('/auth/pin', _pinHandler(auth));
   router.get('/auth/status', _authStatusHandler(auth));
   router.post('/auth/logout', _logoutHandler(auth));
+  router.get('/auth/config', _configHandler(ref));
 
   // ── Static assets ───────────────────────────────────────────────────────────
 
   router.get('/assets/<file|[^]*>', _assetsHandler());
+  // The app's own category icons and display font, so the browser matches
+  // the phone and works without internet.
+  router.get('/icons/<file>', _bundleFileHandler('assets/categories/'));
+  router.get('/fonts/<file>', _bundleFileHandler('assets/fonts/'));
+  router.get('/brand/<file>', _bundleFileHandler('assets/icon/'));
 
   // ── Protected API ───────────────────────────────────────────────────────────
 
@@ -59,6 +69,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth) {
   api.get('/subscriptions', listSubscriptionsHandler(ref));
   api.post('/subscriptions', createSubscriptionHandler(ref));
   api.put('/subscriptions/<id>', updateSubscriptionHandler(ref));
+  api.delete('/subscriptions/<id>', deleteSubscriptionHandler(ref));
 
   api.get('/reports/cashflow', cashflowReportHandler(ref));
   api.get('/reports/by-category', byCategoryReportHandler(ref));
@@ -105,7 +116,13 @@ Handler _pinHandler(WebCompanionAuth auth) {
       final statusCode = e.isLockout ? 429 : 401;
       return Response(
         statusCode,
-        body: jsonEncode({'error': e.message, 'isLockout': e.isLockout}),
+        // The browser shows its own localized text from these fields.
+        body: jsonEncode({
+          'error': e.message,
+          'isLockout': e.isLockout,
+          if (e.attemptsLeft != null) 'attemptsLeft': e.attemptsLeft,
+          if (e.isLockout) 'retryInMinutes': auth.lockoutStatus.remainingMinutes,
+        }),
         headers: _jsonHeaders,
       );
     }
@@ -139,21 +156,74 @@ Handler _logoutHandler(WebCompanionAuth auth) {
 Handler _assetsHandler() {
   return (Request request) async {
     final file = request.params['file'];
-    if (file == null || file.isEmpty) return Response.notFound('Not found');
-
-    if (file.contains('..') || file.contains('//')) {
-      return Response.forbidden('Invalid path');
+    if (file == null || !_safeName.hasMatch(file) || file.contains('..')) {
+      return Response.notFound('Not found');
     }
-
     try {
       final data = await rootBundle.load('assets/web/$file');
       return Response.ok(
         data.buffer.asUint8List(),
-        headers: {'content-type': _mimeFor(file)},
+        headers: {
+          'content-type': _mimeFor(file),
+          // Bundled libraries and fonts never change within an app version;
+          // the SPA's own files must reload after an app update.
+          if (file.endsWith('.woff2') || file.endsWith('.min.js'))
+            'cache-control': _cacheLong,
+        },
       );
     } catch (_) {
-      return Response.notFound('Asset not found: $file');
+      return Response.notFound('Not found');
     }
+  };
+}
+
+/// Serves one file from a bundled asset folder (icons, fonts), by plain
+/// file name only — no paths.
+Handler _bundleFileHandler(String folder) {
+  return (Request request) async {
+    final file = request.params['file'];
+    if (file == null || !_safeName.hasMatch(file) || file.contains('..')) {
+      return Response.notFound('Not found');
+    }
+    try {
+      final data = await rootBundle.load('$folder$file');
+      return Response.ok(
+        data.buffer.asUint8List(),
+        headers: {'content-type': _mimeFor(file), 'cache-control': _cacheLong},
+      );
+    } catch (_) {
+      return Response.notFound('Not found');
+    }
+  };
+}
+
+final _safeName = RegExp(r'^[A-Za-z0-9_.()\-]+$');
+const _cacheLong = 'public, max-age=604800';
+
+// ── Config (no token: the PIN screen needs it too) ───────────────────────────
+
+/// Language, accent colors and number format, so the browser looks and
+/// reads like the phone. Nothing private.
+Handler _configHandler(Ref ref) {
+  return (Request request) {
+    final lang = (Intl.defaultLocale ?? 'en').split(RegExp('[_-]')).first;
+    final pair = accentPairById(ref.read(accentColorProvider)) ??
+        brandPalette.first;
+    String hex(Color c) =>
+        '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+    return Response.ok(
+      jsonEncode({
+        'locale': const ['en', 'ar', 'fr'].contains(lang) ? lang : 'en',
+        'accent': {
+          'bright': hex(pair.bright),
+          'deep': hex(pair.deep),
+          'lightFill': hex(pair.lightFill),
+          'darkFill': hex(pair.darkFill),
+        },
+        'number': numberFormatSpec(),
+      }),
+      headers: _jsonHeaders,
+    );
   };
 }
 
@@ -224,6 +294,8 @@ String _mimeFor(String path) {
   if (path.endsWith('.svg')) return 'image/svg+xml';
   if (path.endsWith('.ico')) return 'image/x-icon';
   if (path.endsWith('.json')) return 'application/json; charset=utf-8';
+  if (path.endsWith('.woff2')) return 'font/woff2';
+  if (path.endsWith('.ttf')) return 'font/ttf';
   return 'application/octet-stream';
 }
 
@@ -232,8 +304,8 @@ const _jsonHeaders = {'content-type': 'application/json; charset=utf-8'};
 const _placeholderHtml = '''<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><title>BudgetSeal Web</title>
-<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#F1F5F9;}
-.card{background:#fff;border-radius:14px;padding:40px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08);}
-h1{color:#2563EB;margin:0 0 8px;}p{color:#64748B;}</style></head>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#F7F5F1;}
+.card{background:#fff;border-radius:16px;padding:40px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+h1{color:#8A5E0F;margin:0 0 8px;}p{color:#6B655B;}</style></head>
 <body><div class="card"><h1>BudgetSeal Web</h1><p>Loading web interface...</p></div></body>
 </html>''';

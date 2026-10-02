@@ -47,21 +47,27 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       // It returns null when WiFi is off — no need for BSSID/name checks.
       final connected = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
 
-      // Check if the network name suggests a public network
-      final lower = (name ?? '').replaceAll('"', '').toLowerCase();
-      final publicKeywords = [
-        'guest', 'public', 'free', 'open', 'airport', 'hotel',
-        'cafe', 'coffee', 'starbucks', 'mcdonalds', 'restaurant',
-        'library', 'hospital', 'mall', 'shop', 'store',
+      // Android hides the network name without location permission (null
+      // or "<unknown ssid>"): an unknown name is not evidence of a public
+      // network. Keywords are specific — "free"/"open" would flag home
+      // routers like "Freebox".
+      final cleaned = name?.replaceAll('"', '').trim();
+      final known = cleaned != null &&
+          cleaned.isNotEmpty &&
+          cleaned.toLowerCase() != '<unknown ssid>';
+      final lower = known ? cleaned.toLowerCase() : '';
+      const publicKeywords = [
+        'guest', 'public', 'airport', 'hotel', 'cafe', 'coffee',
+        'starbucks', 'mcdonalds', 'restaurant', 'library', 'hospital',
+        'free wifi', 'free_wifi', 'freewifi',
       ];
-      final isPublic = connected && (name == null ||
-          name.isEmpty ||
-          publicKeywords.any((k) => lower.contains(k)));
+      final isPublic =
+          connected && known && publicKeywords.any((k) => lower.contains(k));
 
       setState(() {
         _hasWifi = connected;
         _wifiWarning = isPublic;
-        _wifiName = name?.replaceAll('"', '');
+        _wifiName = known ? cleaned : null;
       });
     } catch (_) {
       if (mounted) setState(() => _hasWifi = false);
@@ -208,12 +214,15 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 4,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 24, letterSpacing: 12, fontWeight: FontWeight.w700),
                     decoration: InputDecoration(
-                      labelText: tr.wc4DigitPin,
+                      hintText: tr.wc4DigitPin,
+                      hintStyle: const TextStyle(
+                          fontSize: 15, letterSpacing: 0, fontWeight: FontWeight.w400),
                       errorText: error,
                       counterText: '',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius)),
                     ),
                     onChanged: (_) {
                       if (error != null) setModalState(() => error = null);
@@ -422,9 +431,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.accentLight,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.35)),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Text(
                     url,
@@ -562,7 +569,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.caution),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,9 +596,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.pastel(context, AppColors.overspent, light: 0.88, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(
-          color: AppColors.overspent.withValues(alpha: 0.3),
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -655,11 +658,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             ? AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75)
             : AppColors.accentLight,
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(
-          color: isPublic
-              ? AppColors.caution.withValues(alpha: 0.4)
-              : AppColors.accent.withValues(alpha: 0.3),
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -710,7 +708,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       decoration: BoxDecoration(
         color: AppColors.pastel(context, AppColors.caution, light: 0.85, dark: 0.75),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.caution.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

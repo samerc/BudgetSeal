@@ -1,4 +1,127 @@
 {
+  "webNavHome": "الرئيسية",
+  "webNavBudget": "الميزانية",
+  "webMenu": "القائمة",
+  "webShortcuts": "الاختصارات",
+  "webSignOut": "تسجيل الخروج",
+  "webConnChecking": "جارٍ الاتصال…",
+  "webConnOk": "متصل بالهاتف",
+  "webConnLost": "تعذّر الوصول إلى الهاتف",
+  "webOffline": "تعذّر الوصول إلى هاتفك. أبقِ BudgetSeal مفتوحًا والمرافق الإلكتروني قيد التشغيل، على شبكة Wi‑Fi نفسها.",
+  "webOfflineShort": "تعذّر الوصول إلى هاتفك",
+  "webAuthSubtitle": "أدخل الرمز الذي عيّنته على هاتفك",
+  "webAuthFoot": "تبقى بياناتك على هاتفك. هذه الصفحة تقرؤها عبر شبكة Wi‑Fi.",
+  "webAuthDelete": "حذف الرقم",
+  "webAuthWrongLeft": "رمز خاطئ · المحاولات المتبقية: {n}",
+  "webAuthLocked": "محاولات كثيرة. حاول مجددًا بعد {n} د.",
+  "webAuthExpired": "انتهت جلستك. أدخل الرمز مرة أخرى.",
+  "webErrRequest": "تعذّر الحفظ. تحقّق من القيم وحاول مجددًا.",
+  "webErrTooMany": "تغييرات كثيرة دفعة واحدة. انتظر قليلًا.",
+  "webErrNoRate": "لا يوجد سعر صرف لهذه العملة بعد. أدخل سعرًا.",
+  "webNeedAccount": "أضف حسابًا أولًا.",
+  "webSeeAll": "عرض الكل",
+  "webRecent": "الأحدث",
+  "webLoadMore": "عرض المزيد",
+  "webDuplicate": "تكرار",
+  "webCsv": "تصدير CSV",
+  "webCsvPreparing": "جارٍ تجهيز التصدير…",
+  "webCsvDone": "تم تصدير الصفوف: {n}",
+  "webWholeYear": "السنة كاملة",
+  "webPrevYear": "السنة السابقة",
+  "webNextYear": "السنة التالية",
+  "webPrevMonth": "الشهر السابق",
+  "webNextMonth": "الشهر التالي",
+  "webRta": "جاهز للتوزيع",
+  "webRtaAssign": "وزّع",
+  "webNetWorth": "صافي الثروة",
+  "webNetWorthCur": "صافي الثروة · {cur}",
+  "webEnvSpending": "إنفاق",
+  "webEnvFlexible": "مُرحَّل",
+  "webEnvAvailable": "متاح",
+  "webEnvOverspent": "تجاوز الميزانية",
+  "webEnvSpent": "تم إنفاق {amount}",
+  "webEnvOf": "من {amount}",
+  "webEnvToGo": "{amount} للوصول إلى الهدف",
+  "webEnvReached": "تم بلوغ الهدف",
+  "webFundTitle": "تمويل {name}",
+  "webFundToTarget": "حتى الهدف",
+  "webFundAll": "كل المتاح",
+  "webFundAvailable": "جاهز للتوزيع: {amount}",
+  "webFundOver": "سيصبح المبلغ الجاهز للتوزيع {amount}",
+  "webFundOverMsg": "هذا أكثر من المبلغ الجاهز للتوزيع. هل تريد التمويل على أي حال؟",
+  "webFundAnyway": "موّل على أي حال",
+  "webTxAddShort": "إضافة",
+  "webTxNewExpense": "مصروف جديد",
+  "webTxNewIncome": "دخل جديد",
+  "webTxNewTransfer": "تحويل جديد",
+  "webTxEditExpense": "تعديل المصروف",
+  "webTxEditIncome": "تعديل الدخل",
+  "webTxEditTransfer": "تعديل التحويل",
+  "webTxEmptyTitle": "لا معاملات هنا",
+  "webTxEmptySub": "أضف معاملة أو اختر شهرًا آخر.",
+  "webTxNoMatch": "لا نتائج مطابقة لبحثك",
+  "webTxSplit": "مقسّمة · {n}",
+  "webTxSplitHint": "تُعدَّل عناصر المعاملة المقسّمة من هاتفك.",
+  "webSaveAddAnother": "حفظ وإضافة أخرى",
+  "webFormTitle": "العنوان",
+  "webFormName": "الاسم",
+  "webFormNoCategory": "بلا فئة",
+  "webFormInCurrency": "بعملة الحساب المصدر: {cur}",
+  "webFormRateLabel": "السعر: 1 {cur} = ? {base}",
+  "webFormRateAuto": "اتركه فارغًا لاستخدام آخر سعر على الهاتف",
+  "webFormReceived": "المبلغ المستلم بـ {cur}",
+  "webFormRepeats": "التكرار",
+  "webFormNextDue": "التاريخ التالي",
+  "webFormFirstDate": "التاريخ الأول",
+  "webValReceived": "أدخل المبلغ المستلم",
+  "webValRate": "أدخل سعرًا صالحًا",
+  "webValCurrency": "استخدم رمز عملة من 3 أحرف، مثل USD",
+  "webAcctAdd": "إضافة حساب",
+  "webAcctNew": "حساب جديد",
+  "webAcctNameHint": "مثال: البنك الرئيسي",
+  "webAcctOpening": "الرصيد الحالي",
+  "webAcctOpeningHint": "بالسالب لبطاقة عليها دين",
+  "webAcctTravel": "محفظة سفر",
+  "webAcctGroupBank": "حسابات بنكية",
+  "webAcctGroupCash": "نقدًا",
+  "webAcctGroupCredit": "بطاقات ائتمان",
+  "webAcctGroupWallet": "محافظ رقمية",
+  "webCatAdd": "إضافة فئة",
+  "webCatNew": "فئة جديدة",
+  "webCatEdit": "تعديل الفئة",
+  "webCatNameHint": "مثال: البقالة",
+  "webCatParent": "ضمن",
+  "webCatTopLevel": "فئة رئيسية",
+  "webCatParentLocked": "لديها فئات فرعية، لذا تبقى فئة رئيسية.",
+  "webCatIcon": "رمز تعبيري",
+  "webCatColor": "اللون",
+  "webCatCustomColor": "لون مخصص",
+  "webCatSubs": "فئات فرعية: {n}",
+  "webCatNoSubs": "بلا فئات فرعية",
+  "webRecAdd": "إضافة متكررة",
+  "webRecNew": "عنصر متكرر جديد",
+  "webRecEdit": "تعديل العنصر المتكرر",
+  "webRecEmpty": "لا عناصر متكررة بعد",
+  "webRecEmptySub": "الإيجار، الراتب، تحويلات الادخار: تُسجَّل تلقائيًا.",
+  "webRecTitleHint": "مثال: الإيجار",
+  "webRecNext": "التالي {date}",
+  "webRecOn": "نشط",
+  "webRecOff": "متوقف مؤقتًا",
+  "webRecPaused": "متوقفة مؤقتًا",
+  "webRecPausedToast": "تم الإيقاف المؤقت",
+  "webRecResumed": "تم الاستئناف",
+  "webRecPastHint": "التاريخ الماضي يسجّل المرات الفائتة عند فتح التطبيق في المرة التالية.",
+  "webSubAdd": "إضافة اشتراك",
+  "webSubNew": "اشتراك جديد",
+  "webSubEdit": "تعديل الاشتراك",
+  "webSubEmptySub": "تابع البث والتطبيقات والعضويات، مع تغيّرات أسعارها.",
+  "webSubTitleHint": "مثال: Netflix",
+  "webSubMonthly": "شهريًا",
+  "webSubYearly": "{amount} سنويًا",
+  "webRepEmpty": "لا شيء مسجّل هذا الشهر",
+  "webRepEmptySub": "اختر شهرًا آخر بالأسهم.",
+  "webShortcutPages": "الانتقال إلى صفحة في القائمة",
+  "wcStartFailed": "تعذّر التشغيل. أوقف Wi‑Fi وشغّله، ثم حاول مجددًا.",
   "billItemN": "البند {n}",
   "billDiscardTitle": "تجاهل هذه الفاتورة؟",
   "billDiscardBody": "ستفقد البنود والتقسيم الذي أدخلته.",
@@ -21,8 +144,7 @@
   "billTaxHint": "يُقسَّم بحسب ما طلبه كل شخص.",
   "billReceiptMatch": "يطابق مجموع الإيصال ({total})",
   "billReceiptDiff": "مجموع البنود {items} · مجموع الإيصال {total}",
-  "webEnvBalanceOfTarget": "{balance} من {target}",
-  "webShortcutRefresh": "تحديث الصفحة الحالية",
+  "webShortcutRefresh": "إعادة التحميل من الهاتف",
   "currencyNameUsd": "دولار أمريكي",
   "currencyNameEur": "يورو",
   "currencyNameGbp": "جنيه إسترليني",
@@ -3925,152 +4047,31 @@
   "@wcForegroundChannelDesc": {
     "description": "Notification channel description"
   },
-  "webAuthLockout": "محاولات كثيرة جداً. أعد المحاولة لاحقاً.",
-  "@webAuthLockout": {
-    "description": "Auth error"
-  },
   "webAuthIncorrect": "رمز PIN غير صحيح",
   "@webAuthIncorrect": {
     "description": "Auth error"
-  },
-  "webServerUnreachable": "الخادم غير قابل للوصول",
-  "@webServerUnreachable": {
-    "description": "Toast error"
-  },
-  "webUnexpectedResponse": "استجابة غير متوقعة من الخادم",
-  "@webUnexpectedResponse": {
-    "description": "Toast error"
-  },
-  "webUnexpectedError": "خطأ غير متوقع",
-  "@webUnexpectedError": {
-    "description": "Toast error"
   },
   "webUndo": "تراجع",
   "@webUndo": {
     "description": "Toast button"
   },
-  "webSaving": "جارٍ الحفظ…",
-  "@webSaving": {
-    "description": "Modal button"
-  },
-  "webDashNoAccounts": "لا حسابات بعد.",
-  "@webDashNoAccounts": {
-    "description": "Empty state"
-  },
-  "webDashUnallocated": "غير موزع",
-  "@webDashUnallocated": {
-    "description": "Banner label"
-  },
-  "webDashNoEnvelopes": "لا أظرف بعد.",
-  "@webDashNoEnvelopes": {
-    "description": "Empty state"
-  },
-  "webDashFallbackTx": "معاملة",
-  "@webDashFallbackTx": {
-    "description": "Fallback title"
-  },
-  "webDashNoTxTitle": "لا توجد معاملات بعد",
-  "@webDashNoTxTitle": {
-    "description": "Empty title"
-  },
-  "webDashNoTxSub": "أضف أول معاملة للبدء",
-  "@webDashNoTxSub": {
-    "description": "Empty subtitle"
-  },
-  "webDashSeeAll": "عرض الكل",
-  "@webDashSeeAll": {
-    "description": "Button"
-  },
-  "webDashRecent": "المعاملات الأخيرة",
-  "@webDashRecent": {
-    "description": "Card title"
-  },
-  "webDashViewAll": "عرض الكل",
-  "@webDashViewAll": {
-    "description": "Button"
-  },
   "webTxNoRate": "بدون سعر",
   "@webTxNoRate": {
     "description": "Warning"
   },
-  "webTxNoFound": "لا معاملات موجودة",
-  "@webTxNoFound": {
-    "description": "Empty state"
-  },
-  "webTxCsv": "CSV",
-  "@webTxCsv": {
-    "description": "Button"
-  },
-  "webTxCsvTooltip": "تصدير CSV",
-  "@webTxCsvTooltip": {
-    "description": "Tooltip"
-  },
-  "webTxAdd": "+ إضافة",
+  "webTxAdd": "إضافة معاملة",
   "@webTxAdd": {
     "description": "Button"
   },
-  "webTxSearch": "البحث بالعنوان…",
+  "webTxSearch": "ابحث في العناوين والملاحظات",
   "@webTxSearch": {
     "description": "Placeholder"
-  },
-  "webTxThDate": "التاريخ",
-  "@webTxThDate": {
-    "description": "Table header"
-  },
-  "webTxThType": "النوع",
-  "@webTxThType": {
-    "description": "Table header"
-  },
-  "webTxThTitle": "العنوان",
-  "@webTxThTitle": {
-    "description": "Table header"
-  },
-  "webTxThAccount": "الحساب",
-  "@webTxThAccount": {
-    "description": "Table header"
-  },
-  "webTxThCategory": "الفئة",
-  "@webTxThCategory": {
-    "description": "Table header"
-  },
-  "webTxThAmount": "المبلغ",
-  "@webTxThAmount": {
-    "description": "Table header"
-  },
-  "webTxPrev": "→ السابق",
-  "@webTxPrev": {
-    "description": "Pagination"
-  },
-  "webTxPageN": "صفحة {page}",
-  "@webTxPageN": {
-    "description": "Pagination",
-    "placeholders": {
-      "page": {
-        "type": "int"
-      }
-    }
-  },
-  "webTxNext": "التالي ←",
-  "@webTxNext": {
-    "description": "Pagination"
-  },
-  "webTxCsvExported": "تم تصدير CSV",
-  "@webTxCsvExported": {
-    "description": "Toast"
-  },
-  "webTxEdit": "تعديل",
-  "@webTxEdit": {
-    "description": "Button"
-  },
-  "webTxDel": "حذف",
-  "@webTxDel": {
-    "description": "Button"
   },
   "webFormType": "النوع",
   "@webFormType": {
     "description": "Label"
   },
-  "webFormFromAccount": "من حساب",
+  "webFormFromAccount": "من الحساب",
   "@webFormFromAccount": {
     "description": "Label"
   },
@@ -4078,11 +4079,7 @@
   "@webFormAccount": {
     "description": "Label"
   },
-  "webFormSelectAccount": "اختر حساباً",
-  "@webFormSelectAccount": {
-    "description": "Default option"
-  },
-  "webFormToAccount": "إلى حساب",
+  "webFormToAccount": "إلى الحساب",
   "@webFormToAccount": {
     "description": "Label"
   },
@@ -4090,57 +4087,21 @@
   "@webFormCategory": {
     "description": "Label"
   },
-  "webFormNone": "— لا شيء —",
-  "@webFormNone": {
-    "description": "Default option"
-  },
   "webFormAmount": "المبلغ",
   "@webFormAmount": {
     "description": "Label"
-  },
-  "webFormAmountPlaceholder": "0.00",
-  "@webFormAmountPlaceholder": {
-    "description": "Placeholder"
   },
   "webFormCurrency": "العملة",
   "@webFormCurrency": {
     "description": "Label"
   },
-  "webFormCurrencyPlaceholder": "USD",
-  "@webFormCurrencyPlaceholder": {
-    "description": "Placeholder"
-  },
-  "webFormExchangeRate": "سعر الصرف",
-  "@webFormExchangeRate": {
-    "description": "Label"
-  },
-  "webFormRatePlaceholder": "سعر الصرف للعملة الأساسية",
-  "@webFormRatePlaceholder": {
-    "description": "Placeholder"
-  },
   "webFormDate": "التاريخ",
   "@webFormDate": {
-    "description": "Label"
-  },
-  "webFormTitleNote": "العنوان / الملاحظة",
-  "@webFormTitleNote": {
     "description": "Label"
   },
   "webFormOptional": "اختياري",
   "@webFormOptional": {
     "description": "Placeholder"
-  },
-  "webFormRateHint": "1 {txCur} = ؟ {baseCur}",
-  "@webFormRateHint": {
-    "description": "Hint",
-    "placeholders": {
-      "txCur": {
-        "type": "String"
-      },
-      "baseCur": {
-        "type": "String"
-      }
-    }
   },
   "webValSelectAccount": "اختر حساباً",
   "@webValSelectAccount": {
@@ -4154,21 +4115,13 @@
   "@webValSelectDest": {
     "description": "Validation"
   },
-  "webValAccountsDiffer": "يجب أن يختلف حساب المصدر عن الوجهة",
+  "webValAccountsDiffer": "اختر حسابين مختلفين",
   "@webValAccountsDiffer": {
     "description": "Validation"
-  },
-  "webModalAddTx": "إضافة معاملة",
-  "@webModalAddTx": {
-    "description": "Modal title"
   },
   "webToastTxAdded": "تمت إضافة المعاملة",
   "@webToastTxAdded": {
     "description": "Toast"
-  },
-  "webModalEditTx": "تعديل المعاملة",
-  "@webModalEditTx": {
-    "description": "Modal title"
   },
   "webToastTxUpdated": "تم تحديث المعاملة",
   "@webToastTxUpdated": {
@@ -4178,103 +4131,13 @@
   "@webToastTxDeleted": {
     "description": "Toast"
   },
-  "webToastNoLines": "لا تفاصيل خطوط متاحة",
-  "@webToastNoLines": {
-    "description": "Toast"
-  },
-  "webTxLinesHeader": "سطور المعاملة ({count})",
-  "@webTxLinesHeader": {
-    "description": "Section header",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webThLineAmount": "المبلغ",
-  "@webThLineAmount": {
-    "description": "Table header"
-  },
-  "webThLineCurrency": "العملة",
-  "@webThLineCurrency": {
-    "description": "Table header"
-  },
-  "webThLineCategory": "الفئة",
-  "@webThLineCategory": {
-    "description": "Table header"
-  },
-  "webThLineAccount": "الحساب",
-  "@webThLineAccount": {
-    "description": "Table header"
-  },
-  "webThLineNote": "ملاحظة",
-  "@webThLineNote": {
-    "description": "Table header"
-  },
-  "webThLineRate": "السعر",
-  "@webThLineRate": {
-    "description": "Table header"
-  },
-  "webCatSubSingular": "فئة فرعية واحدة",
-  "@webCatSubSingular": {
-    "description": "Count"
-  },
-  "webCatSubPlural": "{count} فئات فرعية",
-  "@webCatSubPlural": {
-    "description": "Count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webCatSectionExpense": "مصروف",
-  "@webCatSectionExpense": {
-    "description": "Section"
-  },
-  "webCatSectionIncome": "الدخل",
-  "@webCatSectionIncome": {
-    "description": "Section"
-  },
-  "webCatEmptyTitle": "لا فئات بعد",
+  "webCatEmptyTitle": "لا فئات هنا",
   "@webCatEmptyTitle": {
     "description": "Empty title"
   },
-  "webCatEmptySub": "أضف أول فئة للبدء",
+  "webCatEmptySub": "تجمع الفئات مصاريفك ودخلك.",
   "@webCatEmptySub": {
     "description": "Empty subtitle"
-  },
-  "webCatFormName": "الاسم",
-  "@webCatFormName": {
-    "description": "Label"
-  },
-  "webCatFormNameHint": "مثل: بقالة",
-  "@webCatFormNameHint": {
-    "description": "Placeholder"
-  },
-  "webCatFormParent": "الفئة الأم",
-  "@webCatFormParent": {
-    "description": "Label"
-  },
-  "webCatFormNone": "— لا شيء (مستوى أعلى) —",
-  "@webCatFormNone": {
-    "description": "Default option"
-  },
-  "webCatFormIcon": "الأيقونة (إيموجي)",
-  "@webCatFormIcon": {
-    "description": "Label"
-  },
-  "webCatFormColor": "اللون",
-  "@webCatFormColor": {
-    "description": "Label"
-  },
-  "webCatFormType": "نوع المعاملة",
-  "@webCatFormType": {
-    "description": "Label"
-  },
-  "webModalAddCat": "إضافة فئة",
-  "@webModalAddCat": {
-    "description": "Modal title"
   },
   "webValNameRequired": "الاسم مطلوب",
   "@webValNameRequired": {
@@ -4284,131 +4147,49 @@
   "@webToastCatAdded": {
     "description": "Toast"
   },
-  "webToastCatNotFound": "الفئة غير موجودة",
-  "@webToastCatNotFound": {
-    "description": "Toast"
-  },
-  "webModalEditCat": "تعديل الفئة",
-  "@webModalEditCat": {
-    "description": "Modal title"
-  },
-  "webToastCatUpdated": "تم تحديث الفئة",
+  "webToastCatUpdated": "تم حفظ الفئة",
   "@webToastCatUpdated": {
     "description": "Toast"
   },
-  "webAcctEmptyTitle": "لا توجد حسابات بعد",
+  "webAcctEmptyTitle": "لا حسابات بعد",
   "@webAcctEmptyTitle": {
     "description": "Empty title"
   },
-  "webAcctEmptySub": "أضف أول حساب للبدء",
+  "webAcctEmptySub": "أضف الحسابات التي تدفع منها لتبدأ المتابعة.",
   "@webAcctEmptySub": {
     "description": "Empty subtitle"
   },
-  "webAcctTypeBank": "حسابات بنكية",
+  "webAcctTypeBank": "بنك",
   "@webAcctTypeBank": {
     "description": "Group label"
   },
-  "webAcctTypeCash": "نقدي",
+  "webAcctTypeCash": "نقدًا",
   "@webAcctTypeCash": {
     "description": "Group label"
   },
-  "webAcctTypeCredit": "بطاقات ائتمان",
+  "webAcctTypeCredit": "ائتمان",
   "@webAcctTypeCredit": {
     "description": "Group label"
   },
-  "webAcctTypeWallet": "محافظ",
+  "webAcctTypeWallet": "محفظة",
   "@webAcctTypeWallet": {
     "description": "Group label"
-  },
-  "webAcctNetWorth": "صافي الثروة · {cur}",
-  "@webAcctNetWorth": {
-    "description": "Card title",
-    "placeholders": {
-      "cur": {
-        "type": "String"
-      }
-    }
-  },
-  "webAcctCountSingular": "حساب واحد",
-  "@webAcctCountSingular": {
-    "description": "Count"
-  },
-  "webAcctCountPlural": "{count} حسابات",
-  "@webAcctCountPlural": {
-    "description": "Count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "webAcctTxEmpty": "لا معاملات لهذا الحساب",
-  "@webAcctTxEmpty": {
-    "description": "Empty state"
-  },
-  "webAcctBack": "→ رجوع",
-  "@webAcctBack": {
-    "description": "Button"
-  },
-  "webAcctFormNameHint": "مثل: حساب جاري",
-  "@webAcctFormNameHint": {
-    "description": "Placeholder"
-  },
-  "webAcctFormType": "النوع",
-  "@webAcctFormType": {
-    "description": "Label"
-  },
-  "webAcctFormTypeBank": "بنك",
-  "@webAcctFormTypeBank": {
-    "description": "Option"
-  },
-  "webAcctFormTypeCash": "نقدي",
-  "@webAcctFormTypeCash": {
-    "description": "Option"
-  },
-  "webAcctFormTypeCredit": "ائتمان",
-  "@webAcctFormTypeCredit": {
-    "description": "Option"
-  },
-  "webAcctFormTypeWallet": "محفظة",
-  "@webAcctFormTypeWallet": {
-    "description": "Option"
-  },
-  "webAcctFormOpening": "الرصيد الافتتاحي",
-  "@webAcctFormOpening": {
-    "description": "Label"
-  },
-  "webModalAddAcct": "إضافة حساب",
-  "@webModalAddAcct": {
-    "description": "Modal title"
   },
   "webToastAcctAdded": "تمت إضافة الحساب",
   "@webToastAcctAdded": {
     "description": "Toast"
   },
-  "webEnvEmptyTitle": "لا أظرف",
+  "webEnvEmptyTitle": "لا أظرف بعد",
   "@webEnvEmptyTitle": {
     "description": "Empty title"
   },
-  "webEnvEmptySub": "الأظرف تُدار من تطبيق BudgetSeal.",
+  "webEnvEmptySub": "أنشئ الأظرف من تبويب الميزانية في التطبيق، ثم موّلها من هنا.",
   "@webEnvEmptySub": {
     "description": "Empty subtitle"
   },
-  "webEnvUnallocated": "غير موزع:",
-  "@webEnvUnallocated": {
-    "description": "Label"
-  },
-  "webEnvFund": "+ تمويل",
+  "webEnvFund": "تمويل",
   "@webEnvFund": {
     "description": "Button"
-  },
-  "webModalFund": "تمويل الظرف",
-  "@webModalFund": {
-    "description": "Modal title"
-  },
-  "webFormAmountToFund": "المبلغ للتمويل",
-  "@webFormAmountToFund": {
-    "description": "Label"
   },
   "webFormNote": "ملاحظة",
   "@webFormNote": {
@@ -4418,87 +4199,27 @@
   "@webToastEnvFunded": {
     "description": "Toast"
   },
-  "webBtnFundConfirm": "تمويل",
-  "@webBtnFundConfirm": {
-    "description": "Button"
-  },
-  "webRecurringEmpty": "لا معاملات متكررة",
-  "@webRecurringEmpty": {
-    "description": "Empty state"
-  },
-  "webThService": "الخدمة",
-  "@webThService": {
-    "description": "Table header"
-  },
-  "webThFrequency": "التكرار",
-  "@webThFrequency": {
-    "description": "Table header"
-  },
-  "webThNextDue": "الاستحقاق التالي",
-  "@webThNextDue": {
-    "description": "Table header"
-  },
-  "webThOn": "مفعّل",
-  "@webThOn": {
-    "description": "Table header"
-  },
-  "webToggleEnabled": "مفعّل",
-  "@webToggleEnabled": {
-    "description": "Toggle title"
-  },
-  "webToggleDisabled": "معطل",
-  "@webToggleDisabled": {
-    "description": "Toggle title"
-  },
-  "webFormTitleLabel": "العنوان",
-  "@webFormTitleLabel": {
-    "description": "Label"
-  },
-  "webFormTitleHint": "مثل: Netflix",
-  "@webFormTitleHint": {
-    "description": "Placeholder"
-  },
-  "webFormFrequency": "التكرار",
-  "@webFormFrequency": {
-    "description": "Label"
-  },
   "webFormEvery": "كل",
   "@webFormEvery": {
     "description": "Label"
-  },
-  "webFormStartDate": "تاريخ البدء",
-  "@webFormStartDate": {
-    "description": "Label"
-  },
-  "webModalAddRecurring": "إضافة متكررة",
-  "@webModalAddRecurring": {
-    "description": "Modal title"
   },
   "webToastRecurringAdded": "تمت إضافة المتكررة",
   "@webToastRecurringAdded": {
     "description": "Toast"
   },
-  "webModalEditRecurring": "تعديل المتكررة",
-  "@webModalEditRecurring": {
-    "description": "Modal title"
-  },
   "webToastUpdated": "تم التحديث",
   "@webToastUpdated": {
     "description": "Toast"
   },
-  "webToastNotFound": "غير موجود",
-  "@webToastNotFound": {
-    "description": "Toast"
-  },
-  "webValSelectStartDate": "اختر تاريخ البدء",
+  "webValSelectStartDate": "اختر تاريخًا",
   "@webValSelectStartDate": {
     "description": "Validation"
   },
-  "webConfirmDeleteRecurring": "حذف المتكررة",
+  "webConfirmDeleteRecurring": "حذف هذا العنصر المتكرر؟",
   "@webConfirmDeleteRecurring": {
     "description": "Dialog title"
   },
-  "webConfirmDeleteRecurringMsg": "سيتم حذف هذه المعاملة المتكررة نهائياً.",
+  "webConfirmDeleteRecurringMsg": "سيتوقف تسجيله. تبقى المعاملات التي سُجّلت سابقًا.",
   "@webConfirmDeleteRecurringMsg": {
     "description": "Dialog content"
   },
@@ -4510,49 +4231,21 @@
   "@webSubEmpty": {
     "description": "Empty state"
   },
-  "webModalAddSub": "إضافة اشتراك",
-  "@webModalAddSub": {
-    "description": "Modal title"
-  },
   "webToastSubAdded": "تمت إضافة الاشتراك",
   "@webToastSubAdded": {
     "description": "Toast"
   },
-  "webModalEditSub": "تعديل الاشتراك",
-  "@webModalEditSub": {
-    "description": "Modal title"
-  },
-  "webFormNewAmount": "المبلغ الجديد",
-  "@webFormNewAmount": {
-    "description": "Label"
-  },
-  "webSubPriceHint": "تغيير المبلغ سيضيف إدخالاً في تاريخ الأسعار.",
+  "webSubPriceHint": "يُضاف المبلغ الجديد إلى سجل الأسعار.",
   "@webSubPriceHint": {
     "description": "Hint"
   },
-  "webConfirmDeleteSub": "حذف الاشتراك",
+  "webConfirmDeleteSub": "حذف هذا الاشتراك؟",
   "@webConfirmDeleteSub": {
     "description": "Dialog title"
   },
-  "webConfirmDeleteSubMsg": "سيتم حذف هذا الاشتراك نهائياً.",
+  "webConfirmDeleteSubMsg": "سيتوقف تسجيله. تبقى الدفعات المسجّلة سابقًا.",
   "@webConfirmDeleteSubMsg": {
     "description": "Dialog content"
-  },
-  "webReportsYear": "السنة",
-  "@webReportsYear": {
-    "description": "Label"
-  },
-  "webReportsMonth": "الشهر",
-  "@webReportsMonth": {
-    "description": "Label"
-  },
-  "webReportsLoad": "تحميل",
-  "@webReportsLoad": {
-    "description": "Button"
-  },
-  "webReportsSelectPrompt": "اختر فترة واضغط تحميل.",
-  "@webReportsSelectPrompt": {
-    "description": "Prompt"
   },
   "webStatIncome": "الدخل",
   "@webStatIncome": {
@@ -4570,7 +4263,7 @@
   "@webStatSavingsRate": {
     "description": "Stat label"
   },
-  "webStatAvgDaily": "متوسط الإنفاق اليومي",
+  "webStatAvgDaily": "المتوسط اليومي",
   "@webStatAvgDaily": {
     "description": "Stat label"
   },
@@ -4578,7 +4271,7 @@
   "@webStatTransactions": {
     "description": "Stat label"
   },
-  "webReportDailyCashflow": "التدفق النقدي اليومي",
+  "webReportDailyCashflow": "يومًا بيوم",
   "@webReportDailyCashflow": {
     "description": "Section title"
   },
@@ -4586,7 +4279,7 @@
   "@webReportSpendingCat": {
     "description": "Section title"
   },
-  "webReportNoExpense": "لا بيانات مصاريف",
+  "webReportNoExpense": "لا إنفاق هذا الشهر",
   "@webReportNoExpense": {
     "description": "Empty state"
   },
@@ -4594,11 +4287,11 @@
   "@webReportIncomeCat": {
     "description": "Section title"
   },
-  "webReportNoIncome": "لا بيانات دخل",
+  "webReportNoIncome": "لا دخل هذا الشهر",
   "@webReportNoIncome": {
     "description": "Empty state"
   },
-  "webReportTopExpenses": "أعلى المصاريف",
+  "webReportTopExpenses": "أكبر المصاريف",
   "@webReportTopExpenses": {
     "description": "Section title"
   },
@@ -4622,7 +4315,7 @@
   "@webShortcutSearch": {
     "description": "Description"
   },
-  "webShortcutClose": "إغلاق النافذة / إلغاء التركيز",
+  "webShortcutClose": "إغلاق النافذة",
   "@webShortcutClose": {
     "description": "Description"
   },

@@ -964,218 +964,119 @@ wc_foreground_channel_desc,Notification channel description,BudgetSeal Web Compa
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Auth,,,,
 # ──────────────────────────────────────────────,,,,
-web_auth_lockout,Auth error,Too many attempts. Try again later.,محاولات كثيرة جداً. أعد المحاولة لاحقاً.,Trop de tentatives. Réessayez plus tard.
 web_auth_incorrect,Auth error,Incorrect PIN,رمز PIN غير صحيح,PIN incorrect
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Toast / Modal,,,,
 # ──────────────────────────────────────────────,,,,
-web_server_unreachable,Toast error,Server unreachable,الخادم غير قابل للوصول,Serveur injoignable
-web_unexpected_response,Toast error,Unexpected server response,استجابة غير متوقعة من الخادم,Réponse inattendue du serveur
-web_unexpected_error,Toast error,Unexpected error,خطأ غير متوقع,Erreur inattendue
 web_undo,Toast button,Undo,تراجع,Annuler
-web_saving,Modal button,Saving…,جارٍ الحفظ…,Enregistrement…
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Dashboard,,,,
 # ──────────────────────────────────────────────,,,,
-web_dash_no_accounts,Empty state,No accounts yet.,لا حسابات بعد.,Aucun compte pour le moment.
-web_dash_unallocated,Banner label,Unallocated,غير موزع,Non affecté
-web_dash_no_envelopes,Empty state,No envelopes yet.,لا أظرف بعد.,Aucune enveloppe pour le moment.
-web_dash_fallback_tx,Fallback title,Transaction,معاملة,Transaction
-web_dash_no_tx_title,Empty title,No transactions yet,لا توجد معاملات بعد,Aucune transaction pour le moment
-web_dash_no_tx_sub,Empty subtitle,Add your first transaction to get started,أضف أول معاملة للبدء,Ajoutez votre première transaction pour commencer
-web_dash_see_all,Button,See all,عرض الكل,Voir tout
-web_dash_recent,Card title,Recent Transactions,المعاملات الأخيرة,Transactions récentes
-web_dash_view_all,Button,View all,عرض الكل,Voir tout
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Transactions,,,,
 # ──────────────────────────────────────────────,,,,
 web_tx_no_rate,Warning,No rate,بدون سعر,Pas de taux
-web_tx_no_found,Empty state,No transactions found,لا معاملات موجودة,Aucune transaction trouvée
-web_tx_csv,Button,CSV,CSV,CSV
-web_tx_csv_tooltip,Tooltip,Export CSV,تصدير CSV,Exporter CSV
-web_tx_add,Button,+ Add,+ إضافة,+ Ajouter
-web_tx_search,Placeholder,Search by title…,البحث بالعنوان…,Rechercher par titre…
-web_tx_th_date,Table header,Date,التاريخ,Date
-web_tx_th_type,Table header,Type,النوع,Type
-web_tx_th_title,Table header,Title,العنوان,Titre
-web_tx_th_account,Table header,Account,الحساب,Compte
-web_tx_th_category,Table header,Category,الفئة,Catégorie
-web_tx_th_amount,Table header,Amount,المبلغ,Montant
-web_tx_prev,Pagination,← Prev,→ السابق,← Préc.
-web_tx_page_n,Pagination,Page {page},صفحة {page},Page {page}
-web_tx_next,Pagination,Next →,التالي ←,Suiv. →
-web_tx_csv_exported,Toast,CSV exported,تم تصدير CSV,CSV exporté
-web_tx_edit,Button,Edit,تعديل,Modifier
-web_tx_del,Button,Del,حذف,Suppr.
+web_tx_add,Button,Add transaction,إضافة معاملة,Ajouter une transaction
+web_tx_search,Placeholder,Search titles and notes,ابحث في العناوين والملاحظات,Rechercher dans les titres et notes
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Transaction form,,,,
 # ──────────────────────────────────────────────,,,,
 web_form_type,Label,Type,النوع,Type
-web_form_from_account,Label,From Account,من حساب,Compte source
+web_form_from_account,Label,From account,من الحساب,Depuis le compte
 web_form_account,Label,Account,الحساب,Compte
-web_form_select_account,Default option,Select account,اختر حساباً,Sélectionner un compte
-web_form_to_account,Label,To Account,إلى حساب,Compte destination
+web_form_to_account,Label,To account,إلى الحساب,Vers le compte
 web_form_category,Label,Category,الفئة,Catégorie
-web_form_none,Default option,— None —,— لا شيء —,— Aucun —
 web_form_amount,Label,Amount,المبلغ,Montant
-web_form_amount_placeholder,Placeholder,0.00,0.00,0.00
 web_form_currency,Label,Currency,العملة,Devise
-web_form_currency_placeholder,Placeholder,USD,USD,USD
-web_form_exchange_rate,Label,Exchange Rate,سعر الصرف,Taux de change
-web_form_rate_placeholder,Placeholder,Rate to base currency,سعر الصرف للعملة الأساسية,Taux vers la devise de base
 web_form_date,Label,Date,التاريخ,Date
-web_form_title_note,Label,Title / Note,العنوان / الملاحظة,Titre / Note
 web_form_optional,Placeholder,Optional,اختياري,Optionnel
-web_form_rate_hint,Hint,1 {txCur} = ? {baseCur},1 {txCur} = ؟ {baseCur},1 {txCur} = ? {baseCur}
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Transaction validation & CRUD,,,,
 # ──────────────────────────────────────────────,,,,
 web_val_select_account,Validation,Select an account,اختر حساباً,Sélectionnez un compte
 web_val_valid_amount,Validation,Enter a valid amount,أدخل مبلغاً صالحاً,Saisissez un montant valide
 web_val_select_dest,Validation,Select destination account,اختر حساب الوجهة,Sélectionnez le compte de destination
-web_val_accounts_differ,Validation,From and To accounts must differ,يجب أن يختلف حساب المصدر عن الوجهة,Les comptes source et destination doivent différer
-web_modal_add_tx,Modal title,Add Transaction,إضافة معاملة,Ajouter une transaction
+web_val_accounts_differ,Validation,Pick two different accounts,اختر حسابين مختلفين,Choisissez deux comptes différents
 web_toast_tx_added,Toast,Transaction added,تمت إضافة المعاملة,Transaction ajoutée
-web_modal_edit_tx,Modal title,Edit Transaction,تعديل المعاملة,Modifier la transaction
 web_toast_tx_updated,Toast,Transaction updated,تم تحديث المعاملة,Transaction mise à jour
 web_toast_tx_deleted,Toast,Transaction deleted,تم حذف المعاملة,Transaction supprimée
-web_toast_no_lines,Toast,No line details available,لا تفاصيل خطوط متاحة,Aucun détail de ligne disponible
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Transaction detail lines,,,,
 # ──────────────────────────────────────────────,,,,
-web_tx_lines_header,Section header,Transaction Lines ({count}),سطور المعاملة ({count}),Lignes de transaction ({count})
-web_th_line_amount,Table header,Amount,المبلغ,Montant
-web_th_line_currency,Table header,Currency,العملة,Devise
-web_th_line_category,Table header,Category,الفئة,Catégorie
-web_th_line_account,Table header,Account,الحساب,Compte
-web_th_line_note,Table header,Note,ملاحظة,Note
-web_th_line_rate,Table header,Rate,السعر,Taux
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Categories,,,,
 # ──────────────────────────────────────────────,,,,
-web_cat_sub_singular,Count,1 sub-category,فئة فرعية واحدة,1 sous-catégorie
-web_cat_sub_plural,Count,{count} sub-categories,{count} فئات فرعية,{count} sous-catégories
-web_cat_section_expense,Section,Expense,مصروف,Dépense
-web_cat_section_income,Section,Income,الدخل,Revenu
-web_cat_empty_title,Empty title,No categories yet,لا فئات بعد,Aucune catégorie
-web_cat_empty_sub,Empty subtitle,Add your first category to get started,أضف أول فئة للبدء,Ajoutez votre première catégorie pour commencer
+web_cat_empty_title,Empty title,No categories here,لا فئات هنا,Aucune catégorie ici
+web_cat_empty_sub,Empty subtitle,Categories group your spending and income.,تجمع الفئات مصاريفك ودخلك.,Les catégories regroupent vos dépenses et revenus.
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Category form,,,,
 # ──────────────────────────────────────────────,,,,
-web_cat_form_name,Label,Name,الاسم,Nom
-web_cat_form_name_hint,Placeholder,e.g. Groceries,مثل: بقالة,ex. Courses
-web_cat_form_parent,Label,Parent Category,الفئة الأم,Catégorie parente
-web_cat_form_none,Default option,— None (top-level) —,— لا شيء (مستوى أعلى) —,— Aucune (niveau supérieur) —
-web_cat_form_icon,Label,Icon (emoji),الأيقونة (إيموجي),Icône (émoji)
-web_cat_form_color,Label,Color,اللون,Couleur
-web_cat_form_type,Label,Transaction Type,نوع المعاملة,Type de transaction
-web_modal_add_cat,Modal title,Add Category,إضافة فئة,Ajouter une catégorie
 web_val_name_required,Validation,Name is required,الاسم مطلوب,Le nom est requis
 web_toast_cat_added,Toast,Category added,تمت إضافة الفئة,Catégorie ajoutée
-web_toast_cat_not_found,Toast,Category not found,الفئة غير موجودة,Catégorie introuvable
-web_modal_edit_cat,Modal title,Edit Category,تعديل الفئة,Modifier la catégorie
-web_toast_cat_updated,Toast,Category updated,تم تحديث الفئة,Catégorie mise à jour
+web_toast_cat_updated,Toast,Category saved,تم حفظ الفئة,Catégorie enregistrée
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Accounts,,,,
 # ──────────────────────────────────────────────,,,,
-web_acct_empty_title,Empty title,No accounts yet,لا توجد حسابات بعد,Aucun compte pour le moment
-web_acct_empty_sub,Empty subtitle,Add your first account to get started,أضف أول حساب للبدء,Ajoutez votre premier compte pour commencer
-web_acct_type_bank,Group label,Bank Accounts,حسابات بنكية,Comptes bancaires
-web_acct_type_cash,Group label,Cash,نقدي,Espèces
-web_acct_type_credit,Group label,Credit Cards,بطاقات ائتمان,Cartes de crédit
-web_acct_type_wallet,Group label,Wallets,محافظ,Portefeuilles
-web_acct_net_worth,Card title,Net Worth · {cur},صافي الثروة · {cur},Patrimoine net · {cur}
-web_acct_count_singular,Count,1 account,حساب واحد,1 compte
-web_acct_count_plural,Count,{count} accounts,{count} حسابات,{count} comptes
-web_acct_tx_empty,Empty state,No transactions for this account,لا معاملات لهذا الحساب,Aucune transaction pour ce compte
-web_acct_back,Button,← Back,→ رجوع,← Retour
+web_acct_empty_title,Empty title,No accounts yet,لا حسابات بعد,Aucun compte
+web_acct_empty_sub,Empty subtitle,Add the accounts you pay from to start tracking.,أضف الحسابات التي تدفع منها لتبدأ المتابعة.,Ajoutez les comptes avec lesquels vous payez pour commencer.
+web_acct_type_bank,Group label,Bank,بنك,Banque
+web_acct_type_cash,Group label,Cash,نقدًا,Espèces
+web_acct_type_credit,Group label,Credit,ائتمان,Crédit
+web_acct_type_wallet,Group label,Wallet,محفظة,Portefeuille
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Account form,,,,
 # ──────────────────────────────────────────────,,,,
-web_acct_form_name_hint,Placeholder,e.g. Checking,مثل: حساب جاري,ex. Compte courant
-web_acct_form_type,Label,Type,النوع,Type
-web_acct_form_type_bank,Option,Bank,بنك,Banque
-web_acct_form_type_cash,Option,Cash,نقدي,Espèces
-web_acct_form_type_credit,Option,Credit,ائتمان,Crédit
-web_acct_form_type_wallet,Option,Wallet,محفظة,Portefeuille
-web_acct_form_opening,Label,Opening Balance,الرصيد الافتتاحي,Solde d'ouverture
-web_modal_add_acct,Modal title,Add Account,إضافة حساب,Ajouter un compte
 web_toast_acct_added,Toast,Account added,تمت إضافة الحساب,Compte ajouté
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Envelopes,,,,
 # ──────────────────────────────────────────────,,,,
-web_env_empty_title,Empty title,No envelopes,لا أظرف,Aucune enveloppe
-web_env_empty_sub,Empty subtitle,Envelopes are managed in the BudgetSeal app.,الأظرف تُدار من تطبيق BudgetSeal.,Les enveloppes sont gérées dans l'application BudgetSeal.
-web_env_unallocated,Label,Unallocated:,غير موزع:,Non affecté :
-web_env_fund,Button,+ Fund,+ تمويل,+ Financer
-web_modal_fund,Modal title,Fund Envelope,تمويل الظرف,Financer l'enveloppe
-web_form_amount_to_fund,Label,Amount to Fund,المبلغ للتمويل,Montant à financer
+web_env_empty_title,Empty title,No envelopes yet,لا أظرف بعد,Pas encore d'enveloppes
+web_env_empty_sub,Empty subtitle,"Create envelopes in the app's Budget tab, then fund them from here.",أنشئ الأظرف من تبويب الميزانية في التطبيق، ثم موّلها من هنا.,"Créez des enveloppes dans l'onglet Budget de l'app, puis financez-les d'ici."
+web_env_fund,Button,Fund,تمويل,Financer
 web_form_note,Label,Note,ملاحظة,Note
 web_toast_env_funded,Toast,Envelope funded,تم تمويل الظرف,Enveloppe financée
-web_btn_fund_confirm,Button,Fund,تمويل,Financer
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Recurring,,,,
 # ──────────────────────────────────────────────,,,,
-web_recurring_empty,Empty state,No recurring transactions,لا معاملات متكررة,Aucune transaction récurrente
-web_th_service,Table header,Service,الخدمة,Service
-web_th_frequency,Table header,Frequency,التكرار,Fréquence
-web_th_next_due,Table header,Next Due,الاستحقاق التالي,Prochaine échéance
-web_th_on,Table header,On,مفعّل,Actif
-web_toggle_enabled,Toggle title,Enabled,مفعّل,Activé
-web_toggle_disabled,Toggle title,Disabled,معطل,Désactivé
-web_form_title_label,Label,Title,العنوان,Titre
-web_form_title_hint,Placeholder,e.g. Netflix,مثل: Netflix,ex. Netflix
-web_form_frequency,Label,Frequency,التكرار,Fréquence
 web_form_every,Label,Every,كل,Chaque
-web_form_start_date,Label,Start Date,تاريخ البدء,Date de début
-web_modal_add_recurring,Modal title,Add Recurring,إضافة متكررة,Ajouter un récurrent
 web_toast_recurring_added,Toast,Recurring added,تمت إضافة المتكررة,Récurrent ajouté
-web_modal_edit_recurring,Modal title,Edit Recurring,تعديل المتكررة,Modifier le récurrent
 web_toast_updated,Toast,Updated,تم التحديث,Mis à jour
-web_toast_not_found,Toast,Not found,غير موجود,Introuvable
-web_val_select_start_date,Validation,Select a start date,اختر تاريخ البدء,Sélectionnez une date de début
-web_confirm_delete_recurring,Dialog title,Delete Recurring,حذف المتكررة,Supprimer le récurrent
-web_confirm_delete_recurring_msg,Dialog content,This recurring transaction will be permanently deleted.,سيتم حذف هذه المعاملة المتكررة نهائياً.,Cette transaction récurrente sera supprimée définitivement.
+web_val_select_start_date,Validation,Pick a date,اختر تاريخًا,Choisissez une date
+web_confirm_delete_recurring,Dialog title,Delete this recurring item?,حذف هذا العنصر المتكرر؟,Supprimer cet élément récurrent ?
+web_confirm_delete_recurring_msg,Dialog content,It stops posting. Transactions it already posted stay.,سيتوقف تسجيله. تبقى المعاملات التي سُجّلت سابقًا.,Il ne sera plus enregistré. Les transactions déjà créées restent.
 web_toast_deleted,Toast,Deleted,تم الحذف,Supprimé
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Subscriptions,,,,
 # ──────────────────────────────────────────────,,,,
 web_sub_empty,Empty state,No subscriptions yet,لا اشتراكات بعد,Aucun abonnement
-web_modal_add_sub,Modal title,Add Subscription,إضافة اشتراك,Ajouter un abonnement
 web_toast_sub_added,Toast,Subscription added,تمت إضافة الاشتراك,Abonnement ajouté
-web_modal_edit_sub,Modal title,Edit Subscription,تعديل الاشتراك,Modifier l'abonnement
-web_form_new_amount,Label,New Amount,المبلغ الجديد,Nouveau montant
-web_sub_price_hint,Hint,Changing the amount will add a price history entry.,تغيير المبلغ سيضيف إدخالاً في تاريخ الأسعار.,Modifier le montant ajoutera une entrée dans l'historique des prix.
-web_confirm_delete_sub,Dialog title,Delete Subscription,حذف الاشتراك,Supprimer l'abonnement
-web_confirm_delete_sub_msg,Dialog content,This subscription will be permanently deleted.,سيتم حذف هذا الاشتراك نهائياً.,Cet abonnement sera supprimé définitivement.
+web_sub_price_hint,Hint,A new amount is added to the price history.,يُضاف المبلغ الجديد إلى سجل الأسعار.,Un nouveau montant s'ajoute à l'historique des prix.
+web_confirm_delete_sub,Dialog title,Delete this subscription?,حذف هذا الاشتراك؟,Supprimer cet abonnement ?
+web_confirm_delete_sub_msg,Dialog content,It stops posting. Payments already recorded stay.,سيتوقف تسجيله. تبقى الدفعات المسجّلة سابقًا.,Il ne sera plus enregistré. Les paiements déjà créés restent.
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Reports,,,,
 # ──────────────────────────────────────────────,,,,
-web_reports_year,Label,Year,السنة,Année
-web_reports_month,Label,Month,الشهر,Mois
-web_reports_load,Button,Load,تحميل,Charger
-web_reports_select_prompt,Prompt,Select a period and click Load.,اختر فترة واضغط تحميل.,Sélectionnez une période et cliquez sur Charger.
 web_stat_income,Stat label,Income,الدخل,Revenu
 web_stat_expenses,Stat label,Expenses,مصاريف,Dépenses
 web_stat_net,Stat label,Net,صافي,Net
-web_stat_savings_rate,Stat label,Savings Rate,معدل الادخار,Taux d'épargne
-web_stat_avg_daily,Stat label,Avg. Daily Spend,متوسط الإنفاق اليومي,Dépense quotidienne moy.
+web_stat_savings_rate,Stat label,Savings rate,معدل الادخار,Taux d'épargne
+web_stat_avg_daily,Stat label,Average per day,المتوسط اليومي,Moyenne par jour
 web_stat_transactions,Stat label,Transactions,المعاملات,Transactions
-web_report_daily_cashflow,Section title,Daily Cashflow,التدفق النقدي اليومي,Flux de trésorerie quotidien
-web_report_spending_cat,Section title,Spending by Category,الإنفاق حسب الفئة,Dépenses par catégorie
-web_report_no_expense,Empty state,No expense data,لا بيانات مصاريف,Aucune donnée de dépense
-web_report_income_cat,Section title,Income by Category,الدخل حسب الفئة,Revenus par catégorie
-web_report_no_income,Empty state,No income data,لا بيانات دخل,Aucune donnée de revenu
-web_report_top_expenses,Section title,Top Expenses,أعلى المصاريف,Principales dépenses
+web_report_daily_cashflow,Section title,Day by day,يومًا بيوم,Jour par jour
+web_report_spending_cat,Section title,Spending by category,الإنفاق حسب الفئة,Dépenses par catégorie
+web_report_no_expense,Empty state,No spending this month,لا إنفاق هذا الشهر,Aucune dépense ce mois-ci
+web_report_income_cat,Section title,Income by category,الدخل حسب الفئة,Revenus par catégorie
+web_report_no_income,Empty state,No income this month,لا دخل هذا الشهر,Aucun revenu ce mois-ci
+web_report_top_expenses,Section title,Biggest expenses,أكبر المصاريف,Plus grosses dépenses
 web_chart_income,Chart label,Income,الدخل,Revenu
 web_chart_expense,Chart label,Expense,مصروف,Dépense
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Keyboard shortcuts,,,,
 # ──────────────────────────────────────────────,,,,
-web_shortcuts_title,Modal title,Keyboard Shortcuts,اختصارات لوحة المفاتيح,Raccourcis clavier
+web_shortcuts_title,Modal title,Keyboard shortcuts,اختصارات لوحة المفاتيح,Raccourcis clavier
 web_shortcut_new_tx,Description,New transaction,معاملة جديدة,Nouvelle transaction
 web_shortcut_search,Description,Search transactions,البحث في المعاملات,Rechercher les transactions
-web_shortcut_close,Description,Close modal / unfocus,إغلاق النافذة / إلغاء التركيز,Fermer la modale / défocaliser
+web_shortcut_close,Description,Close the dialog,إغلاق النافذة,Fermer la fenêtre
 web_shortcut_help,Description,Show this help,إظهار هذه المساعدة,Afficher cette aide
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Months (abbreviated),,,,
@@ -2070,8 +1971,7 @@ currency_name_try,,Turkish Lira,ليرة تركية,Livre turque
 
 # ──────────────────────────────────────────────,,,,
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
-web_env_balance_of_target,,{balance} of {target},{balance} من {target},{balance} sur {target}
-web_shortcut_refresh,,Refresh current page,تحديث الصفحة الحالية,Rafraîchir la page actuelle
+web_shortcut_refresh,,Reload from the phone,إعادة التحميل من الهاتف,Recharger depuis le téléphone
 
 # ──────────────────────────────────────────────,,,,
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
@@ -2097,3 +1997,129 @@ bill_tax_amount,,Tax & service amount,مبلغ الضريبة والخدمة,Mon
 bill_tax_hint,,Split in proportion to what each person ordered.,يُقسَّم بحسب ما طلبه كل شخص.,Réparti selon ce que chacun a commandé.
 bill_receipt_match,,Matches the receipt total ({total}),يطابق مجموع الإيصال ({total}),Correspond au total du ticket ({total})
 bill_receipt_diff,,Items add up to {items} · receipt total {total},مجموع البنود {items} · مجموع الإيصال {total},Les articles font {items} · total du ticket {total}
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+web_nav_home,,Home,الرئيسية,Accueil
+web_nav_budget,,Budget,الميزانية,Budget
+web_menu,,Menu,القائمة,Menu
+web_shortcuts,,Shortcuts,الاختصارات,Raccourcis
+web_sign_out,,Sign out,تسجيل الخروج,Se déconnecter
+web_conn_checking,,Connecting…,جارٍ الاتصال…,Connexion…
+web_conn_ok,,Connected to phone,متصل بالهاتف,Connecté au téléphone
+web_conn_lost,,Phone not reachable,تعذّر الوصول إلى الهاتف,Téléphone injoignable
+web_offline,,"Can't reach your phone. Keep BudgetSeal open with the Web Companion running, on the same Wi‑Fi.",تعذّر الوصول إلى هاتفك. أبقِ BudgetSeal مفتوحًا والمرافق الإلكتروني قيد التشغيل، على شبكة Wi‑Fi نفسها.,"Impossible de joindre votre téléphone. Gardez BudgetSeal ouvert avec le Compagnon Web actif, sur le même Wi‑Fi."
+web_offline_short,,Can't reach your phone,تعذّر الوصول إلى هاتفك,Téléphone injoignable
+web_auth_subtitle,,Enter the PIN you set on your phone,أدخل الرمز الذي عيّنته على هاتفك,Saisissez le code PIN défini sur votre téléphone
+web_auth_foot,,Your data stays on your phone. This page reads it over your Wi‑Fi.,تبقى بياناتك على هاتفك. هذه الصفحة تقرؤها عبر شبكة Wi‑Fi.,Vos données restent sur votre téléphone. Cette page les lit via votre Wi‑Fi.
+web_auth_delete,,Delete digit,حذف الرقم,Effacer le chiffre
+web_auth_wrong_left,,Wrong PIN · {n} attempts left,رمز خاطئ · المحاولات المتبقية: {n},Code PIN incorrect · {n} essais restants
+web_auth_locked,,Too many attempts. Try again in {n} min.,محاولات كثيرة. حاول مجددًا بعد {n} د.,Trop de tentatives. Réessayez dans {n} min.
+web_auth_expired,,Your session ended. Enter your PIN again.,انتهت جلستك. أدخل الرمز مرة أخرى.,Votre session a expiré. Saisissez à nouveau votre code PIN.
+web_err_request,,Couldn't save. Check the values and try again.,تعذّر الحفظ. تحقّق من القيم وحاول مجددًا.,Enregistrement impossible. Vérifiez les valeurs et réessayez.
+web_err_too_many,,Too many changes at once. Wait a moment.,تغييرات كثيرة دفعة واحدة. انتظر قليلًا.,Trop de modifications à la fois. Patientez un instant.
+web_err_no_rate,,No exchange rate for this currency yet. Enter one.,لا يوجد سعر صرف لهذه العملة بعد. أدخل سعرًا.,Pas encore de taux de change pour cette devise. Saisissez-en un.
+web_need_account,,Add an account first.,أضف حسابًا أولًا.,Ajoutez d'abord un compte.
+web_see_all,,See all,عرض الكل,Tout voir
+web_recent,,Recent,الأحدث,Récentes
+web_load_more,,Load more,عرض المزيد,Charger plus
+web_duplicate,,Duplicate,تكرار,Dupliquer
+web_csv,,Export CSV,تصدير CSV,Exporter en CSV
+web_csv_preparing,,Preparing the export…,جارٍ تجهيز التصدير…,Préparation de l'export…
+web_csv_done,,{n} rows exported,تم تصدير الصفوف: {n},{n} lignes exportées
+web_whole_year,,Whole year,السنة كاملة,Toute l'année
+web_prev_year,,Previous year,السنة السابقة,Année précédente
+web_next_year,,Next year,السنة التالية,Année suivante
+web_prev_month,,Previous month,الشهر السابق,Mois précédent
+web_next_month,,Next month,الشهر التالي,Mois suivant
+web_rta,,Ready to assign,جاهز للتوزيع,Prêt à répartir
+web_rta_assign,,Assign,وزّع,Répartir
+web_net_worth,,Net worth,صافي الثروة,Patrimoine net
+web_net_worth_cur,,Net worth · {cur},صافي الثروة · {cur},Patrimoine net · {cur}
+web_env_spending,,Spending,إنفاق,Dépenses
+web_env_flexible,,Rollover,مُرحَّل,Cumulatif
+web_env_available,,Available,متاح,Disponible
+web_env_overspent,,Overspent,تجاوز الميزانية,Dépassé
+web_env_spent,,{amount} spent,تم إنفاق {amount},{amount} dépensés
+web_env_of,,of {amount},من {amount},sur {amount}
+web_env_to_go,,{amount} to go,{amount} للوصول إلى الهدف,encore {amount}
+web_env_reached,,Target reached,تم بلوغ الهدف,Objectif atteint
+web_fund_title,,Fund {name},تمويل {name},Financer {name}
+web_fund_to_target,,To target,حتى الهدف,Jusqu'à l'objectif
+web_fund_all,,All available,كل المتاح,Tout le disponible
+web_fund_available,,Ready to assign: {amount},جاهز للتوزيع: {amount},Prêt à répartir : {amount}
+web_fund_over,,Ready to assign would go to {amount},سيصبح المبلغ الجاهز للتوزيع {amount},Le montant prêt à répartir passerait à {amount}
+web_fund_over_msg,,This is more than you have ready to assign. Fund anyway?,هذا أكثر من المبلغ الجاهز للتوزيع. هل تريد التمويل على أي حال؟,C’est plus que votre montant prêt à répartir. Financer quand même ?
+web_fund_anyway,,Fund anyway,موّل على أي حال,Financer quand même
+web_tx_add_short,,Add,إضافة,Ajouter
+web_tx_new_expense,,New expense,مصروف جديد,Nouvelle dépense
+web_tx_new_income,,New income,دخل جديد,Nouveau revenu
+web_tx_new_transfer,,New transfer,تحويل جديد,Nouveau virement
+web_tx_edit_expense,,Edit expense,تعديل المصروف,Modifier la dépense
+web_tx_edit_income,,Edit income,تعديل الدخل,Modifier le revenu
+web_tx_edit_transfer,,Edit transfer,تعديل التحويل,Modifier le virement
+web_tx_empty_title,,No transactions here,لا معاملات هنا,Aucune transaction ici
+web_tx_empty_sub,,"Add one, or pick another month.",أضف معاملة أو اختر شهرًا آخر.,Ajoutez-en une ou choisissez un autre mois.
+web_tx_no_match,,Nothing matches your search,لا نتائج مطابقة لبحثك,Aucun résultat pour cette recherche
+web_tx_split,,Split · {n},مقسّمة · {n},Divisée · {n}
+web_tx_split_hint,,Items of a split are edited on your phone.,تُعدَّل عناصر المعاملة المقسّمة من هاتفك.,Les éléments d'une transaction divisée se modifient sur votre téléphone.
+web_save_add_another,,Save & add another,حفظ وإضافة أخرى,Enregistrer et ajouter
+web_form_title,,Title,العنوان,Titre
+web_form_name,,Name,الاسم,Nom
+web_form_no_category,,No category,بلا فئة,Sans catégorie
+web_form_in_currency,,"In {cur}, the source account’s currency",بعملة الحساب المصدر: {cur},"En {cur}, la devise du compte source"
+web_form_rate_label,,Rate: 1 {cur} = ? {base},السعر: 1 {cur} = ? {base},Taux : 1 {cur} = ? {base}
+web_form_rate_auto,,Leave empty to use the phone's latest rate,اتركه فارغًا لاستخدام آخر سعر على الهاتف,Laissez vide pour utiliser le dernier taux du téléphone
+web_form_received,,Amount received in {cur},المبلغ المستلم بـ {cur},Montant reçu en {cur}
+web_form_repeats,,Repeats,التكرار,Répétition
+web_form_next_due,,Next date,التاريخ التالي,Prochaine date
+web_form_first_date,,First date,التاريخ الأول,Première date
+web_val_received,,Enter the amount received,أدخل المبلغ المستلم,Saisissez le montant reçu
+web_val_rate,,Enter a valid rate,أدخل سعرًا صالحًا,Saisissez un taux valide
+web_val_currency,,"Use a 3-letter currency code, like USD",استخدم رمز عملة من 3 أحرف، مثل USD,"Utilisez un code devise de 3 lettres, comme EUR"
+web_acct_add,,Add account,إضافة حساب,Ajouter un compte
+web_acct_new,,New account,حساب جديد,Nouveau compte
+web_acct_name_hint,,e.g. Main bank,مثال: البنك الرئيسي,ex. Banque principale
+web_acct_opening,,Current balance,الرصيد الحالي,Solde actuel
+web_acct_opening_hint,,Negative for a card you owe on,بالسالب لبطاقة عليها دين,Négatif pour une carte à rembourser
+web_acct_travel,,Travel wallet,محفظة سفر,Portefeuille de voyage
+web_acct_group_bank,,Bank accounts,حسابات بنكية,Comptes bancaires
+web_acct_group_cash,,Cash,نقدًا,Espèces
+web_acct_group_credit,,Credit cards,بطاقات ائتمان,Cartes de crédit
+web_acct_group_wallet,,Digital wallets,محافظ رقمية,Portefeuilles numériques
+web_cat_add,,Add category,إضافة فئة,Ajouter une catégorie
+web_cat_new,,New category,فئة جديدة,Nouvelle catégorie
+web_cat_edit,,Edit category,تعديل الفئة,Modifier la catégorie
+web_cat_name_hint,,e.g. Groceries,مثال: البقالة,ex. Courses
+web_cat_parent,,Inside,ضمن,Dans
+web_cat_top_level,,Main category,فئة رئيسية,Catégorie principale
+web_cat_parent_locked,,"It has subcategories, so it stays a main category.",لديها فئات فرعية، لذا تبقى فئة رئيسية.,"Elle a des sous-catégories, elle reste donc principale."
+web_cat_icon,,Emoji,رمز تعبيري,Emoji
+web_cat_color,,Color,اللون,Couleur
+web_cat_custom_color,,Custom color,لون مخصص,Couleur personnalisée
+web_cat_subs,,{n} subcategories,فئات فرعية: {n},{n} sous-catégories
+web_cat_no_subs,,No subcategories,بلا فئات فرعية,Aucune sous-catégorie
+web_rec_add,,Add recurring,إضافة متكررة,Ajouter un récurrent
+web_rec_new,,New recurring item,عنصر متكرر جديد,Nouvel élément récurrent
+web_rec_edit,,Edit recurring item,تعديل العنصر المتكرر,Modifier l'élément récurrent
+web_rec_empty,,No recurring items yet,لا عناصر متكررة بعد,Pas encore d'éléments récurrents
+web_rec_empty_sub,,"Rent, salary, savings transfers: they post on their own.",الإيجار، الراتب، تحويلات الادخار: تُسجَّل تلقائيًا.,"Loyer, salaire, virements d’épargne : ils sont enregistrés automatiquement."
+web_rec_title_hint,,e.g. Rent,مثال: الإيجار,ex. Loyer
+web_rec_next,,next {date},التالي {date},prochain le {date}
+web_rec_on,,Active,نشط,Actif
+web_rec_off,,Paused,متوقف مؤقتًا,En pause
+web_rec_paused,,Paused,متوقفة مؤقتًا,En pause
+web_rec_paused_toast,,Paused,تم الإيقاف المؤقت,Mis en pause
+web_rec_resumed,,Active again,تم الاستئناف,Réactivé
+web_rec_past_hint,,A past date posts the missed occurrences the next time the app opens.,التاريخ الماضي يسجّل المرات الفائتة عند فتح التطبيق في المرة التالية.,Une date passée enregistre les occurrences manquées à la prochaine ouverture de l'app.
+web_sub_add,,Add subscription,إضافة اشتراك,Ajouter un abonnement
+web_sub_new,,New subscription,اشتراك جديد,Nouvel abonnement
+web_sub_edit,,Edit subscription,تعديل الاشتراك,Modifier l'abonnement
+web_sub_empty_sub,,"Track streaming, apps and memberships, with their price changes.",تابع البث والتطبيقات والعضويات، مع تغيّرات أسعارها.,"Suivez streaming, apps et abonnements, avec leurs changements de prix."
+web_sub_title_hint,,e.g. Netflix,مثال: Netflix,ex. Netflix
+web_sub_monthly,,Per month,شهريًا,Par mois
+web_sub_yearly,,{amount} per year,{amount} سنويًا,{amount} par an
+web_rep_empty,,Nothing recorded this month,لا شيء مسجّل هذا الشهر,Rien d’enregistré ce mois-ci
+web_rep_empty_sub,,Pick another month with the arrows.,اختر شهرًا آخر بالأسهم.,Choisissez un autre mois avec les flèches.
+web_shortcut_pages,,Go to a page in the menu,الانتقال إلى صفحة في القائمة,Aller à une page du menu
+wc_start_failed,,"Couldn't start. Turn Wi‑Fi off and on, then try again.",تعذّر التشغيل. أوقف Wi‑Fi وشغّله، ثم حاول مجددًا.,Démarrage impossible. Désactivez puis réactivez le Wi‑Fi et réessayez.

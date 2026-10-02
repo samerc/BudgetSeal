@@ -99,6 +99,744 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @webNavHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get webNavHome;
+
+  /// No description provided for @webNavBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get webNavBudget;
+
+  /// No description provided for @webMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get webMenu;
+
+  /// No description provided for @webShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get webShortcuts;
+
+  /// No description provided for @webSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get webSignOut;
+
+  /// No description provided for @webConnChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get webConnChecking;
+
+  /// No description provided for @webConnOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to phone'**
+  String get webConnOk;
+
+  /// No description provided for @webConnLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone not reachable'**
+  String get webConnLost;
+
+  /// No description provided for @webOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach your phone. Keep BudgetSeal open with the Web Companion running, on the same Wi‑Fi.'**
+  String get webOffline;
+
+  /// No description provided for @webOfflineShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach your phone'**
+  String get webOfflineShort;
+
+  /// No description provided for @webAuthSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the PIN you set on your phone'**
+  String get webAuthSubtitle;
+
+  /// No description provided for @webAuthFoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays on your phone. This page reads it over your Wi‑Fi.'**
+  String get webAuthFoot;
+
+  /// No description provided for @webAuthDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete digit'**
+  String get webAuthDelete;
+
+  /// No description provided for @webAuthWrongLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN · {n} attempts left'**
+  String webAuthWrongLeft(int n);
+
+  /// No description provided for @webAuthLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {n} min.'**
+  String webAuthLocked(int n);
+
+  /// No description provided for @webAuthExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session ended. Enter your PIN again.'**
+  String get webAuthExpired;
+
+  /// No description provided for @webErrRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Check the values and try again.'**
+  String get webErrRequest;
+
+  /// No description provided for @webErrTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many changes at once. Wait a moment.'**
+  String get webErrTooMany;
+
+  /// No description provided for @webErrNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate for this currency yet. Enter one.'**
+  String get webErrNoRate;
+
+  /// No description provided for @webNeedAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an account first.'**
+  String get webNeedAccount;
+
+  /// No description provided for @webSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get webSeeAll;
+
+  /// No description provided for @webRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get webRecent;
+
+  /// No description provided for @webLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get webLoadMore;
+
+  /// No description provided for @webDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get webDuplicate;
+
+  /// No description provided for @webCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get webCsv;
+
+  /// No description provided for @webCsvPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the export…'**
+  String get webCsvPreparing;
+
+  /// No description provided for @webCsvDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} rows exported'**
+  String webCsvDone(int n);
+
+  /// No description provided for @webWholeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole year'**
+  String get webWholeYear;
+
+  /// No description provided for @webPrevYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year'**
+  String get webPrevYear;
+
+  /// No description provided for @webNextYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Next year'**
+  String get webNextYear;
+
+  /// No description provided for @webPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get webPrevMonth;
+
+  /// No description provided for @webNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get webNextMonth;
+
+  /// No description provided for @webRta.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign'**
+  String get webRta;
+
+  /// No description provided for @webRtaAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign'**
+  String get webRtaAssign;
+
+  /// No description provided for @webNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth'**
+  String get webNetWorth;
+
+  /// No description provided for @webNetWorthCur.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth · {cur}'**
+  String webNetWorthCur(String cur);
+
+  /// No description provided for @webEnvSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get webEnvSpending;
+
+  /// No description provided for @webEnvFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollover'**
+  String get webEnvFlexible;
+
+  /// No description provided for @webEnvAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get webEnvAvailable;
+
+  /// No description provided for @webEnvOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent'**
+  String get webEnvOverspent;
+
+  /// No description provided for @webEnvSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} spent'**
+  String webEnvSpent(String amount);
+
+  /// No description provided for @webEnvOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {amount}'**
+  String webEnvOf(String amount);
+
+  /// No description provided for @webEnvToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go'**
+  String webEnvToGo(String amount);
+
+  /// No description provided for @webEnvReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached'**
+  String get webEnvReached;
+
+  /// No description provided for @webFundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund {name}'**
+  String webFundTitle(String name);
+
+  /// No description provided for @webFundToTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'To target'**
+  String get webFundToTarget;
+
+  /// No description provided for @webFundAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All available'**
+  String get webFundAll;
+
+  /// No description provided for @webFundAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign: {amount}'**
+  String webFundAvailable(String amount);
+
+  /// No description provided for @webFundOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign would go to {amount}'**
+  String webFundOver(String amount);
+
+  /// No description provided for @webFundOverMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This is more than you have ready to assign. Fund anyway?'**
+  String get webFundOverMsg;
+
+  /// No description provided for @webFundAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund anyway'**
+  String get webFundAnyway;
+
+  /// No description provided for @webTxAddShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get webTxAddShort;
+
+  /// No description provided for @webTxNewExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'New expense'**
+  String get webTxNewExpense;
+
+  /// No description provided for @webTxNewIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'New income'**
+  String get webTxNewIncome;
+
+  /// No description provided for @webTxNewTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'New transfer'**
+  String get webTxNewTransfer;
+
+  /// No description provided for @webTxEditExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get webTxEditExpense;
+
+  /// No description provided for @webTxEditIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit income'**
+  String get webTxEditIncome;
+
+  /// No description provided for @webTxEditTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transfer'**
+  String get webTxEditTransfer;
+
+  /// No description provided for @webTxEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions here'**
+  String get webTxEmptyTitle;
+
+  /// No description provided for @webTxEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one, or pick another month.'**
+  String get webTxEmptySub;
+
+  /// No description provided for @webTxNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches your search'**
+  String get webTxNoMatch;
+
+  /// No description provided for @webTxSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split · {n}'**
+  String webTxSplit(int n);
+
+  /// No description provided for @webTxSplitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Items of a split are edited on your phone.'**
+  String get webTxSplitHint;
+
+  /// No description provided for @webSaveAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & add another'**
+  String get webSaveAddAnother;
+
+  /// No description provided for @webFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get webFormTitle;
+
+  /// No description provided for @webFormName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get webFormName;
+
+  /// No description provided for @webFormNoCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get webFormNoCategory;
+
+  /// No description provided for @webFormInCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'In {cur}, the source account’s currency'**
+  String webFormInCurrency(String cur);
+
+  /// No description provided for @webFormRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: 1 {cur} = ? {base}'**
+  String webFormRateLabel(String cur, String base);
+
+  /// No description provided for @webFormRateAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the phone\'s latest rate'**
+  String get webFormRateAuto;
+
+  /// No description provided for @webFormReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received in {cur}'**
+  String webFormReceived(String cur);
+
+  /// No description provided for @webFormRepeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get webFormRepeats;
+
+  /// No description provided for @webFormNextDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Next date'**
+  String get webFormNextDue;
+
+  /// No description provided for @webFormFirstDate.
+  ///
+  /// In en, this message translates to:
+  /// **'First date'**
+  String get webFormFirstDate;
+
+  /// No description provided for @webValReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount received'**
+  String get webValReceived;
+
+  /// No description provided for @webValRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid rate'**
+  String get webValRate;
+
+  /// No description provided for @webValCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a 3-letter currency code, like USD'**
+  String get webValCurrency;
+
+  /// No description provided for @webAcctAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add account'**
+  String get webAcctAdd;
+
+  /// No description provided for @webAcctNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New account'**
+  String get webAcctNew;
+
+  /// No description provided for @webAcctNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Main bank'**
+  String get webAcctNameHint;
+
+  /// No description provided for @webAcctOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Current balance'**
+  String get webAcctOpening;
+
+  /// No description provided for @webAcctOpeningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative for a card you owe on'**
+  String get webAcctOpeningHint;
+
+  /// No description provided for @webAcctTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel wallet'**
+  String get webAcctTravel;
+
+  /// No description provided for @webAcctGroupBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank accounts'**
+  String get webAcctGroupBank;
+
+  /// No description provided for @webAcctGroupCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get webAcctGroupCash;
+
+  /// No description provided for @webAcctGroupCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit cards'**
+  String get webAcctGroupCredit;
+
+  /// No description provided for @webAcctGroupWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital wallets'**
+  String get webAcctGroupWallet;
+
+  /// No description provided for @webCatAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get webCatAdd;
+
+  /// No description provided for @webCatNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get webCatNew;
+
+  /// No description provided for @webCatEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get webCatEdit;
+
+  /// No description provided for @webCatNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Groceries'**
+  String get webCatNameHint;
+
+  /// No description provided for @webCatParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside'**
+  String get webCatParent;
+
+  /// No description provided for @webCatTopLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Main category'**
+  String get webCatTopLevel;
+
+  /// No description provided for @webCatParentLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'It has subcategories, so it stays a main category.'**
+  String get webCatParentLocked;
+
+  /// No description provided for @webCatIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get webCatIcon;
+
+  /// No description provided for @webCatColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get webCatColor;
+
+  /// No description provided for @webCatCustomColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color'**
+  String get webCatCustomColor;
+
+  /// No description provided for @webCatSubs.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} subcategories'**
+  String webCatSubs(int n);
+
+  /// No description provided for @webCatNoSubs.
+  ///
+  /// In en, this message translates to:
+  /// **'No subcategories'**
+  String get webCatNoSubs;
+
+  /// No description provided for @webRecAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recurring'**
+  String get webRecAdd;
+
+  /// No description provided for @webRecNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New recurring item'**
+  String get webRecNew;
+
+  /// No description provided for @webRecEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recurring item'**
+  String get webRecEdit;
+
+  /// No description provided for @webRecEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring items yet'**
+  String get webRecEmpty;
+
+  /// No description provided for @webRecEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent, salary, savings transfers: they post on their own.'**
+  String get webRecEmptySub;
+
+  /// No description provided for @webRecTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Rent'**
+  String get webRecTitleHint;
+
+  /// No description provided for @webRecNext.
+  ///
+  /// In en, this message translates to:
+  /// **'next {date}'**
+  String webRecNext(String date);
+
+  /// No description provided for @webRecOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get webRecOn;
+
+  /// No description provided for @webRecOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get webRecOff;
+
+  /// No description provided for @webRecPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get webRecPaused;
+
+  /// No description provided for @webRecPausedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get webRecPausedToast;
+
+  /// No description provided for @webRecResumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Active again'**
+  String get webRecResumed;
+
+  /// No description provided for @webRecPastHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A past date posts the missed occurrences the next time the app opens.'**
+  String get webRecPastHint;
+
+  /// No description provided for @webSubAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subscription'**
+  String get webSubAdd;
+
+  /// No description provided for @webSubNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New subscription'**
+  String get webSubNew;
+
+  /// No description provided for @webSubEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit subscription'**
+  String get webSubEdit;
+
+  /// No description provided for @webSubEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Track streaming, apps and memberships, with their price changes.'**
+  String get webSubEmptySub;
+
+  /// No description provided for @webSubTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Netflix'**
+  String get webSubTitleHint;
+
+  /// No description provided for @webSubMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Per month'**
+  String get webSubMonthly;
+
+  /// No description provided for @webSubYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} per year'**
+  String webSubYearly(String amount);
+
+  /// No description provided for @webRepEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded this month'**
+  String get webRepEmpty;
+
+  /// No description provided for @webRepEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another month with the arrows.'**
+  String get webRepEmptySub;
+
+  /// No description provided for @webShortcutPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to a page in the menu'**
+  String get webShortcutPages;
+
+  /// No description provided for @wcStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start. Turn Wi‑Fi off and on, then try again.'**
+  String get wcStartFailed;
+
   /// No description provided for @billItemN.
   ///
   /// In en, this message translates to:
@@ -231,16 +969,10 @@ abstract class S {
   /// **'Items add up to {items} · receipt total {total}'**
   String billReceiptDiff(String items, String total);
 
-  /// No description provided for @webEnvBalanceOfTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'{balance} of {target}'**
-  String webEnvBalanceOfTarget(String balance, String target);
-
   /// No description provided for @webShortcutRefresh.
   ///
   /// In en, this message translates to:
-  /// **'Refresh current page'**
+  /// **'Reload from the phone'**
   String get webShortcutRefresh;
 
   /// No description provided for @currencyNameUsd.
@@ -7705,32 +8437,8 @@ abstract class S {
   /// Auth error
   ///
   /// In en, this message translates to:
-  /// **'Too many attempts. Try again later.'**
-  String get webAuthLockout;
-
-  /// Auth error
-  ///
-  /// In en, this message translates to:
   /// **'Incorrect PIN'**
   String get webAuthIncorrect;
-
-  /// Toast error
-  ///
-  /// In en, this message translates to:
-  /// **'Server unreachable'**
-  String get webServerUnreachable;
-
-  /// Toast error
-  ///
-  /// In en, this message translates to:
-  /// **'Unexpected server response'**
-  String get webUnexpectedResponse;
-
-  /// Toast error
-  ///
-  /// In en, this message translates to:
-  /// **'Unexpected error'**
-  String get webUnexpectedError;
 
   /// Toast button
   ///
@@ -7738,173 +8446,23 @@ abstract class S {
   /// **'Undo'**
   String get webUndo;
 
-  /// Modal button
-  ///
-  /// In en, this message translates to:
-  /// **'Saving…'**
-  String get webSaving;
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No accounts yet.'**
-  String get webDashNoAccounts;
-
-  /// Banner label
-  ///
-  /// In en, this message translates to:
-  /// **'Unallocated'**
-  String get webDashUnallocated;
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No envelopes yet.'**
-  String get webDashNoEnvelopes;
-
-  /// Fallback title
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction'**
-  String get webDashFallbackTx;
-
-  /// Empty title
-  ///
-  /// In en, this message translates to:
-  /// **'No transactions yet'**
-  String get webDashNoTxTitle;
-
-  /// Empty subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Add your first transaction to get started'**
-  String get webDashNoTxSub;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'See all'**
-  String get webDashSeeAll;
-
-  /// Card title
-  ///
-  /// In en, this message translates to:
-  /// **'Recent Transactions'**
-  String get webDashRecent;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'View all'**
-  String get webDashViewAll;
-
   /// Warning
   ///
   /// In en, this message translates to:
   /// **'No rate'**
   String get webTxNoRate;
 
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No transactions found'**
-  String get webTxNoFound;
-
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'CSV'**
-  String get webTxCsv;
-
-  /// Tooltip
-  ///
-  /// In en, this message translates to:
-  /// **'Export CSV'**
-  String get webTxCsvTooltip;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'+ Add'**
+  /// **'Add transaction'**
   String get webTxAdd;
 
   /// Placeholder
   ///
   /// In en, this message translates to:
-  /// **'Search by title…'**
+  /// **'Search titles and notes'**
   String get webTxSearch;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Date'**
-  String get webTxThDate;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Type'**
-  String get webTxThType;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get webTxThTitle;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get webTxThAccount;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get webTxThCategory;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get webTxThAmount;
-
-  /// Pagination
-  ///
-  /// In en, this message translates to:
-  /// **'← Prev'**
-  String get webTxPrev;
-
-  /// Pagination
-  ///
-  /// In en, this message translates to:
-  /// **'Page {page}'**
-  String webTxPageN(int page);
-
-  /// Pagination
-  ///
-  /// In en, this message translates to:
-  /// **'Next →'**
-  String get webTxNext;
-
-  /// Toast
-  ///
-  /// In en, this message translates to:
-  /// **'CSV exported'**
-  String get webTxCsvExported;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get webTxEdit;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Del'**
-  String get webTxDel;
 
   /// Label
   ///
@@ -7915,7 +8473,7 @@ abstract class S {
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'From Account'**
+  /// **'From account'**
   String get webFormFromAccount;
 
   /// Label
@@ -7924,16 +8482,10 @@ abstract class S {
   /// **'Account'**
   String get webFormAccount;
 
-  /// Default option
-  ///
-  /// In en, this message translates to:
-  /// **'Select account'**
-  String get webFormSelectAccount;
-
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'To Account'**
+  /// **'To account'**
   String get webFormToAccount;
 
   /// Label
@@ -7942,23 +8494,11 @@ abstract class S {
   /// **'Category'**
   String get webFormCategory;
 
-  /// Default option
-  ///
-  /// In en, this message translates to:
-  /// **'— None —'**
-  String get webFormNone;
-
   /// Label
   ///
   /// In en, this message translates to:
   /// **'Amount'**
   String get webFormAmount;
-
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'0.00'**
-  String get webFormAmountPlaceholder;
 
   /// Label
   ///
@@ -7966,47 +8506,17 @@ abstract class S {
   /// **'Currency'**
   String get webFormCurrency;
 
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'USD'**
-  String get webFormCurrencyPlaceholder;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Exchange Rate'**
-  String get webFormExchangeRate;
-
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'Rate to base currency'**
-  String get webFormRatePlaceholder;
-
   /// Label
   ///
   /// In en, this message translates to:
   /// **'Date'**
   String get webFormDate;
 
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Title / Note'**
-  String get webFormTitleNote;
-
   /// Placeholder
   ///
   /// In en, this message translates to:
   /// **'Optional'**
   String get webFormOptional;
-
-  /// Hint
-  ///
-  /// In en, this message translates to:
-  /// **'1 {txCur} = ? {baseCur}'**
-  String webFormRateHint(String txCur, String baseCur);
 
   /// Validation
   ///
@@ -8029,26 +8539,14 @@ abstract class S {
   /// Validation
   ///
   /// In en, this message translates to:
-  /// **'From and To accounts must differ'**
+  /// **'Pick two different accounts'**
   String get webValAccountsDiffer;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Transaction'**
-  String get webModalAddTx;
 
   /// Toast
   ///
   /// In en, this message translates to:
   /// **'Transaction added'**
   String get webToastTxAdded;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Transaction'**
-  String get webModalEditTx;
 
   /// Toast
   ///
@@ -8062,137 +8560,17 @@ abstract class S {
   /// **'Transaction deleted'**
   String get webToastTxDeleted;
 
-  /// Toast
-  ///
-  /// In en, this message translates to:
-  /// **'No line details available'**
-  String get webToastNoLines;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction Lines ({count})'**
-  String webTxLinesHeader(int count);
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get webThLineAmount;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get webThLineCurrency;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get webThLineCategory;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get webThLineAccount;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Note'**
-  String get webThLineNote;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Rate'**
-  String get webThLineRate;
-
-  /// Count
-  ///
-  /// In en, this message translates to:
-  /// **'1 sub-category'**
-  String get webCatSubSingular;
-
-  /// Count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} sub-categories'**
-  String webCatSubPlural(int count);
-
-  /// Section
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get webCatSectionExpense;
-
-  /// Section
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get webCatSectionIncome;
-
   /// Empty title
   ///
   /// In en, this message translates to:
-  /// **'No categories yet'**
+  /// **'No categories here'**
   String get webCatEmptyTitle;
 
   /// Empty subtitle
   ///
   /// In en, this message translates to:
-  /// **'Add your first category to get started'**
+  /// **'Categories group your spending and income.'**
   String get webCatEmptySub;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get webCatFormName;
-
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Groceries'**
-  String get webCatFormNameHint;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Parent Category'**
-  String get webCatFormParent;
-
-  /// Default option
-  ///
-  /// In en, this message translates to:
-  /// **'— None (top-level) —'**
-  String get webCatFormNone;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Icon (emoji)'**
-  String get webCatFormIcon;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Color'**
-  String get webCatFormColor;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Transaction Type'**
-  String get webCatFormType;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Category'**
-  String get webModalAddCat;
 
   /// Validation
   ///
@@ -8209,19 +8587,7 @@ abstract class S {
   /// Toast
   ///
   /// In en, this message translates to:
-  /// **'Category not found'**
-  String get webToastCatNotFound;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Category'**
-  String get webModalEditCat;
-
-  /// Toast
-  ///
-  /// In en, this message translates to:
-  /// **'Category updated'**
+  /// **'Category saved'**
   String get webToastCatUpdated;
 
   /// Empty title
@@ -8233,13 +8599,13 @@ abstract class S {
   /// Empty subtitle
   ///
   /// In en, this message translates to:
-  /// **'Add your first account to get started'**
+  /// **'Add the accounts you pay from to start tracking.'**
   String get webAcctEmptySub;
 
   /// Group label
   ///
   /// In en, this message translates to:
-  /// **'Bank Accounts'**
+  /// **'Bank'**
   String get webAcctTypeBank;
 
   /// Group label
@@ -8251,92 +8617,14 @@ abstract class S {
   /// Group label
   ///
   /// In en, this message translates to:
-  /// **'Credit Cards'**
+  /// **'Credit'**
   String get webAcctTypeCredit;
 
   /// Group label
   ///
   /// In en, this message translates to:
-  /// **'Wallets'**
-  String get webAcctTypeWallet;
-
-  /// Card title
-  ///
-  /// In en, this message translates to:
-  /// **'Net Worth · {cur}'**
-  String webAcctNetWorth(String cur);
-
-  /// Count
-  ///
-  /// In en, this message translates to:
-  /// **'1 account'**
-  String get webAcctCountSingular;
-
-  /// Count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} accounts'**
-  String webAcctCountPlural(int count);
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No transactions for this account'**
-  String get webAcctTxEmpty;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'← Back'**
-  String get webAcctBack;
-
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Checking'**
-  String get webAcctFormNameHint;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Type'**
-  String get webAcctFormType;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Bank'**
-  String get webAcctFormTypeBank;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Cash'**
-  String get webAcctFormTypeCash;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
-  /// **'Credit'**
-  String get webAcctFormTypeCredit;
-
-  /// Option
-  ///
-  /// In en, this message translates to:
   /// **'Wallet'**
-  String get webAcctFormTypeWallet;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Opening Balance'**
-  String get webAcctFormOpening;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Account'**
-  String get webModalAddAcct;
+  String get webAcctTypeWallet;
 
   /// Toast
   ///
@@ -8347,38 +8635,20 @@ abstract class S {
   /// Empty title
   ///
   /// In en, this message translates to:
-  /// **'No envelopes'**
+  /// **'No envelopes yet'**
   String get webEnvEmptyTitle;
 
   /// Empty subtitle
   ///
   /// In en, this message translates to:
-  /// **'Envelopes are managed in the BudgetSeal app.'**
+  /// **'Create envelopes in the app\'s Budget tab, then fund them from here.'**
   String get webEnvEmptySub;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Unallocated:'**
-  String get webEnvUnallocated;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'+ Fund'**
+  /// **'Fund'**
   String get webEnvFund;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Fund Envelope'**
-  String get webModalFund;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Amount to Fund'**
-  String get webFormAmountToFund;
 
   /// Label
   ///
@@ -8392,89 +8662,11 @@ abstract class S {
   /// **'Envelope funded'**
   String get webToastEnvFunded;
 
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Fund'**
-  String get webBtnFundConfirm;
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No recurring transactions'**
-  String get webRecurringEmpty;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Service'**
-  String get webThService;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Frequency'**
-  String get webThFrequency;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'Next Due'**
-  String get webThNextDue;
-
-  /// Table header
-  ///
-  /// In en, this message translates to:
-  /// **'On'**
-  String get webThOn;
-
-  /// Toggle title
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get webToggleEnabled;
-
-  /// Toggle title
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get webToggleDisabled;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get webFormTitleLabel;
-
-  /// Placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Netflix'**
-  String get webFormTitleHint;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Frequency'**
-  String get webFormFrequency;
-
   /// Label
   ///
   /// In en, this message translates to:
   /// **'Every'**
   String get webFormEvery;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Start Date'**
-  String get webFormStartDate;
-
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Recurring'**
-  String get webModalAddRecurring;
 
   /// Toast
   ///
@@ -8482,40 +8674,28 @@ abstract class S {
   /// **'Recurring added'**
   String get webToastRecurringAdded;
 
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Recurring'**
-  String get webModalEditRecurring;
-
   /// Toast
   ///
   /// In en, this message translates to:
   /// **'Updated'**
   String get webToastUpdated;
 
-  /// Toast
-  ///
-  /// In en, this message translates to:
-  /// **'Not found'**
-  String get webToastNotFound;
-
   /// Validation
   ///
   /// In en, this message translates to:
-  /// **'Select a start date'**
+  /// **'Pick a date'**
   String get webValSelectStartDate;
 
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Delete Recurring'**
+  /// **'Delete this recurring item?'**
   String get webConfirmDeleteRecurring;
 
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This recurring transaction will be permanently deleted.'**
+  /// **'It stops posting. Transactions it already posted stay.'**
   String get webConfirmDeleteRecurringMsg;
 
   /// Toast
@@ -8530,71 +8710,29 @@ abstract class S {
   /// **'No subscriptions yet'**
   String get webSubEmpty;
 
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Subscription'**
-  String get webModalAddSub;
-
   /// Toast
   ///
   /// In en, this message translates to:
   /// **'Subscription added'**
   String get webToastSubAdded;
 
-  /// Modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Subscription'**
-  String get webModalEditSub;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'New Amount'**
-  String get webFormNewAmount;
-
   /// Hint
   ///
   /// In en, this message translates to:
-  /// **'Changing the amount will add a price history entry.'**
+  /// **'A new amount is added to the price history.'**
   String get webSubPriceHint;
 
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Delete Subscription'**
+  /// **'Delete this subscription?'**
   String get webConfirmDeleteSub;
 
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'This subscription will be permanently deleted.'**
+  /// **'It stops posting. Payments already recorded stay.'**
   String get webConfirmDeleteSubMsg;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Year'**
-  String get webReportsYear;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Month'**
-  String get webReportsMonth;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Load'**
-  String get webReportsLoad;
-
-  /// Prompt
-  ///
-  /// In en, this message translates to:
-  /// **'Select a period and click Load.'**
-  String get webReportsSelectPrompt;
 
   /// Stat label
   ///
@@ -8617,13 +8755,13 @@ abstract class S {
   /// Stat label
   ///
   /// In en, this message translates to:
-  /// **'Savings Rate'**
+  /// **'Savings rate'**
   String get webStatSavingsRate;
 
   /// Stat label
   ///
   /// In en, this message translates to:
-  /// **'Avg. Daily Spend'**
+  /// **'Average per day'**
   String get webStatAvgDaily;
 
   /// Stat label
@@ -8635,37 +8773,37 @@ abstract class S {
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Daily Cashflow'**
+  /// **'Day by day'**
   String get webReportDailyCashflow;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Spending by Category'**
+  /// **'Spending by category'**
   String get webReportSpendingCat;
 
   /// Empty state
   ///
   /// In en, this message translates to:
-  /// **'No expense data'**
+  /// **'No spending this month'**
   String get webReportNoExpense;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Income by Category'**
+  /// **'Income by category'**
   String get webReportIncomeCat;
 
   /// Empty state
   ///
   /// In en, this message translates to:
-  /// **'No income data'**
+  /// **'No income this month'**
   String get webReportNoIncome;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Top Expenses'**
+  /// **'Biggest expenses'**
   String get webReportTopExpenses;
 
   /// Chart label
@@ -8683,7 +8821,7 @@ abstract class S {
   /// Modal title
   ///
   /// In en, this message translates to:
-  /// **'Keyboard Shortcuts'**
+  /// **'Keyboard shortcuts'**
   String get webShortcutsTitle;
 
   /// Description
@@ -8701,7 +8839,7 @@ abstract class S {
   /// Description
   ///
   /// In en, this message translates to:
-  /// **'Close modal / unfocus'**
+  /// **'Close the dialog'**
   String get webShortcutClose;
 
   /// Description

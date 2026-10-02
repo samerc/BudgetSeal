@@ -170,9 +170,11 @@ lib/
         └── tappable.dart             # Premium tactile button (scale + haptic, platform-aware)
 
 assets/web/
-    index.html    # SPA shell + sidebar with SVG nav icons
-    app.js        # ~1200 lines, vanilla JS, hash routing, 8 screens
-    styles.css    # Full design system (tokens, dark mode, components)
+    index.html    # SPA shell (PIN screen, sidebar) — no inline scripts
+    app.js        # ~1500 lines, vanilla JS, hash routing, data-action delegation, 9 screens
+    styles.css    # App design language (accent vars, paper/night, RTL via logical props)
+    chart.umd.min.js, nunito-sans*.woff2   # bundled so it works offline
+    locale_{en,ar,fr}.json  # generated from the CSV (csv_to_web_json.dart)
     help.html     # Bundled help guide (also hostable as standalone webpage)
 
 docs/
@@ -555,7 +557,7 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - Auto-stop after **6 hours** (Android 15+ caps dataSync foreground services at 6h; we match this on all platforms).
 - PIN stored as SHA-256 hash in FlutterSecureStorage.
 - Session tokens: UUID4, 4-hour inactivity expiry, server-side in-memory map, max 10 sessions (oldest evicted).
-- Security middleware pipeline order: `catchAll → privateIp → bodySize (512 KB) → rateLimit (120 req/min) → writeRateLimit (10 writes/min) → abuseDetection (SQL/XSS/honeypot/field size) → security headers (CSP, X-Frame-Options, etc.) → auth → router`.
+- Security middleware pipeline order: `catchAll → privateIp → bodySize (512 KB) → rateLimit (120 req/min) → writeRateLimit (40 writes/min) → abuseDetection (SQL/XSS/honeypot/field size) → security headers (CSP, X-Frame-Options, etc.) → auth → router`.
 - Handlers use `ref.read(databaseProvider)` and `.get()` (one-shot Future), not `.watch()` (streams). Web client polls on demand.
 
 ### Security
@@ -566,10 +568,10 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - **`/auth/logout`** endpoint revokes the session token explicitly.
 - **Session timeouts**: 4-hour inactivity timeout + 8-hour absolute session lifetime. Max 10 concurrent sessions (oldest evicted).
 - **Private IP check** validates IPv4 (127.x, 10.x, 192.168.x, 172.16-31.x) and IPv6 (::1, fe80: link-local, fc/fd ULA).
-- **Rate limiter** evicts stale IP entries every 5 minutes to prevent memory growth. Global: 120 req/min. Writes (POST/PUT/DELETE): 10/min per IP.
-- **Abuse detection**: regex patterns block SQL injection keywords (DROP, UNION SELECT, etc.) and XSS patterns (`<script>`, `javascript:`, `onerror=`). Oversized fields (>10K chars) rejected. Honeypot field ("website") catches bots.
-- **WiFi security warning**: Phone screen shows a network security notice before the Start button. Detects public networks by WiFi name keywords (guest, public, airport, hotel, cafe, etc.) and shows an elevated amber warning.
-- **`esc()` in app.js** escapes `& < > " '` — used on ALL user-generated values including IDs in onclick handlers. `safeHex()` validates color hex values in style attributes to prevent CSS injection.
+- **Rate limiter** evicts stale IP entries every 5 minutes to prevent memory growth. Global: 120 req/min. Writes (POST/PUT/DELETE): 40/min per IP (room for fast keyboard entry).
+- **Abuse detection**: regex patterns block SQL injection keywords (DROP TABLE, UNION SELECT, etc.) and XSS patterns (`<script>`, `javascript:`, `onerror=`). No `--` or `UPDATE x SET` patterns — they rejected ordinary notes ("Dinner -- with Sam"). Oversized fields (>10K chars) rejected. Honeypot field ("website") catches bots.
+- **WiFi security warning**: Phone screen shows a network security notice before the Start button. Detects public networks by WiFi name keywords (guest, public, airport, hotel, cafe, free wifi…) and shows an elevated amber warning. An unknown name (null / `<unknown ssid>` — Android hides it without location permission) is NOT treated as public, and there are no bare `free`/`open` keywords (they flagged home routers like "Freebox").
+- **No inline scripts or handlers in the SPA**: the CSP is `script-src 'self'`. Clicks go through `data-action` attributes and one delegated listener (`actions` map in app.js); forms wire their own `addEventListener`s. Never put user text inside a JS string in an attribute — HTML-decoding turns `&#39;` back into `'` before the JS runs (this broke account names with an apostrophe). `esc()` escapes every user value placed in markup; `safeHex()` validates colors used in `style`.
 - **Search input** escapes SQL LIKE wildcards (`%`, `_`, `\`) in the backend before passing to Drift's `.like()`.
 - **FK validation** checks household ownership: `validateIdExists()` verifies the referenced ID belongs to the authenticated user's household, preventing IDOR attacks.
 - **Input validation** on all POST/PUT endpoints: type checks, string length limits (kMaxNameLength=100, kMaxNoteLength=500), amount bounds (>0, ≤1B), enum validation, FK existence + household checks. Invalid data returns 400 with clear error message.
@@ -580,77 +582,71 @@ Local WiFi HTTP server (port **7432**) built into the app. Phone is the server; 
 - `isRealRate` check: both `cashflowReportHandler` and `byCategoryReportHandler` skip lines where currency differs from base but `exchangeRateToBase` is ~1.0 (rate not set). Same logic as `isRealRate()` in `format_number.dart`.
 - Transactions with missing exchange rates show an amber "No rate" warning in the list.
 
-### Web SPA Notes
-- Token stored in `sessionStorage` (clears on browser close), sent as `Authorization: Bearer <token>`.
-- `api()` function in `app.js` shows user-friendly errors: 500→"Something went wrong", 429→"Too many requests", 413→"Request too large". No console logging of errors.
-- `items()` safe accessor used on all API responses to prevent crash on missing `items` key.
-- Mobile responsive: hamburger menu slides sidebar in/out on screens ≤768px. Nav links auto-close sidebar.
-- Transaction search uses `oninput` with 400ms debounce (real-time, not Enter-only).
-- Modal focus trap: Tab cycles within modal, auto-focuses first input.
-- Keyboard shortcuts: `N`=new tx, `R`=refresh, `/`=search, `Esc`=close, `?`=help. Help icon in sidebar.
-- CSV export available on Transactions, Recurring, and Subscriptions pages.
-- `getAccounts()` / `getCategories()` use `if (!('accounts' in cache))` — only populate cache on success (`if (d) cache.accounts = ...`). Failed loads leave the key absent so the next call retries. Do NOT use `if (!cache.accounts)` — an empty array `[]` is truthy, permanently poisoning the cache after a failed load.
-- `Content-Type: application/json` is only sent on requests that have a body (POST/PUT), not on GETs.
-- Categories and accounts are prefetched in the background after auth success.
-- `invalidateAll()` clears all cached data after any mutation (add/edit/delete).
-
-### SPA Features
-- **Skeleton loaders** on all pages instead of spinner.
-- **Keyboard shortcuts**: `N` = new transaction, `R` = refresh page, `/` = search, `Esc` = close modal, `?` = help. Disabled during input focus and when modal is open. Help icon visible in sidebar.
-- **Transaction search**: server-side LIKE query on `note` field with SQL wildcard escaping.
-- **Month navigation**: year arrows + month tabs (Jan–Dec + All). Backend supports `from`/`to` date params.
-- **Account filtering**: transactions list supports `accountId` param (matches both source and destination for transfers).
-- **Dark mode toggle**: cycles System → Light → Dark, persisted in `localStorage`, applied via `html[data-theme]` attribute.
-- **Connection status**: green/red dot in sidebar, pings `/auth/status` every 15 seconds.
-- **CSV export**: downloads current table as `.csv` file.
-- **Styled confirm dialogs**: `confirmDialog()` returns Promise, used for delete recurring/subscriptions. Transaction delete is immediate (soft-delete, recoverable via Health Check).
-- **Exchange rate field**: auto-shown in transaction form when currency differs from base, with conversion hint.
+### Web SPA (assets/web: index.html, styles.css, app.js)
+- **Design = the app's**: warm paper/night surfaces, the user's accent pair (from `/auth/config`, set as `--acc-*` CSS variables), Bricolage Grotesque for titles/amounts (served from `assets/fonts` at `/fonts/`), Nunito Sans (bundled `nunito-sans*.woff2`, OFL in `assets/fonts/OFL-NunitoSans.txt`), pastel category chips with the app's PNG icons (`/icons/<file>`, name from `categoryIconFile()` in category_icon.dart, sent as `categoryIconFile`/`iconFile`), the gold Ready-to-assign banner, borderless filled inputs, pill buttons, radius-25 dialogs, Cashew-style popup toasts. Logical CSS properties only, so `dir="rtl"` mirrors everything.
+- **No internet needed**: Chart.js is bundled (`assets/web/chart.umd.min.js`, MIT) and fonts are local; the CSP allows only `'self'`. Assets in `assets/web/` must sit directly in that folder (pubspec lists the folder, not subfolders). `.woff2`/`.min.js`, `/icons`, `/fonts`, `/brand` get a 7-day cache; the SPA's own files stay `no-store`.
+- **`GET /auth/config`** (no token — the PIN screen needs it): `locale` (from `Intl.defaultLocale`, en/ar/fr), `accent` (bright/deep/fills of the chosen pair; Material You falls back to Gold), `number` = `numberFormatSpec()` (format_number.dart: separators, parentheses negatives, Arabic digits, symbol map). `fmt()` in app.js mirrors `formatAmount()` and wraps every amount in a left-to-right isolate (`\u2066…\u2069`, plus `\u200E` after an Arabic symbol) so signs/digits never reorder next to "ل.ل" or on an Arabic page.
+- **Strings**: every visible string is `t('web_…')` / `data-i18n`; keys live in the ARBs + CSV and are generated into `locale_*.json` by `tool/csv_to_web_json.dart` (web keys must exist in the ARBs). Placeholders are plain `{n}` (no ICU plurals in web strings — Arabic uses "label: {n}" phrasing).
+- **Dates**: the browser sends the user's calendar day `YYYY-MM-DD` (`dayKey()`, never `toISOString()` — UTC shifts the day). `parseWebDate()` (transactions_handler.dart) keeps the time of day when editing, uses now for today, noon otherwise.
+- **Transactions**: grouped by day, "Load more" paging (`hasMore` from a limit+1 query), filters (type, year/month — "Whole year", search, account page). Row click = edit dialog; row buttons duplicate/delete. **Delete waits 5 s for Undo** (`pendingDeletes`, flushed with `keepalive` on `pagehide`/sign-out). Split transactions: lines shown read-only, amount/category hidden ("edited on your phone"). The form remembers the last account/type (`localStorage`), has Save & add another, Today/Yesterday chips, a category `<select>` filtered by type with subcategories indented.
+- **Currencies in the form**: an expense/income line in a non-base currency shows a rate field ("1 EUR = ? USD"); empty → the server uses `latestCachedRate()` (no network in a request), else 1.0 + "No rate". A transfer between accounts in different currencies asks for the **amount received**; the server stores `exchangeRateToBase = received / sent` (source → destination, as the app does) and refuses a cross-currency transfer without it.
+- **Budget**: `budgetSnapshot()` (`api/_budget.dart`, shared by dashboard + envelopes) returns envelopes in the Budget tab's order (sortOrder nulls-last, then name) with `spentByCurrency` (period consumption from `watchSpendingInPeriod().first`) and the linked category's color, plus `unallocated` per currency and the current `period`. Fund dialog: To target / All available chips; over-funding warns inline and the second submit goes ahead.
+- **Recurring/subscriptions** share handlers (`listRecurring/createRecurring/updateRecurring/deleteRecurring` with `subscription:`), always filtering `deleted = false`. Editable: title, amount (subscriptions add a price-history entry), note, account, destination, category, frequency/interval, next date (also sets `anchorDay`), enabled. Subscriptions page shows per-month/per-year cost (`perMonth()`).
+- **Notes**: payloads carry `visibleNote()`; the PUT handler re-appends the hidden `[obj:…]` tag (`noteTag()`), and an empty `note` clears it. Edits record the new transaction, carry `receiptPath`, and soft-delete the old one inside one `db.transaction`.
+- **Connection**: `/auth/status` every 15 s; unreachable → banner + red dot; `authenticated:false` → PIN screen with "session ended". Coming back to the tab after 30 s re-renders the page (`visibilitychange`). PIN errors show attempts left / lockout minutes (`attemptsLeft`, `retryInMinutes` from `/auth/pin`).
+- Token in `sessionStorage` (`bs_token`). `api()` shows localized toasts (429, 5xx, missing rate; English users see the server's 400 message). Shortcuts: N new, / search, R reload, 1–8 pages, Enter saves a form, Esc closes, ? help.
+- Visual QA without a phone: a mock server serving `assets/web` with canned JSON + headless Edge screenshots works well (Edge won't go below ~500 px wide — use an iframe for phone width).
 
 ### REST API Endpoints
 ```
-POST /auth/pin                         → { token, expiresAt }
+POST /auth/pin                         → { token, expiresAt } | 401 { attemptsLeft } | 429 { isLockout, retryInMinutes }
 GET  /auth/status                      → { authenticated: bool }
+GET  /auth/config                      → { locale, accent, number }   (no token)
+GET  /icons/<file> /fonts/<file> /brand/<file>  → bundled category icons, fonts, app icon
 
-GET  /api/dashboard                    → period info, envelopes, recent 10 transactions
-GET  /api/transactions?page=&limit=    → paginated list (supports type, accountId, from, to, search)
-POST /api/transactions                 → create
+GET  /api/dashboard                    → household, period, accounts, envelopes, unallocated, 8 recent transactions
+GET  /api/transactions?page=&limit=    → { items, hasMore } (type, accountId incl. per-line accounts, from, to, search)
+POST /api/transactions                 → create (transfer: exchangeRateToBase = source → destination)
 GET  /api/transactions/:id             → single + lines
-PUT  /api/transactions/:id             → update
+PUT  /api/transactions/:id             → update (type can change; returns the new id)
 DELETE /api/transactions/:id           → soft delete
 
-GET  /api/categories                   → all non-archived
-POST /api/categories                   → create (supports parentId)
-PUT  /api/categories/:id               → update
+GET  /api/categories                   → all non-archived (with iconFile)
+POST /api/categories                   → create (parentId must be a top-level category)
+PUT  /api/categories/:id               → update (parentId: not itself, not if it has children)
 
 GET  /api/accounts                     → with balances
-POST /api/accounts                     → create
+POST /api/accounts                     → create (initialBalance may be negative)
 
-GET  /api/envelopes                    → allocations with balances
+GET  /api/envelopes                    → { items, unallocated, period, baseCurrency }
 POST /api/envelopes/:id/fund           → add funding
 
-GET  /api/recurring                    → all recurring
-POST /api/recurring                    → create
+GET  /api/recurring                    → recurring items (not subscriptions, not deleted)
+POST /api/recurring                    → create (transfer needs destinationAccountId)
 PUT  /api/recurring/:id                → update
-DELETE /api/recurring/:id              → delete
+DELETE /api/recurring/:id              → soft delete
 
-GET  /api/subscriptions                → recurring where isSubscription=true
+GET  /api/subscriptions                → subscriptions (not deleted)
 POST /api/subscriptions                → create
-PUT  /api/subscriptions/:id            → update
+PUT  /api/subscriptions/:id            → update (price change → priceHistory)
+DELETE /api/subscriptions/:id          → soft delete
 
-GET  /api/reports/cashflow?year&month  → monthly totals, topExpenses, transactionCount
+GET  /api/reports/cashflow?year&month  → monthly totals, topExpenses, transactionCount, daily
 GET  /api/reports/by-category?year&month&type → spending/income per category (type=expense|income)
 ```
+Tests: `test/features/web_companion_api_test.dart` calls the handlers with an in-memory DB through a `ProviderContainer` (`Provider<Ref>((ref) => ref)` hands them a Ref; route params go in `context['shelf_router/params']`).
 
 ### SPA Hash Routes
 ```
-#/              Dashboard (envelopes, period summary, recent transactions)
-#/transactions  List with search, month tabs, type filters, CSV export
-#/categories    Manage categories (hierarchy with parent/sub)
-#/accounts      Accounts grouped by type + net worth + per-account transactions
-#/envelopes     Envelope balances + fund
-#/recurring     Recurring transactions
-#/subscriptions Subscriptions
-#/reports       Summary stats, daily chart, doughnut, category breakdown, top expenses
+#/                Home (Ready to assign, net worth, accounts, envelopes, recent)
+#/transactions    Day-grouped list, search, type + month filters, CSV export
+#/accounts/<id>   One account's transactions
+#/envelopes       Budget: Ready to assign + envelope cards + fund
+#/reports         Month arrows, stats, daily chart, category donut/shares, biggest expenses
+#/accounts        Net worth per currency, accounts by type
+#/categories      Expense/Income toggle, parents with subcategories
+#/recurring       Active + paused recurring items
+#/subscriptions   Monthly/yearly cost + subscriptions
 ```
 
 ## Auto Backup

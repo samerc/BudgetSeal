@@ -1,31 +1,60 @@
 import '../../../core/database/app_database.dart';
+import '../../../shared/utils/note_text.dart';
+import '../../../shared/widgets/category_icon.dart';
+
+/// Category display fields shared by every payload that shows a category.
+/// `categoryIconFile` is the PNG the app draws (served at `/icons/<file>`);
+/// without one the browser falls back to the emoji, then the first letter.
+Map<String, dynamic> categoryFields(Category? c) => {
+      'categoryId': c?.id,
+      'categoryName': c?.name,
+      'categoryIcon': c?.icon,
+      'categoryColor': c?.colorHex,
+      'categoryIconFile': c == null ? null : categoryIconFile(c.name, c.icon),
+    };
+
+/// The `[obj:ID|amount]` goal/loan tag in a note, or '' — the browser shows
+/// [visibleNote] and the edit handler puts the tag back.
+String noteTag(String note) =>
+    RegExp(r'\s*\[obj:[^\]]*\]').firstMatch(note)?.group(0) ?? '';
 
 Map<String, dynamic> txToJson(
   Transaction t,
   Map<String, Category> catMap,
-  Map<String, Account> acctMap,
-) =>
-    {
-      'id': t.id,
-      'type': t.type,
-      'amount': t.amount,
-      'currency': t.currency,
-      'exchangeRateToBase': t.exchangeRateToBase,
-      'note': t.note,
-      'date': t.createdAt.toIso8601String(),
-      'accountId': t.accountId,
-      'accountName': acctMap[t.accountId]?.name,
-      'destinationAccountId': t.destinationAccountId,
-      'destinationAccountName': t.destinationAccountId != null
-          ? acctMap[t.destinationAccountId]?.name
-          : null,
-      'categoryId': t.categoryId,
-      'categoryName': t.categoryId != null ? catMap[t.categoryId]?.name : null,
-      'categoryIcon': t.categoryId != null ? catMap[t.categoryId]?.icon : null,
-      'categoryColor':
-          t.categoryId != null ? catMap[t.categoryId]?.colorHex : null,
-      'status': t.status,
-    };
+  Map<String, Account> acctMap, {
+  TransactionLine? firstLine,
+  int lineCount = 0,
+}) {
+  // Split and single-line transactions keep the category on the line.
+  final catId = t.categoryId ?? firstLine?.categoryId;
+  return {
+    'id': t.id,
+    'type': t.type,
+    'amount': t.amount,
+    'currency': t.currency,
+    'exchangeRateToBase': t.exchangeRateToBase,
+    'note': visibleNote(t.note),
+    'date': t.createdAt.toIso8601String(),
+    'accountId': t.accountId,
+    'accountName': acctMap[t.accountId]?.name,
+    'accountCurrency': acctMap[t.accountId]?.currency,
+    'destinationAccountId': t.destinationAccountId,
+    'destinationAccountName': t.destinationAccountId != null
+        ? acctMap[t.destinationAccountId]?.name
+        : null,
+    'destinationCurrency': t.destinationAccountId != null
+        ? acctMap[t.destinationAccountId]?.currency
+        : null,
+    ...categoryFields(catId != null ? catMap[catId] : null),
+    'status': t.status,
+    'lineCount': lineCount,
+    if (firstLine != null) ...{
+      'lineCurrency': firstLine.currency,
+      'lineAmount': firstLine.amount,
+      'lineExchangeRate': firstLine.exchangeRateToBase,
+    },
+  };
+}
 
 Map<String, dynamic> lineToJson(
   TransactionLine l,
@@ -37,14 +66,10 @@ Map<String, dynamic> lineToJson(
       'amount': l.amount,
       'currency': l.currency,
       'exchangeRateToBase': l.exchangeRateToBase,
-      'note': l.note,
+      'note': visibleNote(l.note),
       'accountId': l.accountId,
       'accountName': l.accountId != null ? acctMap[l.accountId]?.name : null,
-      'categoryId': l.categoryId,
-      'categoryName': l.categoryId != null ? catMap[l.categoryId]?.name : null,
-      'categoryIcon': l.categoryId != null ? catMap[l.categoryId]?.icon : null,
-      'categoryColor':
-          l.categoryId != null ? catMap[l.categoryId]?.colorHex : null,
+      ...categoryFields(l.categoryId != null ? catMap[l.categoryId] : null),
     };
 
 Map<String, dynamic> accountToJson(Account a, double balance) => {
@@ -60,24 +85,29 @@ Map<String, dynamic> accountToJson(Account a, double balance) => {
 
 Map<String, dynamic> allocationToJson(
   Allocation a,
-  Map<String, double> balanceByCurrency,
-) =>
+  Map<String, double> balanceByCurrency, {
+  Map<String, double> spentByCurrency = const {},
+  String? colorHex,
+}) =>
     {
       'id': a.id,
       'name': a.name,
-      'type': a.type,
+      'type': a.type == 'saving' ? 'flexible' : a.type,
       'icon': a.icon,
+      'colorHex': colorHex,
       'periodicity': a.periodicity,
       'rollover': a.rollover,
       'targetAmount': a.targetAmount,
       'targetCurrency': a.targetCurrency,
       'balanceByCurrency': balanceByCurrency,
+      'spentByCurrency': spentByCurrency,
     };
 
 Map<String, dynamic> categoryToJson(Category c) => {
       'id': c.id,
       'name': c.name,
       'icon': c.icon,
+      'iconFile': categoryIconFile(c.name, c.icon),
       'colorHex': c.colorHex,
       'transactionType': c.transactionType,
       'parentId': c.parentId,
@@ -111,7 +141,5 @@ Map<String, dynamic> recurringToJson(
       'destinationAccountName': r.destinationAccountId != null
           ? acctMap[r.destinationAccountId]?.name
           : null,
-      'categoryId': r.categoryId,
-      'categoryName': r.categoryId != null ? catMap[r.categoryId]?.name : null,
-      'categoryIcon': r.categoryId != null ? catMap[r.categoryId]?.icon : null,
+      ...categoryFields(r.categoryId != null ? catMap[r.categoryId] : null),
     };
