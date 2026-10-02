@@ -590,14 +590,19 @@ class _FundingBanner extends StatelessWidget {
                   Text(S.of(context).fundAvailableToDistribute,
                       style: TextStyle(color: AppColors.tp(context).withValues(alpha: 0.65), fontSize: 13.5, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  CurrencyDisplay(
-                    amount: available,
-                    currency: baseCurrency,
-                    amountStyle: TextStyle(
-                      color: AppColors.tp(context),
-                      fontSize: 26,
-                      fontFamily: TypographyTokens.displayFamily,
-                      fontWeight: FontWeight.w700,
+                  // Large amounts shrink to one line instead of wrapping.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: CurrencyDisplay(
+                      amount: available,
+                      currency: baseCurrency,
+                      amountStyle: TextStyle(
+                        color: AppColors.tp(context),
+                        fontSize: 26,
+                        fontFamily: TypographyTokens.displayFamily,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],

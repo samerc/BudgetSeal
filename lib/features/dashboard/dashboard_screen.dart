@@ -443,15 +443,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        RollingNumber(
-                                          amount: baseNetWorth,
-                                          currency: baseCurrency,
-                                          lazyFirstRender: false,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: TypographyTokens.displayFamily,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.tp(context),
+                                        // Large amounts shrink to one line instead of wrapping.
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: AlignmentDirectional.centerStart,
+                                          child: RollingNumber(
+                                            amount: baseNetWorth,
+                                            currency: baseCurrency,
+                                            lazyFirstRender: false,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontFamily: TypographyTokens.displayFamily,
+                                              fontWeight: FontWeight.w800,
+                                              color: AppColors.tp(context),
+                                            ),
                                           ),
                                         ),
                                         if (otherNetWorthCount > 0)
@@ -492,15 +497,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                             ],
                                           ),
                                           const SizedBox(height: 4),
-                                          RollingNumber(
-                                            amount: unallocBase,
-                                            currency: baseCurrency,
-                                            lazyFirstRender: false,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontFamily: TypographyTokens.displayFamily,
-                                              fontWeight: FontWeight.w800,
-                                              color: AppColors.tp(context),
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: AlignmentDirectional.centerStart,
+                                            child: RollingNumber(
+                                              amount: unallocBase,
+                                              currency: baseCurrency,
+                                              lazyFirstRender: false,
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontFamily: TypographyTokens.displayFamily,
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.tp(context),
+                                              ),
                                             ),
                                           ),
                                           if (otherUnallocCount > 0)

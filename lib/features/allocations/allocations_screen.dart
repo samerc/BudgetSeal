@@ -916,14 +916,19 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                         ),
                       ),
                       const SizedBox(height: 2),
-                      CurrencyDisplay(
-                        amount: baseAmount,
-                        currency: widget.baseCurrency,
-                        amountStyle: const TextStyle(
-                          color: ink,
-                          fontSize: 30,
-                          fontFamily: TypographyTokens.displayFamily,
-                          fontWeight: FontWeight.w600,
+                      // Large amounts shrink to one line instead of wrapping.
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: CurrencyDisplay(
+                          amount: baseAmount,
+                          currency: widget.baseCurrency,
+                          amountStyle: const TextStyle(
+                            color: ink,
+                            fontSize: 30,
+                            fontFamily: TypographyTokens.displayFamily,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       if (hasOtherCurrencies)

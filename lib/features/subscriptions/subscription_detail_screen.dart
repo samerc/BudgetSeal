@@ -423,16 +423,21 @@ class _SubscriptionDetailScreenState
                   size: 56,
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  '${formatAmount(amount, currency: currency)}${_frequencySuffix(frequency, interval)}',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: TypographyTokens.displayFamily,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.tp(context),
+                // Large amounts shrink to one line instead of wrapping.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${formatAmount(amount, currency: currency)}${_frequencySuffix(frequency, interval)}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: TypographyTokens.displayFamily,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.tp(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(

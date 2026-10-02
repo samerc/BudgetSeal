@@ -1695,13 +1695,18 @@ class _AssistedTransactionScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          '$_selectedCurrency ${_fmtCalcForDisplay(_activeLine.calcDisplay)}',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontFamily: TypographyTokens.displayFamily,
-                            fontWeight: FontWeight.w700,
-                            color: typeColor,
+                        // Large amounts shrink to one line instead of wrapping.
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Text(
+                            '$_selectedCurrency ${_fmtCalcForDisplay(_activeLine.calcDisplay)}',
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontFamily: TypographyTokens.displayFamily,
+                              fontWeight: FontWeight.w700,
+                              color: typeColor,
+                            ),
                           ),
                         ),
                         Text(

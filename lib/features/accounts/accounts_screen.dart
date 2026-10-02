@@ -374,17 +374,21 @@ class _TotalBalanceCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    // Large amounts shrink to one line instead of wrapping.
                     Flexible(
-                      child: Text(
-                        formatAmount(e.value, currency: e.key),
-                        style: TextStyle(
-                          color: e.value < 0 ? AppColors.overspent : onCard,
-                          fontSize: 24,
-                          fontFamily: TypographyTokens.displayFamily,
-                          fontWeight: FontWeight.w800,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          formatAmount(e.value, currency: e.key),
+                          style: TextStyle(
+                            color: e.value < 0 ? AppColors.overspent : onCard,
+                            fontSize: 24,
+                            fontFamily: TypographyTokens.displayFamily,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
