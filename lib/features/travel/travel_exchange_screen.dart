@@ -133,7 +133,17 @@ class _TravelExchangeScreenState
                       ]),
                     );
                   }).toList(),
-                  onChanged: (v) => setState(() => _fromAccountId = v),
+                  onChanged: (v) => setState(() {
+                    _fromAccountId = v;
+                    // The wallet's currency can't be the one being exchanged.
+                    final from = activeAccounts
+                        .where((a) => a.id == v)
+                        .firstOrNull
+                        ?.currency;
+                    if (from != null && from == _targetCurrency) {
+                      _targetCurrency = _otherCurrency(from, accounts);
+                    }
+                  }),
                 ),
               ),
             ),
@@ -183,6 +193,7 @@ class _TravelExchangeScreenState
                 child: CurrencyPickerField(
                   label: S.of(context).travelCurrencyReceive,
                   value: _targetCurrency,
+                  exclude: {if (fromAcc != null) fromAcc.currency},
                   onChanged: (v) => setState(() => _targetCurrency = v),
                 ),
               ),
@@ -278,6 +289,15 @@ class _TravelExchangeScreenState
         ),
       ),
     );
+  }
+
+  /// A sensible destination when the source takes the current one: another
+  /// currency the user already has an account in, else USD/EUR.
+  String _otherCurrency(String source, List<Account> accounts) {
+    for (final a in accounts) {
+      if (!a.archived && a.currency != source) return a.currency;
+    }
+    return source == 'USD' ? 'EUR' : 'USD';
   }
 
   bool get _canExchange {

@@ -15,6 +15,9 @@ class CurrencyPickerField extends ConsumerWidget {
   /// Optional list of currency codes to show in "Recently Used".
   final List<String> recentCurrencies;
 
+  /// Codes left out of the picker.
+  final Set<String> exclude;
+
   const CurrencyPickerField({
     super.key,
     required this.label,
@@ -22,6 +25,7 @@ class CurrencyPickerField extends ConsumerWidget {
     required this.onChanged,
     this.textColor,
     this.recentCurrencies = const [],
+    this.exclude = const {},
   });
 
   @override
@@ -42,6 +46,7 @@ class CurrencyPickerField extends ConsumerWidget {
             current: value,
             recentCurrencies: recentCurrencies,
             accountCurrencies: acctCurrencies,
+            exclude: exclude,
           ),
         );
         if (result != null) onChanged(result);

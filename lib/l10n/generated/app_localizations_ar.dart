@@ -9,6 +9,402 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get currencyNameAfn => 'أفغاني أفغانستاني';
+
+  @override
+  String get currencyNameAll => 'ليك ألباني';
+
+  @override
+  String get currencyNameAmd => 'درام أرميني';
+
+  @override
+  String get currencyNameAng => 'غيلدر الأنتيل الهولندية';
+
+  @override
+  String get currencyNameAoa => 'كوانزا أنغولي';
+
+  @override
+  String get currencyNameArs => 'بيزو أرجنتيني';
+
+  @override
+  String get currencyNameAwg => 'فلورن أروبي';
+
+  @override
+  String get currencyNameAzn => 'مانات أذربيجاني';
+
+  @override
+  String get currencyNameBam => 'مارك بوسني قابل للتحويل';
+
+  @override
+  String get currencyNameBbd => 'دولار بربادوسي';
+
+  @override
+  String get currencyNameBdt => 'تاكا بنغلاديشي';
+
+  @override
+  String get currencyNameBgn => 'ليف بلغاري';
+
+  @override
+  String get currencyNameBhd => 'دينار بحريني';
+
+  @override
+  String get currencyNameBif => 'فرنك بوروندي';
+
+  @override
+  String get currencyNameBmd => 'دولار برمودي';
+
+  @override
+  String get currencyNameBnd => 'دولار بروناي';
+
+  @override
+  String get currencyNameBob => 'بوليفيانو بوليفي';
+
+  @override
+  String get currencyNameBsd => 'دولار باهامي';
+
+  @override
+  String get currencyNameBtn => 'نغولترم بوتاني';
+
+  @override
+  String get currencyNameBwp => 'بولا بوتسواني';
+
+  @override
+  String get currencyNameByn => 'روبل بيلاروسي';
+
+  @override
+  String get currencyNameBzd => 'دولار بليزي';
+
+  @override
+  String get currencyNameCdf => 'فرنك كونغولي';
+
+  @override
+  String get currencyNameClp => 'بيزو تشيلي';
+
+  @override
+  String get currencyNameCop => 'بيزو كولومبي';
+
+  @override
+  String get currencyNameCrc => 'كولون كوستاريكي';
+
+  @override
+  String get currencyNameCup => 'بيزو كوبي';
+
+  @override
+  String get currencyNameCve => 'إسكودو الرأس الأخضر';
+
+  @override
+  String get currencyNameCzk => 'كرونة تشيكية';
+
+  @override
+  String get currencyNameDjf => 'فرنك جيبوتي';
+
+  @override
+  String get currencyNameDkk => 'كرونة دنماركية';
+
+  @override
+  String get currencyNameDop => 'بيزو دومينيكاني';
+
+  @override
+  String get currencyNameDzd => 'دينار جزائري';
+
+  @override
+  String get currencyNameEgp => 'جنيه مصري';
+
+  @override
+  String get currencyNameErn => 'ناكفا إريتري';
+
+  @override
+  String get currencyNameEtb => 'بير إثيوبي';
+
+  @override
+  String get currencyNameFjd => 'دولار فيجي';
+
+  @override
+  String get currencyNameFkp => 'جنيه جزر فوكلاند';
+
+  @override
+  String get currencyNameGel => 'لاري جورجي';
+
+  @override
+  String get currencyNameGhs => 'سيدي غاني';
+
+  @override
+  String get currencyNameGip => 'جنيه جبل طارق';
+
+  @override
+  String get currencyNameGmd => 'دالاسي غامبي';
+
+  @override
+  String get currencyNameGnf => 'فرنك غيني';
+
+  @override
+  String get currencyNameGtq => 'كتزال غواتيمالي';
+
+  @override
+  String get currencyNameGyd => 'دولار غياني';
+
+  @override
+  String get currencyNameHnl => 'لمبيرا هندوراسي';
+
+  @override
+  String get currencyNameHtg => 'غورد هايتي';
+
+  @override
+  String get currencyNameHuf => 'فورنت مجري';
+
+  @override
+  String get currencyNameIdr => 'روبية إندونيسية';
+
+  @override
+  String get currencyNameIls => 'شيكل إسرائيلي جديد';
+
+  @override
+  String get currencyNameIqd => 'دينار عراقي';
+
+  @override
+  String get currencyNameIrr => 'ريال إيراني';
+
+  @override
+  String get currencyNameIsk => 'كرونة آيسلندية';
+
+  @override
+  String get currencyNameJmd => 'دولار جامايكي';
+
+  @override
+  String get currencyNameJod => 'دينار أردني';
+
+  @override
+  String get currencyNameKes => 'شلن كيني';
+
+  @override
+  String get currencyNameKgs => 'سوم قيرغيزستاني';
+
+  @override
+  String get currencyNameKhr => 'رييل كمبودي';
+
+  @override
+  String get currencyNameKmf => 'فرنك قمري';
+
+  @override
+  String get currencyNameKpw => 'وون كوري شمالي';
+
+  @override
+  String get currencyNameKrw => 'وون كوري جنوبي';
+
+  @override
+  String get currencyNameKyd => 'دولار جزر كايمان';
+
+  @override
+  String get currencyNameKzt => 'تينغ كازاخستاني';
+
+  @override
+  String get currencyNameLak => 'كيب لاوسي';
+
+  @override
+  String get currencyNameLkr => 'روبية سريلانكية';
+
+  @override
+  String get currencyNameLrd => 'دولار ليبيري';
+
+  @override
+  String get currencyNameLsl => 'لوتي ليسوتو';
+
+  @override
+  String get currencyNameLyd => 'دينار ليبي';
+
+  @override
+  String get currencyNameMad => 'درهم مغربي';
+
+  @override
+  String get currencyNameMdl => 'ليو مولدوفي';
+
+  @override
+  String get currencyNameMga => 'أرياري مدغشقري';
+
+  @override
+  String get currencyNameMkd => 'دينار مقدوني';
+
+  @override
+  String get currencyNameMmk => 'كيات ميانماري';
+
+  @override
+  String get currencyNameMnt => 'توغروغ منغولي';
+
+  @override
+  String get currencyNameMop => 'باتاكا ماكاوية';
+
+  @override
+  String get currencyNameMru => 'أوقية موريتانية';
+
+  @override
+  String get currencyNameMur => 'روبية موريشيوسية';
+
+  @override
+  String get currencyNameMvr => 'روفية مالديفية';
+
+  @override
+  String get currencyNameMwk => 'كواشا مالاوي';
+
+  @override
+  String get currencyNameMyr => 'رينغيت ماليزي';
+
+  @override
+  String get currencyNameMzn => 'متكال موزمبيقي';
+
+  @override
+  String get currencyNameNad => 'دولار ناميبي';
+
+  @override
+  String get currencyNameNgn => 'نيرة نيجيرية';
+
+  @override
+  String get currencyNameNio => 'كوردوبا نيكاراغوي';
+
+  @override
+  String get currencyNameNpr => 'روبية نيبالية';
+
+  @override
+  String get currencyNameOmr => 'ريال عماني';
+
+  @override
+  String get currencyNamePab => 'بالبوا بنمي';
+
+  @override
+  String get currencyNamePen => 'سول بيروفي';
+
+  @override
+  String get currencyNamePgk => 'كينا بابوا غينيا الجديدة';
+
+  @override
+  String get currencyNamePhp => 'بيزو فلبيني';
+
+  @override
+  String get currencyNamePkr => 'روبية باكستانية';
+
+  @override
+  String get currencyNamePln => 'زلوتي بولندي';
+
+  @override
+  String get currencyNamePyg => 'غواراني باراغواي';
+
+  @override
+  String get currencyNameQar => 'ريال قطري';
+
+  @override
+  String get currencyNameRon => 'ليو روماني';
+
+  @override
+  String get currencyNameRsd => 'دينار صربي';
+
+  @override
+  String get currencyNameRub => 'روبل روسي';
+
+  @override
+  String get currencyNameRwf => 'فرنك رواندي';
+
+  @override
+  String get currencyNameSbd => 'دولار جزر سليمان';
+
+  @override
+  String get currencyNameScr => 'روبية سيشيلية';
+
+  @override
+  String get currencyNameSdg => 'جنيه سوداني';
+
+  @override
+  String get currencyNameShp => 'جنيه سانت هيلينا';
+
+  @override
+  String get currencyNameSle => 'ليون سيراليوني';
+
+  @override
+  String get currencyNameSos => 'شلن صومالي';
+
+  @override
+  String get currencyNameSrd => 'دولار سورينامي';
+
+  @override
+  String get currencyNameSsp => 'جنيه جنوب سوداني';
+
+  @override
+  String get currencyNameStn => 'دوبرا ساو تومي وبرينسيب';
+
+  @override
+  String get currencyNameSyp => 'ليرة سورية';
+
+  @override
+  String get currencyNameSzl => 'ليلانجيني سوازيلندي';
+
+  @override
+  String get currencyNameThb => 'بات تايلندي';
+
+  @override
+  String get currencyNameTjs => 'سوموني طاجيكستاني';
+
+  @override
+  String get currencyNameTmt => 'مانات تركمانستاني';
+
+  @override
+  String get currencyNameTnd => 'دينار تونسي';
+
+  @override
+  String get currencyNameTop => 'بانغا تونغي';
+
+  @override
+  String get currencyNameTtd => 'دولار ترينيداد وتوباغو';
+
+  @override
+  String get currencyNameTwd => 'دولار تايواني جديد';
+
+  @override
+  String get currencyNameTzs => 'شلن تنزاني';
+
+  @override
+  String get currencyNameUah => 'هريفنيا أوكرانية';
+
+  @override
+  String get currencyNameUgx => 'شلن أوغندي';
+
+  @override
+  String get currencyNameUyu => 'بيزو أوروغواي';
+
+  @override
+  String get currencyNameUzs => 'سوم أوزبكستاني';
+
+  @override
+  String get currencyNameVes => 'بوليفار فنزويلي';
+
+  @override
+  String get currencyNameVnd => 'دونغ فيتنامي';
+
+  @override
+  String get currencyNameVuv => 'فاتو فانواتي';
+
+  @override
+  String get currencyNameWst => 'تالا ساموي';
+
+  @override
+  String get currencyNameXaf => 'فرنك وسط أفريقي';
+
+  @override
+  String get currencyNameXcd => 'دولار شرق الكاريبي';
+
+  @override
+  String get currencyNameXof => 'فرنك غرب أفريقي';
+
+  @override
+  String get currencyNameXpf => 'فرنك سي إف بي';
+
+  @override
+  String get currencyNameYer => 'ريال يمني';
+
+  @override
+  String get currencyNameZmw => 'كواشا زامبي';
+
+  @override
+  String get currencyNameZwg => 'ذهب زيمبابوي';
+
+  @override
   String travelWalletName(String currency) {
     return 'سفر - $currency';
   }

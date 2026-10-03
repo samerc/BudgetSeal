@@ -2352,3 +2352,138 @@ travel_over_balance_title,,More than this account holds,أكثر من رصيد �
 travel_over_balance_msg,,{account} holds {balance}. After this exchange it will be {after}.,رصيد {account}: {balance}. بعد هذا الصرف سيصبح {after}.,"{account} contient {balance}. Après cet échange, il sera de {after}."
 travel_exchange_anyway,,Exchange anyway,الصرف على أي حال,Échanger quand même
 acct_balance_changed,,This wallet's balance just changed. Check the new amount and try again.,تغيّر رصيد هذه المحفظة للتو. تحقّق من المبلغ الجديد وحاول مرة أخرى.,Le solde de ce portefeuille vient de changer. Vérifiez le nouveau montant et réessayez.
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+currency_name_afn,,Afghan Afghani,أفغاني أفغانستاني,Afghani afghan
+currency_name_all,,Albanian Lek,ليك ألباني,Lek albanais
+currency_name_amd,,Armenian Dram,درام أرميني,Dram arménien
+currency_name_ang,,Netherlands Antillean Guilder,غيلدر الأنتيل الهولندية,Florin antillais
+currency_name_aoa,,Angolan Kwanza,كوانزا أنغولي,Kwanza angolais
+currency_name_ars,,Argentine Peso,بيزو أرجنتيني,Peso argentin
+currency_name_awg,,Aruban Florin,فلورن أروبي,Florin arubais
+currency_name_azn,,Azerbaijani Manat,مانات أذربيجاني,Manat azerbaïdjanais
+currency_name_bam,,Bosnia-Herzegovina Convertible Mark,مارك بوسني قابل للتحويل,Mark convertible de Bosnie-Herzégovine
+currency_name_bbd,,Barbadian Dollar,دولار بربادوسي,Dollar barbadien
+currency_name_bdt,,Bangladeshi Taka,تاكا بنغلاديشي,Taka bangladais
+currency_name_bgn,,Bulgarian Lev,ليف بلغاري,Lev bulgare
+currency_name_bhd,,Bahraini Dinar,دينار بحريني,Dinar bahreïni
+currency_name_bif,,Burundian Franc,فرنك بوروندي,Franc burundais
+currency_name_bmd,,Bermudian Dollar,دولار برمودي,Dollar bermudien
+currency_name_bnd,,Brunei Dollar,دولار بروناي,Dollar brunéien
+currency_name_bob,,Bolivian Boliviano,بوليفيانو بوليفي,Boliviano bolivien
+currency_name_bsd,,Bahamian Dollar,دولار باهامي,Dollar bahaméen
+currency_name_btn,,Bhutanese Ngultrum,نغولترم بوتاني,Ngultrum bhoutanais
+currency_name_bwp,,Botswana Pula,بولا بوتسواني,Pula botswanais
+currency_name_byn,,Belarusian Ruble,روبل بيلاروسي,Rouble biélorusse
+currency_name_bzd,,Belize Dollar,دولار بليزي,Dollar bélizien
+currency_name_cdf,,Congolese Franc,فرنك كونغولي,Franc congolais
+currency_name_clp,,Chilean Peso,بيزو تشيلي,Peso chilien
+currency_name_cop,,Colombian Peso,بيزو كولومبي,Peso colombien
+currency_name_crc,,Costa Rican Colón,كولون كوستاريكي,Colón costaricain
+currency_name_cup,,Cuban Peso,بيزو كوبي,Peso cubain
+currency_name_cve,,Cape Verdean Escudo,إسكودو الرأس الأخضر,Escudo capverdien
+currency_name_czk,,Czech Koruna,كرونة تشيكية,Couronne tchèque
+currency_name_djf,,Djiboutian Franc,فرنك جيبوتي,Franc djiboutien
+currency_name_dkk,,Danish Krone,كرونة دنماركية,Couronne danoise
+currency_name_dop,,Dominican Peso,بيزو دومينيكاني,Peso dominicain
+currency_name_dzd,,Algerian Dinar,دينار جزائري,Dinar algérien
+currency_name_egp,,Egyptian Pound,جنيه مصري,Livre égyptienne
+currency_name_ern,,Eritrean Nakfa,ناكفا إريتري,Nakfa érythréen
+currency_name_etb,,Ethiopian Birr,بير إثيوبي,Birr éthiopien
+currency_name_fjd,,Fijian Dollar,دولار فيجي,Dollar fidjien
+currency_name_fkp,,Falkland Islands Pound,جنيه جزر فوكلاند,Livre des Malouines
+currency_name_gel,,Georgian Lari,لاري جورجي,Lari géorgien
+currency_name_ghs,,Ghanaian Cedi,سيدي غاني,Cedi ghanéen
+currency_name_gip,,Gibraltar Pound,جنيه جبل طارق,Livre de Gibraltar
+currency_name_gmd,,Gambian Dalasi,دالاسي غامبي,Dalasi gambien
+currency_name_gnf,,Guinean Franc,فرنك غيني,Franc guinéen
+currency_name_gtq,,Guatemalan Quetzal,كتزال غواتيمالي,Quetzal guatémaltèque
+currency_name_gyd,,Guyanese Dollar,دولار غياني,Dollar guyanien
+currency_name_hnl,,Honduran Lempira,لمبيرا هندوراسي,Lempira hondurien
+currency_name_htg,,Haitian Gourde,غورد هايتي,Gourde haïtienne
+currency_name_huf,,Hungarian Forint,فورنت مجري,Forint hongrois
+currency_name_idr,,Indonesian Rupiah,روبية إندونيسية,Roupie indonésienne
+currency_name_ils,,Israeli New Shekel,شيكل إسرائيلي جديد,Nouveau shekel israélien
+currency_name_iqd,,Iraqi Dinar,دينار عراقي,Dinar irakien
+currency_name_irr,,Iranian Rial,ريال إيراني,Rial iranien
+currency_name_isk,,Icelandic Króna,كرونة آيسلندية,Couronne islandaise
+currency_name_jmd,,Jamaican Dollar,دولار جامايكي,Dollar jamaïcain
+currency_name_jod,,Jordanian Dinar,دينار أردني,Dinar jordanien
+currency_name_kes,,Kenyan Shilling,شلن كيني,Shilling kényan
+currency_name_kgs,,Kyrgyzstani Som,سوم قيرغيزستاني,Som kirghize
+currency_name_khr,,Cambodian Riel,رييل كمبودي,Riel cambodgien
+currency_name_kmf,,Comorian Franc,فرنك قمري,Franc comorien
+currency_name_kpw,,North Korean Won,وون كوري شمالي,Won nord-coréen
+currency_name_krw,,South Korean Won,وون كوري جنوبي,Won sud-coréen
+currency_name_kyd,,Cayman Islands Dollar,دولار جزر كايمان,Dollar des îles Caïmans
+currency_name_kzt,,Kazakhstani Tenge,تينغ كازاخستاني,Tenge kazakh
+currency_name_lak,,Lao Kip,كيب لاوسي,Kip laotien
+currency_name_lkr,,Sri Lankan Rupee,روبية سريلانكية,Roupie srilankaise
+currency_name_lrd,,Liberian Dollar,دولار ليبيري,Dollar libérien
+currency_name_lsl,,Lesotho Loti,لوتي ليسوتو,Loti lesothan
+currency_name_lyd,,Libyan Dinar,دينار ليبي,Dinar libyen
+currency_name_mad,,Moroccan Dirham,درهم مغربي,Dirham marocain
+currency_name_mdl,,Moldovan Leu,ليو مولدوفي,Leu moldave
+currency_name_mga,,Malagasy Ariary,أرياري مدغشقري,Ariary malgache
+currency_name_mkd,,Macedonian Denar,دينار مقدوني,Denar macédonien
+currency_name_mmk,,Myanmar Kyat,كيات ميانماري,Kyat birman
+currency_name_mnt,,Mongolian Tögrög,توغروغ منغولي,Tugrik mongol
+currency_name_mop,,Macanese Pataca,باتاكا ماكاوية,Pataca macanaise
+currency_name_mru,,Mauritanian Ouguiya,أوقية موريتانية,Ouguiya mauritanien
+currency_name_mur,,Mauritian Rupee,روبية موريشيوسية,Roupie mauricienne
+currency_name_mvr,,Maldivian Rufiyaa,روفية مالديفية,Rufiyaa maldivien
+currency_name_mwk,,Malawian Kwacha,كواشا مالاوي,Kwacha malawite
+currency_name_myr,,Malaysian Ringgit,رينغيت ماليزي,Ringgit malaisien
+currency_name_mzn,,Mozambican Metical,متكال موزمبيقي,Metical mozambicain
+currency_name_nad,,Namibian Dollar,دولار ناميبي,Dollar namibien
+currency_name_ngn,,Nigerian Naira,نيرة نيجيرية,Naira nigérian
+currency_name_nio,,Nicaraguan Córdoba,كوردوبا نيكاراغوي,Córdoba nicaraguayen
+currency_name_npr,,Nepalese Rupee,روبية نيبالية,Roupie népalaise
+currency_name_omr,,Omani Rial,ريال عماني,Rial omanais
+currency_name_pab,,Panamanian Balboa,بالبوا بنمي,Balboa panaméen
+currency_name_pen,,Peruvian Sol,سول بيروفي,Sol péruvien
+currency_name_pgk,,Papua New Guinean Kina,كينا بابوا غينيا الجديدة,Kina papouan-néo-guinéen
+currency_name_php,,Philippine Peso,بيزو فلبيني,Peso philippin
+currency_name_pkr,,Pakistani Rupee,روبية باكستانية,Roupie pakistanaise
+currency_name_pln,,Polish Złoty,زلوتي بولندي,Zloty polonais
+currency_name_pyg,,Paraguayan Guaraní,غواراني باراغواي,Guaraní paraguayen
+currency_name_qar,,Qatari Riyal,ريال قطري,Riyal qatari
+currency_name_ron,,Romanian Leu,ليو روماني,Leu roumain
+currency_name_rsd,,Serbian Dinar,دينار صربي,Dinar serbe
+currency_name_rub,,Russian Ruble,روبل روسي,Rouble russe
+currency_name_rwf,,Rwandan Franc,فرنك رواندي,Franc rwandais
+currency_name_sbd,,Solomon Islands Dollar,دولار جزر سليمان,Dollar des îles Salomon
+currency_name_scr,,Seychellois Rupee,روبية سيشيلية,Roupie seychelloise
+currency_name_sdg,,Sudanese Pound,جنيه سوداني,Livre soudanaise
+currency_name_shp,,Saint Helena Pound,جنيه سانت هيلينا,Livre de Sainte-Hélène
+currency_name_sle,,Sierra Leonean Leone,ليون سيراليوني,Leone sierra-léonais
+currency_name_sos,,Somali Shilling,شلن صومالي,Shilling somalien
+currency_name_srd,,Surinamese Dollar,دولار سورينامي,Dollar surinamais
+currency_name_ssp,,South Sudanese Pound,جنيه جنوب سوداني,Livre sud-soudanaise
+currency_name_stn,,São Tomé and Príncipe Dobra,دوبرا ساو تومي وبرينسيب,Dobra santoméen
+currency_name_syp,,Syrian Pound,ليرة سورية,Livre syrienne
+currency_name_szl,,Swazi Lilangeni,ليلانجيني سوازيلندي,Lilangeni swazi
+currency_name_thb,,Thai Baht,بات تايلندي,Baht thaïlandais
+currency_name_tjs,,Tajikistani Somoni,سوموني طاجيكستاني,Somoni tadjik
+currency_name_tmt,,Turkmenistan Manat,مانات تركمانستاني,Manat turkmène
+currency_name_tnd,,Tunisian Dinar,دينار تونسي,Dinar tunisien
+currency_name_top,,Tongan Paʻanga,بانغا تونغي,Paʻanga tongien
+currency_name_ttd,,Trinidad and Tobago Dollar,دولار ترينيداد وتوباغو,Dollar de Trinité-et-Tobago
+currency_name_twd,,New Taiwan Dollar,دولار تايواني جديد,Nouveau dollar taïwanais
+currency_name_tzs,,Tanzanian Shilling,شلن تنزاني,Shilling tanzanien
+currency_name_uah,,Ukrainian Hryvnia,هريفنيا أوكرانية,Hryvnia ukrainienne
+currency_name_ugx,,Ugandan Shilling,شلن أوغندي,Shilling ougandais
+currency_name_uyu,,Uruguayan Peso,بيزو أوروغواي,Peso uruguayen
+currency_name_uzs,,Uzbekistani Som,سوم أوزبكستاني,Sum ouzbek
+currency_name_ves,,Venezuelan Bolívar,بوليفار فنزويلي,Bolívar vénézuélien
+currency_name_vnd,,Vietnamese Đồng,دونغ فيتنامي,Dông vietnamien
+currency_name_vuv,,Vanuatu Vatu,فاتو فانواتي,Vatu vanuatuan
+currency_name_wst,,Samoan Tālā,تالا ساموي,Tala samoan
+currency_name_xaf,,Central African CFA Franc,فرنك وسط أفريقي,Franc CFA (BEAC)
+currency_name_xcd,,East Caribbean Dollar,دولار شرق الكاريبي,Dollar des Caraïbes orientales
+currency_name_xof,,West African CFA Franc,فرنك غرب أفريقي,Franc CFA (BCEAO)
+currency_name_xpf,,CFP Franc,فرنك سي إف بي,Franc CFP
+currency_name_yer,,Yemeni Rial,ريال يمني,Rial yéménite
+currency_name_zmw,,Zambian Kwacha,كواشا زامبي,Kwacha zambien
+currency_name_zwg,,Zimbabwe Gold,ذهب زيمبابوي,Or du Zimbabwe
