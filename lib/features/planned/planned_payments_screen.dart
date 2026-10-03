@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/tx_colors_provider.dart';
-import '../../core/engine/allocation_engine.dart';
+import '../../core/engine/planned_engine.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -215,20 +215,18 @@ class _PlannedPaymentsScreenState
   bool get _hasOtherCurrencies =>
       _groups.any((g) => g.hasOtherCurrencies);
 
+  /// Plans being posted right now: a second tap (or Post all) waits out.
+  final _posting = <String>{};
+
   /// Posts a planned item silently (no SnackBar, no _load).
   /// Returns true on success, false on failure.
   Future<bool> _postItemSilent(_PlannedItem item) async {
+    if (!_posting.add(item.tx.id)) return false;
     try {
-      final engine = ref.read(allocationEngineProvider);
-      final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return false;
-
-      final tx = item.tx;
       final fx = ref.read(fxServiceProvider);
       // A plan has no reliable rate (it was saved as 1.0): take today's rate
       // when posting. Null if offline with nothing cached.
       Future<double?> rate(String from, String to) async {
-        if (from == to) return 1.0;
         try {
           return await fx.getRateWithCache(from, to);
         } catch (e) {
@@ -237,79 +235,19 @@ class _PlannedPaymentsScreenState
         }
       }
 
-      // 1. Create the posted transaction FIRST (if this fails, planned tx is still intact)
-      if (tx.type == 'transfer') {
-        final db = ref.read(databaseProvider);
-        final dest = await (db.select(db.accounts)
-              ..where((a) => a.id.equals(tx.destinationAccountId ?? '')))
-            .getSingleOrNull();
-        final destCurrency = dest?.currency ?? tx.currency;
-        final transferRate = await rate(tx.currency, destCurrency);
-        if (transferRate == null) {
-          throw CurrencyConversionException(tx.currency, destCurrency);
-        }
-        await engine.recordTransfer(
-          householdId: householdId,
-          fromAccountId: tx.accountId,
-          toAccountId: tx.destinationAccountId ?? tx.accountId,
-          amount: tx.amount,
-          currency: tx.currency,
-          exchangeRateToBase: transferRate,
-          createdBy: 'user',
-          deviceId: tx.deviceId,
-          note: tx.note,
-          date: tx.createdAt,
-        );
-      } else {
-        // income or expense — use recordTransaction with lines
-        final lines = <TxLine>[
-          for (final l in item.lines)
-            TxLine(
-              amount: l.amount,
-              currency: l.currency,
-              categoryId: l.categoryId,
-              accountId: l.accountId,
-              exchangeRateToBase:
-                  isRealRate(l.currency, _baseCurrency, l.exchangeRateToBase)
-                      ? l.exchangeRateToBase
-                      : await rate(l.currency, _baseCurrency) ?? 1.0,
-              note: l.note,
-            ),
-        ];
-
-        // If no lines exist (legacy), create one from the header
-        if (lines.isEmpty) {
-          lines.add(TxLine(
-            amount: tx.amount,
-            currency: tx.currency,
-            categoryId: tx.categoryId,
-            exchangeRateToBase:
-                isRealRate(tx.currency, _baseCurrency, tx.exchangeRateToBase)
-                    ? tx.exchangeRateToBase
-                    : await rate(tx.currency, _baseCurrency) ?? 1.0,
-          ));
-        }
-
-        await engine.recordTransaction(
-          householdId: householdId,
-          accountId: tx.accountId,
-          type: tx.type,
-          lines: lines,
-          baseCurrency: _baseCurrency,
-          destinationAccountId: tx.destinationAccountId,
-          note: tx.note,
-          deviceId: tx.deviceId,
-          date: tx.createdAt,
-        );
-      }
-
-      // 2. Only delete the planned transaction AFTER successful creation
-      await engine.deleteTransaction(tx.id);
-
+      await PlannedEngine(ref.read(databaseProvider)).post(
+        item.tx.id,
+        baseCurrency: _baseCurrency,
+        rate: rate,
+        createdBy: 'user',
+        deviceId: item.tx.deviceId,
+      );
       return true;
     } catch (e) {
       debugPrint('[PlannedPayments] Error posting: $e');
       return false;
+    } finally {
+      _posting.remove(item.tx.id);
     }
   }
 
@@ -499,7 +437,7 @@ class _PlannedPaymentsScreenState
                             label: formatAmount(_totalAmount,
                                 currency: _baseCurrency),
                             subtitle: _hasOtherCurrencies
-                                ? '${S.of(context).plannedTotalLabel} + other'
+                                ? S.of(context).plannedTotalOther
                                 : S.of(context).plannedTotalLabel,
                             color: AppColors.caution,
                           ),

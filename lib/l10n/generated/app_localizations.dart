@@ -99,6 +99,12 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @plannedTotalOther.
+  ///
+  /// In en, this message translates to:
+  /// **'total + other currencies'**
+  String get plannedTotalOther;
+
   /// No description provided for @syncOtherBudgetTitle.
   ///
   /// In en, this message translates to:

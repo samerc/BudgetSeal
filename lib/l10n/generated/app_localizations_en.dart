@@ -9,6 +9,9 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get plannedTotalOther => 'total + other currencies';
+
+  @override
   String get syncOtherBudgetTitle => 'Another budget is already synced here';
 
   @override

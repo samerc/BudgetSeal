@@ -476,6 +476,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
+                t.status.isNull() & // planned payments aren't logging
                 t.createdBy.equals('recurring').not() &
                 t.createdAt.isBiggerOrEqualValue(today))
             ..limit(1))

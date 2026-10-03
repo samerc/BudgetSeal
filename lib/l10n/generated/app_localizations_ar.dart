@@ -9,6 +9,9 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get plannedTotalOther => 'الإجمالي + عملات أخرى';
+
+  @override
   String get syncOtherBudgetTitle => 'توجد ميزانية أخرى متزامنة هنا';
 
   @override

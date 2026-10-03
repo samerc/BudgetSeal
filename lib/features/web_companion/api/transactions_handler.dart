@@ -343,6 +343,10 @@ Handler updateTransactionHandler(Ref ref) {
       if (existing == null || existing.householdId != householdId) {
         return notFound();
       }
+      // Re-recording a plan here would post it (with envelope rows).
+      if (existing.status != null) {
+        return badRequest('Planned payments are edited with /api/planned');
+      }
 
       final type = optString(body, 'type') ?? existing.type;
       if (!_types.contains(type)) {

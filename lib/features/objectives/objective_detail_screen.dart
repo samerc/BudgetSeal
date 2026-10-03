@@ -137,6 +137,7 @@ class _ObjectiveDetailScreenState
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
+              t.status.isNull() & // a planned payment isn't paid yet
               t.note.like('%$idTag%'))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .get();
@@ -153,6 +154,7 @@ class _ObjectiveDetailScreenState
             ..where((t) =>
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
+                t.status.isNull() &
                 t.note.like('%$escapedName%'))
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();

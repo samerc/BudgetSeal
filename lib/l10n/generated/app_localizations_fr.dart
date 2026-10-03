@@ -9,6 +9,9 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get plannedTotalOther => 'total + autres devises';
+
+  @override
   String get syncOtherBudgetTitle => 'Un autre budget est déjà synchronisé ici';
 
   @override

@@ -1,4 +1,5 @@
 {
+  "plannedTotalOther": "total + other currencies",
   "syncOtherBudgetTitle": "Another budget is already synced here",
   "syncOtherBudgetBody": "This account's sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.",
   "syncUseSyncedBudget": "Use the synced budget",

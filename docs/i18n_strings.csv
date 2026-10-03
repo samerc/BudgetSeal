@@ -2338,3 +2338,7 @@ sync_err_backup_failed,,"Couldn't back up your current data, so nothing was repl
 sync_other_budget_title,,Another budget is already synced here,توجد ميزانية أخرى متزامنة هنا,Un autre budget est déjà synchronisé ici
 sync_other_budget_body,,This account's sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.,يحتوي ملف المزامنة في هذا الحساب على ميزانية أُنشئت على جهاز آخر. هل تريد استخدامها على هذا الجهاز؟ ستحلّ محلّ البيانات الموجودة على هذا الجهاز، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.,Le fichier de synchronisation de ce compte contient un budget créé sur un autre appareil. L'utiliser sur cet appareil ? Il remplace les données de cet appareil ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.
 sync_use_synced_budget,,Use the synced budget,استخدام الميزانية المتزامنة,Utiliser le budget synchronisé
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+planned_total_other,,total + other currencies,الإجمالي + عملات أخرى,total + autres devises

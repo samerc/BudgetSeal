@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
-import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../core/engine/planned_engine.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
@@ -220,54 +219,24 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
         _PlanType.transfer => 'transfer',
       };
 
-      // If editing, soft-delete old transaction (lines can be hard-deleted
-      // since they aren't synced independently)
-      if (_isEditing) {
-        final oldTx = widget.editTx!['transaction'] as Transaction?;
-        if (oldTx != null) {
-          await (db.delete(db.transactionLines)
-                ..where((l) => l.transactionId.equals(oldTx.id)))
-              .go();
-          await (db.update(db.transactions)
-                ..where((t) => t.id.equals(oldTx.id)))
-              .write(TransactionsCompanion(
-            deleted: const Value(true),
-            lastModified: Value(DateTime.now()),
-          ));
-        }
-      }
-
-      final txId = const Uuid().v4();
-      final now = DateTime.now();
-
-      await db.into(db.transactions).insert(TransactionsCompanion.insert(
-            id: txId,
-            householdId: householdId,
-            type: typeStr,
-            accountId: _accountId!,
-            destinationAccountId: Value(_type == _PlanType.transfer ? _destAccountId : null),
-            amount: amount,
-            currency: _currency,
-            exchangeRateToBase: const Value(1.0),
-            categoryId: Value(_categoryId),
-            createdBy: 'user',
-            deviceId: 'local',
-            note: Value(effectiveNote),
-            createdAt: Value(targetDate),
-            status: const Value('planned'),
-            lastModified: Value(now),
-          ));
-
-      // Insert transaction line
-      await db.into(db.transactionLines).insert(TransactionLinesCompanion.insert(
-            id: const Uuid().v4(),
-            transactionId: txId,
-            amount: amount,
-            currency: _currency,
-            categoryId: Value(_categoryId),
-            accountId: Value(_accountId),
-            exchangeRateToBase: const Value(1.0),
-          ));
+      // One db transaction: an edit replaces the old plan atomically.
+      final oldTx = _isEditing
+          ? widget.editTx!['transaction'] as Transaction?
+          : null;
+      await PlannedEngine(db).save(
+        replaceId: oldTx?.id,
+        householdId: householdId,
+        type: typeStr,
+        accountId: _accountId!,
+        destinationAccountId: _destAccountId,
+        amount: amount,
+        currency: _currency,
+        categoryId: _categoryId,
+        note: effectiveNote,
+        date: targetDate,
+        createdBy: 'user',
+        deviceId: 'local',
+      );
 
       if (!mounted) return;
 

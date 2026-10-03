@@ -409,6 +409,12 @@ void main() {
         id: a['id'] as String,
         body: {'type': 'expense', 'accountId': 'usd', 'amount': 90, 'date': '2026-12-02'});
     expect(edited['status'], 200);
+    // The transaction edit endpoint must not post a plan.
+    final viaTx = await call(updateTransactionHandler(ref), 'PUT',
+        id: edited['id'] as String,
+        body: {'type': 'expense', 'accountId': 'usd', 'amount': 90});
+    expect(viaTx['status'], 400);
+    expect((await balances())['usd'] ?? 0, 0);
     final list = await call(listPlannedHandler(ref), 'GET');
     final items = list['items'] as List;
     expect(items.map((i) => i['amount']), [50, 90]); // ordered by date

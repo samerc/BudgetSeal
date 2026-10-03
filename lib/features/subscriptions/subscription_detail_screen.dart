@@ -85,7 +85,7 @@ class _SubscriptionDetailScreenState
       List<Map<String, dynamic>> pastData = [];
       if (householdId.isNotEmpty && title.isNotEmpty) {
         final pastRows = await db.customSelect(
-          'SELECT * FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
+          'SELECT * FROM transactions WHERE household_id = ? AND deleted = 0 AND status IS NULL AND (note LIKE ? OR note = ?) AND type = ? ORDER BY created_at DESC LIMIT 20',
           variables: [
             drift.Variable.withString(householdId),
             drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),
@@ -214,7 +214,7 @@ class _SubscriptionDetailScreenState
 
     // Count transactions AFTER the picked cancellation date
     final futureRows = await db.customSelect(
-      'SELECT COUNT(*) as cnt FROM transactions WHERE household_id = ? AND (note LIKE ? OR note = ?) AND created_at > ?',
+      'SELECT COUNT(*) as cnt FROM transactions WHERE household_id = ? AND deleted = 0 AND status IS NULL AND (note LIKE ? OR note = ?) AND created_at > ?',
       variables: [
         drift.Variable.withString(householdId),
         drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),
@@ -261,7 +261,7 @@ class _SubscriptionDetailScreenState
     if (futureCount > 0) {
       final engine = ref.read(allocationEngineProvider);
       final futureTxRows = await db.customSelect(
-        'SELECT id FROM transactions WHERE household_id = ? AND deleted = 0 AND (note LIKE ? OR note = ?) AND created_at > ?',
+        'SELECT id FROM transactions WHERE household_id = ? AND deleted = 0 AND status IS NULL AND (note LIKE ? OR note = ?) AND created_at > ?',
         variables: [
           drift.Variable.withString(householdId),
           drift.Variable.withString('%${title.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_')}%'),

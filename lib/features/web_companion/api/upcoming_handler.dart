@@ -2,16 +2,15 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/engine/allocation_engine.dart';
+import '../../../core/engine/planned_engine.dart';
 import '../../../core/engine/recurring_engine.dart';
 import '../../../core/fx/fx_service.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
-import '../../../shared/utils/format_number.dart' show isRealRate;
 import '_serializers.dart';
 import '_validation.dart';
 import 'transactions_handler.dart' show parseWebDate;
@@ -217,44 +216,20 @@ Future<Response> _savePlanned(Ref ref, Request request, String? id) async {
       if (old == null) return notFound();
     }
 
-    final newId = const Uuid().v4();
-    final now = DateTime.now();
-    await db.transaction(() async {
-      if (old != null) {
-        await (db.delete(db.transactionLines)
-              ..where((l) => l.transactionId.equals(old!.id)))
-            .go();
-        await (db.update(db.transactions)..where((t) => t.id.equals(old!.id)))
-            .write(TransactionsCompanion(
-                deleted: const Value(true), lastModified: Value(now)));
-      }
-      await db.into(db.transactions).insert(TransactionsCompanion.insert(
-            id: newId,
-            householdId: householdId,
-            type: type!,
-            accountId: accountId,
-            destinationAccountId: Value(destId),
-            amount: amount,
-            currency: account.currency,
-            exchangeRateToBase: const Value(1.0),
-            categoryId: Value(categoryId),
-            createdBy: 'web',
-            deviceId: 'web',
-            note: Value(note),
-            createdAt: Value(date),
-            status: const Value('planned'),
-            lastModified: Value(now),
-          ));
-      await db.into(db.transactionLines).insert(TransactionLinesCompanion.insert(
-            id: const Uuid().v4(),
-            transactionId: newId,
-            amount: amount,
-            currency: account.currency,
-            categoryId: Value(categoryId),
-            accountId: Value(accountId),
-            exchangeRateToBase: const Value(1.0),
-          ));
-    });
+    final newId = await PlannedEngine(db).save(
+      replaceId: old?.id,
+      householdId: householdId,
+      type: type!,
+      accountId: accountId,
+      destinationAccountId: destId,
+      amount: amount,
+      currency: account.currency,
+      categoryId: categoryId,
+      note: note,
+      date: date,
+      createdBy: 'web',
+      deviceId: 'web',
+    );
     return id == null ? created({'id': newId}) : ok({'id': newId});
   } catch (e) {
     return serverError(e);
@@ -312,10 +287,8 @@ Handler postPlannedHandler(Ref ref) {
       return badRequest('ids must be a list of planned payment ids');
     }
     final db = ref.read(databaseProvider);
-    final engine = ref.read(allocationEngineProvider);
     try {
       final base = await _base(db, householdId);
-      final accts = (await _refs(db, householdId)).$2;
       Future<double?> rate(String from, String to) async =>
           from == to ? 1.0 : await latestCachedRate(db, from, to);
 
@@ -334,63 +307,13 @@ Handler postPlannedHandler(Ref ref) {
           continue;
         }
         try {
-          await db.transaction(() async {
-            if (tx.type == 'transfer') {
-              final destCur = accts[tx.destinationAccountId]?.currency ?? tx.currency;
-              final r = await rate(tx.currency, destCur);
-              if (r == null) throw CurrencyConversionException(tx.currency, destCur);
-              await engine.recordTransfer(
-                householdId: householdId,
-                fromAccountId: tx.accountId,
-                toAccountId: tx.destinationAccountId ?? tx.accountId,
-                amount: tx.amount,
-                currency: tx.currency,
-                exchangeRateToBase: r,
-                createdBy: 'web',
-                deviceId: 'web',
-                note: tx.note,
-                date: tx.createdAt,
-              );
-            } else {
-              final lines = await (db.select(db.transactionLines)
-                    ..where((l) => l.transactionId.equals(tx.id)))
-                  .get();
-              Future<double> lineRate(String cur, double stored) async =>
-                  isRealRate(cur, base, stored) ? stored : await rate(cur, base) ?? 1.0;
-              await engine.recordTransaction(
-                householdId: householdId,
-                accountId: tx.accountId,
-                type: tx.type,
-                lines: lines.isEmpty
-                    ? [
-                        TxLine(
-                          amount: tx.amount,
-                          currency: tx.currency,
-                          categoryId: tx.categoryId,
-                          exchangeRateToBase:
-                              await lineRate(tx.currency, tx.exchangeRateToBase),
-                        ),
-                      ]
-                    : [
-                        for (final l in lines)
-                          TxLine(
-                            amount: l.amount,
-                            currency: l.currency,
-                            categoryId: l.categoryId,
-                            accountId: l.accountId,
-                            exchangeRateToBase:
-                                await lineRate(l.currency, l.exchangeRateToBase),
-                            note: l.note,
-                          ),
-                      ],
-                baseCurrency: base,
-                note: tx.note,
-                deviceId: 'web',
-                date: tx.createdAt,
-              );
-            }
-            await engine.deleteTransaction(tx.id);
-          });
+          await PlannedEngine(db).post(
+            tx.id,
+            baseCurrency: base,
+            rate: rate,
+            createdBy: 'web',
+            deviceId: 'web',
+          );
           posted++;
         } on CurrencyConversionException {
           failed.add(id);
