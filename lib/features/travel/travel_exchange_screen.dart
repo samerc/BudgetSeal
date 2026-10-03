@@ -1,17 +1,14 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
-import '../../core/database/daos/accounts_dao.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
-import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/services/travel_account_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -39,13 +36,6 @@ class _TravelExchangeScreenState
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
-  /// Exchange rate: how many destination units per 1 source unit.
-  /// e.g. $100 → €90 means rate = 0.9 (destination gets source * 0.9)
-  double get _effectiveRate =>
-      _sourceAmount > 0 && _receivedAmount > 0
-          ? _receivedAmount / _sourceAmount
-          : 1.0;
-
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(accountsProvider).value ?? [];
@@ -57,6 +47,13 @@ class _TravelExchangeScreenState
             .where((a) => a.id == _fromAccountId)
             .firstOrNull
         : null;
+    // Mid-trip: more cash goes into the wallet already open for it.
+    final openWallet = (accounts
+            .where((a) =>
+                a.isTravel && !a.archived && a.currency == _targetCurrency)
+            .toList()
+          ..sort((a, b) => b.lastModified.compareTo(a.lastModified)))
+        .firstOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -239,6 +236,20 @@ class _TravelExchangeScreenState
               ),
             ],
 
+            if (openWallet != null) ...[
+              const SizedBox(height: 12),
+              Row(children: [
+                Icon(Icons.flight_rounded, size: 14, color: AppColors.accent),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    S.of(context).travelAddsToWallet(openWallet.name),
+                    style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+                  ),
+                ),
+              ]),
+            ],
+
             const SizedBox(height: 28),
 
             // ── Exchange Button ──
@@ -251,7 +262,10 @@ class _TravelExchangeScreenState
                       child: CircularProgressIndicator(
                           color: AppColors.onAccent, strokeWidth: 2))
                   : const Icon(Icons.flight_takeoff_rounded, size: 18),
-              label: Text(S.of(context).travelExchangeButton,
+              label: Text(
+                  openWallet != null
+                      ? S.of(context).travelExchangeTopUp
+                      : S.of(context).travelExchangeButton,
                   style:
                       TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               style: FilledButton.styleFrom(
@@ -279,11 +293,11 @@ class _TravelExchangeScreenState
 
   Future<void> _doExchange() async {
     // Translated before any await (context may change meanwhile).
-    final exchangeNote = S.of(context).travelExchangeNote(_targetCurrency);
+    final tr = S.of(context);
+    final exchangeNote = tr.travelExchangeNote(_targetCurrency);
     setState(() => _loading = true);
     try {
       final db = ref.read(databaseProvider);
-      final engine = ref.read(allocationEngineProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
 
@@ -292,59 +306,42 @@ class _TravelExchangeScreenState
           .firstOrNull;
       if (fromAcc == null) return;
 
-      // Check for existing archived travel account in this currency
-      final existingTravel = await (db.select(db.accounts)
-            ..where((a) =>
-                a.householdId.equals(householdId))
-            ..where((a) => a.isTravel.equals(true))
-            ..where((a) => a.currency.equals(_targetCurrency))
-            ..where((a) => a.archived.equals(true))
-            // A deleted wallet must not come back via "Reactivate".
-            ..where((a) => a.deleted.equals(false)))
-          .getSingleOrNull();
-
-      String travelAccountId;
-
-      if (existingTravel != null) {
-        // Ask user whether to reactivate or create new
-        final reactivate = await _askReactivate(existingTravel);
+      // More than the account holds: say so, but allow it (like funding an
+      // envelope past Ready to assign).
+      final available = await BalanceCalculator(db).accountBalance(fromAcc.id);
+      if (_sourceAmount - available >=
+          TravelAccountService.zeroThreshold(fromAcc.currency)) {
         if (!mounted) return;
-        if (reactivate == null) {
-          setState(() => _loading = false);
-          return; // cancelled
-        }
-        if (reactivate) {
-          // Unarchive existing
-          travelAccountId = existingTravel.id;
-          await (db.update(db.accounts)
-                ..where((a) => a.id.equals(travelAccountId)))
-              .write(AccountsCompanion(
-            archived: const Value(false),
-            lastModified: Value(DateTime.now()),
-          ));
-        } else {
-          // Create new
-          travelAccountId = await _createTravelAccount(
-              db, householdId, fromAcc.currency);
-        }
-      } else {
-        // No existing — create new
-        travelAccountId =
-            await _createTravelAccount(db, householdId, fromAcc.currency);
+        final go = await _confirmOverBalance(fromAcc, available);
+        if (go != true) return;
       }
 
-      // Record the transfer
-      await engine.recordTransfer(
+      // Into the wallet already open for this currency; else offer the last
+      // archived one; else a new wallet.
+      String? walletId =
+          (await TravelAccountService.activeWallet(db, householdId, _targetCurrency))
+              ?.id;
+      if (walletId == null) {
+        final archived = await TravelAccountService.archivedWallet(
+            db, householdId, _targetCurrency);
+        if (archived != null) {
+          final reactivate = await _askReactivate(archived);
+          if (!mounted || reactivate == null) return; // cancelled
+          if (reactivate) walletId = archived.id;
+        }
+      }
+
+      await TravelAccountService.exchange(
+        db,
         householdId: householdId,
-        fromAccountId: _fromAccountId!,
-        toAccountId: travelAccountId,
+        fromAccountId: fromAcc.id,
+        fromCurrency: fromAcc.currency,
         amount: _sourceAmount,
-        currency: fromAcc.currency,
-        exchangeRateToBase: _effectiveRate,
-        createdBy: 'local',
-        deviceId: 'local',
+        toCurrency: _targetCurrency,
+        received: _receivedAmount,
+        walletId: walletId,
+        newWalletName: tr.travelWalletName(_targetCurrency),
         note: exchangeNote,
-        date: DateTime.now(),
       );
 
       // Refresh providers
@@ -356,7 +353,7 @@ class _TravelExchangeScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                S.of(context).travelExchangeSuccess(
+                tr.travelExchangeSuccess(
                     formatAmount(_sourceAmount, currency: fromAcc.currency),
                     formatAmount(_receivedAmount, currency: _targetCurrency))),
             behavior: SnackBarBehavior.floating,
@@ -366,10 +363,11 @@ class _TravelExchangeScreenState
         context.pop();
       }
     } catch (e) {
+      debugPrint('[Travel] Exchange failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(S.of(context).travelExchangeFailed),
+              content: Text(tr.travelExchangeFailed),
               behavior: SnackBarBehavior.floating),
         );
       }
@@ -378,20 +376,29 @@ class _TravelExchangeScreenState
     }
   }
 
-  Future<String> _createTravelAccount(
-      AppDatabase db, String householdId, String sourceCurrency) async {
-    final id = const Uuid().v4();
-    await AccountsDao(db).upsert(AccountsCompanion.insert(
-      id: id,
-      householdId: householdId,
-      name: 'Travel - $_targetCurrency',
-      type: 'wallet',
-      currency: _targetCurrency,
-      deviceId: 'local',
-      isTravel: const Value(true),
-      decimalPlaces: Value(currencyDecimals(_targetCurrency)),
-    ));
-    return id;
+  Future<bool?> _confirmOverBalance(Account from, double available) {
+    final tr = S.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.travelOverBalanceTitle),
+        content: Text(tr.travelOverBalanceMsg(
+          from.name,
+          formatAmount(available, currency: from.currency),
+          formatAmount(available - _sourceAmount, currency: from.currency),
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr.travelExchangeAnyway),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<bool?> _askReactivate(Account existing) async {

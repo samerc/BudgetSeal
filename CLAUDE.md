@@ -991,6 +991,13 @@ Accounts are accessed from More > Accounts.
 ### Reactivation
 When exchanging to a currency that has an archived travel wallet, a dialog asks: **Reactivate** (unarchive existing) or **Create New**. Prevents account clutter across repeated trips.
 
+### Money logic (`TravelAccountService`, core/services/travel_account_service.dart)
+- `activeWallet()` / `archivedWallet()`: newest by `lastModified`, `limit(1)` — there can be several archived wallets per currency ("Create new"), a `getSingleOrNull()` there threw and blocked every later exchange.
+- An **open** wallet in the target currency gets the money (top-up mid-trip; the button reads "Exchange & add to wallet"); only without one is an archived wallet offered.
+- `exchange()`: create/unarchive the wallet + `recordTransfer` (rate = received / amount) in one db transaction. New wallets are named `travelWalletName`. More than the source holds → warning dialog, allowed.
+- `convertBack()`: reads the balance inside the db transaction; if it isn't the `expectedBalance` shown in the sheet → `TravelBalanceChangedException` and nothing happens (archiving with money left drops it out of every balance); else transfers it all and archives. Same-currency destination prefills the amount received.
+- `zeroThreshold(currency)` = half a unit of the last decimal (auto-archive and the checks above).
+
 ### Key Rules
 - Travel accounts have `isTravel = true` — visually distinguished with a plane badge
 - Auto-archive threshold is currency-aware: 0.5 for JPY (0 decimals), 0.005 for USD (2 decimals), 0.0005 for KWD (3 decimals)

@@ -9,6 +9,34 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String travelWalletName(String currency) {
+    return 'سفر - $currency';
+  }
+
+  @override
+  String travelAddsToWallet(String wallet) {
+    return 'يُضاف إلى محفظة $wallet';
+  }
+
+  @override
+  String get travelExchangeTopUp => 'صرف وإضافة إلى المحفظة';
+
+  @override
+  String get travelOverBalanceTitle => 'أكثر من رصيد هذا الحساب';
+
+  @override
+  String travelOverBalanceMsg(String account, String balance, String after) {
+    return 'رصيد $account: $balance. بعد هذا الصرف سيصبح $after.';
+  }
+
+  @override
+  String get travelExchangeAnyway => 'الصرف على أي حال';
+
+  @override
+  String get acctBalanceChanged =>
+      'تغيّر رصيد هذه المحفظة للتو. تحقّق من المبلغ الجديد وحاول مرة أخرى.';
+
+  @override
   String get plannedTotalOther => 'الإجمالي + عملات أخرى';
 
   @override

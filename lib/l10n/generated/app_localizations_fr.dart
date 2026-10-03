@@ -9,6 +9,34 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String travelWalletName(String currency) {
+    return 'Voyage - $currency';
+  }
+
+  @override
+  String travelAddsToWallet(String wallet) {
+    return 'S\'ajoute à votre portefeuille $wallet';
+  }
+
+  @override
+  String get travelExchangeTopUp => 'Échanger et ajouter au portefeuille';
+
+  @override
+  String get travelOverBalanceTitle => 'Plus que le solde de ce compte';
+
+  @override
+  String travelOverBalanceMsg(String account, String balance, String after) {
+    return '$account contient $balance. Après cet échange, il sera de $after.';
+  }
+
+  @override
+  String get travelExchangeAnyway => 'Échanger quand même';
+
+  @override
+  String get acctBalanceChanged =>
+      'Le solde de ce portefeuille vient de changer. Vérifiez le nouveau montant et réessayez.';
+
+  @override
   String get plannedTotalOther => 'total + autres devises';
 
   @override

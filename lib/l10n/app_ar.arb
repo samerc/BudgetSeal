@@ -1,4 +1,11 @@
 {
+  "travelWalletName": "سفر - {currency}",
+  "travelAddsToWallet": "يُضاف إلى محفظة {wallet}",
+  "travelExchangeTopUp": "صرف وإضافة إلى المحفظة",
+  "travelOverBalanceTitle": "أكثر من رصيد هذا الحساب",
+  "travelOverBalanceMsg": "رصيد {account}: {balance}. بعد هذا الصرف سيصبح {after}.",
+  "travelExchangeAnyway": "الصرف على أي حال",
+  "acctBalanceChanged": "تغيّر رصيد هذه المحفظة للتو. تحقّق من المبلغ الجديد وحاول مرة أخرى.",
   "plannedTotalOther": "الإجمالي + عملات أخرى",
   "syncOtherBudgetTitle": "توجد ميزانية أخرى متزامنة هنا",
   "syncOtherBudgetBody": "يحتوي ملف المزامنة في هذا الحساب على ميزانية أُنشئت على جهاز آخر. هل تريد استخدامها على هذا الجهاز؟ ستحلّ محلّ البيانات الموجودة على هذا الجهاز، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.",

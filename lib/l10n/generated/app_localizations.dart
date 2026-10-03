@@ -99,6 +99,48 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @travelWalletName.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel - {currency}'**
+  String travelWalletName(String currency);
+
+  /// No description provided for @travelAddsToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds to your {wallet} wallet'**
+  String travelAddsToWallet(String wallet);
+
+  /// No description provided for @travelExchangeTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange & add to wallet'**
+  String get travelExchangeTopUp;
+
+  /// No description provided for @travelOverBalanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More than this account holds'**
+  String get travelOverBalanceTitle;
+
+  /// No description provided for @travelOverBalanceMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{account} holds {balance}. After this exchange it will be {after}.'**
+  String travelOverBalanceMsg(String account, String balance, String after);
+
+  /// No description provided for @travelExchangeAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange anyway'**
+  String get travelExchangeAnyway;
+
+  /// No description provided for @acctBalanceChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'This wallet\'s balance just changed. Check the new amount and try again.'**
+  String get acctBalanceChanged;
+
   /// No description provided for @plannedTotalOther.
   ///
   /// In en, this message translates to:

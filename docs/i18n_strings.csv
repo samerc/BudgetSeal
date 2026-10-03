@@ -2342,3 +2342,13 @@ sync_use_synced_budget,,Use the synced budget,استخدام الميزانية 
 # ──────────────────────────────────────────────,,,,
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
 planned_total_other,,total + other currencies,الإجمالي + عملات أخرى,total + autres devises
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+travel_wallet_name,,Travel - {currency},سفر - {currency},Voyage - {currency}
+travel_adds_to_wallet,,Adds to your {wallet} wallet,يُضاف إلى محفظة {wallet},S'ajoute à votre portefeuille {wallet}
+travel_exchange_top_up,,Exchange & add to wallet,صرف وإضافة إلى المحفظة,Échanger et ajouter au portefeuille
+travel_over_balance_title,,More than this account holds,أكثر من رصيد هذا الحساب,Plus que le solde de ce compte
+travel_over_balance_msg,,{account} holds {balance}. After this exchange it will be {after}.,رصيد {account}: {balance}. بعد هذا الصرف سيصبح {after}.,"{account} contient {balance}. Après cet échange, il sera de {after}."
+travel_exchange_anyway,,Exchange anyway,الصرف على أي حال,Échanger quand même
+acct_balance_changed,,This wallet's balance just changed. Check the new amount and try again.,تغيّر رصيد هذه المحفظة للتو. تحقّق من المبلغ الجديد وحاول مرة أخرى.,Le solde de ce portefeuille vient de changer. Vérifiez le nouveau montant et réessayez.

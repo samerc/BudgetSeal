@@ -17,6 +17,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/fx/fx_service.dart';
+import '../../core/services/travel_account_service.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/activity_filter_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -983,8 +984,14 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       return;
     }
 
+    final walletCurrency = _currencyController.text;
     String? destAccountId = regularAccounts.first.id;
-    double receivedAmount = 0;
+    double sameCurrencyAmount(String? id) =>
+        regularAccounts.where((a) => a.id == id).firstOrNull?.currency ==
+                walletCurrency
+            ? balance
+            : 0;
+    double receivedAmount = sameCurrencyAmount(destAccountId);
 
     final tr = S.of(context);
     final surfaceColor = AppColors.sf(context);
@@ -1021,16 +1028,26 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 value: a.id,
                 child: Text('${a.name} (${a.currency})'),
               )).toList(),
-              onChanged: (v) => setModalState(() => destAccountId = v),
+              onChanged: (v) => setModalState(() {
+                destAccountId = v;
+                receivedAmount = sameCurrencyAmount(v);
+              }),
             ),
             const SizedBox(height: 16),
             // Amount received
             CalculatorAmountField(
+              // A new key per destination so the prefilled amount shows.
+              key: ValueKey(destAccountId),
               value: receivedAmount,
               label: tr.acctAmountReceived,
               currency: regularAccounts
                   .where((a) => a.id == destAccountId).firstOrNull?.currency,
-              hintText: '0.00',
+              hintText: formatNumber(0,
+                  decimals: currencyDecimals(regularAccounts
+                          .where((a) => a.id == destAccountId)
+                          .firstOrNull
+                          ?.currency ??
+                      walletCurrency)),
               fontSize: 22,
               onChanged: (v) => setModalState(() => receivedAmount = v),
             ),
@@ -1052,7 +1069,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     if (confirmed != true || !mounted) return;
 
     try {
-      final engine = ref.read(allocationEngineProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
 
@@ -1060,29 +1076,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           .where((a) => a.id == destAccountId).firstOrNull;
       if (destAcc == null) return;
 
-      // Record the reverse transfer
-      final rate = balance > 0 ? receivedAmount / balance : 1.0;
-      await engine.recordTransfer(
+      // Transfer the balance and archive, in one db transaction; refused if
+      // the balance changed since the sheet opened.
+      await TravelAccountService.convertBack(
+        ref.read(databaseProvider),
         householdId: householdId,
-        fromAccountId: widget.accountId,
+        walletId: widget.accountId,
+        expectedBalance: balance,
         toAccountId: destAccountId!,
-        amount: balance,
-        currency: _currencyController.text,
-        exchangeRateToBase: rate,
-        createdBy: 'local',
-        deviceId: 'local',
-        note: S.of(context).travelConvertBackNote(destAcc.currency),
-        date: DateTime.now(),
+        received: receivedAmount,
+        note: tr.travelConvertBackNote(destAcc.currency),
       );
-
-      // Archive the travel account
-      final db = ref.read(databaseProvider);
-      await (db.update(db.accounts)
-            ..where((a) => a.id.equals(widget.accountId)))
-          .write(AccountsCompanion(
-        archived: const Value(true),
-        lastModified: Value(DateTime.now()),
-      ));
 
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
@@ -1098,7 +1102,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         );
         context.pop();
       }
+    } on TravelBalanceChangedException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr.acctBalanceChanged),
+              behavior: SnackBarBehavior.floating),
+        );
+        _loadAccount(); // show the new balance
+      }
     } catch (e) {
+      debugPrint('[AccountDetail] Convert back failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(S.of(context).acctSomethingWrong),

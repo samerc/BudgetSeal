@@ -9,6 +9,34 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String travelWalletName(String currency) {
+    return 'Travel - $currency';
+  }
+
+  @override
+  String travelAddsToWallet(String wallet) {
+    return 'Adds to your $wallet wallet';
+  }
+
+  @override
+  String get travelExchangeTopUp => 'Exchange & add to wallet';
+
+  @override
+  String get travelOverBalanceTitle => 'More than this account holds';
+
+  @override
+  String travelOverBalanceMsg(String account, String balance, String after) {
+    return '$account holds $balance. After this exchange it will be $after.';
+  }
+
+  @override
+  String get travelExchangeAnyway => 'Exchange anyway';
+
+  @override
+  String get acctBalanceChanged =>
+      'This wallet\'s balance just changed. Check the new amount and try again.';
+
+  @override
   String get plannedTotalOther => 'total + other currencies';
 
   @override
