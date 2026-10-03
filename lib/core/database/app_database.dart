@@ -193,7 +193,40 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(m, allocations, allocations.sortOrder);
           }
         },
+        beforeOpen: (_) => _ensureSyncTriggers(),
       );
+
+  /// Tables that sync merges by `last_modified` (newer row wins).
+  static const syncedTables = [
+    'households',
+    'users',
+    'accounts',
+    'allocations',
+    'categories',
+    'transactions',
+    'recurring_transactions',
+    'transaction_templates',
+    'objectives',
+  ];
+
+  /// An update that doesn't set `last_modified` itself (a forgotten
+  /// `lastModified:` in a companion, raw SQL) never reached other devices:
+  /// the merge keeps the row with the newer stamp. These triggers stamp such
+  /// updates with the current time. An update that sets a new stamp (every
+  /// sync merge, explicit writes) is left alone. Idempotent; created on every
+  /// open, so no schema version is needed. Dates are stored as Unix seconds.
+  Future<void> _ensureSyncTriggers() async {
+    for (final t in syncedTables) {
+      await customStatement('''
+        CREATE TRIGGER IF NOT EXISTS bump_last_modified_$t
+        AFTER UPDATE ON $t
+        FOR EACH ROW WHEN NEW.last_modified IS OLD.last_modified
+        BEGIN
+          UPDATE $t SET last_modified = CAST(strftime('%s', 'now') AS INTEGER)
+          WHERE id = NEW.id;
+        END''');
+    }
+  }
 
   /// Adds [column] to [table] only if the SQLite table does not already have
   /// it. Prevents "duplicate column name" when a migration re-runs or the

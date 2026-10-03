@@ -45,6 +45,11 @@ void main() {
     final file = File(p.join(dir.path, 'v17.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      // A real v17 database has no sync triggers (they're created on open,
+      // after migrating), and they'd block dropping last_modified below.
+      for (final t in AppDatabase.syncedTables) {
+        await db.customStatement('DROP TRIGGER IF EXISTS bump_last_modified_$t');
+      }
       // Strip the v18 columns to mimic a real v17 database, then rewind version.
       for (final stmt in const [
         'ALTER TABLE accounts DROP COLUMN deleted',

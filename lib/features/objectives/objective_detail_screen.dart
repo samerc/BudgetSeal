@@ -155,7 +155,7 @@ class _ObjectiveDetailScreenState
                 t.householdId.equals(householdId) &
                 t.deleted.equals(false) &
                 t.status.isNull() &
-                t.note.like('%$escapedName%'))
+                t.note.like('%$escapedName%', escapeChar: r'\'))
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();
     }
