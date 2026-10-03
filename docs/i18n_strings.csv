@@ -2332,3 +2332,9 @@ sync_err_corrupt,,The sync file couldn't be read. Sync again from your other dev
 sync_err_signed_out,,You were signed out of Google Drive. Connect again to keep syncing.,تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.,Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.
 sync_err_generic,,Sync didn't finish. Please try again in a moment.,لم تكتمل المزامنة. حاول مرة أخرى بعد قليل.,La synchronisation n'a pas abouti. Réessayez dans un instant.
 sync_err_backup_failed,,"Couldn't back up your current data, so nothing was replaced.",تعذّر نسخ بياناتك الحالية احتياطيًا، لذلك لم يُستبدل أي شيء.,Impossible de sauvegarder vos données actuelles : rien n'a été remplacé.
+
+# ──────────────────────────────────────────────,,,,
+# ADDED FROM ARB (Oct 2026 audit sync),,,,
+sync_other_budget_title,,Another budget is already synced here,توجد ميزانية أخرى متزامنة هنا,Un autre budget est déjà synchronisé ici
+sync_other_budget_body,,This account's sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.,يحتوي ملف المزامنة في هذا الحساب على ميزانية أُنشئت على جهاز آخر. هل تريد استخدامها على هذا الجهاز؟ ستحلّ محلّ البيانات الموجودة على هذا الجهاز، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.,Le fichier de synchronisation de ce compte contient un budget créé sur un autre appareil. L'utiliser sur cet appareil ? Il remplace les données de cet appareil ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.
+sync_use_synced_budget,,Use the synced budget,استخدام الميزانية المتزامنة,Utiliser le budget synchronisé

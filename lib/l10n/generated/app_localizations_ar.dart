@@ -9,6 +9,16 @@ class SAr extends S {
   SAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get syncOtherBudgetTitle => 'توجد ميزانية أخرى متزامنة هنا';
+
+  @override
+  String get syncOtherBudgetBody =>
+      'يحتوي ملف المزامنة في هذا الحساب على ميزانية أُنشئت على جهاز آخر. هل تريد استخدامها على هذا الجهاز؟ ستحلّ محلّ البيانات الموجودة على هذا الجهاز، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.';
+
+  @override
+  String get syncUseSyncedBudget => 'استخدام الميزانية المتزامنة';
+
+  @override
   String get syncErrWrongPassword =>
       'كلمة مرور المزامنة غير صحيحة. استخدم نفس كلمة المرور الموجودة على جهازك الآخر.';
 

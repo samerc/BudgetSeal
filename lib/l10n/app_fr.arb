@@ -1,4 +1,7 @@
 {
+  "syncOtherBudgetTitle": "Un autre budget est déjà synchronisé ici",
+  "syncOtherBudgetBody": "Le fichier de synchronisation de ce compte contient un budget créé sur un autre appareil. L'utiliser sur cet appareil ? Il remplace les données de cet appareil ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.",
+  "syncUseSyncedBudget": "Utiliser le budget synchronisé",
   "syncErrWrongPassword": "Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.",
   "syncErrCorrupt": "Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.",
   "syncErrSignedOut": "Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.",

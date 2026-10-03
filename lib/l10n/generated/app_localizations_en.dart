@@ -9,6 +9,16 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get syncOtherBudgetTitle => 'Another budget is already synced here';
+
+  @override
+  String get syncOtherBudgetBody =>
+      'This account\'s sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.';
+
+  @override
+  String get syncUseSyncedBudget => 'Use the synced budget';
+
+  @override
   String get syncErrWrongPassword =>
       'Wrong sync password. Use the same password as on your other device.';
 

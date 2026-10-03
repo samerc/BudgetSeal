@@ -1,4 +1,7 @@
 {
+  "syncOtherBudgetTitle": "Another budget is already synced here",
+  "syncOtherBudgetBody": "This account's sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.",
+  "syncUseSyncedBudget": "Use the synced budget",
   "syncErrWrongPassword": "Wrong sync password. Use the same password as on your other device.",
   "syncErrCorrupt": "The sync file couldn't be read. Sync again from your other device.",
   "syncErrSignedOut": "You were signed out of Google Drive. Connect again to keep syncing.",

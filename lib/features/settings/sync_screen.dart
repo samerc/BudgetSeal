@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/providers/sync_provider.dart';
@@ -248,6 +249,7 @@ class SyncScreen extends ConsumerWidget {
           behavior: SnackBarBehavior.floating,
         ),
       );
+      await _firstSync(context, ref, provider);
     } else if (!ok && context.mounted) {
       String errorMsg = S.of(context).syncFailedToConnect;
       if (provider is GoogleDriveProvider && provider.lastConnectError != null) {
@@ -267,6 +269,59 @@ class SyncScreen extends ConsumerWidget {
           ],
         ),
       );
+    }
+  }
+
+  /// Right after connecting: upload when the provider has no file yet,
+  /// merge when it holds this budget, and ask when it holds another one —
+  /// merging two separate budgets would mix two households in one database.
+  Future<void> _firstSync(
+      BuildContext context, WidgetRef ref, CloudProvider provider) async {
+    final notifier = ref.read(syncProvider.notifier);
+    final RemoteMatch match;
+    try {
+      match = await notifier.checkRemote();
+    } catch (e) {
+      // Stays connected; the error shows on this screen until fixed (e.g.
+      // the sync password is entered).
+      ref.read(syncProvider.notifier).reportError(e);
+      return;
+    }
+    switch (match) {
+      case RemoteMatch.none:
+        await notifier.initialUpload();
+      case RemoteMatch.same:
+        await notifier.sync();
+      case RemoteMatch.other:
+        if (!context.mounted) return;
+        final tr = S.of(context);
+        final use = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(tr.syncOtherBudgetTitle),
+            content: Text(tr.syncOtherBudgetBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(tr.syncDisconnect),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(tr.syncUseSyncedBudget),
+              ),
+            ],
+          ),
+        );
+        if (use == true) {
+          await notifier.restoreFromProvider(provider);
+          if (context.mounted &&
+              ref.read(syncProvider).status == SyncStatus.success) {
+            context.go('/');
+          }
+        } else {
+          // Left connected, the next automatic sync would merge the two.
+          await notifier.disconnectProvider();
+        }
     }
   }
 

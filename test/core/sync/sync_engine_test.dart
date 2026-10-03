@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:budgetseal/core/database/app_database.dart';
 import 'dart:io';
 
+import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:budgetseal/core/engine/recurring_engine.dart';
 import 'package:budgetseal/core/providers/sync_provider.dart';
 import 'package:budgetseal/core/sync/cloud_provider.dart';
@@ -207,6 +208,54 @@ void main() {
 
       await RecurringEngine(b).processRecurring();
       await expectOnePosting(b);
+    });
+  });
+
+  group('deleted transactions', () {
+    Future<String> spend(AppDatabase db) async {
+      await addAccount(db);
+      await db.into(db.allocations).insert(AllocationsCompanion.insert(
+          id: 'env', householdId: 'hh', name: 'Food', categoryId: 'cat',
+          deviceId: 'x', lastModified: Value(DateTime(2026, 1, 1))));
+      await db.into(db.categories).insert(CategoriesCompanion.insert(
+          id: 'cat', householdId: 'hh', name: 'Food',
+          allocationId: const Value('env'),
+          lastModified: Value(DateTime(2026, 1, 1))));
+      return AllocationEngine(db).recordTransaction(
+          householdId: 'hh', accountId: 'acc', type: 'expense',
+          lines: [TxLine(amount: 12, currency: 'USD', categoryId: 'cat')],
+          baseCurrency: 'USD');
+    }
+
+    test("their envelope rows don't come back from the other device",
+        () async {
+      final id = await spend(a);
+      await sync(a, b);
+      expect(await b.select(b.allocationLedger).get(), hasLength(1));
+
+      await AllocationEngine(a).deleteTransaction(id);
+      await sync(b, a); // B's file still has the ledger row
+      expect(await a.select(a.allocationLedger).get(), isEmpty);
+
+      await sync(a, b);
+      expect((await b.select(b.transactions).getSingle()).deleted, isTrue);
+      expect(await b.select(b.allocationLedger).get(), isEmpty);
+    });
+
+    test('purged ones stay purged', () async {
+      final id = await spend(a);
+      await AllocationEngine(a).deleteTransaction(id);
+      await sync(a, b);
+
+      // Health Check → Purge on A.
+      await (a.delete(a.transactionLines)
+            ..where((l) => l.transactionId.equals(id)))
+          .go();
+      await (a.delete(a.transactions)..where((t) => t.id.equals(id))).go();
+
+      await sync(b, a);
+      expect(await a.select(a.transactions).get(), isEmpty);
+      expect(await a.select(a.transactionLines).get(), isEmpty);
     });
   });
 

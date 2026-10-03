@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import '../database/daos/ledger_dao.dart';
 import 'sync_encryption.dart';
 
 /// Exports all data from the local database as a JSON map.
@@ -50,7 +52,8 @@ class SyncEngine {
       'objectives': objectivesList.map(_objectiveToMap).toList(),
     };
 
-    final json = jsonEncode(data);
+    // A few MB of JSON for a long history: encode off the UI thread.
+    final json = await Isolate.run(() => jsonEncode(data));
     // Encrypt if a sync password is set
     return SyncEncryption.encrypt(json);
   }
@@ -61,17 +64,7 @@ class SyncEngine {
   /// Used for restore-from-backup scenarios.
   /// Automatically decrypts if the file is encrypted.
   Future<void> restoreFromJson(String rawContent) async {
-    final jsonStr = await SyncEncryption.decrypt(rawContent);
-    final dynamic decoded;
-    try {
-      decoded = jsonDecode(jsonStr);
-    } catch (e) {
-      throw FormatException('Sync file is corrupted or not valid JSON');
-    }
-    if (decoded is! Map<String, dynamic>) {
-      throw FormatException('Sync file has unexpected format');
-    }
-    final data = decoded;
+    final data = await _readFile(rawContent);
 
     await _db.transaction(() async {
       // Delete all existing data (order matters for foreign keys)
@@ -142,6 +135,16 @@ class SyncEngine {
     });
   }
 
+  /// Household ids in a sync file (decrypting it if needed): tells a
+  /// device connecting to an existing file whether it's the same budget.
+  Future<Set<String>> householdIdsIn(String rawContent) async {
+    final data = await _readFile(rawContent);
+    return {
+      for (final h in _list(data, 'households'))
+        (h as Map<String, dynamic>)['id'] as String,
+    };
+  }
+
   // ── Merge (row-level sync) ────────────────────────────────────
 
   /// Merge remote data into local database.
@@ -149,20 +152,32 @@ class SyncEngine {
   /// If row doesn't exist locally, insert it.
   /// Returns the number of rows updated/inserted.
   Future<int> mergeFromJson(String rawContent) async {
-    final jsonStr = await SyncEncryption.decrypt(rawContent);
-    final dynamic decoded;
-    try {
-      decoded = jsonDecode(jsonStr);
-    } catch (e) {
-      throw FormatException('Sync file is corrupted or not valid JSON');
-    }
-    if (decoded is! Map<String, dynamic>) {
-      throw FormatException('Sync file has unexpected format');
-    }
-    final data = decoded;
+    final data = await _readFile(rawContent);
     int changed = 0;
 
     await _db.transaction(() async {
+      // A transaction deleted on the other device that this one doesn't
+      // have (never got it, or purged it in Health Check) has nothing to
+      // delete here: skip it with its lines and ledger rows, or purged rows
+      // would come back from every sync.
+      final localTx = (await _db
+              .customSelect('SELECT id FROM transactions')
+              .get())
+          .map((r) => r.data['id'] as String)
+          .toSet();
+      final skipTx = {
+        for (final t in _list(data, 'transactions'))
+          if ((t as Map<String, dynamic>)['deleted'] == true &&
+              !localTx.contains(t['id']))
+            t['id'] as String,
+      };
+      List<dynamic> keep(String key, String txField) => skipTx.isEmpty
+          ? _list(data, key)
+          : _list(data, key)
+              .where((r) => !skipTx.contains(
+                  (r as Map<String, dynamic>)[txField]))
+              .toList();
+
       changed += await _mergeTable(
           _db.households, _list(data, 'households'), _householdFromMap,
           getId: (m) => m['id'] as String,
@@ -194,17 +209,17 @@ class SyncEngine {
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(
-          _db.transactions, _list(data, 'transactions'), _transactionFromMap,
+          _db.transactions, keep('transactions', 'id'), _transactionFromMap,
           getId: (m) => m['id'] as String,
           column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
 
       changed += await _mergeTable(_db.transactionLines,
-          _list(data, 'transactionLines'), _txLineFromMap,
+          keep('transactionLines', 'transactionId'), _txLineFromMap,
           getId: (m) => m['id'] as String, getModified: (_) => null);
 
       changed += await _mergeTable(_db.allocationLedger,
-          _list(data, 'allocationLedger'), _ledgerFromMap,
+          keep('allocationLedger', 'sourceTransactionId'), _ledgerFromMap,
           getId: (m) => m['id'] as String,
           column: 'created_at',
           getModified: (m) => _parseDate(m['createdAt']));
@@ -232,6 +247,11 @@ class SyncEngine {
           getId: (m) => m['id'] as String,
           column: 'last_modified',
           getModified: (m) => _parseDate(m['lastModified']));
+
+      // Ledger rows of deleted transactions are removed for good on the
+      // device that deleted them, but the other device's file still has
+      // them: drop them again (balances ignore them anyway).
+      await LedgerDao(_db).deleteForDeletedTransactions();
     });
 
     return changed;
@@ -252,13 +272,17 @@ class SyncEngine {
 
     // Bulk-fetch all local rows' IDs + the table's own timestamp column in
     // one query. A table without one (transaction lines) is insert-only.
+    final hasDeleted = table.columnsByName.containsKey('deleted');
     final localRows = await (_db.customSelect(
-      'SELECT id, ${column ?? 'NULL'} AS ts FROM ${table.actualTableName}',
+      'SELECT id, ${column ?? 'NULL'} AS ts, '
+      '${hasDeleted ? 'deleted' : '0'} AS del FROM ${table.actualTableName}',
     )).get();
 
     final localTimestamps = <String, DateTime?>{};
+    final localDeleted = <String>{};
     for (final row in localRows) {
       final id = row.data['id'] as String;
+      if (row.data['del'] == 1) localDeleted.add(id);
       final tsStr = row.data['ts'];
       DateTime? ts;
       if (tsStr != null) {
@@ -269,39 +293,51 @@ class SyncEngine {
       localTimestamps[id] = ts;
     }
 
-    int changed = 0;
+    final toWrite = <Insertable<dynamic>>[];
     for (final row in remoteRows) {
       final map = row as Map<String, dynamic>;
       final id = getId(map);
       final remoteModified = getModified(map);
 
       if (!localTimestamps.containsKey(id)) {
-        // New row — insert
-        await _insertOrUpdate(table, fromMap(map));
-        changed++;
+        toWrite.add(fromMap(map)); // new row
       } else if (remoteModified != null) {
         final localModified = localTimestamps[id];
         if (localModified != null && remoteModified.isAfter(localModified)) {
-          await _insertOrUpdate(table, fromMap(map));
-          changed++;
+          toWrite.add(fromMap(map));
+        } else if (remoteModified == localModified &&
+            map['deleted'] == true &&
+            !localDeleted.contains(id)) {
+          // Same second (times are stored in whole seconds): a delete wins
+          // over the edit it can't be told apart from.
+          toWrite.add(fromMap(map));
         }
       }
     }
-    return changed;
-  }
-
-  /// Helper to insert-or-update using the correct table type.
-  Future<void> _insertOrUpdate(
-    TableInfo<dynamic, dynamic> table,
-    Insertable<dynamic> companion,
-  ) async {
-    // Cast to satisfy drift's generic constraints on into<T extends Table>().
-    await _db
-        .into(table as TableInfo<Table, dynamic>)
-        .insertOnConflictUpdate(companion);
+    if (toWrite.isEmpty) return 0;
+    // One batch per table (a first sync can bring thousands of rows).
+    // Cast to satisfy drift's generic constraints on insert<T extends Table>().
+    await _db.batch((b) => b.insertAllOnConflictUpdate(
+        table as TableInfo<Table, dynamic>, toWrite));
+    return toWrite.length;
   }
 
   // ── Helpers ───────────────────────────────────────────────────
+
+  /// Decrypts (if needed) and parses a sync file, off the UI thread.
+  Future<Map<String, dynamic>> _readFile(String rawContent) async {
+    final jsonStr = await SyncEncryption.decrypt(rawContent);
+    final dynamic decoded;
+    try {
+      decoded = await Isolate.run(() => jsonDecode(jsonStr));
+    } catch (e) {
+      throw FormatException('Sync file is corrupted or not valid JSON');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw FormatException('Sync file has unexpected format');
+    }
+    return decoded;
+  }
 
   List<dynamic> _list(Map<String, dynamic> data, String key) =>
       (data[key] as List<dynamic>?) ?? [];

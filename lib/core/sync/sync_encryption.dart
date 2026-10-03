@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
@@ -39,6 +40,7 @@ class SyncEncryption {
 
   /// Clear the stored password.
   static Future<void> clearPassword() async {
+    _keyCache.clear();
     await _secureStorage.delete(key: _passwordKey);
     await _secureStorage.delete(key: _saltKey);
   }
@@ -55,13 +57,15 @@ class SyncEncryption {
     }
 
     final salt = await _getOrCreateSalt();
-    final key = _deriveKey(password, salt);
-    final iv = IV.fromSecureRandom(16);
+    final key = await _keyFor(password, salt);
+    final iv = IV.fromSecureRandom(16).bytes;
 
-    final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
-    final encrypted = encrypter.encrypt(plaintext, iv: iv);
+    // AES + base64 of a multi-MB file: off the UI thread.
+    final cipher = await Isolate.run(() => Encrypter(AES(Key(key), mode: AESMode.cbc))
+        .encrypt(plaintext, iv: IV(iv))
+        .base64);
 
-    return 'ENC:1:${base64Encode(salt)}:${iv.base64}:${encrypted.base64}';
+    return 'ENC:1:${base64Encode(salt)}:${base64Encode(iv)}:$cipher';
   }
 
   /// Decrypt an encrypted string with the given password.
@@ -85,14 +89,14 @@ class SyncEncryption {
     }
 
     final salt = base64Decode(parts[2]);
-    final iv = IV.fromBase64(parts[3]);
-    final ciphertext = Encrypted.fromBase64(parts[4]);
+    final iv = base64Decode(parts[3]);
+    final ciphertext = parts[4];
 
-    final key = _deriveKey(password, salt);
-    final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
+    final key = await _keyFor(password, salt);
 
     try {
-      return encrypter.decrypt(ciphertext, iv: iv);
+      return await Isolate.run(() => Encrypter(AES(Key(key), mode: AESMode.cbc))
+          .decrypt(Encrypted.fromBase64(ciphertext), iv: IV(iv)));
     } catch (e) {
       throw const SyncPasswordException(missing: false);
     }
@@ -111,12 +115,26 @@ class SyncEncryption {
     return salt;
   }
 
+  /// Derived keys by password + salt: PBKDF2 (100k rounds) takes about a
+  /// second on a slow phone, and every sync needs it twice (read + write).
+  static final _keyCache = <String, Uint8List>{};
+
+  static Future<Uint8List> _keyFor(String password, Uint8List salt) async {
+    final id = '${base64Encode(salt)}:$password';
+    final cached = _keyCache[id];
+    if (cached != null) return cached;
+    final key = await Isolate.run(() => _deriveKey(password, salt));
+    // A sync reads with the other device's salt and writes with ours.
+    if (_keyCache.length >= 4) _keyCache.clear();
+    _keyCache[id] = key;
+    return key;
+  }
+
   /// Derive a 256-bit AES key from password + salt using PBKDF2.
-  static Key _deriveKey(String password, Uint8List salt) {
+  static Uint8List _deriveKey(String password, Uint8List salt) {
     final pbkdf2 = pc.KeyDerivator('SHA-256/HMAC/PBKDF2')
       ..init(pc.Pbkdf2Parameters(salt, 100000, 32));
-    final keyBytes = pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
-    return Key(keyBytes);
+    return pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
   }
 }
 

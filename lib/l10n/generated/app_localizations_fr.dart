@@ -9,6 +9,16 @@ class SFr extends S {
   SFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get syncOtherBudgetTitle => 'Un autre budget est déjà synchronisé ici';
+
+  @override
+  String get syncOtherBudgetBody =>
+      'Le fichier de synchronisation de ce compte contient un budget créé sur un autre appareil. L\'utiliser sur cet appareil ? Il remplace les données de cet appareil ; une sauvegarde est d\'abord enregistrée dans Sauvegarde et restauration.';
+
+  @override
+  String get syncUseSyncedBudget => 'Utiliser le budget synchronisé';
+
+  @override
   String get syncErrWrongPassword =>
       'Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.';
 

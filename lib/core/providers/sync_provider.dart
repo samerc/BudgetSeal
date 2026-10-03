@@ -17,8 +17,12 @@ import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
 import '../sync/sync_encryption.dart';
 import '../sync/sync_engine.dart';
+import 'age_of_money_provider.dart';
+import 'daily_spending_provider.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
+import 'objectives_provider.dart';
+import 'period_reset_provider.dart';
 import 'receipt_sync_provider.dart';
 import '../../l10n/s_lookup.dart';
 
@@ -26,6 +30,18 @@ const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
 
 enum SyncStatus { idle, syncing, success, error }
+
+/// What a newly connected provider already holds.
+enum RemoteMatch {
+  /// No sync file yet — upload this device's data.
+  none,
+
+  /// A file of this device's budget — sync (merge) as usual.
+  same,
+
+  /// A file of a different budget — ask before replacing this one.
+  other,
+}
 
 class SyncState {
   final CloudProvider? activeProvider;
@@ -187,6 +203,7 @@ class SyncNotifier extends Notifier<SyncState> {
       final remoteJson = await provider.download();
       if (remoteJson != null) {
         totalChanges += await _engine.mergeFromJson(remoteJson);
+        if (totalChanges > 0) _refreshAfterMerge();
       }
 
       // 2. Export local state and upload
@@ -218,6 +235,36 @@ class SyncNotifier extends Notifier<SyncState> {
         lastError: syncErrorText(e),
       );
     }
+  }
+
+  /// Most screens read Drift streams and redraw by themselves after a
+  /// merge; these providers load once and need a nudge.
+  void _refreshAfterMerge() {
+    ref.invalidate(objectivesProvider);
+    ref.invalidate(dailySpendingProvider);
+    ref.invalidate(ageOfMoneyProvider);
+    ref.invalidate(pendingResetProvider);
+  }
+
+  /// Shows [e] as the sync error (see [syncErrorText]).
+  void reportError(Object e) => state = state.copyWith(
+        status: SyncStatus.error,
+        lastError: syncErrorText(e),
+      );
+
+  /// After connecting: is there a sync file, and is it this budget's?
+  /// Throws (e.g. [SyncPasswordException]) when the file can't be read.
+  Future<RemoteMatch> checkRemote() async {
+    final provider = state.activeProvider;
+    if (provider == null) return RemoteMatch.none;
+    final raw = await provider.download();
+    if (raw == null) return RemoteMatch.none;
+    final ids = await _engine.householdIdsIn(raw);
+    final local = ref.read(currentHouseholdIdProvider);
+    if (ids.isEmpty) return RemoteMatch.none;
+    return local != null && ids.contains(local)
+        ? RemoteMatch.same
+        : RemoteMatch.other;
   }
 
   /// Sync receipt files with Google Drive.

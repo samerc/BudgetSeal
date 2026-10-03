@@ -99,6 +99,24 @@ abstract class S {
     Locale('fr')
   ];
 
+  /// No description provided for @syncOtherBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Another budget is already synced here'**
+  String get syncOtherBudgetTitle;
+
+  /// No description provided for @syncOtherBudgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This account\'s sync file holds a budget made on another device. Use it on this device? It replaces the data on this device; a backup of it is saved first in Backup & Restore.'**
+  String get syncOtherBudgetBody;
+
+  /// No description provided for @syncUseSyncedBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the synced budget'**
+  String get syncUseSyncedBudget;
+
   /// No description provided for @syncErrWrongPassword.
   ///
   /// In en, this message translates to:

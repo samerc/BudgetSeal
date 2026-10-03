@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -27,6 +28,7 @@ class GoogleDriveProvider implements CloudProvider {
   drive.DriveApi? _driveApi;
   String? _syncFileId;
   String? _folderId;
+  bool _sharedFolder = false;
   String? lastConnectError;
   bool _initialized = false;
 
@@ -89,58 +91,45 @@ class GoogleDriveProvider implements CloudProvider {
     _driveApi = null;
     _syncFileId = null;
     _folderId = null;
+    _sharedFolder = false;
   }
 
   @override
   Future<void> upload(String jsonContent) async {
-    final api = await _getDriveApi();
-    final folderId = await _getOrCreateFolder(api);
-    final fileId = await _findSyncFile(api, folderId);
+    final bytes = utf8.encode(jsonContent);
+    await _retryIfGone((api) async {
+      final folderId = await _getOrCreateFolder(api);
+      final fileId = await _findSyncFile(api, folderId);
+      final media = drive.Media(Stream.value(bytes), bytes.length,
+          contentType: 'application/json');
 
-    final media = drive.Media(
-      Stream.value(utf8.encode(jsonContent)),
-      utf8.encode(jsonContent).length,
-      contentType: 'application/json',
-    );
-
-    if (fileId != null) {
-      await api.files.update(drive.File(), fileId, uploadMedia: media);
-    } else {
-      final driveFile = drive.File()
-        ..name = _syncFileName
-        ..parents = [folderId]
-        ..mimeType = 'application/json';
-      final created =
-          await api.files.create(driveFile, uploadMedia: media);
-      _syncFileId = created.id;
-    }
+      if (fileId != null) {
+        await api.files.update(drive.File(), fileId, uploadMedia: media);
+      } else {
+        final driveFile = drive.File()
+          ..name = _syncFileName
+          ..parents = [folderId]
+          ..mimeType = 'application/json';
+        final created =
+            await api.files.create(driveFile, uploadMedia: media);
+        _syncFileId = created.id;
+      }
+    });
   }
 
   @override
-  Future<String?> download() async {
-    final api = await _getDriveApi();
-    final folderId = await _getOrCreateFolder(api);
-    final fileId = await _findSyncFile(api, folderId);
-    if (fileId == null) return null;
-
-    final response = await api.files.get(
-      fileId,
-      downloadOptions: drive.DownloadOptions.fullMedia,
-    ) as drive.Media;
-
-    final bytes = <int>[];
-    await for (final chunk in response.stream) {
-      bytes.addAll(chunk);
-    }
-    return utf8.decode(bytes);
-  }
+  Future<String?> download() => _retryIfGone((api) async {
+        final folderId = await _getOrCreateFolder(api);
+        final fileId = await _findSyncFile(api, folderId);
+        if (fileId == null) return null;
+        return utf8.decode(await _fetch(api, fileId));
+      });
 
   @override
-  Future<bool> syncFileExists() async {
-    final api = await _getDriveApi();
-    final folderId = await _getOrCreateFolder(api);
-    return await _findSyncFile(api, folderId) != null;
-  }
+  Future<bool> syncFileExists() => _retryIfGone((api) async {
+        final folderId = await _getOrCreateFolder(api);
+        return await _findSyncFile(api, folderId) != null;
+      });
 
   // ── Receipt sync ──────────────────────────────────────────────
 
@@ -150,18 +139,15 @@ class GoogleDriveProvider implements CloudProvider {
     final parentFolderId = await _getOrCreateFolder(api);
     final receiptsFolderId =
         await _getOrCreateSubfolder(api, parentFolderId, 'receipts');
+    // One listing instead of a query per receipt.
+    final onDrive = (await _receiptFiles(api, receiptsFolderId)).keys.toSet();
 
     for (final filePath in filePaths) {
       final file = io.File(filePath);
       if (!file.existsSync()) continue;
 
       final fileName = filePath.split('/').last.split('\\').last;
-
-      // Check if file already exists on Drive
-      final query =
-          "name = '${_escGdql(fileName)}' and '${_escGdql(receiptsFolderId)}' in parents and trashed = false";
-      final existing = await api.files.list(q: query, spaces: 'drive');
-      if (existing.files != null && existing.files!.isNotEmpty) continue;
+      if (onDrive.contains(fileName)) continue;
 
       final bytes = await file.readAsBytes();
       final media = drive.Media(
@@ -185,37 +171,72 @@ class GoogleDriveProvider implements CloudProvider {
     final receiptsFolderId =
         await _getOrCreateSubfolder(api, parentFolderId, 'receipts');
 
-    // List all receipt files on Drive
-    final query =
-        "'$receiptsFolderId' in parents and trashed = false";
-    final driveFiles = await api.files.list(q: query, spaces: 'drive');
+    final onDrive = await _receiptFiles(api, receiptsFolderId);
+    final wanted = filenames.toSet();
 
-    if (driveFiles.files == null) return;
-
-    for (final driveFile in driveFiles.files!) {
-      final name = driveFile.name;
-      if (name == null || driveFile.id == null) continue;
-      if (!filenames.contains(name)) continue;
+    for (final MapEntry(key: name, value: id) in onDrive.entries) {
+      if (!wanted.contains(name)) continue;
 
       // Sanitize filename to prevent path traversal
       final safeName = name.replaceAll(RegExp(r'[/\\]'), '_').replaceAll('..', '_');
       final localPath = '$localReceiptsDir/$safeName';
       if (io.File(localPath).existsSync()) continue;
 
-      // Download the file
-      final response = await api.files.get(
-        driveFile.id!,
-        downloadOptions: drive.DownloadOptions.fullMedia,
-      ) as drive.Media;
-
-      final bytes = <int>[];
-      await for (final chunk in response.stream) {
-        bytes.addAll(chunk);
-      }
+      final bytes = await _fetch(api, id);
 
       final dir = io.Directory(localReceiptsDir);
       if (!dir.existsSync()) dir.createSync(recursive: true);
       await io.File(localPath).writeAsBytes(bytes);
+    }
+  }
+
+  /// Every receipt in the folder, name → id, following pages (a list
+  /// call returns at most 100 by default).
+  Future<Map<String, String>> _receiptFiles(
+      drive.DriveApi api, String folderId) async {
+    final files = <String, String>{};
+    String? page;
+    do {
+      final list = await api.files.list(
+        q: "'${_escGdql(folderId)}' in parents and trashed = false",
+        spaces: 'drive',
+        pageSize: 1000,
+        pageToken: page,
+        $fields: 'nextPageToken, files(id, name)',
+      );
+      for (final f in list.files ?? const <drive.File>[]) {
+        if (f.name != null && f.id != null) files[f.name!] = f.id!;
+      }
+      page = list.nextPageToken;
+    } while (page != null);
+    return files;
+  }
+
+  Future<Uint8List> _fetch(drive.DriveApi api, String fileId) async {
+    final media = await api.files.get(
+      fileId,
+      downloadOptions: drive.DownloadOptions.fullMedia,
+    ) as drive.Media;
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in media.stream) {
+      bytes.add(chunk);
+    }
+    return bytes.takeBytes();
+  }
+
+  /// Runs [job]; when Drive says a remembered file or folder is gone (404 —
+  /// deleted in the Drive app, or this session's ids are stale) it forgets
+  /// them and tries once more, which finds or recreates them.
+  Future<T> _retryIfGone<T>(Future<T> Function(drive.DriveApi api) job) async {
+    final api = await _getDriveApi();
+    try {
+      return await job(api);
+    } on drive.DetailedApiRequestError catch (e) {
+      if (e.status != 404) rethrow;
+      _syncFileId = null;
+      // A joined (shared) folder that's gone stays an error.
+      if (!_sharedFolder) _folderId = null;
+      return job(api);
     }
   }
 
@@ -270,6 +291,7 @@ class GoogleDriveProvider implements CloudProvider {
       _driveApi = drive.DriveApi(
           _AuthClient(http.Client(), auth.accessToken, _refreshToken));
       _folderId = folderId;
+      _sharedFolder = true;
 
       // Verify we can access the folder
       await _driveApi!.files.get(folderId);
@@ -349,7 +371,10 @@ class GoogleDriveProvider implements CloudProvider {
     if (_folderId != null) return _folderId!;
     final query =
         "name = '${_escGdql(_folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-    final list = await api.files.list(q: query, spaces: 'drive');
+    // Oldest first: two folders (made by two devices at once) always
+    // resolve to the same one.
+    final list =
+        await api.files.list(q: query, spaces: 'drive', orderBy: 'createdTime');
     if (list.files != null && list.files!.isNotEmpty) {
       _folderId = list.files!.first.id!;
       return _folderId!;
@@ -367,7 +392,9 @@ class GoogleDriveProvider implements CloudProvider {
     if (_syncFileId != null) return _syncFileId;
     final query =
         "name = '${_escGdql(_syncFileName)}' and '${_escGdql(folderId)}' in parents and trashed = false";
-    final list = await api.files.list(q: query, spaces: 'drive');
+    // Several sync files (two first uploads at once): the newest one.
+    final list = await api.files
+        .list(q: query, spaces: 'drive', orderBy: 'modifiedTime desc');
     if (list.files != null && list.files!.isNotEmpty) {
       _syncFileId = list.files!.first.id;
       return _syncFileId;
