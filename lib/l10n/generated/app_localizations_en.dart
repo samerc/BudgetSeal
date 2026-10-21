@@ -7466,4 +7466,99 @@ class SEn extends S {
   String txMonthSpent(String spent, String income) {
     return 'Spent $spent · income $income';
   }
+
+  @override
+  String get webGsTitle => 'Get started';
+
+  @override
+  String webGsProgress(String done, String total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get webGsHide => 'Hide';
+
+  @override
+  String get webGsIncomeTitle => 'Record your income';
+
+  @override
+  String get webGsIncomeBody => 'Money comes in first. Then you give it jobs.';
+
+  @override
+  String get webGsEnvelopesTitle => 'Create envelopes';
+
+  @override
+  String get webGsEnvelopesBody =>
+      'One for each thing you spend on, like groceries or rent.';
+
+  @override
+  String get webGsFundTitle => 'Fund your envelopes';
+
+  @override
+  String get webGsFundBody =>
+      'Move money from Ready to assign into your envelopes.';
+
+  @override
+  String get webGsExpenseTitle => 'Log an expense';
+
+  @override
+  String get webGsExpenseBody => 'It comes out of the matching envelope.';
+
+  @override
+  String get webSealAllSealed => 'All sealed';
+
+  @override
+  String get webSealAllSealedBody => 'Every bit of your money has a job.';
+
+  @override
+  String get webSealFullyFunded => 'Fully funded';
+
+  @override
+  String webMonthSealed(String month) {
+    return '$month sealed';
+  }
+
+  @override
+  String webImpactLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String webImpactOver(String amount) {
+    return 'over by $amount';
+  }
+
+  @override
+  String get webImpactNotBudgeted => 'Not budgeted';
+
+  @override
+  String webMonthBudget(String month) {
+    return '$month budget';
+  }
+
+  @override
+  String webMonthSpentOf(String spent, String budgeted, String income) {
+    return 'Spent $spent of $budgeted budgeted · income $income';
+  }
+
+  @override
+  String webMonthSpent(String spent, String income) {
+    return 'Spent $spent · income $income';
+  }
+
+  @override
+  String get webOverspentTitle => 'Overspent envelopes';
+
+  @override
+  String webEnvOverBy(String amount) {
+    return 'Over by $amount';
+  }
+
+  @override
+  String get webBillsWeek => 'Bills due this week';
+
+  @override
+  String webNAccounts(String n) {
+    return '$n accounts';
+  }
 }

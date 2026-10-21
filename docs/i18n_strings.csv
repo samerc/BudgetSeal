@@ -2511,3 +2511,28 @@ tx_impact_not_budgeted,Activity row pill: expense whose category has no envelope
 tx_month_budget,"Activity month card title, e.g. ""October budget""",{month} budget,ميزانية {month},Budget de {month}
 tx_month_spent_of,Activity month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
 tx_month_spent,Activity month card line when no envelope has a target,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}
+web_gs_title,Web Companion: getting-started checklist on Home (same as the app),Get started,ابدأ,Pour commencer
+web_gs_progress,Web Companion: getting-started checklist on Home (same as the app),{done} of {total},{done} من {total},{done} sur {total}
+web_gs_hide,Web Companion: getting-started checklist on Home (same as the app),Hide,إخفاء,Masquer
+web_gs_income_title,Web Companion: getting-started checklist on Home (same as the app),Record your income,سجّل دخلك,Saisissez vos revenus
+web_gs_income_body,Web Companion: getting-started checklist on Home (same as the app),Money comes in first. Then you give it jobs.,يأتي المال أولًا، ثم تعطيه مهامّ.,"L'argent arrive d'abord. Ensuite, vous lui donnez une mission."
+web_gs_envelopes_title,Web Companion: getting-started checklist on Home (same as the app),Create envelopes,أنشئ أظرفًا,Créez des enveloppes
+web_gs_envelopes_body,Web Companion: getting-started checklist on Home (same as the app),"One for each thing you spend on, like groceries or rent.",واحد لكل ما تنفق عليه، مثل البقالة أو الإيجار.,"Une pour chaque type de dépense, comme les courses ou le loyer."
+web_gs_fund_title,Web Companion: getting-started checklist on Home (same as the app),Fund your envelopes,موّل أظرفك,Approvisionnez vos enveloppes
+web_gs_fund_body,Web Companion: getting-started checklist on Home (same as the app),Move money from Ready to assign into your envelopes.,انقل المال من «جاهز للتوزيع» إلى أظرفك.,Déplacez l'argent de « Prêt à répartir » vers vos enveloppes.
+web_gs_expense_title,Web Companion: getting-started checklist on Home (same as the app),Log an expense,سجّل مصروفًا,Saisissez une dépense
+web_gs_expense_body,Web Companion: getting-started checklist on Home (same as the app),It comes out of the matching envelope.,يُخصم من الظرف المطابق.,Elle est prise dans l'enveloppe correspondante.
+web_seal_all_sealed,Web: Ready to assign banner when every bit of money is in an envelope,All sealed,كلّه مختوم,Tout est scellé
+web_seal_all_sealed_body,Web: Ready to assign banner subtitle when all money is assigned,Every bit of your money has a job.,لكل جزء من أموالك مهمّة.,Tout votre argent a une mission.
+web_seal_fully_funded,Web: envelope card tag next to the seal,Fully funded,مموّل بالكامل,Entièrement approvisionnée
+web_month_sealed,"Web: past month within budget, e.g. ""September sealed""",{month} sealed,تم ختم {month},{month} scellé
+web_impact_left,"Web transaction row: envelope balance after, e.g. ""$142.80 left""",{amount} left,متبقٍّ {amount},{amount} restants
+web_impact_over,"Web transaction row / month card: ""over by $8.00""",over by {amount},تجاوز بـ {amount},dépassé de {amount}
+web_impact_not_budgeted,Web transaction row pill: no envelope for this category,Not budgeted,خارج الميزانية,Hors budget
+web_month_budget,"Web transactions: month card title, e.g. ""October budget""",{month} budget,ميزانية {month},Budget de {month}
+web_month_spent_of,Web transactions: month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
+web_month_spent,Web transactions: month card line without envelope targets,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}
+web_overspent_title,Web Home: card listing envelopes below zero,Overspent envelopes,أظرف متجاوزة,Enveloppes dépassées
+web_env_over_by,"Web Home: overspent envelope row, e.g. ""Over by $9.00""",Over by {amount},تجاوز بـ {amount},Dépassée de {amount}
+web_bills_week,Web Home: bills due within 7 days,Bills due this week,فواتير مستحقة هذا الأسبوع,Factures de la semaine
+web_n_accounts,Web transaction row: split across several accounts,{n} accounts,حسابات: {n},{n} comptes

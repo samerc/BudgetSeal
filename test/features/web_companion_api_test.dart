@@ -49,6 +49,7 @@ void main() {
   }
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     db = AppDatabase.forTesting(NativeDatabase.memory());
     container = ProviderContainer(
         overrides: [databaseProvider.overrideWithValue(db)]);
@@ -267,6 +268,66 @@ void main() {
     expect(d['status'], 200);
     expect((d['unallocated'] as Map)['USD'], 500);
     expect(d['period'], isNotNull);
+    // The getting-started checklist: income done, the rest to go.
+    expect(d['gettingStarted'],
+        {'income': true, 'envelopes': false, 'funded': false, 'expense': false});
+    await call(hideGettingStartedHandler(ref), 'POST');
+    expect((await call(dashboardHandler(ref), 'GET'))['gettingStarted'],
+        isNull);
+  });
+
+  test('list rows carry their budget impact, balance after, month summary',
+      () async {
+    await db.into(db.allocations).insert(AllocationsCompanion.insert(
+        id: 'env',
+        householdId: hh,
+        name: 'Groceries',
+        categoryId: 'food',
+        type: const Value('spending'),
+        targetAmount: const Value(50),
+        targetCurrency: const Value('USD'),
+        deviceId: 't'));
+    await (db.update(db.categories)..where((c) => c.id.equals('food')))
+        .write(const CategoriesCompanion(allocationId: Value('env')));
+    await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'income',
+      'accountId': 'usd',
+      'amount': 500,
+      'categoryId': 'pay',
+    });
+    // A minute earlier: rows in the same second replay in id order.
+    await (db.update(db.transactions)..where((t) => t.type.equals('income')))
+        .write(TransactionsCompanion(
+            createdAt: Value(
+                DateTime.now().subtract(const Duration(minutes: 1)))));
+    await call(moveEnvelopeMoneyHandler(ref), 'POST',
+        body: {'toId': 'env', 'amount': 50, 'currency': 'USD'});
+    await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'accountId': 'usd',
+      'amount': 20,
+      'categoryId': 'food',
+    });
+    final now = DateTime.now();
+    String day(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-01';
+    final list = await call(listTransactionsHandler(ref), 'GET',
+        query: '?from=${day(now)}&to=${day(DateTime(now.year, now.month + 1))}');
+    final items = list['items'] as List;
+    final expense = items.firstWhere((t) => t['type'] == 'expense');
+    expect(expense['impact']['name'], 'Groceries');
+    expect(expense['impact']['balanceAfter'], 30);
+    expect(expense['impact']['latest'], isTrue);
+    expect(expense['balanceAfter']['balance'], 480);
+    expect(expense['balanceAfter']['accountName'], 'usd');
+    final income = items.firstWhere((t) => t['type'] == 'income');
+    expect(income['impact'], isNull);
+    expect(income['balanceAfter']['balance'], 500);
+    expect(list['summary'],
+        {'spent': 20.0, 'income': 500.0, 'budgeted': 50.0, 'currency': 'USD'});
+
+    final envs = await call(listEnvelopesHandler(ref), 'GET');
+    expect((envs['items'] as List).single['sealed'], isTrue);
   });
 
   test('bulk create writes every row, or none when one is bad', () async {

@@ -13227,6 +13227,156 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Spent {spent} · income {income}'**
   String txMonthSpent(String spent, String income);
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get webGsTitle;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String webGsProgress(String done, String total);
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get webGsHide;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Record your income'**
+  String get webGsIncomeTitle;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Money comes in first. Then you give it jobs.'**
+  String get webGsIncomeBody;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Create envelopes'**
+  String get webGsEnvelopesTitle;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'One for each thing you spend on, like groceries or rent.'**
+  String get webGsEnvelopesBody;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Fund your envelopes'**
+  String get webGsFundTitle;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Move money from Ready to assign into your envelopes.'**
+  String get webGsFundBody;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'Log an expense'**
+  String get webGsExpenseTitle;
+
+  /// Web Companion: getting-started checklist on Home (same as the app)
+  ///
+  /// In en, this message translates to:
+  /// **'It comes out of the matching envelope.'**
+  String get webGsExpenseBody;
+
+  /// Web: Ready to assign banner when every bit of money is in an envelope
+  ///
+  /// In en, this message translates to:
+  /// **'All sealed'**
+  String get webSealAllSealed;
+
+  /// Web: Ready to assign banner subtitle when all money is assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Every bit of your money has a job.'**
+  String get webSealAllSealedBody;
+
+  /// Web: envelope card tag next to the seal
+  ///
+  /// In en, this message translates to:
+  /// **'Fully funded'**
+  String get webSealFullyFunded;
+
+  /// Web: past month within budget, e.g. "September sealed"
+  ///
+  /// In en, this message translates to:
+  /// **'{month} sealed'**
+  String webMonthSealed(String month);
+
+  /// Web transaction row: envelope balance after, e.g. "$142.80 left"
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String webImpactLeft(String amount);
+
+  /// Web transaction row / month card: "over by $8.00"
+  ///
+  /// In en, this message translates to:
+  /// **'over by {amount}'**
+  String webImpactOver(String amount);
+
+  /// Web transaction row pill: no envelope for this category
+  ///
+  /// In en, this message translates to:
+  /// **'Not budgeted'**
+  String get webImpactNotBudgeted;
+
+  /// Web transactions: month card title, e.g. "October budget"
+  ///
+  /// In en, this message translates to:
+  /// **'{month} budget'**
+  String webMonthBudget(String month);
+
+  /// Web transactions: month card line
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {spent} of {budgeted} budgeted · income {income}'**
+  String webMonthSpentOf(String spent, String budgeted, String income);
+
+  /// Web transactions: month card line without envelope targets
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {spent} · income {income}'**
+  String webMonthSpent(String spent, String income);
+
+  /// Web Home: card listing envelopes below zero
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent envelopes'**
+  String get webOverspentTitle;
+
+  /// Web Home: overspent envelope row, e.g. "Over by $9.00"
+  ///
+  /// In en, this message translates to:
+  /// **'Over by {amount}'**
+  String webEnvOverBy(String amount);
+
+  /// Web Home: bills due within 7 days
+  ///
+  /// In en, this message translates to:
+  /// **'Bills due this week'**
+  String get webBillsWeek;
+
+  /// Web transaction row: split across several accounts
+  ///
+  /// In en, this message translates to:
+  /// **'{n} accounts'**
+  String webNAccounts(String n);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

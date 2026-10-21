@@ -4,6 +4,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/database/daos/ledger_dao.dart';
 import '../../../core/engine/balance_calculator.dart';
 import '../../../core/engine/period_engine.dart';
+import '../../../core/providers/seal_provider.dart' show isEnvelopeSealed;
 import '_serializers.dart';
 
 /// Envelopes (in the Budget tab's order), Ready to assign per currency and
@@ -57,6 +58,9 @@ Future<Map<String, dynamic>> budgetSnapshot(
   final spent = await LedgerDao(db)
       .watchSpendingInPeriod(householdId, period.start, period.end)
       .first;
+  final funded =
+      await LedgerDao(db).fundedInPeriod(householdId, period.start, period.end);
+  final base = household?.baseCurrency ?? 'USD';
 
   // Unallocated = account totals − envelope totals, per currency.
   final unallocated = <String, double>{};
@@ -85,12 +89,18 @@ Future<Map<String, dynamic>> budgetSnapshot(
         .map((a) => accountToJson(a, accountBalances[a.id] ?? 0))
         .toList(),
     'envelopes': allocs
-        .map((a) => allocationToJson(
-              a,
-              allocBalances[a.id] ?? const {},
-              spentByCurrency: spent[a.id] ?? const {},
-              colorHex: colorByAlloc[a.id] ?? catById[a.categoryId]?.colorHex,
-            ))
+        .map((a) => {
+              ...allocationToJson(
+                a,
+                allocBalances[a.id] ?? const {},
+                spentByCurrency: spent[a.id] ?? const {},
+                colorHex:
+                    colorByAlloc[a.id] ?? catById[a.categoryId]?.colorHex,
+              ),
+              // Fully funded: the app's wax seal.
+              'sealed': isEnvelopeSealed(
+                  a, allocBalances[a.id] ?? const {}, funded[a.id], base),
+            })
         .toList(),
     'unallocated': unallocated,
   };

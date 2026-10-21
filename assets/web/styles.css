@@ -524,7 +524,7 @@ img { display: block; }
   appearance: none;
   border: none;
   border-radius: var(--r-pill);
-  background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 1024 1024' fill='%23999'%3E%3Cpath d='M855%20407%20535%20727Q530%20731%20524.5%20733.5Q519%20736%20512%20736Q505%20736%20499.5%20733.5Q494%20731%20489%20727L169%20407Q165%20402%20162.5%20396.5Q160%20391%20160%20384Q160%20371%20169.5%20361.5Q179%20352%20192%20352Q199%20352%20204.5%20354.5Q210%20357%20215%20361L512%20659L809%20361Q814%20357%20819.5%20354.5Q825%20352%20832%20352Q845%20352%20854.5%20361.5Q864%20371%20864%20384Q864%20391%20861.5%20396.5Q859%20402%20855%20407Z'/%3E%3C/svg%3E") no-repeat right 12px center;
   box-shadow: var(--shadow);
   padding: 9px 34px 9px 16px;
   font-weight: 700;
@@ -555,7 +555,7 @@ img { display: block; }
 .input:focus { box-shadow: 0 0 0 2px var(--accent); background: var(--card); }
 .input::placeholder { color: var(--hint); }
 .input:disabled { opacity: .6; }
-select.input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-inline-end: 40px; }
+select.input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 1024 1024' fill='%23999'%3E%3Cpath d='M855%20407%20535%20727Q530%20731%20524.5%20733.5Q519%20736%20512%20736Q505%20736%20499.5%20733.5Q494%20731%20489%20727L169%20407Q165%20402%20162.5%20396.5Q160%20391%20160%20384Q160%20371%20169.5%20361.5Q179%20352%20192%20352Q199%20352%20204.5%20354.5Q210%20357%20215%20361L512%20659L809%20361Q814%20357%20819.5%20354.5Q825%20352%20832%20352Q845%20352%20854.5%20361.5Q864%20371%20864%20384Q864%20391%20861.5%20396.5Q859%20402%20855%20407Z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-inline-end: 40px; }
 [dir="rtl"] select.input { background-position: left 16px center; }
 .input.amount { font-family: var(--display); font-size: 26px; font-weight: 800; min-height: 58px; letter-spacing: -.3px; }
 .input-cur { position: relative; }
@@ -866,3 +866,81 @@ kbd {
 
 /* Honeypot field — hidden from people, filled by bots. */
 .hp-field { position: absolute; inset-inline-start: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+
+/* ── Activity list (the app's own, Oct 2026) ────────────────────────────── */
+
+.chip-icon.square { border-radius: 12px; }
+.tx-row { gap: 12px; min-height: 0; padding: 10px 16px; }
+.tx-row .chip-icon { --size: 40px; }
+.tx-line { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.tx-line .row-title { flex: 1; min-width: 0; }
+.tx-line.sub { margin-top: 3px; font-size: 12.5px; color: var(--text-2); align-items: center; }
+.tx-amount { font-family: var(--display); font-size: 16px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tx-impact { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.tx-impact .impact { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.tx-impact .impact svg { flex-shrink: 0; }
+.tx-impact .impact b { color: var(--text); font-weight: 700; }
+.tx-impact .impact.over { color: var(--expense); font-weight: 600; }
+.tx-impact .tag svg { width: 11px; height: 11px; }
+[dir="rtl"] .tx-impact .tag svg { transform: scaleX(-1); }
+.tx-after { display: flex; min-width: 0; max-width: 45%; white-space: nowrap; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.tx-after .num { flex-shrink: 0; }
+.ellip { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill-cover {
+  flex-shrink: 0; border: 0; cursor: pointer;
+  font: inherit; font-size: 11.5px; font-weight: 800;
+  padding: 2px 9px; border-radius: 99px;
+  background: var(--expense); color: #fff;
+}
+.pill-cover:hover { filter: brightness(1.08); }
+
+.day-cards { display: flex; flex-direction: column; gap: 12px; }
+.day-card { padding: 0; overflow: hidden; }
+.day-card-head { display: flex; align-items: baseline; gap: 8px; padding: 12px 16px 4px; }
+/* Rows keep room for their hover actions; the day net lines up with the amounts. */
+.day-card:has(.row-actions) .day-card-head { padding-inline-end: 102px; }
+.day-name { font-family: var(--display); font-size: 16px; font-weight: 700; }
+.day-date { flex: 1; font-size: 13px; color: var(--text-2); }
+.day-net { font-family: var(--display); font-size: 14px; font-weight: 600; color: var(--text-2); }
+.day-card .row { border-radius: 0; }
+.day-card .row + .row { border-top: 1px solid var(--line); }
+
+.month-card { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; margin-bottom: 12px; }
+.month-card.sealed { flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; }
+.month-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.month-title { font-family: var(--display); font-size: 20px; font-weight: 700; }
+.month-title.sm { font-size: 16px; }
+.month-left { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.month-left.over { color: var(--expense); }
+.month-detail { font-size: 13px; color: var(--text-2); }
+
+/* ── Seals ──────────────────────────────────────────────────────────────── */
+
+.seal { flex-shrink: 0; }
+.chip-wrap { position: relative; display: inline-grid; flex-shrink: 0; }
+.chip-seal { position: absolute; inset-inline-end: -5px; bottom: -4px; display: grid; }
+.sealed-text { color: var(--accent); font-weight: 800; }
+.rta.sealed { gap: 16px; }
+.rta-amount.sm { font-size: 24px; letter-spacing: -.4px; }
+
+/* ── Home: getting started, overspent, bills ────────────────────────────── */
+
+.gs-card { margin-bottom: 16px; padding: 14px 8px 8px; }
+.gs-head { display: flex; align-items: center; gap: 10px; padding: 0 8px 6px; }
+.gs-title { font-family: var(--display); font-size: 18px; font-weight: 700; flex: 1; }
+.gs-step { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 10px 8px; border-radius: 12px; border: 0; background: none; font: inherit; color: inherit; text-align: start; }
+.gs-step.clickable { cursor: pointer; }
+.gs-step.clickable:hover { background: var(--container); }
+.gs-check { color: var(--hint); display: grid; padding-top: 1px; }
+.gs-step.done .gs-check { color: var(--accent); }
+.gs-step-title { display: block; font-weight: 800; font-size: 14.5px; }
+.gs-step.done .gs-step-title { text-decoration: line-through; color: var(--text-2); }
+.gs-step-body { display: block; font-size: 13px; color: var(--text-2); }
+.home-focus { margin-top: 16px; }
+.over-head { padding: 10px 16px 2px; font-weight: 800; color: var(--expense); display: flex; align-items: center; gap: 8px; }
+.row-sub.expense { color: var(--expense); font-weight: 700; }
+
+@media (max-width: 520px) {
+  .day-card-head, .day-card:has(.row-actions) .day-card-head { padding-inline: 10px; }
+  .tx-after { max-width: 50%; }
+}

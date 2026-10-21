@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
 import '../engine/period_engine.dart' show budgetPeriodFor;
 import 'allocations_provider.dart';
@@ -20,16 +21,23 @@ final sealedEnvelopesProvider = FutureProvider<Set<String>>((ref) async {
   final funded = await LedgerDao(ref.read(databaseProvider))
       .fundedInPeriod(household.id, period.start, period.end);
 
-  final sealed = <String>{};
-  for (final a in allocations) {
-    final alloc = a.data.allocation;
-    final target = alloc.targetAmount ?? 0;
-    if (target <= 0) continue;
-    final cur = alloc.targetCurrency ?? household.baseCurrency;
-    final have = alloc.type == 'spending'
-        ? (funded[alloc.id]?[cur] ?? 0)
-        : (a.balanceByCurrency[cur] ?? 0);
-    if (have >= target - 0.005) sealed.add(alloc.id);
-  }
-  return sealed;
+  return {
+    for (final a in allocations)
+      if (isEnvelopeSealed(a.data.allocation, a.balanceByCurrency,
+          funded[a.data.allocation.id], household.baseCurrency))
+        a.data.allocation.id,
+  };
 });
+
+/// The seal rule, shared with the Web Companion: [funded] is what went into
+/// the envelope this period (`LedgerDao.fundedInPeriod`) by currency.
+bool isEnvelopeSealed(Allocation alloc, Map<String, double> balances,
+    Map<String, double>? funded, String baseCurrency) {
+  final target = alloc.targetAmount ?? 0;
+  if (target <= 0) return false;
+  final cur = alloc.targetCurrency ?? baseCurrency;
+  final have = alloc.type == 'spending'
+      ? (funded?[cur] ?? 0)
+      : (balances[cur] ?? 0);
+  return have >= target - 0.005;
+}

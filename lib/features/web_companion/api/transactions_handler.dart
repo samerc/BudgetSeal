@@ -9,6 +9,7 @@ import '../../../core/fx/fx_service.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
+import '../../../shared/utils/format_number.dart' show isRealRate;
 import '../../../shared/utils/note_text.dart';
 import '_running.dart';
 import '_serializers.dart';
@@ -27,8 +28,7 @@ Handler listTransactionsHandler(Ref ref) {
     try {
       final params = request.url.queryParameters;
       final page = (int.tryParse(params['page'] ?? '1') ?? 1).clamp(1, 10000);
-      final limit =
-          (int.tryParse(params['limit'] ?? '50') ?? 50).clamp(1, 200);
+      final limit = (int.tryParse(params['limit'] ?? '50') ?? 50).clamp(1, 200);
       final offset = (page - 1) * limit;
       final typeFilter = params['type'];
       final accountFilter = params['accountId'];
@@ -117,26 +117,84 @@ Handler listTransactionsHandler(Ref ref) {
           ? null
           : await accountRunning(db, account);
 
+      final base = household?.baseCurrency ?? 'USD';
+      // What each row did to the budget and to its account, as in the app.
+      final extras = await txRowExtras(db, householdId, txs, acctMap);
+
+      // The month card: first page of a date range.
+      final summary = page == 1 && fromDate != null && toDate != null
+          ? await _rangeSummary(db, householdId, base, fromDate, toDate)
+          : null;
+
       return ok({
         'page': page,
         'limit': limit,
         'hasMore': hasMore,
-        'baseCurrency': household?.baseCurrency ?? 'USD',
-        'items': txs
-            .map((t) => {
-                  ...txToJson(t, catMap, acctMap,
-                      firstLine: firstLine[t.id],
-                      lineCount: lineCount[t.id] ?? 0),
-                  if (running?[t.id] != null) ...{
-                    'accountAmount': running![t.id]!.effect,
-                    'runningBalance': running[t.id]!.balance,
-                  },
-                })
-            .toList(),
+        'baseCurrency': base,
+        if (summary != null) 'summary': summary,
+        'items': txs.map((t) {
+          return {
+            ...txToJson(t, catMap, acctMap,
+                firstLine: firstLine[t.id], lineCount: lineCount[t.id] ?? 0),
+            if (running?[t.id] != null) ...{
+              'accountAmount': running![t.id]!.effect,
+              'runningBalance': running[t.id]!.balance,
+            },
+            ...extras(t),
+          };
+        }).toList(),
       });
     } catch (e) {
       return serverError(e);
     }
+  };
+}
+
+/// Spent and income in [from, to) in the base currency (lines without a
+/// real rate left out, as in the app) and the month's budget: the targets
+/// of spending envelopes in the base currency.
+Future<Map<String, dynamic>> _rangeSummary(AppDatabase db, String householdId,
+    String base, DateTime from, DateTime to) async {
+  final rows = await (db.select(db.transactionLines).join([
+    innerJoin(db.transactions,
+        db.transactions.id.equalsExp(db.transactionLines.transactionId)),
+  ])
+        ..where(db.transactions.householdId.equals(householdId) &
+            db.transactions.deleted.equals(false) &
+            db.transactions.status.isNull() &
+            db.transactions.type.isIn(['income', 'expense']) &
+            db.transactions.createdAt.isBiggerOrEqualValue(from) &
+            db.transactions.createdAt.isSmallerThanValue(to)))
+      .get();
+  var spent = 0.0, income = 0.0;
+  for (final r in rows) {
+    final l = r.readTable(db.transactionLines);
+    if (!isRealRate(l.currency, base, l.exchangeRateToBase)) continue;
+    final v = l.amount * l.exchangeRateToBase;
+    if (r.readTable(db.transactions).type == 'income') {
+      income += v;
+    } else {
+      spent += v;
+    }
+  }
+  final envs = await (db.select(db.allocations)
+        ..where((a) =>
+            a.householdId.equals(householdId) &
+            a.deleted.equals(false) &
+            a.archived.equals(false) &
+            a.type.equals('spending')))
+      .get();
+  var budgeted = 0.0;
+  for (final a in envs) {
+    if ((a.targetAmount ?? 0) > 0 && (a.targetCurrency ?? base) == base) {
+      budgeted += a.targetAmount!;
+    }
+  }
+  return {
+    'spent': spent,
+    'income': income,
+    'budgeted': budgeted,
+    'currency': base,
   };
 }
 
@@ -533,8 +591,7 @@ DateTime? parseWebDate(String? s, {DateTime? keepTimeOf}) {
 class _Transfer {
   final String? from, to, currency, error;
   final double? amount, rate;
-  const _Transfer(
-      {this.from, this.to, this.currency, this.amount, this.rate})
+  const _Transfer({this.from, this.to, this.currency, this.amount, this.rate})
       : error = null;
   const _Transfer.error(String this.error)
       : from = null,
@@ -551,8 +608,8 @@ Future<_Transfer> _readTransfer(
     AppDatabase db, String householdId, Map<String, dynamic> body,
     {Transaction? existing}) async {
   final from = optString(body, 'accountId') ?? existing?.accountId;
-  final to = optString(body, 'destinationAccountId') ??
-      existing?.destinationAccountId;
+  final to =
+      optString(body, 'destinationAccountId') ?? existing?.destinationAccountId;
   if (from == null) {
     return const _Transfer.error('accountId is required for transfers');
   }
@@ -569,7 +626,9 @@ Future<_Transfer> _readTransfer(
   final toAcct = await (db.select(db.accounts)
         ..where((a) => a.id.equals(to) & a.householdId.equals(householdId)))
       .getSingleOrNull();
-  if (fromAcct == null) return const _Transfer.error('accountId does not exist');
+  if (fromAcct == null) {
+    return const _Transfer.error('accountId does not exist');
+  }
   if (toAcct == null) {
     return const _Transfer.error('destinationAccountId does not exist');
   }
@@ -614,7 +673,9 @@ Future<({List<TxLine>? lines, String? error})> _readLines(
     if (raw.length > 50) return fail('Too many lines (max 50)');
     final parsed = <TxLine>[];
     for (final r in raw) {
-      if (r is! Map<String, dynamic>) return fail('Each line must be an object');
+      if (r is! Map<String, dynamic>) {
+        return fail('Each line must be an object');
+      }
       final amt = requireDouble(r, 'amount');
       if (amt == null || amt <= 0) {
         return fail('Each line must have a positive amount');

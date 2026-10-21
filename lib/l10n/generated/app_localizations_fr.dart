@@ -7552,4 +7552,101 @@ class SFr extends S {
   String txMonthSpent(String spent, String income) {
     return 'Dépensé $spent · revenus $income';
   }
+
+  @override
+  String get webGsTitle => 'Pour commencer';
+
+  @override
+  String webGsProgress(String done, String total) {
+    return '$done sur $total';
+  }
+
+  @override
+  String get webGsHide => 'Masquer';
+
+  @override
+  String get webGsIncomeTitle => 'Saisissez vos revenus';
+
+  @override
+  String get webGsIncomeBody =>
+      'L\'argent arrive d\'abord. Ensuite, vous lui donnez une mission.';
+
+  @override
+  String get webGsEnvelopesTitle => 'Créez des enveloppes';
+
+  @override
+  String get webGsEnvelopesBody =>
+      'Une pour chaque type de dépense, comme les courses ou le loyer.';
+
+  @override
+  String get webGsFundTitle => 'Approvisionnez vos enveloppes';
+
+  @override
+  String get webGsFundBody =>
+      'Déplacez l\'argent de « Prêt à répartir » vers vos enveloppes.';
+
+  @override
+  String get webGsExpenseTitle => 'Saisissez une dépense';
+
+  @override
+  String get webGsExpenseBody =>
+      'Elle est prise dans l\'enveloppe correspondante.';
+
+  @override
+  String get webSealAllSealed => 'Tout est scellé';
+
+  @override
+  String get webSealAllSealedBody => 'Tout votre argent a une mission.';
+
+  @override
+  String get webSealFullyFunded => 'Entièrement approvisionnée';
+
+  @override
+  String webMonthSealed(String month) {
+    return '$month scellé';
+  }
+
+  @override
+  String webImpactLeft(String amount) {
+    return '$amount restants';
+  }
+
+  @override
+  String webImpactOver(String amount) {
+    return 'dépassé de $amount';
+  }
+
+  @override
+  String get webImpactNotBudgeted => 'Hors budget';
+
+  @override
+  String webMonthBudget(String month) {
+    return 'Budget de $month';
+  }
+
+  @override
+  String webMonthSpentOf(String spent, String budgeted, String income) {
+    return 'Dépensé $spent sur $budgeted prévus · revenus $income';
+  }
+
+  @override
+  String webMonthSpent(String spent, String income) {
+    return 'Dépensé $spent · revenus $income';
+  }
+
+  @override
+  String get webOverspentTitle => 'Enveloppes dépassées';
+
+  @override
+  String webEnvOverBy(String amount) {
+    return 'Dépassée de $amount';
+  }
+
+  @override
+  String get webBillsWeek => 'Factures de la semaine';
+
+  @override
+  String webNAccounts(String n) {
+    return '$n comptes';
+  }
 }

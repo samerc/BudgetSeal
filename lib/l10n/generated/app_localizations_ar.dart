@@ -7491,4 +7491,98 @@ class SAr extends S {
   String txMonthSpent(String spent, String income) {
     return 'أُنفق $spent · الدخل $income';
   }
+
+  @override
+  String get webGsTitle => 'ابدأ';
+
+  @override
+  String webGsProgress(String done, String total) {
+    return '$done من $total';
+  }
+
+  @override
+  String get webGsHide => 'إخفاء';
+
+  @override
+  String get webGsIncomeTitle => 'سجّل دخلك';
+
+  @override
+  String get webGsIncomeBody => 'يأتي المال أولًا، ثم تعطيه مهامّ.';
+
+  @override
+  String get webGsEnvelopesTitle => 'أنشئ أظرفًا';
+
+  @override
+  String get webGsEnvelopesBody =>
+      'واحد لكل ما تنفق عليه، مثل البقالة أو الإيجار.';
+
+  @override
+  String get webGsFundTitle => 'موّل أظرفك';
+
+  @override
+  String get webGsFundBody => 'انقل المال من «جاهز للتوزيع» إلى أظرفك.';
+
+  @override
+  String get webGsExpenseTitle => 'سجّل مصروفًا';
+
+  @override
+  String get webGsExpenseBody => 'يُخصم من الظرف المطابق.';
+
+  @override
+  String get webSealAllSealed => 'كلّه مختوم';
+
+  @override
+  String get webSealAllSealedBody => 'لكل جزء من أموالك مهمّة.';
+
+  @override
+  String get webSealFullyFunded => 'مموّل بالكامل';
+
+  @override
+  String webMonthSealed(String month) {
+    return 'تم ختم $month';
+  }
+
+  @override
+  String webImpactLeft(String amount) {
+    return 'متبقٍّ $amount';
+  }
+
+  @override
+  String webImpactOver(String amount) {
+    return 'تجاوز بـ $amount';
+  }
+
+  @override
+  String get webImpactNotBudgeted => 'خارج الميزانية';
+
+  @override
+  String webMonthBudget(String month) {
+    return 'ميزانية $month';
+  }
+
+  @override
+  String webMonthSpentOf(String spent, String budgeted, String income) {
+    return 'أُنفق $spent من $budgeted مخصّصة · الدخل $income';
+  }
+
+  @override
+  String webMonthSpent(String spent, String income) {
+    return 'أُنفق $spent · الدخل $income';
+  }
+
+  @override
+  String get webOverspentTitle => 'أظرف متجاوزة';
+
+  @override
+  String webEnvOverBy(String amount) {
+    return 'تجاوز بـ $amount';
+  }
+
+  @override
+  String get webBillsWeek => 'فواتير مستحقة هذا الأسبوع';
+
+  @override
+  String webNAccounts(String n) {
+    return 'حسابات: $n';
+  }
 }

@@ -117,6 +117,8 @@ function fmtSigned(amount, cur, type) {
   return fmt(abs, cur);
 }
 
+/** "+$5.00" with the sign inside the left-to-right isolate (RTL-safe). */
+function fmtPlus(v, cur) { return `⁦+${fmt(v, cur)}⁩`; }
 function fmtPlain(v, d = 2) { return wrapNeg(numStr(Math.abs(v), d), v < 0); }
 
 function toDate(iso) { return iso instanceof Date ? iso : new Date(iso); }
@@ -244,34 +246,40 @@ function transferChip(cls = '') {
 
 // ── Icons (inline SVG, stroke = currentColor) ────────────────────────────────
 
-const svg = (p, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+// Phosphor icons (icons.js, generated from the app's own icon font).
+const ph = (name, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true"><path d="${PH[name]}"/></svg>`;
 const IC = {
-  plus: svg('<path d="M12 5v14M5 12h14"/>'),
-  edit: svg('<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
-  trash: svg('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'),
-  copy: svg('<rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
-  download: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'),
-  search: svg('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'),
-  left: svg('<path d="m15 18-6-6 6-6"/>'),
-  right: svg('<path d="m9 18 6-6-6-6"/>'),
-  back: svg('<path d="M19 12H5M12 19l-7-7 7-7"/>'),
-  transfer: svg('<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>'),
-  tag: svg('<path d="M12 2H2v10l9.3 9.3a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><path d="M7 7h.01"/>'),
-  check: svg('<path d="M20 6 9 17l-5-5"/>'),
-  alert: svg('<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>'),
-  envelope: svg('<rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>'),
-  wallet: svg('<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>'),
-  bank: svg('<path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/>'),
-  cash: svg('<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>'),
-  card: svg('<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>'),
-  plane: svg('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'),
-  repeat: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
-  receipt: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>'),
-  grid: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
-  upload: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>'),
-  calendar: svg('<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
-  target: svg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
-  chart: svg('<path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 15 4-4 3 3 6-6"/>'),
+  plus: ph('plus'),
+  edit: ph('edit'),
+  trash: ph('trash'),
+  copy: ph('copy'),
+  download: ph('download'),
+  search: ph('search'),
+  left: ph('left'),
+  right: ph('right'),
+  back: ph('back'),
+  arrowRight: ph('arrowRight', 12),
+  transfer: ph('transfer'),
+  tag: ph('tag'),
+  check: ph('check'),
+  alert: ph('alert'),
+  envelope: ph('envelope'),
+  envelopeSmall: ph('envelope', 13),
+  wallet: ph('wallet'),
+  bank: ph('bank'),
+  cash: ph('cash'),
+  card: ph('card'),
+  plane: ph('plane'),
+  repeat: ph('repeat'),
+  receipt: ph('receipt'),
+  grid: ph('grid'),
+  upload: ph('upload'),
+  calendar: ph('calendar'),
+  target: ph('target'),
+  chart: ph('chart'),
+  x: ph('x'),
+  checkCircle: ph('checkCircle'),
+  circle: ph('circle'),
 };
 const TYPE_ICON = { bank: IC.bank, cash: IC.cash, credit: IC.card, wallet: IC.wallet };
 
@@ -472,11 +480,26 @@ function pageHead(title, sub, actions = '') {
   </div>`;
 }
 
-/** Ready-to-assign banner (the brand element): base currency big, others as chips. */
-function rtaBanner(unallocated, base, withButton) {
+/** Ready-to-assign banner (the brand element): base currency big, others as
+ *  chips. With envelopes, nothing left to assign, some money in envelopes
+ *  and none overspent it becomes "All sealed" (the app's banner). */
+function rtaBanner(unallocated, base, withButton, envelopes = null) {
   const entries = Object.entries(unallocated || {}).filter(([c, v]) => c === base || Math.abs(v) >= 0.005);
   const main = unallocated?.[base] ?? 0;
   const others = entries.filter(([c]) => c !== base);
+  const envs = envelopes || [];
+  const nothingLeft = entries.every(([, v]) => Math.abs(v) < 0.005);
+  const anyFunded = envs.some(e => Object.values(e.balanceByCurrency || {}).some(v => v > 0.005));
+  const anyOver = envs.some(e => Object.values(e.balanceByCurrency || {}).some(v => v < -0.005));
+  if (envs.length && nothingLeft && anyFunded && !anyOver) {
+    return `<div class="rta sealed">
+      ${sealSvg(44, true)}
+      <div class="rta-body">
+        <div class="rta-amount sm">${esc(t('web_seal_all_sealed'))}</div>
+        <div class="rta-label">${esc(t('web_seal_all_sealed_body'))}</div>
+      </div>
+    </div>`;
+  }
   return `<div class="rta">
     <div class="rta-body">
       <div class="rta-label">${esc(t('web_rta'))}</div>
@@ -487,51 +510,111 @@ function rtaBanner(unallocated, base, withButton) {
   </div>`;
 }
 
-/** One transaction row, like the app's TxTile. */
+/** The brand's wax seal (the app's SealMark): scalloped accent disc, pressed
+ *  ring, ink check. `inverse` = ink seal with an accent check, for the gold
+ *  Ready to assign banner. */
+function sealSvg(size = 20, inverse = false) {
+  const pts = [];
+  for (let i = 0; i < 360; i += 3) {
+    const a = i * Math.PI / 180;
+    const r = 12 * (0.9 + 0.1 * Math.cos(14 * a));
+    pts.push(`${(12 + Math.cos(a) * r).toFixed(2)},${(12 + Math.sin(a) * r).toFixed(2)}`);
+  }
+  const fill = inverse ? 'var(--ink)' : 'var(--acc-bright)';
+  const mark = inverse ? 'var(--acc-bright)' : 'var(--ink)';
+  const ring = inverse ? 'color-mix(in srgb, var(--acc-bright) 45%, transparent)' : 'color-mix(in srgb, var(--acc-bright) 78%, #000)';
+  return `<svg class="seal" width="${size}" height="${size}" viewBox="0 0 24 24" role="img" aria-label="${esc(t('web_seal_fully_funded'))}">
+    <polygon points="${pts.join(' ')}" fill="${fill}"/>
+    <circle cx="12" cy="12" r="7.44" fill="none" stroke="${ring}" stroke-width="1.08"/>
+    <path d="M8.4 12.24 11.04 14.88 15.84 9.6" fill="none" stroke="${mark}" stroke-width="1.92" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/** One transaction row, like the app's TxTile: title, then what it did to
+ *  the budget (envelope · left / over by + Cover / Not budgeted / → Ready to
+ *  assign / Bank → Cash); amount and the account's balance after it. */
 function txRow(tx, base, opts = {}) {
   const isTransfer = tx.type === 'transfer';
-  const chip = isTransfer ? transferChip() : catChip(tx);
+  const chip = isTransfer ? transferChip('square') : catChip(tx, 'square');
   const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
-  const title = tx.note || (isTransfer ? `${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}` : tx.categoryName) || t(`type_${tx.type}`);
-  const subParts = [];
-  if (opts.showDate) subParts.push(fmtDate(tx.date));
-  if (!isTransfer && tx.note && tx.categoryName) subParts.push(tx.categoryName);
-  if (isTransfer && tx.note) subParts.push(`${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}`);
-  else if (!isTransfer) subParts.push(tx.accountName || '');
+  const title = tx.note || (isTransfer ? t('type_transfer') : tx.categoryName) || t(`type_${tx.type}`);
   const cur = tx.lineCurrency || tx.accountCurrency || tx.currency;
   const amt = tx.lineCount > 1 ? tx.amount : (tx.lineAmount ?? tx.amount);
   const shownCur = tx.lineCount > 1 ? tx.currency : cur;
-  let amountSub = '';
-  if (isTransfer && tx.destinationCurrency && tx.destinationCurrency !== tx.currency) {
-    amountSub = `<div class="row-amount-sub num">${arrow} ${esc(fmt(tx.amount * tx.exchangeRateToBase, tx.destinationCurrency))}</div>`;
-  } else if (shownCur !== base) {
-    const rate = tx.lineExchangeRate ?? tx.exchangeRateToBase;
-    amountSub = rate && Math.abs(rate - 1) > 0.001
-      ? `<div class="row-amount-sub num">${esc(fmt(amt * rate, base))}</div>`
-      : `<div class="row-amount-sub"><span class="tag warn">${esc(t('web_tx_no_rate'))}</span></div>`;
-  }
-  let cls = tx.type === 'income' ? 'income' : tx.type === 'expense' ? 'expense' : '';
-  let amountText = fmtSigned(amt, shownCur, tx.type);
+
+  // Expenses in plain text (red is for overspending), income green "+",
+  // transfers grey. An account page shows the signed effect on that account.
+  let cls = tx.type === 'income' ? 'income' : isTransfer ? 'muted' : '';
+  let amountText = tx.type === 'income' ? fmtPlus(amt, shownCur) : fmt(amt, shownCur);
   if (opts.account && tx.accountAmount != null) {
     const e = tx.accountAmount;
-    cls = e > 0 ? 'income' : e < 0 ? 'expense' : '';
-    amountText = (e > 0 ? '+' : '') + fmt(e, opts.account.currency);
-    amountSub = `<div class="row-amount-sub num" title="${esc(t('web_acct_balance_after'))}">${esc(fmt(tx.runningBalance, opts.account.currency))}</div>`;
+    cls = e > 0 ? 'income' : '';
+    amountText = e > 0 ? fmtPlus(e, opts.account.currency) : fmt(e, opts.account.currency);
   }
-  return `<div class="row clickable" data-action="edit-tx" data-id="${esc(tx.id)}" tabindex="0">
+
+  // Second line: the budget impact.
+  let impact;
+  const im = tx.impact;
+  if (isTransfer) {
+    let s = `${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}`;
+    if (tx.destinationCurrency && tx.destinationCurrency !== tx.currency) s += ` · ${fmt(tx.amount * tx.exchangeRateToBase, tx.destinationCurrency)}`;
+    impact = `<span class="ellip">${esc(s)}</span>`;
+  } else if (tx.type === 'income') {
+    impact = `<span class="tag accent">${IC.arrowRight}${esc(t('web_rta'))}</span>`;
+  } else if (im) {
+    const name = im.count > 1 ? `${im.name} +${im.count - 1}` : im.name;
+    const amount = fmt(Math.abs(im.balanceAfter), im.currency);
+    if (im.balanceAfter < -0.005) {
+      impact = `<span class="impact over">${IC.envelopeSmall}<span class="ellip">${esc(name)} · ${esc(t('web_impact_over', { amount }))}</span></span>`;
+      if (im.latest && im.balanceNow < -0.005 && opts.cover !== false) {
+        impact += `<button class="pill-cover" data-action="cover" data-id="${esc(im.envelopeId)}">${esc(t('web_env_cover'))}</button>`;
+      }
+    } else {
+      const left = esc(t('web_impact_left', { amount: '\u0000' })).replace('\u0000', `<b class="num">${esc(amount)}</b>`);
+      impact = `<span class="impact">${IC.envelopeSmall}<span class="ellip">${esc(name)} · ${left}</span></span>`;
+    }
+  } else {
+    impact = (tx.categoryName && tx.categoryName !== title ? `<span class="ellip">${esc(tx.categoryName)}</span>` : '')
+      + `<span class="tag warn">${esc(t('web_impact_not_budgeted'))}</span>`;
+  }
+
+  // Under the amount: date (Home), balance after (account page: no name).
+  let end = '';
+  if (opts.showDate) {
+    end = esc(fmtDate(tx.date));
+  } else if (opts.account && tx.runningBalance != null) {
+    end = `<span class="num">${esc(fmt(tx.runningBalance, opts.account.currency))}</span>`;
+  } else if (tx.balanceAfter?.accountCount) {
+    end = esc(t('web_n_accounts', { n: tx.balanceAfter.accountCount }));
+  } else if (tx.balanceAfter) {
+    const b = tx.balanceAfter;
+    end = `<span class="ellip">${esc(b.accountName || '')}</span><span class="num"> · ${esc(fmt(b.balance, b.currency))}</span>`;
+  }
+  let extra = '';
+  if (!isTransfer && shownCur !== base) {
+    const rate = tx.lineExchangeRate ?? tx.exchangeRateToBase;
+    extra = rate && Math.abs(rate - 1) > 0.001
+      ? `<div class="row-amount-sub num">≈ ${esc(fmt(amt * rate, base))}</div>`
+      : `<div class="row-amount-sub"><span class="tag warn">${esc(t('web_tx_no_rate'))}</span></div>`;
+  }
+
+  return `<div class="row tx-row clickable" data-action="edit-tx" data-id="${esc(tx.id)}" tabindex="0">
     ${chip}
     <div class="row-main">
-      <div class="row-title">${esc(title)}${tx.lineCount > 1 ? ` <span class="tag">${esc(t('web_tx_split', { n: tx.lineCount }))}</span>` : ''}</div>
-      <div class="row-sub">${esc(subParts.filter(Boolean).join(' · '))}</div>
+      <div class="tx-line">
+        <span class="row-title">${esc(title)}${tx.lineCount > 1 ? ` <span class="tag">${esc(t('web_tx_split', { n: tx.lineCount }))}</span>` : ''}</span>
+        <span class="tx-amount num ${cls}">${esc(amountText)}</span>
+      </div>
+      <div class="tx-line sub">
+        <span class="tx-impact">${impact}</span>
+        ${end ? `<span class="tx-after">${end}</span>` : ''}
+      </div>
+      ${extra}
     </div>
     ${opts.actions ? `<div class="row-actions">
       <button class="icon-btn" data-action="dup-tx" data-id="${esc(tx.id)}" title="${esc(t('web_duplicate'))}" aria-label="${esc(t('web_duplicate'))}">${IC.copy}</button>
       <button class="icon-btn danger" data-action="del-tx" data-id="${esc(tx.id)}" title="${esc(t('common_delete'))}" aria-label="${esc(t('common_delete'))}">${IC.trash}</button>
     </div>` : ''}
-    <div class="row-end">
-      <div class="row-amount ${cls}">${esc(amountText)}</div>
-      ${amountSub}
-    </div>
   </div>`;
 }
 
@@ -650,19 +733,73 @@ window.addEventListener('hashchange', () => navigate(location.hash));
 
 // ── Home ──────────────────────────────────────────────────────────────────────
 
+/** Get started: the app's four steps, ticked from real data. */
+function gettingStartedCard(gs) {
+  if (!gs) return '';
+  const steps = [
+    ['income', 'web_gs_income_title', 'web_gs_income_body', 'data-action="add-income"'],
+    ['envelopes', 'web_gs_envelopes_title', 'web_gs_envelopes_body', ''],
+    ['funded', 'web_gs_fund_title', 'web_gs_fund_body', 'href="#/envelopes"'],
+    ['expense', 'web_gs_expense_title', 'web_gs_expense_body', 'data-action="add-tx"'],
+  ];
+  const done = steps.filter(([k]) => gs[k]).length;
+  return `<div class="card gs-card">
+    <div class="gs-head">
+      <span class="gs-title">${esc(t('web_gs_title'))}</span>
+      <span class="tag accent num">${esc(t('web_gs_progress', { done, total: 4 }))}</span>
+      <button class="icon-btn" data-action="gs-hide" title="${esc(t('web_gs_hide'))}" aria-label="${esc(t('web_gs_hide'))}">${IC.x}</button>
+    </div>
+    ${steps.map(([k, title, body, link]) => {
+      const tag = !gs[k] && link ? (link.startsWith('href') ? 'a' : 'button') : 'div';
+      return `<${tag} class="gs-step${gs[k] ? ' done' : ''}${tag !== 'div' ? ' clickable' : ''}" ${tag !== 'div' ? link : ''}>
+        <span class="gs-check">${gs[k] ? IC.checkCircle : IC.circle}</span>
+        <span><span class="gs-step-title">${esc(t(title))}</span><span class="gs-step-body">${esc(t(body))}</span></span>
+      </${tag}>`;
+    }).join('')}
+  </div>`;
+}
+
 async function renderHome(quiet) {
   if (!quiet) setContent(pageHead(t('web_nav_home'), '') + skeleton(5));
-  const d = await api('/api/dashboard');
+  const [d, up] = await Promise.all([api('/api/dashboard'), api('/api/upcoming?days=7', { quiet: true })]);
   if (!d || state.route !== '#/' && state.route !== '') return;
   const { household = {}, accounts = [], envelopes = [], unallocated = {}, recentTransactions = [] } = d;
   const base = household.baseCurrency || 'USD';
   state.baseCurrency = base;
   cache.accounts = cache.accounts || accounts;
+  // Cover and Fund on this page work from the dashboard's envelopes.
+  cache.envelopes = envelopes;
+  cache.unallocated = unallocated;
 
   // Net worth per currency — never summed across currencies.
   const worth = {};
   accounts.forEach(a => { worth[a.currency] = (worth[a.currency] || 0) + a.balance; });
   const worthOthers = Object.entries(worth).filter(([c]) => c !== base);
+
+  // Envelopes below zero in their target currency, with Cover.
+  const over = envelopes.map(e => ({ e, f: envFigures(e) })).filter(x => x.f.over);
+  const overHtml = over.length ? `<div class="card card-flush over-card">
+      <div class="over-head">${esc(t('web_overspent_title'))} <span class="tag num">${over.length}</span></div>
+      ${over.map(({ e, f }) => `<div class="row">
+        ${envChip(e, 'sm')}
+        <div class="row-main"><div class="row-title">${esc(e.name)}</div>
+          <div class="row-sub expense">${esc(t('web_env_over_by', { amount: fmt(-f.bal, f.cur) }))}</div></div>
+        <button class="btn btn-sm btn-cover" data-action="cover" data-id="${esc(e.id)}">${esc(t('web_env_cover'))}</button>
+      </div>`).join('')}
+    </div>` : '';
+
+  // Bills due within a week (the next occurrence of each).
+  const bills = (up?.items || []).filter(b => b.occurrence === 0);
+  const billsHtml = bills.length ? `<div>
+      <div class="section-head"><span class="section-title">${esc(t('web_bills_week'))}</span><a class="section-link" href="#/upcoming">${esc(t('web_see_all'))}</a></div>
+      <div class="card card-flush list">${bills.slice(0, 5).map(b => `<div class="row clickable" data-action="bill" data-id="${esc(b.id)}" tabindex="0">
+        ${b.type === 'transfer' ? transferChip('sm') : catChip(b, 'sm')}
+        <div class="row-main"><div class="row-title">${esc(b.title || b.categoryName || t(`type_${b.type}`))}</div>
+          <div class="row-sub${b.daysUntil < 0 ? ' overdue' : ''}">${esc(dueLabel(b.daysUntil))}</div></div>
+        <div class="row-end"><div class="row-amount ${b.type === 'income' ? 'income' : ''}">${esc(fmt(b.amount, b.currency))}</div></div>
+      </div>`).join('')}</div>
+    </div>` : '';
+  cache.bills = up?.items || [];
 
   const acctHtml = accounts.length
     ? `<div class="acct-strip">${accounts.map(a => `
@@ -677,22 +814,23 @@ async function renderHome(quiet) {
     : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`;
 
   const recentHtml = recentTransactions.length
-    ? `<div class="card card-flush list">${recentTransactions.map(tx => txRow(tx, base, { showDate: true })).join('')}</div>`
-    : `<div class="card">${emptyState(IC.receipt, t('web_tx_empty_title'), t('web_tx_empty_sub'), { action: 'add-tx', label: t('web_tx_add') })}</div>`;
+    ? `<div class="card card-flush list">${recentTransactions.map(tx => txRow(tx, base, { showDate: true, cover: false })).join('')}</div>`
+    : `<div class="card">${emptyState(IC.receipt, t('web_tx_empty_title'), t('web_tx_empty_sub'), d.gettingStarted ? null : { action: 'add-tx', label: t('web_tx_add') })}</div>`;
 
   setContent(`
     ${pageHead(t('web_nav_home'), esc([household.name, base].filter(Boolean).join(' · ')),
       `<button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`)}
+    ${gettingStartedCard(d.gettingStarted)}
     <div class="hero-row">
-      ${rtaBanner(unallocated, base, true)}
+      ${rtaBanner(unallocated, base, true, envelopes)}
       <div class="card stat-hero">
         <div class="label">${esc(t('web_net_worth'))}</div>
         <div class="value num">${esc(fmt(worth[base] || 0, base))}</div>
         ${worthOthers.length ? `<div class="extra num">${worthOthers.map(([c, v]) => esc(fmt(v, c))).join(' · ')}</div>` : ''}
       </div>
     </div>
-    <div class="section-head"><span class="section-title">${esc(t('nav_accounts'))}</span><a class="section-link" href="#/accounts">${esc(t('web_see_all'))}</a></div>
-    ${acctHtml}
+    ${overHtml && billsHtml ? `<div class="grid-2 home-focus"><div>${overHtml}</div>${billsHtml}</div>`
+      : overHtml || billsHtml ? `<div class="home-focus">${overHtml || billsHtml}</div>` : ''}
     <div class="grid-2" style="margin-top:8px">
       <div>
         <div class="section-head"><span class="section-title">${esc(t('web_nav_budget'))}</span><a class="section-link" href="#/envelopes">${esc(t('web_see_all'))}</a></div>
@@ -702,7 +840,9 @@ async function renderHome(quiet) {
         <div class="section-head"><span class="section-title">${esc(t('web_recent'))}</span><a class="section-link" href="#/transactions">${esc(t('web_see_all'))}</a></div>
         ${recentHtml}
       </div>
-    </div>`);
+    </div>
+    <div class="section-head"><span class="section-title">${esc(t('nav_accounts'))}</span><a class="section-link" href="#/accounts">${esc(t('web_see_all'))}</a></div>
+    ${acctHtml}`);
 }
 
 // ── Envelopes ─────────────────────────────────────────────────────────────────
@@ -739,6 +879,13 @@ function envChip(e, cls = '') {
   return `<span class="chip-icon ${cls}" style="background:${pastel(color)}">${inner}</span>`;
 }
 
+/** Envelope chip with the wax seal on it when fully funded (as in the app). */
+function envIcon(e, cls = '') {
+  return e.sealed
+    ? `<span class="chip-wrap">${envChip(e, cls)}<span class="chip-seal">${sealSvg(cls === 'sm' ? 16 : 20)}</span></span>`
+    : envChip(e, cls);
+}
+
 function barColor(f) {
   if (f.over) return 'var(--expense)';
   if (!f.flexible && f.pct >= 100) return 'var(--expense)';
@@ -749,7 +896,7 @@ function barColor(f) {
 function envMini(e) {
   const f = envFigures(e);
   return `<a class="env-mini row clickable" href="#/envelopes">
-    ${envChip(e, 'sm')}
+    ${envIcon(e, 'sm')}
     <div class="row-main">
       <div class="env-mini-top"><span class="row-title">${esc(e.name)}</span><span class="row-amount ${f.over ? 'expense' : ''}">${esc(fmt(f.bal, f.cur))}</span></div>
       ${f.pct != null ? `<div class="bar thin"><span style="width:${f.pct.toFixed(1)}%;background:${barColor(f)}"></span></div>` : ''}
@@ -773,8 +920,8 @@ async function renderBudget(quiet) {
     const kind = f.flexible ? t('web_env_flexible') : t('web_env_spending');
     return `<div class="card env-card${f.over ? ' over' : ''}">
       <div class="env-top">
-        ${envChip(e)}
-        <div class="row-main"><div class="env-name">${esc(e.name)}</div><div class="env-kind">${esc(kind)}</div></div>
+        ${envIcon(e)}
+        <div class="row-main"><div class="env-name">${esc(e.name)}</div><div class="env-kind">${esc(kind)}${e.sealed ? ` · <span class="sealed-text">${esc(t('web_seal_fully_funded'))}</span>` : ''}</div></div>
       </div>
       <div>
         <div class="env-amount num">${esc(fmt(f.bal, f.cur))}</div>
@@ -796,7 +943,7 @@ async function renderBudget(quiet) {
 
   setContent(`
     ${pageHead(t('web_nav_budget'), esc(period))}
-    ${rtaBanner(d.unallocated, base, false)}
+    ${rtaBanner(d.unallocated, base, false, cache.envelopes)}
     <div class="section-head"><span class="section-title">${esc(t('nav_envelopes'))}</span></div>
     ${cache.envelopes.length ? `<div class="grid-auto">${cards}</div>` : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`}`);
 }
@@ -1085,8 +1232,55 @@ async function loadTx(reset) {
   if (!d || txView !== v) return;
   state.baseCurrency = d.baseCurrency || state.baseCurrency;
   v.items = reset ? d.items : v.items.concat(d.items);
+  if (reset) v.summary = d.summary || null;
   v.hasMore = !!d.hasMore;
   drawTx();
+}
+
+/** The month's budget above the list (the app's month card): what's left of
+ *  the spending envelopes' targets, a gold bar, spent of budgeted · income.
+ *  A past month within budget closes as "<Month> sealed". */
+function monthCard(s, year, month) {
+  if (!s) return '';
+  const now = new Date();
+  const past = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth());
+  const name = new Date(year, month, 15).toLocaleDateString(intlLocale(), { month: 'long' });
+  const monthName = name.charAt(0).toUpperCase() + name.slice(1);
+  const f = v => fmt(v, s.currency);
+  const hasBudget = s.budgeted > 0;
+  const left = s.budgeted - s.spent;
+  const over = left < -0.005;
+  const detail = hasBudget
+    ? t('web_month_spent_of', { spent: f(s.spent), budgeted: f(s.budgeted), income: f(s.income) })
+    : t('web_month_spent', { spent: f(s.spent), income: f(s.income) });
+  if (past && hasBudget && !over) {
+    return `<div class="card month-card sealed">${sealSvg(34)}<div>
+      <div class="month-title sm">${esc(t('web_month_sealed', { month: monthName }))}</div>
+      <div class="month-detail">${esc(detail)}</div></div></div>`;
+  }
+  const pct = hasBudget ? Math.min(100, Math.max(0, s.spent / s.budgeted * 100)) : 0;
+  return `<div class="card month-card">
+    <div class="month-top">
+      <span class="month-title">${esc(hasBudget ? t('web_month_budget', { month: monthName }) : monthName)}</span>
+      ${hasBudget ? `<span class="month-left num${over ? ' over' : ''}">${esc(over ? t('web_impact_over', { amount: f(-left) }) : t('web_impact_left', { amount: f(left) }))}</span>` : ''}
+    </div>
+    ${hasBudget ? `<div class="bar"><span style="width:${pct.toFixed(1)}%;background:${over ? 'var(--expense)' : 'var(--acc-bright)'}"></span></div>` : ''}
+    <div class="month-detail">${esc(detail)}</div>
+  </div>`;
+}
+
+/** Signed day net in the base currency (lines without a rate left out). */
+function dayNet(items, base) {
+  let net = 0;
+  for (const tx of items) {
+    if (tx.type === 'transfer') continue;
+    const cur = tx.lineCount > 1 ? tx.currency : (tx.lineCurrency || tx.currency);
+    const rate = tx.lineCount > 1 ? 1 : (tx.lineExchangeRate ?? 1);
+    const v = cur === base ? (tx.lineCount > 1 ? tx.amount : (tx.lineAmount ?? tx.amount))
+      : Math.abs(rate - 1) > 0.001 ? (tx.lineAmount ?? tx.amount) * rate : 0;
+    net += tx.type === 'income' ? v : -v;
+  }
+  return net;
 }
 
 function drawTx() {
@@ -1094,20 +1288,36 @@ function drawTx() {
   const box = document.getElementById('tx-results');
   if (!box) return;
   const visible = v.items.filter(tx => !pendingDeletes.has(tx.id));
+  // The month card: a month of the whole list (no type/search filter).
+  const card = !v.accountId && v.month >= 0 && !v.type && !v.search ? monthCard(v.summary, v.year, v.month) : '';
   if (!visible.length) {
-    box.innerHTML = `<div class="card">${emptyState(IC.receipt, v.search ? t('web_tx_no_match') : t('web_tx_empty_title'), v.search ? '' : t('web_tx_empty_sub'), v.search ? null : { action: 'add-tx', label: t('web_tx_add') })}</div>`;
+    box.innerHTML = card + `<div class="card">${emptyState(IC.receipt, v.search ? t('web_tx_no_match') : t('web_tx_empty_title'), v.search ? '' : t('web_tx_empty_sub'), v.search ? null : { action: 'add-tx', label: t('web_tx_add') })}</div>`;
     return;
   }
+  const base = state.baseCurrency;
   const groups = [];
   for (const tx of visible) {
     const k = dayKey(tx.date);
     if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, date: tx.date, items: [] });
     groups[groups.length - 1].items.push(tx);
   }
-  box.innerHTML = `<div class="card card-flush list">
-    ${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.date))}</span></div>${g.items.map(tx => txRow(tx, state.baseCurrency, { actions: true, account: v.account })).join('')}`).join('')}
-    ${v.hasMore ? `<div class="load-more"><button class="btn btn-tonal" data-action="more-tx">${esc(t('web_load_more'))}</button></div>` : ''}
-  </div>`;
+  // One card per day: the day's name, its date and net, then its rows.
+  const dayCard = g => {
+    const d = toDate(g.date);
+    const today = dayKey(new Date());
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const name = g.k === today ? t('common_today') : g.k === dayKey(y) ? t('common_yesterday')
+      : d.toLocaleDateString(intlLocale(), { weekday: 'long' });
+    const date = d.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
+    const net = v.accountId ? 0 : dayNet(g.items, base);
+    return `<section class="card day-card">
+      <div class="day-card-head"><span class="day-name">${esc(name.charAt(0).toUpperCase() + name.slice(1))}</span><span class="day-date">${esc(date)}</span>
+        ${Math.abs(net) >= 0.005 ? `<span class="day-net num">${esc(net > 0 ? fmtPlus(net, base) : fmt(net, base))}</span>` : ''}</div>
+      ${g.items.map(tx => txRow(tx, base, { actions: true, account: v.account })).join('')}
+    </section>`;
+  };
+  box.innerHTML = `${card}<div class="day-cards">${groups.map(dayCard).join('')}</div>
+    ${v.hasMore ? `<div class="load-more"><button class="btn btn-tonal" data-action="more-tx">${esc(t('web_load_more'))}</button></div>` : ''}`;
   if (v.flash) {
     const row = box.querySelector(`[data-id="${CSS.escape(v.flash)}"]`);
     row?.classList.add('flash');
@@ -3091,7 +3301,18 @@ const actions = {
   'bulk-del': el => { bulk.rows.splice(Number(el.dataset.row), 1); if (!bulk.rows.length) bulk.rows.push(bulkRow()); bulk.bad = -1; drawBulk(); bulkStore(); },
   'bulk-clear': () => { bulk.rows = [bulkRow()]; while (bulk.rows.length < 3) bulk.rows.push(bulkRow(bulk.rows[0])); bulk.bad = -1; drawBulk({ row: 0, col: 'amount' }); bulkStore(); },
   'move': el => openMove(el.dataset.id),
-  'cover': el => openMove(el.dataset.id, true),
+  'cover': async el => {
+    // From a transaction row the envelopes may not be loaded yet.
+    if (!(cache.envelopes || []).some(e => e.id === el.dataset.id)) {
+      const d = await api('/api/envelopes');
+      if (!d) return;
+      cache.envelopes = d.items || [];
+      cache.unallocated = d.unallocated || {};
+    }
+    openMove(el.dataset.id, true);
+  },
+  'gs-hide': async () => { if (await api('/api/getting-started/hide', { method: 'POST' })) refresh(true); },
+  'add-income': () => { lsSet('bs_last_type', 'income'); openTxForm(null, 'add'); },
   'add-account': openAddAccount,
   'add-cat': () => refs().then(() => openCategoryForm()),
   'edit-cat': el => openCategoryForm((cache.categories || []).find(c => c.id === el.dataset.id)),
@@ -3186,6 +3407,11 @@ function signOut() {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 (async () => {
+  // The page's own icons (sidebar, PIN pad) are placeholders until now.
+  for (const el of document.querySelectorAll('i[data-ph]')) {
+    el.insertAdjacentHTML('afterend', ph(el.dataset.ph).replace('<svg ', `<svg class="${el.className}" `));
+    el.remove();
+  }
   applyTheme(state.theme);
   initAuth();
   initShortcuts();

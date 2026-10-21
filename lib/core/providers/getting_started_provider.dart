@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../database/app_database.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
 
@@ -30,9 +31,14 @@ final gettingStartedProvider = StreamProvider<GettingStarted>((ref) {
   final db = ref.watch(databaseProvider);
   final hid = ref.watch(currentHouseholdIdProvider);
   if (hid == null) return const Stream.empty();
-  return db
-      .customSelect(
-        '''
+  return gettingStartedQuery(db, hid).watchSingle();
+});
+
+/// One query for all four steps (also read by the Web Companion).
+Selectable<GettingStarted> gettingStartedQuery(AppDatabase db, String hid) =>
+    db
+        .customSelect(
+          '''
 SELECT
   EXISTS(SELECT 1 FROM transactions WHERE household_id = ?1 AND deleted = 0
          AND status IS NULL AND type = 'income') AS income,
@@ -44,22 +50,23 @@ SELECT
   EXISTS(SELECT 1 FROM transactions WHERE household_id = ?1 AND deleted = 0
          AND status IS NULL AND type = 'expense') AS expense
 ''',
-        variables: [Variable.withString(hid)],
-        readsFrom: {db.transactions, db.allocations, db.allocationLedger},
-      )
-      .watchSingle()
-      .map((r) => GettingStarted(
-            income: r.read<bool>('income'),
-            envelopes: r.read<bool>('envelopes'),
-            funded: r.read<bool>('funded'),
-            expense: r.read<bool>('expense'),
-          ));
-});
+          variables: [Variable.withString(hid)],
+          readsFrom: {db.transactions, db.allocations, db.allocationLedger},
+        )
+        .map((r) => GettingStarted(
+              income: r.read<bool>('income'),
+              envelopes: r.read<bool>('envelopes'),
+              funded: r.read<bool>('funded'),
+              expense: r.read<bool>('expense'),
+            ));
+
+/// Pref: the checklist was closed (shared with the Web Companion).
+const gettingStartedHiddenKey = 'getting_started_hidden';
 
 /// Whether the checklist is hidden for good: the user closed it, or every
 /// step was done once (it doesn't come back if data is deleted later).
 class GettingStartedHiddenNotifier extends Notifier<bool> {
-  static const _key = 'getting_started_hidden';
+  static const _key = gettingStartedHiddenKey;
 
   @override
   bool build() {

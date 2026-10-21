@@ -48,6 +48,7 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth, ChangeFeed changes) {
   final api = Router();
 
   api.get('/dashboard', dashboardHandler(ref));
+  api.post('/getting-started/hide', hideGettingStartedHandler(ref));
 
   api.get('/transactions', listTransactionsHandler(ref));
   api.post('/transactions', createTransactionHandler(ref));
