@@ -481,6 +481,7 @@ class _TravelExchangeScreenState
             child: Text(S.of(context).travelCreateNew),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(S.of(context).travelReactivate),
           ),

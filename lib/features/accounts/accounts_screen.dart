@@ -311,6 +311,7 @@ class _ArchivedSection extends ConsumerWidget {
             child: Text(tr.commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(tr.acctUnarchive),
           ),

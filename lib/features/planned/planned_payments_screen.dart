@@ -19,6 +19,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 /// A planned payment item with its resolved account, category, and lines.
 class _PlannedItem {
@@ -450,8 +451,11 @@ class _PlannedPaymentsScreenState
 
               // ── Loading / Empty / List ──
               if (_loading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: SkeletonList(),
+                  ),
                 )
               else if (_groups.isEmpty)
                 SliverFillRemaining(

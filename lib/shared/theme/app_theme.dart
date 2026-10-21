@@ -210,6 +210,8 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v,
           borderRadius: BorderRadius.circular(RadiusTokens.dialog)),
       titleTextStyle: fs(21, FontWeight.w700, textPrimary),
       contentTextStyle: fs(15.5, FontWeight.w400, textSecondary),
+      // Room for Cancel + a primary button side by side.
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
     ),
     // Cashew openBottomSheet: no drag handle, tinted, max width 650.
     bottomSheetTheme: BottomSheetThemeData(

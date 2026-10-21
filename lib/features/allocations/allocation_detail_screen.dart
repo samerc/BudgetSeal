@@ -1141,6 +1141,7 @@ class _AllocationDetailScreenState
               child: Text(tr.commonCancel),
             ),
             FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => Navigator.pop(context, true),
               child: Text(tr.allocFundAnyway),
             ),

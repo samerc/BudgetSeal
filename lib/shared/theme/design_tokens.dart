@@ -164,3 +164,17 @@ abstract final class InputLimits {
   /// Max transaction/balance amount (1 billion)
   static const double maxAmount = 1e9;
 }
+
+/// Filled/Outlined buttons inside dialog actions. The theme makes them full
+/// width (52 high) for screens, which stacks a dialog's Cancel above its
+/// primary button; this compact size puts them side by side (the actions bar
+/// still stacks them when they don't fit). Everything else comes from the
+/// theme.
+abstract final class DialogButtons {
+  static final filled = FilledButton.styleFrom(
+      minimumSize: const Size(64, 44),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10));
+  static final outlined = OutlinedButton.styleFrom(
+      minimumSize: const Size(64, 44),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10));
+}

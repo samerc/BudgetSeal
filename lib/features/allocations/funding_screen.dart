@@ -18,6 +18,7 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_display.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 class FundingScreen extends ConsumerStatefulWidget {
   const FundingScreen({super.key});
@@ -152,6 +153,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
               child: Text(tr.commonCancel),
             ),
             FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => Navigator.pop(context, true),
               child: Text(tr.fundAnyway),
             ),
@@ -225,7 +227,10 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         title: Text(S.of(context).fundTitle),
       ),
       body: allocationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList()),
         error: (e, _) => ErrorRetry(
           message: S.of(context).fundCouldntLoad,
           details: '$e',

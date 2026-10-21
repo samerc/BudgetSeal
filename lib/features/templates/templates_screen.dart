@@ -20,6 +20,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 enum _SortMode { mostUsed, alphabetical, newest, amount }
 enum _GroupMode { none, type, category }
@@ -306,7 +307,10 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             // ── List ─────────────────────────────────────────────
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList())
                   : filtered.isEmpty
                       ? EmptyState(
                           icon: AppIcons.lightning,

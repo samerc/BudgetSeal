@@ -12,6 +12,7 @@ import '../../shared/utils/format_number.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 class BillCalendarScreen extends ConsumerStatefulWidget {
   const BillCalendarScreen({super.key});
@@ -249,7 +250,10 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList())
           : Column(
               children: [
                 // Weekday headers

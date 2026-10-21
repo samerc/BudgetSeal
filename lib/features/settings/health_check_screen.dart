@@ -193,6 +193,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             child: Text(tr.commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(tr.healthRepairDone),
           ),

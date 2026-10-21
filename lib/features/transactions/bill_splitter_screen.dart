@@ -28,6 +28,7 @@ import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/providers/transactions_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bill Splitter — 3-step guided flow
@@ -389,6 +390,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: Text(tr.billKeepAsOne)),
             FilledButton(
+                style: DialogButtons.filled,
                 onPressed: () => Navigator.pop(ctx, true),
                 child: Text(tr.billSplit)),
           ],
@@ -601,6 +603,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: Text(tr.billGoBackBtn)),
             FilledButton(
+                style: DialogButtons.filled,
                 onPressed: () => Navigator.pop(ctx, true),
                 child: Text(tr.billContinueAnyway)),
           ],
@@ -623,13 +626,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     if (mode == _PaidMode.other) {
       // Nothing leaves the account now: track what the user owes the payer.
       final payer = _effectivePayer;
-      final n = await _createLoans('borrowed', {payer: myShare});
-      if (!mounted || n == 0) return;
+      final ids = await _createLoans('borrowed', {payer: myShare});
+      if (!mounted || ids.isEmpty) return;
+      final undo = _undoAction(loanIds: ids);
       context.pop();
       messenger.showSnackBar(SnackBar(
         content: Text(tr.billOweCreated(
             payer, formatAmount(myShare, currency: _billCurrency))),
         behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
       ));
       return;
     }
@@ -663,36 +668,68 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     // Not saved (form closed): stay on the bill so nothing is lost.
     if (txId == null || !mounted) return;
 
-    var loans = 0;
+    var loanIds = const <String>[];
     if (mode == _PaidMode.me) {
-      loans = await _createLoans('lent', {
+      loanIds = await _createLoans('lent', {
         for (final p in others)
           if ((splits[p] ?? 0) > 0) p: splits[p]!,
       });
     }
     if (!mounted) return;
+    final undo = _undoAction(txId: txId, loanIds: loanIds);
     context.pop();
-    if (loans > 0) {
+    if (loanIds.isNotEmpty) {
+      // Replaces the form's "Saved" SnackBar: its Undo would remove the
+      // payment but leave these loans behind.
+      messenger.clearSnackBars();
       messenger.showSnackBar(SnackBar(
-        content: Text(tr.billLoansCreated(loans)),
+        content: Text(tr.billLoansCreated(loanIds.length)),
         behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
       ));
     }
   }
 
+  /// Undo for a saved bill: the payment (if any) and the loans it created,
+  /// together. Captures the container — the screen is gone by then.
+  VoidCallback _undoAction({String? txId, List<String> loanIds = const []}) {
+    final container = ProviderScope.containerOf(context);
+    return () async {
+      try {
+        if (txId != null) {
+          await container.read(allocationEngineProvider).deleteTransaction(txId);
+          container.invalidate(transactionEntriesProvider);
+          container.invalidate(monthlyTransactionsProvider);
+        }
+        if (loanIds.isNotEmpty) {
+          final db = container.read(databaseProvider);
+          await (db.update(db.objectives)..where((o) => o.id.isIn(loanIds)))
+              .write(ObjectivesCompanion(
+                  deleted: const Value(true),
+                  lastModified: Value(DateTime.now())));
+          container.invalidate(objectivesProvider);
+        }
+      } catch (e) {
+        debugPrint('[BillSplitter] Undo failed: $e');
+      }
+    };
+  }
+
   /// One loan per person in Goals & Loans, in the bill's currency. Repayments
   /// are recorded from the loan (Record payment), like any other loan.
-  Future<int> _createLoans(String direction, Map<String, double> amounts) async {
+  Future<List<String>> _createLoans(
+      String direction, Map<String, double> amounts) async {
     final householdId = ref.read(currentHouseholdIdProvider);
-    if (householdId == null) return 0;
+    if (householdId == null) return const [];
     final db = ref.read(databaseProvider);
     final name = S.of(context).billLoanName(formatDate(DateTime.now()));
-    var n = 0;
+    final ids = <String>[];
     try {
       for (final e in amounts.entries) {
         if (e.value <= 0) continue;
+        final id = const Uuid().v4();
         await db.into(db.objectives).insert(ObjectivesCompanion.insert(
-              id: const Uuid().v4(),
+              id: id,
               householdId: householdId,
               name: name,
               type: 'loan',
@@ -704,7 +741,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               direction: Value(direction),
               lastModified: Value(DateTime.now()),
             ));
-        n++;
+        ids.add(id);
       }
       ref.invalidate(objectivesProvider);
     } catch (e) {
@@ -716,7 +753,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         ));
       }
     }
-    return n;
+    return ids;
   }
 
   /// Plain-text summary for a group chat.
@@ -747,6 +784,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(tr.commonCancel)),
           FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(tr.txAfDiscard)),
         ],
@@ -1132,6 +1170,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(tr.commonCancel)),
           FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
               child: Text(tr.billSplit)),
         ],

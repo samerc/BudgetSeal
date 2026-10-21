@@ -13,6 +13,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 class _RateRow {
   final String currency;
@@ -174,6 +175,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
             child: Text(tr.commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(dCtx, 'save'),
             child: Text(tr.commonSave),
           ),
@@ -224,7 +226,10 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
         ],
       ),
       body: !_loadedOnce
-          ? const Center(child: CircularProgressIndicator())
+          ? const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList())
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [

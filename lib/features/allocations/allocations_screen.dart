@@ -492,7 +492,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                               label: l.allocRemaining,
                               amount: totalRemaining,
                               currency: baseCurrency,
-                              color: AppColors.healthy,
+                              color: totalRemaining < -0.005
+                                  ? AppColors.overspent
+                                  : AppColors.healthy,
                             ),
                           ],
                         ),
@@ -526,6 +528,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 anyFunded: allocationsAsync.value?.any((a) => a
                         .balanceByCurrency.values
                         .any((v) => v > 0.005)) ??
+                    false,
+                anyOverspent: allocationsAsync.value?.any((a) => a
+                        .balanceByCurrency.values
+                        .any((v) => v < -0.005)) ??
                     false,
               ),
               loading: () => const SizedBox(height: 80),

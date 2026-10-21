@@ -60,6 +60,8 @@ class BudgetFocus extends ConsumerWidget {
             hasAllocations: allocations.isNotEmpty,
             anyFunded: allocations.any(
                 (a) => a.balanceByCurrency.values.any((v) => v > 0.005)),
+            anyOverspent: allocations.any(
+                (a) => a.balanceByCurrency.values.any((v) => v < -0.005)),
             margin: const EdgeInsets.only(bottom: 12),
           ),
         if (overspent.isNotEmpty) ...[

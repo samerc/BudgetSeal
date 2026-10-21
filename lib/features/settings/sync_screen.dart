@@ -748,6 +748,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
             child: Text(S.of(context).commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () {
               if (ctrl.text.isEmpty) return;
               if (ctrl.text != confirmCtrl.text) {

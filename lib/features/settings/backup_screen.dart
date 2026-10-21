@@ -241,6 +241,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         actions: [
           if (canClose)
             FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => SystemNavigator.pop(),
               child: Text(tr.backupCloseApp),
             )

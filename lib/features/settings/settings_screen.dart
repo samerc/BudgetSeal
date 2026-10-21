@@ -1874,6 +1874,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
             child: Text(tr.commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
             child: Text(tr.commonSave),
           ),

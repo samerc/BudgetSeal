@@ -853,6 +853,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: Text(tr.commonGoBack),
             ),
             FilledButton(
+              style: DialogButtons.filled,
               onPressed: () => Navigator.pop(dialogCtx, true),
               child: Text(tr.commonSaveAnyway),
             ),
@@ -909,6 +910,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 child: Text(tr.commonCancel),
               ),
               FilledButton(
+                style: DialogButtons.filled,
                 onPressed: () => Navigator.pop(dialogCtx, true),
                 child: Text(tr.commonSaveAnyway),
               ),

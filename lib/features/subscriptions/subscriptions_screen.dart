@@ -14,6 +14,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../recurring/recurring_screen.dart' show AddRecurringSheet;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 class SubscriptionsScreen extends ConsumerStatefulWidget {
   const SubscriptionsScreen({super.key});
@@ -419,8 +420,11 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
 
               // ── List ──
               if (_loading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: SkeletonList(),
+                  ),
                 )
               else if (_subs.isEmpty)
                 SliverFillRemaining(

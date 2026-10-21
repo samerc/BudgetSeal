@@ -15,6 +15,7 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
 class _AllocationResolution {
@@ -144,7 +145,10 @@ class _PeriodTransitionScreenState
         automaticallyImplyLeading: true,
       ),
       body: allocationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList()),
         error: (e, _) => ErrorRetry(
           message: S.of(context).periodError,
           details: '$e',

@@ -20,6 +20,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 
 /// Shows recurring transactions sorted by next due date,
 /// with visual urgency indicators for overdue / due soon items.
@@ -144,7 +145,10 @@ class _UpcomingBillsScreenState
         title: Text(S.of(context).upcomingTitle),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList())
           : _bills.isEmpty
               ? EmptyState(
                   icon: AppIcons.calendarCheck,

@@ -1125,6 +1125,7 @@ class _AssistedTransactionScreenState
             child: Text(tr.commonCancel),
           ),
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(dCtx, ctrl.text),
             child: Text(tr.commonSave),
           ),

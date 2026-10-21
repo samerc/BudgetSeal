@@ -246,6 +246,7 @@ class UpgradeScreen extends ConsumerWidget {
               child: Text(l.commonCancel),
             ),
             FilledButton(
+              style: DialogButtons.filled,
               onPressed: () async {
                 final code = controller.text.trim();
                 if (code.isEmpty) return;

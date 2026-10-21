@@ -223,6 +223,8 @@ class AllocationCard extends StatelessWidget {
       subtitle = parts.join(' · ');
     }
 
+    final showCover = onCover != null && isTargetOverspent;
+
     return Semantics(
       label: semanticParts.join(', '),
       button: onTap != null,
@@ -282,13 +284,6 @@ class AllocationCard extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (isTargetOverspent)
-                                const Padding(
-                                  padding:
-                                      EdgeInsetsDirectional.only(end: 4),
-                                  child: Icon(AppIcons.warning,
-                                      size: 16, color: AppColors.overspent),
-                                ),
                               Text(
                                 formatAmount(displayBalance,
                                     currency: displayCurrency),
@@ -341,28 +336,33 @@ class AllocationCard extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          // Cover sits under the amount so the name keeps
+                          // its room on narrow phones.
+                          if (showCover)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Material(
+                                color: AppColors.overspent,
+                                shape: const StadiumBorder(),
+                                child: InkWell(
+                                  customBorder: const StadiumBorder(),
+                                  onTap: onCover,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 5),
+                                    child: Text(S.of(context).allocCoverButton,
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.inkOn(
+                                                AppColors.overspent))),
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                      if (onCover != null && isTargetOverspent) ...[
-                        const SizedBox(width: 8),
-                        Material(
-                          color: AppColors.overspent,
-                          shape: const StadiumBorder(),
-                          child: InkWell(
-                            customBorder: const StadiumBorder(),
-                            onTap: onCover,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 7),
-                              child: Text(S.of(context).allocCoverButton,
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.inkOn(AppColors.overspent))),
-                            ),
-                          ),
-                        ),
-                      ] else if (onSpend != null && !_isFlexible) ...[
+                      if (onSpend != null && !_isFlexible && !showCover) ...[
                         const SizedBox(width: 8),
                         Material(
                           color: AppColors.pastel(context, iconColor,

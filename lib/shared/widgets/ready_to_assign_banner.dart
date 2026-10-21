@@ -25,6 +25,7 @@ class ReadyToAssignBanner extends StatefulWidget {
     required this.baseCurrency,
     this.hasAllocations = false,
     this.anyFunded = false,
+    this.anyOverspent = false,
     this.margin = const EdgeInsets.fromLTRB(16, 12, 16, 8),
   });
 
@@ -33,6 +34,10 @@ class ReadyToAssignBanner extends StatefulWidget {
   /// Some envelope holds money. With nothing left to assign this makes the
   /// banner "All sealed" (a budget that was never funded isn't sealed).
   final bool anyFunded;
+
+  /// Some envelope is below zero — then the budget isn't sealed yet, even
+  /// with nothing left to assign.
+  final bool anyOverspent;
 
   @override
   State<ReadyToAssignBanner> createState() => _ReadyToAssignBannerState();
@@ -63,10 +68,13 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
     super.dispose();
   }
 
-  bool get _sealed =>
-      widget.hasAllocations &&
-      widget.anyFunded &&
-      widget.unallocated.values.every((v) => v.abs() < 0.005);
+  bool get _sealed => _isSealed(widget);
+
+  static bool _isSealed(ReadyToAssignBanner w) =>
+      w.hasAllocations &&
+      w.anyFunded &&
+      !w.anyOverspent &&
+      w.unallocated.values.every((v) => v.abs() < 0.005);
 
   // Set when the banner turns sealed while on screen → stamp the seal on.
   bool _stampNext = false;
@@ -74,10 +82,7 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
   @override
   void didUpdateWidget(ReadyToAssignBanner old) {
     super.didUpdateWidget(old);
-    final was = old.hasAllocations &&
-        old.anyFunded &&
-        old.unallocated.values.every((v) => v.abs() < 0.005);
-    if (_sealed && !was) _stampNext = true;
+    if (_sealed && !_isSealed(old)) _stampNext = true;
   }
 
   Widget _buildSealed(BuildContext context, Color fill) {
