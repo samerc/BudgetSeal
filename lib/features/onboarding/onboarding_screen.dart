@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,10 +17,11 @@ import '../../core/sync/invite_code.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/currency_sheet.dart' show kCurrencies;
 import '../../shared/theme/app_colors.dart';
-import '../../shared/theme/brand_palette.dart' show brandInk;
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/widgets/section_header.dart';
 
 
 /// The phone's region currency (en_GB → GBP, fr_FR → EUR) when it's one
@@ -37,6 +37,15 @@ String _localeCurrency() {
   return 'USD';
 }
 
+/// Account types offered in setup: (type, label, icon). Same icons as the
+/// account screen.
+List<(String, String, IconData)> _accountTypes(S s) => [
+      ('cash', s.onboardTypeCash, Icons.money_rounded),
+      ('bank', s.onboardTypeBank, Icons.account_balance_rounded),
+      ('credit', s.onboardTypeCredit, Icons.credit_card_rounded),
+      ('wallet', s.onboardTypeDigital, Icons.account_balance_wallet_rounded),
+    ];
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -50,17 +59,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Setup fields ──
   final _nameController = TextEditingController();
+  final _nameKey = GlobalKey();
   String _baseCurrency = _localeCurrency();
   int _periodStartDay = 1;
 
   // Account
   final _acctNameCtrl = TextEditingController();
+  final _acctNameKey = GlobalKey();
   bool _acctNameSet = false;
   String _acctType = 'cash';
   double _acctInitialBalance = 0;
 
   // Categories
-  bool _seedCategories = true; // true = full set, false = empty
+  bool _seedCategories = true; // true = suggested set, false = none
 
   bool _loading = false;
   String? _nameError;
@@ -83,11 +94,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _nextPage() {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 500),
+  void _goTo(int page) {
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 450),
       curve: Curves.easeInOutCubic,
     );
+  }
+
+  /// The account name follows the type while it's still the default
+  /// (Cash → Bank renames "Cash" to "Bank", a typed name stays).
+  void _changeAcctType(String type) {
+    final labels = {for (final t in _accountTypes(S.of(context))) t.$1: t.$2};
+    setState(() {
+      if (_acctNameCtrl.text.trim() == labels[_acctType]) {
+        _acctNameCtrl.text = labels[type] ?? _acctNameCtrl.text;
+        if (_acctNameError != null) _acctNameError = null;
+      }
+      _acctType = type;
+    });
   }
 
   // ── Submit: create household + account + categories + entry mode ──
@@ -104,6 +129,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() {
         _nameError = nameErr;
         _acctNameError = acctErr;
+      });
+      // The button sits below the fields: bring the first error into view.
+      final key = nameErr != null ? _nameKey : _acctNameKey;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = key.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(ctx,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              alignment: 0.2);
+        }
       });
       return;
     }
@@ -174,7 +210,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ref.read(entryModeProvider.notifier).setMode('assisted');
 
       // 5. Go to done page
-      if (mounted) _nextPage();
+      if (mounted) _goTo(2);
     } catch (e) {
       debugPrint('[Onboarding] Error during setup: $e');
       if (mounted) {
@@ -192,93 +228,152 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        // Fixed night surface: light status bar icons in every theme.
-        value: SystemUiOverlayStyle.light,
-        child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryLight,
-              AppColors.primary,
-              AppColors.darkBackground,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Progress dots
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    3,
-                    (i) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: i == _currentPage ? 24 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: i == _currentPage
-                            ? AppColors.accentBright
-                            : Colors.white.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
+    return PopScope(
+      // Back on the setup page returns to the welcome page; on the done
+      // page the household exists, so back finishes onboarding.
+      canPop: _currentPage == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || _loading) return;
+        if (_currentPage == 1) _goTo(0);
+        if (_currentPage == 2) context.go('/');
+      },
+      // System bars come from app.dart's AnnotatedRegion (theme-aware).
+      child: Scaffold(
+          backgroundColor: AppColors.bg(context),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Back (setup page) + progress dots
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (_currentPage == 1)
+                        PositionedDirectional(
+                          start: 4,
+                          child: IconButton(
+                            onPressed: _loading ? null : () => _goTo(0),
+                            tooltip: MaterialLocalizations.of(context)
+                                .backButtonTooltip,
+                            icon: const BackButtonIcon(),
+                            color: AppColors.tp(context),
+                          ),
+                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(
+                          3,
+                          (i) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: i == _currentPage ? 24 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: i == _currentPage
+                                  ? AppColors.accent
+                                  : AppColors.th(context),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ),
-              // Pages
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (i) {
-                    // Don't carry the setup page's keyboard onto the next page.
-                    FocusScope.of(context).unfocus();
-                    setState(() => _currentPage = i);
-                  },
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _WelcomePage(onNext: _nextPage),
-                    _SetupPage(
-                      nameController: _nameController,
-                      baseCurrency: _baseCurrency,
-                      periodStartDay: _periodStartDay,
-                      acctNameCtrl: _acctNameCtrl,
-                      acctType: _acctType,
-                      acctInitialBalance: _acctInitialBalance,
-                      seedCategories: _seedCategories,
-                      loading: _loading,
-                      nameError: _nameError,
-                      acctNameError: _acctNameError,
-                      onNameErrorClear: () => setState(() => _nameError = null),
-                      onAcctNameErrorClear: () => setState(() => _acctNameError = null),
-                      onCurrencyChanged: (v) =>
-                          setState(() => _baseCurrency = v ?? 'USD'),
-                      onDayChanged: (v) =>
-                          setState(() => _periodStartDay = v ?? 1),
-                      onAcctTypeChanged: (v) =>
-                          setState(() => _acctType = v),
-                      onAcctBalanceChanged: (v) =>
-                          setState(() => _acctInitialBalance = v),
-                      onSeedChanged: (v) =>
-                          setState(() => _seedCategories = v),
-                      onSubmit: _submit,
-                    ),
-                    _DonePage(onFinish: () => context.go('/')),
-                  ],
+                // Pages
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (i) {
+                      // Don't carry the setup page's keyboard onto the next page.
+                      FocusScope.of(context).unfocus();
+                      setState(() => _currentPage = i);
+                    },
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _WelcomePage(onNext: () => _goTo(1)),
+                      _SetupPage(
+                        nameController: _nameController,
+                        nameKey: _nameKey,
+                        baseCurrency: _baseCurrency,
+                        periodStartDay: _periodStartDay,
+                        acctNameCtrl: _acctNameCtrl,
+                        acctNameKey: _acctNameKey,
+                        acctType: _acctType,
+                        acctInitialBalance: _acctInitialBalance,
+                        seedCategories: _seedCategories,
+                        loading: _loading,
+                        nameError: _nameError,
+                        acctNameError: _acctNameError,
+                        onNameErrorClear: () =>
+                            setState(() => _nameError = null),
+                        onAcctNameErrorClear: () =>
+                            setState(() => _acctNameError = null),
+                        onCurrencyChanged: (v) =>
+                            setState(() => _baseCurrency = v),
+                        onDayChanged: (v) =>
+                            setState(() => _periodStartDay = v ?? 1),
+                        onAcctTypeChanged: _changeAcctType,
+                        onAcctBalanceChanged: (v) =>
+                            setState(() => _acctInitialBalance = v),
+                        onSeedChanged: (v) =>
+                            setState(() => _seedCategories = v),
+                        onSubmit: _submit,
+                      ),
+                      _DonePage(onFinish: () => context.go('/')),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+    );
+  }
+}
+
+// ─── Shared pieces ──────────────────────────────────────────────────────────
+
+/// Page title: the app's screen title (28 / w800, display face).
+class _PageTitle extends StatelessWidget {
+  final String text;
+  final TextAlign? align;
+  const _PageTitle(this.text, {this.align});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: align,
+      style: TextStyle(
+        fontSize: TypographyTokens.screenTitleSize,
+        fontFamily: TypographyTokens.displayFamily,
+        fontWeight: TypographyTokens.screenTitleWeight,
+        color: AppColors.tp(context),
       ),
+    );
+  }
+}
+
+/// A plain app card: surface, radius 16, soft shadow.
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  const _Card({required this.child, this.padding = const EdgeInsets.all(16)});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        boxShadow: AppColors.cardShadow(context),
       ),
+      child: child,
     );
   }
 }
@@ -332,152 +427,140 @@ class _WelcomePageState extends State<_WelcomePage>
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        children: [
-          const SizedBox(height: 24),
-          // ── Branding ──
-          SlideTransition(
-            position: _slideIcon,
-            child: FadeTransition(
-              opacity: _fadeIcon,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Icon(Icons.account_balance_wallet_rounded,
-                    size: 40, color: AppColors.accentBright),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          SlideTransition(
-            position: _slideTitle,
-            child: FadeTransition(
-              opacity: _fadeTitle,
-              child: Text(
-                S.of(context).onboardWelcomeTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontFamily: TypographyTokens.displayFamily,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          FadeTransition(
-            opacity: _fadeSub,
-            child: Text(
-              S.of(context).onboardTagline,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // ── Envelope explainer ──
-          FadeTransition(
-            opacity: _fadeContent,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                S.of(context).onboardEnvelopeExplainer,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ),
-
-          // ── How it works (compact) ──
-          FadeTransition(
-            opacity: _fadeContent,
+    final s = S.of(context);
+    final steps = [s.onboardStep1, s.onboardStep2, s.onboardStep3, s.onboardStep4];
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                _CompactStep(
-                  number: '1',
-                  text: S.of(context).onboardStep1,
-                ),
                 const SizedBox(height: 8),
-                _CompactStep(
-                  number: '2',
-                  text: S.of(context).onboardStep2,
+                // ── Branding: the app icon, as on the splash screen ──
+                SlideTransition(
+                  position: _slideIcon,
+                  child: FadeTransition(
+                    opacity: _fadeIcon,
+                    child: Image.asset(
+                      'assets/icon/splash_logo.png',
+                      width: 88,
+                      height: 88,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                _CompactStep(
-                  number: '3',
-                  text: S.of(context).onboardStep3,
+                const SizedBox(height: 16),
+                SlideTransition(
+                  position: _slideTitle,
+                  child: FadeTransition(
+                    opacity: _fadeTitle,
+                    child: _PageTitle(s.onboardWelcomeTitle,
+                        align: TextAlign.center),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                _CompactStep(
-                  number: '4',
-                  text: S.of(context).onboardStep4,
+                const SizedBox(height: 6),
+                FadeTransition(
+                  opacity: _fadeSub,
+                  child: Text(
+                    s.onboardTagline,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tp(context),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 32),
-                _OnboardingButton(label: S.of(context).onboardGetStarted, onTap: widget.onNext),
-                const SizedBox(height: 12),
-                _RestoreFromCloudButton(),
-                const SizedBox(height: 8),
-                _JoinHouseholdButton(),
+                const SizedBox(height: 20),
+                FadeTransition(
+                  opacity: _fadeContent,
+                  child: Column(
+                    children: [
+                      Text(
+                        s.onboardEnvelopeExplainer,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.ts(context),
+                          height: 1.45,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // ── How it works ──
+                      _Card(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < steps.length; i++)
+                              _Step(number: '${i + 1}', text: steps[i]),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
-          const SizedBox(height: 32),
-        ],
-      ),
+        ),
+        // ── Actions: pinned, so they're reachable at any text size ──
+        FadeTransition(
+          opacity: _fadeContent,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton(
+                  onPressed: widget.onNext,
+                  child: Text(s.onboardGetStarted),
+                ),
+                const SizedBox(height: 8),
+                const _RestoreButton(),
+                const _JoinHouseholdButton(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _CompactStep extends StatelessWidget {
+class _Step extends StatelessWidget {
   final String number;
   final String text;
-  const _CompactStep({required this.number, required this.text});
+  const _Step({required this.number, required this.text});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Container(
             width: 28,
             height: 28,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.accentLight,
+              shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Text(number,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14)),
-            ),
+            child: Text(number,
+                style: TextStyle(
+                    color: AppColors.accent,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13)),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(text,
                 style: TextStyle(
-                    color: Colors.white, fontSize: 13, height: 1.3)),
+                    color: AppColors.tp(context), fontSize: 14, height: 1.3)),
           ),
         ],
       ),
@@ -489,9 +572,11 @@ class _CompactStep extends StatelessWidget {
 
 class _SetupPage extends StatelessWidget {
   final TextEditingController nameController;
+  final GlobalKey nameKey;
   final String baseCurrency;
   final int periodStartDay;
   final TextEditingController acctNameCtrl;
+  final GlobalKey acctNameKey;
   final String acctType;
   final double acctInitialBalance;
   final bool seedCategories;
@@ -500,7 +585,7 @@ class _SetupPage extends StatelessWidget {
   final String? acctNameError;
   final VoidCallback? onNameErrorClear;
   final VoidCallback? onAcctNameErrorClear;
-  final ValueChanged<String?> onCurrencyChanged;
+  final ValueChanged<String> onCurrencyChanged;
   final ValueChanged<int?> onDayChanged;
   final ValueChanged<String> onAcctTypeChanged;
   final ValueChanged<double> onAcctBalanceChanged;
@@ -509,9 +594,11 @@ class _SetupPage extends StatelessWidget {
 
   const _SetupPage({
     required this.nameController,
+    required this.nameKey,
     required this.baseCurrency,
     required this.periodStartDay,
     required this.acctNameCtrl,
+    required this.acctNameKey,
     required this.acctType,
     required this.acctInitialBalance,
     required this.seedCategories,
@@ -528,322 +615,252 @@ class _SetupPage extends StatelessWidget {
     required this.onSubmit,
   });
 
+  static const _sectionPad = EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8);
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final accountTypes = [
-      ('cash', s.onboardTypeCash, Icons.wallet),
-      ('bank', s.onboardTypeBank, Icons.account_balance),
-      ('credit', s.onboardTypeCredit, Icons.credit_card),
-      ('wallet', s.onboardTypeDigital, Icons.account_balance_wallet),
-    ];
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
-            Text(s.onboardSetupTitle,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: TypographyTokens.displayFamily,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white)),
+            _PageTitle(s.onboardSetupTitle),
             const SizedBox(height: 4),
             Text(s.onboardChangeLater,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.8))),
+                style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
             const SizedBox(height: 20),
 
             // ── Household ──
-            _SectionLabel(s.onboardHouseholdSection),
-            const SizedBox(height: 8),
-            _FormCard(
+            SectionHeader(s.onboardHouseholdSection, padding: _sectionPad),
+            _Card(
               child: Column(
                 children: [
                   TextField(
+                    key: nameKey,
                     controller: nameController,
-                    maxLength: 100,
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
-                    onChanged: nameError != null ? (_) => onNameErrorClear?.call() : null,
-                    decoration: _inputDeco(s.onboardHouseholdName).copyWith(
-                      counterText: '',
+                    maxLength: InputLimits.nameMaxLength,
+                    textCapitalization: TextCapitalization.sentences,
+                    onChanged: nameError != null
+                        ? (_) => onNameErrorClear?.call()
+                        : null,
+                    decoration: InputDecoration(
+                      labelText: s.onboardHouseholdName,
                       hintText: s.onboardHouseholdHint,
-                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
+                      counterText: '',
                       errorText: nameError,
-                      errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   CurrencyPickerField(
                     label: s.onboardBaseCurrency,
                     value: baseCurrency,
-                    onChanged: (v) => onCurrencyChanged(v),
-                    textColor: Colors.white,
+                    onChanged: onCurrencyChanged,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   DropdownButtonFormField<int>(
                     initialValue: periodStartDay,
-                    dropdownColor: AppColors.primary,
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: Colors.white54),
-                    decoration: _inputDeco(s.onboardPeriodStart),
+                    icon: Icon(Icons.expand_more_rounded,
+                        color: AppColors.th(context)),
+                    decoration: InputDecoration(
+                      labelText: s.onboardPeriodStart,
+                      helperText: s.onboardPeriodHelp,
+                    ),
                     items: List.generate(28, (i) => i + 1)
                         .map((d) => DropdownMenuItem(
                               value: d,
-                              child: Text(s.onboardDayN(d),
-                                  style: const TextStyle(color: Colors.white)),
+                              child: Text(s.onboardDayN(d)),
                             ))
                         .toList(),
                     onChanged: onDayChanged,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    s.onboardPeriodHelp,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.65),
-                    ),
-                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
-            // ── First Account ──
-            _SectionLabel(s.onboardFirstAccountSection),
-            const SizedBox(height: 8),
-            _FormCard(
+            // ── First account ──
+            SectionHeader(s.onboardFirstAccountSection, padding: _sectionPad),
+            _Card(
               child: Column(
                 children: [
                   TextField(
+                    key: acctNameKey,
                     controller: acctNameCtrl,
+                    maxLength: InputLimits.nameMaxLength,
                     textCapitalization: TextCapitalization.words,
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
-                    onChanged: acctNameError != null ? (_) => onAcctNameErrorClear?.call() : null,
-                    decoration: _inputDeco(s.onboardAccountName).copyWith(
+                    onChanged: acctNameError != null
+                        ? (_) => onAcctNameErrorClear?.call()
+                        : null,
+                    decoration: InputDecoration(
+                      labelText: s.onboardAccountName,
+                      counterText: '',
                       errorText: acctNameError,
-                      errorStyle: TextStyle(color: Colors.amber.shade300, fontSize: 12),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  // Type chips
+                  const SizedBox(height: 12),
                   Row(
-                    children: accountTypes.map((t) {
-                      final sel = acctType == t.$1;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => onAcctTypeChanged(t.$1),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: sel
-                                  ? AppColors.accentBright
-                                  : Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(t.$3,
-                                    size: 18,
-                                    color: sel
-                                        ? brandInk
-                                        : Colors.white70),
-                                const SizedBox(height: 4),
-                                Text(t.$2,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: sel
-                                          ? brandInk
-                                          : Colors.white70,
-                                      fontWeight: FontWeight.w600,
-                                    )),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 14),
-                  // Balance
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1)),
-                    ),
-                    child: Row(
-                      children: [
-                        Text('$baseCurrency  ',
-                            style: const TextStyle(
-                                color: Colors.white60,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15)),
+                    children: [
+                      for (final t in _accountTypes(s))
                         Expanded(
-                          child: CalculatorAmountField(
-                            value: acctInitialBalance,
-                            fontSize: 18,
-                            hintText: '0',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            onChanged: onAcctBalanceChanged,
+                          child: _TypeChip(
+                            label: t.$2,
+                            icon: t.$3,
+                            selected: acctType == t.$1,
+                            onTap: () => onAcctTypeChanged(t.$1),
                           ),
                         ),
-                      ],
-                    ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _BalanceField(
+                    label: s.acctOpeningBalance,
+                    currency: baseCurrency,
+                    value: acctInitialBalance,
+                    onChanged: onAcctBalanceChanged,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
-            // ── More Options (collapsed by default) ──
-            _ExpandableOptions(
-              seedCategories: seedCategories,
-              onSeedChanged: onSeedChanged,
+            // ── Categories ──
+            SectionHeader(s.onboardCategoriesSection, padding: _sectionPad),
+            _Card(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: SwitchListTile(
+                value: seedCategories,
+                onChanged: onSeedChanged,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: Text(s.onboardSeedCategories,
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.tp(context))),
+                subtitle: Text(
+                    seedCategories ? s.onboardFullSetSub : s.onboardEmptySub,
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              ),
             ),
             const SizedBox(height: 24),
 
-            _OnboardingButton(
-              label: loading ? null : s.onboardCreateStart,
-              loading: loading,
-              onTap: onSubmit,
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: loading ? null : onSubmit,
+                child: loading
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : Text(s.onboardCreateStart),
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
-
-  static InputDecoration _inputDeco(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white60, fontSize: 13),
-      filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.07),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white, width: 2),
-      ),
-    );
-  }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: Colors.white.withValues(alpha: 0.75),
-          letterSpacing: 1.0,
-        ));
-  }
-}
-
-class _FormCard extends StatelessWidget {
-  final Widget child;
-  const _FormCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _ToggleOption extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool isSelected;
+/// Account type choice — the same chip look as the account screen.
+class _TypeChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
   final VoidCallback onTap;
 
-  const _ToggleOption({
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
+  const _TypeChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.1),
-            width: isSelected ? 1.5 : 1,
+    final fg = selected ? AppColors.accent : AppColors.ts(context);
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.accentLight : AppColors.sfv(context),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(
+              color: selected ? AppColors.accent : AppColors.bd(context),
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: fg),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: selected ? AppColors.accent : AppColors.tp(context),
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14)),
-                  const SizedBox(height: 2),
-                  Text(subtitle,
-                      style: TextStyle(
-                          color: Colors.white70, fontSize: 12)),
-                ],
-              ),
-            ),
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: Colors.white,
-              size: 20,
-            ),
-          ],
+      ),
+    );
+  }
+}
+
+/// Opening balance as a labelled input, matching the fields above it.
+/// Tapping opens the calculator (never the keyboard).
+class _BalanceField extends StatelessWidget {
+  final String label;
+  final String currency;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  const _BalanceField({
+    required this.label,
+    required this.currency,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme.bodyLarge;
+    return GestureDetector(
+      onTap: () async {
+        final v = await showCalculatorSheet(context, value);
+        if (v != null) onChanged(v);
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          suffixText: currency,
+          suffixStyle: text?.copyWith(color: AppColors.ts(context)),
+        ),
+        child: Text(
+          value == 0 ? '0' : formatForDisplay(value),
+          style: text?.copyWith(
+              color: value == 0 ? AppColors.th(context) : AppColors.tp(context)),
         ),
       ),
     );
@@ -858,144 +875,161 @@ class _DonePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(26),
+    final s = S.of(context);
+    // Centered in the page, scrolling only when large text needs it.
+    return LayoutBuilder(
+      builder: (context, box) => SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: box.maxHeight - 56),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  color: AppColors.accentLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.check_rounded,
+                    size: 48, color: AppColors.accent),
+              ),
             ),
-            child: const Icon(Icons.check_rounded,
-                size: 44, color: Colors.white),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            S.of(context).onboardAllSet,
-            style: TextStyle(
-              fontSize: 28,
-              fontFamily: TypographyTokens.displayFamily,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+            const SizedBox(height: 24),
+            _PageTitle(s.onboardAllSet, align: TextAlign.center),
+            const SizedBox(height: 12),
+            Text(
+              s.onboardDoneSubtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.ts(context),
+                height: 1.45,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            S.of(context).onboardDoneSubtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.85),
-              height: 1.5,
+            const SizedBox(height: 32),
+            FilledButton(
+              onPressed: onFinish,
+              child: Text(s.onboardStartUsing),
             ),
-          ),
-          const SizedBox(height: 40),
-          _OnboardingButton(
-            label: S.of(context).onboardStartUsing,
-            onTap: onFinish,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            S.of(context).onboardHelpHint,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.7),
+            const SizedBox(height: 16),
+            Text(
+              s.onboardHelpHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
       ),
     );
   }
 }
 
-// ─── Shared button ──────────────────────────────────────────────────────────
+// ─── Sheets: shared layout ─────────────────────────────────────────────────
 
-class _OnboardingButton extends StatelessWidget {
-  final String? label;
-  final bool loading;
-  final VoidCallback onTap;
+/// Sheet body in the app's sheet style (the theme gives radius 20 and no
+/// drag handle): title, description, content, error.
+class _SheetBody extends StatelessWidget {
+  final String title;
+  final String description;
+  final List<Widget> children;
+  final String? error;
 
-  const _OnboardingButton({
-    this.label,
-    this.loading = false,
-    required this.onTap,
+  const _SheetBody({
+    required this.title,
+    required this.description,
+    required this.children,
+    this.error,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        onPressed: loading ? null : onTap,
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.accentBright,
-          foregroundColor: brandInk,
-          disabledBackgroundColor: AppColors.accentBright.withValues(alpha: 0.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius),
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tp(context))),
+              const SizedBox(height: 8),
+              Text(description,
+                  style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
+              const SizedBox(height: 20),
+              ...children,
+              if (error != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.pastel(context, AppColors.overspent,
+                        light: 0.85, dark: 0.78),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline_rounded,
+                          color: AppColors.overspent, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(error!,
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.overspent)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
-        child: loading
-            ? SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  color: brandInk,
-                  strokeWidth: 2.5,
-                ),
-              )
-            : Text(
-                label ?? '',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
       ),
     );
   }
 }
 
-// ─── Restore from Cloud button ─────────────────────────────────────────────
+class _SheetSpinner extends StatelessWidget {
+  const _SheetSpinner();
 
-class _RestoreFromCloudButton extends ConsumerWidget {
-  const _RestoreFromCloudButton();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(child: CircularProgressIndicator(color: AppColors.accent)),
+    );
+  }
+}
+
+// ─── Restore my budget ─────────────────────────────────────────────────────
+
+class _RestoreButton extends ConsumerWidget {
+  const _RestoreButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => _showRestoreSheet(context, ref),
-        icon: const Icon(Icons.cloud_download_rounded, size: 18),
-        label: Text(
-          S.of(context).onboardRestoreCloud,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showRestoreSheet(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(syncProvider.notifier);
-    final providers = notifier.availableProviders;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _RestoreSheet(providers: providers),
+    return OutlinedButton.icon(
+      onPressed: () {
+        final providers = ref.read(syncProvider.notifier).availableProviders;
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => _RestoreSheet(providers: providers),
+        );
+      },
+      icon: const Icon(Icons.restore_rounded, size: 20),
+      label: Text(S.of(context).onboardRestoreCloud),
     );
   }
 }
@@ -1012,7 +1046,17 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
   bool _loading = false;
   String? _error;
 
+  void _fail(String message) {
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        _error = message;
+      });
+    }
+  }
+
   Future<void> _restore(CloudProvider provider) async {
+    final s = S.of(context);
     setState(() {
       _loading = true;
       _error = null;
@@ -1022,10 +1066,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
       final connected =
           await ref.read(syncProvider.notifier).connectProvider(provider);
       if (!connected) {
-        setState(() {
-          _loading = false;
-          _error = S.of(context).onboardConnectFailed(provider.displayName);
-        });
+        _fail(s.onboardConnectFailed(provider.displayName));
         return;
       }
 
@@ -1033,10 +1074,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
 
       final state = ref.read(syncProvider);
       if (state.status == SyncStatus.error) {
-        setState(() {
-          _loading = false;
-          _error = state.lastError ?? S.of(context).onboardNoSyncFile;
-        });
+        _fail(state.lastError ?? s.onboardNoSyncFile);
         return;
       }
 
@@ -1047,144 +1085,55 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
         context.go('/');
       }
     } catch (e) {
-      setState(() {
-        _loading = false;
-        _error = e.toString();
-      });
+      _fail(syncErrorText(e));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.th(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
+    final s = S.of(context);
+    return _SheetBody(
+      title: s.onboardRestoreTitle,
+      description: s.onboardRestoreDesc,
+      error: _error,
+      children: [
+        if (_loading)
+          const _SheetSpinner()
+        else
+          for (final provider in widget.providers) ...[
+            OutlinedButton.icon(
+              onPressed: () => _restore(provider),
+              icon: Icon(
+                  provider is GoogleDriveProvider
+                      ? Icons.add_to_drive_rounded
+                      : Icons.folder_open_rounded,
+                  size: 20),
+              label: Text(provider is GoogleDriveProvider
+                  ? s.onboardGoogleDrive
+                  : s.onboardPickFile),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(S.of(context).onboardRestoreTitle,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          const SizedBox(height: 8),
-          Text(
-            S.of(context).onboardRestoreDesc,
-            style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-          ),
-          const SizedBox(height: 20),
-          if (_loading)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.accent),
-              ),
-            )
-          else ...[
-            ...widget.providers.map((provider) {
-              final isGoogle = provider is GoogleDriveProvider;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: SizedBox(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _restore(provider),
-                    icon: Icon(
-                        isGoogle
-                            ? Icons.add_to_drive_rounded
-                            : Icons.folder_open_rounded,
-                        size: 20),
-                    label: Text(isGoogle ? S.of(context).onboardGoogleDrive : S.of(context).onboardPickFile,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.tp(context),
-                      side: BorderSide(color: AppColors.bd(context)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(CardTokens.radius),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
+            const SizedBox(height: 10),
           ],
-          if (_error != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, AppColors.overspent,
-                    light: 0.85, dark: 0.78),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline_rounded,
-                      color: AppColors.overspent, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(_error!,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.overspent)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
+      ],
     );
   }
 }
 
-// ─── Join a Household button ───────────────────────────────────────────────
+// ─── Join a household ──────────────────────────────────────────────────────
 
-class _JoinHouseholdButton extends ConsumerWidget {
+class _JoinHouseholdButton extends StatelessWidget {
   const _JoinHouseholdButton();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => _showJoinSheet(context),
-        icon: const Icon(Icons.people_outline_rounded, size: 18),
-        label: Text(
-          S.of(context).onboardJoinHousehold,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-          ),
-        ),
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => const _JoinHouseholdSheet(),
       ),
-    );
-  }
-
-  void _showJoinSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const _JoinHouseholdSheet(),
+      icon: const Icon(Icons.people_outline_rounded, size: 20),
+      label: Text(S.of(context).onboardJoinHousehold),
     );
   }
 }
@@ -1208,16 +1157,26 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
     super.dispose();
   }
 
+  void _fail(String message) {
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        _error = message;
+      });
+    }
+  }
+
   Future<void> _join() async {
+    final s = S.of(context);
     final code = _codeController.text.trim();
     if (code.isEmpty) {
-      setState(() => _error = S.of(context).onboardEnterCodeError);
+      setState(() => _error = s.onboardEnterCodeError);
       return;
     }
 
     final folderId = decodeInviteCode(code);
     if (folderId == null) {
-      setState(() => _error = S.of(context).onboardInvalidCodeError);
+      setState(() => _error = s.onboardInvalidCodeError);
       return;
     }
 
@@ -1232,10 +1191,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
 
       final connected = await googleDrive.connectToSharedFolder(folderId);
       if (!connected) {
-        setState(() {
-          _loading = false;
-          _error = S.of(context).onboardDriveJoinFailed;
-        });
+        _fail(s.onboardDriveJoinFailed);
         return;
       }
 
@@ -1244,11 +1200,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
 
       final syncState = ref.read(syncProvider);
       if (syncState.status == SyncStatus.error) {
-        setState(() {
-          _loading = false;
-          _error =
-              syncState.lastError ?? S.of(context).onboardNoSyncFileShared;
-        });
+        _fail(syncState.lastError ?? s.onboardNoSyncFileShared);
         return;
       }
 
@@ -1259,195 +1211,38 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
         context.go('/');
       }
     } catch (e) {
-      setState(() {
-        _loading = false;
-        _error = e.toString();
-      });
+      _fail(syncErrorText(e));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(S.of(context).onboardJoinHousehold,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-            const SizedBox(height: 8),
-            Text(
-              S.of(context).onboardJoinDesc,
-              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-            ),
-            const SizedBox(height: 20),
-            if (_loading)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: CircularProgressIndicator(color: AppColors.accent),
-                ),
-              )
-            else ...[
-              TextField(
-                controller: _codeController,
-                decoration: InputDecoration(
-                  labelText: S.of(context).onboardInviteCode,
-                  hintText: S.of(context).onboardInviteHint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                  ),
-                  prefixIcon: const Icon(Icons.vpn_key_rounded),
-                ),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                child: FilledButton.icon(
-                  onPressed: _join,
-                  icon: const Icon(Icons.login_rounded, size: 20),
-                  label: Text(S.of(context).onboardJoinButton,
-                      style:
-                          const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.overspent,
-                      light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline_rounded,
-                        color: AppColors.overspent, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(_error!,
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.overspent)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpandableOptions extends StatefulWidget {
-  final bool seedCategories;
-  final ValueChanged<bool> onSeedChanged;
-
-  const _ExpandableOptions({
-    required this.seedCategories,
-    required this.onSeedChanged,
-  });
-
-  @override
-  State<_ExpandableOptions> createState() => _ExpandableOptionsState();
-}
-
-class _ExpandableOptionsState extends State<_ExpandableOptions> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final s = S.of(context);
+    return _SheetBody(
+      title: s.onboardJoinHousehold,
+      description: s.onboardJoinDesc,
+      error: _error,
       children: [
-        GestureDetector(
-          onTap: () => setState(() => _expanded = !_expanded),
-          child: Row(
-            children: [
-              AnimatedRotation(
-                turns: _expanded ? 0.25 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: const Icon(Icons.chevron_right_rounded,
-                    color: Colors.white54, size: 20),
-              ),
-              const SizedBox(width: 4),
-              Text(S.of(context).onboardMoreOptions,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white54)),
-              const Spacer(),
-              Text(
-                widget.seedCategories ? S.of(context).onboardFullSet : S.of(context).onboardEmpty,
-                style: TextStyle(fontSize: 11, color: Colors.white38),
-              ),
-            ],
+        if (_loading)
+          const _SheetSpinner()
+        else ...[
+          TextField(
+            controller: _codeController,
+            decoration: InputDecoration(
+              labelText: s.onboardInviteCode,
+              hintText: s.onboardInviteHint,
+              prefixIcon: const Icon(Icons.vpn_key_rounded),
+            ),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 15),
+            onSubmitted: (_) => _join(),
           ),
-        ),
-        AnimatedCrossFade(
-          firstChild: const SizedBox.shrink(),
-          secondChild: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              _SectionLabel(S.of(context).onboardCategoriesSection),
-              const SizedBox(height: 8),
-              _FormCard(
-                child: Column(
-                  children: [
-                    _ToggleOption(
-                      title: S.of(context).onboardFullSet,
-                      subtitle: S.of(context).onboardFullSetSub,
-                      isSelected: widget.seedCategories,
-                      onTap: () => widget.onSeedChanged(true),
-                    ),
-                    const SizedBox(height: 8),
-                    _ToggleOption(
-                      title: S.of(context).onboardEmpty,
-                      subtitle: S.of(context).onboardEmptySub,
-                      isSelected: !widget.seedCategories,
-                      onTap: () => widget.onSeedChanged(false),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _join,
+            icon: const Icon(Icons.login_rounded, size: 20),
+            label: Text(s.onboardJoinButton),
           ),
-          crossFadeState:
-              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 250),
-        ),
+        ],
       ],
     );
   }

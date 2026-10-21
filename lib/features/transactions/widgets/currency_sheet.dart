@@ -583,6 +583,11 @@ class _CurrencySheetState extends State<CurrencySheet>
     final accountCodes = widget.accountCurrencies
         .where((c) => !widget.exclude.contains(c))
         .toList();
+    // No accounts yet (onboarding): pin the chosen currency instead, so the
+    // sheet doesn't open on an A–Z list that hides it.
+    final pinnedSelected = accountCodes.isEmpty &&
+        !widget.exclude.contains(widget.current) &&
+        kCurrencies.any((c) => c.$1 == widget.current);
 
     // Build the recently-used list (only when not searching, max 3).
     final recentCodes = _query.isEmpty
@@ -674,6 +679,22 @@ class _CurrencySheetState extends State<CurrencySheet>
                       color: AppColors.bd(context),
                     ),
                     const SizedBox(height: 4),
+                  ],
+                  if (_query.isEmpty && pinnedSelected) ...[
+                    SectionHeader(S.of(context).currencySelected,
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 4)),
+                    _buildCurrencyTile(
+                        widget.current, currencyName(tr, widget.current)),
+                    Divider(
+                      height: 1,
+                      indent: 20,
+                      endIndent: 20,
+                      color: AppColors.bd(context),
+                    ),
+                    const SizedBox(height: 4),
+                    if (recentCodes.isEmpty)
+                      SectionHeader(S.of(context).currencyAll,
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 4)),
                   ],
                   // Recently used section
                   if (recentCodes.isNotEmpty) ...[

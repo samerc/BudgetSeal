@@ -6424,7 +6424,7 @@ class SFr extends S {
   String get onboardGetStarted => 'Commencer';
 
   @override
-  String get onboardRestoreCloud => 'Restaurer depuis le cloud';
+  String get onboardRestoreCloud => 'Restaurer mon budget';
 
   @override
   String get onboardJoinHousehold => 'Rejoindre un foyer';
@@ -6470,36 +6470,30 @@ class SFr extends S {
   String get onboardCategoriesSection => 'Catégories';
 
   @override
-  String get onboardFullSet => 'Jeu complet';
-
-  @override
   String get onboardFullSetSub => '30 catégories avec sous-catégories';
-
-  @override
-  String get onboardEmpty => 'Vide';
 
   @override
   String get onboardEmptySub => 'Créez les vôtres à partir de zéro';
 
   @override
-  String get onboardCreateStart => 'Créer et commencer';
+  String get onboardCreateStart => 'Créer mon budget';
 
   @override
   String get onboardAllSet => 'Vous êtes prêt !';
 
   @override
   String get onboardDoneSubtitle =>
-      'Commencez à suivre vos dépenses.\nVotre clarté financière commence maintenant.';
+      'Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l\'onglet Budget.';
 
   @override
   String get onboardStartUsing => 'Commencer à utiliser BudgetSeal';
 
   @override
-  String get onboardRestoreTitle => 'Restaurer depuis le cloud';
+  String get onboardRestoreTitle => 'Restaurer votre budget';
 
   @override
   String get onboardRestoreDesc =>
-      'Choisissez où votre sauvegarde est stockée. Cela remplacera les données locales.';
+      'Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
@@ -6532,9 +6526,6 @@ class SFr extends S {
 
   @override
   String get onboardAccountNameError => 'Entrez un nom de compte';
-
-  @override
-  String get onboardMoreOptions => 'Plus d\'options';
 
   @override
   String onboardDayN(int day) {
@@ -7444,4 +7435,10 @@ class SFr extends S {
   String recurringFormStarts(String date) {
     return 'Début : $date';
   }
+
+  @override
+  String get onboardSeedCategories => 'Ajouter les catégories suggérées';
+
+  @override
+  String get currencySelected => 'Sélectionnée';
 }

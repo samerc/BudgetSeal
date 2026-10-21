@@ -11365,19 +11365,19 @@ abstract class S {
   /// Onboarding welcome button
   ///
   /// In en, this message translates to:
-  /// **'Get Started'**
+  /// **'Get started'**
   String get onboardGetStarted;
 
   /// Onboarding restore button
   ///
   /// In en, this message translates to:
-  /// **'Restore from Cloud'**
+  /// **'Restore my budget'**
   String get onboardRestoreCloud;
 
   /// Onboarding join button
   ///
   /// In en, this message translates to:
-  /// **'Join a Household'**
+  /// **'Join a household'**
   String get onboardJoinHousehold;
 
   /// Onboarding setup page title
@@ -11458,23 +11458,11 @@ abstract class S {
   /// **'Categories'**
   String get onboardCategoriesSection;
 
-  /// Onboarding category option title
-  ///
-  /// In en, this message translates to:
-  /// **'Full set'**
-  String get onboardFullSet;
-
   /// Onboarding category option subtitle
   ///
   /// In en, this message translates to:
   /// **'30 categories with subcategories'**
   String get onboardFullSetSub;
-
-  /// Onboarding category option title
-  ///
-  /// In en, this message translates to:
-  /// **'Empty'**
-  String get onboardEmpty;
 
   /// Onboarding category option subtitle
   ///
@@ -11485,7 +11473,7 @@ abstract class S {
   /// Onboarding submit button
   ///
   /// In en, this message translates to:
-  /// **'Create & Start'**
+  /// **'Create my budget'**
   String get onboardCreateStart;
 
   /// Onboarding done page title
@@ -11497,25 +11485,25 @@ abstract class S {
   /// Onboarding done page subtitle
   ///
   /// In en, this message translates to:
-  /// **'Start tracking your expenses.\nYour financial clarity begins now.'**
+  /// **'Next: record your income, then give it jobs in envelopes on the Budget tab.'**
   String get onboardDoneSubtitle;
 
   /// Onboarding done page button
   ///
   /// In en, this message translates to:
-  /// **'Start Using BudgetSeal'**
+  /// **'Start using BudgetSeal'**
   String get onboardStartUsing;
 
   /// Onboarding restore sheet title
   ///
   /// In en, this message translates to:
-  /// **'Restore from Cloud'**
+  /// **'Restore your budget'**
   String get onboardRestoreTitle;
 
   /// Onboarding restore sheet description
   ///
   /// In en, this message translates to:
-  /// **'Choose where your backup is stored. This will replace any local data.'**
+  /// **'Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.'**
   String get onboardRestoreDesc;
 
   /// Onboarding restore option
@@ -11527,7 +11515,7 @@ abstract class S {
   /// Onboarding restore option
   ///
   /// In en, this message translates to:
-  /// **'Pick a File'**
+  /// **'Pick a file'**
   String get onboardPickFile;
 
   /// Onboarding join sheet description
@@ -11551,7 +11539,7 @@ abstract class S {
   /// Onboarding join button
   ///
   /// In en, this message translates to:
-  /// **'Join Household'**
+  /// **'Join household'**
   String get onboardJoinButton;
 
   /// Onboarding join validation error
@@ -11577,12 +11565,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Enter an account name'**
   String get onboardAccountNameError;
-
-  /// Onboarding expandable section label
-  ///
-  /// In en, this message translates to:
-  /// **'More options'**
-  String get onboardMoreOptions;
 
   /// Onboarding period start day dropdown item
   ///
@@ -13083,6 +13065,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Starts: {date}'**
   String recurringFormStarts(String date);
+
+  /// Switch title
+  ///
+  /// In en, this message translates to:
+  /// **'Add suggested categories'**
+  String get onboardSeedCategories;
+
+  /// Currency sheet section header (the chosen currency)
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get currencySelected;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

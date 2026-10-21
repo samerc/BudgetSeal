@@ -3825,7 +3825,7 @@
   "@onboardGetStarted": {
     "description": "Button"
   },
-  "onboardRestoreCloud": "Restaurer depuis le cloud",
+  "onboardRestoreCloud": "Restaurer mon budget",
   "@onboardRestoreCloud": {
     "description": "Button"
   },
@@ -3885,23 +3885,15 @@
   "@onboardCategoriesSection": {
     "description": "Section"
   },
-  "onboardFullSet": "Jeu complet",
-  "@onboardFullSet": {
-    "description": "Toggle title"
-  },
   "onboardFullSetSub": "30 catégories avec sous-catégories",
   "@onboardFullSetSub": {
     "description": "Toggle subtitle"
-  },
-  "onboardEmpty": "Vide",
-  "@onboardEmpty": {
-    "description": "Toggle title"
   },
   "onboardEmptySub": "Créez les vôtres à partir de zéro",
   "@onboardEmptySub": {
     "description": "Toggle subtitle"
   },
-  "onboardCreateStart": "Créer et commencer",
+  "onboardCreateStart": "Créer mon budget",
   "@onboardCreateStart": {
     "description": "Button"
   },
@@ -3909,7 +3901,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "Commencez à suivre vos dépenses.\nVotre clarté financière commence maintenant.",
+  "onboardDoneSubtitle": "Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l'onglet Budget.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -3917,11 +3909,11 @@
   "@onboardStartUsing": {
     "description": "Button"
   },
-  "onboardRestoreTitle": "Restaurer depuis le cloud",
+  "onboardRestoreTitle": "Restaurer votre budget",
   "@onboardRestoreTitle": {
     "description": "Sheet title"
   },
-  "onboardRestoreDesc": "Choisissez où votre sauvegarde est stockée. Cela remplacera les données locales.",
+  "onboardRestoreDesc": "Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone.",
   "@onboardRestoreDesc": {
     "description": "Sheet description"
   },
@@ -5226,7 +5218,6 @@
   "commonArchive": "Archiver",
   "onboardHouseholdNameError": "Entrez un nom de foyer",
   "onboardAccountNameError": "Entrez un nom de compte",
-  "onboardMoreOptions": "Plus d'options",
   "onboardDayN": "Jour {day}",
   "onboardEnvelopeExplainer": "La budgétisation par enveloppes est simple : répartissez vos revenus dans des enveloppes virtuelles pour chaque catégorie de dépenses. Quand une enveloppe est vide, vous arrêtez de dépenser dans cette catégorie.",
   "onboardHouseholdHint": "ex. Mon Budget",
@@ -5585,5 +5576,7 @@
   "objSummaryDeadline": "Échéance",
   "plannedNoteHint": "Note (optionnel)",
   "recurringFormAccountRequired": "Le compte est requis",
-  "recurringFormStarts": "Début : {date}"
+  "recurringFormStarts": "Début : {date}",
+  "onboardSeedCategories": "Ajouter les catégories suggérées",
+  "currencySelected": "Sélectionnée"
 }

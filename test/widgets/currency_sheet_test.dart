@@ -44,6 +44,14 @@ void main() {
     expect(find.textContaining('EGP'), findsOneWidget);
   });
 
+  testWidgets('without accounts the chosen currency is pinned on top',
+      (tester) async {
+    await pump(tester, const CurrencySheet(current: 'GBP'));
+    expect(find.text('Selected'), findsOneWidget);
+    // Visible without scrolling, although the A–Z list starts with AED.
+    expect(find.text('British Pound'), findsWidgets);
+  });
+
   testWidgets('excluded currencies are not offered', (tester) async {
     await pump(
         tester,

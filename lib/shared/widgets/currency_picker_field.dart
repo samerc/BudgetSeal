@@ -57,14 +57,10 @@ class CurrencyPickerField extends ConsumerWidget {
           labelStyle: TextStyle(
               color: textColor?.withValues(alpha: 0.6) ??
                   AppColors.ts(context)),
-          filled: true,
-          fillColor: textColor != null
-              ? Colors.white.withValues(alpha: 0.07)
-              : AppColors.sfv(context),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
+          // Fill, radius and padding come from the theme, as for every
+          // other input.
+          fillColor:
+              textColor != null ? Colors.white.withValues(alpha: 0.07) : null,
           suffixIcon: Icon(Icons.expand_more_rounded,
               color: textColor?.withValues(alpha: 0.5) ??
                   AppColors.th(context)),
@@ -78,11 +74,11 @@ class CurrencyPickerField extends ConsumerWidget {
             Flexible(
               child: Text(
                 value,
-                style: TextStyle(
-                  color: textColor ?? AppColors.tp(context),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+                // Same text as a TextField's value.
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(color: textColor ?? AppColors.tp(context)),
                 overflow: TextOverflow.ellipsis,
               ),
             ),

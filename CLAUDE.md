@@ -914,7 +914,7 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 ## Onboarding
 
-3-page flow: Welcome (how-it-works + Restore/Join buttons) → Setup (household name, currency, period day, account + expandable "More options" for categories & entry mode) → Done. Setup uses `db.batch()` for atomic account + category creation. Field-level validation shows amber error text when household or account name is empty, cleared on typing.
+3-page flow on the app's own theme (paper/night surfaces, theme-aware colors, status bar icons follow the brightness): Welcome (the seal app icon `assets/icon/splash_logo.png` as on the splash, how-it-works card; Get started / Restore my budget / Join a household are pinned under the scrolling content so they're reachable at any text size) → Setup (household name, currency, period day; first account name, type chips, opening balance; "Add suggested categories" switch) → Done (next step: income → envelopes). Inputs use the theme's filled style (`CurrencyPickerField` and the opening balance `InputDecorator` match the TextFields); buttons are theme Filled/Outlined/Text with no overrides; sheets use the theme sheet (radius 20, no handle) and show `syncErrorText(e)`, never `e.toString()`. The account name follows the type chip while it still equals the previous type's label. Back on Setup returns to Welcome (`PopScope` + an app-bar back arrow); back on Done goes to `/`. Setup uses `db.batch()` for atomic account + category creation. Validation errors (theme error style) clear on typing, and the page scrolls to the first one (`Scrollable.ensureVisible` on the field's GlobalKey). With no accounts yet, `CurrencySheet` pins the chosen currency under "Selected".
 
 ## Faster Logging
 

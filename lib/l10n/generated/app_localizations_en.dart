@@ -6347,13 +6347,13 @@ class SEn extends S {
   String get onboardStep4 => 'Spend — each expense draws from its envelope';
 
   @override
-  String get onboardGetStarted => 'Get Started';
+  String get onboardGetStarted => 'Get started';
 
   @override
-  String get onboardRestoreCloud => 'Restore from Cloud';
+  String get onboardRestoreCloud => 'Restore my budget';
 
   @override
-  String get onboardJoinHousehold => 'Join a Household';
+  String get onboardJoinHousehold => 'Join a household';
 
   @override
   String get onboardSetupTitle => 'Set up your household';
@@ -6396,42 +6396,36 @@ class SEn extends S {
   String get onboardCategoriesSection => 'Categories';
 
   @override
-  String get onboardFullSet => 'Full set';
-
-  @override
   String get onboardFullSetSub => '30 categories with subcategories';
-
-  @override
-  String get onboardEmpty => 'Empty';
 
   @override
   String get onboardEmptySub => 'Create your own from scratch';
 
   @override
-  String get onboardCreateStart => 'Create & Start';
+  String get onboardCreateStart => 'Create my budget';
 
   @override
   String get onboardAllSet => 'You\'re all set!';
 
   @override
   String get onboardDoneSubtitle =>
-      'Start tracking your expenses.\nYour financial clarity begins now.';
+      'Next: record your income, then give it jobs in envelopes on the Budget tab.';
 
   @override
-  String get onboardStartUsing => 'Start Using BudgetSeal';
+  String get onboardStartUsing => 'Start using BudgetSeal';
 
   @override
-  String get onboardRestoreTitle => 'Restore from Cloud';
+  String get onboardRestoreTitle => 'Restore your budget';
 
   @override
   String get onboardRestoreDesc =>
-      'Choose where your backup is stored. This will replace any local data.';
+      'Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
 
   @override
-  String get onboardPickFile => 'Pick a File';
+  String get onboardPickFile => 'Pick a file';
 
   @override
   String get onboardJoinDesc =>
@@ -6444,7 +6438,7 @@ class SEn extends S {
   String get onboardInviteHint => 'PP-...';
 
   @override
-  String get onboardJoinButton => 'Join Household';
+  String get onboardJoinButton => 'Join household';
 
   @override
   String get onboardEnterCodeError => 'Please enter an invite code';
@@ -6458,9 +6452,6 @@ class SEn extends S {
 
   @override
   String get onboardAccountNameError => 'Enter an account name';
-
-  @override
-  String get onboardMoreOptions => 'More options';
 
   @override
   String onboardDayN(int day) {
@@ -7361,4 +7352,10 @@ class SEn extends S {
   String recurringFormStarts(String date) {
     return 'Starts: $date';
   }
+
+  @override
+  String get onboardSeedCategories => 'Add suggested categories';
+
+  @override
+  String get currencySelected => 'Selected';
 }

@@ -3825,11 +3825,11 @@
   "@onboardGetStarted": {
     "description": "Button"
   },
-  "onboardRestoreCloud": "الاستعادة من السحابة",
+  "onboardRestoreCloud": "استعادة ميزانيتي",
   "@onboardRestoreCloud": {
     "description": "Button"
   },
-  "onboardJoinHousehold": "الانضمام لأسرة",
+  "onboardJoinHousehold": "الانضمام إلى أسرة",
   "@onboardJoinHousehold": {
     "description": "Button / sheet title"
   },
@@ -3885,23 +3885,15 @@
   "@onboardCategoriesSection": {
     "description": "Section"
   },
-  "onboardFullSet": "مجموعة كاملة",
-  "@onboardFullSet": {
-    "description": "Toggle title"
-  },
   "onboardFullSetSub": "30 فئة مع فئات فرعية",
   "@onboardFullSetSub": {
     "description": "Toggle subtitle"
-  },
-  "onboardEmpty": "فارغ",
-  "@onboardEmpty": {
-    "description": "Toggle title"
   },
   "onboardEmptySub": "أنشئ فئاتك من الصفر",
   "@onboardEmptySub": {
     "description": "Toggle subtitle"
   },
-  "onboardCreateStart": "إنشاء وبدء",
+  "onboardCreateStart": "إنشاء ميزانيتي",
   "@onboardCreateStart": {
     "description": "Button"
   },
@@ -3909,7 +3901,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.",
+  "onboardDoneSubtitle": "الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -3917,11 +3909,11 @@
   "@onboardStartUsing": {
     "description": "Button"
   },
-  "onboardRestoreTitle": "الاستعادة من السحابة",
+  "onboardRestoreTitle": "استعادة ميزانيتك",
   "@onboardRestoreTitle": {
     "description": "Sheet title"
   },
-  "onboardRestoreDesc": "اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.",
+  "onboardRestoreDesc": "اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.",
   "@onboardRestoreDesc": {
     "description": "Sheet description"
   },
@@ -5226,7 +5218,6 @@
   "commonArchive": "أرشفة",
   "onboardHouseholdNameError": "أدخل اسم الأسرة",
   "onboardAccountNameError": "أدخل اسم الحساب",
-  "onboardMoreOptions": "خيارات إضافية",
   "onboardDayN": "اليوم {day}",
   "onboardEnvelopeExplainer": "ميزانية الأظرف بسيطة: قسّم دخلك إلى أظرف افتراضية لكل فئة إنفاق. عندما ينفد ظرف ما، تتوقف عن الإنفاق في تلك الفئة.",
   "onboardHouseholdHint": "مثلاً: ميزانيتي",
@@ -5585,5 +5576,7 @@
   "objSummaryDeadline": "الموعد النهائي",
   "plannedNoteHint": "ملاحظة (اختياري)",
   "recurringFormAccountRequired": "الحساب مطلوب",
-  "recurringFormStarts": "تبدأ: {date}"
+  "recurringFormStarts": "تبدأ: {date}",
+  "onboardSeedCategories": "إضافة الفئات المقترحة",
+  "currencySelected": "المختارة"
 }

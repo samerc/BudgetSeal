@@ -6364,10 +6364,10 @@ class SAr extends S {
   String get onboardGetStarted => 'ابدأ الآن';
 
   @override
-  String get onboardRestoreCloud => 'الاستعادة من السحابة';
+  String get onboardRestoreCloud => 'استعادة ميزانيتي';
 
   @override
-  String get onboardJoinHousehold => 'الانضمام لأسرة';
+  String get onboardJoinHousehold => 'الانضمام إلى أسرة';
 
   @override
   String get onboardSetupTitle => 'إعداد أسرتك';
@@ -6409,36 +6409,30 @@ class SAr extends S {
   String get onboardCategoriesSection => 'الفئات';
 
   @override
-  String get onboardFullSet => 'مجموعة كاملة';
-
-  @override
   String get onboardFullSetSub => '30 فئة مع فئات فرعية';
-
-  @override
-  String get onboardEmpty => 'فارغ';
 
   @override
   String get onboardEmptySub => 'أنشئ فئاتك من الصفر';
 
   @override
-  String get onboardCreateStart => 'إنشاء وبدء';
+  String get onboardCreateStart => 'إنشاء ميزانيتي';
 
   @override
   String get onboardAllSet => 'أنت جاهز!';
 
   @override
   String get onboardDoneSubtitle =>
-      'ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.';
+      'الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.';
 
   @override
   String get onboardStartUsing => 'ابدأ استخدام BudgetSeal';
 
   @override
-  String get onboardRestoreTitle => 'الاستعادة من السحابة';
+  String get onboardRestoreTitle => 'استعادة ميزانيتك';
 
   @override
   String get onboardRestoreDesc =>
-      'اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.';
+      'اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
@@ -6470,9 +6464,6 @@ class SAr extends S {
 
   @override
   String get onboardAccountNameError => 'أدخل اسم الحساب';
-
-  @override
-  String get onboardMoreOptions => 'خيارات إضافية';
 
   @override
   String onboardDayN(int day) {
@@ -7381,4 +7372,10 @@ class SAr extends S {
   String recurringFormStarts(String date) {
     return 'تبدأ: $date';
   }
+
+  @override
+  String get onboardSeedCategories => 'إضافة الفئات المقترحة';
+
+  @override
+  String get currencySelected => 'المختارة';
 }

@@ -818,9 +818,9 @@ onboard_step_1,Step text,Add accounts — where your money lives,أضف حساب
 onboard_step_2,Step text,Create envelopes — budget for each category,أنشئ أظرفاً — ميزانية لكل فئة,Créez des enveloppes — un budget par catégorie
 onboard_step_3,Step text,Fund envelopes — distribute your income,موّل الأظرف — وزّع دخلك,Financez les enveloppes — distribuez vos revenus
 onboard_step_4,Step text,Spend — each expense draws from its envelope,أنفق — كل مصروف يُسحب من ظرفه,Dépensez — chaque dépense puise dans son enveloppe
-onboard_get_started,Button,Get Started,ابدأ الآن,Commencer
-onboard_restore_cloud,Button,Restore from Cloud,الاستعادة من السحابة,Restaurer depuis le cloud
-onboard_join_household,Button / sheet title,Join a Household,الانضمام لأسرة,Rejoindre un foyer
+onboard_get_started,Button,Get started,ابدأ الآن,Commencer
+onboard_restore_cloud,Button,Restore my budget,استعادة ميزانيتي,Restaurer mon budget
+onboard_join_household,Button / sheet title,Join a household,الانضمام إلى أسرة,Rejoindre un foyer
 onboard_setup_title,Setup page title,Set up your household,إعداد أسرتك,Configurer votre foyer
 onboard_change_later,Subtitle,You can change everything later in Settings.,يمكنك تغيير كل شيء لاحقاً من الإعدادات.,Vous pourrez tout modifier plus tard dans les Paramètres.
 onboard_household_section,Section,Household,الأسرة,Foyer
@@ -834,22 +834,20 @@ onboard_type_bank,Chip,Bank,بنك,Banque
 onboard_type_credit,Chip,Credit,ائتمان,Crédit
 onboard_type_digital,Chip,Digital,رقمي,Numérique
 onboard_categories_section,Section,Categories,الفئات,Catégories
-onboard_full_set,Toggle title,Full set,مجموعة كاملة,Jeu complet
 onboard_full_set_sub,Toggle subtitle,30 categories with subcategories,30 فئة مع فئات فرعية,30 catégories avec sous-catégories
-onboard_empty,Toggle title,Empty,فارغ,Vide
 onboard_empty_sub,Toggle subtitle,Create your own from scratch,أنشئ فئاتك من الصفر,Créez les vôtres à partir de zéro
-onboard_create_start,Button,Create & Start,إنشاء وبدء,Créer et commencer
+onboard_create_start,Button,Create my budget,إنشاء ميزانيتي,Créer mon budget
 onboard_all_set,Done page title,You're all set!,أنت جاهز!,Vous êtes prêt !
-onboard_done_subtitle,Done page subtitle,Start tracking your expenses.\nYour financial clarity begins now.,ابدأ تتبع مصاريفك.\nوضوحك المالي يبدأ الآن.,Commencez à suivre vos dépenses.\nVotre clarté financière commence maintenant.
-onboard_start_using,Button,Start Using BudgetSeal,ابدأ استخدام BudgetSeal,Commencer à utiliser BudgetSeal
-onboard_restore_title,Sheet title,Restore from Cloud,الاستعادة من السحابة,Restaurer depuis le cloud
-onboard_restore_desc,Sheet description,Choose where your backup is stored. This will replace any local data.,اختر مكان النسخة الاحتياطية. سيتم استبدال أي بيانات محلية.,Choisissez où votre sauvegarde est stockée. Cela remplacera les données locales.
+onboard_done_subtitle,Done page subtitle,"Next: record your income, then give it jobs in envelopes on the Budget tab.",الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.,"Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l'onglet Budget."
+onboard_start_using,Button,Start using BudgetSeal,ابدأ استخدام BudgetSeal,Commencer à utiliser BudgetSeal
+onboard_restore_title,Sheet title,Restore your budget,استعادة ميزانيتك,Restaurer votre budget
+onboard_restore_desc,Sheet description,"Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.",اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.,"Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone."
 onboard_google_drive,Button,Google Drive,Google Drive,Google Drive
-onboard_pick_file,Button,Pick a File,اختر ملفاً,Choisir un fichier
+onboard_pick_file,Button,Pick a file,اختر ملفاً,Choisir un fichier
 onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing BudgetSeal household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.
 onboard_invite_code,Field label,Invite code,رمز الدعوة,Code d'invitation
 onboard_invite_hint,Field hint,PP-...,PP-...,PP-...
-onboard_join_button,Button,Join Household,الانضمام للأسرة,Rejoindre le foyer
+onboard_join_button,Button,Join household,الانضمام للأسرة,Rejoindre le foyer
 onboard_enter_code_error,Validation,Please enter an invite code,الرجاء إدخال رمز الدعوة,Veuillez saisir un code d'invitation
 onboard_invalid_code_error,Validation,Invalid invite code. It should start with PP-,رمز دعوة غير صالح. يجب أن يبدأ بـ PP-,Code d'invitation invalide. Il doit commencer par PP-
 # ──────────────────────────────────────────────,,,,
@@ -1619,7 +1617,6 @@ notif_budget_warning_title,,Budget Alert,تنبيه الميزانية,Alerte bu
 notif_budget_warning,,{name}: {percent}% used with {days} days left,{name}: تم استخدام {percent}% مع بقاء {days} أيام,{name} : {percent}% utilisé avec {days} jours restants
 onboard_household_name_error,,Enter a household name,أدخل اسم الأسرة,Entrez un nom de foyer
 onboard_account_name_error,,Enter an account name,أدخل اسم الحساب,Entrez un nom de compte
-onboard_more_options,,More options,خيارات إضافية,Plus d'options
 onboard_day_n,,Day {day},اليوم {day},Jour {day}
 onboard_envelope_explainer,,"Envelope budgeting is simple: divide your income into virtual envelopes for each spending category. When an envelope runs out, you stop spending in that category.",ميزانية الأظرف بسيطة: قسّم دخلك إلى أظرف افتراضية لكل فئة إنفاق. عندما ينفد ظرف ما، تتوقف عن الإنفاق في تلك الفئة.,"La budgétisation par enveloppes est simple : répartissez vos revenus dans des enveloppes virtuelles pour chaque catégorie de dépenses. Quand une enveloppe est vide, vous arrêtez de dépenser dans cette catégorie."
 onboard_household_hint,,e.g. My Budget,مثلاً: ميزانيتي,ex. Mon Budget
@@ -2487,3 +2484,5 @@ currency_name_xpf,,CFP Franc,فرنك سي إف بي,Franc CFP
 currency_name_yer,,Yemeni Rial,ريال يمني,Rial yéménite
 currency_name_zmw,,Zambian Kwacha,كواشا زامبي,Kwacha zambien
 currency_name_zwg,,Zimbabwe Gold,ذهب زيمبابوي,Or du Zimbabwe
+onboard_seed_categories,Switch title,Add suggested categories,إضافة الفئات المقترحة,Ajouter les catégories suggérées
+currency_selected,Currency sheet section header (the chosen currency),Selected,المختارة,Sélectionnée

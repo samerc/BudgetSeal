@@ -5228,15 +5228,15 @@
   "@onboardStep4": {
     "description": "Onboarding step 4"
   },
-  "onboardGetStarted": "Get Started",
+  "onboardGetStarted": "Get started",
   "@onboardGetStarted": {
     "description": "Onboarding welcome button"
   },
-  "onboardRestoreCloud": "Restore from Cloud",
+  "onboardRestoreCloud": "Restore my budget",
   "@onboardRestoreCloud": {
     "description": "Onboarding restore button"
   },
-  "onboardJoinHousehold": "Join a Household",
+  "onboardJoinHousehold": "Join a household",
   "@onboardJoinHousehold": {
     "description": "Onboarding join button"
   },
@@ -5292,23 +5292,15 @@
   "@onboardCategoriesSection": {
     "description": "Onboarding section label"
   },
-  "onboardFullSet": "Full set",
-  "@onboardFullSet": {
-    "description": "Onboarding category option title"
-  },
   "onboardFullSetSub": "30 categories with subcategories",
   "@onboardFullSetSub": {
     "description": "Onboarding category option subtitle"
-  },
-  "onboardEmpty": "Empty",
-  "@onboardEmpty": {
-    "description": "Onboarding category option title"
   },
   "onboardEmptySub": "Create your own from scratch",
   "@onboardEmptySub": {
     "description": "Onboarding category option subtitle"
   },
-  "onboardCreateStart": "Create & Start",
+  "onboardCreateStart": "Create my budget",
   "@onboardCreateStart": {
     "description": "Onboarding submit button"
   },
@@ -5316,19 +5308,19 @@
   "@onboardAllSet": {
     "description": "Onboarding done page title"
   },
-  "onboardDoneSubtitle": "Start tracking your expenses.\nYour financial clarity begins now.",
+  "onboardDoneSubtitle": "Next: record your income, then give it jobs in envelopes on the Budget tab.",
   "@onboardDoneSubtitle": {
     "description": "Onboarding done page subtitle"
   },
-  "onboardStartUsing": "Start Using BudgetSeal",
+  "onboardStartUsing": "Start using BudgetSeal",
   "@onboardStartUsing": {
     "description": "Onboarding done page button"
   },
-  "onboardRestoreTitle": "Restore from Cloud",
+  "onboardRestoreTitle": "Restore your budget",
   "@onboardRestoreTitle": {
     "description": "Onboarding restore sheet title"
   },
-  "onboardRestoreDesc": "Choose where your backup is stored. This will replace any local data.",
+  "onboardRestoreDesc": "Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.",
   "@onboardRestoreDesc": {
     "description": "Onboarding restore sheet description"
   },
@@ -5336,7 +5328,7 @@
   "@onboardGoogleDrive": {
     "description": "Onboarding restore option"
   },
-  "onboardPickFile": "Pick a File",
+  "onboardPickFile": "Pick a file",
   "@onboardPickFile": {
     "description": "Onboarding restore option"
   },
@@ -5352,7 +5344,7 @@
   "@onboardInviteHint": {
     "description": "Onboarding join text field hint"
   },
-  "onboardJoinButton": "Join Household",
+  "onboardJoinButton": "Join household",
   "@onboardJoinButton": {
     "description": "Onboarding join button"
   },
@@ -5371,10 +5363,6 @@
   "onboardAccountNameError": "Enter an account name",
   "@onboardAccountNameError": {
     "description": "Onboarding validation error"
-  },
-  "onboardMoreOptions": "More options",
-  "@onboardMoreOptions": {
-    "description": "Onboarding expandable section label"
   },
   "onboardDayN": "Day {day}",
   "@onboardDayN": {
@@ -6147,6 +6135,10 @@
   "recurringFormAccountRequired": "Account is required",
   "@recurringFormAccountRequired": { "description": "Account validation error" },
   "recurringFormStarts": "Starts: {date}",
-  "@recurringFormStarts": { "description": "Start date button", "placeholders": { "date": { "type": "String" } } }
+  "@recurringFormStarts": { "description": "Start date button", "placeholders": { "date": { "type": "String" } } },
+  "onboardSeedCategories": "Add suggested categories",
+  "@onboardSeedCategories": { "description": "Switch title" },
+  "currencySelected": "Selected",
+  "@currencySelected": { "description": "Currency sheet section header (the chosen currency)" }
 }
 
