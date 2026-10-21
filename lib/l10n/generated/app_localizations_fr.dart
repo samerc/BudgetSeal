@@ -1810,9 +1810,6 @@ class SFr extends S {
       'Faites glisser les poignées. L\'onglet Budget et l\'écran d\'alimentation suivent cet ordre.';
 
   @override
-  String get periodSummaryTitle => 'Une nouvelle période budgétaire a commencé';
-
-  @override
   String periodSummaryBody(String spent, String funded) {
     return 'La période précédente, vous avez dépensé $spent sur $funded budgétés.';
   }
@@ -7512,5 +7509,19 @@ class SFr extends S {
   @override
   String homeOverBy(String amount) {
     return 'Dépassée de $amount';
+  }
+
+  @override
+  String get sealFullyFunded => 'Entièrement approvisionnée';
+
+  @override
+  String get sealAllSealed => 'Tout est scellé';
+
+  @override
+  String get sealAllSealedBody => 'Tout votre argent a une mission.';
+
+  @override
+  String periodSealedTitle(String month) {
+    return '$month scellé';
   }
 }

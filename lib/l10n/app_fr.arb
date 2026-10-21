@@ -523,7 +523,6 @@
   "catUnlinkEnvelope": "Aucune enveloppe (hors budget)",
   "allocReorderTitle": "Réordonner les enveloppes",
   "allocReorderHint": "Faites glisser les poignées. L'onglet Budget et l'écran d'alimentation suivent cet ordre.",
-  "periodSummaryTitle": "Une nouvelle période budgétaire a commencé",
   "periodSummaryBody": "La période précédente, vous avez dépensé {spent} sur {funded} budgétés.",
   "periodSummaryUnder": "{amount} sous le budget",
   "periodSummaryOver": "{amount} au-dessus du budget",
@@ -5569,5 +5568,9 @@
   "dashboardSectionBudgetLabel": "Votre budget",
   "dashboardSectionBudgetDesc": "Prêt à répartir, enveloppes dépassées, factures à payer",
   "homeOverspentTitle": "{count, plural, =1{1 enveloppe dépassée} other{{count} enveloppes dépassées}}",
-  "homeOverBy": "Dépassée de {amount}"
+  "homeOverBy": "Dépassée de {amount}",
+  "sealFullyFunded": "Entièrement approvisionnée",
+  "sealAllSealed": "Tout est scellé",
+  "sealAllSealedBody": "Tout votre argent a une mission.",
+  "periodSealedTitle": "{month} scellé"
 }

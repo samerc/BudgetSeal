@@ -7,6 +7,7 @@ import '../theme/design_tokens.dart';
 import 'budget_progress.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
+import 'seal_mark.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -32,6 +33,10 @@ class AllocationCard extends StatelessWidget {
   /// Whether this envelope needs manual period review (amber glow).
   final bool needsReview;
 
+  /// Fully funded (see sealedEnvelopesProvider): a wax seal sits on the
+  /// icon, stamped on when it happens while the card is visible.
+  final bool sealed;
+
   /// Optional period boundaries for daily allowance calculation.
   final DateTime? periodStart;
   final DateTime? periodEnd;
@@ -56,6 +61,7 @@ class AllocationCard extends StatelessWidget {
     this.onSpend,
     this.onCover,
     this.needsReview = false,
+    this.sealed = false,
     this.categoryName,
     this.categoryIcon,
     this.categoryColorHex,
@@ -100,14 +106,28 @@ class AllocationCard extends StatelessWidget {
         ),
       );
     }
-    return Container(
+    return SizedBox(
       width: 44,
       height: 44,
-      decoration: BoxDecoration(
-        color: AppColors.pastel(context, color, light: 0.55, dark: 0.45),
-        shape: BoxShape.circle,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.pastel(context, color, light: 0.55, dark: 0.45),
+              shape: BoxShape.circle,
+            ),
+            child: Center(child: inner),
+          ),
+          PositionedDirectional(
+            end: -4,
+            bottom: -4,
+            child: SealStamp(sealed: sealed, size: 20),
+          ),
+        ],
       ),
-      child: Center(child: inner),
     );
   }
 

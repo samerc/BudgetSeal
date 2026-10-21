@@ -1797,9 +1797,6 @@ class SEn extends S {
       'Drag the handles. The Budget tab and funding screen follow this order.';
 
   @override
-  String get periodSummaryTitle => 'A new budget period started';
-
-  @override
   String periodSummaryBody(String spent, String funded) {
     return 'Last period you spent $spent of $funded budgeted.';
   }
@@ -7426,5 +7423,19 @@ class SEn extends S {
   @override
   String homeOverBy(String amount) {
     return 'Over by $amount';
+  }
+
+  @override
+  String get sealFullyFunded => 'Fully funded';
+
+  @override
+  String get sealAllSealed => 'All sealed';
+
+  @override
+  String get sealAllSealedBody => 'Every bit of your money has a job.';
+
+  @override
+  String periodSealedTitle(String month) {
+    return '$month sealed';
   }
 }

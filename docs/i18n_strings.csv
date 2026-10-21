@@ -1888,7 +1888,6 @@ cat_create_envelope,,"Create a ""{name}"" envelope",إنشاء ظرف «{name}»
 cat_unlink_envelope,,No envelope (unbudgeted),بلا ظرف (خارج الميزانية),Aucune enveloppe (hors budget)
 alloc_reorder_title,,Reorder envelopes,إعادة ترتيب الأظرف,Réordonner les enveloppes
 alloc_reorder_hint,,Drag the handles. The Budget tab and funding screen follow this order.,اسحب المقابض. يتبع تبويب الميزانية وشاشة التمويل هذا الترتيب.,Faites glisser les poignées. L'onglet Budget et l'écran d'alimentation suivent cet ordre.
-period_summary_title,,A new budget period started,بدأت فترة ميزانية جديدة,Une nouvelle période budgétaire a commencé
 period_summary_body,,Last period you spent {spent} of {funded} budgeted.,في الفترة السابقة أنفقت {spent} من أصل {funded} مخصّصة.,"La période précédente, vous avez dépensé {spent} sur {funded} budgétés."
 period_summary_under,,{amount} under budget,أقل من الميزانية بـ {amount},{amount} sous le budget
 period_summary_over,,{amount} over budget,فوق الميزانية بـ {amount},{amount} au-dessus du budget
@@ -2502,3 +2501,7 @@ dashboard_section_budget_label,Customize Home: section name,Your budget,ميزا
 dashboard_section_budget_desc,Customize Home: section description,"Ready to assign, overspent envelopes, bills due",جاهز للتوزيع، الأظرف المتجاوزة، الفواتير المستحقة,"Prêt à répartir, enveloppes dépassées, factures à payer"
 home_overspent_title,Home: card listing overspent envelopes,"{count, plural, =1{1 envelope overspent} other{{count} envelopes overspent}}","{count, plural, =1{ظرف واحد متجاوز} =2{ظرفان متجاوزان} few{{count} أظرف متجاوزة} many{{count} ظرفًا متجاوزًا} other{{count} ظرف متجاوز}}","{count, plural, =1{1 enveloppe dépassée} other{{count} enveloppes dépassées}}"
 home_over_by,Home: how much an envelope is overspent,Over by {amount},متجاوز بمقدار {amount},Dépassée de {amount}
+seal_fully_funded,Envelope detail: shown next to the seal when the envelope reached its target,Fully funded,مموّل بالكامل,Entièrement approvisionnée
+seal_all_sealed,Ready to assign banner when every bit of money is in an envelope,All sealed,كلّه مختوم,Tout est scellé
+seal_all_sealed_body,Ready to assign banner subtitle when all money is assigned,Every bit of your money has a job.,لكل جزء من أموالك مهمّة.,Tout votre argent a une mission.
+period_sealed_title,"Budget tab: card in the first week of a period about the last one, e.g. ""September sealed""",{month} sealed,تم ختم {month},{month} scellé

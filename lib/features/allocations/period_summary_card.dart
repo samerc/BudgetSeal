@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/database/daos/ledger_dao.dart';
@@ -12,6 +13,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/seal_mark.dart';
 
 const _dismissedKey = 'period_summary_dismissed';
 
@@ -26,7 +28,13 @@ class PeriodSummaryCard extends ConsumerStatefulWidget {
 }
 
 class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
-  ({double funded, double spent, String currency, String periodKey})? _data;
+  ({
+    double funded,
+    double spent,
+    String currency,
+    String periodKey,
+    DateTime lastMid,
+  })? _data;
 
   @override
   void initState() {
@@ -57,8 +65,17 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
           .first);
       if (funded <= 0 && spent <= 0) return; // nothing to report
       if (mounted) {
-        setState(() => _data =
-            (funded: funded, spent: spent, currency: base, periodKey: key));
+        // The month most of the last period fell in (start day may be the
+        // 15th): its middle day.
+        final mid = last.start.add(
+            Duration(days: last.end.difference(last.start).inDays ~/ 2));
+        setState(() => _data = (
+              funded: funded,
+              spent: spent,
+              currency: base,
+              periodKey: key,
+              lastMid: mid,
+            ));
       }
     } catch (e) {
       debugPrint('[PeriodSummary] Error loading: $e');
@@ -92,11 +109,13 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
         children: [
           Row(
             children: [
-              Icon(AppIcons.calendarDots,
-                  size: 20, color: AppColors.accent),
-              const SizedBox(width: 8),
+              // The closed period is "sealed".
+              const SealMark(size: 26),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text(tr.periodSummaryTitle,
+                child: Text(
+                    tr.periodSealedTitle(_capitalized(
+                        DateFormat.MMMM().format(d.lastMid))),
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w700)),
               ),
@@ -143,3 +162,6 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
     );
   }
 }
+
+String _capitalized(String s) =>
+    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

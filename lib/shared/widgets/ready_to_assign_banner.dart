@@ -8,6 +8,7 @@ import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import '../utils/format_number.dart';
 import 'currency_display.dart';
+import 'seal_mark.dart';
 import 'tappable.dart';
 
 /// The gold "Ready to assign" banner (Budget tab and Home): money not yet
@@ -23,10 +24,15 @@ class ReadyToAssignBanner extends StatefulWidget {
     required this.unallocated,
     required this.baseCurrency,
     this.hasAllocations = false,
+    this.anyFunded = false,
     this.margin = const EdgeInsets.fromLTRB(16, 12, 16, 8),
   });
 
   final EdgeInsetsGeometry margin;
+
+  /// Some envelope holds money. With nothing left to assign this makes the
+  /// banner "All sealed" (a budget that was never funded isn't sealed).
+  final bool anyFunded;
 
   @override
   State<ReadyToAssignBanner> createState() => _ReadyToAssignBannerState();
@@ -57,6 +63,66 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
     super.dispose();
   }
 
+  bool get _sealed =>
+      widget.hasAllocations &&
+      widget.anyFunded &&
+      widget.unallocated.values.every((v) => v.abs() < 0.005);
+
+  // Set when the banner turns sealed while on screen → stamp the seal on.
+  bool _stampNext = false;
+
+  @override
+  void didUpdateWidget(ReadyToAssignBanner old) {
+    super.didUpdateWidget(old);
+    final was = old.hasAllocations &&
+        old.anyFunded &&
+        old.unallocated.values.every((v) => v.abs() < 0.005);
+    if (_sealed && !was) _stampNext = true;
+  }
+
+  Widget _buildSealed(BuildContext context, Color fill) {
+    final l = S.of(context);
+    const ink = brandInk;
+    final stamp = _stampNext;
+    _stampNext = false;
+    return Container(
+      margin: widget.margin,
+      padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 18, 16),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(RadiusTokens.dialog - 5),
+      ),
+      child: Row(
+        children: [
+          SealStamp(
+              sealed: true, size: 46, stampOnMount: stamp, inverse: true),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.sealAllSealed,
+                    style: const TextStyle(
+                      color: ink,
+                      fontSize: 24,
+                      fontFamily: TypographyTokens.displayFamily,
+                      fontWeight: FontWeight.w700,
+                    )),
+                const SizedBox(height: 2),
+                Text(l.sealAllSealedBody,
+                    style: TextStyle(
+                      color: ink.withValues(alpha: 0.75),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _toggle() {
     setState(() => _expanded = !_expanded);
     if (_expanded) {
@@ -74,6 +140,7 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
     // The brand banner: the bright accent in every theme, dark ink on it.
     const ink = brandInk;
     final fill = AppColors.accentBright;
+    if (_sealed) return _buildSealed(context, fill);
 
     return Container(
       margin: widget.margin,

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:confetti/confetti.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +31,8 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/providers/seal_provider.dart';
+import '../../shared/widgets/seal_mark.dart';
 
 class AllocationDetailScreen extends ConsumerStatefulWidget {
   final String allocationId;
@@ -60,8 +61,6 @@ class _AllocationDetailScreenState
   bool _loading = false;
   bool _showSettings = false;
   bool _showEmojiGrid = false;
-  final _confettiCtrl = ConfettiController(duration: const Duration(seconds: 2));
-  bool _confettiPlayed = false;
   bool _fundPulse = false;
   List<Category> _linkedCategories = [];
   /// For the creation flow: distinguishes saving-with-goal from saving-open.
@@ -116,7 +115,6 @@ class _AllocationDetailScreenState
   void dispose() {
     _nameController.dispose();
     _targetCurrencyController.dispose();
-    _confettiCtrl.dispose();
     super.dispose();
   }
 
@@ -702,18 +700,6 @@ class _AllocationDetailScreenState
           ],
         ),
       ),
-          // Confetti overlay for savings goal completion
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiCtrl,
-              blastDirectionality: BlastDirectionality.explosive,
-              gravity: 0.2,
-              numberOfParticles: 20,
-              maximumSize: const Size(12, 12),
-              minimumSize: const Size(6, 6),
-            ),
-          ),
         ],
       ),
     );
@@ -774,14 +760,12 @@ class _AllocationDetailScreenState
     final otherBalances = Map.of(balances)..remove(targetCurrency);
     final hasTarget = _targetAmount > 0;
 
-    // Trigger confetti when savings goal is reached
-    if (_type == 'flexible' && hasTarget && mainBalance >= _targetAmount &&
-        !_confettiPlayed) {
-      _confettiPlayed = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _confettiCtrl.play();
-      });
-    }
+    // Fully funded → the wax seal (stamped on if it happens here).
+    final sealed = ref
+            .watch(sealedEnvelopesProvider)
+            .value
+            ?.contains(widget.allocationId) ??
+        false;
 
     // Cashew budgetPage header: pastel of the envelope's color, dark text,
     // thick progress bar with a pace marker for spending envelopes.
@@ -806,13 +790,29 @@ class _AllocationDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            S.of(context).allocAvailable,
-            style: TextStyle(
-              color: onHero.withValues(alpha: 0.6),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  S.of(context).allocAvailable,
+                  style: TextStyle(
+                    color: onHero.withValues(alpha: 0.6),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (sealed)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: Text(S.of(context).sealFullyFunded,
+                      style: TextStyle(
+                          color: onHero.withValues(alpha: 0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700)),
+                ),
+              SealStamp(sealed: sealed, size: 30),
+            ],
           ),
           const SizedBox(height: 2),
           // Balance (pulses after funding)

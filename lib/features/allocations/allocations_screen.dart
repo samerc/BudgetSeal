@@ -33,6 +33,7 @@ import 'period_summary_card.dart';
 import 'reorder_envelopes_sheet.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/providers/seal_provider.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -522,6 +523,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 unallocated: unallocated,
                 baseCurrency: baseCurrency,
                 hasAllocations: (allocationsAsync.value?.isNotEmpty ?? false),
+                anyFunded: allocationsAsync.value?.any((a) => a
+                        .balanceByCurrency.values
+                        .any((v) => v > 0.005)) ??
+                    false,
               ),
               loading: () => const SizedBox(height: 80),
               error: (_, __) => const SizedBox.shrink(),
@@ -686,6 +691,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       );
 
       final pendingIds = ref.watch(pendingResetProvider).value ?? [];
+      final sealedIds = ref.watch(sealedEnvelopesProvider).value ?? const <String>{};
       // Envelope → its linked category (categories.allocationId; a top-level
       // one wins over a subcategory). The legacy allocations.categoryId join
       // is empty for envelopes created since categories link themselves.
@@ -717,6 +723,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
             child: AllocationCard(
             needsReview: pendingIds.contains(a.data.allocation.id),
+            sealed: sealedIds.contains(a.data.allocation.id),
             name: a.data.allocation.name,
             type: a.data.allocation.type,
             periodicity: a.data.allocation.periodicity,

@@ -603,7 +603,6 @@
   "catUnlinkEnvelope": "No envelope (unbudgeted)",
   "allocReorderTitle": "Reorder envelopes",
   "allocReorderHint": "Drag the handles. The Budget tab and funding screen follow this order.",
-  "periodSummaryTitle": "A new budget period started",
   "periodSummaryBody": "Last period you spent {spent} of {funded} budgeted.",
   "@periodSummaryBody": {"placeholders": {"spent": {"type": "String"}, "funded": {"type": "String"}}},
   "periodSummaryUnder": "{amount} under budget",
@@ -6151,6 +6150,14 @@
   "homeOverspentTitle": "{count, plural, =1{1 envelope overspent} other{{count} envelopes overspent}}",
   "@homeOverspentTitle": { "description": "Home: card listing overspent envelopes", "placeholders": { "count": { "type": "int" } } },
   "homeOverBy": "Over by {amount}",
-  "@homeOverBy": { "description": "Home: how much an envelope is overspent", "placeholders": { "amount": { "type": "String" } } }
+  "@homeOverBy": { "description": "Home: how much an envelope is overspent", "placeholders": { "amount": { "type": "String" } } },
+  "sealFullyFunded": "Fully funded",
+  "@sealFullyFunded": { "description": "Envelope detail: shown next to the seal when the envelope reached its target" },
+  "sealAllSealed": "All sealed",
+  "@sealAllSealed": { "description": "Ready to assign banner when every bit of money is in an envelope" },
+  "sealAllSealedBody": "Every bit of your money has a job.",
+  "@sealAllSealedBody": { "description": "Ready to assign banner subtitle when all money is assigned" },
+  "periodSealedTitle": "{month} sealed",
+  "@periodSealedTitle": { "description": "Budget tab: card in the first week of a period about the last one, e.g. \"September sealed\"", "placeholders": { "month": { "type": "String" } } }
 }
 

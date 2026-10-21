@@ -3243,12 +3243,6 @@ abstract class S {
   /// **'Drag the handles. The Budget tab and funding screen follow this order.'**
   String get allocReorderHint;
 
-  /// No description provided for @periodSummaryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'A new budget period started'**
-  String get periodSummaryTitle;
-
   /// No description provided for @periodSummaryBody.
   ///
   /// In en, this message translates to:
@@ -13173,6 +13167,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Over by {amount}'**
   String homeOverBy(String amount);
+
+  /// Envelope detail: shown next to the seal when the envelope reached its target
+  ///
+  /// In en, this message translates to:
+  /// **'Fully funded'**
+  String get sealFullyFunded;
+
+  /// Ready to assign banner when every bit of money is in an envelope
+  ///
+  /// In en, this message translates to:
+  /// **'All sealed'**
+  String get sealAllSealed;
+
+  /// Ready to assign banner subtitle when all money is assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Every bit of your money has a job.'**
+  String get sealAllSealedBody;
+
+  /// Budget tab: card in the first week of a period about the last one, e.g. "September sealed"
+  ///
+  /// In en, this message translates to:
+  /// **'{month} sealed'**
+  String periodSealedTitle(String month);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

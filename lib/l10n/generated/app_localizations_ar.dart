@@ -1802,9 +1802,6 @@ class SAr extends S {
       'اسحب المقابض. يتبع تبويب الميزانية وشاشة التمويل هذا الترتيب.';
 
   @override
-  String get periodSummaryTitle => 'بدأت فترة ميزانية جديدة';
-
-  @override
   String periodSummaryBody(String spent, String funded) {
     return 'في الفترة السابقة أنفقت $spent من أصل $funded مخصّصة.';
   }
@@ -7451,5 +7448,19 @@ class SAr extends S {
   @override
   String homeOverBy(String amount) {
     return 'متجاوز بمقدار $amount';
+  }
+
+  @override
+  String get sealFullyFunded => 'مموّل بالكامل';
+
+  @override
+  String get sealAllSealed => 'كلّه مختوم';
+
+  @override
+  String get sealAllSealedBody => 'لكل جزء من أموالك مهمّة.';
+
+  @override
+  String periodSealedTitle(String month) {
+    return 'تم ختم $month';
   }
 }

@@ -365,7 +365,6 @@ Notable additions:
 | sliver_tools | ^0.2.12 | Advanced sliver widgets |
 | google_fonts | ^8.2.0 | Custom fonts |
 | dynamic_color | ^1.9.0 | Material You system accent color |
-| confetti | ^0.8.0 | Celebration effects (goal completion) |
 | google_mlkit_text_recognition | ^0.17.1 | Offline receipt OCR (bill splitter) |
 | encrypt | ^5.0.3 | AES-256 encryption for sync files |
 | flutter_secure_storage | ^11.2.0 | Secure credential storage (Keystore/Keychain) |
@@ -856,9 +855,13 @@ Transaction search uses a 400ms `Timer` debounce to avoid excessive `setState` c
 
 Transaction type filter (All/Income/Expense/Transfer) is saved to SharedPreferences and restored on screen init. Persists across sessions.
 
-## Confetti Celebration
+## Seal Moments
 
-Flexible envelopes with a target trigger a 2-second confetti burst (via `confetti` package) when their balance reaches the target amount. Plays once per screen visit. `ConfettiWidget` overlaid at top-center of the allocation detail screen with explosive blast direction.
+The brand's wax seal (`shared/widgets/seal_mark.dart`: `SealMark` painted scalloped disc in `accentBright` with an ink check like the app icon; `inverse: true` = ink seal with a gold check for use on the gold banner) marks finished budgeting — calm, no confetti:
+- **Fully funded envelope**: `sealedEnvelopesProvider` (`core/providers/seal_provider.dart`) = envelopes with a target where, in the target currency, spending envelopes received ≥ target this period (`fundedInPeriod`; spending afterwards keeps the seal) and flexible ones hold ≥ target. `AllocationCard(sealed:)` puts a 20 px seal on the icon; the envelope hero shows "Fully funded" + a 30 px seal.
+- **All sealed**: `ReadyToAssignBanner` with nothing left to assign in any currency, envelopes present and `anyFunded` (some envelope holds money) turns into "All sealed — Every bit of your money has a job." with the inverse seal and no Assign button.
+- **"<Month> sealed"**: `PeriodSummaryCard` (first week of a period) is titled with the closed period's month (its middle day, capitalized) and the seal.
+- `SealStamp(sealed:)` stamps the seal on (scale 1.8→1, slight twist, light haptic) only when it turns sealed while on screen (`didUpdateWidget`, or `stampOnMount` when the parent swaps layouts); already sealed = shown still.
 
 ## Duplicate Detection
 

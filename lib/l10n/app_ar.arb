@@ -523,7 +523,6 @@
   "catUnlinkEnvelope": "بلا ظرف (خارج الميزانية)",
   "allocReorderTitle": "إعادة ترتيب الأظرف",
   "allocReorderHint": "اسحب المقابض. يتبع تبويب الميزانية وشاشة التمويل هذا الترتيب.",
-  "periodSummaryTitle": "بدأت فترة ميزانية جديدة",
   "periodSummaryBody": "في الفترة السابقة أنفقت {spent} من أصل {funded} مخصّصة.",
   "periodSummaryUnder": "أقل من الميزانية بـ {amount}",
   "periodSummaryOver": "فوق الميزانية بـ {amount}",
@@ -5569,5 +5568,9 @@
   "dashboardSectionBudgetLabel": "ميزانيتك",
   "dashboardSectionBudgetDesc": "جاهز للتوزيع، الأظرف المتجاوزة، الفواتير المستحقة",
   "homeOverspentTitle": "{count, plural, =1{ظرف واحد متجاوز} =2{ظرفان متجاوزان} few{{count} أظرف متجاوزة} many{{count} ظرفًا متجاوزًا} other{{count} ظرف متجاوز}}",
-  "homeOverBy": "متجاوز بمقدار {amount}"
+  "homeOverBy": "متجاوز بمقدار {amount}",
+  "sealFullyFunded": "مموّل بالكامل",
+  "sealAllSealed": "كلّه مختوم",
+  "sealAllSealedBody": "لكل جزء من أموالك مهمّة.",
+  "periodSealedTitle": "تم ختم {month}"
 }
