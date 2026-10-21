@@ -83,7 +83,7 @@ class BudgetProgress extends StatelessWidget {
                           fontSize: height * 0.62,
                           fontWeight: FontWeight.w800,
                           color: isOver
-                              ? Colors.white
+                              ? AppColors.inkOn(AppColors.overspent)
                               : AppColors.pastel(context, color,
                                   light: 0.55, dark: 0.75, inverse: true),
                         ),

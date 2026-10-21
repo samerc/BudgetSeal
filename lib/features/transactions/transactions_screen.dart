@@ -2126,7 +2126,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           color: AppColors.overspent,
           borderRadius: swipeRadius,
         ),
-        child: const Icon(Icons.delete_rounded, color: Colors.white),
+        child: Icon(Icons.delete_rounded,
+            color: AppColors.inkOn(AppColors.overspent)),
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
@@ -2235,7 +2236,6 @@ class _PlannedSection extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
                     color: kPlannedColor,
                   ),
                 ),

@@ -959,8 +959,8 @@ class _ObjectiveDetailScreenState
                       padding: const EdgeInsets.only(top: 6, bottom: 6),
                       child: Text(group.key,
                           style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w700,
-                            color: AppColors.ts(context), letterSpacing: 0.5,
+                            fontSize: 13, fontWeight: FontWeight.w700,
+                            color: AppColors.ts(context),
                           )),
                     ),
                     Wrap(

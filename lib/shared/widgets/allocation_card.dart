@@ -333,10 +333,10 @@ class AllocationCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 7),
                               child: Text(S.of(context).allocCoverButton,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white)),
+                                      color: AppColors.inkOn(AppColors.overspent))),
                             ),
                           ),
                         ),

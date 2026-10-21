@@ -1789,10 +1789,9 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(S.of(context).currencySymbolsAllSection,
                             style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: AppColors.th(context))),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.ts(context))),
                       ),
                       Expanded(child: Divider(color: AppColors.bd(context))),
                     ]),

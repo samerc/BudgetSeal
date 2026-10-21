@@ -5,6 +5,7 @@ import '../../core/providers/tx_list_settings_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/widgets/section_header.dart';
 
 class TxListSettingsScreen extends ConsumerWidget {
   const TxListSettingsScreen({super.key});
@@ -20,18 +21,10 @@ class TxListSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // ── Live Preview ──────────────────────────────────────────
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(S.of(context).txListSelectLayout,
-                style: TextStyle(
-                  fontSize: TypographyTokens.screenTitleSize,
-                  fontFamily: TypographyTokens.displayFamily,
-                  fontWeight: TypographyTokens.screenTitleWeight,
-                  color: AppColors.tp(context),
-                )),
-          ),
-          const SizedBox(height: 16),
+          // A section of this screen (the AppBar holds the title).
+          SectionHeader(S.of(context).txListSelectLayout,
+              padding: const EdgeInsetsDirectional.only(start: 4)),
+          const SizedBox(height: 12),
           _LayoutPreview(settings: s),
           const SizedBox(height: 28),
 

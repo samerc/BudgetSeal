@@ -965,10 +965,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                           padding: const EdgeInsets.only(top: 8, bottom: 6),
                           child: Text(group.key,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.ts(context),
-                                letterSpacing: 0.5,
                               )),
                         ),
                         Wrap(

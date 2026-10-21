@@ -10,6 +10,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/widgets/section_header.dart';
 
 class BillCalendarScreen extends ConsumerStatefulWidget {
   const BillCalendarScreen({super.key});
@@ -106,7 +107,8 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
           children: [
             const SizedBox(height: 16),
             Text(
-              DateFormat('EEEE, MMMM d').format(date),
+              // Weekday + the user's date format.
+              '${DateFormat.EEEE().format(date)}, ${formatDate(date)}',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -366,12 +368,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(S.of(context).billCalUpcoming,
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                              color: AppColors.ts(context))),
+                      SectionHeader(S.of(context).billCalUpcoming),
                       const SizedBox(height: 8),
                       Expanded(
                         child: _items.where((r) => r.enabled).isEmpty
