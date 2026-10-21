@@ -1135,7 +1135,7 @@
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
-  "dashboardSectionMoneyDesc": "Bills, net worth and unallocated",
+  "dashboardSectionMoneyDesc": "Net worth",
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
@@ -6143,6 +6143,14 @@
   "gsExpenseTitle": "Log an expense",
   "@gsExpenseTitle": { "description": "Checklist step 4" },
   "gsExpenseBody": "It comes out of the matching envelope.",
-  "@gsExpenseBody": { "description": "Checklist step 4 hint" }
+  "@gsExpenseBody": { "description": "Checklist step 4 hint" },
+  "dashboardSectionBudgetLabel": "Your budget",
+  "@dashboardSectionBudgetLabel": { "description": "Customize Home: section name" },
+  "dashboardSectionBudgetDesc": "Ready to assign, overspent envelopes, bills due",
+  "@dashboardSectionBudgetDesc": { "description": "Customize Home: section description" },
+  "homeOverspentTitle": "{count, plural, =1{1 envelope overspent} other{{count} envelopes overspent}}",
+  "@homeOverspentTitle": { "description": "Home: card listing overspent envelopes", "placeholders": { "count": { "type": "int" } } },
+  "homeOverBy": "Over by {amount}",
+  "@homeOverBy": { "description": "Home: how much an envelope is overspent", "placeholders": { "amount": { "type": "String" } } }
 }
 

@@ -2615,7 +2615,7 @@ class SFr extends S {
   String get dashboardSectionMoneyLabel => 'Votre argent';
 
   @override
-  String get dashboardSectionMoneyDesc => 'Factures, patrimoine et non alloué';
+  String get dashboardSectionMoneyDesc => 'Valeur nette';
 
   @override
   String get dashboardSectionActivityLabel => 'Activité récente';
@@ -7490,4 +7490,27 @@ class SFr extends S {
   @override
   String get gsExpenseBody =>
       'Elle est prise dans l\'enveloppe correspondante.';
+
+  @override
+  String get dashboardSectionBudgetLabel => 'Votre budget';
+
+  @override
+  String get dashboardSectionBudgetDesc =>
+      'Prêt à répartir, enveloppes dépassées, factures à payer';
+
+  @override
+  String homeOverspentTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count enveloppes dépassées',
+      one: '1 enveloppe dépassée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeOverBy(String amount) {
+    return 'Dépassée de $amount';
+  }
 }

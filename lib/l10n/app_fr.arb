@@ -995,7 +995,7 @@
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
-  "dashboardSectionMoneyDesc": "Factures, patrimoine et non alloué",
+  "dashboardSectionMoneyDesc": "Valeur nette",
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
@@ -5565,5 +5565,9 @@
   "gsFundTitle": "Approvisionnez vos enveloppes",
   "gsFundBody": "Déplacez l'argent de « Prêt à répartir » vers vos enveloppes.",
   "gsExpenseTitle": "Saisissez une dépense",
-  "gsExpenseBody": "Elle est prise dans l'enveloppe correspondante."
+  "gsExpenseBody": "Elle est prise dans l'enveloppe correspondante.",
+  "dashboardSectionBudgetLabel": "Votre budget",
+  "dashboardSectionBudgetDesc": "Prêt à répartir, enveloppes dépassées, factures à payer",
+  "homeOverspentTitle": "{count, plural, =1{1 enveloppe dépassée} other{{count} enveloppes dépassées}}",
+  "homeOverBy": "Dépassée de {amount}"
 }

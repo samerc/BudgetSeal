@@ -20,14 +20,13 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/allocation_card.dart';
 import '../../shared/widgets/budget_progress.dart';
+import '../../shared/widgets/ready_to_assign_banner.dart';
 
-import '../../shared/widgets/currency_display.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
-import '../../shared/theme/brand_palette.dart';
 import 'archived_envelopes_sheet.dart';
 import 'move_money_sheet.dart';
 import 'period_summary_card.dart';
@@ -519,7 +518,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: unallocatedAsync.when(
-              data: (unallocated) => _UnallocatedBanner(
+              data: (unallocated) => ReadyToAssignBanner(
                 unallocated: unallocated,
                 baseCurrency: baseCurrency,
                 hasAllocations: (allocationsAsync.value?.isNotEmpty ?? false),
@@ -825,216 +824,6 @@ class _SummaryDivider extends StatelessWidget {
       height: 28,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       color: AppColors.bd(context),
-    );
-  }
-}
-
-// -----------------------------------------
-// Unallocated Banner
-// -----------------------------------------
-class _UnallocatedBanner extends StatefulWidget {
-  final Map<String, double> unallocated;
-  final String baseCurrency;
-  final bool hasAllocations;
-
-  const _UnallocatedBanner({
-    required this.unallocated,
-    required this.baseCurrency,
-    this.hasAllocations = false,
-  });
-
-  @override
-  State<_UnallocatedBanner> createState() => _UnallocatedBannerState();
-}
-
-class _UnallocatedBannerState extends State<_UnallocatedBanner>
-    with SingleTickerProviderStateMixin {
-  bool _expanded = false;
-  late final AnimationController _animController;
-  late final Animation<double> _expandAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _expandAnim = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  void _toggle() {
-    setState(() => _expanded = !_expanded);
-    if (_expanded) {
-      _animController.forward();
-    } else {
-      _animController.reverse();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = S.of(context);
-    final baseAmount = widget.unallocated[widget.baseCurrency] ?? 0.0;
-    final hasOtherCurrencies = widget.unallocated.length > 1;
-    // The brand banner: the bright accent in every theme, dark ink on it.
-    const ink = brandInk;
-    final fill = AppColors.accentBright;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(RadiusTokens.dialog - 5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.allocReadyToAssign,
-                        style: TextStyle(
-                          color: ink.withValues(alpha: 0.75),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      // Large amounts shrink to one line instead of wrapping.
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: CurrencyDisplay(
-                          amount: baseAmount,
-                          currency: widget.baseCurrency,
-                          amountStyle: const TextStyle(
-                            color: ink,
-                            fontSize: 30,
-                            fontFamily: TypographyTokens.displayFamily,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (hasOtherCurrencies)
-                        Tappable(
-                          onTap: _toggle,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _expanded
-                                      ? l.allocHideOtherCurrencies
-                                      : l.allocOtherCurrencies(
-                                          widget.unallocated.length - 1),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: ink,
-                                  ),
-                                ),
-                                AnimatedRotation(
-                                  turns: _expanded ? 0.5 : 0,
-                                  duration: const Duration(milliseconds: 250),
-                                  child: const Icon(AppIcons.caretDown,
-                                      color: ink, size: 18),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: widget.hasAllocations
-                      ? () => context.push('/funding')
-                      : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: ink,
-                    foregroundColor: fill,
-                    disabledBackgroundColor: ink.withValues(alpha: 0.15),
-                    disabledForegroundColor: ink.withValues(alpha: 0.45),
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: Text(
-                    l.allocAssign,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // -- Expandable currency breakdown --
-          SizeTransition(
-            sizeFactor: _expandAnim,
-            axisAlignment: -1,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.lightenPastel(fill, 0.35),
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                ),
-                child: Column(
-                  children: widget.unallocated.entries.map((e) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Row(
-                        children: [
-                          Text(
-                            e.key,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: ink.withValues(alpha: 0.7),
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            formatAmount(e.value, currency: e.key),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: e.value < 0
-                                  ? AppColors.darkenPastel(
-                                      AppColors.overspent, 0.2)
-                                  : ink,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

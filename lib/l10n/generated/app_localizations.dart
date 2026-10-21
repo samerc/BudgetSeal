@@ -4579,7 +4579,7 @@ abstract class S {
   /// Section description
   ///
   /// In en, this message translates to:
-  /// **'Bills, net worth and unallocated'**
+  /// **'Net worth'**
   String get dashboardSectionMoneyDesc;
 
   /// Section label
@@ -13149,6 +13149,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'It comes out of the matching envelope.'**
   String get gsExpenseBody;
+
+  /// Customize Home: section name
+  ///
+  /// In en, this message translates to:
+  /// **'Your budget'**
+  String get dashboardSectionBudgetLabel;
+
+  /// Customize Home: section description
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign, overspent envelopes, bills due'**
+  String get dashboardSectionBudgetDesc;
+
+  /// Home: card listing overspent envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 envelope overspent} other{{count} envelopes overspent}}'**
+  String homeOverspentTitle(int count);
+
+  /// Home: how much an envelope is overspent
+  ///
+  /// In en, this message translates to:
+  /// **'Over by {amount}'**
+  String homeOverBy(String amount);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

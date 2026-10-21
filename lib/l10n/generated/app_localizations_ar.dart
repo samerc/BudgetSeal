@@ -2613,7 +2613,7 @@ class SAr extends S {
   String get dashboardSectionMoneyLabel => 'أموالك';
 
   @override
-  String get dashboardSectionMoneyDesc => 'الفواتير وصافي الثروة وغير المخصص';
+  String get dashboardSectionMoneyDesc => 'صافي الثروة';
 
   @override
   String get dashboardSectionActivityLabel => 'النشاط الأخير';
@@ -7426,4 +7426,30 @@ class SAr extends S {
 
   @override
   String get gsExpenseBody => 'يُخصم من الظرف المطابق.';
+
+  @override
+  String get dashboardSectionBudgetLabel => 'ميزانيتك';
+
+  @override
+  String get dashboardSectionBudgetDesc =>
+      'جاهز للتوزيع، الأظرف المتجاوزة، الفواتير المستحقة';
+
+  @override
+  String homeOverspentTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ظرف متجاوز',
+      many: '$count ظرفًا متجاوزًا',
+      few: '$count أظرف متجاوزة',
+      two: 'ظرفان متجاوزان',
+      one: 'ظرف واحد متجاوز',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeOverBy(String amount) {
+    return 'متجاوز بمقدار $amount';
+  }
 }

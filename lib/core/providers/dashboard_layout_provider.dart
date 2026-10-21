@@ -7,9 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// [description] are English fallbacks; the UI shows the translated
 /// dashboardSection*Label/Desc strings.
 enum DashboardSection {
+  budget('Your budget', 'Ready to assign, overspent envelopes, bills due'),
   quickActions('Quick Actions', 'Expense, income, transfer, fund'),
   spending('Spending Overview', 'Donut chart with category breakdown'),
-  money('Your Money', 'Net worth and unallocated'),
+  money('Your Money', 'Net worth'),
   activity('Recent Activity', 'Templates and recent transactions');
 
   final String label;
@@ -42,6 +43,7 @@ class DashboardSectionConfig {
 }
 
 const _defaultOrder = [
+  DashboardSectionConfig(section: DashboardSection.budget),
   DashboardSectionConfig(section: DashboardSection.quickActions),
   DashboardSectionConfig(section: DashboardSection.spending),
   DashboardSectionConfig(section: DashboardSection.money),
@@ -71,7 +73,13 @@ class DashboardLayoutNotifier extends Notifier<List<DashboardSectionConfig>> {
         final existing = list.map((c) => c.section).toSet();
         for (final sec in DashboardSection.values) {
           if (!existing.contains(sec)) {
-            list.add(DashboardSectionConfig(section: sec));
+            // Home is budget-first: the budget section leads saved layouts
+            // from before it existed.
+            if (sec == DashboardSection.budget) {
+              list.insert(0, DashboardSectionConfig(section: sec));
+            } else {
+              list.add(DashboardSectionConfig(section: sec));
+            }
           }
         }
         state = list;

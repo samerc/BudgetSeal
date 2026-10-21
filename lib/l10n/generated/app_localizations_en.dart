@@ -2595,7 +2595,7 @@ class SEn extends S {
   String get dashboardSectionMoneyLabel => 'Your money';
 
   @override
-  String get dashboardSectionMoneyDesc => 'Bills, net worth and unallocated';
+  String get dashboardSectionMoneyDesc => 'Net worth';
 
   @override
   String get dashboardSectionActivityLabel => 'Recent activity';
@@ -7404,4 +7404,27 @@ class SEn extends S {
 
   @override
   String get gsExpenseBody => 'It comes out of the matching envelope.';
+
+  @override
+  String get dashboardSectionBudgetLabel => 'Your budget';
+
+  @override
+  String get dashboardSectionBudgetDesc =>
+      'Ready to assign, overspent envelopes, bills due';
+
+  @override
+  String homeOverspentTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count envelopes overspent',
+      one: '1 envelope overspent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeOverBy(String amount) {
+    return 'Over by $amount';
+  }
 }

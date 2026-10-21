@@ -995,7 +995,7 @@
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
-  "dashboardSectionMoneyDesc": "الفواتير وصافي الثروة وغير المخصص",
+  "dashboardSectionMoneyDesc": "صافي الثروة",
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
@@ -5565,5 +5565,9 @@
   "gsFundTitle": "موّل أظرفك",
   "gsFundBody": "انقل المال من «جاهز للتوزيع» إلى أظرفك.",
   "gsExpenseTitle": "سجّل مصروفًا",
-  "gsExpenseBody": "يُخصم من الظرف المطابق."
+  "gsExpenseBody": "يُخصم من الظرف المطابق.",
+  "dashboardSectionBudgetLabel": "ميزانيتك",
+  "dashboardSectionBudgetDesc": "جاهز للتوزيع، الأظرف المتجاوزة، الفواتير المستحقة",
+  "homeOverspentTitle": "{count, plural, =1{ظرف واحد متجاوز} =2{ظرفان متجاوزان} few{{count} أظرف متجاوزة} many{{count} ظرفًا متجاوزًا} other{{count} ظرف متجاوز}}",
+  "homeOverBy": "متجاوز بمقدار {amount}"
 }

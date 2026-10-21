@@ -35,10 +35,10 @@ import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
-import 'widgets/bills_boxes.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../core/providers/getting_started_provider.dart';
 import 'widgets/getting_started_card.dart';
+import 'widgets/budget_focus.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -377,9 +377,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   const SizedBox(height: 20),
     ];
 
+    sectionWidgets[DashboardSection.budget] = [
+                  BudgetFocus(baseCurrency: baseCurrency),
+                  const SizedBox(height: 12),
+    ];
+
     sectionWidgets[DashboardSection.money] = [
-                  // Cashew's Upcoming / Overdue bill boxes
-                  BillsBoxes(baseCurrency: baseCurrency),
                   // Compact money overview: Net Worth + Unallocated
                   accountsAsync.when(
                     data: (accounts) {
@@ -394,11 +397,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           .length;
 
                       return unallocatedAsync.when(
-                        data: (unallocated) {
-                          final unallocBase = unallocated[baseCurrency] ?? 0.0;
-                          final otherUnallocCount = unallocated.keys
-                              .where((k) => k != baseCurrency && (unallocated[k] ?? 0).abs() > 0.01)
-                              .length;
+                        data: (_) {
 
                           return Container(
                             padding: const EdgeInsets.all(16),
@@ -456,60 +455,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                     ),
                                   ),
                                 ),
-                                // Unallocated — only show when positive (actionable)
-                                if (unallocBase >= 0.01) ...[
-                                  Container(
-                                    width: 1,
-                                    height: 40,
-                                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                                    color: AppColors.bd(context),
-                                  ),
-                                  Expanded(
-                                    child: Tappable(
-                                      onTap: () => context.push('/funding'),
-                                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(AppIcons.wallet,
-                                                  size: 13, color: AppColors.ts(context)),
-                                              const SizedBox(width: 5),
-                                              Text(S.of(context).dashboardUnallocated,
-                                                  style: TextStyle(
-                                                      fontSize: 11,
-                                                      color: AppColors.ts(context))),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            alignment: AlignmentDirectional.centerStart,
-                                            child: RollingNumber(
-                                              amount: unallocBase,
-                                              currency: baseCurrency,
-                                              lazyFirstRender: false,
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontFamily: TypographyTokens.displayFamily,
-                                                fontWeight: FontWeight.w800,
-                                                color: AppColors.tp(context),
-                                              ),
-                                            ),
-                                          ),
-                                          if (otherUnallocCount > 0)
-                                            Text(
-                                              S.of(context).dashboardOtherCount(otherUnallocCount),
-                                              style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: AppColors.th(context)),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           );

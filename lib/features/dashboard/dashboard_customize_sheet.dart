@@ -127,6 +127,7 @@ class _CustomizeSheet extends ConsumerWidget {
 }
 
 String _sectionLabel(S l, DashboardSection s) => switch (s) {
+      DashboardSection.budget => l.dashboardSectionBudgetLabel,
       DashboardSection.quickActions => l.dashboardSectionQuickLabel,
       DashboardSection.spending => l.dashboardSectionSpendingLabel,
       DashboardSection.money => l.dashboardSectionMoneyLabel,
@@ -134,6 +135,7 @@ String _sectionLabel(S l, DashboardSection s) => switch (s) {
     };
 
 String _sectionDesc(S l, DashboardSection s) => switch (s) {
+      DashboardSection.budget => l.dashboardSectionBudgetDesc,
       DashboardSection.quickActions => l.dashboardSectionQuickDesc,
       DashboardSection.spending => l.dashboardSectionSpendingDesc,
       DashboardSection.money => l.dashboardSectionMoneyDesc,

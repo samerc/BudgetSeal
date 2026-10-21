@@ -99,7 +99,7 @@ dashboard_section_spending_desc,Section description,Donut chart with category br
 dashboard_section_quick_label,Section label,Quick actions,إجراءات سريعة,Actions rapides
 dashboard_section_quick_desc,Section description,"Expense, income, transfer, fund",مصروف، دخل، تحويل، تمويل,"Dépense, revenu, virement, financement"
 dashboard_section_money_label,Section label,Your money,أموالك,Votre argent
-dashboard_section_money_desc,Section description,"Bills, net worth and unallocated",الفواتير وصافي الثروة وغير المخصص,"Factures, patrimoine et non alloué"
+dashboard_section_money_desc,Customize Home: section description,Net worth,صافي الثروة,Valeur nette
 dashboard_section_activity_label,Section label,Recent activity,النشاط الأخير,Activité récente
 dashboard_section_activity_desc,Section description,Templates and recent transactions,القوالب والمعاملات الأخيرة,Modèles et transactions récentes
 # ──────────────────────────────────────────────,,,,
@@ -2498,3 +2498,7 @@ gs_fund_title,Checklist step 3,Fund your envelopes,موّل أظرفك,Approvisi
 gs_fund_body,Checklist step 3 hint,Move money from Ready to assign into your envelopes.,انقل المال من «جاهز للتوزيع» إلى أظرفك.,Déplacez l'argent de « Prêt à répartir » vers vos enveloppes.
 gs_expense_title,Checklist step 4,Log an expense,سجّل مصروفًا,Saisissez une dépense
 gs_expense_body,Checklist step 4 hint,It comes out of the matching envelope.,يُخصم من الظرف المطابق.,Elle est prise dans l'enveloppe correspondante.
+dashboard_section_budget_label,Customize Home: section name,Your budget,ميزانيتك,Votre budget
+dashboard_section_budget_desc,Customize Home: section description,"Ready to assign, overspent envelopes, bills due",جاهز للتوزيع، الأظرف المتجاوزة، الفواتير المستحقة,"Prêt à répartir, enveloppes dépassées, factures à payer"
+home_overspent_title,Home: card listing overspent envelopes,"{count, plural, =1{1 envelope overspent} other{{count} envelopes overspent}}","{count, plural, =1{ظرف واحد متجاوز} =2{ظرفان متجاوزان} few{{count} أظرف متجاوزة} many{{count} ظرفًا متجاوزًا} other{{count} ظرف متجاوز}}","{count, plural, =1{1 enveloppe dépassée} other{{count} enveloppes dépassées}}"
+home_over_by,Home: how much an envelope is overspent,Over by {amount},متجاوز بمقدار {amount},Dépassée de {amount}
