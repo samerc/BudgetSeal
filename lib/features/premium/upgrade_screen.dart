@@ -34,8 +34,9 @@ class UpgradeScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: const SizedBox.shrink(),
+        // Theme background: a transparent AppBar makes Flutter pick light
+        // status bar icons, unreadable on the paper surface.
         elevation: 0,
-        backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
         child: LayoutBuilder(
