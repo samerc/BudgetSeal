@@ -22,6 +22,10 @@ class EnvelopeImpact {
   /// Envelopes this transaction spent from (split lines can hit several).
   final int envelopeCount;
 
+  /// The envelope's most recent spending — the one row that offers Cover,
+  /// so an overspent envelope doesn't put a button on every row.
+  final bool isLatest;
+
   const EnvelopeImpact({
     required this.allocationId,
     required this.name,
@@ -29,6 +33,7 @@ class EnvelopeImpact {
     required this.balanceAfter,
     required this.balanceNow,
     this.envelopeCount = 1,
+    this.isLatest = false,
   });
 
   bool get overspent => balanceAfter < -0.005;
@@ -84,11 +89,13 @@ final txEnvelopeImpactProvider =
     final running = <String, double>{};
     final after = <String, ({String alloc, String name, String ccy, double bal})>{};
     final envelopes = <String, Set<String>>{};
+    final latest = <String, String>{}; // alloc|currency → last spending tx
     for (final i in items) {
       final key = '${i.alloc}|${i.currency}';
       final bal = (running[key] ?? 0) + i.amount;
       running[key] = bal;
       if (!i.spend || i.tx == null) continue;
+      latest[key] = i.tx!;
       final seen = envelopes.putIfAbsent(i.tx!, () => {});
       // A split keeps the first envelope it spent from.
       if (seen.isEmpty || seen.first == i.alloc) {
@@ -105,6 +112,7 @@ final txEnvelopeImpactProvider =
           balanceAfter: e.value.bal,
           balanceNow: running['${e.value.alloc}|${e.value.ccy}'] ?? 0,
           envelopeCount: envelopes[e.key]!.length,
+          isLatest: latest['${e.value.alloc}|${e.value.ccy}'] == e.key,
         ),
     };
   });

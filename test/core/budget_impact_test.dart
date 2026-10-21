@@ -77,5 +77,8 @@ void main() {
     expect(m['t1']!.balanceNow, closeTo(-10, 0.001));
     expect(m['t1']!.name, 'Food');
     expect(m.containsKey('t3'), isFalse);
+    // Only the envelope's latest spending offers Cover.
+    expect(m['t1']!.isLatest, isTrue);
+    expect(m['t2']!.isLatest, isFalse);
   });
 }

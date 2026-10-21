@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -105,6 +107,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _attachedListCtrl ?? _ownListScrollCtrl;
   bool _showScrollToTop = false;
 
+  /// Title and month strip slide away while scrolling down the list and
+  /// come back on the way up (more rows on small phones).
+  bool _headerHidden = false;
+
   // Quick-add bar
   final _quickAddCtrl = TextEditingController();
 
@@ -152,9 +158,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   }
 
   void _onListScroll() {
-    final show = _listScrollCtrl.hasClients && _listScrollCtrl.offset > 500;
-    if (show != _showScrollToTop) {
-      setState(() => _showScrollToTop = show);
+    if (!_listScrollCtrl.hasClients) return;
+    final pos = _listScrollCtrl.position;
+    final show = pos.pixels > 500;
+    var hidden = _headerHidden;
+    if (pos.pixels < 80) {
+      hidden = false;
+    } else if (pos.userScrollDirection == ScrollDirection.reverse) {
+      hidden = true;
+    } else if (pos.userScrollDirection == ScrollDirection.forward) {
+      hidden = false;
+    }
+    if (show != _showScrollToTop || hidden != _headerHidden) {
+      setState(() {
+        _showScrollToTop = show;
+        _headerHidden = hidden;
+      });
     }
   }
 
@@ -398,6 +417,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _selectedIds.clear();
     });
     _loadPlanned();
+    // Swipes, arrows, taps and the year picker all re-center the strip
+    // (after the frame, when a new year has its months laid out).
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) { if (mounted) _scrollMonthIntoView(); });
   }
 
   Future<void> _loadPlanned() async {
@@ -586,9 +609,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             // ── Header area (the selection bar takes its place) ──
             // Keep the slot (placeholder) so the month strip below keeps its
             // element — and its scroll position — when selection toggles.
-            _selectionMode ? const SizedBox.shrink() : _buildHeader(context),
-            // ── Month tabs ───────────────────────────────────────
-            _buildMonthTabs(context),
+            // Both slide up out of the way while scrolling down (kept in
+            // the tree so the month strip keeps its position).
+            ClipRect(
+              child: AnimatedAlign(
+                alignment: Alignment.bottomCenter,
+                heightFactor:
+                    _headerHidden && !_selectionMode && !_showSearch ? 0 : 1,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _selectionMode
+                        ? const SizedBox.shrink()
+                        : _buildHeader(context),
+                    // ── Month tabs ───────────────────────────────
+                    _buildMonthTabs(context),
+                  ],
+                ),
+              ),
+            ),
             // ── Filter chips (collapsible) ───────────────────────
             if (_showFilters) _buildFilterChips(),
             if (!_showFilters) _buildActiveFilters(),
@@ -1040,13 +1081,23 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   static const double _kYearSlot = 76;
   static const double _kMonthSlot = 100;
 
+  /// Space before the year / after the last month, so January and the
+  /// current month (always the last item) can sit in the middle too.
+  static double _monthStripStartPad(double width) =>
+      math.max(0, width / 2 - _kYearSlot - _kMonthSlot / 2);
+  static double _monthStripEndPad(double width) =>
+      math.max(0, width / 2 - _kMonthSlot / 2);
+
   /// Center the selected month in the month strip (fixed slot widths make
   /// this exact).
   void _scrollMonthIntoView(
       [Duration duration = const Duration(milliseconds: 350)]) {
     if (!_monthScrollCtrl.hasClients) return;
     final pos = _monthScrollCtrl.position;
-    final center = _kYearSlot + (_selectedMonth - 1) * _kMonthSlot + _kMonthSlot / 2;
+    final center = _monthStripStartPad(pos.viewportDimension) +
+        _kYearSlot +
+        (_selectedMonth - 1) * _kMonthSlot +
+        _kMonthSlot / 2;
     final target = (center - pos.viewportDimension / 2)
         .clamp(0.0, pos.maxScrollExtent);
     _monthScrollCtrl.animateTo(target,
@@ -1087,9 +1138,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   child: FadedEdges(
                   startFade: 48,
                   endFade: 32,
-                  child: ListView.builder(
+                  child: LayoutBuilder(builder: (context, box) => ListView.builder(
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
+                    padding: EdgeInsetsDirectional.only(
+                      start: _monthStripStartPad(box.maxWidth),
+                      end: _monthStripEndPad(box.maxWidth),
+                    ),
                     itemCount: monthCount + 1, // +1 for year item
                     itemBuilder: (_, i) {
                       // First item: year selector
@@ -1193,7 +1248,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         ),
                       );
                     },
-                  ),
+                  )),
                 )),
                 // Right arrow (hidden if at current month)
                 if (!_isFutureMonth && !(_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month))
@@ -1908,7 +1963,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     (context, gi) {
                       final group = groups[gi];
                       return Padding(
-                        padding: const EdgeInsets.only(top: 12),
+                        padding: const EdgeInsets.only(top: 10),
                         child: _DayCard(
                           header: _DateHeaderTile(
                             date: group.date,
@@ -2447,7 +2502,7 @@ class _DateHeaderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 6),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
@@ -2456,7 +2511,7 @@ class _DateHeaderTile extends StatelessWidget {
             _name(context),
             style: TextStyle(
               fontFamily: TypographyTokens.displayFamily,
-              fontSize: 17,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppColors.tp(context),
             ),
@@ -2465,7 +2520,7 @@ class _DateHeaderTile extends StatelessWidget {
           Expanded(
             child: Text(
               formatDate(date),
-              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              style: TextStyle(fontSize: 12.5, color: AppColors.ts(context)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -2477,7 +2532,7 @@ class _DateHeaderTile extends StatelessWidget {
                   : formatAmount(dayTotal, currency: baseCurrency),
               style: TextStyle(
                 fontFamily: TypographyTokens.displayFamily,
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.ts(context),
                 fontFeatures: const [FontFeature.tabularFigures()],

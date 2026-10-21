@@ -104,9 +104,9 @@ class TxTile extends ConsumerWidget {
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(
                 16,
-                listSettings.compact ? 7 : 10,
+                listSettings.compact ? 6 : 8,
                 16,
-                listSettings.compact ? 7 : 10),
+                listSettings.compact ? 6 : 8),
             child: Row(
               children: [
                 if (listSettings.showCategoryIcon) ...[
@@ -166,23 +166,23 @@ class TxTile extends ConsumerWidget {
     );
   }
 
-  // ── Icon: 44 px rounded square, category pastel ─────────────────
+  // ── Icon: 40 px rounded square, category pastel ─────────────────
   Widget _icon(BuildContext context, Category? cat, String? catName,
       Color catColor, bool isTransfer, Color typeColor) {
-    const size = 44.0;
+    const size = 40.0;
     if (isTransfer) {
       return Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           color: AppColors.pastel(context, typeColor),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
           AppIcons.arrowsLeftRight,
           color: AppColors.pastel(context, typeColor,
               light: 0.5, dark: 0.5, inverse: true),
-          size: 22,
+          size: 20,
         ),
       );
     }
@@ -270,7 +270,7 @@ class TxTile extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis),
         ));
-        if (impact.stillOverspent && onTap == null) {
+        if (impact.stillOverspent && impact.isLatest && onTap == null) {
           children
             ..add(const SizedBox(width: 6))
             ..add(_pill(
@@ -378,7 +378,7 @@ class TxTile extends ConsumerWidget {
     final showImpact = !settings.compact;
     if (!showImpact && !showBalance && !showDate) return const [];
     return [
-      const SizedBox(height: 4),
+      const SizedBox(height: 3),
       LayoutBuilder(
           builder: (context, box) => Row(
                 children: [
