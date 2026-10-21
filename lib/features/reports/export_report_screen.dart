@@ -13,7 +13,6 @@ import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
-import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 
 /// Generates and shares an HTML monthly report that can be printed as PDF.
@@ -114,12 +113,6 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                         : const Icon(Icons.share_rounded, size: 18),
                     label: Text(
                         _exporting ? S.of(context).exportGenerating : S.of(context).exportGenerateShare),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius)),
-                    ),
                   ),
                 ],
               ),

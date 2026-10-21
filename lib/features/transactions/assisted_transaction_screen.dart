@@ -246,7 +246,6 @@ class _AssistedTransactionScreenState
     // Using the outer widget's context inside a StatefulBuilder registers InheritedWidget
     // dependencies that break when the sheet is dismissed.
     final tr = S.of(context);
-    final surfaceColor = AppColors.sf(context);
     final textPrimary = AppColors.tp(context);
     final textHint = AppColors.th(context);
     final surfaceVariant = AppColors.sfv(context);
@@ -268,9 +267,8 @@ class _AssistedTransactionScreenState
             padding: EdgeInsets.fromLTRB(
                 20, 24, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
             decoration: BoxDecoration(
-              color: surfaceColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
+              color: AppColors.popup(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -375,12 +373,6 @@ class _AssistedTransactionScreenState
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => proceed(ctx, localType),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
                   child: Text(
                       localType == 'transfer'
                           ? tr.txAfEnterAmountButton
@@ -409,7 +401,6 @@ class _AssistedTransactionScreenState
     // Capture S before opening sheet to avoid _dependents.isEmpty crash
     final tr = S.of(context);
 
-    final catSurface = AppColors.sf(context);
     final catTextPrimary = AppColors.tp(context);
     final catHint = AppColors.th(context);
     final catSurfaceVariant = AppColors.sfv(context);
@@ -480,9 +471,8 @@ class _AssistedTransactionScreenState
                 maxHeight: MediaQuery.of(ctx).size.height * 0.85,
               ),
               decoration: BoxDecoration(
-                color: catSurface,
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24)),
+                color: AppColors.popup(context),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
               ),
               child: Column(
                 children: [
@@ -577,11 +567,6 @@ class _AssistedTransactionScreenState
                                 : null,
                             filled: true,
                             fillColor: catSurfaceVariant,
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
                             contentPadding:
                                 const EdgeInsets.symmetric(
                                     vertical: 10),
@@ -678,13 +663,6 @@ class _AssistedTransactionScreenState
                               },
                               icon: const Icon(Icons.add_rounded, size: 18),
                               label: Text(tr.txAfNewCategory),
-                              style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(12)),
-                              ),
                             ),
                           );
                         }
@@ -966,24 +944,12 @@ class _AssistedTransactionScreenState
     final tr = S.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(ctx),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
               const SizedBox(height: 16),
               Text(label,
                   style: TextStyle(
@@ -2107,10 +2073,6 @@ class _AssistedTransactionScreenState
                             style: const TextStyle(fontSize: 14),
                           ),
                           style: OutlinedButton.styleFrom(
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
                             side: BorderSide(
                                 color: AppColors.bd(context)),
                           ),
@@ -2128,10 +2090,6 @@ class _AssistedTransactionScreenState
                           foregroundColor: AppColors.inkOn(typeColor),
                           disabledBackgroundColor:
                               typeColor.withValues(alpha: 0.7),
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: _saving
                             ? SizedBox(
@@ -2309,7 +2267,7 @@ class _AssistedTransactionScreenState
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: bgColor ?? AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
       ),
       child: Row(
         children: [
@@ -2333,26 +2291,34 @@ class _AssistedTransactionScreenState
     return Expanded(
       child: GestureDetector(
         onTap: () => onChanged(value),
-        child: Container(
+        // Same look as the classic form's type pill: a raised surface pill
+        // on a neutral track, the type's color only on the icon.
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? color : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+            color: isSelected ? AppColors.sf(context) : Colors.transparent,
+            borderRadius: BorderRadius.circular(RadiusTokens.pill),
+            boxShadow: isSelected ? AppColors.cardShadow(context) : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon,
-                  size: 16, color: isSelected ? AppColors.inkOn(color) : color),
+              Icon(icon, size: 16, color: color),
               const SizedBox(width: 4),
-              Text(label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? AppColors.inkOn(color)
-                        : AppColors.ts(context),
-                  )),
+              Flexible(
+                child: Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected
+                          ? AppColors.tp(context)
+                          : AppColors.ts(context),
+                    )),
+              ),
             ],
           ),
         ),

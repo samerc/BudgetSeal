@@ -569,8 +569,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -579,7 +579,6 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.th(context), borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 12),
             Text(widget.forceSubscription ? S.of(context).recurringNewSubTitle : S.of(context).recurringNewTitle,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -731,12 +730,6 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius)),
-              ),
               child: _saving
                   ? SizedBox(
                       height: 20,
@@ -870,8 +863,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -880,7 +873,6 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.th(context), borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 12),
             Text(S.of(context).recurringEditTitle,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -1006,11 +998,6 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context, false),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius)),
-                    ),
                     child: Text(S.of(context).commonCancel,
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
@@ -1020,12 +1007,6 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 Expanded(
                   child: FilledButton(
                     onPressed: _saving ? null : _save,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius)),
-                    ),
                     child: _saving
                         ? SizedBox(
                             height: 20,

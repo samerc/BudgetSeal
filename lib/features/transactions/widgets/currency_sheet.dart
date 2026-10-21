@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 // ---------------------------------------------------------------------------
 // Currencies (ISO 4217, generated from a table — keep it sorted by code)
@@ -602,8 +603,8 @@ class _CurrencySheetState extends State<CurrencySheet>
     // A Material (not a coloured Container) so the rows' ripple and
     // selected highlight show.
     return Material(
-      color: AppColors.sf(context),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      color: AppColors.popup(context),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       clipBehavior: Clip.antiAlias,
       child: DraggableScrollableSheet(
         controller: _sheetCtrl,
@@ -616,16 +617,6 @@ class _CurrencySheetState extends State<CurrencySheet>
         builder: (_, scrollCtrl) => Column(
           children: [
             const SizedBox(height: 12),
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -646,12 +637,6 @@ class _CurrencySheetState extends State<CurrencySheet>
                   hintText: S.of(context).commonSearchHint,
                   prefixIcon:
                       const Icon(Icons.search_rounded, size: 18),
-                  filled: true,
-                  fillColor: AppColors.sfv(context),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
                   isDense: true,
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 12),

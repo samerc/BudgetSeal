@@ -119,12 +119,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     hintText: S.of(context).notifCustomMessage,
                     hintStyle: TextStyle(
                         fontSize: 13, color: AppColors.th(context)),
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     isDense: true,

@@ -124,8 +124,6 @@ class _LockScreenState extends State<LockScreen> {
                 foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius)),
               ),
             ),
           ],

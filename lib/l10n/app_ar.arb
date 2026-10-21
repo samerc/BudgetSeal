@@ -1207,10 +1207,6 @@
   "@txTapPlus": {
     "description": "Empty state subtitle"
   },
-  "txAddFirst": "أضف أول معاملة",
-  "@txAddFirst": {
-    "description": "Empty state button"
-  },
   "txSpentOfBudget": "أُنفق {spent} من ميزانية {budget}",
   "@txSpentOfBudget": {
     "description": "Budget progress bar",
@@ -2861,7 +2857,7 @@
   "@settingsGoalsSub": {
     "description": "Tile subtitle"
   },
-  "settingsCustomization": "الإعدادات والتخصيص",
+  "settingsCustomization": "الإعدادات",
   "@settingsCustomization": {
     "description": "Tile title"
   },
@@ -3426,7 +3422,7 @@
   "@tileTheme": { "description": "Tile title" },
   "tileAccentColor": "لون التمييز",
   "@tileAccentColor": { "description": "Tile title" },
-  "tileColors": "الألوان",
+  "tileColors": "ألوان المعاملات",
   "@tileColors": { "description": "Tile title" },
   "tileColorsSub": "الدخل، المصاريف والتحويلات",
   "@tileColorsSub": { "description": "Tile subtitle" },

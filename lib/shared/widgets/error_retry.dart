@@ -82,9 +82,6 @@ class ErrorRetry extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.sf(context),
                 foregroundColor: AppColors.tp(context),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),

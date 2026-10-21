@@ -2868,7 +2868,7 @@ abstract class S {
   /// No description provided for @billOweCreated.
   ///
   /// In en, this message translates to:
-  /// **'Added to Goals & Loans: you owe {name} {amount}'**
+  /// **'Added to goals & loans: you owe {name} {amount}'**
   String billOweCreated(String name, String amount);
 
   /// No description provided for @billShare.
@@ -4177,13 +4177,13 @@ abstract class S {
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Go Back'**
+  /// **'Go back'**
   String get commonGoBack;
 
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Save Anyway'**
+  /// **'Save anyway'**
   String get commonSaveAnyway;
 
   /// Default error message
@@ -4441,7 +4441,7 @@ abstract class S {
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Quick Templates'**
+  /// **'Quick templates'**
   String get dashboardQuickTemplates;
 
   /// Link text
@@ -4489,13 +4489,13 @@ abstract class S {
   /// Toggle label
   ///
   /// In en, this message translates to:
-  /// **'Last 7 Days'**
+  /// **'Last 7 days'**
   String get dashboardLast7Days;
 
   /// Toggle label
   ///
   /// In en, this message translates to:
-  /// **'This Month'**
+  /// **'This month'**
   String get dashboardThisMonth;
 
   /// Global search hint
@@ -4543,13 +4543,13 @@ abstract class S {
   /// Bottom sheet title
   ///
   /// In en, this message translates to:
-  /// **'Customize Dashboard'**
+  /// **'Customize dashboard'**
   String get customizeTitle;
 
   /// Section label
   ///
   /// In en, this message translates to:
-  /// **'Spending Overview'**
+  /// **'Spending overview'**
   String get dashboardSectionSpendingLabel;
 
   /// Section description
@@ -4561,7 +4561,7 @@ abstract class S {
   /// Section label
   ///
   /// In en, this message translates to:
-  /// **'Quick Actions'**
+  /// **'Quick actions'**
   String get dashboardSectionQuickLabel;
 
   /// Section description
@@ -4573,7 +4573,7 @@ abstract class S {
   /// Section label
   ///
   /// In en, this message translates to:
-  /// **'Your Money'**
+  /// **'Your money'**
   String get dashboardSectionMoneyLabel;
 
   /// Section description
@@ -4585,7 +4585,7 @@ abstract class S {
   /// Section label
   ///
   /// In en, this message translates to:
-  /// **'Recent Activity'**
+  /// **'Recent activity'**
   String get dashboardSectionActivityLabel;
 
   /// Section description
@@ -4597,7 +4597,7 @@ abstract class S {
   /// Net worth label on dashboard money card
   ///
   /// In en, this message translates to:
-  /// **'Net Worth'**
+  /// **'Net worth'**
   String get dashboardNetWorth;
 
   /// Unallocated label on dashboard money card
@@ -4759,7 +4759,7 @@ abstract class S {
   /// FAB tooltip
   ///
   /// In en, this message translates to:
-  /// **'Split Bill'**
+  /// **'Split bill'**
   String get txSplitBillTooltip;
 
   /// Date range filter
@@ -4789,7 +4789,7 @@ abstract class S {
   /// Year picker dialog title
   ///
   /// In en, this message translates to:
-  /// **'Select Year'**
+  /// **'Select year'**
   String get txSelectYear;
 
   /// Category filter chip
@@ -4821,12 +4821,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Tap + to record one'**
   String get txTapPlus;
-
-  /// Empty state button
-  ///
-  /// In en, this message translates to:
-  /// **'Add your first transaction'**
-  String get txAddFirst;
 
   /// Budget progress bar
   ///
@@ -4879,7 +4873,7 @@ abstract class S {
   /// AppBar title creating
   ///
   /// In en, this message translates to:
-  /// **'New Transaction'**
+  /// **'New transaction'**
   String get txFormNewTitle;
 
   /// Note field hint
@@ -4897,7 +4891,7 @@ abstract class S {
   /// Template button tooltip
   ///
   /// In en, this message translates to:
-  /// **'Use Template'**
+  /// **'Use template'**
   String get txFormUseTemplate;
 
   /// Auto-fill label
@@ -4993,7 +4987,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Possible Duplicate'**
+  /// **'Possible duplicate'**
   String get txFormDuplicateTitle;
 
   /// Dialog content
@@ -5029,7 +5023,7 @@ abstract class S {
   /// Receipt button
   ///
   /// In en, this message translates to:
-  /// **'Scan Receipt'**
+  /// **'Scan receipt'**
   String get txFormScanReceipt;
 
   /// Gallery button
@@ -5041,7 +5035,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Transaction Details'**
+  /// **'Transaction details'**
   String get txDetailTitle;
 
   /// Error state
@@ -5167,7 +5161,7 @@ abstract class S {
   /// Step 1 title
   ///
   /// In en, this message translates to:
-  /// **'Enter Title'**
+  /// **'Enter title'**
   String get txAfEnterTitle;
 
   /// Transfer note hint
@@ -5179,19 +5173,19 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Enter Amount'**
+  /// **'Enter amount'**
   String get txAfEnterAmountButton;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Select Category'**
+  /// **'Select category'**
   String get txAfSelectCategoryButton;
 
   /// Popup title
   ///
   /// In en, this message translates to:
-  /// **'Select Category'**
+  /// **'Select category'**
   String get txAfSelectCategoryTitle;
 
   /// Search hint
@@ -5203,25 +5197,25 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'New Category'**
+  /// **'New category'**
   String get txAfNewCategory;
 
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Enter Amount'**
+  /// **'Enter amount'**
   String get txAfEnterAmountTitle;
 
   /// Account label (transfer)
   ///
   /// In en, this message translates to:
-  /// **'From Account'**
+  /// **'From account'**
   String get txAfFromAccount;
 
   /// Account label (transfer)
   ///
   /// In en, this message translates to:
-  /// **'To Account'**
+  /// **'To account'**
   String get txAfToAccount;
 
   /// Placeholder
@@ -5233,13 +5227,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Add Account'**
+  /// **'Add account'**
   String get txAfAddAccount;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Exchange Rate Required'**
+  /// **'Exchange rate required'**
   String get txAfExchangeRateRequired;
 
   /// Exchange rate prompt
@@ -5299,19 +5293,19 @@ abstract class S {
   /// Save button
   ///
   /// In en, this message translates to:
-  /// **'Save Transfer'**
+  /// **'Save transfer'**
   String get txAfSaveTransfer;
 
   /// Save button
   ///
   /// In en, this message translates to:
-  /// **'Save {count} Items'**
+  /// **'Save {count} items'**
   String txAfSaveNItems(int count);
 
   /// Save button
   ///
   /// In en, this message translates to:
-  /// **'Add Transaction'**
+  /// **'Add transaction'**
   String get txAfAddTransaction;
 
   /// New button
@@ -5341,25 +5335,25 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Transaction List'**
+  /// **'Transaction list'**
   String get txListTitle;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Select Layout'**
+  /// **'Select layout'**
   String get txListSelectLayout;
 
   /// Setting label
   ///
   /// In en, this message translates to:
-  /// **'Date Banner Total'**
+  /// **'Date banner total'**
   String get txListDateBanner;
 
   /// Dropdown option
   ///
   /// In en, this message translates to:
-  /// **'Day Total'**
+  /// **'Day total'**
   String get txListDayTotal;
 
   /// Dropdown option
@@ -5371,7 +5365,7 @@ abstract class S {
   /// Setting title
   ///
   /// In en, this message translates to:
-  /// **'Account Label'**
+  /// **'Account label'**
   String get txListAccountLabel;
 
   /// Setting subtitle
@@ -5383,7 +5377,7 @@ abstract class S {
   /// Setting title
   ///
   /// In en, this message translates to:
-  /// **'Category Icon'**
+  /// **'Category icon'**
   String get txListCategoryIcon;
 
   /// Setting subtitle
@@ -5407,7 +5401,7 @@ abstract class S {
   /// Preview placeholder
   ///
   /// In en, this message translates to:
-  /// **'Transaction Name'**
+  /// **'Transaction name'**
   String get txListPreviewName;
 
   /// Preview note
@@ -5419,7 +5413,7 @@ abstract class S {
   /// Screen title
   ///
   /// In en, this message translates to:
-  /// **'Bill Splitter'**
+  /// **'Bill splitter'**
   String get billTitle;
 
   /// Loading text
@@ -5449,13 +5443,13 @@ abstract class S {
   /// Primary button
   ///
   /// In en, this message translates to:
-  /// **'Scan Receipt'**
+  /// **'Scan receipt'**
   String get billScanButton;
 
   /// Secondary button
   ///
   /// In en, this message translates to:
-  /// **'Add Manually'**
+  /// **'Add manually'**
   String get billAddManually;
 
   /// Button
@@ -5467,13 +5461,13 @@ abstract class S {
   /// Image source
   ///
   /// In en, this message translates to:
-  /// **'Take Photo'**
+  /// **'Take photo'**
   String get billTakePhoto;
 
   /// Image source
   ///
   /// In en, this message translates to:
-  /// **'Choose from Gallery'**
+  /// **'Choose from gallery'**
   String get billFromGallery;
 
   /// OCR failure snackbar
@@ -5611,7 +5605,7 @@ abstract class S {
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Exchange Rate'**
+  /// **'Exchange rate'**
   String get billExchangeRateTitle;
 
   /// Dialog title
@@ -5743,7 +5737,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'New Transaction'**
+  /// **'New transaction'**
   String get txNewTransactionSheet;
 
   /// Error message
@@ -5809,7 +5803,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'How Envelopes Work'**
+  /// **'How envelopes work'**
   String get allocHelpTitle;
 
   /// Help step
@@ -5899,13 +5893,13 @@ abstract class S {
   /// Empty state button
   ///
   /// In en, this message translates to:
-  /// **'Create Envelope'**
+  /// **'Create envelope'**
   String get allocCreateButton;
 
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'New Envelope'**
+  /// **'New envelope'**
   String get allocNewEnvelope;
 
   /// Fallback name
@@ -5917,7 +5911,7 @@ abstract class S {
   /// Menu item
   ///
   /// In en, this message translates to:
-  /// **'Edit Settings'**
+  /// **'Edit settings'**
   String get allocEditSettings;
 
   /// Menu item
@@ -5929,7 +5923,7 @@ abstract class S {
   /// Menu item
   ///
   /// In en, this message translates to:
-  /// **'Revalue Balances'**
+  /// **'Revalue balances'**
   String get allocRevalueMenu;
 
   /// Menu item
@@ -5941,13 +5935,13 @@ abstract class S {
   /// Bottom button
   ///
   /// In en, this message translates to:
-  /// **'Create Envelope'**
+  /// **'Create envelope'**
   String get allocCreateButtonDetail;
 
   /// Bottom button
   ///
   /// In en, this message translates to:
-  /// **'Save Changes'**
+  /// **'Save changes'**
   String get allocSaveChanges;
 
   /// Section header
@@ -6031,7 +6025,7 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Link Category'**
+  /// **'Link category'**
   String get allocLinkCategory;
 
   /// Fund sheet subtitle
@@ -6043,7 +6037,7 @@ abstract class S {
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Fund Anyway'**
+  /// **'Fund anyway'**
   String get allocFundAnyway;
 
   /// Section header
@@ -6067,7 +6061,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Withdraw from Savings'**
+  /// **'Withdraw from savings'**
   String get allocWithdrawTitle;
 
   /// Button
@@ -6133,13 +6127,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Apply Revaluation'**
+  /// **'Apply revaluation'**
   String get allocApplyRevaluation;
 
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Archive Envelope'**
+  /// **'Archive envelope'**
   String get allocArchiveTitle;
 
   /// Dialog content
@@ -6157,19 +6151,19 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Delete Envelope'**
+  /// **'Delete envelope'**
   String get allocDeleteTitle;
 
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Archive Instead'**
+  /// **'Archive instead'**
   String get allocArchiveInstead;
 
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Delete Permanently'**
+  /// **'Delete permanently'**
   String get allocDeletePermanently;
 
   /// Progress text
@@ -6307,7 +6301,7 @@ abstract class S {
   /// No description provided for @allocFundedNote.
   ///
   /// In en, this message translates to:
-  /// **'Funded from Unallocated'**
+  /// **'Funded from unallocated'**
   String get allocFundedNote;
 
   /// No description provided for @allocFundedSuccess.
@@ -6343,19 +6337,19 @@ abstract class S {
   /// No description provided for @allocEntryPeriodReset.
   ///
   /// In en, this message translates to:
-  /// **'Period Reset'**
+  /// **'Period reset'**
   String get allocEntryPeriodReset;
 
   /// No description provided for @allocEntryCarryForward.
   ///
   /// In en, this message translates to:
-  /// **'Carried Forward'**
+  /// **'Carried forward'**
   String get allocEntryCarryForward;
 
   /// No description provided for @allocWithdrawDesc.
   ///
   /// In en, this message translates to:
-  /// **'Move money from this envelope back to Unallocated.'**
+  /// **'Move money from this envelope back to unallocated.'**
   String get allocWithdrawDesc;
 
   /// No description provided for @allocWithdrawAmountLabel.
@@ -6367,13 +6361,13 @@ abstract class S {
   /// No description provided for @allocWithdrawSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Withdrew {amount} to Unallocated'**
+  /// **'Withdrew {amount} to unallocated'**
   String allocWithdrawSuccess(String amount);
 
   /// No description provided for @allocLinkCategoryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Link a Category'**
+  /// **'Link a category'**
   String get allocLinkCategoryTitle;
 
   /// No description provided for @allocSearchCategories.
@@ -6397,7 +6391,7 @@ abstract class S {
   /// No description provided for @allocRevalueForeignTitle.
   ///
   /// In en, this message translates to:
-  /// **'Revalue Foreign Balances'**
+  /// **'Revalue foreign balances'**
   String get allocRevalueForeignTitle;
 
   /// No description provided for @allocFetch.
@@ -6445,7 +6439,7 @@ abstract class S {
   /// No description provided for @allocDeleteNoLinksTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete Envelope Permanently'**
+  /// **'Delete envelope permanently'**
   String get allocDeleteNoLinksTitle;
 
   /// No description provided for @allocDeleteNoLinksMsg.
@@ -6505,7 +6499,7 @@ abstract class S {
   /// No description provided for @allocGoalsLoans.
   ///
   /// In en, this message translates to:
-  /// **'Goals & Loans'**
+  /// **'Goals & loans'**
   String get allocGoalsLoans;
 
   /// No description provided for @allocGoalsCount.
@@ -6541,7 +6535,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Fund Envelopes'**
+  /// **'Fund envelopes'**
   String get fundTitle;
 
   /// No description provided for @fundCouldntLoad.
@@ -6577,7 +6571,7 @@ abstract class S {
   /// No description provided for @fundStep3.
   ///
   /// In en, this message translates to:
-  /// **'Tap \"Fund All\" to move the money into your envelopes.'**
+  /// **'Tap \"Fund all\" to move the money into your envelopes.'**
   String get fundStep3;
 
   /// No description provided for @fundAvailableToDistribute.
@@ -6595,7 +6589,7 @@ abstract class S {
   /// No description provided for @fundQuickFill.
   ///
   /// In en, this message translates to:
-  /// **'Quick Fill'**
+  /// **'Quick fill'**
   String get fundQuickFill;
 
   /// No description provided for @fundQuickFillDesc.
@@ -6637,7 +6631,7 @@ abstract class S {
   /// No description provided for @fundAllWithTotal.
   ///
   /// In en, this message translates to:
-  /// **'Fund All  ({total})'**
+  /// **'Fund all  ({total})'**
   String fundAllWithTotal(String total);
 
   /// Warning dialog title
@@ -6655,13 +6649,13 @@ abstract class S {
   /// Dialog button
   ///
   /// In en, this message translates to:
-  /// **'Fund Anyway'**
+  /// **'Fund anyway'**
   String get fundAnyway;
 
   /// Ledger note
   ///
   /// In en, this message translates to:
-  /// **'Funded from Unallocated'**
+  /// **'Funded from unallocated'**
   String get fundNote;
 
   /// Snackbar
@@ -6691,7 +6685,7 @@ abstract class S {
   /// Card header
   ///
   /// In en, this message translates to:
-  /// **'Total Balance'**
+  /// **'Total balance'**
   String get acctTotalBalance;
 
   /// FAB tooltip
@@ -6703,7 +6697,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'New Account'**
+  /// **'New account'**
   String get acctNewTitle;
 
   /// Type option
@@ -6739,13 +6733,13 @@ abstract class S {
   /// No description provided for @acctHideArchived.
   ///
   /// In en, this message translates to:
-  /// **'Hide Archived'**
+  /// **'Hide archived'**
   String get acctHideArchived;
 
   /// No description provided for @acctShowArchived.
   ///
   /// In en, this message translates to:
-  /// **'Show Archived'**
+  /// **'Show archived'**
   String get acctShowArchived;
 
   /// No description provided for @acctSortByName.
@@ -6787,7 +6781,7 @@ abstract class S {
   /// No description provided for @acctUnarchiveTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unarchive Account'**
+  /// **'Unarchive account'**
   String get acctUnarchiveTitle;
 
   /// No description provided for @acctUnarchiveMsg.
@@ -6811,7 +6805,7 @@ abstract class S {
   /// No description provided for @acctCurrentBalance.
   ///
   /// In en, this message translates to:
-  /// **'Current Balance'**
+  /// **'Current balance'**
   String get acctCurrentBalance;
 
   /// No description provided for @acctBackFromTrip.
@@ -6829,13 +6823,13 @@ abstract class S {
   /// No description provided for @acctConvertBackClose.
   ///
   /// In en, this message translates to:
-  /// **'Convert Back & Close'**
+  /// **'Convert back & close'**
   String get acctConvertBackClose;
 
   /// No description provided for @acctSettings.
   ///
   /// In en, this message translates to:
-  /// **'Account Settings'**
+  /// **'Account settings'**
   String get acctSettings;
 
   /// No description provided for @acctNameSection.
@@ -6943,7 +6937,7 @@ abstract class S {
   /// No description provided for @acctApplyAdjustment.
   ///
   /// In en, this message translates to:
-  /// **'Apply Adjustment'**
+  /// **'Apply adjustment'**
   String get acctApplyAdjustment;
 
   /// No description provided for @acctBalanceAdjustment.
@@ -6961,7 +6955,7 @@ abstract class S {
   /// No description provided for @acctConvertBack.
   ///
   /// In en, this message translates to:
-  /// **'Convert Back'**
+  /// **'Convert back'**
   String get acctConvertBack;
 
   /// No description provided for @acctConvertBackMsg.
@@ -6985,7 +6979,7 @@ abstract class S {
   /// No description provided for @acctConvertArchive.
   ///
   /// In en, this message translates to:
-  /// **'Convert & Archive'**
+  /// **'Convert & archive'**
   String get acctConvertArchive;
 
   /// No description provided for @acctNoTransferTarget.
@@ -7009,7 +7003,7 @@ abstract class S {
   /// No description provided for @acctArchiveTitle.
   ///
   /// In en, this message translates to:
-  /// **'Archive Account'**
+  /// **'Archive account'**
   String get acctArchiveTitle;
 
   /// No description provided for @acctArchiveMsg.
@@ -7021,7 +7015,7 @@ abstract class S {
   /// No description provided for @acctDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete Account Permanently'**
+  /// **'Delete account permanently'**
   String get acctDeleteTitle;
 
   /// No description provided for @acctDeleteMsg.
@@ -7033,7 +7027,7 @@ abstract class S {
   /// No description provided for @acctArchiveInstead.
   ///
   /// In en, this message translates to:
-  /// **'Archive Instead'**
+  /// **'Archive instead'**
   String get acctArchiveInstead;
 
   /// No description provided for @acctHasTxnsMsg.
@@ -7177,7 +7171,7 @@ abstract class S {
   /// No description provided for @catDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete Category'**
+  /// **'Delete category'**
   String get catDeleteTitle;
 
   /// No description provided for @catDeleteNoTx.
@@ -7195,13 +7189,13 @@ abstract class S {
   /// No description provided for @catNewTitle.
   ///
   /// In en, this message translates to:
-  /// **'New Category'**
+  /// **'New category'**
   String get catNewTitle;
 
   /// No description provided for @catEditTitle.
   ///
   /// In en, this message translates to:
-  /// **'Edit Category'**
+  /// **'Edit category'**
   String get catEditTitle;
 
   /// No description provided for @catName.
@@ -7315,7 +7309,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Bill Calendar'**
+  /// **'Bill calendar'**
   String get billCalTitle;
 
   /// Day sheet subtitle
@@ -7339,7 +7333,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Upcoming Bills'**
+  /// **'Upcoming bills'**
   String get upcomingTitle;
 
   /// Empty state title
@@ -7507,13 +7501,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Change Cancel Date'**
+  /// **'Change cancel date'**
   String get subDetailChangeCancel;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Set Cancellation Date'**
+  /// **'Set cancellation date'**
   String get subDetailSetCancel;
 
   /// Section header
@@ -7645,7 +7639,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'New Template'**
+  /// **'New template'**
   String get tmplNewTitle;
 
   /// Sheet description
@@ -7669,13 +7663,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Save Template'**
+  /// **'Save template'**
   String get tmplSaveButton;
 
   /// Screen title
   ///
   /// In en, this message translates to:
-  /// **'Goals & Loans'**
+  /// **'Goals & loans'**
   String get objTitle;
 
   /// Error state
@@ -7723,7 +7717,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'New Objective'**
+  /// **'New objective'**
   String get objNewTitle;
 
   /// Validation error
@@ -7771,31 +7765,31 @@ abstract class S {
   /// Sheet/button
   ///
   /// In en, this message translates to:
-  /// **'Record Payment'**
+  /// **'Record payment'**
   String get objRecordPayment;
 
   /// Sheet/button
   ///
   /// In en, this message translates to:
-  /// **'Add Funds'**
+  /// **'Add funds'**
   String get objAddFunds;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Record Payment Received'**
+  /// **'Record payment received'**
   String get objRecordReceived;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Record Payment Sent'**
+  /// **'Record payment sent'**
   String get objRecordSent;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Save from Account'**
+  /// **'Save from account'**
   String get objSaveFromAccount;
 
   /// Type chip
@@ -7879,7 +7873,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Delete Objective'**
+  /// **'Delete objective'**
   String get objDeleteTitle;
 
   /// Dialog content
@@ -8035,7 +8029,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Settings & Customization'**
+  /// **'Settings'**
   String get settingsCustomization;
 
   /// Tile subtitle
@@ -8089,7 +8083,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Auto-fill Settings'**
+  /// **'Auto-fill settings'**
   String get autofillTitle;
 
   /// Description
@@ -8161,7 +8155,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Reset Everything'**
+  /// **'Reset everything'**
   String get resetTitle;
 
   /// Dialog content
@@ -8173,13 +8167,13 @@ abstract class S {
   /// Destructive button
   ///
   /// In en, this message translates to:
-  /// **'Delete Everything'**
+  /// **'Delete everything'**
   String get resetButton;
 
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Transaction Colors'**
+  /// **'Transaction colors'**
   String get txColorsTitle;
 
   /// Description
@@ -8191,19 +8185,19 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Reset to Defaults'**
+  /// **'Reset to defaults'**
   String get txColorsReset;
 
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Household Name'**
+  /// **'Household name'**
   String get householdNameTitle;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Travel Exchange'**
+  /// **'Travel exchange'**
   String get tileTravelExchange;
 
   /// Tile title
@@ -8227,13 +8221,13 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Goals & Loans'**
+  /// **'Goals & loans'**
   String get tileGoalsLoans;
 
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Cloud Sync'**
+  /// **'Cloud sync'**
   String get syncTitle;
 
   /// Status
@@ -8269,13 +8263,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Sync Now'**
+  /// **'Sync now'**
   String get syncNow;
 
   /// Button / sheet title
   ///
   /// In en, this message translates to:
-  /// **'Share Household'**
+  /// **'Share household'**
   String get syncShareHousehold;
 
   /// Button / dialog title
@@ -8305,7 +8299,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Connection Failed'**
+  /// **'Connection failed'**
   String get syncConnectionFailed;
 
   /// Default error
@@ -8347,19 +8341,19 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Generate Invite Code'**
+  /// **'Generate invite code'**
   String get syncGenerateInvite;
 
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'Invite Code'**
+  /// **'Invite code'**
   String get syncInviteCode;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Share Code'**
+  /// **'Share code'**
   String get syncShareCode;
 
   /// Validation
@@ -8371,7 +8365,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Sync Encryption'**
+  /// **'Sync encryption'**
   String get syncEncryptionTitle;
 
   /// Subtitle
@@ -8395,7 +8389,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Set Sync Password'**
+  /// **'Set sync password'**
   String get syncSetPasswordTitle;
 
   /// Dialog description
@@ -8419,13 +8413,13 @@ abstract class S {
   /// Field label
   ///
   /// In en, this message translates to:
-  /// **'Confirm Password'**
+  /// **'Confirm password'**
   String get syncConfirmPassword;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Set Password'**
+  /// **'Set password'**
   String get syncSetPasswordButton;
 
   /// Snackbar error
@@ -8443,7 +8437,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Remove Encryption?'**
+  /// **'Remove encryption?'**
   String get syncRemoveEncryptionTitle;
 
   /// Dialog content
@@ -8461,13 +8455,13 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Backup & Restore'**
+  /// **'Backup & restore'**
   String get backupTitle;
 
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Automatic Backups'**
+  /// **'Automatic backups'**
   String get backupAutoTitle;
 
   /// Switch
@@ -8533,7 +8527,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Manual Backup'**
+  /// **'Manual backup'**
   String get backupManualTitle;
 
   /// Help text
@@ -8551,7 +8545,7 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Export & Share'**
+  /// **'Export & share'**
   String get backupExportShare;
 
   /// Card title
@@ -8569,7 +8563,7 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Restore from File'**
+  /// **'Restore from file'**
   String get backupRestoreFromFile;
 
   /// Section header
@@ -8581,7 +8575,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Restore Backup'**
+  /// **'Restore backup'**
   String get backupRestoreDialogTitle;
 
   /// Dialog content
@@ -8623,7 +8617,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Import & Export'**
+  /// **'Import & export'**
   String get ieTitle;
 
   /// Tile title
@@ -8653,7 +8647,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Export Report'**
+  /// **'Export report'**
   String get ieExportReport;
 
   /// Tile subtitle
@@ -8665,13 +8659,13 @@ abstract class S {
   /// AppBar title for CSV export
   ///
   /// In en, this message translates to:
-  /// **'Export Data'**
+  /// **'Export data'**
   String get exportDataTitle;
 
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Export Transactions'**
+  /// **'Export transactions'**
   String get exportTransTitle;
 
   /// Card description
@@ -8683,13 +8677,13 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Export Report'**
+  /// **'Export report'**
   String get exportReportTitle;
 
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Monthly Report'**
+  /// **'Monthly report'**
   String get exportMonthlyTitle;
 
   /// Description
@@ -8707,13 +8701,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Generate & Share'**
+  /// **'Generate & share'**
   String get exportGenerateShare;
 
   /// HTML section
   ///
   /// In en, this message translates to:
-  /// **'Spending by Category'**
+  /// **'Spending by category'**
   String get exportSpendingByCat;
 
   /// AppBar title
@@ -8725,7 +8719,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Daily Reminder'**
+  /// **'Daily reminder'**
   String get notifDailyTitle;
 
   /// Switch
@@ -8755,7 +8749,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Envelope Alerts'**
+  /// **'Envelope alerts'**
   String get notifEnvelopeTitle;
 
   /// Description
@@ -8767,7 +8761,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Upcoming Bills'**
+  /// **'Upcoming bills'**
   String get notifBillsTitle;
 
   /// Description
@@ -8779,7 +8773,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Exchange Rates'**
+  /// **'Exchange rates'**
   String get fxTitle;
 
   /// Tooltip
@@ -8833,7 +8827,7 @@ abstract class S {
   /// Link label
   ///
   /// In en, this message translates to:
-  /// **'Privacy & Terms'**
+  /// **'Privacy & terms'**
   String get aboutPrivacyTerms;
 
   /// Link label
@@ -8881,13 +8875,13 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Recurring & Bills'**
+  /// **'Recurring & bills'**
   String get tileRecurringBills;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Bill Splitter'**
+  /// **'Bill splitter'**
   String get tileBillSplitter;
 
   /// Tile title
@@ -8911,13 +8905,13 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Accent Color'**
+  /// **'Accent color'**
   String get tileAccentColor;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Colors'**
+  /// **'Transaction colors'**
   String get tileColors;
 
   /// Tile subtitle
@@ -8929,7 +8923,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Entry Mode'**
+  /// **'Entry mode'**
   String get tileEntryMode;
 
   /// Tile title
@@ -8947,7 +8941,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Start Screen'**
+  /// **'Start screen'**
   String get tileStartScreen;
 
   /// Tile title
@@ -8959,13 +8953,13 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Text Size'**
+  /// **'Text size'**
   String get tileTextSize;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Transaction List'**
+  /// **'Transaction list'**
   String get tileTxList;
 
   /// Tile subtitle
@@ -8977,7 +8971,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Cloud Sync'**
+  /// **'Cloud sync'**
   String get tileCloudSync;
 
   /// Tile subtitle
@@ -8989,7 +8983,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Share Household'**
+  /// **'Share household'**
   String get tileShareHousehold;
 
   /// Tile subtitle when connected
@@ -9001,7 +8995,7 @@ abstract class S {
   /// Tile subtitle when not connected
   ///
   /// In en, this message translates to:
-  /// **'Connect Cloud Sync first to share'**
+  /// **'Connect cloud sync first to share'**
   String get tileShareHouseholdDisconnected;
 
   /// Snackbar message
@@ -9013,7 +9007,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Backup & Restore'**
+  /// **'Backup & restore'**
   String get tileBackupRestore;
 
   /// Tile subtitle
@@ -9025,7 +9019,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Import & Export'**
+  /// **'Import & export'**
   String get tileImportExport;
 
   /// Tile subtitle
@@ -9049,7 +9043,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Health Check'**
+  /// **'Health check'**
   String get tileHealthCheck;
 
   /// Tile subtitle
@@ -9061,7 +9055,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Sync Receipts'**
+  /// **'Sync receipts'**
   String get tileSyncReceipts;
 
   /// Subtitle when enabled
@@ -9079,13 +9073,13 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Base Currency'**
+  /// **'Base currency'**
   String get tileBaseCurrency;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Period Start Day'**
+  /// **'Period start day'**
   String get tilePeriodStartDay;
 
   /// Description
@@ -9097,7 +9091,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Currency Symbols'**
+  /// **'Currency symbols'**
   String get tileCurrencySymbols;
 
   /// Tile subtitle
@@ -9109,19 +9103,19 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Number Format'**
+  /// **'Number format'**
   String get tileNumberFormat;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Date Format'**
+  /// **'Date format'**
   String get tileDateFormat;
 
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Biometric Lock'**
+  /// **'Biometric lock'**
   String get tileBiometricLock;
 
   /// Tile subtitle
@@ -9133,7 +9127,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Reset Everything'**
+  /// **'Reset everything'**
   String get tileResetEverything;
 
   /// Tile subtitle
@@ -9145,7 +9139,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Entry Mode'**
+  /// **'Entry mode'**
   String get entryModeTitle;
 
   /// Sheet description
@@ -9157,7 +9151,7 @@ abstract class S {
   /// Option title
   ///
   /// In en, this message translates to:
-  /// **'Assisted (Step-by-step)'**
+  /// **'Assisted (step-by-step)'**
   String get entryModeAssisted;
 
   /// Option description
@@ -9169,7 +9163,7 @@ abstract class S {
   /// Option title
   ///
   /// In en, this message translates to:
-  /// **'Classic (Single form)'**
+  /// **'Classic (single form)'**
   String get entryModeClassic;
 
   /// Option description
@@ -9205,7 +9199,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Accent Color'**
+  /// **'Accent color'**
   String get accentColorTitle;
 
   /// Option
@@ -9229,7 +9223,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Start Screen'**
+  /// **'Start screen'**
   String get startScreenTitle;
 
   /// Sheet description
@@ -9241,7 +9235,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Choose Font'**
+  /// **'Choose font'**
   String get chooseFontTitle;
 
   /// Font preview text
@@ -9253,7 +9247,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Text Size'**
+  /// **'Text size'**
   String get textSizeTitle;
 
   /// Preview subtitle
@@ -9265,7 +9259,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Currency Symbols'**
+  /// **'Currency symbols'**
   String get currencySymbolsTitle;
 
   /// Sheet description
@@ -9295,7 +9289,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Number Format'**
+  /// **'Number format'**
   String get numberFormatTitle;
 
   /// Sheet description
@@ -9313,19 +9307,19 @@ abstract class S {
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'Thousands Separator'**
+  /// **'Thousands separator'**
   String get numberFormatThousands;
 
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'Decimal Separator'**
+  /// **'Decimal separator'**
   String get numberFormatDecimal;
 
   /// Label
   ///
   /// In en, this message translates to:
-  /// **'Negative Numbers'**
+  /// **'Negative numbers'**
   String get numberFormatNegative;
 
   /// Warning text
@@ -9337,7 +9331,7 @@ abstract class S {
   /// Sheet title
   ///
   /// In en, this message translates to:
-  /// **'Date Format'**
+  /// **'Date format'**
   String get dateFormatTitle;
 
   /// Snackbar
@@ -9397,7 +9391,7 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Backup Now'**
+  /// **'Backup now'**
   String get backupNowButton;
 
   /// No description provided for @syncShareInviteText.
@@ -9409,13 +9403,13 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Privacy & Terms'**
+  /// **'Privacy & terms'**
   String get privacyTermsTitle;
 
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Privacy Policy'**
+  /// **'Privacy policy'**
   String get privacyPolicyTitle;
 
   /// Date
@@ -9433,7 +9427,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'1. Data Storage'**
+  /// **'1. Data storage'**
   String get privacyDataStorageTitle;
 
   /// Body
@@ -9445,7 +9439,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'2. Cloud Sync (Optional)'**
+  /// **'2. Cloud sync (optional)'**
   String get privacyCloudSyncTitle;
 
   /// Body
@@ -9469,7 +9463,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'4. Analytics & Tracking'**
+  /// **'4. Analytics & tracking'**
   String get privacyAnalyticsTitle;
 
   /// Body
@@ -9493,7 +9487,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'6. Receipt Images'**
+  /// **'6. Receipt images'**
   String get privacyReceiptsTitle;
 
   /// Body
@@ -9517,7 +9511,7 @@ abstract class S {
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Terms of Use'**
+  /// **'Terms of use'**
   String get termsOfUseTitle;
 
   /// Heading
@@ -9535,7 +9529,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'2. Intended Use'**
+  /// **'2. Intended use'**
   String get termsIntendedUseTitle;
 
   /// Body
@@ -9547,7 +9541,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'3. Data Accuracy'**
+  /// **'3. Data accuracy'**
   String get termsDataAccuracyTitle;
 
   /// Body
@@ -9559,7 +9553,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'4. No Warranty'**
+  /// **'4. No warranty'**
   String get termsNoWarrantyTitle;
 
   /// Body
@@ -9571,7 +9565,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'5. Limitation of Liability'**
+  /// **'5. Limitation of liability'**
   String get termsLiabilityTitle;
 
   /// Body
@@ -9583,7 +9577,7 @@ abstract class S {
   /// Heading
   ///
   /// In en, this message translates to:
-  /// **'6. Intellectual Property'**
+  /// **'6. Intellectual property'**
   String get termsIPTitle;
 
   /// Body
@@ -9619,7 +9613,7 @@ abstract class S {
   /// AppBar title
   ///
   /// In en, this message translates to:
-  /// **'Health Check'**
+  /// **'Health check'**
   String get healthTitle;
 
   /// Tooltip
@@ -9637,13 +9631,13 @@ abstract class S {
   /// Status title
   ///
   /// In en, this message translates to:
-  /// **'All Clear'**
+  /// **'All clear'**
   String get healthAllClear;
 
   /// Status title
   ///
   /// In en, this message translates to:
-  /// **'Issues Found'**
+  /// **'Issues found'**
   String get healthIssuesFound;
 
   /// Subtitle
@@ -9685,31 +9679,31 @@ abstract class S {
   /// Section
   ///
   /// In en, this message translates to:
-  /// **'Balance Invariant'**
+  /// **'Balance invariant'**
   String get healthBalanceInvariant;
 
   /// Section
   ///
   /// In en, this message translates to:
-  /// **'Account Balances'**
+  /// **'Account balances'**
   String get healthAccountBalances;
 
   /// Section
   ///
   /// In en, this message translates to:
-  /// **'Envelope Balances'**
+  /// **'Envelope balances'**
   String get healthEnvelopeBalances;
 
   /// Section
   ///
   /// In en, this message translates to:
-  /// **'Data Quality'**
+  /// **'Data quality'**
   String get healthDataQuality;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Repair Balances'**
+  /// **'Repair balances'**
   String get healthRepairButton;
 
   /// Label
@@ -9751,7 +9745,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Repair Balances'**
+  /// **'Repair balances'**
   String get healthRepairTitle;
 
   /// Dialog content
@@ -9781,7 +9775,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Purge Deleted Transactions'**
+  /// **'Purge deleted transactions'**
   String get healthPurgeTitle;
 
   /// Dialog text
@@ -9823,7 +9817,7 @@ abstract class S {
   /// Tab
   ///
   /// In en, this message translates to:
-  /// **'Balance Sheet'**
+  /// **'Balance sheet'**
   String get reportsBalanceTab;
 
   /// Hint title
@@ -9871,7 +9865,7 @@ abstract class S {
   /// Section title
   ///
   /// In en, this message translates to:
-  /// **'Spending Activity'**
+  /// **'Spending activity'**
   String get reportsSpendingActivity;
 
   /// Legend
@@ -9889,13 +9883,13 @@ abstract class S {
   /// Toggle / title
   ///
   /// In en, this message translates to:
-  /// **'6-Month Trend'**
+  /// **'6-month trend'**
   String get reports6MonthTrend;
 
   /// Toggle
   ///
   /// In en, this message translates to:
-  /// **'Daily Pace'**
+  /// **'Daily pace'**
   String get reportsDailyPaceToggle;
 
   /// Empty state
@@ -9949,7 +9943,7 @@ abstract class S {
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Spending Velocity'**
+  /// **'Spending velocity'**
   String get reportsVelocityTitle;
 
   /// Label
@@ -9979,25 +9973,25 @@ abstract class S {
   /// Card label
   ///
   /// In en, this message translates to:
-  /// **'Biggest Expense'**
+  /// **'Biggest expense'**
   String get reportsBiggestExpense;
 
   /// Card label
   ///
   /// In en, this message translates to:
-  /// **'Savings Rate'**
+  /// **'Savings rate'**
   String get reportsSavingsRate;
 
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Recurring Transactions'**
+  /// **'Recurring transactions'**
   String get reportsRecurringTitle;
 
   /// Card title
   ///
   /// In en, this message translates to:
-  /// **'Age of Money'**
+  /// **'Age of money'**
   String get reportsAgeTitle;
 
   /// Rating
@@ -10081,37 +10075,37 @@ abstract class S {
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'End of Last Week'**
+  /// **'End of last week'**
   String get reportsEndLastWeek;
 
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'End of Last Month'**
+  /// **'End of last month'**
   String get reportsEndLastMonth;
 
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'Same Time Last Month'**
+  /// **'Same time last month'**
   String get reportsSameTimeLastMonth;
 
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'End of Last Quarter'**
+  /// **'End of last quarter'**
   String get reportsEndLastQuarter;
 
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'End of Last Year'**
+  /// **'End of last year'**
   String get reportsEndLastYear;
 
   /// Compare option
   ///
   /// In en, this message translates to:
-  /// **'Same Time Last Year'**
+  /// **'Same time last year'**
   String get reportsSameTimeLastYear;
 
   /// Compare option
@@ -10165,13 +10159,13 @@ abstract class S {
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Stop Server'**
+  /// **'Stop server'**
   String get wcStopButton;
 
   /// Button
   ///
   /// In en, this message translates to:
-  /// **'Start Server'**
+  /// **'Start server'**
   String get wcStartButton;
 
   /// Card title
@@ -10297,7 +10291,7 @@ abstract class S {
   /// Banner title
   ///
   /// In en, this message translates to:
-  /// **'No WiFi Connection'**
+  /// **'No WiFi connection'**
   String get wcNoWifiTitle;
 
   /// Banner description
@@ -10309,19 +10303,19 @@ abstract class S {
   /// Banner title
   ///
   /// In en, this message translates to:
-  /// **'Public Network Detected'**
+  /// **'Public network detected'**
   String get wcPublicNetwork;
 
   /// Banner title
   ///
   /// In en, this message translates to:
-  /// **'Network Security'**
+  /// **'Network security'**
   String get wcNetworkSecurity;
 
   /// Warning title
   ///
   /// In en, this message translates to:
-  /// **'Security Warning'**
+  /// **'Security warning'**
   String get wcSecurityWarning;
 
   /// Info bullet
@@ -10855,7 +10849,7 @@ abstract class S {
   /// Notification title
   ///
   /// In en, this message translates to:
-  /// **'Low Envelopes'**
+  /// **'Low envelopes'**
   String get notifLowEnvelopesTitle;
 
   /// Notification body
@@ -10879,7 +10873,7 @@ abstract class S {
   /// Notification title
   ///
   /// In en, this message translates to:
-  /// **'Upcoming Bills'**
+  /// **'Upcoming bills'**
   String get notifUpcomingBillsTitle;
 
   /// Notification body
@@ -10903,7 +10897,7 @@ abstract class S {
   /// Notification title for budget warning
   ///
   /// In en, this message translates to:
-  /// **'Budget Alert'**
+  /// **'Budget alert'**
   String get notifBudgetWarningTitle;
 
   /// Notification body for envelope approaching budget limit
@@ -10951,7 +10945,7 @@ abstract class S {
   /// Channel name
   ///
   /// In en, this message translates to:
-  /// **'Daily Reminder'**
+  /// **'Daily reminder'**
   String get notifReminderChannel;
 
   /// Channel description
@@ -10963,7 +10957,7 @@ abstract class S {
   /// Ledger note
   ///
   /// In en, this message translates to:
-  /// **'Auto-covered from Unallocated'**
+  /// **'Auto-covered from unallocated'**
   String get engineAutoCovered;
 
   /// Ledger note
@@ -10975,13 +10969,13 @@ abstract class S {
   /// Ledger note
   ///
   /// In en, this message translates to:
-  /// **'Withdrawn to Unallocated'**
+  /// **'Withdrawn to unallocated'**
   String get engineWithdrawn;
 
   /// Ledger note
   ///
   /// In en, this message translates to:
-  /// **'Period reset — returned to Unallocated'**
+  /// **'Period reset — returned to unallocated'**
   String get enginePeriodReturned;
 
   /// Ledger note
@@ -11029,7 +11023,7 @@ abstract class S {
   /// Option
   ///
   /// In en, this message translates to:
-  /// **'Extra Large'**
+  /// **'Extra large'**
   String get textScaleExtraLarge;
 
   /// Default category
@@ -11047,13 +11041,13 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Public Transit'**
+  /// **'Public transit'**
   String get defcatPublicTransit;
 
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Parking & Tolls'**
+  /// **'Parking & tolls'**
   String get defcatParkingTolls;
 
   /// Default category
@@ -11143,13 +11137,13 @@ abstract class S {
   /// Default category
   ///
   /// In en, this message translates to:
-  /// **'Other Income'**
+  /// **'Other income'**
   String get defcatOtherIncome;
 
   /// Default category preset group
   ///
   /// In en, this message translates to:
-  /// **'Food & Drink'**
+  /// **'Food & drink'**
   String get defcatFoodDrink;
 
   /// Default category preset group
@@ -11179,7 +11173,7 @@ abstract class S {
   /// Default category preset
   ///
   /// In en, this message translates to:
-  /// **'Dining Out'**
+  /// **'Dining out'**
   String get defcatDiningOut;
 
   /// Default category preset
@@ -11293,7 +11287,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Select BudgetSeal Sync File'**
+  /// **'Select BudgetSeal sync file'**
   String get filePickerTitle;
 
   /// Empty state
@@ -11605,7 +11599,7 @@ abstract class S {
   /// Travel exchange screen title
   ///
   /// In en, this message translates to:
-  /// **'Travel Exchange'**
+  /// **'Travel exchange'**
   String get travelTitle;
 
   /// Travel exchange info banner
@@ -11653,13 +11647,13 @@ abstract class S {
   /// Travel exchange submit button
   ///
   /// In en, this message translates to:
-  /// **'Exchange & Create Travel Wallet'**
+  /// **'Exchange & create travel wallet'**
   String get travelExchangeButton;
 
   /// Travel exchange reactivate dialog title
   ///
   /// In en, this message translates to:
-  /// **'Existing Travel Wallet'**
+  /// **'Existing travel wallet'**
   String get travelExistingWallet;
 
   /// Travel exchange reactivate dialog text
@@ -11671,7 +11665,7 @@ abstract class S {
   /// Travel exchange reactivate dialog button
   ///
   /// In en, this message translates to:
-  /// **'Create New'**
+  /// **'Create new'**
   String get travelCreateNew;
 
   /// Travel exchange reactivate dialog button
@@ -11695,7 +11689,7 @@ abstract class S {
   /// Period transition screen title
   ///
   /// In en, this message translates to:
-  /// **'New Period'**
+  /// **'New period'**
   String get periodNewTitle;
 
   /// Period transition error message
@@ -11731,7 +11725,7 @@ abstract class S {
   /// Period transition submit button
   ///
   /// In en, this message translates to:
-  /// **'Complete Period Transition'**
+  /// **'Complete period transition'**
   String get periodCompleteButton;
 
   /// Period transition error snackbar
@@ -11755,7 +11749,7 @@ abstract class S {
   /// Period resolution option
   ///
   /// In en, this message translates to:
-  /// **'Return to Unallocated'**
+  /// **'Return to unallocated'**
   String get periodReturnUnallocated;
 
   /// Period resolution option description
@@ -11767,7 +11761,7 @@ abstract class S {
   /// Period resolution option
   ///
   /// In en, this message translates to:
-  /// **'Carry Forward'**
+  /// **'Carry forward'**
   String get periodCarryForward;
 
   /// Period resolution option description
@@ -11797,7 +11791,7 @@ abstract class S {
   /// Leftover resolution screen title
   ///
   /// In en, this message translates to:
-  /// **'Resolve Leftovers'**
+  /// **'Resolve leftovers'**
   String get leftoverTitle;
 
   /// Leftover resolution missing args
@@ -11887,7 +11881,7 @@ abstract class S {
   /// Error boundary retry button
   ///
   /// In en, this message translates to:
-  /// **'Try Again'**
+  /// **'Try again'**
   String get commonTryAgain;
 
   /// Error boundary description
@@ -12085,19 +12079,19 @@ abstract class S {
   /// Add sheet title
   ///
   /// In en, this message translates to:
-  /// **'New Recurring Transaction'**
+  /// **'New recurring transaction'**
   String get recurringNewTitle;
 
   /// Add sheet title when subscription
   ///
   /// In en, this message translates to:
-  /// **'New Subscription'**
+  /// **'New subscription'**
   String get recurringNewSubTitle;
 
   /// Edit sheet title
   ///
   /// In en, this message translates to:
-  /// **'Edit Recurring Transaction'**
+  /// **'Edit recurring transaction'**
   String get recurringEditTitle;
 
   /// Title field label
@@ -12235,13 +12229,13 @@ abstract class S {
   /// Receipt picker option
   ///
   /// In en, this message translates to:
-  /// **'Take Photo'**
+  /// **'Take photo'**
   String get receiptTakePhoto;
 
   /// Receipt picker option
   ///
   /// In en, this message translates to:
-  /// **'Choose from Gallery'**
+  /// **'Choose from gallery'**
   String get receiptChooseGallery;
 
   /// Receipt picker subtitle
@@ -12259,7 +12253,7 @@ abstract class S {
   /// Import screen heading
   ///
   /// In en, this message translates to:
-  /// **'Import from Bank CSV'**
+  /// **'Import from bank CSV'**
   String get importFromBank;
 
   /// Import screen description
@@ -12289,7 +12283,7 @@ abstract class S {
   /// Section title for column mapping
   ///
   /// In en, this message translates to:
-  /// **'Column Mapping'**
+  /// **'Column mapping'**
   String get importColumnMapping;
 
   /// Column mapping description
@@ -12301,7 +12295,7 @@ abstract class S {
   /// Section title for preview
   ///
   /// In en, this message translates to:
-  /// **'Import Preview'**
+  /// **'Import preview'**
   String get importPreview;
 
   /// Warning when no amount column mapped
@@ -12319,7 +12313,7 @@ abstract class S {
   /// Snackbar validation
   ///
   /// In en, this message translates to:
-  /// **'Please assign an Amount column'**
+  /// **'Please assign an amount column'**
   String get importAssignAmount;
 
   /// Snackbar on successful import
@@ -12433,13 +12427,13 @@ abstract class S {
   /// Menu item to hide settings
   ///
   /// In en, this message translates to:
-  /// **'Hide Settings'**
+  /// **'Hide settings'**
   String get objHideSettings;
 
   /// Menu item to show settings
   ///
   /// In en, this message translates to:
-  /// **'Edit Settings'**
+  /// **'Edit settings'**
   String get objEditSettings;
 
   /// Progress text: of $X
@@ -12481,7 +12475,7 @@ abstract class S {
   /// Share sheet title for exported report
   ///
   /// In en, this message translates to:
-  /// **'BudgetSeal Health Check Report'**
+  /// **'BudgetSeal health check report'**
   String get healthReportTitle;
 
   /// Snackbar after repair
@@ -12655,7 +12649,7 @@ abstract class S {
   /// Screen title for planned payments
   ///
   /// In en, this message translates to:
-  /// **'Planned Payments'**
+  /// **'Planned payments'**
   String get plannedTitle;
 
   /// Settings tile subtitle for planned payments
@@ -12697,7 +12691,7 @@ abstract class S {
   /// Dialog title for posting all planned payments in a month
   ///
   /// In en, this message translates to:
-  /// **'Post All Payments'**
+  /// **'Post all payments'**
   String get plannedPostAllTitle;
 
   /// Dialog body for posting all planned payments
@@ -12709,7 +12703,7 @@ abstract class S {
   /// Button label to post all planned payments
   ///
   /// In en, this message translates to:
-  /// **'Post All'**
+  /// **'Post all'**
   String get plannedPostAll;
 
   /// Snackbar after posting all planned payments
@@ -12727,7 +12721,7 @@ abstract class S {
   /// Dialog title for deleting a planned payment
   ///
   /// In en, this message translates to:
-  /// **'Delete Planned Payment'**
+  /// **'Delete planned payment'**
   String get plannedDeleteTitle;
 
   /// Dialog body for deleting a planned payment
@@ -12769,19 +12763,19 @@ abstract class S {
   /// Save button label on plan payment form
   ///
   /// In en, this message translates to:
-  /// **'Plan Payment'**
+  /// **'Plan payment'**
   String get plannedPlanButton;
 
   /// AppBar title when editing a planned payment
   ///
   /// In en, this message translates to:
-  /// **'Edit Planned Payment'**
+  /// **'Edit planned payment'**
   String get plannedEditTitle;
 
   /// Label for month picker in plan payment form
   ///
   /// In en, this message translates to:
-  /// **'Target Month'**
+  /// **'Target month'**
   String get plannedTargetMonth;
 
   /// Label for exact date picker when no date selected
@@ -12859,7 +12853,7 @@ abstract class S {
   /// Menu item to save transaction as template
   ///
   /// In en, this message translates to:
-  /// **'Save as Template'**
+  /// **'Save as template'**
   String get txDetailSaveAsTemplate;
 
   /// Snackbar after saving as template
@@ -12877,7 +12871,7 @@ abstract class S {
   /// Settings toggle for Arabic numeral style
   ///
   /// In en, this message translates to:
-  /// **'Arabic-Indic Numerals'**
+  /// **'Arabic-Indic numerals'**
   String get tileArabicDigits;
 
   /// Upgrade screen title
@@ -12895,7 +12889,7 @@ abstract class S {
   /// Premium feature: cloud sync
   ///
   /// In en, this message translates to:
-  /// **'Cloud Sync'**
+  /// **'Cloud sync'**
   String get upgradeFeatureSync;
 
   /// Premium feature: web companion
@@ -12907,19 +12901,19 @@ abstract class S {
   /// Premium feature: bill splitter
   ///
   /// In en, this message translates to:
-  /// **'Bill Splitter'**
+  /// **'Bill splitter'**
   String get upgradeFeatureBillSplitter;
 
   /// Premium feature: travel exchange
   ///
   /// In en, this message translates to:
-  /// **'Travel Exchange'**
+  /// **'Travel exchange'**
   String get upgradeFeatureTravelExchange;
 
   /// Premium feature: planned payments
   ///
   /// In en, this message translates to:
-  /// **'Planned Payments'**
+  /// **'Planned payments'**
   String get upgradeFeaturePlannedPayments;
 
   /// Premium feature: no limits
@@ -12955,7 +12949,7 @@ abstract class S {
   /// Redeem code link/dialog title
   ///
   /// In en, this message translates to:
-  /// **'Redeem Code'**
+  /// **'Redeem code'**
   String get upgradeRedeemCode;
 
   /// Redeem code text field hint
@@ -12985,7 +12979,7 @@ abstract class S {
   /// Restore purchase link
   ///
   /// In en, this message translates to:
-  /// **'Restore Purchase'**
+  /// **'Restore purchase'**
   String get upgradeRestorePurchase;
 
   /// Success message after restoring purchase

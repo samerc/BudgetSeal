@@ -997,9 +997,6 @@ class _FundingAllocationTile extends StatelessWidget {
                         foregroundColor: AppColors.accent,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
                         minimumSize: const Size(0, 0),
                       ),
                       child: Text(
@@ -1086,12 +1083,8 @@ class _BottomFundBar extends StatelessWidget {
           child: FilledButton(
             onPressed: canFund ? onFund : null,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.accent,
               disabledBackgroundColor: AppColors.sfv(context),
               disabledForegroundColor: AppColors.th(context),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(CardTokens.radius),
-              ),
               elevation: canFund ? 2 : 0,
               shadowColor: AppColors.accent.withValues(alpha: 0.4),
             ),

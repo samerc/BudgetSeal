@@ -218,9 +218,6 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: pinSurface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {

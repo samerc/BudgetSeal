@@ -173,16 +173,6 @@ class _CategorySheetState extends State<CategorySheet>
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                 child: Column(
                   children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.th(context),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 14),
                     // Title + New button
                     Row(
@@ -214,12 +204,6 @@ class _CategorySheetState extends State<CategorySheet>
                               decoration: InputDecoration(
                                 hintText: S.of(context).catSheetCategoryName,
                                 isDense: true,
-                                filled: true,
-                                fillColor: AppColors.sfv(context),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
                               ),
                               textCapitalization: TextCapitalization.words,
                               onSubmitted: _submitNew,
@@ -268,12 +252,6 @@ class _CategorySheetState extends State<CategorySheet>
                             TextStyle(color: AppColors.th(context)),
                         prefixIcon: Icon(Icons.search_rounded,
                             size: 18, color: AppColors.th(context)),
-                        filled: true,
-                        fillColor: AppColors.sfv(context),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 10),
                         isDense: true,

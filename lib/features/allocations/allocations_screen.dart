@@ -32,6 +32,7 @@ import 'archived_envelopes_sheet.dart';
 import 'move_money_sheet.dart';
 import 'period_summary_card.dart';
 import 'reorder_envelopes_sheet.dart';
+import '../../shared/widgets/empty_state.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -352,15 +353,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                             },
                           )
                         : null,
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
                   style: TextStyle(
                     fontSize: 15,
@@ -619,7 +614,11 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         ],
       ),
       ),
-      floatingActionButton: FloatingActionButton(
+      // Hidden while there are no envelopes: the empty state's button is
+      // the same action.
+      floatingActionButton: (allocationsAsync.value?.isEmpty ?? true)
+          ? null
+          : FloatingActionButton(
         heroTag: 'fab_allocations',
         tooltip: l.allocCreateTooltip,
         onPressed: () {
@@ -1121,63 +1120,12 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = S.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, AppColors.accent,
-                    light: 0.85, dark: 0.78),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(Icons.mail_rounded,
-                  size: 36, color: AppColors.accent),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l.allocNoYet,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l.allocCreateHelp,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.ts(context),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => context.push('/allocations/new'),
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: Text(
-                  l.allocCreateButton,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                ),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.mail_rounded,
+      title: l.allocNoYet,
+      subtitle: l.allocCreateHelp,
+      actionLabel: l.allocCreateButton,
+      onAction: () => context.push('/allocations/new'),
     );
   }
 }

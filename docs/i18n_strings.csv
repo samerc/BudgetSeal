@@ -21,8 +21,8 @@ common_none,Dropdown option none,None,لا شيء,Aucun
 common_today,Date label,Today,اليوم,Aujourd'hui
 common_yesterday,Date label,Yesterday,أمس,Hier
 common_got_it,Dismiss button,Got it,فهمت,Compris
-common_go_back,Dialog button,Go Back,الرجوع,Retour
-common_save_anyway,Dialog button,Save Anyway,حفظ على أي حال,Enregistrer quand même
+common_go_back,Dialog button,Go back,الرجوع,Retour
+common_save_anyway,Dialog button,Save anyway,حفظ على أي حال,Enregistrer quand même
 common_something_went_wrong,Default error message,Something went wrong,حدث خطأ ما,Une erreur est survenue
 common_show_details,Expandable toggle,Show details,إظهار التفاصيل,Afficher les détails
 common_hide_details,Expandable toggle,Hide details,إخفاء التفاصيل,Masquer les détails
@@ -73,7 +73,7 @@ dashboard_search_tooltip,Search button tooltip,Search,بحث,Rechercher
 dashboard_quick_transfer,Quick action button,Transfer,تحويل,Virement
 dashboard_quick_fund,Quick action button,Fund,تمويل,Financer
 dashboard_quick_split,Quick action button,Split,تقسيم,Diviser
-dashboard_quick_templates,Section title,Quick Templates,قوالب سريعة,Modèles rapides
+dashboard_quick_templates,Section title,Quick templates,قوالب سريعة,Modèles rapides
 dashboard_view_all,Link text,View all,عرض الكل,Voir tout
 dashboard_no_transactions_yet,Empty state,No transactions yet,لا توجد معاملات بعد,Aucune transaction pour le moment
 dashboard_no_transactions_today,Nudge banner,No transactions today — tap + to add one,لا معاملات اليوم — اضغط + لإضافة واحدة,Aucune transaction aujourd'hui — appuyez sur + pour en ajouter
@@ -81,8 +81,8 @@ dashboard_label_expenses,Mini stat label,Expenses,مصاريف,Dépenses
 dashboard_label_net,Mini stat label,Net,صافي,Net
 dashboard_spent,Donut chart center,spent,مُنفَق,dépensé
 dashboard_no_spending,Empty donut placeholder,No spending,لا إنفاق,Aucune dépense
-dashboard_last_7_days,Toggle label,Last 7 Days,آخر 7 أيام,7 derniers jours
-dashboard_this_month,Toggle label,This Month,هذا الشهر,Ce mois-ci
+dashboard_last_7_days,Toggle label,Last 7 days,آخر 7 أيام,7 derniers jours
+dashboard_this_month,Toggle label,This month,هذا الشهر,Ce mois-ci
 dashboard_search_placeholder,Global search hint,"Search transactions, accounts...",البحث في المعاملات والحسابات...,"Rechercher transactions, comptes..."
 dashboard_type_at_least_2,Search hint,Type at least 2 characters,اكتب حرفين على الأقل,Tapez au moins 2 caractères
 dashboard_no_results_for,Search empty state,"No results for ""{query}""","لا نتائج لـ """"{query}""""",Aucun résultat pour « {query} »
@@ -93,14 +93,14 @@ dashboard_other_category,Fallback category name,Other,أخرى,Autre
 # ──────────────────────────────────────────────,,,,
 # DASHBOARD CUSTOMIZE,,,,
 # ──────────────────────────────────────────────,,,,
-customize_title,Bottom sheet title,Customize Dashboard,تخصيص لوحة التحكم,Personnaliser le tableau de bord
-dashboard_section_spending_label,Section label,Spending Overview,نظرة عامة على الإنفاق,Aperçu des dépenses
+customize_title,Bottom sheet title,Customize dashboard,تخصيص لوحة التحكم,Personnaliser le tableau de bord
+dashboard_section_spending_label,Section label,Spending overview,نظرة عامة على الإنفاق,Aperçu des dépenses
 dashboard_section_spending_desc,Section description,Donut chart with category breakdown,رسم بياني دائري مع تفصيل الفئات,Graphique en anneau avec répartition par catégorie
-dashboard_section_quick_label,Section label,Quick Actions,إجراءات سريعة,Actions rapides
+dashboard_section_quick_label,Section label,Quick actions,إجراءات سريعة,Actions rapides
 dashboard_section_quick_desc,Section description,"Expense, income, transfer, fund",مصروف، دخل، تحويل، تمويل,"Dépense, revenu, virement, financement"
-dashboard_section_money_label,Section label,Your Money,أموالك,Votre argent
+dashboard_section_money_label,Section label,Your money,أموالك,Votre argent
 dashboard_section_money_desc,Section description,"Bills, net worth and unallocated",الفواتير وصافي الثروة وغير المخصص,"Factures, patrimoine et non alloué"
-dashboard_section_activity_label,Section label,Recent Activity,النشاط الأخير,Activité récente
+dashboard_section_activity_label,Section label,Recent activity,النشاط الأخير,Activité récente
 dashboard_section_activity_desc,Section description,Templates and recent transactions,القوالب والمعاملات الأخيرة,Modèles et transactions récentes
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — List screen,,,,
@@ -120,18 +120,17 @@ tx_list_settings_tooltip,Settings button tooltip,List settings,إعدادات ا
 tx_quick_add_hint,Quick-add bar placeholder,"Type name and amount, e.g. Coffee 4.50",اكتب الاسم والمبلغ، مثال: قهوة 4.50,"Tapez le nom et le montant, ex. Café 4.50"
 tx_send_tooltip,Quick-add send tooltip,Send,إرسال,Envoyer
 tx_scroll_top_tooltip,FAB tooltip,Scroll to top,التمرير للأعلى,Retour en haut
-tx_split_bill_tooltip,FAB tooltip,Split Bill,تقسيم الفاتورة,Partager l'addition
+tx_split_bill_tooltip,FAB tooltip,Split bill,تقسيم الفاتورة,Partager l'addition
 tx_from_date,Date range filter,From date,من تاريخ,Du
 tx_to_date,Date range filter,To date,إلى تاريخ,Au
 tx_min_amount,Amount range hint,Min,الحد الأدنى,Min
 tx_max_amount,Amount range hint,Max,الحد الأقصى,Max
-tx_select_year,Year picker dialog title,Select Year,اختر السنة,Choisir l'année
+tx_select_year,Year picker dialog title,Select year,اختر السنة,Choisir l'année
 tx_filtered_category,Category filter chip,Filtered: {categoryName},مصفّى: {categoryName},Filtré : {categoryName}
 tx_no_category_in_month,Empty state with category filter,No {categoryName} transactions in {monthLabel},لا معاملات {categoryName} في {monthLabel},Aucune transaction {categoryName} en {monthLabel}
 tx_no_matching,Empty state with filters,No matching transactions,لا معاملات مطابقة,Aucune transaction correspondante
 tx_no_yet,Empty state,No transactions yet,لا توجد معاملات بعد,Aucune transaction pour le moment
 tx_tap_plus,Empty state subtitle,Tap + to record one,اضغط + لتسجيل واحدة,Appuyez sur + pour en ajouter
-tx_add_first,Empty state button,Add your first transaction,أضف أول معاملة,Ajoutez votre première transaction
 tx_spent_of_budget,Budget progress bar,Spent {spent} of {budget} budget,أُنفق {spent} من ميزانية {budget},{spent} dépensé sur un budget de {budget}
 tx_total_cash_flow,Footer summary,Total cash flow: {amount} · {count} transaction(s),إجمالي التدفق النقدي: {amount} · {count} معاملة(ات),Flux total : {amount} · {count} transaction(s)
 tx_n_items,Multi-line display,{count} items,{count} عناصر,{count} éléments
@@ -142,10 +141,10 @@ tx_n_accounts,Multi-account label,{count} accounts,{count} حسابات,{count} 
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — Add/Edit form,,,,
 # ──────────────────────────────────────────────,,,,
-tx_form_new_title,AppBar title creating,New Transaction,معاملة جديدة,Nouvelle transaction
+tx_form_new_title,AppBar title creating,New transaction,معاملة جديدة,Nouvelle transaction
 tx_form_note_hint,Note field hint,Add a note…,أضف ملاحظة…,Ajouter une note…
 tx_form_title_hint,Title field hint,"Title (e.g. Coffee, Groceries)",العنوان (مثل: قهوة، بقالة),"Titre (ex. Café, Courses)"
-tx_form_use_template,Template button tooltip,Use Template,استخدام قالب,Utiliser un modèle
+tx_form_use_template,Template button tooltip,Use template,استخدام قالب,Utiliser un modèle
 tx_form_auto_detected,Auto-fill label,Auto-detected,تم الكشف تلقائياً,Détecté automatiquement
 tx_form_from_account,Transfer source hint,From account,من حساب,Depuis le compte
 tx_form_to_account,Transfer dest hint,To account,إلى حساب,Vers le compte
@@ -161,18 +160,18 @@ tx_form_select_account,Validation error,Select an account for the transaction,ا
 tx_form_enter_amount_item,Validation error,Enter an amount for item {n},أدخل مبلغاً للعنصر {n},Saisissez un montant pour l'élément {n}
 tx_form_enter_amount_tx,Validation error,Enter an amount for the transaction,أدخل مبلغاً للمعاملة,Saisissez un montant pour la transaction
 tx_form_rate_not_set_title,Dialog title,Exchange rate not set,لم يتم تعيين سعر الصرف,Taux de change non défini
-tx_form_duplicate_title,Dialog title,Possible Duplicate,معاملة مكررة محتملة,Doublon possible
+tx_form_duplicate_title,Dialog title,Possible duplicate,معاملة مكررة محتملة,Doublon possible
 tx_form_duplicate_content,Dialog content,"A similar transaction with the same amount, category, and date already exists. Save anyway?",توجد معاملة مشابهة بنفس المبلغ والفئة والتاريخ. حفظ على أي حال؟,"Une transaction similaire avec le même montant, catégorie et date existe déjà. Enregistrer quand même ?"
 tx_form_saved,Success snackbar,Transaction saved,تم حفظ المعاملة,Transaction enregistrée
 tx_form_receipt_attached,Receipt indicator,Receipt attached,إيصال مرفق,Reçu joint
 tx_form_n_receipts,Multiple receipts,{count} receipts attached,{count} إيصالات مرفقة,{count} reçus joints
 tx_form_add_more,Add receipts tooltip,Add more,إضافة المزيد,Ajouter plus
-tx_form_scan_receipt,Receipt button,Scan Receipt,مسح الإيصال,Scanner le reçu
+tx_form_scan_receipt,Receipt button,Scan receipt,مسح الإيصال,Scanner le reçu
 tx_form_gallery,Gallery button,Gallery,المعرض,Galerie
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — Detail screen,,,,
 # ──────────────────────────────────────────────,,,,
-tx_detail_title,AppBar title,Transaction Details,تفاصيل المعاملة,Détails de la transaction
+tx_detail_title,AppBar title,Transaction details,تفاصيل المعاملة,Détails de la transaction
 tx_detail_not_found,Error state,Transaction not found,المعاملة غير موجودة,Transaction introuvable
 tx_detail_copied,Snackbar,Copied {amount},تم نسخ {amount},{amount} copié
 tx_detail_date,Detail label,Date,التاريخ,Date
@@ -196,19 +195,19 @@ tx_af_discard_title,Back confirmation title,Discard transaction?,Abandonner ال
 tx_af_discard_content,Back confirmation content,You have an unsaved transaction. Are you sure you want to go back?,لديك معاملة غير محفوظة. هل تريد العودة؟,Vous avez une transaction non enregistrée. Voulez-vous revenir en arrière ?
 tx_af_keep_editing,Dialog button,Keep editing,متابعة التعديل,Continuer l'édition
 tx_af_discard,Dialog button,Discard,تجاهل,Abandonner
-tx_af_enter_title,Step 1 title,Enter Title,أدخل العنوان,Saisir le titre
+tx_af_enter_title,Step 1 title,Enter title,أدخل العنوان,Saisir le titre
 tx_af_transfer_note_hint,Transfer note hint,"Note (e.g. rent, savings)",ملاحظة (مثل: إيجار، ادخار),"Note (ex. loyer, épargne)"
-tx_af_enter_amount_button,Button,Enter Amount,إدخال المبلغ,Saisir le montant
-tx_af_select_category_button,Button,Select Category,اختيار الفئة,Choisir la catégorie
-tx_af_select_category_title,Popup title,Select Category,اختيار الفئة,Choisir la catégorie
+tx_af_enter_amount_button,Button,Enter amount,إدخال المبلغ,Saisir le montant
+tx_af_select_category_button,Button,Select category,اختيار الفئة,Choisir la catégorie
+tx_af_select_category_title,Popup title,Select category,اختيار الفئة,Choisir la catégorie
 tx_af_search_categories,Search hint,Search categories...,البحث في الفئات...,Rechercher des catégories...
-tx_af_new_category,Button,New Category,فئة جديدة,Nouvelle catégorie
-tx_af_enter_amount_title,AppBar title,Enter Amount,إدخال المبلغ,Saisir le montant
-tx_af_from_account,Account label (transfer),From Account,من حساب,Compte source
-tx_af_to_account,Account label (transfer),To Account,إلى حساب,Compte destination
+tx_af_new_category,Button,New category,فئة جديدة,Nouvelle catégorie
+tx_af_enter_amount_title,AppBar title,Enter amount,إدخال المبلغ,Saisir le montant
+tx_af_from_account,Account label (transfer),From account,من حساب,Compte source
+tx_af_to_account,Account label (transfer),To account,إلى حساب,Compte destination
 tx_af_tap_to_select,Placeholder,Tap to select,اضغط للاختيار,Appuyez pour sélectionner
-tx_af_add_account,Button,Add Account,إضافة حساب,Ajouter un compte
-tx_af_exchange_rate_required,Section title,Exchange Rate Required,سعر الصرف مطلوب,Taux de change requis
+tx_af_add_account,Button,Add account,إضافة حساب,Ajouter un compte
+tx_af_exchange_rate_required,Section title,Exchange rate required,سعر الصرف مطلوب,Taux de change requis
 tx_af_how_many_per,Exchange rate prompt,How many {sourceCurrency} per 1 {destCurrency}?,كم {sourceCurrency} مقابل 1 {destCurrency}؟,Combien de {sourceCurrency} pour 1 {destCurrency} ?
 tx_af_tap_to_enter_rate,Rate hint,Tap to enter rate,اضغط لإدخال السعر,Appuyez pour saisir le taux
 tx_af_recipient_gets,Conversion preview,Recipient gets = {amount},المستلم يحصل على = {amount},Le destinataire reçoit = {amount}
@@ -218,9 +217,9 @@ tx_af_please_select_account,Snackbar,Please select an account,الرجاء اخ�
 tx_af_please_select_dest,Snackbar,Please select a destination account,الرجاء اختيار حساب الوجهة,Veuillez sélectionner un compte de destination
 tx_af_mixed_title,Dialog title,Mixed transaction,معاملة مختلطة,Transaction mixte
 tx_af_add_another,Button,Add another item,إضافة عنصر آخر,Ajouter un autre élément
-tx_af_save_transfer,Save button,Save Transfer,حفظ التحويل,Enregistrer le virement
-tx_af_save_n_items,Save button,Save {count} Items,حفظ {count} عناصر,Enregistrer {count} éléments
-tx_af_add_transaction,Save button,Add Transaction,إضافة معاملة,Ajouter une transaction
+tx_af_save_transfer,Save button,Save transfer,حفظ التحويل,Enregistrer le virement
+tx_af_save_n_items,Save button,Save {count} items,حفظ {count} عناصر,Enregistrer {count} éléments
+tx_af_add_transaction,Save button,Add transaction,إضافة معاملة,Ajouter une transaction
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — Category sheet,,,,
 # ──────────────────────────────────────────────,,,,
@@ -240,31 +239,31 @@ tx_widget_item_note,Per-item note hint,Item note…,ملاحظة العنصر…
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — List settings,,,,
 # ──────────────────────────────────────────────,,,,
-tx_list_title,AppBar title,Transaction List,قائمة المعاملات,Liste des transactions
-tx_list_select_layout,Section title,Select Layout,اختر التنسيق,Choisir la disposition
-tx_list_date_banner,Setting label,Date Banner Total,إجمالي شريط التاريخ,Total de la bannière de date
-tx_list_day_total,Dropdown option,Day Total,إجمالي اليوم,Total du jour
-tx_list_account_label,Setting title,Account Label,تسمية الحساب,Libellé du compte
+tx_list_title,AppBar title,Transaction list,قائمة المعاملات,Liste des transactions
+tx_list_select_layout,Section title,Select layout,اختر التنسيق,Choisir la disposition
+tx_list_date_banner,Setting label,Date banner total,إجمالي شريط التاريخ,Total de la bannière de date
+tx_list_day_total,Dropdown option,Day total,إجمالي اليوم,Total du jour
+tx_list_account_label,Setting title,Account label,تسمية الحساب,Libellé du compte
 tx_list_account_subtitle,Setting subtitle,Show account name on each transaction,إظهار اسم الحساب على كل معاملة,Afficher le nom du compte sur chaque transaction
-tx_list_category_icon,Setting title,Category Icon,أيقونة الفئة,Icône de catégorie
+tx_list_category_icon,Setting title,Category icon,أيقونة الفئة,Icône de catégorie
 tx_list_category_subtitle,Setting subtitle,Show category icon circle,إظهار دائرة أيقونة الفئة,Afficher le cercle d'icône de catégorie
 tx_list_time,Setting title,Time,الوقت,Heure
 tx_list_time_subtitle,Setting subtitle,Show time of the transaction,إظهار وقت المعاملة,Afficher l'heure de la transaction
-tx_list_preview_name,Preview placeholder,Transaction Name,اسم المعاملة,Nom de la transaction
+tx_list_preview_name,Preview placeholder,Transaction name,اسم المعاملة,Nom de la transaction
 tx_list_preview_note,Preview note,This is a note that is part of the transaction.,هذه ملاحظة مرتبطة بالمعاملة.,Ceci est une note associée à la transaction.
 # ──────────────────────────────────────────────,,,,
 # BILL SPLITTER,,,,
 # ──────────────────────────────────────────────,,,,
-bill_title,Screen title,Bill Splitter,تقسيم الفاتورة,Partage d'addition
+bill_title,Screen title,Bill splitter,تقسيم الفاتورة,Partage d'addition
 bill_scanning,Loading text,Scanning receipt...,جارٍ مسح الإيصال...,Numérisation du reçu...
 bill_scan_tooltip,Tooltip,Scan receipt,مسح الإيصال,Scanner le reçu
 bill_empty_title,Empty state title,Add items to split,أضف عناصر للتقسيم,Ajouter des éléments à partager
 bill_empty_subtitle,Empty state subtitle,Scan a receipt or add items manually,امسح إيصالاً أو أضف عناصر يدوياً,Scannez un reçu ou ajoutez manuellement
-bill_scan_button,Primary button,Scan Receipt,مسح الإيصال,Scanner le reçu
-bill_add_manually,Secondary button,Add Manually,إضافة يدوية,Ajouter manuellement
+bill_scan_button,Primary button,Scan receipt,مسح الإيصال,Scanner le reçu
+bill_add_manually,Secondary button,Add manually,إضافة يدوية,Ajouter manuellement
 bill_add_item,Button,Add item,إضافة عنصر,Ajouter un élément
-bill_take_photo,Image source,Take Photo,التقاط صورة,Prendre une photo
-bill_from_gallery,Image source,Choose from Gallery,اختيار من المعرض,Choisir depuis la galerie
+bill_take_photo,Image source,Take photo,التقاط صورة,Prendre une photo
+bill_from_gallery,Image source,Choose from gallery,اختيار من المعرض,Choisir depuis la galerie
 bill_no_text,OCR failure snackbar,No text detected. Try a clearer photo.,لم يتم اكتشاف نص. جرب صورة أوضح.,Aucun texte détecté. Essayez une photo plus nette.
 bill_enter_amount,OCR amount dialog title,Enter amount,أدخل المبلغ,Saisir le montant
 bill_keep_as_one,Dialog button,Keep as one,إبقاء كعنصر واحد,Garder en un seul
@@ -296,7 +295,7 @@ bill_item_removed,Undo snackbar,Item removed,تمت إزالة العنصر,Arti
 alloc_title,Screen title,Budget,الميزانية,Budget
 alloc_search_tooltip,Tooltip,Search envelopes,البحث في الأظرف,Rechercher des enveloppes
 alloc_help_tooltip,Tooltip,How envelopes work,كيف تعمل الأظرف,Comment fonctionnent les enveloppes
-alloc_help_title,Dialog title,How Envelopes Work,كيف تعمل الأظرف,Comment fonctionnent les enveloppes
+alloc_help_title,Dialog title,How envelopes work,كيف تعمل الأظرف,Comment fonctionnent les enveloppes
 alloc_help_step_1,Help step,Create envelopes for each spending category,أنشئ أظرفاً لكل فئة إنفاق,Créez des enveloppes pour chaque catégorie de dépense
 alloc_help_step_2,Help step,Set a monthly budget target for each,حدد هدفاً شهرياً لكل ظرف,Définissez un objectif mensuel pour chacune
 alloc_help_step_3,Help step,Fund envelopes when you get paid,موّل الأظرف عند استلام راتبك,Financez les enveloppes quand vous êtes payé
@@ -313,18 +312,18 @@ alloc_no_match,Search empty state,"No envelopes match ""{query}""","لا أظر�
 alloc_create_tooltip,FAB tooltip,Create envelope,إنشاء ظرف,Créer une enveloppe
 alloc_no_yet,Empty state title,No envelopes yet,لا أظرف بعد,Aucune enveloppe pour le moment
 alloc_create_help,Budget tab empty state,"Create an envelope for each thing you spend on, then fund it from Ready to assign.",أنشئ ظرفاً لكل ما تنفق عليه، ثم موّله من «جاهز للتوزيع».,"Créez une enveloppe pour chaque poste de dépense, puis financez-la depuis « Prêt à répartir »."
-alloc_create_button,Empty state button,Create Envelope,إنشاء ظرف,Créer une enveloppe
+alloc_create_button,Empty state button,Create envelope,إنشاء ظرف,Créer une enveloppe
 # ──────────────────────────────────────────────,,,,
 # ALLOCATIONS / ENVELOPES — Detail,,,,
 # ──────────────────────────────────────────────,,,,
-alloc_new_envelope,AppBar title,New Envelope,ظرف جديد,Nouvelle enveloppe
+alloc_new_envelope,AppBar title,New envelope,ظرف جديد,Nouvelle enveloppe
 alloc_fallback_name,Fallback name,Envelope,ظرف,Enveloppe
-alloc_edit_settings,Menu item,Edit Settings,تعديل الإعدادات,Modifier les paramètres
+alloc_edit_settings,Menu item,Edit settings,تعديل الإعدادات,Modifier les paramètres
 alloc_withdraw_menu,Menu item,Withdraw,سحب,Retirer
-alloc_revalue_menu,Menu item,Revalue Balances,إعادة تقييم الأرصدة,Réévaluer les soldes
+alloc_revalue_menu,Menu item,Revalue balances,إعادة تقييم الأرصدة,Réévaluer les soldes
 alloc_archive_menu,Menu item,Archive,أرشفة,Archiver
-alloc_create_button_detail,Bottom button,Create Envelope,إنشاء ظرف,Créer une enveloppe
-alloc_save_changes,Bottom button,Save Changes,حفظ التغييرات,Enregistrer les modifications
+alloc_create_button_detail,Bottom button,Create envelope,إنشاء ظرف,Créer une enveloppe
+alloc_save_changes,Bottom button,Save changes,حفظ التغييرات,Enregistrer les modifications
 alloc_name_icon_section,Section header,Name & icon,الاسم والأيقونة,Nom et icône
 alloc_name_hint,TextField hint,Envelope name (e.g. Groceries),اسم الظرف (مثل: بقالة),Nom de l'enveloppe (ex. Courses)
 alloc_remove_icon,Button,Remove icon,إزالة الأيقونة,Supprimer l'icône
@@ -338,13 +337,13 @@ alloc_periodic,Chip label,Periodic,دوري,Périodique
 alloc_permanent,Chip label,Permanent,دائم,Permanent
 alloc_target_amount,Field label,Target amount,المبلغ المستهدف,Montant cible
 alloc_budget_amount,Field label,Budget amount,مبلغ الميزانية,Montant du budget
-alloc_link_category,Button,Link Category,ربط فئة,Lier une catégorie
+alloc_link_category,Button,Link category,ربط فئة,Lier une catégorie
 alloc_from_unallocated,Fund sheet subtitle,From your unallocated balance,من رصيدك غير الموزع,Depuis votre solde non affecté
-alloc_fund_anyway,Dialog button,Fund Anyway,تمويل على أي حال,Financer quand même
+alloc_fund_anyway,Dialog button,Fund anyway,تمويل على أي حال,Financer quand même
 alloc_recent_activity,Section header,Recent activity,النشاط الأخير,Activité récente
 alloc_no_activity,Empty state,No activity yet,لا نشاط بعد,Aucune activité
 alloc_spending_history,Section header,Spending history,تاريخ الإنفاق,Historique des dépenses
-alloc_withdraw_title,Sheet title,Withdraw from Savings,السحب من المدخرات,Retrait de l'épargne
+alloc_withdraw_title,Sheet title,Withdraw from savings,السحب من المدخرات,Retrait de l'épargne
 alloc_withdraw_button,Button,Withdraw,سحب,Retirer
 alloc_no_foreign_balances,Snackbar,No foreign-currency balances to revalue,لا أرصدة بعملات أجنبية لإعادة تقييمها,Aucun solde en devise étrangère à réévaluer
 alloc_balance_in_envelope,Label,balance in this envelope,الرصيد في هذا الظرف,solde dans cette enveloppe
@@ -355,22 +354,22 @@ alloc_new_value,Label,New value,القيمة الجديدة,Nouvelle valeur
 alloc_gain,Label,Gain,ربح,Gain
 alloc_loss,Label,Loss,خسارة,Perte
 alloc_total_adjustment,Label,Total adjustment,إجمالي التعديل,Ajustement total
-alloc_apply_revaluation,Button,Apply Revaluation,تطبيق إعادة التقييم,Appliquer la réévaluation
-alloc_archive_title,Dialog title,Archive Envelope,أرشفة الظرف,Archiver l'enveloppe
+alloc_apply_revaluation,Button,Apply revaluation,تطبيق إعادة التقييم,Appliquer la réévaluation
+alloc_archive_title,Dialog title,Archive envelope,أرشفة الظرف,Archiver l'enveloppe
 alloc_archive_msg,Dialog content,This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).,سيتم إخفاء هذا الظرف من جميع القوائم ولن تُخصم منه المصاريف. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من قائمة تبويب الميزانية (⋮ › الأظرف المؤرشفة).,Cette enveloppe sera masquée de toutes les listes et ne recevra plus de dépenses. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver depuis le menu de l'onglet Budget (⋮ › Enveloppes archivées).
 alloc_archived,Snackbar,Envelope archived,تم أرشفة الظرف,Enveloppe archivée
-alloc_delete_title,Dialog title,Delete Envelope,حذف الظرف,Supprimer l'enveloppe
-alloc_archive_instead,Dialog button,Archive Instead,أرشفة بدلاً من ذلك,Archiver à la place
-alloc_delete_permanently,Dialog button,Delete Permanently,حذف نهائي,Supprimer définitivement
+alloc_delete_title,Dialog title,Delete envelope,حذف الظرف,Supprimer l'enveloppe
+alloc_archive_instead,Dialog button,Archive instead,أرشفة بدلاً من ذلك,Archiver à la place
+alloc_delete_permanently,Dialog button,Delete permanently,حذف نهائي,Supprimer définitivement
 alloc_percent_saved,Progress text,{pct}% saved,{pct}% مدّخر,{pct}% épargné
 # ──────────────────────────────────────────────,,,,
 # FUNDING SCREEN,,,,
 # ──────────────────────────────────────────────,,,,
-fund_title,AppBar title,Fund Envelopes,تمويل الأظرف,Financer les enveloppes
+fund_title,AppBar title,Fund envelopes,تمويل الأظرف,Financer les enveloppes
 fund_overfunding_title,Warning dialog title,Over-funding,تمويل زائد,Surfinancement
 fund_overfunding_msg,Warning dialog content,You're assigning {details}. Your unallocated balance will go negative.\n\nContinue anyway?,أنت توزع {details}. سيصبح رصيدك غير الموزع سالباً.\n\nالمتابعة؟,Vous affectez {details}. Votre solde non affecté deviendra négatif.\n\nContinuer ?
-fund_anyway,Dialog button,Fund Anyway,تمويل على أي حال,Financer quand même
-fund_note,Ledger note,Funded from Unallocated,موّل من غير الموزع,Financé depuis Non affecté
+fund_anyway,Dialog button,Fund anyway,تمويل على أي حال,Financer quand même
+fund_note,Ledger note,Funded from unallocated,موّل من غير الموزع,Financé depuis Non affecté
 fund_success,Snackbar,Allocations funded successfully,تم تمويل الأظرف بنجاح,Enveloppes financées avec succès
 # ──────────────────────────────────────────────,,,,
 # ACCOUNTS — List,,,,
@@ -378,14 +377,14 @@ fund_success,Snackbar,Allocations funded successfully,تم تمويل الأظر
 acct_title,Screen title,Accounts,الحسابات,Comptes
 acct_no_yet,Empty state,No accounts yet,لا توجد حسابات بعد,Aucun compte pour le moment
 acct_tap_plus,Empty state subtitle,Tap + to add one,اضغط + لإضافة حساب,Appuyez sur + pour en ajouter
-acct_total_balance,Card header,Total Balance,الرصيد الإجمالي,Solde total
+acct_total_balance,Card header,Total balance,الرصيد الإجمالي,Solde total
 acct_add_tooltip,FAB tooltip,Add account,إضافة حساب,Ajouter un compte
 acct_created,Save toast,Account created,تم إنشاء الحساب,Compte créé
 acct_updated,Save toast,Account updated,تم تحديث الحساب,Compte mis à jour
 # ──────────────────────────────────────────────,,,,
 # ACCOUNTS — Detail,,,,
 # ──────────────────────────────────────────────,,,,
-acct_new_title,AppBar title,New Account,حساب جديد,Nouveau compte
+acct_new_title,AppBar title,New account,حساب جديد,Nouveau compte
 acct_type_cash,Type option,Cash,نقدي,Espèces
 acct_type_bank,Type option,Bank,بنك,Banque
 acct_type_credit,Type option,Credit card,بطاقة ائتمان,Carte de crédit
@@ -415,14 +414,14 @@ freq_every_n_years,Frequency (interval),Every {n} years,كل {n} سنوات,Tous
 # ──────────────────────────────────────────────,,,,
 # BILL CALENDAR,,,,
 # ──────────────────────────────────────────────,,,,
-bill_cal_title,AppBar title,Bill Calendar,تقويم الفواتير,Calendrier des factures
+bill_cal_title,AppBar title,Bill calendar,تقويم الفواتير,Calendrier des factures
 bill_cal_n_due,Day sheet subtitle,{count} bill(s) due,{count} فاتورة(فواتير) مستحقة,{count} facture(s) due(s)
 bill_cal_upcoming,Section header,Upcoming,القادمة,À venir
 bill_cal_no_upcoming,Empty state,No upcoming bills,لا فواتير قادمة,Aucune facture à venir
 # ──────────────────────────────────────────────,,,,
 # UPCOMING BILLS,,,,
 # ──────────────────────────────────────────────,,,,
-upcoming_title,AppBar title,Upcoming Bills,الفواتير القادمة,Factures à venir
+upcoming_title,AppBar title,Upcoming bills,الفواتير القادمة,Factures à venir
 upcoming_no_title,Empty state title,No upcoming bills,لا فواتير قادمة,Aucune facture à venir
 upcoming_no_subtitle,Empty state subtitle,Create recurring transactions to see them here.,أنشئ معاملات متكررة لرؤيتها هنا.,Créez des transactions récurrentes pour les voir ici.
 upcoming_overdue,Urgency label,Overdue by {days} day(s),مستحقة منذ {days} يوم(أيام),En retard de {days} jour(s)
@@ -456,8 +455,8 @@ sub_detail_ends_on,Detail label,Ends on,ينتهي في,Se termine le
 sub_detail_total_paid,Detail label,Total paid (est.),إجمالي المدفوع (تقديري),Total payé (est.)
 sub_detail_price_history,Section header,Price history,تاريخ الأسعار,Historique des prix
 sub_detail_present,Date suffix,present,الحالي,présent
-sub_detail_change_cancel,Button,Change Cancel Date,تغيير تاريخ الإلغاء,Modifier la date d'annulation
-sub_detail_set_cancel,Button,Set Cancellation Date,تحديد تاريخ الإلغاء,Définir la date d'annulation
+sub_detail_change_cancel,Button,Change cancel date,تغيير تاريخ الإلغاء,Modifier la date d'annulation
+sub_detail_set_cancel,Button,Set cancellation date,تحديد تاريخ الإلغاء,Définir la date d'annulation
 sub_detail_past_tx,Section header,Past transactions,المعاملات السابقة,Transactions passées
 sub_detail_upcoming,Section header,Upcoming,القادمة,À venir
 sub_detail_scheduled,Subtitle,scheduled,مجدول,prévu
@@ -482,16 +481,16 @@ tmpl_add_tooltip,FAB tooltip,Add template,إضافة قالب,Ajouter un modèle
 tmpl_use,Action,Use template,استخدام القالب,Utiliser le modèle
 tmpl_delete_title,Dialog title,Delete template?,حذف القالب؟,Supprimer le modèle ?
 tmpl_delete_msg,Dialog content,This template will be permanently removed.,سيتم حذف هذا القالب نهائياً.,Ce modèle sera supprimé définitivement.
-tmpl_new_title,Sheet title,New Template,قالب جديد,Nouveau modèle
+tmpl_new_title,Sheet title,New template,قالب جديد,Nouveau modèle
 tmpl_new_desc,Sheet description,Save a transaction you do often for quick re-use.,احفظ معاملة تقوم بها كثيراً لإعادة الاستخدام السريع.,Enregistrez une transaction fréquente pour la réutiliser rapidement.
 tmpl_title_required,Validation error,Title is required,العنوان مطلوب,Le titre est requis
 tmpl_category_optional,Field label,Category (optional),الفئة (اختياري),Catégorie (optionnel)
-tmpl_save_button,Button,Save Template,حفظ القالب,Enregistrer le modèle
+tmpl_save_button,Button,Save template,حفظ القالب,Enregistrer le modèle
 tmpl_created,Save toast,Template created,تم إنشاء القالب,Modèle créé
 # ──────────────────────────────────────────────,,,,
 # OBJECTIVES (Goals & Loans),,,,
 # ──────────────────────────────────────────────,,,,
-obj_title,Screen title,Goals & Loans,الأهداف والقروض,Objectifs et prêts
+obj_title,Screen title,Goals & loans,الأهداف والقروض,Objectifs et prêts
 obj_failed_to_load,Error state,Failed to load objectives,فشل تحميل الأهداف,Échec du chargement des objectifs
 obj_no_title,Empty state title,No goals or loans yet,لا أهداف أو قروض بعد,Aucun objectif ou prêt
 obj_goals_section,Section header,Goals,الأهداف,Objectifs
@@ -499,7 +498,7 @@ obj_loans_section,Section header,Loans,القروض,Prêts
 obj_lent_to,Subtitle,Lent to {contact},أُقرض لـ {contact},Prêté à {contact}
 obj_borrowed_from,Subtitle,Borrowed from {contact},اقتُرض من {contact},Emprunté à {contact}
 obj_due,Deadline text,Due {date},مستحق {date},Dû le {date}
-obj_new_title,AppBar title,New Objective,هدف جديد,Nouvel objectif
+obj_new_title,AppBar title,New objective,هدف جديد,Nouvel objectif
 obj_name_required,Validation error,Name is required,الاسم مطلوب,Le nom est requis
 obj_created,Snackbar,Objective created,تم إنشاء الهدف,Objectif créé
 obj_note_payment_received,Transaction note prefix,Payment received,دفعة مستلمة,Paiement reçu
@@ -507,11 +506,11 @@ obj_note_payment,Transaction note prefix,Payment,دفعة,Paiement
 obj_note_goal_savings,Transaction note prefix,Goal savings,ادخار للهدف,Épargne objectif
 obj_updated,Snackbar,Objective updated,تم تحديث الهدف,Objectif mis à jour
 obj_no_accounts,Snackbar,No accounts available,لا حسابات متاحة,Aucun compte disponible
-obj_record_payment,Sheet/button,Record Payment,تسجيل دفعة,Enregistrer un paiement
-obj_add_funds,Sheet/button,Add Funds,إضافة أموال,Ajouter des fonds
-obj_record_received,Button,Record Payment Received,تسجيل دفعة مستلمة,Enregistrer un paiement reçu
-obj_record_sent,Button,Record Payment Sent,تسجيل دفعة مرسلة,Enregistrer un paiement envoyé
-obj_save_from_account,Button,Save from Account,حفظ من حساب,Épargner depuis un compte
+obj_record_payment,Sheet/button,Record payment,تسجيل دفعة,Enregistrer un paiement
+obj_add_funds,Sheet/button,Add funds,إضافة أموال,Ajouter des fonds
+obj_record_received,Button,Record payment received,تسجيل دفعة مستلمة,Enregistrer un paiement reçu
+obj_record_sent,Button,Record payment sent,تسجيل دفعة مرسلة,Enregistrer un paiement envoyé
+obj_save_from_account,Button,Save from account,حفظ من حساب,Épargner depuis un compte
 obj_goal_chip,Type chip,Goal,هدف,Objectif
 obj_loan_chip,Type chip,Loan,قرض,Prêt
 obj_goal_name,Field label,Goal name,اسم الهدف,Nom de l'objectif
@@ -525,7 +524,7 @@ obj_i_lent,Segment,I lent,أقرضت,J'ai prêté
 obj_i_borrowed,Segment,I borrowed,اقترضت,J'ai emprunté
 obj_set_deadline,InkWell label,Set a deadline (optional),تحديد موعد نهائي (اختياري),Définir une échéance (optionnel)
 obj_color_section,Section header,Color,اللون,Couleur
-obj_delete_title,Dialog title,Delete Objective,حذف الهدف,Supprimer l'objectif
+obj_delete_title,Dialog title,Delete objective,حذف الهدف,Supprimer l'objectif
 obj_cannot_undo,Dialog content,This cannot be undone.,لا يمكن التراجع عن هذا.,Cette action est irréversible.
 obj_saved_so_far,Goals & loans,Saved so far,ما تم توفيره,Épargné à ce jour
 obj_recorded_so_far,Goals & loans,Recorded so far,ما تم تسجيله,Enregistré à ce jour
@@ -544,7 +543,7 @@ obj_delete_all,Goals & loans,Delete everything,حذف كل شيء,Tout supprimer
 # ──────────────────────────────────────────────,,,,
 # TRAVEL EXCHANGE,,,,
 # ──────────────────────────────────────────────,,,,
-travel_title,AppBar title,Travel Exchange,صرف السفر,Change de voyage
+travel_title,AppBar title,Travel exchange,صرف السفر,Change de voyage
 travel_info,Info banner,Exchange money for your trip. A temporary travel wallet will be created automatically.,صرّف أموالاً لرحلتك. ستُنشأ محفظة سفر مؤقتة تلقائياً.,Échangez de l'argent pour votre voyage. Un portefeuille temporaire sera créé automatiquement.
 travel_from,Section label,From,من,De
 travel_select_account,Dropdown hint,Select account,اختر حساباً,Sélectionner un compte
@@ -552,25 +551,25 @@ travel_amount_to_exchange,Section label,Amount to exchange,المبلغ للصر
 travel_currency_section,Section label,Travel currency,عملة السفر,Devise de voyage
 travel_currency_receive,Field label,Currency you receive,العملة التي تتلقاها,Devise que vous recevez
 travel_amount_received,Section label,Amount received,المبلغ المستلم,Montant reçu
-travel_exchange_button,Button,Exchange & Create Travel Wallet,صرف وإنشاء محفظة سفر,Changer et créer un portefeuille de voyage
-travel_existing_wallet,Dialog title,Existing Travel Wallet,محفظة سفر موجودة,Portefeuille de voyage existant
-travel_create_new,Dialog button,Create New,إنشاء جديد,Créer nouveau
+travel_exchange_button,Button,Exchange & create travel wallet,صرف وإنشاء محفظة سفر,Changer et créer un portefeuille de voyage
+travel_existing_wallet,Dialog title,Existing travel wallet,محفظة سفر موجودة,Portefeuille de voyage existant
+travel_create_new,Dialog button,Create new,إنشاء جديد,Créer nouveau
 travel_reactivate,Dialog button,Reactivate,إعادة تفعيل,Réactiver
 # ──────────────────────────────────────────────,,,,
 # PERIODS,,,,
 # ──────────────────────────────────────────────,,,,
-period_new_title,AppBar / banner title,New Period,فترة جديدة,Nouvelle période
+period_new_title,AppBar / banner title,New period,فترة جديدة,Nouvelle période
 period_error,Error retry,Couldn't load envelopes,تعذّر تحميل الأظرف,Impossible de charger les enveloppes
 period_resolve_leftovers,Subheading,Resolve leftover balances,حل الأرصدة المتبقية,Résoudre les soldes restants
 period_n_items,Item count,{count} items,{count} عناصر,{count} éléments
 period_no_leftovers,Empty state title,No leftover balances to resolve,لا أرصدة متبقية لحلها,Aucun solde restant à résoudre
 period_all_zero,Empty state subtitle,All periodic allocations have zero or negative balances.,جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.,Toutes les enveloppes périodiques ont des soldes nuls ou négatifs.
-period_complete_button,Button,Complete Period Transition,إتمام انتقال الفترة,Terminer la transition de période
+period_complete_button,Button,Complete period transition,إتمام انتقال الفترة,Terminer la transition de période
 period_rollover,Card subtitle,Rollover allocation,ظرف مُرحَّل,Enveloppe avec report
 period_periodic,Card subtitle,Periodic allocation,ظرف دوري,Enveloppe périodique
-period_return_unallocated,Radio option,Return to Unallocated,إرجاع إلى غير الموزع,Retourner au Non affecté
+period_return_unallocated,Radio option,Return to unallocated,إرجاع إلى غير الموزع,Retourner au Non affecté
 period_return_desc,Radio description,Balance returns to the pool,يعود الرصيد إلى الحوض,Le solde retourne au pool
-period_carry_forward,Radio option,Carry Forward,ترحيل,Reporter
+period_carry_forward,Radio option,Carry forward,ترحيل,Reporter
 period_carry_desc,Radio description,Keep balance for next period,الاحتفاظ بالرصيد للفترة التالية,Garder le solde pour la prochaine période
 period_move_to,Radio option,Move to...,نقل إلى...,Transférer à...
 period_move_desc,Radio description,Transfer to another allocation,تحويل إلى ظرف آخر,Transférer à une autre enveloppe
@@ -578,7 +577,7 @@ period_select_allocation,Dropdown hint,Select allocation,اختر ظرفاً,Sé
 # ──────────────────────────────────────────────,,,,
 # LEFTOVER RESOLUTION,,,,
 # ──────────────────────────────────────────────,,,,
-leftover_title,AppBar title,Resolve Leftovers,حل المتبقيات,Résoudre les restes
+leftover_title,AppBar title,Resolve leftovers,حل المتبقيات,Résoudre les restes
 leftover_no_allocation,Error state,No allocation specified.,لم يتم تحديد ظرف.,Aucune enveloppe spécifiée.
 leftover_not_found,Error state,Allocation not found.,الظرف غير موجود.,Enveloppe introuvable.
 leftover_current_balance,Label,Current balance,الرصيد الحالي,Solde actuel
@@ -604,7 +603,7 @@ settings_web_companion_sub,Tile subtitle,Manage your budget from a browser,إد�
 settings_recurring_sub,Tile subtitle,Manage recurring transactions,إدارة المعاملات المتكررة,Gérer les transactions récurrentes
 settings_subscriptions_sub,Tile subtitle,Track recurring subscriptions,تتبع الاشتراكات المتكررة,Suivre les abonnements récurrents
 settings_goals_sub,Tile subtitle,Savings goals and debt tracking,أهداف الادخار وتتبع الديون,Objectifs d'épargne et suivi des dettes
-settings_customization,Tile title,Settings & Customization,الإعدادات والتخصيص,Paramètres et personnalisation
+settings_customization,More page row title,Settings,الإعدادات,Paramètres
 settings_customization_sub,Tile subtitle,"Theme, font, data, preferences",المظهر، الخط، البيانات، التفضيلات,"Thème, police, données, préférences"
 settings_about,Tile title,About BudgetSeal,حول BudgetSeal,À propos de BudgetSeal
 # ──────────────────────────────────────────────,,,,
@@ -619,7 +618,7 @@ theme_title,Picker title,Theme,المظهر,Thème
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Autofill,,,,
 # ──────────────────────────────────────────────,,,,
-autofill_title,Sheet title,Auto-fill Settings,إعدادات الملء التلقائي,Paramètres de remplissage auto
+autofill_title,Sheet title,Auto-fill settings,إعدادات الملء التلقائي,Paramètres de remplissage auto
 autofill_desc,Description,"When you pick a category, these fields are pre-filled from your last transaction with that category.",عند اختيار فئة يتم ملء هذه الحقول تلقائياً من آخر معاملة بتلك الفئة.,Lorsque vous choisissez une catégorie ces champs sont pré-remplis depuis votre dernière transaction.
 autofill_account,Toggle,Account,الحساب,Compte
 autofill_account_sub,Subtitle,Use the same account as last time,استخدام نفس الحساب كآخر مرة,Utiliser le même compte que la dernière fois
@@ -634,66 +633,66 @@ autofill_override_sub,Subtitle,Replace fields even if you already filled them,ا
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Data reset,,,,
 # ──────────────────────────────────────────────,,,,
-reset_title,Dialog title,Reset Everything,إعادة تعيين كل شيء,Tout réinitialiser
+reset_title,Dialog title,Reset everything,إعادة تعيين كل شيء,Tout réinitialiser
 reset_content,Dialog content,This will permanently delete ALL your data:\n\n• All accounts and balances\n• All transactions\n• All envelopes and categories\n• All settings\n\nThis cannot be undone. Are you absolutely sure?,سيؤدي هذا إلى حذف جميع بياناتك نهائياً:\n\n• جميع الحسابات والأرصدة\n• جميع المعاملات\n• جميع الأظرف والفئات\n• جميع الإعدادات\n\nلا يمكن التراجع. هل أنت متأكد تماماً؟,Cela supprimera définitivement TOUTES vos données :\n\n• Tous les comptes et soldes\n• Toutes les transactions\n• Toutes les enveloppes et catégories\n• Tous les paramètres\n\nCette action est irréversible. Êtes-vous absolument sûr ?
-reset_button,Destructive button,Delete Everything,حذف كل شيء,Tout supprimer
+reset_button,Destructive button,Delete everything,حذف كل شيء,Tout supprimer
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Transaction colors,,,,
 # ──────────────────────────────────────────────,,,,
-tx_colors_title,Sheet title,Transaction Colors,ألوان المعاملات,Couleurs des transactions
+tx_colors_title,Sheet title,Transaction colors,ألوان المعاملات,Couleurs des transactions
 tx_colors_desc,Description,"Choose a color for each transaction type. These colors are used throughout the app to visually distinguish income, expenses, and transfers.",اختر لوناً لكل نوع معاملة. تُستخدم هذه الألوان في التطبيق للتمييز بصرياً بين الدخل والمصاريف والتحويلات.,"Choisissez une couleur pour chaque type de transaction. Ces couleurs sont utilisées dans l'application pour distinguer visuellement les revenus, dépenses et virements."
-tx_colors_reset,Button,Reset to Defaults,إعادة تعيين للافتراضي,Réinitialiser les valeurs par défaut
+tx_colors_reset,Button,Reset to defaults,إعادة تعيين للافتراضي,Réinitialiser les valeurs par défaut
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Household,,,,
 # ──────────────────────────────────────────────,,,,
-household_name_title,Dialog title,Household Name,اسم الأسرة,Nom du foyer
+household_name_title,Dialog title,Household name,اسم الأسرة,Nom du foyer
 # ──────────────────────────────────────────────,,,,
 # SETTINGS — Tiles (titles),,,,
 # ──────────────────────────────────────────────,,,,
-tile_travel_exchange,Tile title,Travel Exchange,صرف السفر,Change de voyage
+tile_travel_exchange,Tile title,Travel exchange,صرف السفر,Change de voyage
 tile_exchange_rates,Tile title,Exchange rates,أسعار الصرف,Taux de change
 tile_web_companion,Tile title,Web Companion,المرافق الإلكتروني,Compagnon Web
 tile_subscriptions,Tile title,Subscriptions,الاشتراكات,Abonnements
-tile_goals_loans,Tile title,Goals & Loans,الأهداف والقروض,Objectifs et prêts
+tile_goals_loans,Tile title,Goals & loans,الأهداف والقروض,Objectifs et prêts
 # ──────────────────────────────────────────────,,,,
 # CLOUD SYNC,,,,
 # ──────────────────────────────────────────────,,,,
-sync_title,AppBar title,Cloud Sync,المزامنة السحابية,Synchronisation cloud
+sync_title,AppBar title,Cloud sync,المزامنة السحابية,Synchronisation cloud
 sync_not_connected,Status,Not connected,غير متصل,Non connecté
 sync_syncing,Status,Syncing...,جارٍ المزامنة...,Synchronisation...
 sync_last_failed,Status,Last sync failed,فشلت آخر مزامنة,Dernière sync échouée
 sync_not_yet,Status,Not yet synced,لم تتم المزامنة بعد,Pas encore synchronisé
 sync_connect_prompt,Subtitle,Connect a cloud provider to sync your data,اربط مزود سحابي لمزامنة بياناتك,Connectez un fournisseur cloud pour synchroniser
-sync_now,Button,Sync Now,مزامنة الآن,Synchroniser maintenant
-sync_share_household,Button / sheet title,Share Household,مشاركة الأسرة,Partager le foyer
+sync_now,Button,Sync now,مزامنة الآن,Synchroniser maintenant
+sync_share_household,Button / sheet title,Share household,مشاركة الأسرة,Partager le foyer
 sync_disconnect,Button / dialog title,Disconnect,قطع الاتصال,Déconnecter
 sync_connect_section,Section header,Connect a provider,ربط مزود,Connecter un fournisseur
 sync_receipt_coming_soon,Note,Receipt sync coming soon for this provider,مزامنة الإيصالات قريباً لهذا المزود,Synchronisation des reçus bientôt disponible
 sync_provider_info,Info text,"OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.",OneDrive وDropbox يفتحان منتقي الملفات الذي يصل لتلك الخدمات عند تثبيت تطبيقاتها. Google Drive يتطلب مشروع Google Cloud مع OAuth.,OneDrive et Dropbox ouvrent le sélecteur de fichiers système qui accède à ces services quand leurs apps sont installées. Google Drive nécessite un projet Google Cloud avec OAuth.
-sync_connection_failed,Dialog title,Connection Failed,فشل الاتصال,Échec de la connexion
+sync_connection_failed,Dialog title,Connection failed,فشل الاتصال,Échec de la connexion
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
 sync_share_desc,Sheet description,Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.,شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.,Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.
 sync_their_email,Field label,Their email address,عنوان بريدهم الإلكتروني,Leur adresse e-mail
 sync_email_hint,Field hint,partner@gmail.com,partner@gmail.com,partenaire@gmail.com
 sync_sharing,Button,Sharing...,جارٍ المشاركة...,Partage...
-sync_generate_invite,Button,Generate Invite Code,إنشاء رمز الدعوة,Générer un code d'invitation
-sync_invite_code,Label,Invite Code,رمز الدعوة,Code d'invitation
-sync_share_code,Button,Share Code,مشاركة الرمز,Partager le code
+sync_generate_invite,Button,Generate invite code,إنشاء رمز الدعوة,Générer un code d'invitation
+sync_invite_code,Label,Invite code,رمز الدعوة,Code d'invitation
+sync_share_code,Button,Share code,مشاركة الرمز,Partager le code
 sync_valid_email_error,Validation,Please enter a valid email address,الرجاء إدخال عنوان بريد إلكتروني صالح,Veuillez saisir une adresse e-mail valide
-sync_encryption_title,Card title,Sync Encryption,تشفير المزامنة,Chiffrement de la synchronisation
+sync_encryption_title,Card title,Sync encryption,تشفير المزامنة,Chiffrement de la synchronisation
 sync_encrypted,Subtitle,Your sync file is encrypted with AES-256,ملف المزامنة مشفر بـ AES-256,Votre fichier de synchronisation est chiffré en AES-256
 sync_not_encrypted,Subtitle,Sync file is not encrypted,ملف المزامنة غير مشفر,Le fichier de synchronisation n'est pas chiffré
 sync_gdrive_warning,Warning,Anyone with access to your Google Drive can read your financial data,أي شخص يصل إلى Google Drive يمكنه قراءة بياناتك المالية,Toute personne ayant accès à votre Google Drive peut lire vos données financières
-sync_set_password_title,Dialog title,Set Sync Password,تعيين كلمة مرور المزامنة,Définir le mot de passe de synchronisation
+sync_set_password_title,Dialog title,Set sync password,تعيين كلمة مرور المزامنة,Définir le mot de passe de synchronisation
 sync_password_desc,Dialog description,This password encrypts your sync file on Google Drive. You'll need the same password on any other device that syncs with this household.,تشفّر هذه الكلمة ملف المزامنة على Google Drive. ستحتاج نفس الكلمة على أي جهاز آخر يتزامن مع هذه الأسرة.,Ce mot de passe chiffre votre fichier de synchronisation sur Google Drive. Vous aurez besoin du même mot de passe sur tout autre appareil.
 sync_password_label,Field label,Password,كلمة المرور,Mot de passe
 sync_password_hint,Field hint,Enter a strong password,أدخل كلمة مرور قوية,Saisissez un mot de passe fort
-sync_confirm_password,Field label,Confirm Password,تأكيد كلمة المرور,Confirmer le mot de passe
-sync_set_password_button,Button,Set Password,تعيين كلمة المرور,Définir le mot de passe
+sync_confirm_password,Field label,Confirm password,تأكيد كلمة المرور,Confirmer le mot de passe
+sync_set_password_button,Button,Set password,تعيين كلمة المرور,Définir le mot de passe
 sync_passwords_dont_match,Snackbar error,Passwords don't match,كلمتا المرور غير متطابقتين,Les mots de passe ne correspondent pas
 sync_encryption_enabled,Snackbar,Sync encryption enabled. Next sync will be encrypted.,تم تفعيل التشفير. ستكون المزامنة التالية مشفرة.,Chiffrement activé. La prochaine synchronisation sera chiffrée.
-sync_remove_encryption_title,Dialog title,Remove Encryption?,إزالة التشفير؟,Supprimer le chiffrement ?
+sync_remove_encryption_title,Dialog title,Remove encryption?,إزالة التشفير؟,Supprimer le chiffrement ?
 sync_remove_encryption_msg,Dialog content,Future sync files will be unencrypted. Other devices will need to remove their password too.,ستكون ملفات المزامنة المستقبلية غير مشفرة. ستحتاج الأجهزة الأخرى لإزالة كلمة المرور أيضاً.,Les futurs fichiers de synchronisation ne seront pas chiffrés. Les autres appareils devront aussi supprimer leur mot de passe.
 sync_encryption_removed,Snackbar,Sync encryption removed,تم إزالة التشفير,Chiffrement supprimé
 # ──────────────────────────────────────────────,,,,
@@ -702,8 +701,8 @@ sync_encryption_removed,Snackbar,Sync encryption removed,تم إزالة الت�
 # ──────────────────────────────────────────────,,,,
 # BACKUP & RESTORE,,,,
 # ──────────────────────────────────────────────,,,,
-backup_title,AppBar title,Backup & Restore,النسخ الاحتياطي والاستعادة,Sauvegarde et restauration
-backup_auto_title,Card title,Automatic Backups,النسخ الاحتياطي التلقائي,Sauvegardes automatiques
+backup_title,AppBar title,Backup & restore,النسخ الاحتياطي والاستعادة,Sauvegarde et restauration
+backup_auto_title,Card title,Automatic backups,النسخ الاحتياطي التلقائي,Sauvegardes automatiques
 backup_enable,Switch,Enable automatic backups,تفعيل النسخ الاحتياطي التلقائي,Activer les sauvegardes automatiques
 backup_disabled,Subtitle,Disabled,معطل,Désactivé
 backup_frequency,Label,Frequency,التكرار,Fréquence
@@ -714,15 +713,15 @@ backup_every_3d,Option,Every 3 days,كل 3 أيام,Tous les 3 jours
 backup_weekly,Option,Weekly,أسبوعي,Hebdomadaire
 backup_keep_last,Label,Keep last,الاحتفاظ بآخر,Garder les dernières
 backup_n_backups,Option,{n} backups,{n} نسخ احتياطية,{n} sauvegardes
-backup_manual_title,Card title,Manual Backup,نسخ احتياطي يدوي,Sauvegarde manuelle
+backup_manual_title,Card title,Manual backup,نسخ احتياطي يدوي,Sauvegarde manuelle
 backup_export_desc,Help text,Export your database to share or store externally.,تصدير قاعدة البيانات لمشاركتها أو تخزينها خارجياً.,Exportez votre base de données pour la partager ou la stocker.
 backup_exporting,Button,Exporting...,جارٍ التصدير...,Exportation...
-backup_export_share,Button,Export & Share,تصدير ومشاركة,Exporter et partager
+backup_export_share,Button,Export & share,تصدير ومشاركة,Exporter et partager
 backup_restore_title,Card title,Restore,الاستعادة,Restauration
 backup_restore_desc,Help text,Pick a .db file to restore from.,اختر ملف .db للاستعادة منه.,Choisissez un fichier .db pour restaurer.
-backup_restore_from_file,Button,Restore from File,الاستعادة من ملف,Restaurer depuis un fichier
+backup_restore_from_file,Button,Restore from file,الاستعادة من ملف,Restaurer depuis un fichier
 backup_local_section,Section header,Local backups,النسخ الاحتياطية المحلية,Sauvegardes locales
-backup_restore_dialog_title,Dialog title,Restore Backup,استعادة النسخة الاحتياطية,Restaurer la sauvegarde
+backup_restore_dialog_title,Dialog title,Restore backup,استعادة النسخة الاحتياطية,Restaurer la sauvegarde
 backup_restore_warning,Dialog content,This will replace ALL current data with the backup. This cannot be undone. Continue?,سيتم استبدال جميع البيانات الحالية بالنسخة الاحتياطية. لا يمكن التراجع. متابعة؟,Cela remplacera TOUTES les données actuelles par la sauvegarde. Irréversible. Continuer ?
 backup_restored,Snackbar,Backup restored. Please restart the app.,تمت الاستعادة. يرجى إعادة تشغيل التطبيق.,Sauvegarde restaurée. Veuillez redémarrer l'application.
 backup_db_not_found,Error,Database file not found,ملف قاعدة البيانات غير موجود,Fichier de base de données introuvable
@@ -731,39 +730,39 @@ backup_invalid,Error,Invalid backup file — not a valid database,ملف غير 
 # ──────────────────────────────────────────────,,,,
 # IMPORT & EXPORT,,,,
 # ──────────────────────────────────────────────,,,,
-ie_title,AppBar title,Import & Export,الاستيراد والتصدير,Importation et exportation
+ie_title,AppBar title,Import & export,الاستيراد والتصدير,Importation et exportation
 ie_import_csv,Tile title,Import CSV,استيراد CSV,Importer CSV
 ie_import_csv_sub,Tile subtitle,Import transactions from a bank CSV file,استيراد المعاملات من ملف CSV بنكي,Importer des transactions depuis un fichier CSV bancaire
 ie_export_csv,Tile title,Export CSV,تصدير CSV,Exporter CSV
 ie_export_csv_sub,Tile subtitle,Export transactions as a spreadsheet,تصدير المعاملات كجدول بيانات,Exporter les transactions en tableur
-ie_export_report,Tile title,Export Report,تصدير التقرير,Exporter le rapport
+ie_export_report,Tile title,Export report,تصدير التقرير,Exporter le rapport
 ie_export_report_sub,Tile subtitle,Generate a printable monthly report,إنشاء تقرير شهري قابل للطباعة,Générer un rapport mensuel imprimable
 # ──────────────────────────────────────────────,,,,
 # EXPORT REPORT,,,,
 # ──────────────────────────────────────────────,,,,
-export_report_title,AppBar title,Export Report,تصدير التقرير,Exporter le rapport
-export_monthly_title,Card title,Monthly Report,التقرير الشهري,Rapport mensuel
+export_report_title,AppBar title,Export report,تصدير التقرير,Exporter le rapport
+export_monthly_title,Card title,Monthly report,التقرير الشهري,Rapport mensuel
 export_monthly_desc,Description,Generate a printable HTML report for a selected month. Open it in a browser and use Print > Save as PDF.,إنشاء تقرير HTML قابل للطباعة لشهر محدد. افتحه في المتصفح واستخدم طباعة > حفظ كـ PDF.,Générez un rapport HTML imprimable. Ouvrez-le dans un navigateur et utilisez Imprimer > Enregistrer en PDF.
 export_generating,Button,Generating...,جارٍ الإنشاء...,Génération...
-export_generate_share,Button,Generate & Share,إنشاء ومشاركة,Générer et partager
-export_spending_by_cat,HTML section,Spending by Category,الإنفاق حسب الفئة,Dépenses par catégorie
+export_generate_share,Button,Generate & share,إنشاء ومشاركة,Générer et partager
+export_spending_by_cat,HTML section,Spending by category,الإنفاق حسب الفئة,Dépenses par catégorie
 # ──────────────────────────────────────────────,,,,
 # NOTIFICATIONS,,,,
 # ──────────────────────────────────────────────,,,,
 notif_title,AppBar title,Notifications,الإشعارات,Notifications
-notif_daily_title,Card title,Daily Reminder,التذكير اليومي,Rappel quotidien
+notif_daily_title,Card title,Daily reminder,التذكير اليومي,Rappel quotidien
 notif_daily_enable,Switch,Enable daily reminder,تفعيل التذكير اليومي,Activer le rappel quotidien
 notif_daily_disabled,Subtitle,Remind me to log transactions,ذكّرني بتسجيل المعاملات,Me rappeler d'enregistrer les transactions
 notif_time,Label,Time,الوقت,Heure
 notif_custom_message,Hint,Custom message (optional),رسالة مخصصة (اختياري),Message personnalisé (optionnel)
-notif_envelope_title,Card title,Envelope Alerts,تنبيهات الأظرف,Alertes d'enveloppes
+notif_envelope_title,Card title,Envelope alerts,تنبيهات الأظرف,Alertes d'enveloppes
 notif_envelope_desc,Description,"You'll get a notification when envelopes are overspent or bills are coming up. The app checks when it opens or comes back to the foreground, at most once a day per alert.",ستصلك إشعارات عند تجاوز الأظرف أو اقتراب الفواتير. يتحقق التطبيق عند فتحه أو العودة إليه، مرة واحدة يومياً كحد أقصى لكل تنبيه.,"Vous recevez une notification quand des enveloppes sont dépassées ou que des factures approchent. L'app vérifie à l'ouverture ou au retour au premier plan, au plus une fois par jour par alerte."
-notif_bills_title,Card title,Upcoming Bills,الفواتير القادمة,Factures à venir
+notif_bills_title,Card title,Upcoming bills,الفواتير القادمة,Factures à venir
 notif_bills_desc,Description,"You'll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.",ستتلقى إشعاراً عندما تكون المعاملات المتكررة مستحقة خلال يومين. يتم التحقق عند فتح التطبيق أو العودة إليه، مرة واحدة يومياً على الأكثر.,"Vous recevrez une notification quand des transactions récurrentes sont dues sous 2 jours. Vérifié à l'ouverture de l'app ou à son retour, au plus une fois par jour."
 # ──────────────────────────────────────────────,,,,
 # EXCHANGE RATES,,,,
 # ──────────────────────────────────────────────,,,,
-fx_title,AppBar title,Exchange Rates,أسعار الصرف,Taux de change
+fx_title,AppBar title,Exchange rates,أسعار الصرف,Taux de change
 fx_refresh_tooltip,Tooltip,Refresh rates,تحديث الأسعار,Actualiser les taux
 fx_cache_info,Info text,Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.,تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.,Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.
 # ──────────────────────────────────────────────,,,,
@@ -778,33 +777,33 @@ about_credit,Credit line,Made by Samer,صنعه سامر,Créé par Samer
 # ──────────────────────────────────────────────,,,,
 # HEALTH CHECK,,,,
 # ──────────────────────────────────────────────,,,,
-health_title,AppBar title,Health Check,فحص السلامة,Bilan de santé
+health_title,AppBar title,Health check,فحص السلامة,Bilan de santé
 health_export_tooltip,Tooltip,Export report,تصدير التقرير,Exporter le rapport
 health_rerun_tooltip,Tooltip,Re-run check,إعادة الفحص,Relancer le bilan
-health_all_clear,Status title,All Clear,كل شيء سليم,Tout est en ordre
-health_issues_found,Status title,Issues Found,تم اكتشاف مشاكل,Problèmes détectés
+health_all_clear,Status title,All clear,كل شيء سليم,Tout est en ordre
+health_issues_found,Status title,Issues found,تم اكتشاف مشاكل,Problèmes détectés
 health_data_consistent,Subtitle,Your data is consistent and healthy,بياناتك متسقة وسليمة,Vos données sont cohérentes et saines
 health_discrepancies,Subtitle,Some balance discrepancies detected,تم اكتشاف بعض اختلافات الأرصدة,Des écarts de solde détectés
 health_transactions_stat,Badge,Transactions,المعاملات,Transactions
 health_ledger_stat,Badge,Ledger,السجل,Grand livre
 health_backup_stat,Badge,Backup,النسخة الاحتياطية,Sauvegarde
 health_never,Badge value,Never,أبداً,Jamais
-health_balance_invariant,Section,Balance Invariant,ثابت الرصيد,Invariant de solde
-health_account_balances,Section,Account Balances,أرصدة الحسابات,Soldes des comptes
-health_envelope_balances,Section,Envelope Balances,أرصدة الأظرف,Soldes des enveloppes
-health_data_quality,Section,Data Quality,جودة البيانات,Qualité des données
-health_repair_button,Button,Repair Balances,إصلاح الأرصدة,Réparer les soldes
+health_balance_invariant,Section,Balance invariant,ثابت الرصيد,Invariant de solde
+health_account_balances,Section,Account balances,أرصدة الحسابات,Soldes des comptes
+health_envelope_balances,Section,Envelope balances,أرصدة الأظرف,Soldes des enveloppes
+health_data_quality,Section,Data quality,جودة البيانات,Qualité des données
+health_repair_button,Button,Repair balances,إصلاح الأرصدة,Réparer les soldes
 health_ledger_entries,Label,Ledger entries,إدخالات السجل,Écritures du grand livre
 health_soft_deleted,Label,Soft-deleted,محذوفة مبدئياً,Supprimées temporairement
 health_orphan_entries,Label,Orphan ledger entries,إدخالات سجل يتيمة,Écritures orphelines
 health_last_backup,Label,Last backup,آخر نسخة احتياطية,Dernière sauvegarde
 health_no_accounts,Empty state,No accounts,لا حسابات,Aucun compte
 health_no_envelopes,Empty state,No envelopes,لا أظرف,Aucune enveloppe
-health_repair_title,Dialog title,Repair Balances,إصلاح الأرصدة,Réparer les soldes
+health_repair_title,Dialog title,Repair balances,إصلاح الأرصدة,Réparer les soldes
 health_repair_msg,Dialog content,This will create adjustment ledger entries to bring allocation balances back in line with account balances. A backup is recommended before proceeding.\n\nContinue?,سيتم إنشاء إدخالات تعديل لإعادة مطابقة أرصدة الأظرف مع الحسابات. يُنصح بعمل نسخة احتياطية قبل المتابعة.\n\nالمتابعة؟,Cela créera des écritures d'ajustement pour réaligner les soldes des enveloppes avec les comptes. Une sauvegarde est recommandée.\n\nContinuer ?
 health_repair_done,Button,Repair,إصلاح,Réparer
 health_no_adjustments,Snackbar,No adjustments needed,لا تعديلات مطلوبة,Aucun ajustement nécessaire
-health_purge_title,Dialog title,Purge Deleted Transactions,تطهير المعاملات المحذوفة,Purger les transactions supprimées
+health_purge_title,Dialog title,Purge deleted transactions,تطهير المعاملات المحذوفة,Purger les transactions supprimées
 health_purge_suffix,Dialog text,This cannot be undone.,لا يمكن التراجع عن هذا.,Cette action est irréversible.
 health_purge_button,Button,Purge,تطهير,Purger
 # ──────────────────────────────────────────────,,,,
@@ -862,7 +861,7 @@ reports_title,Screen title,Reports,التقارير,Rapports
 reports_overview_tab,Tab,Overview,نظرة عامة,Aperçu
 reports_categories_tab,Tab,Categories,الفئات,Catégories
 reports_insights_tab,Tab,Insights,رؤى,Analyses
-reports_balance_tab,Tab,Balance Sheet,الميزانية العمومية,Bilan
+reports_balance_tab,Tab,Balance sheet,الميزانية العمومية,Bilan
 reports_hint_title,Hint title,Explore your spending patterns,استكشف أنماط إنفاقك,Explorez vos habitudes de dépenses
 reports_hint_body,Hint body,Switch between tabs to see different views. The Insights tab shows your financial health.,تنقل بين علامات التبويب لعرض مختلف. علامة الرؤى تُظهر صحتك المالية.,Basculez entre les onglets pour différentes vues. L'onglet Analyses montre votre santé financière.
 reports_daily_pace,Summary label,Daily pace,السرعة اليومية,Rythme quotidien
@@ -870,11 +869,11 @@ reports_projected_total,Summary label,Projected total,الإجمالي المت�
 reports_less_than_last,Comparison,{pct}% less than last month,{pct}% أقل من الشهر الماضي,{pct}% de moins que le mois dernier
 reports_more_than_last,Comparison,{pct}% more than last month,{pct}% أكثر من الشهر الماضي,{pct}% de plus que le mois dernier
 reports_same_as_last,Comparison,Same as last month,مثل الشهر الماضي,Identique au mois dernier
-reports_spending_activity,Section title,Spending Activity,نشاط الإنفاق,Activité de dépenses
+reports_spending_activity,Section title,Spending activity,نشاط الإنفاق,Activité de dépenses
 reports_heatmap_none,Legend,None,لا شيء,Aucun
 reports_heatmap_help,Help text,Each square is one day. Darker = higher amount. Scroll left to see past months.,كل مربع يمثل يوماً. أغمق = مبلغ أعلى. مرر لليسار لرؤية الأشهر السابقة.,Chaque carré est un jour. Plus sombre = montant plus élevé. Faites défiler à gauche pour les mois précédents.
-reports_6_month_trend,Toggle / title,6-Month Trend,اتجاه 6 أشهر,Tendance sur 6 mois
-reports_daily_pace_toggle,Toggle,Daily Pace,السرعة اليومية,Rythme quotidien
+reports_6_month_trend,Toggle / title,6-month trend,اتجاه 6 أشهر,Tendance sur 6 mois
+reports_daily_pace_toggle,Toggle,Daily pace,السرعة اليومية,Rythme quotidien
 reports_no_spending,Empty state,No spending this month,لا إنفاق هذا الشهر,Aucune dépense ce mois-ci
 reports_top_spending,Toggle,Top spending,أعلى إنفاق,Principales dépenses
 reports_top_transactions,Toggle,Top transactions,أعلى معاملات,Principales transactions
@@ -883,15 +882,15 @@ reports_no_note,Fallback,No note,بدون ملاحظة,Aucune note
 reports_new_badge,Badge,NEW,جديد,NOUVEAU
 reports_current_legend,Legend,Current,الحالي,Actuel
 reports_typical_legend,Legend,Typical,المعتاد,Typique
-reports_velocity_title,Card title,Spending Velocity,سرعة الإنفاق,Vélocité des dépenses
+reports_velocity_title,Card title,Spending velocity,سرعة الإنفاق,Vélocité des dépenses
 reports_projected,Label,Projected,المتوقع,Projeté
 reports_budget,Label,Budget,الميزانية,Budget
 reports_daily_rate,Stat label,Daily rate,المعدل اليومي,Taux quotidien
 reports_day,Stat label,Day,يوم,Jour
-reports_biggest_expense,Card label,Biggest Expense,أكبر مصروف,Plus grosse dépense
-reports_savings_rate,Card label,Savings Rate,معدل الادخار,Taux d'épargne
-reports_recurring_title,Card title,Recurring Transactions,المعاملات المتكررة,Transactions récurrentes
-reports_age_title,Card title,Age of Money,عمر المال,Âge de l'argent
+reports_biggest_expense,Card label,Biggest expense,أكبر مصروف,Plus grosse dépense
+reports_savings_rate,Card label,Savings rate,معدل الادخار,Taux d'épargne
+reports_recurring_title,Card title,Recurring transactions,المعاملات المتكررة,Transactions récurrentes
+reports_age_title,Card title,Age of money,عمر المال,Âge de l'argent
 reports_age_excellent,Rating,Excellent,ممتاز,Excellent
 reports_age_getting_there,Rating,Getting there,في التقدم,En bonne voie
 reports_age_needs_work,Rating,Needs work,يحتاج عملاً,À améliorer
@@ -905,12 +904,12 @@ reports_net_worth,Section title,Net worth,صافي الثروة,Patrimoine net
 reports_assets,Section header,Assets,الأصول,Actifs
 reports_liabilities,Section header,Liabilities,الالتزامات,Passifs
 reports_compare_to,Sheet title,Compare balances to:,مقارنة الأرصدة بـ:,Comparer les soldes à :
-reports_end_last_week,Compare option,End of Last Week,نهاية الأسبوع الماضي,Fin de la semaine dernière
-reports_end_last_month,Compare option,End of Last Month,نهاية الشهر الماضي,Fin du mois dernier
-reports_same_time_last_month,Compare option,Same Time Last Month,نفس الوقت الشهر الماضي,Même période le mois dernier
-reports_end_last_quarter,Compare option,End of Last Quarter,نهاية الربع الماضي,Fin du dernier trimestre
-reports_end_last_year,Compare option,End of Last Year,نهاية السنة الماضية,Fin de l'année dernière
-reports_same_time_last_year,Compare option,Same Time Last Year,نفس الوقت السنة الماضية,Même période l'année dernière
+reports_end_last_week,Compare option,End of last week,نهاية الأسبوع الماضي,Fin de la semaine dernière
+reports_end_last_month,Compare option,End of last month,نهاية الشهر الماضي,Fin du mois dernier
+reports_same_time_last_month,Compare option,Same time last month,نفس الوقت الشهر الماضي,Même période le mois dernier
+reports_end_last_quarter,Compare option,End of last quarter,نهاية الربع الماضي,Fin du dernier trimestre
+reports_end_last_year,Compare option,End of last year,نهاية السنة الماضية,Fin de l'année dernière
+reports_same_time_last_year,Compare option,Same time last year,نفس الوقت السنة الماضية,Même période l'année dernière
 reports_custom,Compare option,Custom...,مخصص...,Personnalisé...
 # ──────────────────────────────────────────────,,,,
 # WEB COMPANION — Phone UI,,,,
@@ -922,8 +921,8 @@ wc_running,Status,Server running,الخادم يعمل,Serveur en marche
 wc_error,Status,Error,خطأ,Erreur
 wc_no_wifi,Status,No WiFi,بدون WiFi,Pas de WiFi
 wc_auto_stop,Subtitle,Stops automatically after 6 hours,يتوقف تلقائياً بعد 6 ساعات,S'arrête automatiquement après 6 heures
-wc_stop_button,Button,Stop Server,إيقاف الخادم,Arrêter le serveur
-wc_start_button,Button,Start Server,تشغيل الخادم,Démarrer le serveur
+wc_stop_button,Button,Stop server,إيقاف الخادم,Arrêter le serveur
+wc_start_button,Button,Start server,تشغيل الخادم,Démarrer le serveur
 wc_open_on_laptop,Card title,Open on your laptop,افتح على حاسوبك,Ouvrez sur votre ordinateur
 wc_url_copied,Snackbar,URL copied to clipboard,تم نسخ الرابط,URL copiée dans le presse-papiers
 wc_copy_url,Tooltip,Copy URL,نسخ الرابط,Copier l'URL
@@ -944,11 +943,11 @@ wc_enter_4_digits_error,Validation,Enter exactly 4 digits,أدخل 4 أرقام 
 wc_update_pin,Button,Update PIN,تحديث الـ PIN,Mettre à jour le PIN
 wc_pin_updated,Snackbar,PIN updated. All active sessions signed out.,تم تحديث الـ PIN. تم تسجيل خروج جميع الجلسات.,PIN mis à jour. Toutes les sessions actives déconnectées.
 wc_ios_warning,Warning banner,Keep BudgetSeal in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.,أبقِ BudgetSeal في المقدمة أثناء تشغيل الخادم. iOS لا يدعم الخوادم في الخلفية — قفل الشاشة سيوقفه.,Gardez BudgetSeal au premier plan pendant le fonctionnement du serveur. iOS ne supporte pas les serveurs en arrière-plan — verrouiller l'écran l'arrêtera.
-wc_no_wifi_title,Banner title,No WiFi Connection,لا اتصال WiFi,Pas de connexion WiFi
+wc_no_wifi_title,Banner title,No WiFi connection,لا اتصال WiFi,Pas de connexion WiFi
 wc_no_wifi_desc,Banner description,Connect your phone to a WiFi network to use Web Companion. The server needs WiFi to let your laptop access the budget.,اربط هاتفك بشبكة WiFi لاستخدام المرافق الإلكتروني. يحتاج الخادم WiFi ليتيح لحاسوبك الوصول.,Connectez votre téléphone au WiFi pour utiliser le Compagnon Web. Le serveur a besoin du WiFi pour que votre ordinateur accède au budget.
-wc_public_network,Banner title,Public Network Detected,شبكة عامة مكتشفة,Réseau public détecté
-wc_network_security,Banner title,Network Security,أمان الشبكة,Sécurité du réseau
-wc_security_warning,Warning title,Security Warning,تحذير أمني,Avertissement de sécurité
+wc_public_network,Banner title,Public network detected,شبكة عامة مكتشفة,Réseau public détecté
+wc_network_security,Banner title,Network security,أمان الشبكة,Sécurité du réseau
+wc_security_warning,Warning title,Security warning,تحذير أمني,Avertissement de sécurité
 wc_info_1,Info bullet,Only accessible on the same WiFi network,يمكن الوصول فقط من نفس شبكة WiFi,Accessible uniquement sur le même réseau WiFi
 wc_info_2,Info bullet,Server stops automatically after 6 hours,الخادم يتوقف تلقائياً بعد 6 ساعات,Le serveur s'arrête automatiquement après 6 heures
 wc_info_3,Info bullet,5 failed PIN attempts locks the interface for 30 minutes,5 محاولات PIN فاشلة تقفل الواجهة لمدة 30 دقيقة,5 tentatives de PIN échouées verrouillent l'interface pendant 30 minutes
@@ -1091,11 +1090,11 @@ month_dec,Month abbreviation,Dec,ديسمبر,Déc
 # ──────────────────────────────────────────────,,,,
 # NOTIFICATIONS — Push,,,,
 # ──────────────────────────────────────────────,,,,
-notif_low_envelopes_title,Notification title,Low Envelopes,أظرف منخفضة,Enveloppes faibles
+notif_low_envelopes_title,Notification title,Low envelopes,أظرف منخفضة,Enveloppes faibles
 notif_single_overspent,Notification body,{name} is overspent. Consider adding funds.,{name} تجاوز حده. فكّر في إضافة أموال.,{name} est dépassé(e). Pensez à ajouter des fonds.
 notif_multiple_overspent,Notification body,{count} envelopes are overspent: {names}{more}.,{count} أظرف تجاوزت حدها: {names}{more}.,{count} enveloppes sont dépassées : {names}{more}.
 notif_and_more,Notification suffix,and {count} more,و{count} أخرى,et {count} de plus
-notif_upcoming_bills_title,Notification title,Upcoming Bills,الفواتير القادمة,Factures à venir
+notif_upcoming_bills_title,Notification title,Upcoming bills,الفواتير القادمة,Factures à venir
 notif_single_due,Notification body,{title} is due soon.,{title} مستحقة قريباً.,{title} est bientôt due.
 notif_multiple_due,Notification body,{count} bills due: {names}{more}.,{count} فواتير مستحقة: {names}{more}.,{count} factures dues : {names}{more}.
 notif_bills_and_more,Notification suffix,and more,والمزيد,et plus
@@ -1108,15 +1107,15 @@ notif_reminder_2,Notification body,Don't forget to log today's transactions!,ل�
 notif_reminder_3,Notification body,Stay on track — record today's spending.,ابقَ على المسار — سجّل إنفاق اليوم.,Restez sur la bonne voie — enregistrez vos dépenses du jour.
 notif_reminder_4,Notification body,A minute now saves hours later. Log your day!,دقيقة الآن توفر ساعات لاحقاً. سجّل يومك!,Une minute maintenant économise des heures plus tard. Enregistrez votre journée !
 notif_reminder_5,Notification body,Keep your budget honest — add today's transactions.,حافظ على صدق ميزانيتك — أضف معاملات اليوم.,Gardez votre budget honnête — ajoutez les transactions du jour.
-notif_reminder_channel,Channel name,Daily Reminder,التذكير اليومي,Rappel quotidien
+notif_reminder_channel,Channel name,Daily reminder,التذكير اليومي,Rappel quotidien
 notif_reminder_channel_desc,Channel description,Daily reminder to log transactions,تذكير يومي لتسجيل المعاملات,Rappel quotidien pour enregistrer les transactions
 # ──────────────────────────────────────────────,,,,
 # ENGINE / LEDGER NOTES,,,,
 # ──────────────────────────────────────────────,,,,
-engine_auto_covered,Ledger note,Auto-covered from Unallocated,تم التغطية تلقائياً من غير الموزع,Couvert automatiquement depuis Non affecté
+engine_auto_covered,Ledger note,Auto-covered from unallocated,تم التغطية تلقائياً من غير الموزع,Couvert automatiquement depuis Non affecté
 engine_direct_income,Ledger note,Direct from income,مباشرة من الدخل,Directement du revenu
-engine_withdrawn,Ledger note,Withdrawn to Unallocated,تم السحب إلى غير الموزع,Retiré vers Non affecté
-engine_period_returned,Ledger note,Period reset — returned to Unallocated,إعادة تعيين الفترة — أُرجع إلى غير الموزع,Réinitialisation de période — retourné au Non affecté
+engine_withdrawn,Ledger note,Withdrawn to unallocated,تم السحب إلى غير الموزع,Retiré vers Non affecté
+engine_period_returned,Ledger note,Period reset — returned to unallocated,إعادة تعيين الفترة — أُرجع إلى غير الموزع,Réinitialisation de période — retourné au Non affecté
 engine_period_out,Ledger note,Period reset — transferred out,إعادة تعيين الفترة — تم التحويل,Réinitialisation de période — transféré
 engine_period_received,Ledger note,Received from period reset,مُستلم من إعادة تعيين الفترة,Reçu de la réinitialisation de période
 engine_carry_forward,Ledger note,Period carry-forward,ترحيل الفترة,Report de période
@@ -1133,14 +1132,14 @@ engine_auto_reset,Ledger note,Period auto-reset,إعادة تعيين تلقائ
 text_scale_small,Option,Small,صغير,Petit
 text_scale_default,Option,Default,افتراضي,Par défaut
 text_scale_large,Option,Large,كبير,Grand
-text_scale_extra_large,Option,Extra Large,كبير جداً,Très grand
+text_scale_extra_large,Option,Extra large,كبير جداً,Très grand
 # ──────────────────────────────────────────────,,,,
 # DEFAULT CATEGORIES,,,,
 # ──────────────────────────────────────────────,,,,
 defcat_groceries,Default category,Groceries,بقالة,Courses
 defcat_fuel,Default category,Fuel,وقود,Carburant
-defcat_public_transit,Default category,Public Transit,مواصلات عامة,Transports en commun
-defcat_parking_tolls,Default category,Parking & Tolls,مواقف ورسوم,Parking et péages
+defcat_public_transit,Default category,Public transit,مواصلات عامة,Transports en commun
+defcat_parking_tolls,Default category,Parking & tolls,مواقف ورسوم,Parking et péages
 defcat_maintenance,Default category,Maintenance,صيانة,Entretien
 defcat_shopping,Default category,Shopping,تسوق,Shopping
 defcat_clothing,Default category,Clothing,ملابس,Vêtements
@@ -1155,13 +1154,13 @@ defcat_gifts,Default category,Gifts,هدايا,Cadeaux
 defcat_salary,Default category,Salary,راتب,Salaire
 defcat_freelance,Default category,Freelance,عمل حر,Freelance
 defcat_investments,Default category,Investments,استثمارات,Investissements
-defcat_other_income,Default category,Other Income,دخل آخر,Autres revenus
-defcat_food_drink,Default category preset group,Food & Drink,طعام وشراب,Alimentation
+defcat_other_income,Default category,Other income,دخل آخر,Autres revenus
+defcat_food_drink,Default category preset group,Food & drink,طعام وشراب,Alimentation
 defcat_transport,Default category preset group,Transport,مواصلات,Transport
 defcat_bills,Default category preset group,Bills,فواتير,Factures
 defcat_home,Default category preset group,Home,المنزل,Maison
 defcat_travel,Default category preset group,Travel,سفر,Voyage
-defcat_dining_out,Default category preset,Dining Out,أكل في الخارج,Restaurant
+defcat_dining_out,Default category preset,Dining out,أكل في الخارج,Restaurant
 defcat_coffee,Default category preset,Coffee,قهوة,Cafe
 defcat_rent,Default category preset,Rent,إيجار,Loyer
 defcat_furniture,Default category preset,Furniture,أثاث,Meubles
@@ -1183,29 +1182,29 @@ defcat_other,Default category preset,Other,أخرى,Autre
 # ──────────────────────────────────────────────,,,,
 # PLANNED PAYMENTS,,,,
 # ──────────────────────────────────────────────,,,,
-planned_title,Screen title,Planned Payments,المدفوعات المخططة,Paiements planifiés
+planned_title,Screen title,Planned payments,المدفوعات المخططة,Paiements planifiés
 planned_subtitle,Settings tile subtitle,Plan future one-time payments,خطط لمدفوعات مستقبلية لمرة واحدة,Planifiez des paiements ponctuels futurs
 planned_add_tooltip,FAB tooltip,Add planned payment,إضافة دفعة مخططة,Ajouter un paiement planifié
 planned_empty_title,Empty state title,No planned payments,لا توجد مدفوعات مخططة,Aucun paiement planifié
 planned_empty_subtitle,Empty state subtitle,Plan future payments to track what you expect to spend before committing.,خطط لمدفوعات مستقبلية لتتبع ما تتوقع إنفاقه قبل الالتزام.,Planifiez des paiements futurs pour suivre ce que vous prévoyez de dépenser avant de vous engager.
 planned_posted,Snackbar success,Payment posted successfully,تم ترحيل الدفعة بنجاح,Paiement enregistré avec succès
 planned_post_failed,Snackbar error,Failed to post payment,فشل ترحيل الدفعة,Échec de l'enregistrement du paiement
-planned_post_all_title,Dialog title,Post All Payments,ترحيل جميع المدفوعات,Enregistrer tous les paiements
-planned_post_all,Button,Post All,ترحيل الكل,Tout enregistrer
-planned_delete_title,Dialog title,Delete Planned Payment,حذف الدفعة المخططة,Supprimer le paiement planifié
+planned_post_all_title,Dialog title,Post all payments,ترحيل جميع المدفوعات,Enregistrer tous les paiements
+planned_post_all,Button,Post all,ترحيل الكل,Tout enregistrer
+planned_delete_title,Dialog title,Delete planned payment,حذف الدفعة المخططة,Supprimer le paiement planifié
 planned_deleted,Snackbar success,Planned payment deleted,تم حذف الدفعة المخططة,Paiement planifié supprimé
 planned_delete_failed,Snackbar error,Failed to delete payment,فشل حذف الدفعة,Échec de la suppression du paiement
 planned_save_failed,Snackbar error,Could not save planned payment,تعذّر حفظ الدفعة المخططة,Impossible d'enregistrer le paiement planifié
-planned_plan_button,Save button,Plan Payment,تخطيط الدفعة,Planifier le paiement
-planned_edit_title,AppBar title,Edit Planned Payment,تعديل الدفعة المخططة,Modifier le paiement planifié
-planned_target_month,Section label,Target Month,الشهر المستهدف,Mois cible
+planned_plan_button,Save button,Plan payment,تخطيط الدفعة,Planifier le paiement
+planned_edit_title,AppBar title,Edit planned payment,تعديل الدفعة المخططة,Modifier le paiement planifié
+planned_target_month,Section label,Target month,الشهر المستهدف,Mois cible
 planned_exact_date,Field label,Pick exact date (optional),اختر تاريخاً محدداً (اختياري),Choisir une date précise (optionnel)
 planned_badge,Badge label,Planned,مخططة,Planifié
 planned_post,Action button,Post,ترحيل,Enregistrer
 # ──────────────────────────────────────────────,,,,
 # SYNC ERRORS,,,,
 # ──────────────────────────────────────────────,,,,
-file_picker_title,Dialog title,Select BudgetSeal Sync File,اختر ملف مزامنة BudgetSeal,Sélectionnez le fichier de synchronisation BudgetSeal
+file_picker_title,Dialog title,Select BudgetSeal sync file,اختر ملف مزامنة BudgetSeal,Sélectionnez le fichier de synchronisation BudgetSeal
 # ──────────────────────────────────────────────,,,,
 # SHARED WIDGETS,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1222,8 +1221,8 @@ settings_version_n,About tile subtitle,Version {version},الإصدار {version
 settings_preview,Number format preview,Preview: {preview},معاينة: {preview},Aperçu : {preview}
 sub_could_not_update,Snackbar error,Could not update subscription,تعذّر تحديث الاشتراك,Impossible de mettre à jour l'abonnement
 help_guide_title,Help screen title,Help Guide,دليل المساعدة,Guide d'aide
-receipt_take_photo,Receipt picker option,Take Photo,التقاط صورة,Prendre une photo
-receipt_choose_gallery,Receipt picker option,Choose from Gallery,اختيار من المعرض,Choisir dans la galerie
+receipt_take_photo,Receipt picker option,Take photo,التقاط صورة,Prendre une photo
+receipt_choose_gallery,Receipt picker option,Choose from gallery,اختيار من المعرض,Choisir dans la galerie
 receipt_select_multiple,Receipt picker subtitle,Select multiple photos,اختيار صور متعددة,Sélectionner plusieurs photos
 
 # ──────────────────────────────────────────────,,,,
@@ -1281,7 +1280,7 @@ common_amount,,Amount,المبلغ,Montant
 common_category,,Category,فئة,Catégorie
 common_currency,,Currency,العملة,Devise
 common_title,,Title,العنوان,Titre
-dashboard_net_worth,,Net Worth,صافي الثروة,Patrimoine net
+dashboard_net_worth,,Net worth,صافي الثروة,Patrimoine net
 dashboard_unallocated,,Unallocated,غير مخصص,Non alloué
 dashboard_other_count,,+ {count} other,+ {count} أخرى,+ {count} autre(s)
 dashboard_fund_envelopes_tooltip,,Fund envelopes,تمويل الأظرف,Alimenter les enveloppes
@@ -1299,7 +1298,7 @@ bill_step1_desc,,Step 1: Add items from your receipt — scan or enter manually.
 bill_step2_desc,,"Step 2: Add people and assign items. Toggle ""Split evenly"" to divide the total equally.","الخطوة 2: أضف الأشخاص وعيّن العناصر. فعّل ""تقسيم بالتساوي"" لتقسيم المبلغ بالتساوي.",Étape 2 : Ajoutez des personnes et assignez les articles. Activez « Diviser également » pour répartir le total équitablement.
 bill_step3_desc,,"Step 3: Review the split, add tip, and confirm.",الخطوة 3: راجع التقسيم، أضف البقشيش، وأكّد.,"Étape 3 : Vérifiez la répartition, ajoutez le pourboire et confirmez."
 bill_bill_in,,Bill in {currency},الفاتورة بعملة {currency},Addition en {currency}
-bill_exchange_rate_title,,Exchange Rate,سعر الصرف,Taux de change
+bill_exchange_rate_title,,Exchange rate,سعر الصرف,Taux de change
 bill_remove_person_title,,Remove person,إزالة الشخص,Supprimer la personne
 bill_remove_person_content,,"{name} has {count} item(s) assigned only to them. Reassign to someone else, or delete those items?",{name} لديه {count} عنصر(ات) مخصصة له فقط. أعد تعيينها لشخص آخر، أو احذفها؟,{name} a {count} article(s) assigné(s) uniquement à lui/elle. Réassigner à quelqu'un d'autre ou supprimer ces articles ?
 bill_reassign_to,,Reassign to:,إعادة تعيين إلى:,Réassigner à :
@@ -1314,7 +1313,7 @@ bill_continue_anyway,,Continue anyway,المتابعة على أي حال,Contin
 tx_form_could_not_save,,Could not save transaction. Please try again.,تعذّر حفظ المعاملة. حاول مجدداً.,Impossible d'enregistrer la transaction. Veuillez réessayer.
 tx_transaction_deleted,,Transaction deleted,تم حذف المعاملة,Transaction supprimée
 tx_undo_action,,Undo,تراجع,Annuler
-tx_new_transaction_sheet,,New Transaction,معاملة جديدة,Nouvelle transaction
+tx_new_transaction_sheet,,New transaction,معاملة جديدة,Nouvelle transaction
 tx_could_not_load,,Could not load transaction,تعذّر تحميل المعاملة,Impossible de charger la transaction
 tx_af_mixed_content,,This will create {count} linked transactions:\n\n{summary}\n\nThey will appear as separate transactions but linked together.,سيتم إنشاء {count} معاملات مترابطة:\n\n{summary}\n\nستظهر كمعاملات منفصلة ولكن مرتبطة ببعضها.,Cela créera {count} transactions liées :\n\n{summary}\n\nElles apparaîtront comme des transactions séparées mais liées entre elles.
 tx_af_another_with_count,,Add another item ({count} items · {total}),إضافة عنصر آخر ({count} عناصر · {total}),Ajouter un autre article ({count} articles · {total})
@@ -1343,22 +1342,22 @@ alloc_fund,,Fund,تمويل,Financer
 alloc_fund_envelope,,Fund {name},تمويل {name},Financer {name}
 alloc_over_funding_title,,Over-funding,تمويل زائد,Sur-financement
 alloc_over_funding_msg,,You're assigning {deficit} more than your available {available} unallocated balance.\n\nYour unallocated balance will go negative. Continue anyway?,أنت توزع {deficit} أكثر من رصيدك غير الموزع المتاح ({available}).\n\nسيصبح رصيدك غير الموزع سالباً. المتابعة؟,Vous affectez {deficit} de plus que votre solde non alloué disponible ({available}).\n\nVotre solde non alloué deviendra négatif. Continuer ?
-alloc_funded_note,,Funded from Unallocated,موّل من غير الموزع,Financé depuis le non alloué
+alloc_funded_note,,Funded from unallocated,موّل من غير الموزع,Financé depuis le non alloué
 alloc_funded_success,,Funded {amount} to {name},تم تمويل {amount} إلى {name},Financé {amount} vers {name}
 alloc_fund_error,,Could not fund envelope. Please try again.,تعذّر تمويل الظرف. حاول مجدداً.,Impossible de financer l'enveloppe. Veuillez réessayer.
 alloc_entry_funded,,Funded,موّل,Financé
 alloc_entry_spent,,Spent,مُنفَق,Dépensé
 alloc_entry_adjustment,,Adjustment,تعديل,Ajustement
-alloc_entry_period_reset,,Period Reset,إعادة تعيين الفترة,Réinitialisation de période
-alloc_entry_carry_forward,,Carried Forward,مُرحَّل,Reporté
-alloc_withdraw_desc,,Move money from this envelope back to Unallocated.,نقل المال من هذا الظرف إلى غير الموزع.,Transférer l'argent de cette enveloppe vers le non alloué.
+alloc_entry_period_reset,,Period reset,إعادة تعيين الفترة,Réinitialisation de période
+alloc_entry_carry_forward,,Carried forward,مُرحَّل,Reporté
+alloc_withdraw_desc,,Move money from this envelope back to unallocated.,نقل المال من هذا الظرف إلى غير الموزع.,Transférer l'argent de cette enveloppe vers le non alloué.
 alloc_withdraw_amount_label,,Amount to withdraw,المبلغ المراد سحبه,Montant à retirer
-alloc_withdraw_success,,Withdrew {amount} to Unallocated,تم سحب {amount} إلى غير الموزع,Retiré {amount} vers le non alloué
-alloc_link_category_title,,Link a Category,ربط فئة,Lier une catégorie
+alloc_withdraw_success,,Withdrew {amount} to unallocated,تم سحب {amount} إلى غير الموزع,Retiré {amount} vers le non alloué
+alloc_link_category_title,,Link a category,ربط فئة,Lier une catégorie
 alloc_search_categories,,Search categories...,البحث في الفئات...,Rechercher des catégories...
 alloc_no_matching_categories,,No matching categories,لا فئات مطابقة,Aucune catégorie correspondante
 alloc_all_categories_linked,,All categories are already linked to envelopes,جميع الفئات مرتبطة بأظرف بالفعل,Toutes les catégories sont déjà liées à des enveloppes
-alloc_revalue_foreign_title,,Revalue Foreign Balances,إعادة تقييم الأرصدة الأجنبية,Réévaluer les soldes en devises
+alloc_revalue_foreign_title,,Revalue foreign balances,إعادة تقييم الأرصدة الأجنبية,Réévaluer les soldes en devises
 alloc_fetch,,Fetch,جلب,Récupérer
 alloc_reval_applied,,Revaluation applied,تم تطبيق إعادة التقييم,Réévaluation appliquée
 alloc_reval_error,,Could not apply revaluation. Please try again.,تعذّر تطبيق إعادة التقييم. حاول مجدداً.,Impossible d'appliquer la réévaluation. Veuillez réessayer.
@@ -1366,7 +1365,7 @@ alloc_fetch_rate_error,,Could not fetch rate for {currency},تعذّر جلب ا
 alloc_delete_linked_warning,,"{count,plural, =1{1 category is} other{{count} categories are}} linked to this envelope ({names})","{count,plural, =1{فئة واحدة مرتبطة} =2{فئتان مرتبطتان} few{{count} فئات مرتبطة} many{{count} فئةً مرتبطة} other{{count} فئة مرتبطة}} بهذا الظرف ({names})","{count,plural, =1{1 catégorie est liée} other{{count} catégories sont liées}} à cette enveloppe ({names})"
 alloc_delete_and_more,,and {count} more,و{count} أخرى,et {count} autre(s)
 alloc_delete_consequences,,Deleting will:\n  • Unlink all categories from this envelope\n  • Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.,سيؤدي الحذف إلى:\n  • إلغاء ربط جميع الفئات من هذا الظرف\n  • حذف كل سجل الدفتر لهذا الظرف\n\nفكر في الأرشفة بدلاً من ذلك للحفاظ على السجل.,La suppression va :\n  • Délier toutes les catégories de cette enveloppe\n  • Supprimer tout l'historique du grand livre\n\nEnvisagez l'archivage pour préserver l'historique.
-alloc_delete_no_links_title,,Delete Envelope Permanently,حذف الظرف نهائياً,Supprimer l'enveloppe définitivement
+alloc_delete_no_links_title,,Delete envelope permanently,حذف الظرف نهائياً,Supprimer l'enveloppe définitivement
 alloc_delete_no_links_msg,,This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.,هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.,Cette enveloppe n'a pas de catégories liées. Tout l'historique du grand livre sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.
 alloc_delete_error,,Could not delete. Please try again.,تعذّر الحذف. حاول مجدداً.,Impossible de supprimer. Veuillez réessayer.
 alloc_envelope_created,,Envelope created,تم إنشاء الظرف,Enveloppe créée
@@ -1376,7 +1375,7 @@ alloc_base_currency_only,,{currency} envelopes only · {count} in other currenci
 alloc_hide_other_currencies,,Hide other currencies,إخفاء العملات الأخرى,Masquer les autres devises
 alloc_daily_budget,,{amount}/day for {days} days,{amount}/يوم لمدة {days} أيام,{amount}/jour pendant {days} jours
 alloc_other_currencies,,"{count,plural, =1{+ 1 other currency} other{+ {count} other currencies}}","{count,plural, =1{+ عملة أخرى واحدة} =2{+ عملتان أخريان} few{+ {count} عملات أخرى} many{+ {count} عملةً أخرى} other{+ {count} عملة أخرى}}","{count,plural, =1{+ 1 autre devise} other{+ {count} autres devises}}"
-alloc_goals_loans,,Goals & Loans,أهداف وقروض,Objectifs et prêts
+alloc_goals_loans,,Goals & loans,أهداف وقروض,Objectifs et prêts
 alloc_goals_count,,"{count,plural, =1{1 goal} other{{count} goals}}","{count,plural, =1{هدف واحد} =2{هدفان} few{{count} أهداف} many{{count} هدفًا} other{{count} هدف}}","{count,plural, =1{1 objectif} other{{count} objectifs}}"
 alloc_loans_count,,"{count,plural, =1{1 loan} other{{count} loans}}","{count,plural, =1{قرض واحد} =2{قرضان} few{{count} قروض} many{{count} قرضًا} other{{count} قرض}}","{count,plural, =1{1 prêt} other{{count} prêts}}"
 allocNEnvelopesNeedReset,,"{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}","{count,plural, =1{ظرف واحد يحتاج إعادة تعيين} =2{ظرفان يحتاجان إعادة تعيين} few{{count} أظرف تحتاج إعادة تعيين} many{{count} ظرفًا تحتاج إعادة تعيين} other{{count} ظرف تحتاج إعادة تعيين}}","{count,plural, =1{1 enveloppe nécessite une réinitialisation} other{{count} enveloppes nécessitent une réinitialisation}}"
@@ -1385,34 +1384,34 @@ fund_no_allocations,,No allocations to fund.\nCreate allocations first.,لا أ�
 fund_how_title,,How does funding work?,كيف يعمل التمويل؟,Comment fonctionne le financement ?
 fund_step1,,Check your unallocated balance — this is money you haven't assigned to any envelope yet.,تحقق من رصيدك غير الموزع — هذا المال الذي لم تخصصه لأي ظرف بعد.,Vérifiez votre solde non alloué — c'est l'argent que vous n'avez pas encore affecté à une enveloppe.
 fund_step2,,"Enter how much to put in each envelope, or use ""Quick Fill"" to auto-fill periodic envelopes up to their target.","أدخل المبلغ لكل ظرف، أو استخدم ""ملء سريع"" لملء الأظرف الدورية تلقائياً حتى هدفها.","Entrez le montant pour chaque enveloppe, ou utilisez « Remplissage rapide » pour remplir automatiquement les enveloppes périodiques jusqu'à leur objectif."
-fund_step3,,"Tap ""Fund All"" to move the money into your envelopes.","اضغط ""تمويل الكل"" لتوزيع المال على أظرفك.",Appuyez sur « Financer tout » pour distribuer l'argent dans vos enveloppes.
+fund_step3,,"Tap ""Fund all"" to move the money into your envelopes.","اضغط ""تمويل الكل"" لتوزيع المال على أظرفك.",Appuyez sur « Financer tout » pour distribuer l'argent dans vos enveloppes.
 fund_available_to_distribute,,Available to distribute,متاح للتوزيع,Disponible à distribuer
 fund_exceeds_warning,,Total exceeds available unallocated funds,المجموع يتجاوز الأموال غير الموزعة المتاحة,Le total dépasse les fonds non alloués disponibles
-fund_quick_fill,,Quick Fill,ملء سريع,Remplissage rapide
+fund_quick_fill,,Quick fill,ملء سريع,Remplissage rapide
 fund_quick_fill_desc,,"{count,plural, =1{Auto-fill 1 periodic envelope up to its target} other{Auto-fill {count} periodic envelopes up to their target}}","{count,plural, =1{ملء ظرف دوري واحد تلقائياً حتى هدفه} =2{ملء ظرفين دوريين تلقائياً حتى هدفيهما} few{ملء {count} أظرف دورية تلقائياً حتى أهدافها} many{ملء {count} ظرفًا دوريًا تلقائياً حتى أهدافها} other{ملء {count} ظرف دوري تلقائياً حتى أهدافها}}","{count,plural, =1{Remplir automatiquement 1 enveloppe périodique jusqu'à son objectif} other{Remplir automatiquement {count} enveloppes périodiques jusqu'à leur objectif}}"
 fund_all_at_target,,All periodic envelopes are at their target,جميع الأظرف الدورية عند أهدافها,Toutes les enveloppes périodiques sont à leur objectif
 fund_funded,,Funded,موّل,Financé
 fund_balance,,Balance: {amount},الرصيد: {amount},Solde : {amount}
 fund_fill,,Fill {amount},ملء {amount},Remplir {amount}
 fund_enter_amounts,,Enter amounts to fund,أدخل مبالغ للتمويل,Entrez des montants à financer
-fund_all_with_total,,Fund All  ({total}),تمويل الكل  ({total}),Financer tout  ({total})
-acct_hide_archived,,Hide Archived,إخفاء المؤرشفة,Masquer les archivés
-acct_show_archived,,Show Archived,إظهار المؤرشفة,Afficher les archivés
+fund_all_with_total,,Fund all  ({total}),تمويل الكل  ({total}),Financer tout  ({total})
+acct_hide_archived,,Hide archived,إخفاء المؤرشفة,Masquer les archivés
+acct_show_archived,,Show archived,إظهار المؤرشفة,Afficher les archivés
 acct_sort_by_name,,Sort by name,ترتيب حسب الاسم,Trier par nom
 acct_sort_by_balance,,Sort by balance,ترتيب حسب الرصيد,Trier par solde
 acct_sort_by_type,,Sort by type,ترتيب حسب النوع,Trier par type
 acct_travel_wallet,,Travel wallet · {currency},محفظة سفر · {currency},Portefeuille de voyage · {currency}
 acct_archived,,Archived,المؤرشفة,Archivés
 acct_no_archived,,No archived accounts,لا حسابات مؤرشفة,Aucun compte archivé
-acct_unarchive_title,,Unarchive Account,إلغاء أرشفة الحساب,Désarchiver le compte
+acct_unarchive_title,,Unarchive account,إلغاء أرشفة الحساب,Désarchiver le compte
 acct_unarchive_msg,,"Restore ""{name}"" to your active accounts?","استعادة ""{name}"" إلى حساباتك النشطة؟",Restaurer « {name} » dans vos comptes actifs ?
 acct_unarchive,,Unarchive,إلغاء الأرشفة,Désarchiver
 acct_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivé
-acct_current_balance,,Current Balance,الرصيد الحالي,Solde actuel
+acct_current_balance,,Current balance,الرصيد الحالي,Solde actuel
 acct_back_from_trip,,Back from your trip?,عدت من رحلتك؟,De retour de voyage ?
 acct_convert_back_desc,,Convert your remaining {currency} balance back and close this travel wallet.,تحويل رصيد {currency} المتبقي وإغلاق محفظة السفر هذه.,Convertir votre solde restant en {currency} et fermer ce portefeuille de voyage.
-acct_convert_back_close,,Convert Back & Close,تحويل وإغلاق,Convertir et fermer
-acct_settings,,Account Settings,إعدادات الحساب,Paramètres du compte
+acct_convert_back_close,,Convert back & close,تحويل وإغلاق,Convertir et fermer
+acct_settings,,Account settings,إعدادات الحساب,Paramètres du compte
 acct_name_section,,Name,الاسم,Nom
 acct_account_name,,Account name,اسم الحساب,Nom du compte
 acct_type_section,,Type,النوع,Type
@@ -1427,22 +1426,22 @@ acct_no_transactions,,No transactions yet,لا معاملات بعد,Aucune tran
 acct_adjust_desc,,"Enter the balance your bank (or wallet) shows. If it differs, an adjustment transaction is recorded for the difference.",أدخل الرصيد الذي يظهره مصرفك (أو محفظتك). إن اختلف، تُسجَّل معاملة تسوية بالفرق.,"Saisissez le solde affiché par votre banque (ou portefeuille). S'il diffère, une transaction d'ajustement est enregistrée pour la différence."
 acct_current_balance_label,,Current balance: {amount},الرصيد الحالي: {amount},Solde actuel : {amount}
 acct_enter_real_balance,,Enter the real balance,أدخل الرصيد الحقيقي,Entrez le solde réel
-acct_apply_adjustment,,Apply Adjustment,تطبيق التعديل,Appliquer l'ajustement
+acct_apply_adjustment,,Apply adjustment,تطبيق التعديل,Appliquer l'ajustement
 acct_balance_adjustment,,Balance adjustment,تعديل الرصيد,Ajustement du solde
 acct_balance_adjusted_by,,Balance adjusted by {amount},تم تعديل الرصيد بمقدار {amount},Solde ajusté de {amount}
-acct_convert_back,,Convert Back,تحويل مرة أخرى,Reconvertir
+acct_convert_back,,Convert back,تحويل مرة أخرى,Reconvertir
 acct_convert_back_msg,,Convert {amount} back to your account,تحويل {amount} مرة أخرى إلى حسابك,Reconvertir {amount} vers votre compte
 acct_transfer_to,,Transfer to,تحويل إلى,Transférer vers
 acct_amount_received,,Amount received,المبلغ المستلم,Montant reçu
-acct_convert_archive,,Convert & Archive,تحويل وأرشفة,Convertir et archiver
+acct_convert_archive,,Convert & archive,تحويل وأرشفة,Convertir et archiver
 acct_no_transfer_target,,No account to transfer to,لا حساب للتحويل إليه,Aucun compte cible pour le transfert
 acct_converted_back,,Converted back {amount} and archived,تم التحويل مرة أخرى {amount} وأرشفة,Reconverti {amount} et archivé
 acct_something_wrong,,Something went wrong. Please try again.,حدث خطأ ما. حاول مجدداً.,Une erreur est survenue. Veuillez réessayer.
-acct_archive_title,,Archive Account,أرشفة الحساب,Archiver le compte
+acct_archive_title,,Archive account,أرشفة الحساب,Archiver le compte
 acct_archive_msg,,This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.,سيتم إخفاء هذا الحساب من جميع القوائم والقوائم المنسدلة. ستُحفظ معاملاتك.\n\nيمكنك إلغاء الأرشفة لاحقاً من الإعدادات.,Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nVous pouvez le désarchiver plus tard depuis les Paramètres.
-acct_delete_title,,Delete Account Permanently,حذف الحساب نهائياً,Supprimer le compte définitivement
+acct_delete_title,,Delete account permanently,حذف الحساب نهائياً,Supprimer le compte définitivement
 acct_delete_msg,,This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.,هذا الحساب ليس له معاملات. هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع.,Ce compte n'a aucune transaction. Êtes-vous sûr de vouloir le supprimer définitivement ? Cette action est irréversible.
-acct_archive_instead,,Archive Instead,أرشفة بدلاً من ذلك,Archiver à la place
+acct_archive_instead,,Archive instead,أرشفة بدلاً من ذلك,Archiver à la place
 cat_total,,{count} total,{count} إجمالي,{count} au total
 cat_expense_count,,{count} expense,{count} مصروف,{count} dépense(s)
 cat_income_count,,{count} income,{count} دخل,{count} revenu(s)
@@ -1460,11 +1459,11 @@ cat_archive,,Archive,أرشفة,Archiver
 cat_unarchive,,Unarchive,إلغاء الأرشفة,Désarchiver
 cat_restored,,Category restored,تم استعادة الفئة,Catégorie restaurée
 cat_archived,,Category archived,تم أرشفة الفئة,Catégorie archivée
-cat_delete_title,,Delete Category,حذف الفئة,Supprimer la catégorie
+cat_delete_title,,Delete category,حذف الفئة,Supprimer la catégorie
 cat_delete_no_tx,,This category has no transactions. Delete permanently?,هذه الفئة ليس لها معاملات. حذف نهائي؟,Cette catégorie n'a aucune transaction. Supprimer définitivement ?
 cat_deleted,,Category deleted,تم حذف الفئة,Catégorie supprimée
-cat_new_title,,New Category,فئة جديدة,Nouvelle catégorie
-cat_edit_title,,Edit Category,تعديل الفئة,Modifier la catégorie
+cat_new_title,,New category,فئة جديدة,Nouvelle catégorie
+cat_edit_title,,Edit category,تعديل الفئة,Modifier la catégorie
 cat_name,,Name,الاسم,Nom
 cat_parent,,Parent,الفئة الأم,Catégorie parente
 cat_none,,None,لا شيء,Aucun
@@ -1474,10 +1473,10 @@ cat_created,,Category created,تم إنشاء الفئة,Catégorie créée
 cat_updated,,Category updated,تم تحديث الفئة,Catégorie mise à jour
 common_archive,,Archive,أرشفة,Archiver
 backup_restore_failed,,Restore failed. The backup may be corrupted.,فشلت الاستعادة. قد يكون ملف النسخة الاحتياطية تالفاً.,La restauration a échoué. Le fichier de sauvegarde est peut-être corrompu.
-export_data_title,,Export Data,تصدير البيانات,Exporter les données
-export_trans_title,,Export Transactions,تصدير المعاملات,Exporter les transactions
+export_data_title,,Export data,تصدير البيانات,Exporter les données
+export_trans_title,,Export transactions,تصدير المعاملات,Exporter les transactions
 export_trans_desc,,"Export all your transactions as a CSV file. You can open it in Excel, Google Sheets, or any spreadsheet app.",صدّر جميع معاملاتك كملف CSV. يمكنك فتحه في Excel أو Google Sheets أو أي تطبيق جداول بيانات.,"Exportez toutes vos transactions en fichier CSV. Vous pouvez l'ouvrir dans Excel, Google Sheets ou toute application de tableur."
-about_privacy_terms,,Privacy & Terms,الخصوصية والشروط,Confidentialité et conditions
+about_privacy_terms,,Privacy & terms,الخصوصية والشروط,Confidentialité et conditions
 about_licenses,,Licenses,التراخيص,Licences
 about_legalese,,© {year} Samer Cheaib. All rights reserved.,© {year} سامر شعيب. جميع الحقوق محفوظة.,© {year} Samer Cheaib. Tous droits réservés.
 settings_title,,Settings,الإعدادات,Paramètres
@@ -1485,83 +1484,83 @@ settings_appearance_section,,Appearance,المظهر,Apparence
 settings_data_section,,Data,البيانات,Données
 settings_preferences_section,,Preferences,التفضيلات,Préférences
 settings_security_section,,Security,الأمان,Sécurité
-tile_recurring_bills,,Recurring & Bills,المتكررة والفواتير,Récurrences et factures
-tile_bill_splitter,,Bill Splitter,تقسيم الفواتير,Partage de facture
+tile_recurring_bills,,Recurring & bills,المتكررة والفواتير,Récurrences et factures
+tile_bill_splitter,,Bill splitter,تقسيم الفواتير,Partage de facture
 tile_help_guide,,Help Guide,دليل المساعدة,Guide d'aide
 settings_help_sub,,How to use BudgetSeal,كيفية استخدام BudgetSeal,Comment utiliser BudgetSeal
 tile_theme,,Theme,المظهر,Thème
-tile_accent_color,,Accent Color,لون التمييز,Couleur d'accentuation
-tile_colors,,Colors,الألوان,Couleurs
+tile_accent_color,,Accent color,لون التمييز,Couleur d'accentuation
+tile_colors,Settings tile: income/expense/transfer colors,Transaction colors,ألوان المعاملات,Couleurs des transactions
 tile_colors_sub,,"Income, expense & transfer",الدخل، المصاريف والتحويلات,"Revenus, dépenses et transferts"
-tile_entry_mode,,Entry Mode,وضع الإدخال,Mode de saisie
+tile_entry_mode,,Entry mode,وضع الإدخال,Mode de saisie
 tile_autofill,,Auto-fill,الملء التلقائي,Remplissage auto
 tile_autofill_sub,,Pre-fill fields from last transaction,ملء الحقول من آخر معاملة,Pré-remplir les champs de la dernière transaction
-tile_start_screen,,Start Screen,شاشة البداية,Écran de démarrage
+tile_start_screen,,Start screen,شاشة البداية,Écran de démarrage
 tile_font,,Font,الخط,Police
-tile_text_size,,Text Size,حجم النص,Taille du texte
-tile_tx_list,,Transaction List,قائمة المعاملات,Liste des transactions
+tile_text_size,,Text size,حجم النص,Taille du texte
+tile_tx_list,,Transaction list,قائمة المعاملات,Liste des transactions
 tile_tx_list_sub,,"Layout, icons, date banner",التخطيط، الأيقونات، شريط التاريخ,"Disposition, icônes, bannière de date"
-tile_cloud_sync,,Cloud Sync,المزامنة السحابية,Synchronisation cloud
+tile_cloud_sync,,Cloud sync,المزامنة السحابية,Synchronisation cloud
 tile_cloud_sync_sub,,Sync across devices,مزامنة عبر الأجهزة,Synchroniser entre les appareils
-tile_share_household,,Share Household,مشاركة الأسرة,Partager le foyer
+tile_share_household,,Share household,مشاركة الأسرة,Partager le foyer
 tile_share_household_connected,,Invite someone to share your data,دعوة شخص لمشاركة بياناتك,Inviter quelqu'un à partager vos données
-tile_share_household_disconnected,,Connect Cloud Sync first to share,قم بتوصيل المزامنة السحابية أولاً,Connectez d'abord la synchronisation cloud
+tile_share_household_disconnected,,Connect cloud sync first to share,قم بتوصيل المزامنة السحابية أولاً,Connectez d'abord la synchronisation cloud
 tile_share_household_snackbar,,Set up Cloud Sync with Google Drive first to share your household.,قم بإعداد المزامنة السحابية مع Google Drive أولاً لمشاركة أسرتك.,Configurez d'abord la synchronisation cloud avec Google Drive pour partager votre foyer.
-tile_backup_restore,,Backup & Restore,النسخ الاحتياطي والاستعادة,Sauvegarde et restauration
+tile_backup_restore,,Backup & restore,النسخ الاحتياطي والاستعادة,Sauvegarde et restauration
 tile_backup_restore_sub,,Export or restore database,تصدير أو استعادة قاعدة البيانات,Exporter ou restaurer la base de données
-tile_import_export,,Import & Export,الاستيراد والتصدير,Importer et exporter
+tile_import_export,,Import & export,الاستيراد والتصدير,Importer et exporter
 tile_import_export_sub,,"CSV import, export, and reports",استيراد CSV، تصدير، وتقارير,"Import CSV, export et rapports"
 tile_notifications,,Notifications,الإشعارات,Notifications
 tile_notifications_sub,,"Daily reminder, envelope & bill alerts",تذكير يومي، تنبيهات المظاريف والفواتير,"Rappel quotidien, alertes enveloppes et factures"
-tile_health_check,,Health Check,فحص السلامة,Bilan de santé
+tile_health_check,,Health check,فحص السلامة,Bilan de santé
 tile_health_check_sub,,Verify data integrity & repair,التحقق من سلامة البيانات وإصلاحها,Vérifier l'intégrité des données et réparer
-tile_sync_receipts,,Sync Receipts,مزامنة الإيصالات,Synchroniser les reçus
+tile_sync_receipts,,Sync receipts,مزامنة الإيصالات,Synchroniser les reçus
 tile_sync_receipts_on,,Upload receipt photos to cloud storage,رفع صور الإيصالات إلى التخزين السحابي,Télécharger les photos de reçus vers le cloud
 tile_sync_receipts_off,,Receipts are stored on this device only,الإيصالات مخزنة على هذا الجهاز فقط,Les reçus sont stockés uniquement sur cet appareil
-tile_base_currency,,Base Currency,العملة الأساسية,Devise de base
-tile_period_start_day,,Period Start Day,يوم بداية الفترة,Jour de début de période
+tile_base_currency,,Base currency,العملة الأساسية,Devise de base
+tile_period_start_day,,Period start day,يوم بداية الفترة,Jour de début de période
 tile_period_start_day_desc,,The day of the month when a new budget period starts.,اليوم من الشهر الذي تبدأ فيه فترة ميزانية جديدة.,Le jour du mois où une nouvelle période budgétaire commence.
-tile_currency_symbols,,Currency Symbols,رموز العملات,Symboles de devises
+tile_currency_symbols,,Currency symbols,رموز العملات,Symboles de devises
 tile_currency_symbols_sub,,Override how currencies are displayed,تغيير طريقة عرض العملات,Modifier l'affichage des devises
-tile_number_format,,Number Format,تنسيق الأرقام,Format des nombres
-tile_date_format,,Date Format,تنسيق التاريخ,Format de date
-tile_biometric_lock,,Biometric Lock,القفل البيومتري,Verrouillage biométrique
+tile_number_format,,Number format,تنسيق الأرقام,Format des nombres
+tile_date_format,,Date format,تنسيق التاريخ,Format de date
+tile_biometric_lock,,Biometric lock,القفل البيومتري,Verrouillage biométrique
 tile_biometric_sub,,Require fingerprint or face to open,طلب بصمة أو وجه للفتح,Exiger empreinte ou visage pour ouvrir
-tile_reset_everything,,Reset Everything,إعادة تعيين الكل,Tout réinitialiser
+tile_reset_everything,,Reset everything,إعادة تعيين الكل,Tout réinitialiser
 tile_reset_sub,,Erase all data and start fresh,مسح جميع البيانات والبدء من جديد,Effacer toutes les données et recommencer
-entry_mode_title,,Entry Mode,وضع الإدخال,Mode de saisie
+entry_mode_title,,Entry mode,وضع الإدخال,Mode de saisie
 entry_mode_desc,,Choose how you add new transactions.,اختر كيفية إضافة معاملات جديدة.,Choisissez comment ajouter de nouvelles transactions.
-entry_mode_assisted,,Assisted (Step-by-step),مساعد (خطوة بخطوة),Assisté (étape par étape)
+entry_mode_assisted,,Assisted (step-by-step),مساعد (خطوة بخطوة),Assisté (étape par étape)
 entry_mode_assisted_desc,,"Guides you through adding a transaction step by step. First pick a title, then a category, then enter the amount. Best for beginners.",يرشدك خطوة بخطوة لإضافة معاملة. اختر أولاً العنوان، ثم الفئة، ثم أدخل المبلغ. الأفضل للمبتدئين.,"Vous guide étape par étape pour ajouter une transaction. Choisissez d'abord un titre, puis une catégorie, puis entrez le montant. Idéal pour les débutants."
-entry_mode_classic,,Classic (Single form),كلاسيكي (نموذج واحد),Classique (formulaire unique)
+entry_mode_classic,,Classic (single form),كلاسيكي (نموذج واحد),Classique (formulaire unique)
 entry_mode_classic_desc,,All fields on one screen. Fill in what you need and save. Faster for experienced users.,جميع الحقول في شاشة واحدة. املأ ما تحتاج واحفظ. أسرع للمستخدمين ذوي الخبرة.,Tous les champs sur un seul écran. Remplissez ce dont vous avez besoin et enregistrez. Plus rapide pour les utilisateurs expérimentés.
 entry_mode_assisted_short,,Assisted (step-by-step),مساعد (خطوة بخطوة),Assisté (étape par étape)
 entry_mode_classic_short,,Classic (single form),كلاسيكي (نموذج واحد),Classique (formulaire unique)
 theme_follow_device,,Follow device settings,اتبع إعدادات الجهاز,Suivre les paramètres de l'appareil
 theme_amoled,,AMOLED pure black,أسود AMOLED نقي,Noir AMOLED pur
-accent_color_title,,Accent Color,لون التمييز,Couleur d'accentuation
+accent_color_title,,Accent color,لون التمييز,Couleur d'accentuation
 accent_color_system,,System,النظام,Système
 accent_color_system_sub,,Material You (Android 12+),Material You (أندرويد 12+),Material You (Android 12+)
 accent_color_system_label,,System (Material You),النظام (Material You),Système (Material You)
-start_screen_title,,Start Screen,شاشة البداية,Écran de démarrage
+start_screen_title,,Start screen,شاشة البداية,Écran de démarrage
 start_screen_desc,,Opens when you launch the app.,تفتح عند تشغيل التطبيق.,S'ouvre au lancement de l'application.
-choose_font_title,,Choose Font,اختر الخط,Choisir la police
+choose_font_title,,Choose font,اختر الخط,Choisir la police
 font_preview,,The quick brown fox jumps over the lazy dog,الثعلب البني السريع يقفز فوق الكلب الكسول,Le vif renard brun saute par-dessus le chien paresseux
-text_size_title,,Text Size,حجم النص,Taille du texte
+text_size_title,,Text size,حجم النص,Taille du texte
 text_size_preview,,Preview text at this size,نص معاينة بهذا الحجم,Aperçu du texte à cette taille
-currency_symbols_title,,Currency Symbols,رموز العملات,Symboles de devises
+currency_symbols_title,,Currency symbols,رموز العملات,Symboles de devises
 currency_symbols_desc,,"Tap any currency to change how its symbol is displayed. For example, change ل.ل to LBP.",اضغط على أي عملة لتغيير طريقة عرض رمزها. مثلاً، غيّر ل.ل إلى LBP.,"Appuyez sur une devise pour changer l'affichage de son symbole. Par exemple, changez ل.ل en LBP."
 currency_symbols_all_section,,All currencies,جميع العملات,Toutes les devises
 currency_symbol_default,,Default: {symbol},الافتراضي: {symbol},Par défaut : {symbol}
 currency_symbol_for,,Symbol for {code},رمز {code},Symbole pour {code}
-number_format_title,,Number Format,تنسيق الأرقام,Format des nombres
+number_format_title,,Number format,تنسيق الأرقام,Format des nombres
 number_format_desc,,Choose how numbers are displayed throughout the app.,اختر كيفية عرض الأرقام في التطبيق.,Choisissez comment les nombres sont affichés dans l'application.
 number_format_preview,,Preview,معاينة,Aperçu
-number_format_thousands,,Thousands Separator,فاصل الآلاف,Séparateur de milliers
-number_format_decimal,,Decimal Separator,الفاصل العشري,Séparateur décimal
-number_format_negative,,Negative Numbers,الأرقام السالبة,Nombres négatifs
+number_format_thousands,,Thousands separator,فاصل الآلاف,Séparateur de milliers
+number_format_decimal,,Decimal separator,الفاصل العشري,Séparateur décimal
+number_format_negative,,Negative numbers,الأرقام السالبة,Nombres négatifs
 number_format_conflict,,Some options are hidden because they conflict with the decimal separator.,بعض الخيارات مخفية لأنها تتعارض مع الفاصل العشري.,Certaines options sont masquées car elles entrent en conflit avec le séparateur décimal.
-date_format_title,,Date Format,تنسيق التاريخ,Format de date
+date_format_title,,Date format,تنسيق التاريخ,Format de date
 biometric_not_available,,Biometric authentication is not available on this device,المصادقة البيومترية غير متوفرة على هذا الجهاز,L'authentification biométrique n'est pas disponible sur cet appareil
 biometric_verify,,Verify to enable biometric lock,تحقق لتفعيل القفل البيومتري,Vérifiez pour activer le verrouillage biométrique
 biometric_failed,,Authentication failed — biometric lock not enabled,فشلت المصادقة — لم يتم تفعيل القفل البيومتري,Authentification échouée — verrouillage biométrique non activé
@@ -1571,45 +1570,45 @@ biometric_locked_out,,Too many attempts. Please wait and try again.,محاولا
 biometric_passcode_not_set,,"No screen lock is set up on this device. Please set up a PIN, pattern, or password first.",لم يتم إعداد قفل الشاشة على هذا الجهاز. يرجى إعداد رمز PIN أو نمط أو كلمة مرور أولاً.,"Aucun verrouillage d'écran n'est configuré sur cet appareil. Veuillez d'abord configurer un code PIN, un schéma ou un mot de passe."
 backup_banner_no_backup,,You haven't backed up yet,لم تقم بعمل نسخة احتياطية بعد,Vous n'avez pas encore sauvegardé
 backup_banner_days_ago,,You haven't backed up in {days} days,لم تقم بعمل نسخة احتياطية منذ {days} أيام,Vous n'avez pas sauvegardé depuis {days} jours
-backup_now_button,,Backup Now,نسخ احتياطي الآن,Sauvegarder maintenant
+backup_now_button,,Backup now,نسخ احتياطي الآن,Sauvegarder maintenant
 sync_share_invite_text,,Join my BudgetSeal household! Enter this code in the app:\n{code},انضم إلى أسرتي في BudgetSeal! أدخل هذا الرمز في التطبيق:\n{code},Rejoignez mon foyer BudgetSeal ! Saisissez ce code dans l'application :\n{code}
-privacy_terms_title,,Privacy & Terms,الخصوصية والشروط,Confidentialité et conditions
-privacy_policy_title,,Privacy Policy,سياسة الخصوصية,Politique de confidentialité
+privacy_terms_title,,Privacy & terms,الخصوصية والشروط,Confidentialité et conditions
+privacy_policy_title,,Privacy policy,سياسة الخصوصية,Politique de confidentialité
 privacy_last_updated,,Last updated: May 2026,آخر تحديث: مايو 2026,Dernière mise à jour : mai 2026
 privacy_intro,,"BudgetSeal is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.",تم تصميم BudgetSeal مع جعل خصوصيتك مبدأ أساسي. بياناتك المالية ملكك — نحن لا نجمع أو نخزن أو ننقلها إلى أي خادم.,"BudgetSeal est conçu avec votre vie privée comme principe fondamental. Vos données financières vous appartiennent — nous ne les collectons, stockons ou transmettons jamais à aucun serveur."
-privacy_data_storage_title,,1. Data Storage,1. تخزين البيانات,1. Stockage des données
+privacy_data_storage_title,,1. Data storage,1. تخزين البيانات,1. Stockage des données
 privacy_data_storage_body,,"All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable Cloud Sync.",جميع بياناتك المالية (المعاملات، الحسابات، المظاريف، الفئات، الأهداف، والإعدادات) مخزنة محلياً على جهازك في قاعدة بيانات SQLite. لا تغادر البيانات جهازك إلا إذا قمت بتفعيل المزامنة السحابية صراحة.,Toutes vos données financières sont stockées localement sur votre appareil dans une base de données SQLite. Aucune donnée ne quitte votre appareil sauf si vous activez explicitement la synchronisation cloud.
-privacy_cloud_sync_title,,2. Cloud Sync (Optional),2. المزامنة السحابية (اختيارية),2. Synchronisation cloud (optionnelle)
+privacy_cloud_sync_title,,2. Cloud sync (optional),2. المزامنة السحابية (اختيارية),2. Synchronisation cloud (optionnelle)
 privacy_cloud_sync_body,,"If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google's OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).",إذا اخترت تفعيل المزامنة السحابية، يتم رفع بياناتك إلى حسابك الشخصي على Google Drive أو مزود تخزين ملفات تختاره. BudgetSeal لا يملك وصولاً إلى بيانات اعتماد حسابك على Google — تتم المصادقة عبر نظام OAuth من Google.\n\nيمكنك اختيارياً تشفير ملف المزامنة بتشفير AES-256 باستخدام كلمة مرور تحددها. يتم تخزين كلمة المرور فقط على جهازك في التخزين الآمن.,"Si vous choisissez d'activer la synchronisation cloud, vos données sont téléchargées sur votre compte Google Drive personnel ou un fournisseur de stockage de votre choix. BudgetSeal n'a pas accès à vos identifiants Google — l'authentification est gérée par le système OAuth de Google.\n\nVous pouvez optionnellement chiffrer votre fichier de synchronisation avec le chiffrement AES-256 en utilisant un mot de passe que vous définissez."
 privacy_web_companion_title,,3. Web Companion,3. الرفيق الويب,3. Compagnon Web
 privacy_web_companion_body,,"The Web Companion feature runs a local HTTP server on your phone. It is only accessible from devices on the same WiFi network (private IP addresses). No data is sent to the internet. The connection is protected by a PIN, session tokens, and rate limiting. The server stops automatically after 6 hours.",ميزة الرفيق الويب تشغل خادم HTTP محلي على هاتفك. يمكن الوصول إليه فقط من الأجهزة على نفس شبكة WiFi. لا يتم إرسال أي بيانات إلى الإنترنت. الاتصال محمي برمز PIN وجلسات ومعدل تحديد. يتوقف الخادم تلقائياً بعد 6 ساعات.,"La fonctionnalité Compagnon Web exécute un serveur HTTP local sur votre téléphone. Il n'est accessible que depuis les appareils sur le même réseau WiFi. Aucune donnée n'est envoyée sur Internet. La connexion est protégée par un code PIN, des jetons de session et une limitation de débit. Le serveur s'arrête automatiquement après 6 heures."
-privacy_analytics_title,,4. Analytics & Tracking,4. التحليلات والتتبع,4. Analyses et suivi
+privacy_analytics_title,,4. Analytics & tracking,4. التحليلات والتتبع,4. Analyses et suivi
 privacy_analytics_body,,"BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.",BudgetSeal لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.,"BudgetSeal n'inclut aucun SDK d'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d'utilisation, identifiant d'appareil ou métrique comportementale n'est collectée."
 privacy_permissions_title,,5. Permissions,5. الأذونات,5. Autorisations
 privacy_permissions_body,,• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for Cloud Sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.,• الكاميرا — تستخدم فقط لمسح الإيصالات\n• الإشعارات — تذكيرات يومية وتنبيهات فواتير\n• البيومتري — قفل تطبيق اختياري\n• الشبكة — فقط للمزامنة السحابية وجلب أسعار الصرف\n• الشبكة المحلية — خادم الرفيق الويب\n\nجميع الأذونات اختيارية ويمكن رفضها دون التأثير على الوظائف الأساسية.,• Caméra — utilisée uniquement pour le scan de reçus\n• Notifications — rappels quotidiens et alertes de factures\n• Biométrie — verrouillage optionnel de l'application\n• Réseau — uniquement pour la synchronisation cloud et les taux de change\n• Réseau local — serveur Compagnon Web\n\nToutes les autorisations sont optionnelles et peuvent être refusées sans affecter les fonctionnalités principales.
-privacy_receipts_title,,6. Receipt Images,6. صور الإيصالات,6. Images de reçus
+privacy_receipts_title,,6. Receipt images,6. صور الإيصالات,6. Images de reçus
 privacy_receipts_body,,Receipt photos are stored in the app's private directory on your device. They are not uploaded anywhere unless you enable receipt sync via Google Drive. OCR processing is performed entirely offline using on-device ML.,يتم تخزين صور الإيصالات في المجلد الخاص بالتطبيق على جهازك. لا يتم رفعها إلى أي مكان إلا إذا قمت بتفعيل مزامنة الإيصالات عبر Google Drive. تتم معالجة OCR بالكامل على الجهاز.,Les photos de reçus sont stockées dans le répertoire privé de l'application sur votre appareil. Elles ne sont téléchargées nulle part sauf si vous activez la synchronisation des reçus via Google Drive. Le traitement OCR est effectué entièrement hors ligne.
 privacy_backups_title,,7. Backups,7. النسخ الاحتياطي,7. Sauvegardes
 privacy_backups_body,,Automatic backups are stored locally in the app's documents directory. You control backup frequency and retention. Exported backup files are shared via the system share sheet and deleted from temporary storage afterward.,يتم تخزين النسخ الاحتياطية التلقائية محلياً في مجلد وثائق التطبيق. أنت تتحكم في تكرار النسخ الاحتياطي والاحتفاظ. يتم مشاركة ملفات النسخ الاحتياطي المصدرة عبر ورقة المشاركة وحذفها من التخزين المؤقت بعد ذلك.,Les sauvegardes automatiques sont stockées localement dans le répertoire documents de l'application. Vous contrôlez la fréquence et la rétention des sauvegardes.
-terms_of_use_title,,Terms of Use,شروط الاستخدام,Conditions d'utilisation
+terms_of_use_title,,Terms of use,شروط الاستخدام,Conditions d'utilisation
 terms_acceptance_title,,1. Acceptance,1. القبول,1. Acceptation
 terms_acceptance_body,,"By using BudgetSeal, you agree to these terms. If you do not agree, please uninstall the app.",باستخدام BudgetSeal، فإنك توافق على هذه الشروط. إذا كنت لا توافق، يرجى إلغاء تثبيت التطبيق.,"En utilisant BudgetSeal, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez désinstaller l'application."
-terms_intended_use_title,,2. Intended Use,2. الاستخدام المقصود,2. Utilisation prévue
+terms_intended_use_title,,2. Intended use,2. الاستخدام المقصود,2. Utilisation prévue
 terms_intended_use_body,,"BudgetSeal is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.",BudgetSeal هو أداة لإدارة التمويل الشخصي للميزانية الفردية والأسرية. لا يُقصد منه المحاسبة التجارية أو إعداد الضرائب أو المشورة المالية.,"BudgetSeal est un outil de gestion financière personnelle pour la budgétisation individuelle et familiale. Il n'est pas destiné à la comptabilité commerciale, la préparation fiscale ou les conseils financiers."
-terms_data_accuracy_title,,3. Data Accuracy,3. دقة البيانات,3. Exactitude des données
+terms_data_accuracy_title,,3. Data accuracy,3. دقة البيانات,3. Exactitude des données
 terms_data_accuracy_body,,"You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.",أنت مسؤول عن دقة البيانات التي تدخلها. يحسب BudgetSeal الأرصدة والميزانيات والتقارير بناءً على مدخلاتك. أسعار الصرف المجلوبة من مصادر خارجية تقريبية وقد لا تعكس أسعار السوق الفعلية.,"Vous êtes responsable de l'exactitude des données que vous saisissez. BudgetSeal calcule les soldes, budgets et rapports en fonction de vos saisies. Les taux de change provenant de sources externes sont approximatifs."
-terms_no_warranty_title,,4. No Warranty,4. بدون ضمان,4. Sans garantie
+terms_no_warranty_title,,4. No warranty,4. بدون ضمان,4. Sans garantie
 terms_no_warranty_body,,"BudgetSeal is provided ""as is"" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.",يتم توفير BudgetSeal «كما هو» بدون ضمان من أي نوع. بينما نسعى للموثوقية، لا يمكننا ضمان أن التطبيق سيكون خالياً من الأخطاء أو بدون انقطاع. يُنصح بشدة بعمل نسخ احتياطية منتظمة.,"BudgetSeal est fourni « tel quel » sans garantie d'aucune sorte. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons pas garantir que l'application sera exempte d'erreurs. Des sauvegardes régulières sont fortement recommandées."
-terms_liability_title,,5. Limitation of Liability,5. تحديد المسؤولية,5. Limitation de responsabilité
+terms_liability_title,,5. Limitation of liability,5. تحديد المسؤولية,5. Limitation de responsabilité
 terms_liability_body,,"The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.",لن يكون المطور مسؤولاً عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام BudgetSeal.,"Le développeur ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs résultant de l'utilisation de BudgetSeal."
-termsIPTitle,,6. Intellectual Property,6. الملكية الفكرية,6. Propriété intellectuelle
+termsIPTitle,,6. Intellectual property,6. الملكية الفكرية,6. Propriété intellectuelle
 termsIPBody,,BudgetSeal and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.,BudgetSeal ومحتواه الأصلي محمي بحقوق النشر. يستخدم التطبيق مكتبات مفتوحة المصدر مدرجة في قسم التراخيص.,BudgetSeal et son contenu original sont protégés par le droit d'auteur. L'application utilise des bibliothèques open source listées dans la section Licences.
 terms_changes_title,,7. Changes,7. التغييرات,7. Modifications
 terms_changes_body,,These terms may be updated with new app versions. Continued use after an update constitutes acceptance of the revised terms.,قد يتم تحديث هذه الشروط مع إصدارات التطبيق الجديدة. الاستمرار في الاستخدام بعد التحديث يعني قبول الشروط المعدلة.,Ces conditions peuvent être mises à jour avec les nouvelles versions de l'application. L'utilisation continue après une mise à jour constitue l'acceptation des conditions révisées.
 terms_contact_title,,8. Contact,8. الاتصال,8. Contact
 terms_contact_body,,"For questions or concerns about this privacy policy or terms of use, contact: fancyshark505@gmail.com",للأسئلة أو المخاوف حول سياسة الخصوصية أو شروط الاستخدام، تواصل: fancyshark505@gmail.com,"Pour toute question ou préoccupation concernant cette politique de confidentialité ou ces conditions d'utilisation, contactez : fancyshark505@gmail.com"
 health_repair_failed,,Repair failed. Please try again.,فشل الإصلاح. يرجى المحاولة مرة أخرى.,La réparation a échoué. Veuillez réessayer.
-notif_budget_warning_title,,Budget Alert,تنبيه الميزانية,Alerte budget
+notif_budget_warning_title,,Budget alert,تنبيه الميزانية,Alerte budget
 notif_budget_warning,,{name}: {percent}% used with {days} days left,{name}: تم استخدام {percent}% مع بقاء {days} أيام,{name} : {percent}% utilisé avec {days} jours restants
 onboard_household_name_error,,Enter a household name,أدخل اسم الأسرة,Entrez un nom de foyer
 onboard_account_name_error,,Enter an account name,أدخل اسم الحساب,Entrez un nom de compte
@@ -1624,7 +1623,7 @@ travel_balance_label,,Balance: {amount},الرصيد: {amount},Solde : {amount}
 period_transition_failed,,Failed to complete transition. Please try again.,فشل إكمال الانتقال. حاول مجدداً.,Échec de la transition. Veuillez réessayer.
 leftover_load_error,,Couldn't load data,تعذّر تحميل البيانات,Impossible de charger les données
 leftover_resolve_failed,,Failed to resolve leftovers. Please try again.,فشل حل المتبقي. حاول مجدداً.,Échec de la résolution des restes. Veuillez réessayer.
-common_try_again,,Try Again,حاول مجدداً,Réessayer
+common_try_again,,Try again,حاول مجدداً,Réessayer
 common_error_desc,,An unexpected error occurred. Try going back or restarting the app.,حدث خطأ غير متوقع. حاول العودة أو إعادة تشغيل التطبيق.,Une erreur inattendue s'est produite. Essayez de revenir en arrière ou de redémarrer l'application.
 common_uncategorized,,Uncategorized,غير مصنف,Non classé
 wc_public_network_desc_named,,"You appear to be on a public network (""{wifiName}""). Do not start the server — your data will be transmitted unencrypted and could be intercepted by others on the same network.",يبدو أنك على شبكة عامة («{wifiName}»). لا تشغّل الخادم — سيتم نقل بياناتك بدون تشفير ويمكن اعتراضها من قبل آخرين على نفس الشبكة.,Vous semblez être sur un réseau public (« {wifiName} »). Ne démarrez pas le serveur — vos données seront transmises sans chiffrement et pourraient être interceptées par d'autres sur le même réseau.
@@ -1657,9 +1656,9 @@ recurring_delete_body,,This will be permanently removed.,ستتم إزالتها
 recurring_deleted,,Recurring transaction deleted,تم حذف المعاملة المتكررة,Transaction récurrente supprimée
 recurring_created,,Recurring transaction created,تم إنشاء المعاملة المتكررة,Transaction récurrente créée
 recurring_updated,,Recurring transaction updated,تم تحديث المعاملة المتكررة,Transaction récurrente mise à jour
-recurring_new_title,,New Recurring Transaction,معاملة متكررة جديدة,Nouvelle transaction récurrente
-recurring_new_sub_title,,New Subscription,اشتراك جديد,Nouvel abonnement
-recurring_edit_title,,Edit Recurring Transaction,تعديل المعاملة المتكررة,Modifier la transaction récurrente
+recurring_new_title,,New recurring transaction,معاملة متكررة جديدة,Nouvelle transaction récurrente
+recurring_new_sub_title,,New subscription,اشتراك جديد,Nouvel abonnement
+recurring_edit_title,,Edit recurring transaction,تعديل المعاملة المتكررة,Modifier la transaction récurrente
 recurring_form_title_hint,,"Title (e.g. Rent, Salary)",العنوان (مثلاً: إيجار، راتب),"Titre (ex. Loyer, Salaire)"
 recurring_form_title_required,,Title is required,العنوان مطلوب,Le titre est requis
 recurring_form_ends,,Ends: {date},تنتهي: {date},Fin : {date}
@@ -1678,17 +1677,17 @@ recurring_pause_tooltip,,Pause recurring,إيقاف المعاملة المتك�
 recurring_resume_tooltip,,Resume recurring,استئناف المعاملة المتكررة,Reprendre
 recurring_tile_next,,Next: {date},التالي: {date},Prochain : {date}
 import_csv_title,,Import CSV,استيراد CSV,Importer CSV
-import_from_bank,,Import from Bank CSV,استيراد من ملف CSV بنكي,Importer depuis un CSV bancaire
+import_from_bank,,Import from bank CSV,استيراد من ملف CSV بنكي,Importer depuis un CSV bancaire
 import_csv_desc,,Select a CSV export from your bank. Column roles will be auto-detected.,اختر ملف CSV من البنك. سيتم اكتشاف أدوار الأعمدة تلقائياً.,Sélectionnez un export CSV de votre banque. Les rôles des colonnes seront détectés automatiquement.
 import_load_csv,,Load CSV,تحميل CSV,Charger CSV
 import_failed,,Import failed. Please check the file format.,فشل الاستيراد. يرجى التحقق من تنسيق الملف.,Échec de l'importation. Vérifiez le format du fichier.
 import_found_rows,,Found {count} rows in {fileName},تم العثور على {count} صف في {fileName},{count} lignes trouvées dans {fileName}
-import_column_mapping,,Column Mapping,تعيين الأعمدة,Mappage des colonnes
+import_column_mapping,,Column mapping,تعيين الأعمدة,Mappage des colonnes
 import_column_map_desc,,Assign a role to each column. Roles were auto-detected -- adjust as needed.,عيّن دوراً لكل عمود. تم الاكتشاف التلقائي — عدّل حسب الحاجة.,Attribuez un rôle à chaque colonne. Les rôles ont été détectés automatiquement — ajustez si nécessaire.
-import_preview,,Import Preview,معاينة الاستيراد,Aperçu de l'importation
+import_preview,,Import preview,معاينة الاستيراد,Aperçu de l'importation
 import_no_amount,,No Amount column assigned. Please map at least one column to Amount.,لم يتم تعيين عمود المبلغ. يرجى تعيين عمود واحد على الأقل للمبلغ.,Aucune colonne Montant attribuée. Veuillez mapper au moins une colonne au Montant.
 import_into_account,,Import into account,استيراد إلى الحساب,Importer dans le compte
-import_assign_amount,,Please assign an Amount column,يرجى تعيين عمود للمبلغ,Veuillez attribuer une colonne Montant
+import_assign_amount,,Please assign an amount column,يرجى تعيين عمود للمبلغ,Veuillez attribuer une colonne Montant
 import_success,,Imported {count} transactions,تم استيراد {count} معاملة,{count} transactions importées
 import_importing,,Importing… ({count}),جاري الاستيراد… ({count}),Importation… ({count})
 import_button,,Import {count} transactions,استيراد {count} معاملة,Importer {count} transactions
@@ -1707,15 +1706,15 @@ obj_summary_remaining,,Remaining,المتبقي,Restant
 obj_payments_section,,Payments,المدفوعات,Paiements
 obj_settings_section,,Settings,الإعدادات,Paramètres
 obj_type_section,,Type,النوع,Type
-obj_hide_settings,,Hide Settings,إخفاء الإعدادات,Masquer les paramètres
-obj_edit_settings,,Edit Settings,تعديل الإعدادات,Modifier les paramètres
+obj_hide_settings,,Hide settings,إخفاء الإعدادات,Masquer les paramètres
+obj_edit_settings,,Edit settings,تعديل الإعدادات,Modifier les paramètres
 obj_of_target,,of {amount},من {amount},sur {amount}
 obj_received_from,,Received {amount} from {account},تم استلام {amount} من {account},Reçu {amount} de {account}
 obj_paid_from,,Paid {amount} from {account},تم دفع {amount} من {account},Payé {amount} depuis {account}
 health_purge_content,,Permanently remove {count} soft-deleted transaction(s) and their lines from the database?\n\n{suffix},حذف {count} معاملة محذوفة نهائياً وسطورها من قاعدة البيانات؟\n\n{suffix},Supprimer définitivement {count} transaction(s) supprimée(s) et leurs lignes de la base de données ?\n\n{suffix}
 health_purge_button_n,,Purge {count} deleted transaction(s),حذف {count} معاملة محذوفة نهائياً,Purger {count} transaction(s) supprimée(s)
 health_auto_adjustment,,Health check auto-adjustment,تعديل تلقائي لفحص السلامة,Ajustement automatique du bilan de santé
-health_report_title,,BudgetSeal Health Check Report,تقرير فحص سلامة BudgetSeal,Rapport de santé BudgetSeal
+health_report_title,,BudgetSeal health check report,تقرير فحص سلامة BudgetSeal,Rapport de santé BudgetSeal
 health_adjustments_created,,{count} adjustment(s) created,تم إنشاء {count} تعديل(ات),{count} ajustement(s) créé(s)
 health_purged,,{count} transaction(s) purged,تم حذف {count} معاملة نهائياً,{count} transaction(s) purgée(s)
 customize_desc,,Drag to reorder. Toggle to show/hide sections.,اسحب لإعادة الترتيب. بدّل لإظهار/إخفاء الأقسام.,Faites glisser pour réorganiser. Basculez pour afficher/masquer les sections.
@@ -1756,28 +1755,28 @@ backup_restore_dialog_body,,From: {date}\nSize: {size}\n\nThis will replace your
 backup_auto_every,,Backing up {frequency},نسخ احتياطي {frequency},Sauvegarde {frequency}
 backup_last_auto_backup,,Last auto-backup: {date},آخر نسخ احتياطي تلقائي: {date},Dernière sauvegarde auto : {date}
 recurring_form_category,,Category (optional),الفئة (اختياري),Catégorie (optionnel)
-tx_detail_save_as_template,,Save as Template,حفظ كقالب,Enregistrer comme modèle
+tx_detail_save_as_template,,Save as template,حفظ كقالب,Enregistrer comme modèle
 tx_detail_template_saved,,Template saved,تم حفظ القالب,Modèle enregistré
 tx_detail_template_error,,Could not save template,تعذّر حفظ القالب,Impossible d'enregistrer le modèle
-tile_arabic_digits,,Arabic-Indic Numerals,الأرقام العربية الهندية,Chiffres arabo-indiens
+tile_arabic_digits,,Arabic-Indic numerals,الأرقام العربية الهندية,Chiffres arabo-indiens
 upgrade_title,,Upgrade to Premium,الترقية إلى بريميوم,Passer au Premium
 upgrade_subtitle,,"Unlock every feature with a single purchase. No subscriptions, no ads.",افتح جميع الميزات بشراء واحد. بدون اشتراكات، بدون إعلانات.,"Débloquez toutes les fonctionnalités avec un seul achat. Sans abonnement, sans publicité."
-upgrade_feature_sync,,Cloud Sync,المزامنة السحابية,Synchronisation cloud
+upgrade_feature_sync,,Cloud sync,المزامنة السحابية,Synchronisation cloud
 upgrade_feature_web_companion,,Web Companion,الواجهة على الويب,Compagnon Web
-upgrade_feature_bill_splitter,,Bill Splitter,تقسيم الفاتورة,Partage de facture
-upgrade_feature_travel_exchange,,Travel Exchange,صرف السفر,Change de voyage
-upgrade_feature_planned_payments,,Planned Payments,المدفوعات المخططة,Paiements planifiés
+upgrade_feature_bill_splitter,,Bill splitter,تقسيم الفاتورة,Partage de facture
+upgrade_feature_travel_exchange,,Travel exchange,صرف السفر,Change de voyage
+upgrade_feature_planned_payments,,Planned payments,المدفوعات المخططة,Paiements planifiés
 upgrade_feature_unlimited_items,,Unlimited accounts & envelopes,حسابات ومغلفات غير محدودة,Comptes et enveloppes illimités
 upgrade_price,,$4.99,$4.99,"4,99 $"
 upgrade_price_subtitle,,One-time purchase. Yours forever.,شراء لمرة واحدة. ملكك للأبد.,Achat unique. À vous pour toujours.
 upgrade_button,,Upgrade,ترقية,Mettre à niveau
 upgrade_coming_soon,,In-app purchases coming soon,الشراء داخل التطبيق قريبًا,Achats intégrés bientôt disponibles
-upgrade_redeem_code,,Redeem Code,استخدام رمز,Utiliser un code
+upgrade_redeem_code,,Redeem code,استخدام رمز,Utiliser un code
 upgrade_redeem_hint,,Enter your code,أدخل الرمز,Entrez votre code
 upgrade_redeem_button,,Redeem,استخدام,Utiliser
 upgrade_redeem_invalid,,Invalid code. Please try again.,رمز غير صالح. يرجى المحاولة مرة أخرى.,Code invalide. Veuillez réessayer.
 upgrade_redeem_success,,Code redeemed! Premium unlocked.,تم استخدام الرمز! تم فتح بريميوم.,Code utilisé ! Premium débloqué.
-upgrade_restore_purchase,,Restore Purchase,استعادة الشراء,Restaurer l'achat
+upgrade_restore_purchase,,Restore purchase,استعادة الشراء,Restaurer l'achat
 upgrade_restore_success,,Purchase restored! Premium unlocked.,تمت استعادة الشراء! تم فتح بريميوم.,Achat restauré ! Premium débloqué.
 upgrade_restore_none,,No previous purchase found.,لم يتم العثور على شراء سابق.,Aucun achat précédent trouvé.
 cat_sheet_search_hint,,Search categories...,بحث في الفئات...,Rechercher des catégories...
@@ -1979,7 +1978,7 @@ bill_paid_each_desc,,Records only your share.,يسجّل حصّتك فقط.,Enre
 bill_line_part,,{name}'s part,حصّة {name},Part de {name}
 bill_loan_name,,Bill split · {date},تقسيم فاتورة · {date},Addition partagée · {date}
 bill_loans_created,,"{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}","{n, plural, =1{أُضيف قرض واحد إلى الأهداف والقروض} =2{أُضيف قرضان إلى الأهداف والقروض} few{أُضيفت {n} قروض إلى الأهداف والقروض} many{أُضيف {n} قرضًا إلى الأهداف والقروض} other{أُضيف {n} قرض إلى الأهداف والقروض}}","{n, plural, =1{1 prêt ajouté à Objectifs et prêts} other{{n} prêts ajoutés à Objectifs et prêts}}"
-bill_owe_created,,Added to Goals & Loans: you owe {name} {amount},أُضيف إلى الأهداف والقروض: تدين لـ {name} بمبلغ {amount},Ajouté à Objectifs et prêts : vous devez {amount} à {name}
+bill_owe_created,,Added to goals & loans: you owe {name} {amount},أُضيف إلى الأهداف والقروض: تدين لـ {name} بمبلغ {amount},Ajouté à Objectifs et prêts : vous devez {amount} à {name}
 bill_share,,Share split,مشاركة التقسيم,Partager la répartition
 bill_share_header,,Bill split · total {total},تقسيم فاتورة · المجموع {total},Addition partagée · total {total}
 bill_share_paid_by,,Paid by {name},دفعها {name},Payé par {name}

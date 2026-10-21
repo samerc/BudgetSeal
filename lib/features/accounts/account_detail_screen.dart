@@ -161,22 +161,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      filled: true,
-      fillColor: AppColors.sfv(context),
       labelStyle: TextStyle(color: AppColors.ts(context)),
       hintStyle: TextStyle(color: AppColors.th(context)),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.accent, width: 1.5),
-      ),
     );
   }
 
@@ -383,8 +369,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.accent,
                           side: BorderSide(color: AppColors.accent.withValues(alpha: 0.3)),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
                         ),
                       ),
                     ),
@@ -576,12 +560,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               child: FilledButton(
                 onPressed: _loading ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.accent,
                   disabledBackgroundColor:
                       AppColors.accent.withValues(alpha: 0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                  ),
                 ),
                 child: _loading
                     ? SizedBox(
@@ -795,8 +775,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
-            color: AppColors.sf(ctx),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            color: AppColors.popup(ctx),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -865,12 +845,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     Navigator.pop(ctx, val);
                   }
                 },
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius)),
-                ),
                 child: Text(
                     diff != null && diff.abs() < 0.005
                         ? tr.acctReconcileConfirm
@@ -1001,9 +975,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: surfaceColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Padding(
           padding: EdgeInsets.fromLTRB(

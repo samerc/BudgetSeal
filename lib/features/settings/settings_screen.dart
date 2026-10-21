@@ -314,8 +314,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         padding: EdgeInsets.fromLTRB(
             20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
         decoration: BoxDecoration(
-          color: AppColors.sf(ctx),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          color: AppColors.popup(ctx),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -341,23 +341,11 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               decoration: InputDecoration(
                 counterText: '',
                 hintText: hint,
-                filled: true,
-                fillColor: AppColors.sfv(ctx),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
               ),
             ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius)),
-              ),
               child: Text(S.of(ctx).commonSave,
                   style: const
                       TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
@@ -393,7 +381,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     Color transferColor = current.transfer;
 
     final tr = S.of(context);
-    final colorSurface = AppColors.sf(context);
     final colorSurfaceVariant = AppColors.sfv(context);
     final colorTextPrimary = AppColors.tp(context);
     final colorTextSecondary = AppColors.ts(context);
@@ -408,9 +395,9 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             maxHeight: MediaQuery.of(ctx).size.height * 0.85,
           ),
           decoration: BoxDecoration(
-            color: colorSurface,
+            color: AppColors.popup(context),
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
+                const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
           ),
           child: SafeArea(
             child: SingleChildScrollView(
@@ -420,16 +407,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Drag handle
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorSurfaceVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Text(tr.txColorsTitle,
                       style: TextStyle(
@@ -495,12 +472,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                       ));
                       Navigator.pop(ctx);
                     },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
                     child: Text(tr.commonSave,
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
@@ -644,8 +615,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         padding: EdgeInsets.fromLTRB(
             20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
         decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          color: AppColors.popup(context),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -667,12 +638,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: '$min–$max',
-                filled: true,
-                fillColor: AppColors.sfv(context),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -683,12 +648,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   Navigator.pop(ctx, val);
                 }
               },
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius)),
-              ),
               child: Text(S.of(context).commonSave,
                   style: const
                       TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
@@ -992,23 +951,13 @@ class _EntryModeSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.sfv(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
           const SizedBox(height: 16),
           Text(S.of(context).entryModeTitle,
               style: TextStyle(
@@ -1159,7 +1108,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           // ── Appearance ──
           _SectionHeader(title: l.settingsAppearanceSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.palette_rounded, title: l.tileTheme,
+          _SettingsTile(icon: Icons.contrast_rounded, title: l.tileTheme,
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
           Builder(builder: (context) {
@@ -1797,8 +1746,8 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: Column(
         children: [
@@ -1806,16 +1755,6 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Column(
               children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 16),
                 Text(S.of(context).currencySymbolsTitle,
                     style: TextStyle(
@@ -1927,12 +1866,6 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'e.g. ${defaultCurrencySymbols[code]}',
-            filled: true,
-            fillColor: AppColors.sfv(context),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
           ),
         ),
         actions: [
@@ -1998,23 +1931,14 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.8,
       ),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Text(S.of(context).numberFormatTitle,
                 style: TextStyle(
@@ -2411,23 +2335,13 @@ class _ShareHouseholdSettingsSheetState
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
         decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: AppColors.popup(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
             Text(
               S.of(context).syncShareHousehold,
@@ -2450,9 +2364,6 @@ class _ShareHouseholdSettingsSheetState
                 decoration: InputDecoration(
                   labelText: S.of(context).syncTheirEmail,
                   hintText: S.of(context).syncEmailHint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                  ),
                   prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
@@ -2472,11 +2383,6 @@ class _ShareHouseholdSettingsSheetState
                     _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
                   ),
                 ),
               ),
@@ -2523,12 +2429,6 @@ class _ShareHouseholdSettingsSheetState
                     S.of(context).syncShareCode,
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
                   ),
                 ),
               ),

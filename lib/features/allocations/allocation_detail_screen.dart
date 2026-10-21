@@ -128,17 +128,8 @@ class _AllocationDetailScreenState
       labelStyle: TextStyle(color: AppColors.ts(context), fontSize: 14),
       floatingLabelStyle: TextStyle(
           color: AppColors.accent, fontWeight: FontWeight.w600),
-      filled: true,
-      fillColor: AppColors.sfv(context),
       prefixIcon: prefixIcon,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-          borderRadius: _inputRadius, borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(
-          borderRadius: _inputRadius, borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(
-          borderRadius: _inputRadius,
-          borderSide: BorderSide(color: AppColors.accent, width: 1.5)),
     );
   }
 
@@ -276,12 +267,6 @@ class _AllocationDetailScreenState
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: FilledButton(
                   onPressed: _loading ? null : _save,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(CardTokens.radius)),
-                  ),
                   child: _loading
                       ? SizedBox(
                           height: 20,
@@ -703,9 +688,6 @@ class _AllocationDetailScreenState
                     foregroundColor: AppColors.accent,
                     side: BorderSide(
                         color: AppColors.accent.withValues(alpha: 0.4)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ]),
@@ -934,7 +916,6 @@ class _AllocationDetailScreenState
               backgroundColor:
                   AppColors.pastel(context, envColor, light: 0.55, dark: 0.5),
               foregroundColor: onHero,
-              minimumSize: const Size.fromHeight(48),
             ),
           ),
         ],
@@ -967,19 +948,13 @@ class _AllocationDetailScreenState
     }
 
     final tr = S.of(context);
-    final surfaceColor = AppColors.sf(context);
-    final hintColor = AppColors.th(context);
     final textPrimaryColor = AppColors.tp(context);
     final textSecondaryColor = AppColors.ts(context);
     final surfaceVariantColor = AppColors.sfv(context);
     final borderColor = AppColors.bd(context);
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
-      backgroundColor: surfaceColor,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Padding(
           padding: EdgeInsets.fromLTRB(
@@ -987,16 +962,6 @@ class _AllocationDetailScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: hintColor,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
               Text(
                 tr.allocFundEnvelope(_nameController.text),
@@ -1139,12 +1104,6 @@ class _AllocationDetailScreenState
                 child: FilledButton(
                   onPressed: () => Navigator.pop(
                       ctx, {'amount': amount, 'currency': selectedCurrency}),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
                   child: Text(tr.allocFund,
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w600)),
@@ -1599,7 +1558,6 @@ class _AllocationDetailScreenState
     final currency = _targetCurrencyController.text;
 
     final tr = S.of(context);
-    final withdrawSurfaceColor = AppColors.sf(context);
     final withdrawTextSecondary = AppColors.ts(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
@@ -1610,8 +1568,8 @@ class _AllocationDetailScreenState
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
-            color: withdrawSurfaceColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: AppColors.popup(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1640,11 +1598,6 @@ class _AllocationDetailScreenState
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
                       child: Text(tr.commonCancel),
                     ),
                   ),
@@ -1654,12 +1607,6 @@ class _AllocationDetailScreenState
                       onPressed: withdrawAmount > 0
                           ? () => Navigator.pop(ctx, true)
                           : null,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
                       child: Text(tr.allocWithdrawButton,
                           style: const TextStyle(fontWeight: FontWeight.w600)),
                     ),
@@ -1734,7 +1681,6 @@ class _AllocationDetailScreenState
     }
 
     final tr = S.of(context);
-    final linkSurfaceColor = AppColors.sf(context);
     final linkHintColor = AppColors.th(context);
     final linkTextPrimary = AppColors.tp(context);
     final linkTextSecondary = AppColors.ts(context);
@@ -1759,9 +1705,8 @@ class _AllocationDetailScreenState
                 maxHeight: MediaQuery.of(ctx).size.height * 0.7,
               ),
               decoration: BoxDecoration(
-                color: linkSurfaceColor,
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20)),
+                color: AppColors.popup(context),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
               ),
               child: Column(
                 children: [
@@ -1769,16 +1714,6 @@ class _AllocationDetailScreenState
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                     child: Column(
                       children: [
-                        Center(
-                          child: Container(
-                            width: 36,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: linkHintColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 12),
                         Text(tr.allocLinkCategoryTitle,
                             style: TextStyle(
@@ -1802,10 +1737,6 @@ class _AllocationDetailScreenState
                                 color: linkHintColor),
                             filled: true,
                             fillColor: linkSurfaceVariant,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
                             contentPadding:
                                 const EdgeInsets.symmetric(vertical: 10),
                             isDense: true,
@@ -2473,24 +2404,13 @@ class _RevalueSheetState extends State<_RevalueSheet> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.85,
       ),
       decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: AppColors.popup(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 4),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.bd(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
           // Title
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -2560,12 +2480,6 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: (hasChanges && !_applying) ? _apply : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(CardTokens.radius)),
-                  ),
                   child: _applying
                       ? SizedBox(
                           height: 20,
@@ -2681,8 +2595,6 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                     side: BorderSide(
                         color: AppColors.accent.withValues(alpha: 0.4)),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),

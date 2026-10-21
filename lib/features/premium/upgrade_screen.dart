@@ -132,13 +132,6 @@ class UpgradeScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: AppColors.onAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    ),
-                  ),
                   child: Text(
                     l.upgradeButton,
                     style: const TextStyle(

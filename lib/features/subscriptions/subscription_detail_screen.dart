@@ -573,10 +573,6 @@ class _SubscriptionDetailScreenState
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.overspent,
                     side: const BorderSide(color: AppColors.overspent),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -594,10 +590,6 @@ class _SubscriptionDetailScreenState
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
                     side: BorderSide(color: AppColors.accent),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),

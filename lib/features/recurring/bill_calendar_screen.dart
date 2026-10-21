@@ -98,26 +98,12 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
     final date = DateTime(_viewMonth.year, _viewMonth.month, day);
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Text(
               DateFormat('EEEE, MMMM d').format(date),

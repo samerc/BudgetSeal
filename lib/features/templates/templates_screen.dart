@@ -273,12 +273,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   hintStyle: TextStyle(color: AppColors.th(context)),
                   prefixIcon: Icon(Icons.search_rounded,
                       size: 20, color: AppColors.th(context)),
-                  filled: true,
-                  fillColor: AppColors.sfv(context),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   isDense: true,
                 ),
@@ -645,8 +639,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
     final tr = S.of(context);
-    final tmplSurface = AppColors.sf(context);
-    final tmplSurfaceVariant = AppColors.sfv(context);
     final tmplTextPrimary = AppColors.tp(context);
     final tmplTextSecondary = AppColors.ts(context);
     final result = await showModalBottomSheet<bool>(
@@ -660,9 +652,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           padding: EdgeInsets.fromLTRB(
               20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           decoration: BoxDecoration(
-            color: tmplSurface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
+            color: AppColors.popup(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
           ),
           child: SingleChildScrollView(
             child: Form(
@@ -671,16 +662,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: tmplSurfaceVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Text(existing != null ? tr.tmplEditTitle : tr.tmplNewTitle,
                       style: TextStyle(
@@ -817,13 +798,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                         Navigator.pop(ctx, true);
                       }
                     },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
                     child: Text(tr.tmplSaveButton,
                         style: const TextStyle(
                             fontSize: 16,

@@ -2759,9 +2759,6 @@ class SAr extends S {
   String get txTapPlus => 'اضغط + لتسجيل واحدة';
 
   @override
-  String get txAddFirst => 'أضف أول معاملة';
-
-  @override
   String txSpentOfBudget(String spent, String budget) {
     return 'أُنفق $spent من ميزانية $budget';
   }
@@ -4605,7 +4602,7 @@ class SAr extends S {
   String get settingsGoalsSub => 'أهداف الادخار وتتبع الديون';
 
   @override
-  String get settingsCustomization => 'الإعدادات والتخصيص';
+  String get settingsCustomization => 'الإعدادات';
 
   @override
   String get settingsCustomizationSub => 'المظهر، الخط، البيانات، التفضيلات';
@@ -5068,7 +5065,7 @@ class SAr extends S {
   String get tileAccentColor => 'لون التمييز';
 
   @override
-  String get tileColors => 'الألوان';
+  String get tileColors => 'ألوان المعاملات';
 
   @override
   String get tileColorsSub => 'الدخل، المصاريف والتحويلات';

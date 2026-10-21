@@ -63,8 +63,6 @@ class ObjectivesScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
                       minimumSize: Size.zero,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ],

@@ -1207,10 +1207,6 @@
   "@txTapPlus": {
     "description": "Empty state subtitle"
   },
-  "txAddFirst": "Ajoutez votre première transaction",
-  "@txAddFirst": {
-    "description": "Empty state button"
-  },
   "txSpentOfBudget": "{spent} dépensé sur un budget de {budget}",
   "@txSpentOfBudget": {
     "description": "Budget progress bar",
@@ -2861,7 +2857,7 @@
   "@settingsGoalsSub": {
     "description": "Tile subtitle"
   },
-  "settingsCustomization": "Paramètres et personnalisation",
+  "settingsCustomization": "Paramètres",
   "@settingsCustomization": {
     "description": "Tile title"
   },
@@ -3426,7 +3422,7 @@
   "@tileTheme": { "description": "Tile title" },
   "tileAccentColor": "Couleur d'accentuation",
   "@tileAccentColor": { "description": "Tile title" },
-  "tileColors": "Couleurs",
+  "tileColors": "Couleurs des transactions",
   "@tileColors": { "description": "Tile title" },
   "tileColorsSub": "Revenus, dépenses et transferts",
   "@tileColorsSub": { "description": "Tile subtitle" },

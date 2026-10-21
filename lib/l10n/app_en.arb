@@ -526,7 +526,7 @@
   "@billLoanName": {"placeholders": {"date": {"type": "String"}}},
   "billLoansCreated": "{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}",
   "@billLoansCreated": {"placeholders": {"n": {"type": "int"}}},
-  "billOweCreated": "Added to Goals & Loans: you owe {name} {amount}",
+  "billOweCreated": "Added to goals & loans: you owe {name} {amount}",
   "@billOweCreated": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}}},
   "billShare": "Share split",
   "billShareHeader": "Bill split · total {total}",
@@ -862,11 +862,11 @@
   "@commonGotIt": {
     "description": "Dismiss button"
   },
-  "commonGoBack": "Go Back",
+  "commonGoBack": "Go back",
   "@commonGoBack": {
     "description": "Dialog button"
   },
-  "commonSaveAnyway": "Save Anyway",
+  "commonSaveAnyway": "Save anyway",
   "@commonSaveAnyway": {
     "description": "Dialog button"
   },
@@ -1038,7 +1038,7 @@
   "@dashboardQuickSplit": {
     "description": "Quick action button"
   },
-  "dashboardQuickTemplates": "Quick Templates",
+  "dashboardQuickTemplates": "Quick templates",
   "@dashboardQuickTemplates": {
     "description": "Section title"
   },
@@ -1070,11 +1070,11 @@
   "@dashboardNoSpending": {
     "description": "Empty donut placeholder"
   },
-  "dashboardLast7Days": "Last 7 Days",
+  "dashboardLast7Days": "Last 7 days",
   "@dashboardLast7Days": {
     "description": "Toggle label"
   },
-  "dashboardThisMonth": "This Month",
+  "dashboardThisMonth": "This month",
   "@dashboardThisMonth": {
     "description": "Toggle label"
   },
@@ -1111,11 +1111,11 @@
   "@dashboardOtherCategory": {
     "description": "Fallback category name"
   },
-  "customizeTitle": "Customize Dashboard",
+  "customizeTitle": "Customize dashboard",
   "@customizeTitle": {
     "description": "Bottom sheet title"
   },
-  "dashboardSectionSpendingLabel": "Spending Overview",
+  "dashboardSectionSpendingLabel": "Spending overview",
   "@dashboardSectionSpendingLabel": {
     "description": "Section label"
   },
@@ -1123,7 +1123,7 @@
   "@dashboardSectionSpendingDesc": {
     "description": "Section description"
   },
-  "dashboardSectionQuickLabel": "Quick Actions",
+  "dashboardSectionQuickLabel": "Quick actions",
   "@dashboardSectionQuickLabel": {
     "description": "Section label"
   },
@@ -1131,7 +1131,7 @@
   "@dashboardSectionQuickDesc": {
     "description": "Section description"
   },
-  "dashboardSectionMoneyLabel": "Your Money",
+  "dashboardSectionMoneyLabel": "Your money",
   "@dashboardSectionMoneyLabel": {
     "description": "Section label"
   },
@@ -1139,7 +1139,7 @@
   "@dashboardSectionMoneyDesc": {
     "description": "Section description"
   },
-  "dashboardSectionActivityLabel": "Recent Activity",
+  "dashboardSectionActivityLabel": "Recent activity",
   "@dashboardSectionActivityLabel": {
     "description": "Section label"
   },
@@ -1147,7 +1147,7 @@
   "@dashboardSectionActivityDesc": {
     "description": "Section description"
   },
-  "dashboardNetWorth": "Net Worth",
+  "dashboardNetWorth": "Net worth",
   "@dashboardNetWorth": {
     "description": "Net worth label on dashboard money card"
   },
@@ -1290,7 +1290,7 @@
   "@txScrollTopTooltip": {
     "description": "FAB tooltip"
   },
-  "txSplitBillTooltip": "Split Bill",
+  "txSplitBillTooltip": "Split bill",
   "@txSplitBillTooltip": {
     "description": "FAB tooltip"
   },
@@ -1310,7 +1310,7 @@
   "@txMaxAmount": {
     "description": "Amount range hint"
   },
-  "txSelectYear": "Select Year",
+  "txSelectYear": "Select year",
   "@txSelectYear": {
     "description": "Year picker dialog title"
   },
@@ -1346,10 +1346,6 @@
   "txTapPlus": "Tap + to record one",
   "@txTapPlus": {
     "description": "Empty state subtitle"
-  },
-  "txAddFirst": "Add your first transaction",
-  "@txAddFirst": {
-    "description": "Empty state button"
   },
   "txSpentOfBudget": "Spent {spent} of {budget} budget",
   "@txSpentOfBudget": {
@@ -1414,7 +1410,7 @@
       }
     }
   },
-  "txFormNewTitle": "New Transaction",
+  "txFormNewTitle": "New transaction",
   "@txFormNewTitle": {
     "description": "AppBar title creating"
   },
@@ -1426,7 +1422,7 @@
   "@txFormTitleHint": {
     "description": "Title field hint"
   },
-  "txFormUseTemplate": "Use Template",
+  "txFormUseTemplate": "Use template",
   "@txFormUseTemplate": {
     "description": "Template button tooltip"
   },
@@ -1500,7 +1496,7 @@
   "@txFormRateNotSetTitle": {
     "description": "Dialog title"
   },
-  "txFormDuplicateTitle": "Possible Duplicate",
+  "txFormDuplicateTitle": "Possible duplicate",
   "@txFormDuplicateTitle": {
     "description": "Dialog title"
   },
@@ -1529,7 +1525,7 @@
   "@txFormAddMore": {
     "description": "Add receipts tooltip"
   },
-  "txFormScanReceipt": "Scan Receipt",
+  "txFormScanReceipt": "Scan receipt",
   "@txFormScanReceipt": {
     "description": "Receipt button"
   },
@@ -1537,7 +1533,7 @@
   "@txFormGallery": {
     "description": "Gallery button"
   },
-  "txDetailTitle": "Transaction Details",
+  "txDetailTitle": "Transaction details",
   "@txDetailTitle": {
     "description": "AppBar title"
   },
@@ -1636,7 +1632,7 @@
   "@txAfDiscard": {
     "description": "Dialog button"
   },
-  "txAfEnterTitle": "Enter Title",
+  "txAfEnterTitle": "Enter title",
   "@txAfEnterTitle": {
     "description": "Step 1 title"
   },
@@ -1644,15 +1640,15 @@
   "@txAfTransferNoteHint": {
     "description": "Transfer note hint"
   },
-  "txAfEnterAmountButton": "Enter Amount",
+  "txAfEnterAmountButton": "Enter amount",
   "@txAfEnterAmountButton": {
     "description": "Button"
   },
-  "txAfSelectCategoryButton": "Select Category",
+  "txAfSelectCategoryButton": "Select category",
   "@txAfSelectCategoryButton": {
     "description": "Button"
   },
-  "txAfSelectCategoryTitle": "Select Category",
+  "txAfSelectCategoryTitle": "Select category",
   "@txAfSelectCategoryTitle": {
     "description": "Popup title"
   },
@@ -1660,19 +1656,19 @@
   "@txAfSearchCategories": {
     "description": "Search hint"
   },
-  "txAfNewCategory": "New Category",
+  "txAfNewCategory": "New category",
   "@txAfNewCategory": {
     "description": "Button"
   },
-  "txAfEnterAmountTitle": "Enter Amount",
+  "txAfEnterAmountTitle": "Enter amount",
   "@txAfEnterAmountTitle": {
     "description": "AppBar title"
   },
-  "txAfFromAccount": "From Account",
+  "txAfFromAccount": "From account",
   "@txAfFromAccount": {
     "description": "Account label (transfer)"
   },
-  "txAfToAccount": "To Account",
+  "txAfToAccount": "To account",
   "@txAfToAccount": {
     "description": "Account label (transfer)"
   },
@@ -1680,11 +1676,11 @@
   "@txAfTapToSelect": {
     "description": "Placeholder"
   },
-  "txAfAddAccount": "Add Account",
+  "txAfAddAccount": "Add account",
   "@txAfAddAccount": {
     "description": "Button"
   },
-  "txAfExchangeRateRequired": "Exchange Rate Required",
+  "txAfExchangeRateRequired": "Exchange rate required",
   "@txAfExchangeRateRequired": {
     "description": "Section title"
   },
@@ -1742,11 +1738,11 @@
   "@txAfAddAnother": {
     "description": "Button"
   },
-  "txAfSaveTransfer": "Save Transfer",
+  "txAfSaveTransfer": "Save transfer",
   "@txAfSaveTransfer": {
     "description": "Save button"
   },
-  "txAfSaveNItems": "Save {count} Items",
+  "txAfSaveNItems": "Save {count} items",
   "@txAfSaveNItems": {
     "description": "Save button",
     "placeholders": {
@@ -1755,7 +1751,7 @@
       }
     }
   },
-  "txAfAddTransaction": "Add Transaction",
+  "txAfAddTransaction": "Add transaction",
   "@txAfAddTransaction": {
     "description": "Save button"
   },
@@ -1775,19 +1771,19 @@
   "@txWidgetItemNote": {
     "description": "Per-item note hint"
   },
-  "txListTitle": "Transaction List",
+  "txListTitle": "Transaction list",
   "@txListTitle": {
     "description": "AppBar title"
   },
-  "txListSelectLayout": "Select Layout",
+  "txListSelectLayout": "Select layout",
   "@txListSelectLayout": {
     "description": "Section title"
   },
-  "txListDateBanner": "Date Banner Total",
+  "txListDateBanner": "Date banner total",
   "@txListDateBanner": {
     "description": "Setting label"
   },
-  "txListDayTotal": "Day Total",
+  "txListDayTotal": "Day total",
   "@txListDayTotal": {
     "description": "Dropdown option"
   },
@@ -1795,7 +1791,7 @@
   "@txListNone": {
     "description": "Dropdown option"
   },
-  "txListAccountLabel": "Account Label",
+  "txListAccountLabel": "Account label",
   "@txListAccountLabel": {
     "description": "Setting title"
   },
@@ -1803,7 +1799,7 @@
   "@txListAccountSubtitle": {
     "description": "Setting subtitle"
   },
-  "txListCategoryIcon": "Category Icon",
+  "txListCategoryIcon": "Category icon",
   "@txListCategoryIcon": {
     "description": "Setting title"
   },
@@ -1819,7 +1815,7 @@
   "@txListTimeSubtitle": {
     "description": "Setting subtitle"
   },
-  "txListPreviewName": "Transaction Name",
+  "txListPreviewName": "Transaction name",
   "@txListPreviewName": {
     "description": "Preview placeholder"
   },
@@ -1827,7 +1823,7 @@
   "@txListPreviewNote": {
     "description": "Preview note"
   },
-  "billTitle": "Bill Splitter",
+  "billTitle": "Bill splitter",
   "@billTitle": {
     "description": "Screen title"
   },
@@ -1847,11 +1843,11 @@
   "@billEmptySubtitle": {
     "description": "Empty state subtitle"
   },
-  "billScanButton": "Scan Receipt",
+  "billScanButton": "Scan receipt",
   "@billScanButton": {
     "description": "Primary button"
   },
-  "billAddManually": "Add Manually",
+  "billAddManually": "Add manually",
   "@billAddManually": {
     "description": "Secondary button"
   },
@@ -1859,11 +1855,11 @@
   "@billAddItem": {
     "description": "Button"
   },
-  "billTakePhoto": "Take Photo",
+  "billTakePhoto": "Take photo",
   "@billTakePhoto": {
     "description": "Image source"
   },
-  "billFromGallery": "Choose from Gallery",
+  "billFromGallery": "Choose from gallery",
   "@billFromGallery": {
     "description": "Image source"
   },
@@ -1968,7 +1964,7 @@
       }
     }
   },
-  "billExchangeRateTitle": "Exchange Rate",
+  "billExchangeRateTitle": "Exchange rate",
   "@billExchangeRateTitle": {
     "description": "Section title"
   },
@@ -2075,7 +2071,7 @@
   "@txUndoAction": {
     "description": "Snackbar action"
   },
-  "txNewTransactionSheet": "New Transaction",
+  "txNewTransactionSheet": "New transaction",
   "@txNewTransactionSheet": {
     "description": "Sheet title"
   },
@@ -2143,7 +2139,7 @@
   "@allocHelpTooltip": {
     "description": "Tooltip"
   },
-  "allocHelpTitle": "How Envelopes Work",
+  "allocHelpTitle": "How envelopes work",
   "@allocHelpTitle": {
     "description": "Dialog title"
   },
@@ -2206,11 +2202,11 @@
   "@allocCreateHelp": {
     "description": "Empty state subtitle"
   },
-  "allocCreateButton": "Create Envelope",
+  "allocCreateButton": "Create envelope",
   "@allocCreateButton": {
     "description": "Empty state button"
   },
-  "allocNewEnvelope": "New Envelope",
+  "allocNewEnvelope": "New envelope",
   "@allocNewEnvelope": {
     "description": "AppBar title"
   },
@@ -2218,7 +2214,7 @@
   "@allocFallbackName": {
     "description": "Fallback name"
   },
-  "allocEditSettings": "Edit Settings",
+  "allocEditSettings": "Edit settings",
   "@allocEditSettings": {
     "description": "Menu item"
   },
@@ -2226,7 +2222,7 @@
   "@allocWithdrawMenu": {
     "description": "Menu item"
   },
-  "allocRevalueMenu": "Revalue Balances",
+  "allocRevalueMenu": "Revalue balances",
   "@allocRevalueMenu": {
     "description": "Menu item"
   },
@@ -2234,11 +2230,11 @@
   "@allocArchiveMenu": {
     "description": "Menu item"
   },
-  "allocCreateButtonDetail": "Create Envelope",
+  "allocCreateButtonDetail": "Create envelope",
   "@allocCreateButtonDetail": {
     "description": "Bottom button"
   },
-  "allocSaveChanges": "Save Changes",
+  "allocSaveChanges": "Save changes",
   "@allocSaveChanges": {
     "description": "Bottom button"
   },
@@ -2294,7 +2290,7 @@
   "@allocBudgetAmount": {
     "description": "Field label"
   },
-  "allocLinkCategory": "Link Category",
+  "allocLinkCategory": "Link category",
   "@allocLinkCategory": {
     "description": "Button"
   },
@@ -2302,7 +2298,7 @@
   "@allocFromUnallocated": {
     "description": "Fund sheet subtitle"
   },
-  "allocFundAnyway": "Fund Anyway",
+  "allocFundAnyway": "Fund anyway",
   "@allocFundAnyway": {
     "description": "Dialog button"
   },
@@ -2318,7 +2314,7 @@
   "@allocSpendingHistory": {
     "description": "Section header"
   },
-  "allocWithdrawTitle": "Withdraw from Savings",
+  "allocWithdrawTitle": "Withdraw from savings",
   "@allocWithdrawTitle": {
     "description": "Sheet title"
   },
@@ -2362,11 +2358,11 @@
   "@allocTotalAdjustment": {
     "description": "Label"
   },
-  "allocApplyRevaluation": "Apply Revaluation",
+  "allocApplyRevaluation": "Apply revaluation",
   "@allocApplyRevaluation": {
     "description": "Button"
   },
-  "allocArchiveTitle": "Archive Envelope",
+  "allocArchiveTitle": "Archive envelope",
   "@allocArchiveTitle": {
     "description": "Dialog title"
   },
@@ -2378,15 +2374,15 @@
   "@allocArchived": {
     "description": "Snackbar"
   },
-  "allocDeleteTitle": "Delete Envelope",
+  "allocDeleteTitle": "Delete envelope",
   "@allocDeleteTitle": {
     "description": "Dialog title"
   },
-  "allocArchiveInstead": "Archive Instead",
+  "allocArchiveInstead": "Archive instead",
   "@allocArchiveInstead": {
     "description": "Dialog button"
   },
-  "allocDeletePermanently": "Delete Permanently",
+  "allocDeletePermanently": "Delete permanently",
   "@allocDeletePermanently": {
     "description": "Dialog button"
   },
@@ -2424,24 +2420,24 @@
   "allocOverFundingTitle": "Over-funding",
   "allocOverFundingMsg": "You're assigning {deficit} more than your available {available} unallocated balance.\n\nYour unallocated balance will go negative. Continue anyway?",
   "@allocOverFundingMsg": { "placeholders": { "deficit": { "type": "String" }, "available": { "type": "String" } } },
-  "allocFundedNote": "Funded from Unallocated",
+  "allocFundedNote": "Funded from unallocated",
   "allocFundedSuccess": "Funded {amount} to {name}",
   "@allocFundedSuccess": { "placeholders": { "amount": { "type": "String" }, "name": { "type": "String" } } },
   "allocFundError": "Could not fund envelope. Please try again.",
   "allocEntryFunded": "Funded",
   "allocEntrySpent": "Spent",
   "allocEntryAdjustment": "Adjustment",
-  "allocEntryPeriodReset": "Period Reset",
-  "allocEntryCarryForward": "Carried Forward",
-  "allocWithdrawDesc": "Move money from this envelope back to Unallocated.",
+  "allocEntryPeriodReset": "Period reset",
+  "allocEntryCarryForward": "Carried forward",
+  "allocWithdrawDesc": "Move money from this envelope back to unallocated.",
   "allocWithdrawAmountLabel": "Amount to withdraw",
-  "allocWithdrawSuccess": "Withdrew {amount} to Unallocated",
+  "allocWithdrawSuccess": "Withdrew {amount} to unallocated",
   "@allocWithdrawSuccess": { "placeholders": { "amount": { "type": "String" } } },
-  "allocLinkCategoryTitle": "Link a Category",
+  "allocLinkCategoryTitle": "Link a category",
   "allocSearchCategories": "Search categories...",
   "allocNoMatchingCategories": "No matching categories",
   "allocAllCategoriesLinked": "All categories are already linked to envelopes",
-  "allocRevalueForeignTitle": "Revalue Foreign Balances",
+  "allocRevalueForeignTitle": "Revalue foreign balances",
   "allocFetch": "Fetch",
   "allocRevalApplied": "Revaluation applied",
   "allocRevalError": "Could not apply revaluation. Please try again.",
@@ -2452,7 +2448,7 @@
   "allocDeleteAndMore": "and {count} more",
   "@allocDeleteAndMore": { "placeholders": { "count": { "type": "int" } } },
   "allocDeleteConsequences": "Deleting will:\n  \u2022 Unlink all categories from this envelope\n  \u2022 Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.",
-  "allocDeleteNoLinksTitle": "Delete Envelope Permanently",
+  "allocDeleteNoLinksTitle": "Delete envelope permanently",
   "allocDeleteNoLinksMsg": "This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.",
   "allocDeleteError": "Could not delete. Please try again.",
   "allocEnvelopeCreated": "Envelope created",
@@ -2465,7 +2461,7 @@
   "@allocDailyBudget": { "description": "Daily budget remaining", "placeholders": { "amount": { "type": "String" }, "days": { "type": "int" } } },
   "allocOtherCurrencies": "{count,plural, =1{+ 1 other currency} other{+ {count} other currencies}}",
   "@allocOtherCurrencies": { "placeholders": { "count": { "type": "int" } } },
-  "allocGoalsLoans": "Goals & Loans",
+  "allocGoalsLoans": "Goals & loans",
   "allocGoalsCount": "{count,plural, =1{1 goal} other{{count} goals}}",
   "@allocGoalsCount": { "placeholders": { "count": { "type": "int" } } },
   "allocLoansCount": "{count,plural, =1{1 loan} other{{count} loans}}",
@@ -2476,7 +2472,7 @@
   "allocNEnvelopesNeedReset": "{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}",
   "@allocNEnvelopesNeedReset": { "placeholders": { "count": { "type": "int" } } },
 
-  "fundTitle": "Fund Envelopes",
+  "fundTitle": "Fund envelopes",
   "@fundTitle": {
     "description": "AppBar title"
   },
@@ -2485,10 +2481,10 @@
   "fundHowTitle": "How does funding work?",
   "fundStep1": "Check your unallocated balance \u2014 this is money you haven't assigned to any envelope yet.",
   "fundStep2": "Enter how much to put in each envelope, or use \"Quick Fill\" to auto-fill periodic envelopes up to their target.",
-  "fundStep3": "Tap \"Fund All\" to move the money into your envelopes.",
+  "fundStep3": "Tap \"Fund all\" to move the money into your envelopes.",
   "fundAvailableToDistribute": "Available to distribute",
   "fundExceedsWarning": "Total exceeds available unallocated funds",
-  "fundQuickFill": "Quick Fill",
+  "fundQuickFill": "Quick fill",
   "fundQuickFillDesc": "{count,plural, =1{Auto-fill 1 periodic envelope up to its target} other{Auto-fill {count} periodic envelopes up to their target}}",
   "@fundQuickFillDesc": { "placeholders": { "count": { "type": "int" } } },
   "fundAllAtTarget": "All periodic envelopes are at their target",
@@ -2498,7 +2494,7 @@
   "fundFill": "Fill {amount}",
   "@fundFill": { "placeholders": { "amount": { "type": "String" } } },
   "fundEnterAmounts": "Enter amounts to fund",
-  "fundAllWithTotal": "Fund All  ({total})",
+  "fundAllWithTotal": "Fund all  ({total})",
   "@fundAllWithTotal": { "placeholders": { "total": { "type": "String" } } },
   "fundOverfundingTitle": "Over-funding",
   "@fundOverfundingTitle": {
@@ -2513,11 +2509,11 @@
       }
     }
   },
-  "fundAnyway": "Fund Anyway",
+  "fundAnyway": "Fund anyway",
   "@fundAnyway": {
     "description": "Dialog button"
   },
-  "fundNote": "Funded from Unallocated",
+  "fundNote": "Funded from unallocated",
   "@fundNote": {
     "description": "Ledger note"
   },
@@ -2537,7 +2533,7 @@
   "@acctTapPlus": {
     "description": "Empty state subtitle"
   },
-  "acctTotalBalance": "Total Balance",
+  "acctTotalBalance": "Total balance",
   "@acctTotalBalance": {
     "description": "Card header"
   },
@@ -2545,7 +2541,7 @@
   "@acctAddTooltip": {
     "description": "FAB tooltip"
   },
-  "acctNewTitle": "New Account",
+  "acctNewTitle": "New account",
   "@acctNewTitle": {
     "description": "AppBar title"
   },
@@ -2567,8 +2563,8 @@
   },
   "acctAdjustBalance": "Reconcile balance",
   "@acctAdjustBalance": { "description": "Menu item" },
-  "acctHideArchived": "Hide Archived",
-  "acctShowArchived": "Show Archived",
+  "acctHideArchived": "Hide archived",
+  "acctShowArchived": "Show archived",
   "acctSortByName": "Sort by name",
   "acctSortByBalance": "Sort by balance",
   "acctSortByType": "Sort by type",
@@ -2576,18 +2572,18 @@
   "@acctTravelWallet": { "placeholders": { "currency": { "type": "String" } } },
   "acctArchived": "Archived",
   "acctNoArchived": "No archived accounts",
-  "acctUnarchiveTitle": "Unarchive Account",
+  "acctUnarchiveTitle": "Unarchive account",
   "acctUnarchiveMsg": "Restore \"{name}\" to your active accounts?",
   "@acctUnarchiveMsg": { "placeholders": { "name": { "type": "String" } } },
   "acctUnarchive": "Unarchive",
   "acctUnarchived": "{name} unarchived",
   "@acctUnarchived": { "placeholders": { "name": { "type": "String" } } },
-  "acctCurrentBalance": "Current Balance",
+  "acctCurrentBalance": "Current balance",
   "acctBackFromTrip": "Back from your trip?",
   "acctConvertBackDesc": "Convert your remaining {currency} balance back and close this travel wallet.",
   "@acctConvertBackDesc": { "placeholders": { "currency": { "type": "String" } } },
-  "acctConvertBackClose": "Convert Back & Close",
-  "acctSettings": "Account Settings",
+  "acctConvertBackClose": "Convert back & close",
+  "acctSettings": "Account settings",
   "acctNameSection": "Name",
   "acctAccountName": "Account name",
   "acctTypeSection": "Type",
@@ -2607,25 +2603,25 @@
   "acctCurrentBalanceLabel": "Current balance: {amount}",
   "@acctCurrentBalanceLabel": { "placeholders": { "amount": { "type": "String" } } },
   "acctEnterRealBalance": "Enter the real balance",
-  "acctApplyAdjustment": "Apply Adjustment",
+  "acctApplyAdjustment": "Apply adjustment",
   "acctBalanceAdjustment": "Balance adjustment",
   "acctBalanceAdjustedBy": "Balance adjusted by {amount}",
   "@acctBalanceAdjustedBy": { "placeholders": { "amount": { "type": "String" } } },
-  "acctConvertBack": "Convert Back",
+  "acctConvertBack": "Convert back",
   "acctConvertBackMsg": "Convert {amount} back to your account",
   "@acctConvertBackMsg": { "placeholders": { "amount": { "type": "String" } } },
   "acctTransferTo": "Transfer to",
   "acctAmountReceived": "Amount received",
-  "acctConvertArchive": "Convert & Archive",
+  "acctConvertArchive": "Convert & archive",
   "acctNoTransferTarget": "No account to transfer to",
   "acctConvertedBack": "Converted back {amount} and archived",
   "@acctConvertedBack": { "placeholders": { "amount": { "type": "String" } } },
   "acctSomethingWrong": "Something went wrong. Please try again.",
-  "acctArchiveTitle": "Archive Account",
+  "acctArchiveTitle": "Archive account",
   "acctArchiveMsg": "This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.",
-  "acctDeleteTitle": "Delete Account Permanently",
+  "acctDeleteTitle": "Delete account permanently",
   "acctDeleteMsg": "This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.",
-  "acctArchiveInstead": "Archive Instead",
+  "acctArchiveInstead": "Archive instead",
   "acctHasTxnsMsg": "This account has {count} transaction(s). Archive it to keep everything but hide it, or delete it along with those transactions.",
   "@acctHasTxnsMsg": {"placeholders": {"count": {"type": "int"}}},
   "acctDeleteWithTxns": "Delete with transactions",
@@ -2660,11 +2656,11 @@
   "catUnarchive": "Unarchive",
   "catRestored": "Category restored",
   "catArchived": "Category archived",
-  "catDeleteTitle": "Delete Category",
+  "catDeleteTitle": "Delete category",
   "catDeleteNoTx": "This category has no transactions. Delete permanently?",
   "catDeleted": "Category deleted",
-  "catNewTitle": "New Category",
-  "catEditTitle": "Edit Category",
+  "catNewTitle": "New category",
+  "catEditTitle": "Edit category",
   "catName": "Name",
   "catParent": "Parent",
   "catNone": "None",
@@ -2730,7 +2726,7 @@
       }
     }
   },
-  "billCalTitle": "Bill Calendar",
+  "billCalTitle": "Bill calendar",
   "@billCalTitle": {
     "description": "AppBar title"
   },
@@ -2751,7 +2747,7 @@
   "@billCalNoUpcoming": {
     "description": "Empty state"
   },
-  "upcomingTitle": "Upcoming Bills",
+  "upcomingTitle": "Upcoming bills",
   "@upcomingTitle": {
     "description": "AppBar title"
   },
@@ -2878,11 +2874,11 @@
   "@subDetailPresent": {
     "description": "Date suffix"
   },
-  "subDetailChangeCancel": "Change Cancel Date",
+  "subDetailChangeCancel": "Change cancel date",
   "@subDetailChangeCancel": {
     "description": "Button"
   },
-  "subDetailSetCancel": "Set Cancellation Date",
+  "subDetailSetCancel": "Set cancellation date",
   "@subDetailSetCancel": {
     "description": "Button"
   },
@@ -2970,7 +2966,7 @@
   "@tmplDeleteMsg": {
     "description": "Dialog content"
   },
-  "tmplNewTitle": "New Template",
+  "tmplNewTitle": "New template",
   "@tmplNewTitle": {
     "description": "Sheet title"
   },
@@ -2986,11 +2982,11 @@
   "@tmplCategoryOptional": {
     "description": "Field label"
   },
-  "tmplSaveButton": "Save Template",
+  "tmplSaveButton": "Save template",
   "@tmplSaveButton": {
     "description": "Button"
   },
-  "objTitle": "Goals & Loans",
+  "objTitle": "Goals & loans",
   "@objTitle": {
     "description": "Screen title"
   },
@@ -3037,7 +3033,7 @@
       }
     }
   },
-  "objNewTitle": "New Objective",
+  "objNewTitle": "New objective",
   "@objNewTitle": {
     "description": "AppBar title"
   },
@@ -3060,23 +3056,23 @@
   "@objNoAccounts": {
     "description": "Snackbar"
   },
-  "objRecordPayment": "Record Payment",
+  "objRecordPayment": "Record payment",
   "@objRecordPayment": {
     "description": "Sheet/button"
   },
-  "objAddFunds": "Add Funds",
+  "objAddFunds": "Add funds",
   "@objAddFunds": {
     "description": "Sheet/button"
   },
-  "objRecordReceived": "Record Payment Received",
+  "objRecordReceived": "Record payment received",
   "@objRecordReceived": {
     "description": "Button"
   },
-  "objRecordSent": "Record Payment Sent",
+  "objRecordSent": "Record payment sent",
   "@objRecordSent": {
     "description": "Button"
   },
-  "objSaveFromAccount": "Save from Account",
+  "objSaveFromAccount": "Save from account",
   "@objSaveFromAccount": {
     "description": "Button"
   },
@@ -3132,7 +3128,7 @@
   "@objColorSection": {
     "description": "Section header"
   },
-  "objDeleteTitle": "Delete Objective",
+  "objDeleteTitle": "Delete objective",
   "@objDeleteTitle": {
     "description": "Dialog title"
   },
@@ -3208,7 +3204,7 @@
   "@settingsGoalsSub": {
     "description": "Tile subtitle"
   },
-  "settingsCustomization": "Settings & Customization",
+  "settingsCustomization": "Settings",
   "@settingsCustomization": {
     "description": "Tile title"
   },
@@ -3244,7 +3240,7 @@
   "@themeTitle": {
     "description": "Picker title"
   },
-  "autofillTitle": "Auto-fill Settings",
+  "autofillTitle": "Auto-fill settings",
   "@autofillTitle": {
     "description": "Sheet title"
   },
@@ -3292,7 +3288,7 @@
   "@autofillOverrideSub": {
     "description": "Subtitle"
   },
-  "resetTitle": "Reset Everything",
+  "resetTitle": "Reset everything",
   "@resetTitle": {
     "description": "Dialog title"
   },
@@ -3300,11 +3296,11 @@
   "@resetContent": {
     "description": "Dialog content"
   },
-  "resetButton": "Delete Everything",
+  "resetButton": "Delete everything",
   "@resetButton": {
     "description": "Destructive button"
   },
-  "txColorsTitle": "Transaction Colors",
+  "txColorsTitle": "Transaction colors",
   "@txColorsTitle": {
     "description": "Sheet title"
   },
@@ -3312,15 +3308,15 @@
   "@txColorsDesc": {
     "description": "Description"
   },
-  "txColorsReset": "Reset to Defaults",
+  "txColorsReset": "Reset to defaults",
   "@txColorsReset": {
     "description": "Button"
   },
-  "householdNameTitle": "Household Name",
+  "householdNameTitle": "Household name",
   "@householdNameTitle": {
     "description": "Dialog title"
   },
-  "tileTravelExchange": "Travel Exchange",
+  "tileTravelExchange": "Travel exchange",
   "@tileTravelExchange": {
     "description": "Tile title"
   },
@@ -3336,11 +3332,11 @@
   "@tileSubscriptions": {
     "description": "Tile title"
   },
-  "tileGoalsLoans": "Goals & Loans",
+  "tileGoalsLoans": "Goals & loans",
   "@tileGoalsLoans": {
     "description": "Tile title"
   },
-  "syncTitle": "Cloud Sync",
+  "syncTitle": "Cloud sync",
   "@syncTitle": {
     "description": "AppBar title"
   },
@@ -3364,11 +3360,11 @@
   "@syncConnectPrompt": {
     "description": "Subtitle"
   },
-  "syncNow": "Sync Now",
+  "syncNow": "Sync now",
   "@syncNow": {
     "description": "Button"
   },
-  "syncShareHousehold": "Share Household",
+  "syncShareHousehold": "Share household",
   "@syncShareHousehold": {
     "description": "Button / sheet title"
   },
@@ -3388,7 +3384,7 @@
   "@syncProviderInfo": {
     "description": "Info text"
   },
-  "syncConnectionFailed": "Connection Failed",
+  "syncConnectionFailed": "Connection failed",
   "@syncConnectionFailed": {
     "description": "Dialog title"
   },
@@ -3416,15 +3412,15 @@
   "@syncSharing": {
     "description": "Button"
   },
-  "syncGenerateInvite": "Generate Invite Code",
+  "syncGenerateInvite": "Generate invite code",
   "@syncGenerateInvite": {
     "description": "Button"
   },
-  "syncInviteCode": "Invite Code",
+  "syncInviteCode": "Invite code",
   "@syncInviteCode": {
     "description": "Label"
   },
-  "syncShareCode": "Share Code",
+  "syncShareCode": "Share code",
   "@syncShareCode": {
     "description": "Button"
   },
@@ -3432,7 +3428,7 @@
   "@syncValidEmailError": {
     "description": "Validation"
   },
-  "syncEncryptionTitle": "Sync Encryption",
+  "syncEncryptionTitle": "Sync encryption",
   "@syncEncryptionTitle": {
     "description": "Card title"
   },
@@ -3448,7 +3444,7 @@
   "@syncGdriveWarning": {
     "description": "Warning"
   },
-  "syncSetPasswordTitle": "Set Sync Password",
+  "syncSetPasswordTitle": "Set sync password",
   "@syncSetPasswordTitle": {
     "description": "Dialog title"
   },
@@ -3464,11 +3460,11 @@
   "@syncPasswordHint": {
     "description": "Field hint"
   },
-  "syncConfirmPassword": "Confirm Password",
+  "syncConfirmPassword": "Confirm password",
   "@syncConfirmPassword": {
     "description": "Field label"
   },
-  "syncSetPasswordButton": "Set Password",
+  "syncSetPasswordButton": "Set password",
   "@syncSetPasswordButton": {
     "description": "Button"
   },
@@ -3480,7 +3476,7 @@
   "@syncEncryptionEnabled": {
     "description": "Snackbar"
   },
-  "syncRemoveEncryptionTitle": "Remove Encryption?",
+  "syncRemoveEncryptionTitle": "Remove encryption?",
   "@syncRemoveEncryptionTitle": {
     "description": "Dialog title"
   },
@@ -3492,11 +3488,11 @@
   "@syncEncryptionRemoved": {
     "description": "Snackbar"
   },
-  "backupTitle": "Backup & Restore",
+  "backupTitle": "Backup & restore",
   "@backupTitle": {
     "description": "AppBar title"
   },
-  "backupAutoTitle": "Automatic Backups",
+  "backupAutoTitle": "Automatic backups",
   "@backupAutoTitle": {
     "description": "Card title"
   },
@@ -3545,7 +3541,7 @@
       }
     }
   },
-  "backupManualTitle": "Manual Backup",
+  "backupManualTitle": "Manual backup",
   "@backupManualTitle": {
     "description": "Card title"
   },
@@ -3557,7 +3553,7 @@
   "@backupExporting": {
     "description": "Button"
   },
-  "backupExportShare": "Export & Share",
+  "backupExportShare": "Export & share",
   "@backupExportShare": {
     "description": "Button"
   },
@@ -3569,7 +3565,7 @@
   "@backupRestoreDesc": {
     "description": "Help text"
   },
-  "backupRestoreFromFile": "Restore from File",
+  "backupRestoreFromFile": "Restore from file",
   "@backupRestoreFromFile": {
     "description": "Button"
   },
@@ -3577,7 +3573,7 @@
   "@backupLocalSection": {
     "description": "Section header"
   },
-  "backupRestoreDialogTitle": "Restore Backup",
+  "backupRestoreDialogTitle": "Restore backup",
   "@backupRestoreDialogTitle": {
     "description": "Dialog title"
   },
@@ -3605,7 +3601,7 @@
   "@backupInvalid": {
     "description": "Error"
   },
-  "ieTitle": "Import & Export",
+  "ieTitle": "Import & export",
   "@ieTitle": {
     "description": "AppBar title"
   },
@@ -3625,7 +3621,7 @@
   "@ieExportCsvSub": {
     "description": "Tile subtitle"
   },
-  "ieExportReport": "Export Report",
+  "ieExportReport": "Export report",
   "@ieExportReport": {
     "description": "Tile title"
   },
@@ -3633,11 +3629,11 @@
   "@ieExportReportSub": {
     "description": "Tile subtitle"
   },
-  "exportDataTitle": "Export Data",
+  "exportDataTitle": "Export data",
   "@exportDataTitle": {
     "description": "AppBar title for CSV export"
   },
-  "exportTransTitle": "Export Transactions",
+  "exportTransTitle": "Export transactions",
   "@exportTransTitle": {
     "description": "Card title"
   },
@@ -3645,11 +3641,11 @@
   "@exportTransDesc": {
     "description": "Card description"
   },
-  "exportReportTitle": "Export Report",
+  "exportReportTitle": "Export report",
   "@exportReportTitle": {
     "description": "AppBar title"
   },
-  "exportMonthlyTitle": "Monthly Report",
+  "exportMonthlyTitle": "Monthly report",
   "@exportMonthlyTitle": {
     "description": "Card title"
   },
@@ -3661,11 +3657,11 @@
   "@exportGenerating": {
     "description": "Button"
   },
-  "exportGenerateShare": "Generate & Share",
+  "exportGenerateShare": "Generate & share",
   "@exportGenerateShare": {
     "description": "Button"
   },
-  "exportSpendingByCat": "Spending by Category",
+  "exportSpendingByCat": "Spending by category",
   "@exportSpendingByCat": {
     "description": "HTML section"
   },
@@ -3673,7 +3669,7 @@
   "@notifTitle": {
     "description": "AppBar title"
   },
-  "notifDailyTitle": "Daily Reminder",
+  "notifDailyTitle": "Daily reminder",
   "@notifDailyTitle": {
     "description": "Card title"
   },
@@ -3693,7 +3689,7 @@
   "@notifCustomMessage": {
     "description": "Hint"
   },
-  "notifEnvelopeTitle": "Envelope Alerts",
+  "notifEnvelopeTitle": "Envelope alerts",
   "@notifEnvelopeTitle": {
     "description": "Card title"
   },
@@ -3701,7 +3697,7 @@
   "@notifEnvelopeDesc": {
     "description": "Description"
   },
-  "notifBillsTitle": "Upcoming Bills",
+  "notifBillsTitle": "Upcoming bills",
   "@notifBillsTitle": {
     "description": "Card title"
   },
@@ -3709,7 +3705,7 @@
   "@notifBillsDesc": {
     "description": "Description"
   },
-  "fxTitle": "Exchange Rates",
+  "fxTitle": "Exchange rates",
   "@fxTitle": {
     "description": "AppBar title"
   },
@@ -3745,7 +3741,7 @@
   "@aboutCredit": {
     "description": "Credit line"
   },
-  "aboutPrivacyTerms": "Privacy & Terms",
+  "aboutPrivacyTerms": "Privacy & terms",
   "@aboutPrivacyTerms": { "description": "Link label" },
   "aboutLicenses": "Licenses",
   "@aboutLicenses": { "description": "Link label" },
@@ -3761,9 +3757,9 @@
   "@settingsPreferencesSection": { "description": "Section header" },
   "settingsSecuritySection": "Security",
   "@settingsSecuritySection": { "description": "Section header" },
-  "tileRecurringBills": "Recurring & Bills",
+  "tileRecurringBills": "Recurring & bills",
   "@tileRecurringBills": { "description": "Tile title" },
-  "tileBillSplitter": "Bill Splitter",
+  "tileBillSplitter": "Bill splitter",
   "@tileBillSplitter": { "description": "Tile title" },
   "tileHelpGuide": "Help Guide",
   "@tileHelpGuide": { "description": "Tile title" },
@@ -3771,45 +3767,45 @@
   "@settingsHelpSub": { "description": "Tile subtitle" },
   "tileTheme": "Theme",
   "@tileTheme": { "description": "Tile title" },
-  "tileAccentColor": "Accent Color",
+  "tileAccentColor": "Accent color",
   "@tileAccentColor": { "description": "Tile title" },
-  "tileColors": "Colors",
+  "tileColors": "Transaction colors",
   "@tileColors": { "description": "Tile title" },
   "tileColorsSub": "Income, expense & transfer",
   "@tileColorsSub": { "description": "Tile subtitle" },
-  "tileEntryMode": "Entry Mode",
+  "tileEntryMode": "Entry mode",
   "@tileEntryMode": { "description": "Tile title" },
   "tileAutofill": "Auto-fill",
   "@tileAutofill": { "description": "Tile title" },
   "tileAutofillSub": "Pre-fill fields from last transaction",
   "@tileAutofillSub": { "description": "Tile subtitle" },
-  "tileStartScreen": "Start Screen",
+  "tileStartScreen": "Start screen",
   "@tileStartScreen": { "description": "Tile title" },
   "tileFont": "Font",
   "@tileFont": { "description": "Tile title" },
-  "tileTextSize": "Text Size",
+  "tileTextSize": "Text size",
   "@tileTextSize": { "description": "Tile title" },
-  "tileTxList": "Transaction List",
+  "tileTxList": "Transaction list",
   "@tileTxList": { "description": "Tile title" },
   "tileTxListSub": "Layout, icons, date banner",
   "@tileTxListSub": { "description": "Tile subtitle" },
-  "tileCloudSync": "Cloud Sync",
+  "tileCloudSync": "Cloud sync",
   "@tileCloudSync": { "description": "Tile title" },
   "tileCloudSyncSub": "Sync across devices",
   "@tileCloudSyncSub": { "description": "Tile subtitle" },
-  "tileShareHousehold": "Share Household",
+  "tileShareHousehold": "Share household",
   "@tileShareHousehold": { "description": "Tile title" },
   "tileShareHouseholdConnected": "Invite someone to share your data",
   "@tileShareHouseholdConnected": { "description": "Tile subtitle when connected" },
-  "tileShareHouseholdDisconnected": "Connect Cloud Sync first to share",
+  "tileShareHouseholdDisconnected": "Connect cloud sync first to share",
   "@tileShareHouseholdDisconnected": { "description": "Tile subtitle when not connected" },
   "tileShareHouseholdSnackbar": "Set up Cloud Sync with Google Drive first to share your household.",
   "@tileShareHouseholdSnackbar": { "description": "Snackbar message" },
-  "tileBackupRestore": "Backup & Restore",
+  "tileBackupRestore": "Backup & restore",
   "@tileBackupRestore": { "description": "Tile title" },
   "tileBackupRestoreSub": "Export or restore database",
   "@tileBackupRestoreSub": { "description": "Tile subtitle" },
-  "tileImportExport": "Import & Export",
+  "tileImportExport": "Import & export",
   "@tileImportExport": { "description": "Tile title" },
   "tileImportExportSub": "CSV import, export, and reports",
   "@tileImportExportSub": { "description": "Tile subtitle" },
@@ -3817,47 +3813,47 @@
   "@tileNotifications": { "description": "Tile title" },
   "tileNotificationsSub": "Daily reminder, envelope & bill alerts",
   "@tileNotificationsSub": { "description": "Tile subtitle" },
-  "tileHealthCheck": "Health Check",
+  "tileHealthCheck": "Health check",
   "@tileHealthCheck": { "description": "Tile title" },
   "tileHealthCheckSub": "Verify data integrity & repair",
   "@tileHealthCheckSub": { "description": "Tile subtitle" },
-  "tileSyncReceipts": "Sync Receipts",
+  "tileSyncReceipts": "Sync receipts",
   "@tileSyncReceipts": { "description": "Tile title" },
   "tileSyncReceiptsOn": "Upload receipt photos to cloud storage",
   "@tileSyncReceiptsOn": { "description": "Subtitle when enabled" },
   "tileSyncReceiptsOff": "Receipts are stored on this device only",
   "@tileSyncReceiptsOff": { "description": "Subtitle when disabled" },
-  "tileBaseCurrency": "Base Currency",
+  "tileBaseCurrency": "Base currency",
   "@tileBaseCurrency": { "description": "Tile title" },
-  "tilePeriodStartDay": "Period Start Day",
+  "tilePeriodStartDay": "Period start day",
   "@tilePeriodStartDay": { "description": "Tile title" },
   "tilePeriodStartDayDesc": "The day of the month when a new budget period starts.",
   "@tilePeriodStartDayDesc": { "description": "Description" },
-  "tileCurrencySymbols": "Currency Symbols",
+  "tileCurrencySymbols": "Currency symbols",
   "@tileCurrencySymbols": { "description": "Tile title" },
   "tileCurrencySymbolsSub": "Override how currencies are displayed",
   "@tileCurrencySymbolsSub": { "description": "Tile subtitle" },
-  "tileNumberFormat": "Number Format",
+  "tileNumberFormat": "Number format",
   "@tileNumberFormat": { "description": "Tile title" },
-  "tileDateFormat": "Date Format",
+  "tileDateFormat": "Date format",
   "@tileDateFormat": { "description": "Tile title" },
-  "tileBiometricLock": "Biometric Lock",
+  "tileBiometricLock": "Biometric lock",
   "@tileBiometricLock": { "description": "Tile title" },
   "tileBiometricSub": "Require fingerprint or face to open",
   "@tileBiometricSub": { "description": "Tile subtitle" },
-  "tileResetEverything": "Reset Everything",
+  "tileResetEverything": "Reset everything",
   "@tileResetEverything": { "description": "Tile title" },
   "tileResetSub": "Erase all data and start fresh",
   "@tileResetSub": { "description": "Tile subtitle" },
-  "entryModeTitle": "Entry Mode",
+  "entryModeTitle": "Entry mode",
   "@entryModeTitle": { "description": "Sheet title" },
   "entryModeDesc": "Choose how you add new transactions.",
   "@entryModeDesc": { "description": "Sheet description" },
-  "entryModeAssisted": "Assisted (Step-by-step)",
+  "entryModeAssisted": "Assisted (step-by-step)",
   "@entryModeAssisted": { "description": "Option title" },
   "entryModeAssistedDesc": "Guides you through adding a transaction step by step. First pick a title, then a category, then enter the amount. Best for beginners.",
   "@entryModeAssistedDesc": { "description": "Option description" },
-  "entryModeClassic": "Classic (Single form)",
+  "entryModeClassic": "Classic (single form)",
   "@entryModeClassic": { "description": "Option title" },
   "entryModeClassicDesc": "All fields on one screen. Fill in what you need and save. Faster for experienced users.",
   "@entryModeClassicDesc": { "description": "Option description" },
@@ -3869,7 +3865,7 @@
   "@themeFollowDevice": { "description": "Theme subtitle" },
   "themeAmoled": "AMOLED pure black",
   "@themeAmoled": { "description": "Theme subtitle" },
-  "accentColorTitle": "Accent Color",
+  "accentColorTitle": "Accent color",
   "@accentColorTitle": { "description": "Sheet title" },
   "accentColorSystem": "System",
   "@accentColorSystem": { "description": "Option" },
@@ -3877,19 +3873,19 @@
   "@accentColorSystemSub": { "description": "Option subtitle" },
   "accentColorSystemLabel": "System (Material You)",
   "@accentColorSystemLabel": { "description": "Setting value label" },
-  "startScreenTitle": "Start Screen",
+  "startScreenTitle": "Start screen",
   "@startScreenTitle": { "description": "Sheet title" },
   "startScreenDesc": "Opens when you launch the app.",
   "@startScreenDesc": { "description": "Sheet description" },
-  "chooseFontTitle": "Choose Font",
+  "chooseFontTitle": "Choose font",
   "@chooseFontTitle": { "description": "Sheet title" },
   "fontPreview": "The quick brown fox jumps over the lazy dog",
   "@fontPreview": { "description": "Font preview text" },
-  "textSizeTitle": "Text Size",
+  "textSizeTitle": "Text size",
   "@textSizeTitle": { "description": "Sheet title" },
   "textSizePreview": "Preview text at this size",
   "@textSizePreview": { "description": "Preview subtitle" },
-  "currencySymbolsTitle": "Currency Symbols",
+  "currencySymbolsTitle": "Currency symbols",
   "@currencySymbolsTitle": { "description": "Sheet title" },
   "currencySymbolsDesc": "Tap any currency to change how its symbol is displayed. For example, change \u0644.\u0644 to LBP.",
   "@currencySymbolsDesc": { "description": "Sheet description" },
@@ -3899,21 +3895,21 @@
   "@currencySymbolDefault": { "description": "Subtitle for overridden currency", "placeholders": { "symbol": { "type": "String" } } },
   "currencySymbolFor": "Symbol for {code}",
   "@currencySymbolFor": { "description": "Dialog title", "placeholders": { "code": { "type": "String" } } },
-  "numberFormatTitle": "Number Format",
+  "numberFormatTitle": "Number format",
   "@numberFormatTitle": { "description": "Sheet title" },
   "numberFormatDesc": "Choose how numbers are displayed throughout the app.",
   "@numberFormatDesc": { "description": "Sheet description" },
   "numberFormatPreview": "Preview",
   "@numberFormatPreview": { "description": "Label" },
-  "numberFormatThousands": "Thousands Separator",
+  "numberFormatThousands": "Thousands separator",
   "@numberFormatThousands": { "description": "Label" },
-  "numberFormatDecimal": "Decimal Separator",
+  "numberFormatDecimal": "Decimal separator",
   "@numberFormatDecimal": { "description": "Label" },
-  "numberFormatNegative": "Negative Numbers",
+  "numberFormatNegative": "Negative numbers",
   "@numberFormatNegative": { "description": "Label" },
   "numberFormatConflict": "Some options are hidden because they conflict with the decimal separator.",
   "@numberFormatConflict": { "description": "Warning text" },
-  "dateFormatTitle": "Date Format",
+  "dateFormatTitle": "Date format",
   "@dateFormatTitle": { "description": "Sheet title" },
   "biometricNotAvailable": "Biometric authentication is not available on this device",
   "@biometricNotAvailable": { "description": "Snackbar" },
@@ -3933,22 +3929,22 @@
   "@backupBannerNoBackup": { "description": "Banner message" },
   "backupBannerDaysAgo": "You haven't backed up in {days} days",
   "@backupBannerDaysAgo": { "description": "Banner message", "placeholders": { "days": { "type": "int" } } },
-  "backupNowButton": "Backup Now",
+  "backupNowButton": "Backup now",
   "@backupNowButton": { "description": "Button" },
   "syncShareInviteText": "Join my BudgetSeal household! Enter this code in the app:\n{code}",
-  "privacyTermsTitle": "Privacy & Terms",
+  "privacyTermsTitle": "Privacy & terms",
   "@privacyTermsTitle": { "description": "AppBar title" },
-  "privacyPolicyTitle": "Privacy Policy",
+  "privacyPolicyTitle": "Privacy policy",
   "@privacyPolicyTitle": { "description": "Section title" },
   "privacyLastUpdated": "Last updated: May 2026",
   "@privacyLastUpdated": { "description": "Date" },
   "privacyIntro": "BudgetSeal is designed with your privacy as a core principle. Your financial data belongs to you \u2014 we never collect, store, or transmit it to any server.",
   "@privacyIntro": { "description": "Introduction" },
-  "privacyDataStorageTitle": "1. Data Storage",
+  "privacyDataStorageTitle": "1. Data storage",
   "@privacyDataStorageTitle": { "description": "Heading" },
   "privacyDataStorageBody": "All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable Cloud Sync.",
   "@privacyDataStorageBody": { "description": "Body" },
-  "privacyCloudSyncTitle": "2. Cloud Sync (Optional)",
+  "privacyCloudSyncTitle": "2. Cloud sync (optional)",
   "@privacyCloudSyncTitle": { "description": "Heading" },
   "privacyCloudSyncBody": "If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials \u2014 authentication is handled by Google's OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).",
   "@privacyCloudSyncBody": { "description": "Body" },
@@ -3956,7 +3952,7 @@
   "@privacyWebCompanionTitle": { "description": "Heading" },
   "privacyWebCompanionBody": "The Web Companion feature runs a local HTTP server on your phone. It is only accessible from devices on the same WiFi network (private IP addresses). No data is sent to the internet. The connection is protected by a PIN, session tokens, and rate limiting. The server stops automatically after 6 hours.",
   "@privacyWebCompanionBody": { "description": "Body" },
-  "privacyAnalyticsTitle": "4. Analytics & Tracking",
+  "privacyAnalyticsTitle": "4. Analytics & tracking",
   "@privacyAnalyticsTitle": { "description": "Heading" },
   "privacyAnalyticsBody": "BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.",
   "@privacyAnalyticsBody": { "description": "Body" },
@@ -3964,7 +3960,7 @@
   "@privacyPermissionsTitle": { "description": "Heading" },
   "privacyPermissionsBody": "\u2022 Camera \u2014 used only for receipt scanning (offline OCR)\n\u2022 Notifications \u2014 daily reminders and bill alerts\n\u2022 Biometrics \u2014 optional app lock\n\u2022 Network \u2014 only for Cloud Sync and exchange rate fetching\n\u2022 Local Network \u2014 Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.",
   "@privacyPermissionsBody": { "description": "Body" },
-  "privacyReceiptsTitle": "6. Receipt Images",
+  "privacyReceiptsTitle": "6. Receipt images",
   "@privacyReceiptsTitle": { "description": "Heading" },
   "privacyReceiptsBody": "Receipt photos are stored in the app's private directory on your device. They are not uploaded anywhere unless you enable receipt sync via Google Drive. OCR processing is performed entirely offline using on-device ML.",
   "@privacyReceiptsBody": { "description": "Body" },
@@ -3972,29 +3968,29 @@
   "@privacyBackupsTitle": { "description": "Heading" },
   "privacyBackupsBody": "Automatic backups are stored locally in the app's documents directory. You control backup frequency and retention. Exported backup files are shared via the system share sheet and deleted from temporary storage afterward.",
   "@privacyBackupsBody": { "description": "Body" },
-  "termsOfUseTitle": "Terms of Use",
+  "termsOfUseTitle": "Terms of use",
   "@termsOfUseTitle": { "description": "Section title" },
   "termsAcceptanceTitle": "1. Acceptance",
   "@termsAcceptanceTitle": { "description": "Heading" },
   "termsAcceptanceBody": "By using BudgetSeal, you agree to these terms. If you do not agree, please uninstall the app.",
   "@termsAcceptanceBody": { "description": "Body" },
-  "termsIntendedUseTitle": "2. Intended Use",
+  "termsIntendedUseTitle": "2. Intended use",
   "@termsIntendedUseTitle": { "description": "Heading" },
   "termsIntendedUseBody": "BudgetSeal is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances \u2014 it does not provide financial recommendations.",
   "@termsIntendedUseBody": { "description": "Body" },
-  "termsDataAccuracyTitle": "3. Data Accuracy",
+  "termsDataAccuracyTitle": "3. Data accuracy",
   "@termsDataAccuracyTitle": { "description": "Heading" },
   "termsDataAccuracyBody": "You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.",
   "@termsDataAccuracyBody": { "description": "Body" },
-  "termsNoWarrantyTitle": "4. No Warranty",
+  "termsNoWarrantyTitle": "4. No warranty",
   "@termsNoWarrantyTitle": { "description": "Heading" },
   "termsNoWarrantyBody": "BudgetSeal is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.",
   "@termsNoWarrantyBody": { "description": "Body" },
-  "termsLiabilityTitle": "5. Limitation of Liability",
+  "termsLiabilityTitle": "5. Limitation of liability",
   "@termsLiabilityTitle": { "description": "Heading" },
   "termsLiabilityBody": "The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.",
   "@termsLiabilityBody": { "description": "Body" },
-  "termsIPTitle": "6. Intellectual Property",
+  "termsIPTitle": "6. Intellectual property",
   "@termsIPTitle": { "description": "Heading" },
   "termsIPBody": "BudgetSeal and its original content are protected by copyright. The app uses open-source libraries listed in the Licenses section of the About screen.",
   "@termsIPBody": { "description": "Body" },
@@ -4006,7 +4002,7 @@
   "@termsContactTitle": { "description": "Heading" },
   "termsContactBody": "For questions or concerns about this privacy policy or terms of use, contact: fancyshark505@gmail.com",
   "@termsContactBody": { "description": "Body" },
-  "healthTitle": "Health Check",
+  "healthTitle": "Health check",
   "@healthTitle": {
     "description": "AppBar title"
   },
@@ -4018,11 +4014,11 @@
   "@healthRerunTooltip": {
     "description": "Tooltip"
   },
-  "healthAllClear": "All Clear",
+  "healthAllClear": "All clear",
   "@healthAllClear": {
     "description": "Status title"
   },
-  "healthIssuesFound": "Issues Found",
+  "healthIssuesFound": "Issues found",
   "@healthIssuesFound": {
     "description": "Status title"
   },
@@ -4050,23 +4046,23 @@
   "@healthNever": {
     "description": "Badge value"
   },
-  "healthBalanceInvariant": "Balance Invariant",
+  "healthBalanceInvariant": "Balance invariant",
   "@healthBalanceInvariant": {
     "description": "Section"
   },
-  "healthAccountBalances": "Account Balances",
+  "healthAccountBalances": "Account balances",
   "@healthAccountBalances": {
     "description": "Section"
   },
-  "healthEnvelopeBalances": "Envelope Balances",
+  "healthEnvelopeBalances": "Envelope balances",
   "@healthEnvelopeBalances": {
     "description": "Section"
   },
-  "healthDataQuality": "Data Quality",
+  "healthDataQuality": "Data quality",
   "@healthDataQuality": {
     "description": "Section"
   },
-  "healthRepairButton": "Repair Balances",
+  "healthRepairButton": "Repair balances",
   "@healthRepairButton": {
     "description": "Button"
   },
@@ -4094,7 +4090,7 @@
   "@healthNoEnvelopes": {
     "description": "Empty state"
   },
-  "healthRepairTitle": "Repair Balances",
+  "healthRepairTitle": "Repair balances",
   "@healthRepairTitle": {
     "description": "Dialog title"
   },
@@ -4114,7 +4110,7 @@
   "@healthRepairFailed": {
     "description": "Error snackbar"
   },
-  "healthPurgeTitle": "Purge Deleted Transactions",
+  "healthPurgeTitle": "Purge deleted transactions",
   "@healthPurgeTitle": {
     "description": "Dialog title"
   },
@@ -4142,7 +4138,7 @@
   "@reportsInsightsTab": {
     "description": "Tab"
   },
-  "reportsBalanceTab": "Balance Sheet",
+  "reportsBalanceTab": "Balance sheet",
   "@reportsBalanceTab": {
     "description": "Tab"
   },
@@ -4184,7 +4180,7 @@
   "@reportsSameAsLast": {
     "description": "Comparison"
   },
-  "reportsSpendingActivity": "Spending Activity",
+  "reportsSpendingActivity": "Spending activity",
   "@reportsSpendingActivity": {
     "description": "Section title"
   },
@@ -4196,11 +4192,11 @@
   "@reportsHeatmapHelp": {
     "description": "Help text"
   },
-  "reports6MonthTrend": "6-Month Trend",
+  "reports6MonthTrend": "6-month trend",
   "@reports6MonthTrend": {
     "description": "Toggle / title"
   },
-  "reportsDailyPaceToggle": "Daily Pace",
+  "reportsDailyPaceToggle": "Daily pace",
   "@reportsDailyPaceToggle": {
     "description": "Toggle"
   },
@@ -4236,7 +4232,7 @@
   "@reportsTypicalLegend": {
     "description": "Legend"
   },
-  "reportsVelocityTitle": "Spending Velocity",
+  "reportsVelocityTitle": "Spending velocity",
   "@reportsVelocityTitle": {
     "description": "Card title"
   },
@@ -4256,19 +4252,19 @@
   "@reportsDay": {
     "description": "Stat label"
   },
-  "reportsBiggestExpense": "Biggest Expense",
+  "reportsBiggestExpense": "Biggest expense",
   "@reportsBiggestExpense": {
     "description": "Card label"
   },
-  "reportsSavingsRate": "Savings Rate",
+  "reportsSavingsRate": "Savings rate",
   "@reportsSavingsRate": {
     "description": "Card label"
   },
-  "reportsRecurringTitle": "Recurring Transactions",
+  "reportsRecurringTitle": "Recurring transactions",
   "@reportsRecurringTitle": {
     "description": "Card title"
   },
-  "reportsAgeTitle": "Age of Money",
+  "reportsAgeTitle": "Age of money",
   "@reportsAgeTitle": {
     "description": "Card title"
   },
@@ -4324,27 +4320,27 @@
   "@reportsCompareTo": {
     "description": "Sheet title"
   },
-  "reportsEndLastWeek": "End of Last Week",
+  "reportsEndLastWeek": "End of last week",
   "@reportsEndLastWeek": {
     "description": "Compare option"
   },
-  "reportsEndLastMonth": "End of Last Month",
+  "reportsEndLastMonth": "End of last month",
   "@reportsEndLastMonth": {
     "description": "Compare option"
   },
-  "reportsSameTimeLastMonth": "Same Time Last Month",
+  "reportsSameTimeLastMonth": "Same time last month",
   "@reportsSameTimeLastMonth": {
     "description": "Compare option"
   },
-  "reportsEndLastQuarter": "End of Last Quarter",
+  "reportsEndLastQuarter": "End of last quarter",
   "@reportsEndLastQuarter": {
     "description": "Compare option"
   },
-  "reportsEndLastYear": "End of Last Year",
+  "reportsEndLastYear": "End of last year",
   "@reportsEndLastYear": {
     "description": "Compare option"
   },
-  "reportsSameTimeLastYear": "Same Time Last Year",
+  "reportsSameTimeLastYear": "Same time last year",
   "@reportsSameTimeLastYear": {
     "description": "Compare option"
   },
@@ -4380,11 +4376,11 @@
   "@wcAutoStop": {
     "description": "Subtitle"
   },
-  "wcStopButton": "Stop Server",
+  "wcStopButton": "Stop server",
   "@wcStopButton": {
     "description": "Button"
   },
-  "wcStartButton": "Start Server",
+  "wcStartButton": "Start server",
   "@wcStartButton": {
     "description": "Button"
   },
@@ -4468,7 +4464,7 @@
   "@wcIosWarning": {
     "description": "Warning banner"
   },
-  "wcNoWifiTitle": "No WiFi Connection",
+  "wcNoWifiTitle": "No WiFi connection",
   "@wcNoWifiTitle": {
     "description": "Banner title"
   },
@@ -4476,15 +4472,15 @@
   "@wcNoWifiDesc": {
     "description": "Banner description"
   },
-  "wcPublicNetwork": "Public Network Detected",
+  "wcPublicNetwork": "Public network detected",
   "@wcPublicNetwork": {
     "description": "Banner title"
   },
-  "wcNetworkSecurity": "Network Security",
+  "wcNetworkSecurity": "Network security",
   "@wcNetworkSecurity": {
     "description": "Banner title"
   },
-  "wcSecurityWarning": "Security Warning",
+  "wcSecurityWarning": "Security warning",
   "@wcSecurityWarning": {
     "description": "Warning title"
   },
@@ -4840,7 +4836,7 @@
   "@monthDec": {
     "description": "Month abbreviation"
   },
-  "notifLowEnvelopesTitle": "Low Envelopes",
+  "notifLowEnvelopesTitle": "Low envelopes",
   "@notifLowEnvelopesTitle": {
     "description": "Notification title"
   },
@@ -4877,7 +4873,7 @@
       }
     }
   },
-  "notifUpcomingBillsTitle": "Upcoming Bills",
+  "notifUpcomingBillsTitle": "Upcoming bills",
   "@notifUpcomingBillsTitle": {
     "description": "Notification title"
   },
@@ -4909,7 +4905,7 @@
   "@notifBillsAndMore": {
     "description": "Notification suffix"
   },
-  "notifBudgetWarningTitle": "Budget Alert",
+  "notifBudgetWarningTitle": "Budget alert",
   "@notifBudgetWarningTitle": {
     "description": "Notification title for budget warning"
   },
@@ -4946,7 +4942,7 @@
   "@notifReminder5": {
     "description": "Notification body"
   },
-  "notifReminderChannel": "Daily Reminder",
+  "notifReminderChannel": "Daily reminder",
   "@notifReminderChannel": {
     "description": "Channel name"
   },
@@ -4954,7 +4950,7 @@
   "@notifReminderChannelDesc": {
     "description": "Channel description"
   },
-  "engineAutoCovered": "Auto-covered from Unallocated",
+  "engineAutoCovered": "Auto-covered from unallocated",
   "@engineAutoCovered": {
     "description": "Ledger note"
   },
@@ -4962,11 +4958,11 @@
   "@engineDirectIncome": {
     "description": "Ledger note"
   },
-  "engineWithdrawn": "Withdrawn to Unallocated",
+  "engineWithdrawn": "Withdrawn to unallocated",
   "@engineWithdrawn": {
     "description": "Ledger note"
   },
-  "enginePeriodReturned": "Period reset — returned to Unallocated",
+  "enginePeriodReturned": "Period reset — returned to unallocated",
   "@enginePeriodReturned": {
     "description": "Ledger note"
   },
@@ -4998,7 +4994,7 @@
   "@textScaleLarge": {
     "description": "Option"
   },
-  "textScaleExtraLarge": "Extra Large",
+  "textScaleExtraLarge": "Extra large",
   "@textScaleExtraLarge": {
     "description": "Option"
   },
@@ -5010,11 +5006,11 @@
   "@defcatFuel": {
     "description": "Default category"
   },
-  "defcatPublicTransit": "Public Transit",
+  "defcatPublicTransit": "Public transit",
   "@defcatPublicTransit": {
     "description": "Default category"
   },
-  "defcatParkingTolls": "Parking & Tolls",
+  "defcatParkingTolls": "Parking & tolls",
   "@defcatParkingTolls": {
     "description": "Default category"
   },
@@ -5074,11 +5070,11 @@
   "@defcatInvestments": {
     "description": "Default category"
   },
-  "defcatOtherIncome": "Other Income",
+  "defcatOtherIncome": "Other income",
   "@defcatOtherIncome": {
     "description": "Default category"
   },
-  "defcatFoodDrink": "Food & Drink",
+  "defcatFoodDrink": "Food & drink",
   "@defcatFoodDrink": {
     "description": "Default category preset group"
   },
@@ -5098,7 +5094,7 @@
   "@defcatTravel": {
     "description": "Default category preset group"
   },
-  "defcatDiningOut": "Dining Out",
+  "defcatDiningOut": "Dining out",
   "@defcatDiningOut": {
     "description": "Default category preset"
   },
@@ -5174,7 +5170,7 @@
   "@defcatOther": {
     "description": "Default category preset"
   },
-  "filePickerTitle": "Select BudgetSeal Sync File",
+  "filePickerTitle": "Select BudgetSeal sync file",
   "@filePickerTitle": {
     "description": "Dialog title"
   },
@@ -5390,7 +5386,7 @@
     "description": "Lock screen button"
   },
 
-  "travelTitle": "Travel Exchange",
+  "travelTitle": "Travel exchange",
   "@travelTitle": {
     "description": "Travel exchange screen title"
   },
@@ -5422,11 +5418,11 @@
   "@travelAmountReceived": {
     "description": "Travel exchange section label"
   },
-  "travelExchangeButton": "Exchange & Create Travel Wallet",
+  "travelExchangeButton": "Exchange & create travel wallet",
   "@travelExchangeButton": {
     "description": "Travel exchange submit button"
   },
-  "travelExistingWallet": "Existing Travel Wallet",
+  "travelExistingWallet": "Existing travel wallet",
   "@travelExistingWallet": {
     "description": "Travel exchange reactivate dialog title"
   },
@@ -5439,7 +5435,7 @@
       }
     }
   },
-  "travelCreateNew": "Create New",
+  "travelCreateNew": "Create new",
   "@travelCreateNew": {
     "description": "Travel exchange reactivate dialog button"
   },
@@ -5461,7 +5457,7 @@
     }
   },
 
-  "periodNewTitle": "New Period",
+  "periodNewTitle": "New period",
   "@periodNewTitle": {
     "description": "Period transition screen title"
   },
@@ -5490,7 +5486,7 @@
   "@periodAllZero": {
     "description": "Period transition empty state subtitle"
   },
-  "periodCompleteButton": "Complete Period Transition",
+  "periodCompleteButton": "Complete period transition",
   "@periodCompleteButton": {
     "description": "Period transition submit button"
   },
@@ -5506,7 +5502,7 @@
   "@periodPeriodic": {
     "description": "Period transition allocation type label"
   },
-  "periodReturnUnallocated": "Return to Unallocated",
+  "periodReturnUnallocated": "Return to unallocated",
   "@periodReturnUnallocated": {
     "description": "Period resolution option"
   },
@@ -5514,7 +5510,7 @@
   "@periodReturnDesc": {
     "description": "Period resolution option description"
   },
-  "periodCarryForward": "Carry Forward",
+  "periodCarryForward": "Carry forward",
   "@periodCarryForward": {
     "description": "Period resolution option"
   },
@@ -5535,7 +5531,7 @@
     "description": "Period resolution dropdown hint"
   },
 
-  "leftoverTitle": "Resolve Leftovers",
+  "leftoverTitle": "Resolve leftovers",
   "@leftoverTitle": {
     "description": "Leftover resolution screen title"
   },
@@ -5595,7 +5591,7 @@
   "@leftoverResolveFailed": {
     "description": "Leftover resolution error snackbar"
   },
-  "commonTryAgain": "Try Again",
+  "commonTryAgain": "Try again",
   "@commonTryAgain": {
     "description": "Error boundary retry button"
   },
@@ -5722,11 +5718,11 @@
   "@recurringCreated": { "description": "Create success snackbar" },
   "recurringUpdated": "Recurring transaction updated",
   "@recurringUpdated": { "description": "Update success snackbar" },
-  "recurringNewTitle": "New Recurring Transaction",
+  "recurringNewTitle": "New recurring transaction",
   "@recurringNewTitle": { "description": "Add sheet title" },
-  "recurringNewSubTitle": "New Subscription",
+  "recurringNewSubTitle": "New subscription",
   "@recurringNewSubTitle": { "description": "Add sheet title when subscription" },
-  "recurringEditTitle": "Edit Recurring Transaction",
+  "recurringEditTitle": "Edit recurring transaction",
   "@recurringEditTitle": { "description": "Edit sheet title" },
   "recurringFormTitleHint": "Title (e.g. Rent, Salary)",
   "@recurringFormTitleHint": { "description": "Title field label" },
@@ -5778,16 +5774,16 @@
   "@subCouldNotUpdate": { "description": "Snackbar error" },
   "helpGuideTitle": "Help Guide",
   "@helpGuideTitle": { "description": "Help screen app bar title" },
-  "receiptTakePhoto": "Take Photo",
+  "receiptTakePhoto": "Take photo",
   "@receiptTakePhoto": { "description": "Receipt picker option" },
-  "receiptChooseGallery": "Choose from Gallery",
+  "receiptChooseGallery": "Choose from gallery",
   "@receiptChooseGallery": { "description": "Receipt picker option" },
   "receiptSelectMultiple": "Select multiple photos",
   "@receiptSelectMultiple": { "description": "Receipt picker subtitle" },
 
   "importCsvTitle": "Import CSV",
   "@importCsvTitle": { "description": "Import screen app bar title" },
-  "importFromBank": "Import from Bank CSV",
+  "importFromBank": "Import from bank CSV",
   "@importFromBank": { "description": "Import screen heading" },
   "importCsvDesc": "Select a CSV export from your bank. Column roles will be auto-detected.",
   "@importCsvDesc": { "description": "Import screen description" },
@@ -5800,17 +5796,17 @@
     "description": "Row count after loading CSV",
     "placeholders": { "count": { "type": "int" }, "fileName": { "type": "String" } }
   },
-  "importColumnMapping": "Column Mapping",
+  "importColumnMapping": "Column mapping",
   "@importColumnMapping": { "description": "Section title for column mapping" },
   "importColumnMapDesc": "Assign a role to each column. Roles were auto-detected -- adjust as needed.",
   "@importColumnMapDesc": { "description": "Column mapping description" },
-  "importPreview": "Import Preview",
+  "importPreview": "Import preview",
   "@importPreview": { "description": "Section title for preview" },
   "importNoAmount": "No Amount column assigned. Please map at least one column to Amount.",
   "@importNoAmount": { "description": "Warning when no amount column mapped" },
   "importIntoAccount": "Import into account",
   "@importIntoAccount": { "description": "Account selector label" },
-  "importAssignAmount": "Please assign an Amount column",
+  "importAssignAmount": "Please assign an amount column",
   "@importAssignAmount": { "description": "Snackbar validation" },
   "importSuccess": "Imported {count} transactions",
   "@importSuccess": {
@@ -5864,9 +5860,9 @@
   "@objSettingsSection": { "description": "Section header for settings form" },
   "objTypeSection": "Type",
   "@objTypeSection": { "description": "Section header for type toggle" },
-  "objHideSettings": "Hide Settings",
+  "objHideSettings": "Hide settings",
   "@objHideSettings": { "description": "Menu item to hide settings" },
-  "objEditSettings": "Edit Settings",
+  "objEditSettings": "Edit settings",
   "@objEditSettings": { "description": "Menu item to show settings" },
   "objOfTarget": "of {amount}",
   "@objOfTarget": {
@@ -5896,7 +5892,7 @@
   },
   "healthAutoAdjustment": "Health check auto-adjustment",
   "@healthAutoAdjustment": { "description": "Ledger note for repair entries" },
-  "healthReportTitle": "BudgetSeal Health Check Report",
+  "healthReportTitle": "BudgetSeal health check report",
   "@healthReportTitle": { "description": "Share sheet title for exported report" },
   "healthAdjustmentsCreated": "{count} adjustment(s) created",
   "@healthAdjustmentsCreated": {
@@ -5980,7 +5976,7 @@
   "subCancelBodyNoTx": "This will set the cancellation date to {date}.",
   "@subCancelBodyNoTx": { "description": "Cancel subscription dialog body when there are no future transactions", "placeholders": { "date": { "type": "String" } } },
 
-  "plannedTitle": "Planned Payments",
+  "plannedTitle": "Planned payments",
   "@plannedTitle": { "description": "Screen title for planned payments" },
   "plannedSubtitle": "Plan future one-time payments",
   "@plannedSubtitle": { "description": "Settings tile subtitle for planned payments" },
@@ -5994,17 +5990,17 @@
   "@plannedPosted": { "description": "Snackbar after posting a planned payment" },
   "plannedPostFailed": "Failed to post payment",
   "@plannedPostFailed": { "description": "Snackbar when posting a planned payment fails" },
-  "plannedPostAllTitle": "Post All Payments",
+  "plannedPostAllTitle": "Post all payments",
   "@plannedPostAllTitle": { "description": "Dialog title for posting all planned payments in a month" },
   "plannedPostAllContent": "Post all {count} planned payments for {month}?",
   "@plannedPostAllContent": { "description": "Dialog body for posting all planned payments", "placeholders": { "count": { "type": "int" }, "month": { "type": "String" } } },
-  "plannedPostAll": "Post All",
+  "plannedPostAll": "Post all",
   "@plannedPostAll": { "description": "Button label to post all planned payments" },
   "plannedPostAllResult": "{count} payments posted",
   "@plannedPostAllResult": { "description": "Snackbar after posting all planned payments", "placeholders": { "count": { "type": "int" } } },
   "plannedPostAllResultPartial": "{posted} posted, {failed} failed",
   "@plannedPostAllResultPartial": { "description": "Snackbar after partial post-all", "placeholders": { "posted": { "type": "int" }, "failed": { "type": "int" } } },
-  "plannedDeleteTitle": "Delete Planned Payment",
+  "plannedDeleteTitle": "Delete planned payment",
   "@plannedDeleteTitle": { "description": "Dialog title for deleting a planned payment" },
   "plannedDeleteContent": "This payment will be permanently removed. This cannot be undone.",
   "@plannedDeleteContent": { "description": "Dialog body for deleting a planned payment" },
@@ -6018,11 +6014,11 @@
   "@plannedChipLabel": { "description": "Summary chip label (lowercase)" },
   "plannedTotalLabel": "total",
   "@plannedTotalLabel": { "description": "Summary chip label for total amount" },
-  "plannedPlanButton": "Plan Payment",
+  "plannedPlanButton": "Plan payment",
   "@plannedPlanButton": { "description": "Save button label on plan payment form" },
-  "plannedEditTitle": "Edit Planned Payment",
+  "plannedEditTitle": "Edit planned payment",
   "@plannedEditTitle": { "description": "AppBar title when editing a planned payment" },
-  "plannedTargetMonth": "Target Month",
+  "plannedTargetMonth": "Target month",
   "@plannedTargetMonth": { "description": "Label for month picker in plan payment form" },
   "plannedExactDate": "Pick exact date (optional)",
   "@plannedExactDate": { "description": "Label for exact date picker when no date selected" },
@@ -6048,27 +6044,27 @@
   "@backupLastAutoBackup": { "description": "Label showing last auto-backup time", "placeholders": { "date": { "type": "String" } } },
   "recurringFormCategory": "Category (optional)",
   "@recurringFormCategory": { "description": "Category dropdown label in recurring form" },
-  "txDetailSaveAsTemplate": "Save as Template",
+  "txDetailSaveAsTemplate": "Save as template",
   "@txDetailSaveAsTemplate": { "description": "Menu item to save transaction as template" },
   "txDetailTemplateSaved": "Template saved",
   "@txDetailTemplateSaved": { "description": "Snackbar after saving as template" },
   "txDetailTemplateError": "Could not save template",
   "@txDetailTemplateError": { "description": "Snackbar when saving template fails" },
-  "tileArabicDigits": "Arabic-Indic Numerals",
+  "tileArabicDigits": "Arabic-Indic numerals",
   "@tileArabicDigits": { "description": "Settings toggle for Arabic numeral style" },
   "upgradeTitle": "Upgrade to Premium",
   "@upgradeTitle": { "description": "Upgrade screen title" },
   "upgradeSubtitle": "Unlock every feature with a single purchase. No subscriptions, no ads.",
   "@upgradeSubtitle": { "description": "Upgrade screen subtitle" },
-  "upgradeFeatureSync": "Cloud Sync",
+  "upgradeFeatureSync": "Cloud sync",
   "@upgradeFeatureSync": { "description": "Premium feature: cloud sync" },
   "upgradeFeatureWebCompanion": "Web Companion",
   "@upgradeFeatureWebCompanion": { "description": "Premium feature: web companion" },
-  "upgradeFeatureBillSplitter": "Bill Splitter",
+  "upgradeFeatureBillSplitter": "Bill splitter",
   "@upgradeFeatureBillSplitter": { "description": "Premium feature: bill splitter" },
-  "upgradeFeatureTravelExchange": "Travel Exchange",
+  "upgradeFeatureTravelExchange": "Travel exchange",
   "@upgradeFeatureTravelExchange": { "description": "Premium feature: travel exchange" },
-  "upgradeFeaturePlannedPayments": "Planned Payments",
+  "upgradeFeaturePlannedPayments": "Planned payments",
   "@upgradeFeaturePlannedPayments": { "description": "Premium feature: planned payments" },
   "upgradeFeatureUnlimitedItems": "Unlimited accounts & envelopes",
   "@upgradeFeatureUnlimitedItems": { "description": "Premium feature: no limits" },
@@ -6080,7 +6076,7 @@
   "@upgradeButton": { "description": "Upgrade purchase button" },
   "upgradeComingSoon": "In-app purchases coming soon",
   "@upgradeComingSoon": { "description": "Toast when upgrade is tapped before IAP is ready" },
-  "upgradeRedeemCode": "Redeem Code",
+  "upgradeRedeemCode": "Redeem code",
   "@upgradeRedeemCode": { "description": "Redeem code link/dialog title" },
   "upgradeRedeemHint": "Enter your code",
   "@upgradeRedeemHint": { "description": "Redeem code text field hint" },
@@ -6090,7 +6086,7 @@
   "@upgradeRedeemInvalid": { "description": "Error when redeem code is invalid" },
   "upgradeRedeemSuccess": "Code redeemed! Premium unlocked.",
   "@upgradeRedeemSuccess": { "description": "Success message after redeeming code" },
-  "upgradeRestorePurchase": "Restore Purchase",
+  "upgradeRestorePurchase": "Restore purchase",
   "@upgradeRestorePurchase": { "description": "Restore purchase link" },
   "upgradeRestoreSuccess": "Purchase restored! Premium unlocked.",
   "@upgradeRestoreSuccess": { "description": "Success message after restoring purchase" },

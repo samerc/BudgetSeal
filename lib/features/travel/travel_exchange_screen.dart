@@ -279,11 +279,6 @@ class _TravelExchangeScreenState
                       : S.of(context).travelExchangeButton,
                   style:
                       TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius)),
-              ),
             ),
           ],
         ),

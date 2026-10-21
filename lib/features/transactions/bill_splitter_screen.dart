@@ -882,10 +882,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
                           style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
                       Expanded(child: TextField(controller: _rateCtrl,
-                        decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true,
-                          filled: true, fillColor: AppColors.sfv(context),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none)),
+                        decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true, fillColor: AppColors.sfv(context),),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: _onRateTyped)),
                       Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
@@ -913,22 +910,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 onPressed: _scanReceipt,
                 icon: const Icon(Icons.camera_alt_rounded, size: 20),
                 label: Text(S.of(context).billScanButton),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _addManualItem,
                 icon: const Icon(Icons.edit_rounded, size: 18),
                 label: Text(S.of(context).billAddManually),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
               ),
             ] else ...[
               if (_ocrResult != null) ...[
@@ -1216,10 +1203,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           Row(children: [
             Expanded(child: TextField(
               controller: _personCtrl,
-              decoration: InputDecoration(hintText: S.of(context).billAddPerson, isDense: true,
-                filled: true, fillColor: AppColors.sfv(context),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none)),
+              decoration: InputDecoration(hintText: S.of(context).billAddPerson, isDense: true, fillColor: AppColors.sfv(context),),
               textCapitalization: TextCapitalization.words,
               onSubmitted: (_) => _addPerson(),
             )),
@@ -1576,10 +1560,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
             Expanded(child: TextField(controller: _rateCtrl,
-              decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true,
-                filled: true, fillColor: AppColors.sfv(context),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none)),
+              decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true, fillColor: AppColors.sfv(context),),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               onChanged: _onRateTyped)),
             Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',

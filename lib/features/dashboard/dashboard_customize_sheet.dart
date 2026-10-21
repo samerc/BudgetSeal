@@ -10,10 +10,6 @@ void showDashboardCustomizeSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.sf(context),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
     builder: (_) => const _CustomizeSheet(),
   );
 }
@@ -33,18 +29,7 @@ class _CustomizeSheet extends ConsumerWidget {
       expand: false,
       builder: (_, scrollCtrl) => Column(
         children: [
-          // Handle
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 8),
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.th(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          const SizedBox(height: 16),
           // Title
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),

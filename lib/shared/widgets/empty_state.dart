@@ -5,7 +5,7 @@ import '../theme/app_colors.dart';
 /// A reusable empty-state placeholder used across all screens.
 ///
 /// Cashew NoResults style: icon in a pastel circle, bold title, optional
-/// subtitle and pastel action button — all themed via [AppColors].
+/// subtitle and a filled action button — all themed via [AppColors].
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -65,22 +65,14 @@ class EmptyState extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 20),
-              FilledButton.tonal(
+              // The screen's main call to action: the theme's filled button.
+              FilledButton(
                 onPressed: onAction,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.pastel(context, AppColors.accent,
-                      light: 0.7, dark: 0.6),
-                  foregroundColor: AppColors.tp(context),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
                 ),
-                child: Text(
-                  actionLabel!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
-                ),
+                child: Text(actionLabel!),
               ),
             ],
           ],

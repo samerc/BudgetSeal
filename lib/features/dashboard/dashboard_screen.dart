@@ -545,7 +545,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                     style: TextStyle(
                                         color: AppColors.ts(context))),
                                 const SizedBox(height: 12),
-                                FilledButton.tonal(
+                                FilledButton(
                                   onPressed: () => context.push(
                                       '/add-transaction',
                                       extra: {'editType': 'income'}),

@@ -38,6 +38,7 @@ import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/widgets/calculator_amount_field.dart' show showCalculatorSheet;
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -89,8 +90,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   DateTime? _dateTo;
   double? _amountMin;
   double? _amountMax;
-  final _amountMinCtrl = TextEditingController();
-  final _amountMaxCtrl = TextEditingController();
 
   // Quick category filter (#5)
   String? _categoryFilter;
@@ -164,8 +163,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     _initialScrollTimer?.cancel();
     _searchCtrl.dispose();
     _monthScrollCtrl.dispose();
-    _amountMinCtrl.dispose();
-    _amountMaxCtrl.dispose();
     _quickAddCtrl.dispose();
     _attachedListCtrl?.removeListener(_onListScroll);
     _ownListScrollCtrl.dispose();
@@ -743,28 +740,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final txColors = ref.read(txColorsProvider);
     // Capture context-dependent values BEFORE the sheet opens
     final bgColor = AppColors.sf(context);
-    final hintColor = AppColors.th(context);
     final textColor = AppColors.tp(context);
     final tr = S.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: bgColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(
-                  color: hintColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
               const SizedBox(height: 16),
               Text(tr.txNewTransactionSheet,
                   style: TextStyle(
@@ -1095,9 +1081,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 ),
                 // Year + Month list (year is the first item)
                 Expanded(
+                  // Wide enough that a month cut at the edge fades out
+                  // instead of showing a stray letter.
                   child: FadedEdges(
-                  startFade: 12,
-                  endFade: 12,
+                  startFade: 48,
+                  endFade: 32,
                   child: ListView.builder(
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
@@ -1344,76 +1332,40 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ],
           ),
         ),
-        // Amount range filter
+        // Amount range filter — the calculator, never the keyboard; 0 clears.
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Row(
             children: [
-              Icon(Icons.attach_money_rounded,
-                  size: 16, color: AppColors.ts(context)),
-              const SizedBox(width: 8),
               Expanded(
-                child: TextField(
-                  controller: _amountMinCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.tp(context)),
-                  decoration: InputDecoration(
-                    hintText: S.of(context).txMinAmount,
-                    hintStyle: TextStyle(color: AppColors.th(context)),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.bd(context)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.bd(context)),
-                    ),
-                  ),
-                  onChanged: (v) => setState(() {
-                    _amountMin = parseLooseAmount(v);
-                  }),
+                child: _FilterPickerBox(
+                  icon: Icons.vertical_align_bottom_rounded,
+                  label: _amountMin != null
+                      ? formatNumber(_amountMin!)
+                      : S.of(context).txMinAmount,
+                  active: _amountMin != null,
+                  onTap: () async {
+                    final v = await showCalculatorSheet(context, _amountMin ?? 0);
+                    if (v != null && mounted) {
+                      setState(() => _amountMin = v == 0 ? null : v);
+                    }
+                  },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('–',
-                    style: TextStyle(
-                        color: AppColors.ts(context), fontSize: 16)),
-              ),
+              const SizedBox(width: 8),
               Expanded(
-                child: TextField(
-                  controller: _amountMaxCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.tp(context)),
-                  decoration: InputDecoration(
-                    hintText: S.of(context).txMaxAmount,
-                    hintStyle: TextStyle(color: AppColors.th(context)),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    filled: true,
-                    fillColor: AppColors.sfv(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.bd(context)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.bd(context)),
-                    ),
-                  ),
-                  onChanged: (v) => setState(() {
-                    _amountMax = parseLooseAmount(v);
-                  }),
+                child: _FilterPickerBox(
+                  icon: Icons.vertical_align_top_rounded,
+                  label: _amountMax != null
+                      ? formatNumber(_amountMax!)
+                      : S.of(context).txMaxAmount,
+                  active: _amountMax != null,
+                  onTap: () async {
+                    final v = await showCalculatorSheet(context, _amountMax ?? 0);
+                    if (v != null && mounted) {
+                      setState(() => _amountMax = v == 0 ? null : v);
+                    }
+                  },
                 ),
               ),
             ],
@@ -1492,8 +1444,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _dateTo = null;
       _amountMin = null;
       _amountMax = null;
-      _amountMinCtrl.clear();
-      _amountMaxCtrl.clear();
     });
     _saveFilters();
   }
@@ -1603,8 +1553,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           () => setState(() {
                 _amountMin = null;
                 _amountMax = null;
-                _amountMinCtrl.clear();
-                _amountMaxCtrl.clear();
               })
         ),
     ];
@@ -1795,10 +1743,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ? S.of(context).txNoMatching
                     : S.of(context).txNoYet,
             subtitle: hasFilters ? null : S.of(context).txTapPlus,
-            // No match: one tap back to everything.
-            actionLabel: hasFilters
-                ? S.of(context).txClearAllFilters
-                : S.of(context).txAddFirst,
+            // No match: one tap back to everything. Nothing yet: the
+            // subtitle points at the + button (no second button under it).
+            actionLabel: hasFilters ? S.of(context).txClearAllFilters : null,
             onAction: hasFilters
                 ? () {
                     _clearAllFilters();
@@ -1809,7 +1756,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       });
                     }
                   }
-                : () => context.push('/add-transaction'),
+                : null,
           ),
         ],
       );

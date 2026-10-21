@@ -9,6 +9,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
+import '../../shared/theme/design_tokens.dart';
 
 /// Sentinel for "Ready to assign" (Unallocated) in the From/To pickers.
 const _readyToAssign = '';
@@ -62,7 +63,6 @@ Future<bool> showMoveMoneySheet(
   }
   var value = amount;
 
-  final surface = AppColors.sf(context);
   final secondary = AppColors.ts(context);
 
   final moved = await showModalBottomSheet<bool>(
@@ -101,9 +101,8 @@ Future<bool> showMoveMoneySheet(
                   MediaQuery.of(ctx).viewPadding.bottom +
                   20),
           decoration: BoxDecoration(
-            color: surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
+            color: AppColors.popup(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -290,13 +290,6 @@ class _PeriodTransitionScreenState
                 top: false,
                 child: FilledButton(
                   onPressed: _completing ? null : _completeTransition,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
-                  ),
                   child: _completing
                       ? SizedBox(
                           height: 20,

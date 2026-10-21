@@ -471,9 +471,6 @@ class _ActionButton extends StatelessWidget {
           backgroundColor: color,
           foregroundColor: AppColors.inkOn(color),
           disabledBackgroundColor: color.withValues(alpha: 0.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-          ),
         ),
       ),
     );
@@ -552,23 +549,13 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
         decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: AppColors.popup(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
             Text(
               S.of(context).syncShareHousehold,
@@ -591,9 +578,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 decoration: InputDecoration(
                   labelText: S.of(context).syncTheirEmail,
                   hintText: S.of(context).syncEmailHint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                  ),
                   prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
@@ -613,11 +597,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                     _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
                   ),
                 ),
               ),
@@ -664,12 +643,6 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                     S.of(context).syncShareCode,
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                    ),
                   ),
                 ),
               ),

@@ -307,9 +307,6 @@ class _ObjectiveDetailScreenState
       context: context,
       isScrollControlled: true,
       backgroundColor: sfColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
         double amount = 0;
         String? selectedAccountId = activeAccounts.first.id;
@@ -651,7 +648,6 @@ class _ObjectiveDetailScreenState
                       backgroundColor: AppColors.pastel(context, color,
                           light: 0.55, dark: 0.5),
                       foregroundColor: AppColors.tp(context),
-                      minimumSize: const Size.fromHeight(48),
                     ),
                   ),
                 ],
@@ -831,7 +827,6 @@ class _ObjectiveDetailScreenState
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: Size.zero,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ),

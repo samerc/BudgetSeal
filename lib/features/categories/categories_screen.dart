@@ -164,12 +164,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               },
                             )
                           : null,
-                      filled: true,
-                      fillColor: AppColors.sfv(context),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
                       contentPadding:
                           const EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
@@ -282,9 +276,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => _CategoryForm(
         categories: categories,
         existing: existing,
@@ -730,24 +721,12 @@ class _CategoriesSliver extends ConsumerWidget {
   void _showActions(BuildContext context, Category cat) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(ctx),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
               const SizedBox(height: 16),
               Text(cat.name,
                   style: TextStyle(
@@ -903,16 +882,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Drag handle
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.th(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Text(
               _isNew ? S.of(context).catNewTitle : S.of(context).catEditTitle,
@@ -966,17 +935,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     maxLength: InputLimits.nameMaxLength,
                     decoration: InputDecoration(
                       labelText: S.of(context).catName,
-                      filled: true,
-                      fillColor: AppColors.sfv(context),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                            color: AppColors.accent, width: 1.5),
-                      ),
                     ),
                     textCapitalization: TextCapitalization.words,
                     onTap: () {
@@ -1101,12 +1059,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     decoration: InputDecoration(
                       labelText: S.of(context).catParent,
                       labelStyle: const TextStyle(fontSize: 13),
-                      filled: true,
-                      fillColor: AppColors.sfv(context),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 12),
                       isDense: true,
@@ -1133,12 +1085,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       decoration: InputDecoration(
                         labelText: S.of(context).commonAccount,
                         labelStyle: const TextStyle(fontSize: 13),
-                        filled: true,
-                        fillColor: AppColors.sfv(context),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 12),
                         isDense: true,
@@ -1164,13 +1110,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             // Save button
             FilledButton(
               onPressed: _loading ? null : _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                ),
-              ),
               child: _loading
                   ? SizedBox(
                       height: 20,

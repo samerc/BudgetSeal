@@ -631,7 +631,8 @@ class _MonthlySummaryCard extends StatelessWidget {
                   context,
                   label: S.of(context).typeIncome,
                   amount: income,
-                  color: AppColors.healthy,
+                  // Nothing yet: neutral, not a green/red signal.
+                  color: income == 0 ? AppColors.ts(context) : AppColors.healthy,
                 ),
               ),
               Container(
@@ -641,7 +642,7 @@ class _MonthlySummaryCard extends StatelessWidget {
                   context,
                   label: S.of(context).dashboardLabelExpenses,
                   amount: expense,
-                  color: AppColors.overspent,
+                  color: expense == 0 ? AppColors.ts(context) : AppColors.overspent,
                 ),
               ),
               Container(
@@ -651,8 +652,12 @@ class _MonthlySummaryCard extends StatelessWidget {
                   context,
                   label: S.of(context).dashboardLabelNet,
                   amount: net,
-                  color: net >= 0 ? AppColors.healthy : AppColors.overspent,
-                  prefix: net >= 0 ? '+' : '',
+                  color: net == 0
+                      ? AppColors.ts(context)
+                      : net > 0
+                          ? AppColors.healthy
+                          : AppColors.overspent,
+                  prefix: net > 0 ? '+' : '',
                 ),
               ),
             ],
@@ -768,7 +773,21 @@ class _TrendChart extends StatelessWidget {
       ...expenseByMonth,
     ].fold(0.0, (a, b) => a > b ? a : b);
 
-    if (maxVal == 0) return const SizedBox.shrink();
+    // No income or spending in six months: say so, like the heatmap,
+    // instead of an empty gap under the toggle.
+    if (maxVal == 0) {
+      return Container(
+        height: 120,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.sf(context),
+          borderRadius: BorderRadius.circular(CardTokens.radius),
+          boxShadow: AppColors.cardShadow(context),
+        ),
+        child: Text(S.of(context).heatmapNoData,
+            style: TextStyle(fontSize: 14, color: AppColors.th(context))),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -921,10 +940,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.55,
         minChildSize: 0.3,
@@ -933,14 +948,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         builder: (ctx, scrollCtrl) => Column(
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.bd(ctx),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Row(
@@ -2479,12 +2486,17 @@ class _MonthNav extends StatelessWidget {
             color: AppColors.tp(context),
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right_rounded),
-          onPressed: onNext,
-          color: onNext != null
-              ? AppColors.ts(context)
-              : AppColors.th(context),
+        // No future months: hidden (but keeps its space) on the current one.
+        Visibility(
+          visible: onNext != null,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: IconButton(
+            icon: const Icon(Icons.chevron_right_rounded),
+            onPressed: onNext,
+            color: AppColors.ts(context),
+          ),
         ),
       ],
     );
@@ -2571,10 +2583,6 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),

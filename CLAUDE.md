@@ -301,7 +301,7 @@ Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it ever
 - **Card radius:** 16 (`CardTokens.radius`), **padding:** 16h / 14v — consistent everywhere. All `BorderRadius.circular()` calls use the token, never hardcoded.
 - **Category icons:** 48px circles in lists (`CategoryIconTokens.listSize`), 36px compact, 64px hero.
 - **Screen titles:** 28px w800 (`TypographyTokens.screenTitleSize`) — Cashew-inspired large bold.
-- **Section headers (Cashew SettingsHeader):** sentence case, 15px w700, accent color, no letter spacing. ARB header strings are stored in sentence case (never ALL CAPS); `SectionHeader` no longer upper-cases.
+- **Section headers (Cashew SettingsHeader):** sentence case, 15px w700, accent color, no letter spacing. ARB header strings are stored in sentence case (never ALL CAPS); `SectionHeader` no longer upper-cases. Every English UI string is sentence case — buttons, titles, tiles, feature names ("Goals & loans", "Save changes"); only proper nouns keep capitals (BudgetSeal, Google Drive, Web Companion, CSV, PIN). French/Arabic follow their own rules.
 - **Cards (Cashew style, Oct 2026):** warm neutral surface (`AppColors.sf` — white on paper in light, night `#1C1D24` in dark), no border; light mode gets a soft shadow (`AppColors.cardShadow`), black mode a faint white edge (`AppColors.cardBorder`). `AppColors.bd` is a hairline (6% black / 7% white) for dividers.
 - **Pastel fills:** use `AppColors.pastel(context, color)` / `lightenPastel` / `darkenPastel` (Cashew's color model) for anything colored by a category/envelope/accent — never `color.withValues(alpha: 0.1)` tints.
 - No glassmorphism. No left-border accent bars on cards (looks like a prototype).
@@ -744,7 +744,7 @@ Users can pick from 120+ curated emojis organized by group, OR type/paste any em
 
 ### Standard Widgets
 - Loading: `SkeletonList` (Cashew ghost rows: circle + bars, theme-aware shimmer) for lists, `CircularProgressIndicator` for detail screens
-- Empty: `EmptyState` widget everywhere (icon in a 96px pastel circle, 18/w700 title, pastel action)
+- Empty: `EmptyState` widget everywhere (icon in a 96px pastel circle, 18/w700 title, theme `FilledButton` action). Don't add an action that repeats a visible FAB/+ (Activity's empty state has none; Budget hides its FAB while there are no envelopes).
 - Error: `ErrorRetry` widget everywhere
 - Cards: Use `AppCard` widget or `CardTokens.radius` (14) + `CardTokens.padding` (16h, 14v) + `AppColors.sf(context)` bg + `AppColors.bd(context)` border
 - Section headers: Use `SectionHeader` widget or `TypographyTokens.sectionHeaderSize/Weight/LetterSpacing`
@@ -864,7 +864,7 @@ Transfers render as a single row in the transaction list (not two rows). Shows "
 
 `buildLightTheme(fontName, [accentColor])`, `buildDarkTheme(fontName, [accentColor])`, and `buildBlackTheme(fontName, [accentColor])` in `app_theme.dart` generate full ThemeData. `buildBlackTheme` derives from dark with pure black overrides. Font selection is dynamic via `fontProvider`. Default font: Nunito Sans (`defaultAppFont`, closest to Cashew's Avenir). Available: Plus Jakarta Sans, DM Sans, Inter, Poppins, Nunito, Rubik, Space Grotesk.
 
-All three themes come from one `_buildTheme()`; surfaces are fixed warm neutrals (paper `#F7F5F1`/white in light, night `#121318`/`#1C1D24` in dark, pure black in black) — not accent-tinted — exposed through the `SurfaceColors` theme extension, which `AppColors.bg/sf/sfv/popup/bd` read. The accent lives in fills, text, buttons and the brand banner. Inputs are borderless filled (radius 15), dialogs radius 25, sheets radius 20 with no drag handle, buttons radius 20 (`RadiusTokens`).
+All three themes come from one `_buildTheme()`; surfaces are fixed warm neutrals (paper `#F7F5F1`/white in light, night `#121318`/`#1C1D24` in dark, pure black in black) — not accent-tinted — exposed through the `SurfaceColors` theme extension, which `AppColors.bg/sf/sfv/popup/bd` read. The accent lives in fills, text, buttons and the brand banner. Inputs are borderless filled (radius 15), dialogs radius 25, sheets radius 20 with no drag handle, buttons radius 20 (`RadiusTokens`). Don't restate or fight these per widget: no hand-drawn sheet handles, no `showModalBottomSheet(backgroundColor:/shape:)` overrides — a self-decorated sheet uses `AppColors.popup` + `RadiusTokens.sheet` (like `category_sheet.dart`); no `border:`/`enabledBorder:`/`focusedBorder:` or `fillColor: sfv` on an `InputDecoration`; no `shape`/`backgroundColor: accent`/height in `FilledButton.styleFrom` (`minimumSize: Size(0, N)` for buttons in a Row is fine).
 
 **Theme modes:** `themeModeProvider` stores a String (`'system'`/`'light'`/`'dark'`/`'black'`). `flutterThemeMode` getter maps black → dark for Flutter's ThemeMode. `isBlackMode` getter for AMOLED-specific logic. `app.dart` must `ref.watch(themeModeProvider)` for the state (not `.notifier`) to rebuild on theme change.
 

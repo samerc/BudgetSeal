@@ -403,13 +403,6 @@ class _LeftoverResolutionScreenState
                                   _targetAllocationId == null)
                           ? null
                           : () => _save(allocation),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius),
-                        ),
-                      ),
                       child: _saving
                           ? SizedBox(
                               height: 20,

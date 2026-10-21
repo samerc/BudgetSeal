@@ -487,7 +487,6 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             label: Text(S.of(context).healthRepairButton),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.caution,
-              minimumSize: const Size.fromHeight(48),
             ),
           ),
         if (!allHealthy) const SizedBox(height: 12),
@@ -496,9 +495,6 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             onPressed: _purgeSoftDeleted,
             icon: const Icon(Icons.delete_sweep_rounded),
             label: Text(S.of(context).healthPurgeButtonN(report.softDeletedCount)),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
-            ),
           ),
         const SizedBox(height: 32),
       ],

@@ -1574,7 +1574,7 @@ class SEn extends S {
 
   @override
   String billOweCreated(String name, String amount) {
-    return 'Added to Goals & Loans: you owe $name $amount';
+    return 'Added to goals & loans: you owe $name $amount';
   }
 
   @override
@@ -2389,10 +2389,10 @@ class SEn extends S {
   String get commonGotIt => 'Got it';
 
   @override
-  String get commonGoBack => 'Go Back';
+  String get commonGoBack => 'Go back';
 
   @override
-  String get commonSaveAnyway => 'Save Anyway';
+  String get commonSaveAnyway => 'Save anyway';
 
   @override
   String get commonSomethingWentWrong => 'Something went wrong';
@@ -2522,7 +2522,7 @@ class SEn extends S {
   String get dashboardQuickSplit => 'Split';
 
   @override
-  String get dashboardQuickTemplates => 'Quick Templates';
+  String get dashboardQuickTemplates => 'Quick templates';
 
   @override
   String get dashboardViewAll => 'View all';
@@ -2547,10 +2547,10 @@ class SEn extends S {
   String get dashboardNoSpending => 'No spending';
 
   @override
-  String get dashboardLast7Days => 'Last 7 Days';
+  String get dashboardLast7Days => 'Last 7 days';
 
   @override
-  String get dashboardThisMonth => 'This Month';
+  String get dashboardThisMonth => 'This month';
 
   @override
   String get dashboardSearchPlaceholder => 'Search transactions, accounts...';
@@ -2576,36 +2576,36 @@ class SEn extends S {
   String get dashboardOtherCategory => 'Other';
 
   @override
-  String get customizeTitle => 'Customize Dashboard';
+  String get customizeTitle => 'Customize dashboard';
 
   @override
-  String get dashboardSectionSpendingLabel => 'Spending Overview';
+  String get dashboardSectionSpendingLabel => 'Spending overview';
 
   @override
   String get dashboardSectionSpendingDesc =>
       'Donut chart with category breakdown';
 
   @override
-  String get dashboardSectionQuickLabel => 'Quick Actions';
+  String get dashboardSectionQuickLabel => 'Quick actions';
 
   @override
   String get dashboardSectionQuickDesc => 'Expense, income, transfer, fund';
 
   @override
-  String get dashboardSectionMoneyLabel => 'Your Money';
+  String get dashboardSectionMoneyLabel => 'Your money';
 
   @override
   String get dashboardSectionMoneyDesc => 'Bills, net worth and unallocated';
 
   @override
-  String get dashboardSectionActivityLabel => 'Recent Activity';
+  String get dashboardSectionActivityLabel => 'Recent activity';
 
   @override
   String get dashboardSectionActivityDesc =>
       'Templates and recent transactions';
 
   @override
-  String get dashboardNetWorth => 'Net Worth';
+  String get dashboardNetWorth => 'Net worth';
 
   @override
   String get dashboardUnallocated => 'Unallocated';
@@ -2705,7 +2705,7 @@ class SEn extends S {
   String get txScrollTopTooltip => 'Scroll to top';
 
   @override
-  String get txSplitBillTooltip => 'Split Bill';
+  String get txSplitBillTooltip => 'Split bill';
 
   @override
   String get txFromDate => 'From date';
@@ -2720,7 +2720,7 @@ class SEn extends S {
   String get txMaxAmount => 'Max';
 
   @override
-  String get txSelectYear => 'Select Year';
+  String get txSelectYear => 'Select year';
 
   @override
   String txFilteredCategory(String categoryName) {
@@ -2740,9 +2740,6 @@ class SEn extends S {
 
   @override
   String get txTapPlus => 'Tap + to record one';
-
-  @override
-  String get txAddFirst => 'Add your first transaction';
 
   @override
   String txSpentOfBudget(String spent, String budget) {
@@ -2779,7 +2776,7 @@ class SEn extends S {
   }
 
   @override
-  String get txFormNewTitle => 'New Transaction';
+  String get txFormNewTitle => 'New transaction';
 
   @override
   String get txFormNoteHint => 'Add a note…';
@@ -2788,7 +2785,7 @@ class SEn extends S {
   String get txFormTitleHint => 'Title (e.g. Coffee, Groceries)';
 
   @override
-  String get txFormUseTemplate => 'Use Template';
+  String get txFormUseTemplate => 'Use template';
 
   @override
   String get txFormAutoDetected => 'Auto-detected';
@@ -2840,7 +2837,7 @@ class SEn extends S {
   String get txFormRateNotSetTitle => 'Exchange rate not set';
 
   @override
-  String get txFormDuplicateTitle => 'Possible Duplicate';
+  String get txFormDuplicateTitle => 'Possible duplicate';
 
   @override
   String get txFormDuplicateContent =>
@@ -2861,13 +2858,13 @@ class SEn extends S {
   String get txFormAddMore => 'Add more';
 
   @override
-  String get txFormScanReceipt => 'Scan Receipt';
+  String get txFormScanReceipt => 'Scan receipt';
 
   @override
   String get txFormGallery => 'Gallery';
 
   @override
-  String get txDetailTitle => 'Transaction Details';
+  String get txDetailTitle => 'Transaction details';
 
   @override
   String get txDetailNotFound => 'Transaction not found';
@@ -2937,43 +2934,43 @@ class SEn extends S {
   String get txAfDiscard => 'Discard';
 
   @override
-  String get txAfEnterTitle => 'Enter Title';
+  String get txAfEnterTitle => 'Enter title';
 
   @override
   String get txAfTransferNoteHint => 'Note (e.g. rent, savings)';
 
   @override
-  String get txAfEnterAmountButton => 'Enter Amount';
+  String get txAfEnterAmountButton => 'Enter amount';
 
   @override
-  String get txAfSelectCategoryButton => 'Select Category';
+  String get txAfSelectCategoryButton => 'Select category';
 
   @override
-  String get txAfSelectCategoryTitle => 'Select Category';
+  String get txAfSelectCategoryTitle => 'Select category';
 
   @override
   String get txAfSearchCategories => 'Search categories...';
 
   @override
-  String get txAfNewCategory => 'New Category';
+  String get txAfNewCategory => 'New category';
 
   @override
-  String get txAfEnterAmountTitle => 'Enter Amount';
+  String get txAfEnterAmountTitle => 'Enter amount';
 
   @override
-  String get txAfFromAccount => 'From Account';
+  String get txAfFromAccount => 'From account';
 
   @override
-  String get txAfToAccount => 'To Account';
+  String get txAfToAccount => 'To account';
 
   @override
   String get txAfTapToSelect => 'Tap to select';
 
   @override
-  String get txAfAddAccount => 'Add Account';
+  String get txAfAddAccount => 'Add account';
 
   @override
-  String get txAfExchangeRateRequired => 'Exchange Rate Required';
+  String get txAfExchangeRateRequired => 'Exchange rate required';
 
   @override
   String txAfHowManyPer(String sourceCurrency, String destCurrency) {
@@ -3009,15 +3006,15 @@ class SEn extends S {
   String get txAfAddAnother => 'Add another item';
 
   @override
-  String get txAfSaveTransfer => 'Save Transfer';
+  String get txAfSaveTransfer => 'Save transfer';
 
   @override
   String txAfSaveNItems(int count) {
-    return 'Save $count Items';
+    return 'Save $count items';
   }
 
   @override
-  String get txAfAddTransaction => 'Add Transaction';
+  String get txAfAddTransaction => 'Add transaction';
 
   @override
   String get catSheetNew => 'New';
@@ -3032,28 +3029,28 @@ class SEn extends S {
   String get txWidgetItemNote => 'Item note…';
 
   @override
-  String get txListTitle => 'Transaction List';
+  String get txListTitle => 'Transaction list';
 
   @override
-  String get txListSelectLayout => 'Select Layout';
+  String get txListSelectLayout => 'Select layout';
 
   @override
-  String get txListDateBanner => 'Date Banner Total';
+  String get txListDateBanner => 'Date banner total';
 
   @override
-  String get txListDayTotal => 'Day Total';
+  String get txListDayTotal => 'Day total';
 
   @override
   String get txListNone => 'None';
 
   @override
-  String get txListAccountLabel => 'Account Label';
+  String get txListAccountLabel => 'Account label';
 
   @override
   String get txListAccountSubtitle => 'Show account name on each transaction';
 
   @override
-  String get txListCategoryIcon => 'Category Icon';
+  String get txListCategoryIcon => 'Category icon';
 
   @override
   String get txListCategorySubtitle => 'Show category icon circle';
@@ -3065,14 +3062,14 @@ class SEn extends S {
   String get txListTimeSubtitle => 'Show time of the transaction';
 
   @override
-  String get txListPreviewName => 'Transaction Name';
+  String get txListPreviewName => 'Transaction name';
 
   @override
   String get txListPreviewNote =>
       'This is a note that is part of the transaction.';
 
   @override
-  String get billTitle => 'Bill Splitter';
+  String get billTitle => 'Bill splitter';
 
   @override
   String get billScanning => 'Scanning receipt...';
@@ -3087,19 +3084,19 @@ class SEn extends S {
   String get billEmptySubtitle => 'Scan a receipt or add items manually';
 
   @override
-  String get billScanButton => 'Scan Receipt';
+  String get billScanButton => 'Scan receipt';
 
   @override
-  String get billAddManually => 'Add Manually';
+  String get billAddManually => 'Add manually';
 
   @override
   String get billAddItem => 'Add item';
 
   @override
-  String get billTakePhoto => 'Take Photo';
+  String get billTakePhoto => 'Take photo';
 
   @override
-  String get billFromGallery => 'Choose from Gallery';
+  String get billFromGallery => 'Choose from gallery';
 
   @override
   String get billNoText => 'No text detected. Try a clearer photo.';
@@ -3174,7 +3171,7 @@ class SEn extends S {
   }
 
   @override
-  String get billExchangeRateTitle => 'Exchange Rate';
+  String get billExchangeRateTitle => 'Exchange rate';
 
   @override
   String get billRemovePersonTitle => 'Remove person';
@@ -3253,7 +3250,7 @@ class SEn extends S {
   String get txUndoAction => 'Undo';
 
   @override
-  String get txNewTransactionSheet => 'New Transaction';
+  String get txNewTransactionSheet => 'New transaction';
 
   @override
   String get txCouldNotLoad => 'Could not load transaction';
@@ -3293,7 +3290,7 @@ class SEn extends S {
   String get allocHelpTooltip => 'How envelopes work';
 
   @override
-  String get allocHelpTitle => 'How Envelopes Work';
+  String get allocHelpTitle => 'How envelopes work';
 
   @override
   String get allocHelpStep1 => 'Create envelopes for each spending category';
@@ -3338,31 +3335,31 @@ class SEn extends S {
   String get allocNoYet => 'No envelopes yet';
 
   @override
-  String get allocCreateButton => 'Create Envelope';
+  String get allocCreateButton => 'Create envelope';
 
   @override
-  String get allocNewEnvelope => 'New Envelope';
+  String get allocNewEnvelope => 'New envelope';
 
   @override
   String get allocFallbackName => 'Envelope';
 
   @override
-  String get allocEditSettings => 'Edit Settings';
+  String get allocEditSettings => 'Edit settings';
 
   @override
   String get allocWithdrawMenu => 'Withdraw';
 
   @override
-  String get allocRevalueMenu => 'Revalue Balances';
+  String get allocRevalueMenu => 'Revalue balances';
 
   @override
   String get allocArchiveMenu => 'Archive';
 
   @override
-  String get allocCreateButtonDetail => 'Create Envelope';
+  String get allocCreateButtonDetail => 'Create envelope';
 
   @override
-  String get allocSaveChanges => 'Save Changes';
+  String get allocSaveChanges => 'Save changes';
 
   @override
   String get allocNameIconSection => 'Name & icon';
@@ -3406,13 +3403,13 @@ class SEn extends S {
   String get allocBudgetAmount => 'Budget amount';
 
   @override
-  String get allocLinkCategory => 'Link Category';
+  String get allocLinkCategory => 'Link category';
 
   @override
   String get allocFromUnallocated => 'From your unallocated balance';
 
   @override
-  String get allocFundAnyway => 'Fund Anyway';
+  String get allocFundAnyway => 'Fund anyway';
 
   @override
   String get allocRecentActivity => 'Recent activity';
@@ -3424,7 +3421,7 @@ class SEn extends S {
   String get allocSpendingHistory => 'Spending history';
 
   @override
-  String get allocWithdrawTitle => 'Withdraw from Savings';
+  String get allocWithdrawTitle => 'Withdraw from savings';
 
   @override
   String get allocWithdrawButton => 'Withdraw';
@@ -3458,10 +3455,10 @@ class SEn extends S {
   String get allocTotalAdjustment => 'Total adjustment';
 
   @override
-  String get allocApplyRevaluation => 'Apply Revaluation';
+  String get allocApplyRevaluation => 'Apply revaluation';
 
   @override
-  String get allocArchiveTitle => 'Archive Envelope';
+  String get allocArchiveTitle => 'Archive envelope';
 
   @override
   String get allocArchiveMsg =>
@@ -3471,13 +3468,13 @@ class SEn extends S {
   String get allocArchived => 'Envelope archived';
 
   @override
-  String get allocDeleteTitle => 'Delete Envelope';
+  String get allocDeleteTitle => 'Delete envelope';
 
   @override
-  String get allocArchiveInstead => 'Archive Instead';
+  String get allocArchiveInstead => 'Archive instead';
 
   @override
-  String get allocDeletePermanently => 'Delete Permanently';
+  String get allocDeletePermanently => 'Delete permanently';
 
   @override
   String allocPercentSaved(int pct) {
@@ -3562,7 +3559,7 @@ class SEn extends S {
   }
 
   @override
-  String get allocFundedNote => 'Funded from Unallocated';
+  String get allocFundedNote => 'Funded from unallocated';
 
   @override
   String allocFundedSuccess(String amount, String name) {
@@ -3582,25 +3579,25 @@ class SEn extends S {
   String get allocEntryAdjustment => 'Adjustment';
 
   @override
-  String get allocEntryPeriodReset => 'Period Reset';
+  String get allocEntryPeriodReset => 'Period reset';
 
   @override
-  String get allocEntryCarryForward => 'Carried Forward';
+  String get allocEntryCarryForward => 'Carried forward';
 
   @override
   String get allocWithdrawDesc =>
-      'Move money from this envelope back to Unallocated.';
+      'Move money from this envelope back to unallocated.';
 
   @override
   String get allocWithdrawAmountLabel => 'Amount to withdraw';
 
   @override
   String allocWithdrawSuccess(String amount) {
-    return 'Withdrew $amount to Unallocated';
+    return 'Withdrew $amount to unallocated';
   }
 
   @override
-  String get allocLinkCategoryTitle => 'Link a Category';
+  String get allocLinkCategoryTitle => 'Link a category';
 
   @override
   String get allocSearchCategories => 'Search categories...';
@@ -3613,7 +3610,7 @@ class SEn extends S {
       'All categories are already linked to envelopes';
 
   @override
-  String get allocRevalueForeignTitle => 'Revalue Foreign Balances';
+  String get allocRevalueForeignTitle => 'Revalue foreign balances';
 
   @override
   String get allocFetch => 'Fetch';
@@ -3651,7 +3648,7 @@ class SEn extends S {
       'Deleting will:\n  • Unlink all categories from this envelope\n  • Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.';
 
   @override
-  String get allocDeleteNoLinksTitle => 'Delete Envelope Permanently';
+  String get allocDeleteNoLinksTitle => 'Delete envelope permanently';
 
   @override
   String get allocDeleteNoLinksMsg =>
@@ -3694,7 +3691,7 @@ class SEn extends S {
   }
 
   @override
-  String get allocGoalsLoans => 'Goals & Loans';
+  String get allocGoalsLoans => 'Goals & loans';
 
   @override
   String allocGoalsCount(int count) {
@@ -3739,7 +3736,7 @@ class SEn extends S {
   }
 
   @override
-  String get fundTitle => 'Fund Envelopes';
+  String get fundTitle => 'Fund envelopes';
 
   @override
   String get fundCouldntLoad => 'Couldn\'t load envelopes';
@@ -3761,7 +3758,7 @@ class SEn extends S {
 
   @override
   String get fundStep3 =>
-      'Tap \"Fund All\" to move the money into your envelopes.';
+      'Tap \"Fund all\" to move the money into your envelopes.';
 
   @override
   String get fundAvailableToDistribute => 'Available to distribute';
@@ -3770,7 +3767,7 @@ class SEn extends S {
   String get fundExceedsWarning => 'Total exceeds available unallocated funds';
 
   @override
-  String get fundQuickFill => 'Quick Fill';
+  String get fundQuickFill => 'Quick fill';
 
   @override
   String fundQuickFillDesc(int count) {
@@ -3804,7 +3801,7 @@ class SEn extends S {
 
   @override
   String fundAllWithTotal(String total) {
-    return 'Fund All  ($total)';
+    return 'Fund all  ($total)';
   }
 
   @override
@@ -3816,10 +3813,10 @@ class SEn extends S {
   }
 
   @override
-  String get fundAnyway => 'Fund Anyway';
+  String get fundAnyway => 'Fund anyway';
 
   @override
-  String get fundNote => 'Funded from Unallocated';
+  String get fundNote => 'Funded from unallocated';
 
   @override
   String get fundSuccess => 'Allocations funded successfully';
@@ -3834,13 +3831,13 @@ class SEn extends S {
   String get acctTapPlus => 'Tap + to add one';
 
   @override
-  String get acctTotalBalance => 'Total Balance';
+  String get acctTotalBalance => 'Total balance';
 
   @override
   String get acctAddTooltip => 'Add account';
 
   @override
-  String get acctNewTitle => 'New Account';
+  String get acctNewTitle => 'New account';
 
   @override
   String get acctTypeCash => 'Cash';
@@ -3858,10 +3855,10 @@ class SEn extends S {
   String get acctAdjustBalance => 'Reconcile balance';
 
   @override
-  String get acctHideArchived => 'Hide Archived';
+  String get acctHideArchived => 'Hide archived';
 
   @override
-  String get acctShowArchived => 'Show Archived';
+  String get acctShowArchived => 'Show archived';
 
   @override
   String get acctSortByName => 'Sort by name';
@@ -3884,7 +3881,7 @@ class SEn extends S {
   String get acctNoArchived => 'No archived accounts';
 
   @override
-  String get acctUnarchiveTitle => 'Unarchive Account';
+  String get acctUnarchiveTitle => 'Unarchive account';
 
   @override
   String acctUnarchiveMsg(String name) {
@@ -3900,7 +3897,7 @@ class SEn extends S {
   }
 
   @override
-  String get acctCurrentBalance => 'Current Balance';
+  String get acctCurrentBalance => 'Current balance';
 
   @override
   String get acctBackFromTrip => 'Back from your trip?';
@@ -3911,10 +3908,10 @@ class SEn extends S {
   }
 
   @override
-  String get acctConvertBackClose => 'Convert Back & Close';
+  String get acctConvertBackClose => 'Convert back & close';
 
   @override
-  String get acctSettings => 'Account Settings';
+  String get acctSettings => 'Account settings';
 
   @override
   String get acctNameSection => 'Name';
@@ -3973,7 +3970,7 @@ class SEn extends S {
   String get acctEnterRealBalance => 'Enter the real balance';
 
   @override
-  String get acctApplyAdjustment => 'Apply Adjustment';
+  String get acctApplyAdjustment => 'Apply adjustment';
 
   @override
   String get acctBalanceAdjustment => 'Balance adjustment';
@@ -3984,7 +3981,7 @@ class SEn extends S {
   }
 
   @override
-  String get acctConvertBack => 'Convert Back';
+  String get acctConvertBack => 'Convert back';
 
   @override
   String acctConvertBackMsg(String amount) {
@@ -3998,7 +3995,7 @@ class SEn extends S {
   String get acctAmountReceived => 'Amount received';
 
   @override
-  String get acctConvertArchive => 'Convert & Archive';
+  String get acctConvertArchive => 'Convert & archive';
 
   @override
   String get acctNoTransferTarget => 'No account to transfer to';
@@ -4012,21 +4009,21 @@ class SEn extends S {
   String get acctSomethingWrong => 'Something went wrong. Please try again.';
 
   @override
-  String get acctArchiveTitle => 'Archive Account';
+  String get acctArchiveTitle => 'Archive account';
 
   @override
   String get acctArchiveMsg =>
       'This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.';
 
   @override
-  String get acctDeleteTitle => 'Delete Account Permanently';
+  String get acctDeleteTitle => 'Delete account permanently';
 
   @override
   String get acctDeleteMsg =>
       'This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.';
 
   @override
-  String get acctArchiveInstead => 'Archive Instead';
+  String get acctArchiveInstead => 'Archive instead';
 
   @override
   String acctHasTxnsMsg(int count) {
@@ -4118,7 +4115,7 @@ class SEn extends S {
   String get catArchived => 'Category archived';
 
   @override
-  String get catDeleteTitle => 'Delete Category';
+  String get catDeleteTitle => 'Delete category';
 
   @override
   String get catDeleteNoTx =>
@@ -4128,10 +4125,10 @@ class SEn extends S {
   String get catDeleted => 'Category deleted';
 
   @override
-  String get catNewTitle => 'New Category';
+  String get catNewTitle => 'New category';
 
   @override
-  String get catEditTitle => 'Edit Category';
+  String get catEditTitle => 'Edit category';
 
   @override
   String get catName => 'Name';
@@ -4196,7 +4193,7 @@ class SEn extends S {
   }
 
   @override
-  String get billCalTitle => 'Bill Calendar';
+  String get billCalTitle => 'Bill calendar';
 
   @override
   String billCalNDue(int count) {
@@ -4210,7 +4207,7 @@ class SEn extends S {
   String get billCalNoUpcoming => 'No upcoming bills';
 
   @override
-  String get upcomingTitle => 'Upcoming Bills';
+  String get upcomingTitle => 'Upcoming bills';
 
   @override
   String get upcomingNoTitle => 'No upcoming bills';
@@ -4302,10 +4299,10 @@ class SEn extends S {
   String get subDetailPresent => 'present';
 
   @override
-  String get subDetailChangeCancel => 'Change Cancel Date';
+  String get subDetailChangeCancel => 'Change cancel date';
 
   @override
-  String get subDetailSetCancel => 'Set Cancellation Date';
+  String get subDetailSetCancel => 'Set cancellation date';
 
   @override
   String get subDetailPastTx => 'Past transactions';
@@ -4371,7 +4368,7 @@ class SEn extends S {
   String get tmplDeleteMsg => 'This template will be permanently removed.';
 
   @override
-  String get tmplNewTitle => 'New Template';
+  String get tmplNewTitle => 'New template';
 
   @override
   String get tmplNewDesc => 'Save a transaction you do often for quick re-use.';
@@ -4383,10 +4380,10 @@ class SEn extends S {
   String get tmplCategoryOptional => 'Category (optional)';
 
   @override
-  String get tmplSaveButton => 'Save Template';
+  String get tmplSaveButton => 'Save template';
 
   @override
-  String get objTitle => 'Goals & Loans';
+  String get objTitle => 'Goals & loans';
 
   @override
   String get objFailedToLoad => 'Failed to load objectives';
@@ -4416,7 +4413,7 @@ class SEn extends S {
   }
 
   @override
-  String get objNewTitle => 'New Objective';
+  String get objNewTitle => 'New objective';
 
   @override
   String get objNameRequired => 'Name is required';
@@ -4440,19 +4437,19 @@ class SEn extends S {
   String get objNoAccounts => 'No accounts available';
 
   @override
-  String get objRecordPayment => 'Record Payment';
+  String get objRecordPayment => 'Record payment';
 
   @override
-  String get objAddFunds => 'Add Funds';
+  String get objAddFunds => 'Add funds';
 
   @override
-  String get objRecordReceived => 'Record Payment Received';
+  String get objRecordReceived => 'Record payment received';
 
   @override
-  String get objRecordSent => 'Record Payment Sent';
+  String get objRecordSent => 'Record payment sent';
 
   @override
-  String get objSaveFromAccount => 'Save from Account';
+  String get objSaveFromAccount => 'Save from account';
 
   @override
   String get objGoalChip => 'Goal';
@@ -4494,7 +4491,7 @@ class SEn extends S {
   String get objColorSection => 'Color';
 
   @override
-  String get objDeleteTitle => 'Delete Objective';
+  String get objDeleteTitle => 'Delete objective';
 
   @override
   String get objCannotUndo => 'This cannot be undone.';
@@ -4581,7 +4578,7 @@ class SEn extends S {
   String get settingsGoalsSub => 'Savings goals and debt tracking';
 
   @override
-  String get settingsCustomization => 'Settings & Customization';
+  String get settingsCustomization => 'Settings';
 
   @override
   String get settingsCustomizationSub => 'Theme, font, data, preferences';
@@ -4608,7 +4605,7 @@ class SEn extends S {
   String get themeTitle => 'Theme';
 
   @override
-  String get autofillTitle => 'Auto-fill Settings';
+  String get autofillTitle => 'Auto-fill settings';
 
   @override
   String get autofillDesc =>
@@ -4646,30 +4643,30 @@ class SEn extends S {
       'Replace fields even if you already filled them';
 
   @override
-  String get resetTitle => 'Reset Everything';
+  String get resetTitle => 'Reset everything';
 
   @override
   String get resetContent =>
       'This will permanently delete ALL your data:\n\n• All accounts and balances\n• All transactions\n• All envelopes and categories\n• All settings\n\nThis cannot be undone. Are you absolutely sure?';
 
   @override
-  String get resetButton => 'Delete Everything';
+  String get resetButton => 'Delete everything';
 
   @override
-  String get txColorsTitle => 'Transaction Colors';
+  String get txColorsTitle => 'Transaction colors';
 
   @override
   String get txColorsDesc =>
       'Choose a color for each transaction type. These colors are used throughout the app to visually distinguish income, expenses, and transfers.';
 
   @override
-  String get txColorsReset => 'Reset to Defaults';
+  String get txColorsReset => 'Reset to defaults';
 
   @override
-  String get householdNameTitle => 'Household Name';
+  String get householdNameTitle => 'Household name';
 
   @override
-  String get tileTravelExchange => 'Travel Exchange';
+  String get tileTravelExchange => 'Travel exchange';
 
   @override
   String get tileExchangeRates => 'Exchange rates';
@@ -4681,10 +4678,10 @@ class SEn extends S {
   String get tileSubscriptions => 'Subscriptions';
 
   @override
-  String get tileGoalsLoans => 'Goals & Loans';
+  String get tileGoalsLoans => 'Goals & loans';
 
   @override
-  String get syncTitle => 'Cloud Sync';
+  String get syncTitle => 'Cloud sync';
 
   @override
   String get syncNotConnected => 'Not connected';
@@ -4702,10 +4699,10 @@ class SEn extends S {
   String get syncConnectPrompt => 'Connect a cloud provider to sync your data';
 
   @override
-  String get syncNow => 'Sync Now';
+  String get syncNow => 'Sync now';
 
   @override
-  String get syncShareHousehold => 'Share Household';
+  String get syncShareHousehold => 'Share household';
 
   @override
   String get syncDisconnect => 'Disconnect';
@@ -4722,7 +4719,7 @@ class SEn extends S {
       'OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.';
 
   @override
-  String get syncConnectionFailed => 'Connection Failed';
+  String get syncConnectionFailed => 'Connection failed';
 
   @override
   String get syncFailedToConnect => 'Failed to connect';
@@ -4745,19 +4742,19 @@ class SEn extends S {
   String get syncSharing => 'Sharing...';
 
   @override
-  String get syncGenerateInvite => 'Generate Invite Code';
+  String get syncGenerateInvite => 'Generate invite code';
 
   @override
-  String get syncInviteCode => 'Invite Code';
+  String get syncInviteCode => 'Invite code';
 
   @override
-  String get syncShareCode => 'Share Code';
+  String get syncShareCode => 'Share code';
 
   @override
   String get syncValidEmailError => 'Please enter a valid email address';
 
   @override
-  String get syncEncryptionTitle => 'Sync Encryption';
+  String get syncEncryptionTitle => 'Sync encryption';
 
   @override
   String get syncEncrypted => 'Your sync file is encrypted with AES-256';
@@ -4770,7 +4767,7 @@ class SEn extends S {
       'Anyone with access to your Google Drive can read your financial data';
 
   @override
-  String get syncSetPasswordTitle => 'Set Sync Password';
+  String get syncSetPasswordTitle => 'Set sync password';
 
   @override
   String get syncPasswordDesc =>
@@ -4783,10 +4780,10 @@ class SEn extends S {
   String get syncPasswordHint => 'Enter a strong password';
 
   @override
-  String get syncConfirmPassword => 'Confirm Password';
+  String get syncConfirmPassword => 'Confirm password';
 
   @override
-  String get syncSetPasswordButton => 'Set Password';
+  String get syncSetPasswordButton => 'Set password';
 
   @override
   String get syncPasswordsDontMatch => 'Passwords don\'t match';
@@ -4796,7 +4793,7 @@ class SEn extends S {
       'Sync encryption enabled. Next sync will be encrypted.';
 
   @override
-  String get syncRemoveEncryptionTitle => 'Remove Encryption?';
+  String get syncRemoveEncryptionTitle => 'Remove encryption?';
 
   @override
   String get syncRemoveEncryptionMsg =>
@@ -4806,10 +4803,10 @@ class SEn extends S {
   String get syncEncryptionRemoved => 'Sync encryption removed';
 
   @override
-  String get backupTitle => 'Backup & Restore';
+  String get backupTitle => 'Backup & restore';
 
   @override
-  String get backupAutoTitle => 'Automatic Backups';
+  String get backupAutoTitle => 'Automatic backups';
 
   @override
   String get backupEnable => 'Enable automatic backups';
@@ -4844,7 +4841,7 @@ class SEn extends S {
   }
 
   @override
-  String get backupManualTitle => 'Manual Backup';
+  String get backupManualTitle => 'Manual backup';
 
   @override
   String get backupExportDesc =>
@@ -4854,7 +4851,7 @@ class SEn extends S {
   String get backupExporting => 'Exporting...';
 
   @override
-  String get backupExportShare => 'Export & Share';
+  String get backupExportShare => 'Export & share';
 
   @override
   String get backupRestoreTitle => 'Restore';
@@ -4863,13 +4860,13 @@ class SEn extends S {
   String get backupRestoreDesc => 'Pick a .db file to restore from.';
 
   @override
-  String get backupRestoreFromFile => 'Restore from File';
+  String get backupRestoreFromFile => 'Restore from file';
 
   @override
   String get backupLocalSection => 'Local backups';
 
   @override
-  String get backupRestoreDialogTitle => 'Restore Backup';
+  String get backupRestoreDialogTitle => 'Restore backup';
 
   @override
   String get backupRestoreWarning =>
@@ -4892,7 +4889,7 @@ class SEn extends S {
   String get backupInvalid => 'Invalid backup file — not a valid database';
 
   @override
-  String get ieTitle => 'Import & Export';
+  String get ieTitle => 'Import & export';
 
   @override
   String get ieImportCsv => 'Import CSV';
@@ -4907,26 +4904,26 @@ class SEn extends S {
   String get ieExportCsvSub => 'Export transactions as a spreadsheet';
 
   @override
-  String get ieExportReport => 'Export Report';
+  String get ieExportReport => 'Export report';
 
   @override
   String get ieExportReportSub => 'Generate a printable monthly report';
 
   @override
-  String get exportDataTitle => 'Export Data';
+  String get exportDataTitle => 'Export data';
 
   @override
-  String get exportTransTitle => 'Export Transactions';
+  String get exportTransTitle => 'Export transactions';
 
   @override
   String get exportTransDesc =>
       'Export all your transactions as a CSV file. You can open it in Excel, Google Sheets, or any spreadsheet app.';
 
   @override
-  String get exportReportTitle => 'Export Report';
+  String get exportReportTitle => 'Export report';
 
   @override
-  String get exportMonthlyTitle => 'Monthly Report';
+  String get exportMonthlyTitle => 'Monthly report';
 
   @override
   String get exportMonthlyDesc =>
@@ -4936,16 +4933,16 @@ class SEn extends S {
   String get exportGenerating => 'Generating...';
 
   @override
-  String get exportGenerateShare => 'Generate & Share';
+  String get exportGenerateShare => 'Generate & share';
 
   @override
-  String get exportSpendingByCat => 'Spending by Category';
+  String get exportSpendingByCat => 'Spending by category';
 
   @override
   String get notifTitle => 'Notifications';
 
   @override
-  String get notifDailyTitle => 'Daily Reminder';
+  String get notifDailyTitle => 'Daily reminder';
 
   @override
   String get notifDailyEnable => 'Enable daily reminder';
@@ -4960,21 +4957,21 @@ class SEn extends S {
   String get notifCustomMessage => 'Custom message (optional)';
 
   @override
-  String get notifEnvelopeTitle => 'Envelope Alerts';
+  String get notifEnvelopeTitle => 'Envelope alerts';
 
   @override
   String get notifEnvelopeDesc =>
       'You\'ll get a notification when envelopes are overspent or bills are coming up. The app checks when it opens or comes back to the foreground, at most once a day per alert.';
 
   @override
-  String get notifBillsTitle => 'Upcoming Bills';
+  String get notifBillsTitle => 'Upcoming bills';
 
   @override
   String get notifBillsDesc =>
       'You\'ll receive a notification when recurring transactions are due within 2 days. Checked when the app opens or comes back, at most once a day.';
 
   @override
-  String get fxTitle => 'Exchange Rates';
+  String get fxTitle => 'Exchange rates';
 
   @override
   String get fxRefreshTooltip => 'Refresh rates';
@@ -5003,7 +5000,7 @@ class SEn extends S {
   String get aboutCredit => 'Made by Samer';
 
   @override
-  String get aboutPrivacyTerms => 'Privacy & Terms';
+  String get aboutPrivacyTerms => 'Privacy & terms';
 
   @override
   String get aboutLicenses => 'Licenses';
@@ -5029,10 +5026,10 @@ class SEn extends S {
   String get settingsSecuritySection => 'Security';
 
   @override
-  String get tileRecurringBills => 'Recurring & Bills';
+  String get tileRecurringBills => 'Recurring & bills';
 
   @override
-  String get tileBillSplitter => 'Bill Splitter';
+  String get tileBillSplitter => 'Bill splitter';
 
   @override
   String get tileHelpGuide => 'Help Guide';
@@ -5044,16 +5041,16 @@ class SEn extends S {
   String get tileTheme => 'Theme';
 
   @override
-  String get tileAccentColor => 'Accent Color';
+  String get tileAccentColor => 'Accent color';
 
   @override
-  String get tileColors => 'Colors';
+  String get tileColors => 'Transaction colors';
 
   @override
   String get tileColorsSub => 'Income, expense & transfer';
 
   @override
-  String get tileEntryMode => 'Entry Mode';
+  String get tileEntryMode => 'Entry mode';
 
   @override
   String get tileAutofill => 'Auto-fill';
@@ -5062,48 +5059,48 @@ class SEn extends S {
   String get tileAutofillSub => 'Pre-fill fields from last transaction';
 
   @override
-  String get tileStartScreen => 'Start Screen';
+  String get tileStartScreen => 'Start screen';
 
   @override
   String get tileFont => 'Font';
 
   @override
-  String get tileTextSize => 'Text Size';
+  String get tileTextSize => 'Text size';
 
   @override
-  String get tileTxList => 'Transaction List';
+  String get tileTxList => 'Transaction list';
 
   @override
   String get tileTxListSub => 'Layout, icons, date banner';
 
   @override
-  String get tileCloudSync => 'Cloud Sync';
+  String get tileCloudSync => 'Cloud sync';
 
   @override
   String get tileCloudSyncSub => 'Sync across devices';
 
   @override
-  String get tileShareHousehold => 'Share Household';
+  String get tileShareHousehold => 'Share household';
 
   @override
   String get tileShareHouseholdConnected => 'Invite someone to share your data';
 
   @override
   String get tileShareHouseholdDisconnected =>
-      'Connect Cloud Sync first to share';
+      'Connect cloud sync first to share';
 
   @override
   String get tileShareHouseholdSnackbar =>
       'Set up Cloud Sync with Google Drive first to share your household.';
 
   @override
-  String get tileBackupRestore => 'Backup & Restore';
+  String get tileBackupRestore => 'Backup & restore';
 
   @override
   String get tileBackupRestoreSub => 'Export or restore database';
 
   @override
-  String get tileImportExport => 'Import & Export';
+  String get tileImportExport => 'Import & export';
 
   @override
   String get tileImportExportSub => 'CSV import, export, and reports';
@@ -5115,13 +5112,13 @@ class SEn extends S {
   String get tileNotificationsSub => 'Daily reminder, envelope & bill alerts';
 
   @override
-  String get tileHealthCheck => 'Health Check';
+  String get tileHealthCheck => 'Health check';
 
   @override
   String get tileHealthCheckSub => 'Verify data integrity & repair';
 
   @override
-  String get tileSyncReceipts => 'Sync Receipts';
+  String get tileSyncReceipts => 'Sync receipts';
 
   @override
   String get tileSyncReceiptsOn => 'Upload receipt photos to cloud storage';
@@ -5130,54 +5127,54 @@ class SEn extends S {
   String get tileSyncReceiptsOff => 'Receipts are stored on this device only';
 
   @override
-  String get tileBaseCurrency => 'Base Currency';
+  String get tileBaseCurrency => 'Base currency';
 
   @override
-  String get tilePeriodStartDay => 'Period Start Day';
+  String get tilePeriodStartDay => 'Period start day';
 
   @override
   String get tilePeriodStartDayDesc =>
       'The day of the month when a new budget period starts.';
 
   @override
-  String get tileCurrencySymbols => 'Currency Symbols';
+  String get tileCurrencySymbols => 'Currency symbols';
 
   @override
   String get tileCurrencySymbolsSub => 'Override how currencies are displayed';
 
   @override
-  String get tileNumberFormat => 'Number Format';
+  String get tileNumberFormat => 'Number format';
 
   @override
-  String get tileDateFormat => 'Date Format';
+  String get tileDateFormat => 'Date format';
 
   @override
-  String get tileBiometricLock => 'Biometric Lock';
+  String get tileBiometricLock => 'Biometric lock';
 
   @override
   String get tileBiometricSub => 'Require fingerprint or face to open';
 
   @override
-  String get tileResetEverything => 'Reset Everything';
+  String get tileResetEverything => 'Reset everything';
 
   @override
   String get tileResetSub => 'Erase all data and start fresh';
 
   @override
-  String get entryModeTitle => 'Entry Mode';
+  String get entryModeTitle => 'Entry mode';
 
   @override
   String get entryModeDesc => 'Choose how you add new transactions.';
 
   @override
-  String get entryModeAssisted => 'Assisted (Step-by-step)';
+  String get entryModeAssisted => 'Assisted (step-by-step)';
 
   @override
   String get entryModeAssistedDesc =>
       'Guides you through adding a transaction step by step. First pick a title, then a category, then enter the amount. Best for beginners.';
 
   @override
-  String get entryModeClassic => 'Classic (Single form)';
+  String get entryModeClassic => 'Classic (single form)';
 
   @override
   String get entryModeClassicDesc =>
@@ -5196,7 +5193,7 @@ class SEn extends S {
   String get themeAmoled => 'AMOLED pure black';
 
   @override
-  String get accentColorTitle => 'Accent Color';
+  String get accentColorTitle => 'Accent color';
 
   @override
   String get accentColorSystem => 'System';
@@ -5208,25 +5205,25 @@ class SEn extends S {
   String get accentColorSystemLabel => 'System (Material You)';
 
   @override
-  String get startScreenTitle => 'Start Screen';
+  String get startScreenTitle => 'Start screen';
 
   @override
   String get startScreenDesc => 'Opens when you launch the app.';
 
   @override
-  String get chooseFontTitle => 'Choose Font';
+  String get chooseFontTitle => 'Choose font';
 
   @override
   String get fontPreview => 'The quick brown fox jumps over the lazy dog';
 
   @override
-  String get textSizeTitle => 'Text Size';
+  String get textSizeTitle => 'Text size';
 
   @override
   String get textSizePreview => 'Preview text at this size';
 
   @override
-  String get currencySymbolsTitle => 'Currency Symbols';
+  String get currencySymbolsTitle => 'Currency symbols';
 
   @override
   String get currencySymbolsDesc =>
@@ -5246,7 +5243,7 @@ class SEn extends S {
   }
 
   @override
-  String get numberFormatTitle => 'Number Format';
+  String get numberFormatTitle => 'Number format';
 
   @override
   String get numberFormatDesc =>
@@ -5256,20 +5253,20 @@ class SEn extends S {
   String get numberFormatPreview => 'Preview';
 
   @override
-  String get numberFormatThousands => 'Thousands Separator';
+  String get numberFormatThousands => 'Thousands separator';
 
   @override
-  String get numberFormatDecimal => 'Decimal Separator';
+  String get numberFormatDecimal => 'Decimal separator';
 
   @override
-  String get numberFormatNegative => 'Negative Numbers';
+  String get numberFormatNegative => 'Negative numbers';
 
   @override
   String get numberFormatConflict =>
       'Some options are hidden because they conflict with the decimal separator.';
 
   @override
-  String get dateFormatTitle => 'Date Format';
+  String get dateFormatTitle => 'Date format';
 
   @override
   String get biometricNotAvailable =>
@@ -5307,7 +5304,7 @@ class SEn extends S {
   }
 
   @override
-  String get backupNowButton => 'Backup Now';
+  String get backupNowButton => 'Backup now';
 
   @override
   String syncShareInviteText(String code) {
@@ -5315,10 +5312,10 @@ class SEn extends S {
   }
 
   @override
-  String get privacyTermsTitle => 'Privacy & Terms';
+  String get privacyTermsTitle => 'Privacy & terms';
 
   @override
-  String get privacyPolicyTitle => 'Privacy Policy';
+  String get privacyPolicyTitle => 'Privacy policy';
 
   @override
   String get privacyLastUpdated => 'Last updated: May 2026';
@@ -5328,14 +5325,14 @@ class SEn extends S {
       'BudgetSeal is designed with your privacy as a core principle. Your financial data belongs to you — we never collect, store, or transmit it to any server.';
 
   @override
-  String get privacyDataStorageTitle => '1. Data Storage';
+  String get privacyDataStorageTitle => '1. Data storage';
 
   @override
   String get privacyDataStorageBody =>
       'All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable Cloud Sync.';
 
   @override
-  String get privacyCloudSyncTitle => '2. Cloud Sync (Optional)';
+  String get privacyCloudSyncTitle => '2. Cloud sync (optional)';
 
   @override
   String get privacyCloudSyncBody =>
@@ -5349,7 +5346,7 @@ class SEn extends S {
       'The Web Companion feature runs a local HTTP server on your phone. It is only accessible from devices on the same WiFi network (private IP addresses). No data is sent to the internet. The connection is protected by a PIN, session tokens, and rate limiting. The server stops automatically after 6 hours.';
 
   @override
-  String get privacyAnalyticsTitle => '4. Analytics & Tracking';
+  String get privacyAnalyticsTitle => '4. Analytics & tracking';
 
   @override
   String get privacyAnalyticsBody =>
@@ -5363,7 +5360,7 @@ class SEn extends S {
       '• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for Cloud Sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.';
 
   @override
-  String get privacyReceiptsTitle => '6. Receipt Images';
+  String get privacyReceiptsTitle => '6. Receipt images';
 
   @override
   String get privacyReceiptsBody =>
@@ -5377,7 +5374,7 @@ class SEn extends S {
       'Automatic backups are stored locally in the app\'s documents directory. You control backup frequency and retention. Exported backup files are shared via the system share sheet and deleted from temporary storage afterward.';
 
   @override
-  String get termsOfUseTitle => 'Terms of Use';
+  String get termsOfUseTitle => 'Terms of use';
 
   @override
   String get termsAcceptanceTitle => '1. Acceptance';
@@ -5387,35 +5384,35 @@ class SEn extends S {
       'By using BudgetSeal, you agree to these terms. If you do not agree, please uninstall the app.';
 
   @override
-  String get termsIntendedUseTitle => '2. Intended Use';
+  String get termsIntendedUseTitle => '2. Intended use';
 
   @override
   String get termsIntendedUseBody =>
       'BudgetSeal is a personal finance management tool for individual and household budgeting. It is not intended for commercial accounting, tax preparation, or financial advice. The app provides tools to organize your finances — it does not provide financial recommendations.';
 
   @override
-  String get termsDataAccuracyTitle => '3. Data Accuracy';
+  String get termsDataAccuracyTitle => '3. Data accuracy';
 
   @override
   String get termsDataAccuracyBody =>
       'You are responsible for the accuracy of the data you enter. BudgetSeal calculates balances, budgets, and reports based on your input. Exchange rates fetched from external sources are approximate and may not reflect real-time market rates.';
 
   @override
-  String get termsNoWarrantyTitle => '4. No Warranty';
+  String get termsNoWarrantyTitle => '4. No warranty';
 
   @override
   String get termsNoWarrantyBody =>
       'BudgetSeal is provided \"as is\" without warranty of any kind. While we strive for reliability, we cannot guarantee that the app will be error-free or uninterrupted. Regular backups are strongly recommended.';
 
   @override
-  String get termsLiabilityTitle => '5. Limitation of Liability';
+  String get termsLiabilityTitle => '5. Limitation of liability';
 
   @override
   String get termsLiabilityBody =>
       'The developer shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use of BudgetSeal, including but not limited to data loss, financial miscalculations, or sync failures.';
 
   @override
-  String get termsIPTitle => '6. Intellectual Property';
+  String get termsIPTitle => '6. Intellectual property';
 
   @override
   String get termsIPBody =>
@@ -5436,7 +5433,7 @@ class SEn extends S {
       'For questions or concerns about this privacy policy or terms of use, contact: fancyshark505@gmail.com';
 
   @override
-  String get healthTitle => 'Health Check';
+  String get healthTitle => 'Health check';
 
   @override
   String get healthExportTooltip => 'Export report';
@@ -5445,10 +5442,10 @@ class SEn extends S {
   String get healthRerunTooltip => 'Re-run check';
 
   @override
-  String get healthAllClear => 'All Clear';
+  String get healthAllClear => 'All clear';
 
   @override
-  String get healthIssuesFound => 'Issues Found';
+  String get healthIssuesFound => 'Issues found';
 
   @override
   String get healthDataConsistent => 'Your data is consistent and healthy';
@@ -5469,19 +5466,19 @@ class SEn extends S {
   String get healthNever => 'Never';
 
   @override
-  String get healthBalanceInvariant => 'Balance Invariant';
+  String get healthBalanceInvariant => 'Balance invariant';
 
   @override
-  String get healthAccountBalances => 'Account Balances';
+  String get healthAccountBalances => 'Account balances';
 
   @override
-  String get healthEnvelopeBalances => 'Envelope Balances';
+  String get healthEnvelopeBalances => 'Envelope balances';
 
   @override
-  String get healthDataQuality => 'Data Quality';
+  String get healthDataQuality => 'Data quality';
 
   @override
-  String get healthRepairButton => 'Repair Balances';
+  String get healthRepairButton => 'Repair balances';
 
   @override
   String get healthLedgerEntries => 'Ledger entries';
@@ -5502,7 +5499,7 @@ class SEn extends S {
   String get healthNoEnvelopes => 'No envelopes';
 
   @override
-  String get healthRepairTitle => 'Repair Balances';
+  String get healthRepairTitle => 'Repair balances';
 
   @override
   String get healthRepairMsg =>
@@ -5518,7 +5515,7 @@ class SEn extends S {
   String get healthRepairFailed => 'Repair failed. Please try again.';
 
   @override
-  String get healthPurgeTitle => 'Purge Deleted Transactions';
+  String get healthPurgeTitle => 'Purge deleted transactions';
 
   @override
   String get healthPurgeSuffix => 'This cannot be undone.';
@@ -5539,7 +5536,7 @@ class SEn extends S {
   String get reportsInsightsTab => 'Insights';
 
   @override
-  String get reportsBalanceTab => 'Balance Sheet';
+  String get reportsBalanceTab => 'Balance sheet';
 
   @override
   String get reportsHintTitle => 'Explore your spending patterns';
@@ -5568,7 +5565,7 @@ class SEn extends S {
   String get reportsSameAsLast => 'Same as last month';
 
   @override
-  String get reportsSpendingActivity => 'Spending Activity';
+  String get reportsSpendingActivity => 'Spending activity';
 
   @override
   String get reportsHeatmapNone => 'None';
@@ -5578,10 +5575,10 @@ class SEn extends S {
       'Each square is one day. Darker = higher amount. Scroll left to see past months.';
 
   @override
-  String get reports6MonthTrend => '6-Month Trend';
+  String get reports6MonthTrend => '6-month trend';
 
   @override
-  String get reportsDailyPaceToggle => 'Daily Pace';
+  String get reportsDailyPaceToggle => 'Daily pace';
 
   @override
   String get reportsNoSpending => 'No spending this month';
@@ -5608,7 +5605,7 @@ class SEn extends S {
   String get reportsTypicalLegend => 'Typical';
 
   @override
-  String get reportsVelocityTitle => 'Spending Velocity';
+  String get reportsVelocityTitle => 'Spending velocity';
 
   @override
   String get reportsProjected => 'Projected';
@@ -5623,16 +5620,16 @@ class SEn extends S {
   String get reportsDay => 'Day';
 
   @override
-  String get reportsBiggestExpense => 'Biggest Expense';
+  String get reportsBiggestExpense => 'Biggest expense';
 
   @override
-  String get reportsSavingsRate => 'Savings Rate';
+  String get reportsSavingsRate => 'Savings rate';
 
   @override
-  String get reportsRecurringTitle => 'Recurring Transactions';
+  String get reportsRecurringTitle => 'Recurring transactions';
 
   @override
-  String get reportsAgeTitle => 'Age of Money';
+  String get reportsAgeTitle => 'Age of money';
 
   @override
   String get reportsAgeExcellent => 'Excellent';
@@ -5678,22 +5675,22 @@ class SEn extends S {
   String get reportsCompareTo => 'Compare balances to:';
 
   @override
-  String get reportsEndLastWeek => 'End of Last Week';
+  String get reportsEndLastWeek => 'End of last week';
 
   @override
-  String get reportsEndLastMonth => 'End of Last Month';
+  String get reportsEndLastMonth => 'End of last month';
 
   @override
-  String get reportsSameTimeLastMonth => 'Same Time Last Month';
+  String get reportsSameTimeLastMonth => 'Same time last month';
 
   @override
-  String get reportsEndLastQuarter => 'End of Last Quarter';
+  String get reportsEndLastQuarter => 'End of last quarter';
 
   @override
-  String get reportsEndLastYear => 'End of Last Year';
+  String get reportsEndLastYear => 'End of last year';
 
   @override
-  String get reportsSameTimeLastYear => 'Same Time Last Year';
+  String get reportsSameTimeLastYear => 'Same time last year';
 
   @override
   String get reportsCustom => 'Custom...';
@@ -5720,10 +5717,10 @@ class SEn extends S {
   String get wcAutoStop => 'Stops automatically after 6 hours';
 
   @override
-  String get wcStopButton => 'Stop Server';
+  String get wcStopButton => 'Stop server';
 
   @override
-  String get wcStartButton => 'Start Server';
+  String get wcStartButton => 'Start server';
 
   @override
   String get wcOpenOnLaptop => 'Open on your laptop';
@@ -5789,20 +5786,20 @@ class SEn extends S {
       'Keep BudgetSeal in the foreground while the server is running. iOS does not support background servers — locking your screen will stop it.';
 
   @override
-  String get wcNoWifiTitle => 'No WiFi Connection';
+  String get wcNoWifiTitle => 'No WiFi connection';
 
   @override
   String get wcNoWifiDesc =>
       'Connect your phone to a WiFi network to use Web Companion. The server needs WiFi to let your laptop access the budget.';
 
   @override
-  String get wcPublicNetwork => 'Public Network Detected';
+  String get wcPublicNetwork => 'Public network detected';
 
   @override
-  String get wcNetworkSecurity => 'Network Security';
+  String get wcNetworkSecurity => 'Network security';
 
   @override
-  String get wcSecurityWarning => 'Security Warning';
+  String get wcSecurityWarning => 'Security warning';
 
   @override
   String get wcInfo1 => 'Only accessible on the same WiFi network';
@@ -6077,7 +6074,7 @@ class SEn extends S {
   String get monthDec => 'Dec';
 
   @override
-  String get notifLowEnvelopesTitle => 'Low Envelopes';
+  String get notifLowEnvelopesTitle => 'Low envelopes';
 
   @override
   String notifSingleOverspent(String name) {
@@ -6095,7 +6092,7 @@ class SEn extends S {
   }
 
   @override
-  String get notifUpcomingBillsTitle => 'Upcoming Bills';
+  String get notifUpcomingBillsTitle => 'Upcoming bills';
 
   @override
   String notifSingleDue(String title) {
@@ -6111,7 +6108,7 @@ class SEn extends S {
   String get notifBillsAndMore => 'and more';
 
   @override
-  String get notifBudgetWarningTitle => 'Budget Alert';
+  String get notifBudgetWarningTitle => 'Budget alert';
 
   @override
   String notifBudgetWarning(String name, String percent, String days) {
@@ -6138,22 +6135,22 @@ class SEn extends S {
       'Keep your budget honest — add today\'s transactions.';
 
   @override
-  String get notifReminderChannel => 'Daily Reminder';
+  String get notifReminderChannel => 'Daily reminder';
 
   @override
   String get notifReminderChannelDesc => 'Daily reminder to log transactions';
 
   @override
-  String get engineAutoCovered => 'Auto-covered from Unallocated';
+  String get engineAutoCovered => 'Auto-covered from unallocated';
 
   @override
   String get engineDirectIncome => 'Direct from income';
 
   @override
-  String get engineWithdrawn => 'Withdrawn to Unallocated';
+  String get engineWithdrawn => 'Withdrawn to unallocated';
 
   @override
-  String get enginePeriodReturned => 'Period reset — returned to Unallocated';
+  String get enginePeriodReturned => 'Period reset — returned to unallocated';
 
   @override
   String get enginePeriodOut => 'Period reset — transferred out';
@@ -6177,7 +6174,7 @@ class SEn extends S {
   String get textScaleLarge => 'Large';
 
   @override
-  String get textScaleExtraLarge => 'Extra Large';
+  String get textScaleExtraLarge => 'Extra large';
 
   @override
   String get defcatGroceries => 'Groceries';
@@ -6186,10 +6183,10 @@ class SEn extends S {
   String get defcatFuel => 'Fuel';
 
   @override
-  String get defcatPublicTransit => 'Public Transit';
+  String get defcatPublicTransit => 'Public transit';
 
   @override
-  String get defcatParkingTolls => 'Parking & Tolls';
+  String get defcatParkingTolls => 'Parking & tolls';
 
   @override
   String get defcatMaintenance => 'Maintenance';
@@ -6234,10 +6231,10 @@ class SEn extends S {
   String get defcatInvestments => 'Investments';
 
   @override
-  String get defcatOtherIncome => 'Other Income';
+  String get defcatOtherIncome => 'Other income';
 
   @override
-  String get defcatFoodDrink => 'Food & Drink';
+  String get defcatFoodDrink => 'Food & drink';
 
   @override
   String get defcatTransport => 'Transport';
@@ -6252,7 +6249,7 @@ class SEn extends S {
   String get defcatTravel => 'Travel';
 
   @override
-  String get defcatDiningOut => 'Dining Out';
+  String get defcatDiningOut => 'Dining out';
 
   @override
   String get defcatCoffee => 'Coffee';
@@ -6309,7 +6306,7 @@ class SEn extends S {
   String get defcatOther => 'Other';
 
   @override
-  String get filePickerTitle => 'Select BudgetSeal Sync File';
+  String get filePickerTitle => 'Select BudgetSeal sync file';
 
   @override
   String get heatmapNoData => 'No data yet';
@@ -6475,7 +6472,7 @@ class SEn extends S {
   String get lockUnlockButton => 'Unlock';
 
   @override
-  String get travelTitle => 'Travel Exchange';
+  String get travelTitle => 'Travel exchange';
 
   @override
   String get travelInfo =>
@@ -6500,10 +6497,10 @@ class SEn extends S {
   String get travelAmountReceived => 'Amount received';
 
   @override
-  String get travelExchangeButton => 'Exchange & Create Travel Wallet';
+  String get travelExchangeButton => 'Exchange & create travel wallet';
 
   @override
-  String get travelExistingWallet => 'Existing Travel Wallet';
+  String get travelExistingWallet => 'Existing travel wallet';
 
   @override
   String travelPreviousWallet(String currency) {
@@ -6511,7 +6508,7 @@ class SEn extends S {
   }
 
   @override
-  String get travelCreateNew => 'Create New';
+  String get travelCreateNew => 'Create new';
 
   @override
   String get travelReactivate => 'Reactivate';
@@ -6525,7 +6522,7 @@ class SEn extends S {
   }
 
   @override
-  String get periodNewTitle => 'New Period';
+  String get periodNewTitle => 'New period';
 
   @override
   String get periodError => 'Couldn\'t load envelopes';
@@ -6546,7 +6543,7 @@ class SEn extends S {
       'All periodic allocations have zero or negative balances.';
 
   @override
-  String get periodCompleteButton => 'Complete Period Transition';
+  String get periodCompleteButton => 'Complete period transition';
 
   @override
   String get periodTransitionFailed =>
@@ -6559,13 +6556,13 @@ class SEn extends S {
   String get periodPeriodic => 'Periodic allocation';
 
   @override
-  String get periodReturnUnallocated => 'Return to Unallocated';
+  String get periodReturnUnallocated => 'Return to unallocated';
 
   @override
   String get periodReturnDesc => 'Balance returns to the pool';
 
   @override
-  String get periodCarryForward => 'Carry Forward';
+  String get periodCarryForward => 'Carry forward';
 
   @override
   String get periodCarryDesc => 'Keep balance for next period';
@@ -6580,7 +6577,7 @@ class SEn extends S {
   String get periodSelectAllocation => 'Select allocation';
 
   @override
-  String get leftoverTitle => 'Resolve Leftovers';
+  String get leftoverTitle => 'Resolve leftovers';
 
   @override
   String get leftoverNoAllocation => 'No allocation specified.';
@@ -6627,7 +6624,7 @@ class SEn extends S {
       'Failed to resolve leftovers. Please try again.';
 
   @override
-  String get commonTryAgain => 'Try Again';
+  String get commonTryAgain => 'Try again';
 
   @override
   String get commonErrorDesc =>
@@ -6744,13 +6741,13 @@ class SEn extends S {
   String get recurringUpdated => 'Recurring transaction updated';
 
   @override
-  String get recurringNewTitle => 'New Recurring Transaction';
+  String get recurringNewTitle => 'New recurring transaction';
 
   @override
-  String get recurringNewSubTitle => 'New Subscription';
+  String get recurringNewSubTitle => 'New subscription';
 
   @override
-  String get recurringEditTitle => 'Edit Recurring Transaction';
+  String get recurringEditTitle => 'Edit recurring transaction';
 
   @override
   String get recurringFormTitleHint => 'Title (e.g. Rent, Salary)';
@@ -6837,10 +6834,10 @@ class SEn extends S {
   String get helpGuideTitle => 'Help Guide';
 
   @override
-  String get receiptTakePhoto => 'Take Photo';
+  String get receiptTakePhoto => 'Take photo';
 
   @override
-  String get receiptChooseGallery => 'Choose from Gallery';
+  String get receiptChooseGallery => 'Choose from gallery';
 
   @override
   String get receiptSelectMultiple => 'Select multiple photos';
@@ -6849,7 +6846,7 @@ class SEn extends S {
   String get importCsvTitle => 'Import CSV';
 
   @override
-  String get importFromBank => 'Import from Bank CSV';
+  String get importFromBank => 'Import from bank CSV';
 
   @override
   String get importCsvDesc =>
@@ -6867,14 +6864,14 @@ class SEn extends S {
   }
 
   @override
-  String get importColumnMapping => 'Column Mapping';
+  String get importColumnMapping => 'Column mapping';
 
   @override
   String get importColumnMapDesc =>
       'Assign a role to each column. Roles were auto-detected -- adjust as needed.';
 
   @override
-  String get importPreview => 'Import Preview';
+  String get importPreview => 'Import preview';
 
   @override
   String get importNoAmount =>
@@ -6884,7 +6881,7 @@ class SEn extends S {
   String get importIntoAccount => 'Import into account';
 
   @override
-  String get importAssignAmount => 'Please assign an Amount column';
+  String get importAssignAmount => 'Please assign an amount column';
 
   @override
   String importSuccess(int count) {
@@ -6951,10 +6948,10 @@ class SEn extends S {
   String get objTypeSection => 'Type';
 
   @override
-  String get objHideSettings => 'Hide Settings';
+  String get objHideSettings => 'Hide settings';
 
   @override
-  String get objEditSettings => 'Edit Settings';
+  String get objEditSettings => 'Edit settings';
 
   @override
   String objOfTarget(String amount) {
@@ -6985,7 +6982,7 @@ class SEn extends S {
   String get healthAutoAdjustment => 'Health check auto-adjustment';
 
   @override
-  String get healthReportTitle => 'BudgetSeal Health Check Report';
+  String get healthReportTitle => 'BudgetSeal health check report';
 
   @override
   String healthAdjustmentsCreated(int count) {
@@ -7121,7 +7118,7 @@ class SEn extends S {
   }
 
   @override
-  String get plannedTitle => 'Planned Payments';
+  String get plannedTitle => 'Planned payments';
 
   @override
   String get plannedSubtitle => 'Plan future one-time payments';
@@ -7143,7 +7140,7 @@ class SEn extends S {
   String get plannedPostFailed => 'Failed to post payment';
 
   @override
-  String get plannedPostAllTitle => 'Post All Payments';
+  String get plannedPostAllTitle => 'Post all payments';
 
   @override
   String plannedPostAllContent(int count, String month) {
@@ -7151,7 +7148,7 @@ class SEn extends S {
   }
 
   @override
-  String get plannedPostAll => 'Post All';
+  String get plannedPostAll => 'Post all';
 
   @override
   String plannedPostAllResult(int count) {
@@ -7164,7 +7161,7 @@ class SEn extends S {
   }
 
   @override
-  String get plannedDeleteTitle => 'Delete Planned Payment';
+  String get plannedDeleteTitle => 'Delete planned payment';
 
   @override
   String get plannedDeleteContent =>
@@ -7186,13 +7183,13 @@ class SEn extends S {
   String get plannedTotalLabel => 'total';
 
   @override
-  String get plannedPlanButton => 'Plan Payment';
+  String get plannedPlanButton => 'Plan payment';
 
   @override
-  String get plannedEditTitle => 'Edit Planned Payment';
+  String get plannedEditTitle => 'Edit planned payment';
 
   @override
-  String get plannedTargetMonth => 'Target Month';
+  String get plannedTargetMonth => 'Target month';
 
   @override
   String get plannedExactDate => 'Pick exact date (optional)';
@@ -7241,7 +7238,7 @@ class SEn extends S {
   String get recurringFormCategory => 'Category (optional)';
 
   @override
-  String get txDetailSaveAsTemplate => 'Save as Template';
+  String get txDetailSaveAsTemplate => 'Save as template';
 
   @override
   String get txDetailTemplateSaved => 'Template saved';
@@ -7250,7 +7247,7 @@ class SEn extends S {
   String get txDetailTemplateError => 'Could not save template';
 
   @override
-  String get tileArabicDigits => 'Arabic-Indic Numerals';
+  String get tileArabicDigits => 'Arabic-Indic numerals';
 
   @override
   String get upgradeTitle => 'Upgrade to Premium';
@@ -7260,19 +7257,19 @@ class SEn extends S {
       'Unlock every feature with a single purchase. No subscriptions, no ads.';
 
   @override
-  String get upgradeFeatureSync => 'Cloud Sync';
+  String get upgradeFeatureSync => 'Cloud sync';
 
   @override
   String get upgradeFeatureWebCompanion => 'Web Companion';
 
   @override
-  String get upgradeFeatureBillSplitter => 'Bill Splitter';
+  String get upgradeFeatureBillSplitter => 'Bill splitter';
 
   @override
-  String get upgradeFeatureTravelExchange => 'Travel Exchange';
+  String get upgradeFeatureTravelExchange => 'Travel exchange';
 
   @override
-  String get upgradeFeaturePlannedPayments => 'Planned Payments';
+  String get upgradeFeaturePlannedPayments => 'Planned payments';
 
   @override
   String get upgradeFeatureUnlimitedItems => 'Unlimited accounts & envelopes';
@@ -7290,7 +7287,7 @@ class SEn extends S {
   String get upgradeComingSoon => 'In-app purchases coming soon';
 
   @override
-  String get upgradeRedeemCode => 'Redeem Code';
+  String get upgradeRedeemCode => 'Redeem code';
 
   @override
   String get upgradeRedeemHint => 'Enter your code';
@@ -7305,7 +7302,7 @@ class SEn extends S {
   String get upgradeRedeemSuccess => 'Code redeemed! Premium unlocked.';
 
   @override
-  String get upgradeRestorePurchase => 'Restore Purchase';
+  String get upgradeRestorePurchase => 'Restore purchase';
 
   @override
   String get upgradeRestoreSuccess => 'Purchase restored! Premium unlocked.';

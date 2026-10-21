@@ -404,12 +404,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       : const Icon(Icons.share_rounded, size: 18),
                   label:
                       Text(_working ? S.of(context).backupExporting : S.of(context).backupExportShare),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
                 ),
               ),
             ],
@@ -437,9 +431,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   label: Text(S.of(context).backupRestoreFromFile),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.caution,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),

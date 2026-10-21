@@ -2762,9 +2762,6 @@ class SFr extends S {
   String get txTapPlus => 'Appuyez sur + pour en ajouter';
 
   @override
-  String get txAddFirst => 'Ajoutez votre première transaction';
-
-  @override
   String txSpentOfBudget(String spent, String budget) {
     return '$spent dépensé sur un budget de $budget';
   }
@@ -4622,7 +4619,7 @@ class SFr extends S {
   String get settingsGoalsSub => 'Objectifs d\'épargne et suivi des dettes';
 
   @override
-  String get settingsCustomization => 'Paramètres et personnalisation';
+  String get settingsCustomization => 'Paramètres';
 
   @override
   String get settingsCustomizationSub => 'Thème, police, données, préférences';
@@ -5099,7 +5096,7 @@ class SFr extends S {
   String get tileAccentColor => 'Couleur d\'accentuation';
 
   @override
-  String get tileColors => 'Couleurs';
+  String get tileColors => 'Couleurs des transactions';
 
   @override
   String get tileColorsSub => 'Revenus, dépenses et transferts';
