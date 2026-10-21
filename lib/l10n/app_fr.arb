@@ -870,7 +870,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l'Accueil. Puis répartissez votre argent dans l'onglet Budget.",
+  "dashboardWelcomeBody": "Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les actions rapides de l'Accueil. Puis répartissez votre argent dans l'onglet Budget.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -3880,7 +3880,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l'onglet Budget.",
+  "onboardDoneSubtitle": "La liste sur l'Accueil montre les prochaines étapes : enregistrez vos revenus, puis répartissez-les dans des enveloppes.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -5552,5 +5552,18 @@
   "fundFailed": "Impossible de financer les enveloppes. Réessayez.",
   "lockUnlockFailed": "Déverrouillage impossible. Réessayez.",
   "healthAccountsVsEnvelopes": "Comptes : {accounts} | Enveloppes : {envelopes}",
-  "txAfItemsCount": "{n, plural, =1{1 article} other{{n} articles}}"
+  "txAfItemsCount": "{n, plural, =1{1 article} other{{n} articles}}",
+  "onboardSeedEnvelopes": "Créer des enveloppes pour les catégories principales",
+  "onboardSeedEnvelopesSub": "Alimentation, transport, factures et plus. Vous les approvisionnez après avoir saisi vos revenus.",
+  "gsTitle": "Pour commencer",
+  "gsProgress": "{done} sur {total}",
+  "gsHide": "Masquer",
+  "gsIncomeTitle": "Saisissez vos revenus",
+  "gsIncomeBody": "L'argent arrive d'abord. Ensuite, vous lui donnez une mission.",
+  "gsEnvelopesTitle": "Créez des enveloppes",
+  "gsEnvelopesBody": "Une pour chaque type de dépense, comme les courses ou le loyer.",
+  "gsFundTitle": "Approvisionnez vos enveloppes",
+  "gsFundBody": "Déplacez l'argent de « Prêt à répartir » vers vos enveloppes.",
+  "gsExpenseTitle": "Saisissez une dépense",
+  "gsExpenseBody": "Elle est prise dans l'enveloppe correspondante."
 }

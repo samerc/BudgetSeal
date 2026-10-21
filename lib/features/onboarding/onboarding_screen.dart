@@ -73,6 +73,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // Categories
   bool _seedCategories = true; // true = suggested set, false = none
+  // Envelopes for the main spending groups, so a new budget isn't empty.
+  bool _seedEnvelopes = true;
 
   bool _loading = false;
   String? _nameError;
@@ -180,9 +182,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           final presets = detailedPresets;
           final groupIds = <String, String>{};
 
+          var order = 0;
           for (final p in presets.where((p) => p.parentKey == null)) {
             final id = const Uuid().v4();
             groupIds[p.nameKey] = id;
+            // One spending envelope per main group (no target yet); its
+            // subcategories spend from it.
+            String? envelopeId;
+            if (_seedEnvelopes && kEnvelopeGroupKeys.contains(p.nameKey)) {
+              envelopeId = const Uuid().v4();
+              batch.insert(db.allocations, AllocationsCompanion.insert(
+                id: envelopeId,
+                householdId: householdId,
+                name: p.translatedName(s),
+                categoryId: envelopeId, // legacy; the link is categories.allocationId
+                icon: Value(p.emoji),
+                targetCurrency: Value(_baseCurrency),
+                sortOrder: Value(order++),
+                deviceId: 'local',
+              ));
+            }
             batch.insert(db.categories, CategoriesCompanion.insert(
               id: id,
               householdId: householdId,
@@ -190,6 +209,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               icon: Value(p.emoji),
               colorHex: Value(p.colorHex),
               transactionType: Value(p.type),
+              allocationId: Value(envelopeId),
             ));
           }
           for (final p in presets.where((p) => p.parentKey != null)) {
@@ -305,6 +325,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         acctType: _acctType,
                         acctInitialBalance: _acctInitialBalance,
                         seedCategories: _seedCategories,
+                        seedEnvelopes: _seedEnvelopes,
                         loading: _loading,
                         nameError: _nameError,
                         acctNameError: _acctNameError,
@@ -321,6 +342,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             setState(() => _acctInitialBalance = v),
                         onSeedChanged: (v) =>
                             setState(() => _seedCategories = v),
+                        onSeedEnvelopesChanged: (v) =>
+                            setState(() => _seedEnvelopes = v),
                         onSubmit: _submit,
                       ),
                       _DonePage(onFinish: () => context.go('/')),
@@ -581,6 +604,7 @@ class _SetupPage extends StatelessWidget {
   final String acctType;
   final double acctInitialBalance;
   final bool seedCategories;
+  final bool seedEnvelopes;
   final bool loading;
   final String? nameError;
   final String? acctNameError;
@@ -591,6 +615,7 @@ class _SetupPage extends StatelessWidget {
   final ValueChanged<String> onAcctTypeChanged;
   final ValueChanged<double> onAcctBalanceChanged;
   final ValueChanged<bool> onSeedChanged;
+  final ValueChanged<bool> onSeedEnvelopesChanged;
   final VoidCallback onSubmit;
 
   const _SetupPage({
@@ -603,6 +628,7 @@ class _SetupPage extends StatelessWidget {
     required this.acctType,
     required this.acctInitialBalance,
     required this.seedCategories,
+    required this.seedEnvelopes,
     required this.loading,
     this.nameError,
     this.acctNameError,
@@ -613,6 +639,7 @@ class _SetupPage extends StatelessWidget {
     required this.onAcctTypeChanged,
     required this.onAcctBalanceChanged,
     required this.onSeedChanged,
+    required this.onSeedEnvelopesChanged,
     required this.onSubmit,
   });
 
@@ -732,19 +759,46 @@ class _SetupPage extends StatelessWidget {
             SectionHeader(s.onboardCategoriesSection, padding: _sectionPad),
             _Card(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: SwitchListTile(
-                value: seedCategories,
-                onChanged: onSeedChanged,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                title: Text(s.onboardSeedCategories,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context))),
-                subtitle: Text(
-                    seedCategories ? s.onboardFullSetSub : s.onboardEmptySub,
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    value: seedCategories,
+                    onChanged: onSeedChanged,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    title: Text(s.onboardSeedCategories,
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tp(context))),
+                    subtitle: Text(
+                        seedCategories
+                            ? s.onboardFullSetSub
+                            : s.onboardEmptySub,
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.ts(context))),
+                  ),
+                  if (seedCategories) ...[
+                    Divider(
+                        height: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: AppColors.bd(context)),
+                    SwitchListTile(
+                      value: seedEnvelopes,
+                      onChanged: onSeedEnvelopesChanged,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(s.onboardSeedEnvelopes,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.tp(context))),
+                      subtitle: Text(s.onboardSeedEnvelopesSub,
+                          style: TextStyle(
+                              fontSize: 13, color: AppColors.ts(context))),
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 24),

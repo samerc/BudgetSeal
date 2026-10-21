@@ -870,7 +870,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.",
+  "dashboardWelcomeBody": "سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالإجراءات السريعة في الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -3880,7 +3880,7 @@
   "@onboardAllSet": {
     "description": "Done page title"
   },
-  "onboardDoneSubtitle": "الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.",
+  "onboardDoneSubtitle": "تعرض القائمة في الرئيسية خطواتك التالية: سجّل دخلك، ثم وزّعه على الأظرف.",
   "@onboardDoneSubtitle": {
     "description": "Done page subtitle"
   },
@@ -5552,5 +5552,18 @@
   "fundFailed": "تعذّر تمويل الأظرف. حاول مرة أخرى.",
   "lockUnlockFailed": "تعذّر فتح القفل. حاول مرة أخرى.",
   "healthAccountsVsEnvelopes": "الحسابات: {accounts} | الأظرف: {envelopes}",
-  "txAfItemsCount": "{n, plural, =1{عنصر واحد} =2{عنصران} few{{n} عناصر} other{{n} عنصر}}"
+  "txAfItemsCount": "{n, plural, =1{عنصر واحد} =2{عنصران} few{{n} عناصر} other{{n} عنصر}}",
+  "onboardSeedEnvelopes": "إنشاء أظرف للفئات الرئيسية",
+  "onboardSeedEnvelopesSub": "الطعام والنقل والفواتير وغيرها. تموّلها بعد تسجيل دخلك.",
+  "gsTitle": "ابدأ",
+  "gsProgress": "{done} من {total}",
+  "gsHide": "إخفاء",
+  "gsIncomeTitle": "سجّل دخلك",
+  "gsIncomeBody": "يأتي المال أولًا، ثم تعطيه مهامّ.",
+  "gsEnvelopesTitle": "أنشئ أظرفًا",
+  "gsEnvelopesBody": "واحد لكل ما تنفق عليه، مثل البقالة أو الإيجار.",
+  "gsFundTitle": "موّل أظرفك",
+  "gsFundBody": "انقل المال من «جاهز للتوزيع» إلى أظرفك.",
+  "gsExpenseTitle": "سجّل مصروفًا",
+  "gsExpenseBody": "يُخصم من الظرف المطابق."
 }

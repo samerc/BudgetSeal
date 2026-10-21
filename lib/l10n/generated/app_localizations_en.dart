@@ -2501,7 +2501,7 @@ class SEn extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.';
+      'Record expenses, income and transfers, or split a bill, with the quick actions on Home. Then give your money jobs on the Budget tab.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -6395,7 +6395,7 @@ class SEn extends S {
 
   @override
   String get onboardDoneSubtitle =>
-      'Next: record your income, then give it jobs in envelopes on the Budget tab.';
+      'The checklist on Home shows your next steps: record your income, then give it jobs in envelopes.';
 
   @override
   String get onboardStartUsing => 'Start using BudgetSeal';
@@ -7360,4 +7360,48 @@ class SEn extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String get onboardSeedEnvelopes => 'Create envelopes for main categories';
+
+  @override
+  String get onboardSeedEnvelopesSub =>
+      'Food, transport, bills and more. You fund them after recording your income.';
+
+  @override
+  String get gsTitle => 'Get started';
+
+  @override
+  String gsProgress(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get gsHide => 'Hide';
+
+  @override
+  String get gsIncomeTitle => 'Record your income';
+
+  @override
+  String get gsIncomeBody => 'Money comes in first. Then you give it jobs.';
+
+  @override
+  String get gsEnvelopesTitle => 'Create envelopes';
+
+  @override
+  String get gsEnvelopesBody =>
+      'One for each thing you spend on, like groceries or rent.';
+
+  @override
+  String get gsFundTitle => 'Fund your envelopes';
+
+  @override
+  String get gsFundBody =>
+      'Move money from Ready to assign into your envelopes.';
+
+  @override
+  String get gsExpenseTitle => 'Log an expense';
+
+  @override
+  String get gsExpenseBody => 'It comes out of the matching envelope.';
 }

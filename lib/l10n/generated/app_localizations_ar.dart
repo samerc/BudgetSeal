@@ -2520,7 +2520,7 @@ class SAr extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.';
+      'سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالإجراءات السريعة في الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -6409,7 +6409,7 @@ class SAr extends S {
 
   @override
   String get onboardDoneSubtitle =>
-      'الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.';
+      'تعرض القائمة في الرئيسية خطواتك التالية: سجّل دخلك، ثم وزّعه على الأظرف.';
 
   @override
   String get onboardStartUsing => 'ابدأ استخدام BudgetSeal';
@@ -7383,4 +7383,47 @@ class SAr extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String get onboardSeedEnvelopes => 'إنشاء أظرف للفئات الرئيسية';
+
+  @override
+  String get onboardSeedEnvelopesSub =>
+      'الطعام والنقل والفواتير وغيرها. تموّلها بعد تسجيل دخلك.';
+
+  @override
+  String get gsTitle => 'ابدأ';
+
+  @override
+  String gsProgress(int done, int total) {
+    return '$done من $total';
+  }
+
+  @override
+  String get gsHide => 'إخفاء';
+
+  @override
+  String get gsIncomeTitle => 'سجّل دخلك';
+
+  @override
+  String get gsIncomeBody => 'يأتي المال أولًا، ثم تعطيه مهامّ.';
+
+  @override
+  String get gsEnvelopesTitle => 'أنشئ أظرفًا';
+
+  @override
+  String get gsEnvelopesBody =>
+      'واحد لكل ما تنفق عليه، مثل البقالة أو الإيجار.';
+
+  @override
+  String get gsFundTitle => 'موّل أظرفك';
+
+  @override
+  String get gsFundBody => 'انقل المال من «جاهز للتوزيع» إلى أظرفك.';
+
+  @override
+  String get gsExpenseTitle => 'سجّل مصروفًا';
+
+  @override
+  String get gsExpenseBody => 'يُخصم من الظرف المطابق.';
 }

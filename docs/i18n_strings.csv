@@ -66,7 +66,7 @@ type_all,Filter chip,All,الكل,Tout
 # DASHBOARD,,,,
 # ──────────────────────────────────────────────,,,,
 dashboard_welcome_title,First-visit hint banner title,Welcome to BudgetSeal!,مرحباً بك في BudgetSeal!,Bienvenue sur BudgetSeal !
-dashboard_welcome_body,First-launch welcome tip body,"Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.",سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.,"Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l'Accueil. Puis répartissez votre argent dans l'onglet Budget."
+dashboard_welcome_body,First-launch welcome tip body,"Record expenses, income and transfers, or split a bill, with the quick actions on Home. Then give your money jobs on the Budget tab.",سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالإجراءات السريعة في الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.,"Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les actions rapides de l'Accueil. Puis répartissez votre argent dans l'onglet Budget."
 dashboard_default_name,Fallback household name,BudgetSeal,BudgetSeal,BudgetSeal
 dashboard_customize_tooltip,Customize button tooltip,Customize,تخصيص,Personnaliser
 dashboard_search_tooltip,Search button tooltip,Search,بحث,Rechercher
@@ -835,7 +835,7 @@ onboard_full_set_sub,Toggle subtitle,30 categories with subcategories,30 فئة 
 onboard_empty_sub,Toggle subtitle,Create your own from scratch,أنشئ فئاتك من الصفر,Créez les vôtres à partir de zéro
 onboard_create_start,Button,Create my budget,إنشاء ميزانيتي,Créer mon budget
 onboard_all_set,Done page title,You're all set!,أنت جاهز!,Vous êtes prêt !
-onboard_done_subtitle,Done page subtitle,"Next: record your income, then give it jobs in envelopes on the Budget tab.",الخطوة التالية: سجّل دخلك، ثم وزّعه على الأظرف في تبويب الميزانية.,"Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l'onglet Budget."
+onboard_done_subtitle,Done page subtitle,"The checklist on Home shows your next steps: record your income, then give it jobs in envelopes.",تعرض القائمة في الرئيسية خطواتك التالية: سجّل دخلك، ثم وزّعه على الأظرف.,"La liste sur l'Accueil montre les prochaines étapes : enregistrez vos revenus, puis répartissez-les dans des enveloppes."
 onboard_start_using,Button,Start using BudgetSeal,ابدأ استخدام BudgetSeal,Commencer à utiliser BudgetSeal
 onboard_restore_title,Sheet title,Restore your budget,استعادة ميزانيتك,Restaurer votre budget
 onboard_restore_desc,Sheet description,"Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.",اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.,"Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone."
@@ -2485,3 +2485,16 @@ fund_failed,Snackbar: funding envelopes failed,Couldn't fund the envelopes. Try 
 lock_unlock_failed,Lock screen snackbar: unlock failed,Couldn't unlock. Try again.,تعذّر فتح القفل. حاول مرة أخرى.,Déverrouillage impossible. Réessayez.
 health_accounts_vs_envelopes,Health check per-currency totals,Accounts: {accounts} | Envelopes: {envelopes},الحسابات: {accounts} | الأظرف: {envelopes},Comptes : {accounts} | Enveloppes : {envelopes}
 tx_af_items_count,Assisted save summary item count,"{n, plural, =1{1 item} other{{n} items}}","{n, plural, =1{عنصر واحد} =2{عنصران} few{{n} عناصر} other{{n} عنصر}}","{n, plural, =1{1 article} other{{n} articles}}"
+onboard_seed_envelopes,Onboarding: switch to create envelopes for the main spending groups,Create envelopes for main categories,إنشاء أظرف للفئات الرئيسية,Créer des enveloppes pour les catégories principales
+onboard_seed_envelopes_sub,Onboarding: subtitle of the envelopes switch,"Food, transport, bills and more. You fund them after recording your income.",الطعام والنقل والفواتير وغيرها. تموّلها بعد تسجيل دخلك.,"Alimentation, transport, factures et plus. Vous les approvisionnez après avoir saisi vos revenus."
+gs_title,Home: getting-started checklist title,Get started,ابدأ,Pour commencer
+gs_progress,"Home: checklist progress, e.g. 2 of 4",{done} of {total},{done} من {total},{done} sur {total}
+gs_hide,Home: tooltip to hide the checklist,Hide,إخفاء,Masquer
+gs_income_title,Checklist step 1,Record your income,سجّل دخلك,Saisissez vos revenus
+gs_income_body,Checklist step 1 hint,Money comes in first. Then you give it jobs.,يأتي المال أولًا، ثم تعطيه مهامّ.,"L'argent arrive d'abord. Ensuite, vous lui donnez une mission."
+gs_envelopes_title,Checklist step 2,Create envelopes,أنشئ أظرفًا,Créez des enveloppes
+gs_envelopes_body,Checklist step 2 hint,"One for each thing you spend on, like groceries or rent.",واحد لكل ما تنفق عليه، مثل البقالة أو الإيجار.,"Une pour chaque type de dépense, comme les courses ou le loyer."
+gs_fund_title,Checklist step 3,Fund your envelopes,موّل أظرفك,Approvisionnez vos enveloppes
+gs_fund_body,Checklist step 3 hint,Move money from Ready to assign into your envelopes.,انقل المال من «جاهز للتوزيع» إلى أظرفك.,Déplacez l'argent de « Prêt à répartir » vers vos enveloppes.
+gs_expense_title,Checklist step 4,Log an expense,سجّل مصروفًا,Saisissez une dépense
+gs_expense_body,Checklist step 4 hint,It comes out of the matching envelope.,يُخصم من الظرف المطابق.,Elle est prise dans l'enveloppe correspondante.

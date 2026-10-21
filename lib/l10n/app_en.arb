@@ -1010,7 +1010,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.",
+  "dashboardWelcomeBody": "Record expenses, income and transfers, or split a bill, with the quick actions on Home. Then give your money jobs on the Budget tab.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -5287,7 +5287,7 @@
   "@onboardAllSet": {
     "description": "Onboarding done page title"
   },
-  "onboardDoneSubtitle": "Next: record your income, then give it jobs in envelopes on the Budget tab.",
+  "onboardDoneSubtitle": "The checklist on Home shows your next steps: record your income, then give it jobs in envelopes.",
   "@onboardDoneSubtitle": {
     "description": "Onboarding done page subtitle"
   },
@@ -6117,6 +6117,32 @@
   "healthAccountsVsEnvelopes": "Accounts: {accounts} | Envelopes: {envelopes}",
   "@healthAccountsVsEnvelopes": { "description": "Health check per-currency totals", "placeholders": { "accounts": { "type": "String" }, "envelopes": { "type": "String" } } },
   "txAfItemsCount": "{n, plural, =1{1 item} other{{n} items}}",
-  "@txAfItemsCount": { "description": "Assisted save summary item count", "placeholders": { "n": { "type": "int" } } }
+  "@txAfItemsCount": { "description": "Assisted save summary item count", "placeholders": { "n": { "type": "int" } } },
+  "onboardSeedEnvelopes": "Create envelopes for main categories",
+  "@onboardSeedEnvelopes": { "description": "Onboarding: switch to create envelopes for the main spending groups" },
+  "onboardSeedEnvelopesSub": "Food, transport, bills and more. You fund them after recording your income.",
+  "@onboardSeedEnvelopesSub": { "description": "Onboarding: subtitle of the envelopes switch" },
+  "gsTitle": "Get started",
+  "@gsTitle": { "description": "Home: getting-started checklist title" },
+  "gsProgress": "{done} of {total}",
+  "@gsProgress": { "description": "Home: checklist progress, e.g. 2 of 4", "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } } },
+  "gsHide": "Hide",
+  "@gsHide": { "description": "Home: tooltip to hide the checklist" },
+  "gsIncomeTitle": "Record your income",
+  "@gsIncomeTitle": { "description": "Checklist step 1" },
+  "gsIncomeBody": "Money comes in first. Then you give it jobs.",
+  "@gsIncomeBody": { "description": "Checklist step 1 hint" },
+  "gsEnvelopesTitle": "Create envelopes",
+  "@gsEnvelopesTitle": { "description": "Checklist step 2" },
+  "gsEnvelopesBody": "One for each thing you spend on, like groceries or rent.",
+  "@gsEnvelopesBody": { "description": "Checklist step 2 hint" },
+  "gsFundTitle": "Fund your envelopes",
+  "@gsFundTitle": { "description": "Checklist step 3" },
+  "gsFundBody": "Move money from Ready to assign into your envelopes.",
+  "@gsFundBody": { "description": "Checklist step 3 hint" },
+  "gsExpenseTitle": "Log an expense",
+  "@gsExpenseTitle": { "description": "Checklist step 4" },
+  "gsExpenseBody": "It comes out of the matching envelope.",
+  "@gsExpenseBody": { "description": "Checklist step 4 hint" }
 }
 

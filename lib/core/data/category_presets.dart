@@ -97,6 +97,13 @@ const _cTravel = '#84CC16'; // lime
 const _cPets = '#A855F7'; // violet
 const _cOther = '#64748B'; // slate
 
+/// Main spending groups that onboarding gives an envelope (when the user
+/// keeps "Create envelopes" on).
+const kEnvelopeGroupKeys = {
+  'food_drink', 'transport', 'shopping', 'bills', 'health', 'entertainment',
+  'home',
+};
+
 const essentialPresets = [
   // Groups
   CategoryPreset(nameKey: 'food_drink', fallbackName: 'Food & Drink', emoji: '🍕', colorHex: _cFood),

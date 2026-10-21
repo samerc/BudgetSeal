@@ -37,6 +37,8 @@ import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
 import 'widgets/bills_boxes.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/providers/getting_started_provider.dart';
+import 'widgets/getting_started_card.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -144,6 +146,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     required BuildContext context,
   }) {
     final sectionWidgets = <DashboardSection, List<Widget>>{};
+    final gs = ref.watch(gettingStartedProvider).value;
+    final checklistShown = !ref.watch(gettingStartedHiddenProvider) &&
+        gs != null &&
+        !gs.allDone;
 
     // Build all section widget lists
     sectionWidgets[DashboardSection.spending] = [
@@ -545,14 +551,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 Text(S.of(context).dashboardNoTransactionsYet,
                                     style: TextStyle(
                                         color: AppColors.ts(context))),
-                                const SizedBox(height: 12),
-                                FilledButton(
-                                  onPressed: () => context.push(
-                                      '/add-transaction',
-                                      extra: {'editType': 'income'}),
-                                  // Money comes in first, then gets jobs.
-                                  child: Text(S.of(context).dashboardRecordIncome),
-                                ),
+                                // Money comes in first, then gets jobs. The
+                                // checklist already offers this step.
+                                if (!checklistShown) ...[
+                                  const SizedBox(height: 12),
+                                  FilledButton(
+                                    onPressed: () => context.push(
+                                        '/add-transaction',
+                                        extra: {'editType': 'income'}),
+                                    child: Text(
+                                        S.of(context).dashboardRecordIncome),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -621,8 +631,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   ),
     ];
 
-    // Build ordered list from provider layout
-    final result = <Widget>[];
+    // Build ordered list from provider layout; the getting-started
+    // checklist (new budgets only) leads.
+    final result = <Widget>[const GettingStartedCard()];
     for (final config in layout) {
       if (config.visible && sectionWidgets.containsKey(config.section)) {
         result.addAll(sectionWidgets[config.section]!);

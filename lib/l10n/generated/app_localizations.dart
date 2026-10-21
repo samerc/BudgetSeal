@@ -4399,7 +4399,7 @@ abstract class S {
   /// First-visit hint banner body
   ///
   /// In en, this message translates to:
-  /// **'Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.'**
+  /// **'Record expenses, income and transfers, or split a bill, with the quick actions on Home. Then give your money jobs on the Budget tab.'**
   String get dashboardWelcomeBody;
 
   /// Fallback household name
@@ -11461,7 +11461,7 @@ abstract class S {
   /// Onboarding done page subtitle
   ///
   /// In en, this message translates to:
-  /// **'Next: record your income, then give it jobs in envelopes on the Budget tab.'**
+  /// **'The checklist on Home shows your next steps: record your income, then give it jobs in envelopes.'**
   String get onboardDoneSubtitle;
 
   /// Onboarding done page button
@@ -13071,6 +13071,84 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{n, plural, =1{1 item} other{{n} items}}'**
   String txAfItemsCount(int n);
+
+  /// Onboarding: switch to create envelopes for the main spending groups
+  ///
+  /// In en, this message translates to:
+  /// **'Create envelopes for main categories'**
+  String get onboardSeedEnvelopes;
+
+  /// Onboarding: subtitle of the envelopes switch
+  ///
+  /// In en, this message translates to:
+  /// **'Food, transport, bills and more. You fund them after recording your income.'**
+  String get onboardSeedEnvelopesSub;
+
+  /// Home: getting-started checklist title
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get gsTitle;
+
+  /// Home: checklist progress, e.g. 2 of 4
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String gsProgress(int done, int total);
+
+  /// Home: tooltip to hide the checklist
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get gsHide;
+
+  /// Checklist step 1
+  ///
+  /// In en, this message translates to:
+  /// **'Record your income'**
+  String get gsIncomeTitle;
+
+  /// Checklist step 1 hint
+  ///
+  /// In en, this message translates to:
+  /// **'Money comes in first. Then you give it jobs.'**
+  String get gsIncomeBody;
+
+  /// Checklist step 2
+  ///
+  /// In en, this message translates to:
+  /// **'Create envelopes'**
+  String get gsEnvelopesTitle;
+
+  /// Checklist step 2 hint
+  ///
+  /// In en, this message translates to:
+  /// **'One for each thing you spend on, like groceries or rent.'**
+  String get gsEnvelopesBody;
+
+  /// Checklist step 3
+  ///
+  /// In en, this message translates to:
+  /// **'Fund your envelopes'**
+  String get gsFundTitle;
+
+  /// Checklist step 3 hint
+  ///
+  /// In en, this message translates to:
+  /// **'Move money from Ready to assign into your envelopes.'**
+  String get gsFundBody;
+
+  /// Checklist step 4
+  ///
+  /// In en, this message translates to:
+  /// **'Log an expense'**
+  String get gsExpenseTitle;
+
+  /// Checklist step 4 hint
+  ///
+  /// In en, this message translates to:
+  /// **'It comes out of the matching envelope.'**
+  String get gsExpenseBody;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

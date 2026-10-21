@@ -2519,7 +2519,7 @@ class SFr extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l\'Accueil. Puis répartissez votre argent dans l\'onglet Budget.';
+      'Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les actions rapides de l\'Accueil. Puis répartissez votre argent dans l\'onglet Budget.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -6469,7 +6469,7 @@ class SFr extends S {
 
   @override
   String get onboardDoneSubtitle =>
-      'Prochaine étape : enregistrez vos revenus, puis répartissez-les dans des enveloppes depuis l\'onglet Budget.';
+      'La liste sur l\'Accueil montre les prochaines étapes : enregistrez vos revenus, puis répartissez-les dans des enveloppes.';
 
   @override
   String get onboardStartUsing => 'Commencer à utiliser BudgetSeal';
@@ -7443,4 +7443,51 @@ class SFr extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String get onboardSeedEnvelopes =>
+      'Créer des enveloppes pour les catégories principales';
+
+  @override
+  String get onboardSeedEnvelopesSub =>
+      'Alimentation, transport, factures et plus. Vous les approvisionnez après avoir saisi vos revenus.';
+
+  @override
+  String get gsTitle => 'Pour commencer';
+
+  @override
+  String gsProgress(int done, int total) {
+    return '$done sur $total';
+  }
+
+  @override
+  String get gsHide => 'Masquer';
+
+  @override
+  String get gsIncomeTitle => 'Saisissez vos revenus';
+
+  @override
+  String get gsIncomeBody =>
+      'L\'argent arrive d\'abord. Ensuite, vous lui donnez une mission.';
+
+  @override
+  String get gsEnvelopesTitle => 'Créez des enveloppes';
+
+  @override
+  String get gsEnvelopesBody =>
+      'Une pour chaque type de dépense, comme les courses ou le loyer.';
+
+  @override
+  String get gsFundTitle => 'Approvisionnez vos enveloppes';
+
+  @override
+  String get gsFundBody =>
+      'Déplacez l\'argent de « Prêt à répartir » vers vos enveloppes.';
+
+  @override
+  String get gsExpenseTitle => 'Saisissez une dépense';
+
+  @override
+  String get gsExpenseBody =>
+      'Elle est prise dans l\'enveloppe correspondante.';
 }
