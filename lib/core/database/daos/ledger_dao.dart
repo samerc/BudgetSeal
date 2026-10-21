@@ -13,12 +13,29 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
   Future<void> appendEntry(AllocationLedgerCompanion entry) =>
       into(allocationLedger).insert(entry);
 
-  /// Watch all entries for an allocation, newest first.
-  Stream<List<AllocationLedgerData>> watchByAllocation(String allocationId) =>
-      (select(allocationLedger)
-            ..where((t) => t.allocationId.equals(allocationId))
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .watch();
+  /// Watch all entries for an allocation, newest first, each with the date
+  /// to show: spending at its transaction's date (a purchase logged a day
+  /// late is still yesterday's), other rows at their own time. Rows of
+  /// deleted transactions are left out, as in the balance.
+  Stream<List<({AllocationLedgerData entry, DateTime date})>> watchByAllocation(
+      String allocationId) {
+    final tx = db.transactions;
+    final date = coalesce<DateTime>([
+      tx.createdAt,
+      allocationLedger.createdAt,
+    ]);
+    final q = select(allocationLedger).join([
+      leftOuterJoin(tx, tx.id.equalsExp(allocationLedger.sourceTransactionId)),
+    ])
+      ..addColumns([date])
+      ..where(allocationLedger.allocationId.equals(allocationId) &
+          (tx.id.isNull() | tx.deleted.equals(false)))
+      ..orderBy([OrderingTerm.desc(date)]);
+    return q.watch().map((rows) => [
+          for (final r in rows)
+            (entry: r.readTable(allocationLedger), date: r.read(date)!),
+        ]);
+  }
 
   /// Compute balance per currency for a given allocation via SQL SUM.
   /// Returns `Map<currency, netAmount>` where positive = credit.

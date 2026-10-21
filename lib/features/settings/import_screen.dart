@@ -868,6 +868,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
   Widget _buildAccountSelector(List<Account> accounts) {
     return DropdownButtonFormField<String>(
+      icon: AppIcons.dropdown,
       initialValue: _selectedAccountId,
       decoration: InputDecoration(labelText: S.of(context).importIntoAccount),
       items: accounts

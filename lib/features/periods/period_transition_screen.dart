@@ -453,6 +453,7 @@ class _ResolutionCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
+                      icon: AppIcons.dropdown,
                       isExpanded: true,
                       hint: Text(S.of(context).periodSelectAllocation),
                       value: resolution.targetAllocationId,

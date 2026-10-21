@@ -519,6 +519,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 title: l.acctDecimalSection,
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int?>(
+                    icon: AppIcons.dropdown,
                     value: _decimalPlaces,
                     isExpanded: true,
                     isDense: true,
@@ -992,6 +993,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             const SizedBox(height: 20),
             // Destination account picker
             DropdownButtonFormField<String>(
+              icon: AppIcons.dropdown,
               value: destAccountId,
               decoration: InputDecoration(
                 labelText: tr.acctTransferTo,

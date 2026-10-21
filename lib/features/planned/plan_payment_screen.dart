@@ -367,6 +367,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: DropdownButtonFormField<String>(
+                  icon: AppIcons.dropdown,
                   value: _accountId,
                   decoration: InputDecoration(
                     labelText:
@@ -407,6 +408,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: DropdownButtonFormField<String>(
+                    icon: AppIcons.dropdown,
                     value: _destAccountId,
                     decoration: InputDecoration(
                       labelText: S.of(context).txFormToAccount,

@@ -307,6 +307,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                             fontSize: 13, color: AppColors.ts(context))),
                     const Spacer(),
                     DropdownButton<int>(
+                      icon: AppIcons.dropdown,
                       value: _frequencyHours,
                       underline: const SizedBox.shrink(),
                       style: TextStyle(
@@ -343,6 +344,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                             fontSize: 13, color: AppColors.ts(context))),
                     const Spacer(),
                     DropdownButton<int>(
+                      icon: AppIcons.dropdown,
                       value: _retention,
                       underline: const SizedBox.shrink(),
                       style: TextStyle(

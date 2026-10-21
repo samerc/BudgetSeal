@@ -85,6 +85,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   /// category/title autofill may still replace it.
   bool _accountIsDefault = false;
 
+  /// Other prefilled lines that got the same default (a bill split's
+  /// per-person lines): they follow line 0 when an autofill moves it, so one
+  /// bill isn't paid from two accounts.
+  final Set<LineState> _defaultedLines = {};
+
   /// Form state when it opened (after defaults) — leaving with changes asks
   /// before discarding them.
   String? _initialSignature;
@@ -185,14 +190,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }
       } else if (_lines.any((l) => l.accountId == null)) {
         // Every prefilled line without an account (e.g. a bill split's
-        // per-person lines) starts on the same default account.
+        // per-person lines) starts on the same default account. Only the
+        // first line may take the account's usual category: the others are
+        // someone else's share, not more of the same spending.
         final id = await LastUsedService.defaultAccount(accounts);
         if (!mounted || id == null) return;
         for (var i = 0; i < _lines.length; i++) {
           if (_lines[i].accountId != null) continue;
-          await _onLineAccountChanged(i, id);
+          await _onLineAccountChanged(i, id, fillCategory: i == 0);
           if (!mounted) return;
-          if (i == 0) _accountIsDefault = true;
+          if (i == 0) {
+            _accountIsDefault = true;
+          } else {
+            _defaultedLines.add(_lines[i]);
+          }
         }
       }
     } catch (e) {
@@ -327,7 +338,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       bool didFill = false;
       if (fill.accountId != null &&
           (line.accountId == null || canOverride || _accountIsDefault)) {
-        _onLineAccountChanged(0, fill.accountId!);
+        _autofillAccount(0, fill.accountId!);
         didFill = true;
       }
       if (fill.categoryId != null &&
@@ -410,7 +421,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
   }
 
-  Future<void> _onLineAccountChanged(int lineIndex, String? accountId) async {
+  /// An autofill's account for [lineIndex]; when it replaces line 0's
+  /// default, the lines that shared that default move with it.
+  void _autofillAccount(int lineIndex, String accountId) {
+    final followers = lineIndex == 0 && _accountIsDefault
+        ? _defaultedLines.where(_lines.contains).toList()
+        : const <LineState>[];
+    _onLineAccountChanged(lineIndex, accountId);
+    for (final l in followers) {
+      _onLineAccountChanged(_lines.indexOf(l), accountId, fillCategory: false);
+    }
+  }
+
+  Future<void> _onLineAccountChanged(int lineIndex, String? accountId,
+      {bool fillCategory = true}) async {
     if (accountId == null) return;
     final accounts = ref.read(accountsProvider).value ?? [];
     final acc = accounts.where((a) => a.id == accountId).firstOrNull;
@@ -440,7 +464,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     // Auto-fill category from last transaction with this account
     final afSettings = ref.read(autofillProvider);
-    if (afSettings.category && _lines[lineIndex].categoryId == null) {
+    if (fillCategory &&
+        afSettings.category &&
+        _lines[lineIndex].categoryId == null) {
       final entries = ref.read(transactionEntriesProvider).value ?? [];
       for (final e in entries) {
         if (e.tx.type == 'transfer') continue;
@@ -614,7 +640,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               final canOverride = afSettings.overrideExisting;
               if (fill.accountId != null &&
                   (line.accountId == null || canOverride || _accountIsDefault)) {
-                _onLineAccountChanged(lineIndex, fill.accountId!);
+                _autofillAccount(lineIndex, fill.accountId!);
               }
               if (fill.title != null &&
                   (_titleCtrl.text.isEmpty || canOverride)) {
@@ -633,7 +659,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   .where((c) => c.id == id)
                   .firstOrNull;
               if (cat?.defaultAccountId != null) {
-                _onLineAccountChanged(lineIndex, cat!.defaultAccountId);
+                _autofillAccount(lineIndex, cat!.defaultAccountId!);
               }
             }
           }
@@ -1917,7 +1943,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               onPickCategory: () => _pickCategory(i),
               onPickCurrency: () => _pickCurrency(i),
               onAccountChanged: (v) {
-                _accountIsDefault = false; // picked by hand: keep it
+                // Picked by hand: keep it.
+                if (i == 0) _accountIsDefault = false;
+                _defaultedLines.remove(line);
                 _onLineAccountChanged(i, v);
               },
               onChanged: () => setState(() {}),

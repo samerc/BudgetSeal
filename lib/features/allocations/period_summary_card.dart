@@ -96,6 +96,8 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
     if (d == null) return const SizedBox.shrink();
     final tr = S.of(context);
     final left = d.funded - d.spent;
+    final sealed = left > -0.005;
+    final month = _capitalized(DateFormat.MMMM().format(d.lastMid));
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 8, 12),
@@ -109,13 +111,17 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
         children: [
           Row(
             children: [
-              // The closed period is "sealed".
-              const SealMark(size: 26),
-              const SizedBox(width: 10),
+              // A period that stayed within budget closes "sealed"; one that
+              // went over keeps a plain title (as on the Activity tab).
+              if (sealed) ...[
+                const SealMark(size: 26),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 child: Text(
-                    tr.periodSealedTitle(_capitalized(
-                        DateFormat.MMMM().format(d.lastMid))),
+                    sealed
+                        ? tr.periodSealedTitle(month)
+                        : tr.txMonthBudget(month),
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w700)),
               ),

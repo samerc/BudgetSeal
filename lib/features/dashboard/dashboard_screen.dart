@@ -538,11 +538,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                     Icon(AppIcons.sun,
                                         size: 16, color: AppColors.accent),
                                     const SizedBox(width: 8),
-                                    Text(
-                                      S.of(context).dashboardNoTransactionsToday,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.accent,
+                                    Expanded(
+                                      child: Text(
+                                        S.of(context).dashboardNoTransactionsToday,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.accent,
+                                        ),
                                       ),
                                     ),
                                   ],

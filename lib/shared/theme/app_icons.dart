@@ -6,6 +6,10 @@ import 'package:flutter/widgets.dart';
 /// every glyph `matchTextDirection` — in Arabic a check or a receipt would
 /// flip. Only directional icons (arrows, carets) mirror here.
 abstract final class AppIcons {
+  /// The arrow of every DropdownButton / DropdownButtonFormField (Flutter's
+  /// default is Material's arrow_drop_down and no theme can change it).
+  static const dropdown = Icon(caretDown, size: 18);
+
   static const airplane = IconData(0xe002, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const airplaneLanding = IconData(0xe502, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const airplaneTakeoff = IconData(0xe504, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');

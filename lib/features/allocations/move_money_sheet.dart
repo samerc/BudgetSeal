@@ -6,6 +6,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
@@ -76,6 +77,7 @@ Future<bool> showMoveMoneySheet(
         Widget picker(String label, String selected, ValueChanged<String> on,
                 {required String exclude}) =>
             DropdownButtonFormField<String>(
+              icon: AppIcons.dropdown,
               initialValue: selected,
               isExpanded: true,
               decoration: InputDecoration(labelText: label),

@@ -271,6 +271,7 @@ class _LeftoverResolutionScreenState
                                 const EdgeInsets.symmetric(horizontal: 12),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String?>(
+                                icon: AppIcons.dropdown,
                                 isExpanded: true,
                                 value: _selectedCurrency,
                                 items: [
@@ -355,6 +356,7 @@ class _LeftoverResolutionScreenState
                                   horizontal: 12),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
+                                  icon: AppIcons.dropdown,
                                   isExpanded: true,
                                   hint: Text(S.of(context).periodSelectAllocation),
                                   value: _targetAllocationId,

@@ -1053,6 +1053,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String?>(
+                    icon: AppIcons.dropdown,
                     initialValue: _parentId,
                     isExpanded: true,
                     decoration: InputDecoration(
@@ -1079,6 +1080,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     final accounts =
                         ref.watch(accountsProvider).value ?? [];
                     return DropdownButtonFormField<String?>(
+                      icon: AppIcons.dropdown,
                       initialValue: _defaultAccountId,
                       isExpanded: true,
                       decoration: InputDecoration(

@@ -714,6 +714,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
+                    icon: AppIcons.dropdown,
                     initialValue: accountId,
                     decoration:
                         InputDecoration(labelText: tr.commonAccount),
@@ -734,6 +735,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
+                    icon: AppIcons.dropdown,
                     initialValue: categoryId,
                     decoration: InputDecoration(
                         labelText: tr.tmplCategoryOptional),

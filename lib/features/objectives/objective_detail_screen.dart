@@ -337,6 +337,7 @@ class _ObjectiveDetailScreenState
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    icon: AppIcons.dropdown,
                     value: selectedAccountId,
                     isExpanded: true,
                     items: activeAccounts.map((a) => DropdownMenuItem(

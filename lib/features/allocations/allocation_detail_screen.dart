@@ -215,7 +215,9 @@ class _AllocationDetailScreenState
                     Icon(AppIcons.arrowsLeftRight,
                         size: 18, color: AppColors.accent),
                     const SizedBox(width: 10),
-                    Text(l.allocMoveMenu),
+                    Text(_targetBalance() < 0
+                        ? l.allocCoverTitle
+                        : l.allocMoveMenu),
                   ]),
                 ),
                 PopupMenuItem(
@@ -1227,7 +1229,7 @@ class _AllocationDetailScreenState
           );
         }),
       ]),
-      StreamBuilder<List<AllocationLedgerData>>(
+      StreamBuilder<List<({AllocationLedgerData entry, DateTime date})>>(
         stream: ledgerDao.watchByAllocation(widget.allocationId),
         builder: (context, snapshot) {
           final ledgerEntries = snapshot.data;
@@ -1249,7 +1251,8 @@ class _AllocationDetailScreenState
           }
 
           return Column(
-            children: recent.map((entry) {
+            children: recent.map((row) {
+              final entry = row.entry;
               final isPositive = entry.amount > 0;
               final color =
                   isPositive ? AppColors.healthy : AppColors.overspent;
@@ -1316,8 +1319,8 @@ class _AllocationDetailScreenState
                           Text(
                             // Only repeat the type when a note took the title.
                             entry.note.isNotEmpty
-                                ? '${formatDate(entry.createdAt.toLocal())} · $label'
-                                : formatDate(entry.createdAt.toLocal()),
+                                ? '${formatDate(row.date.toLocal())} · $label'
+                                : formatDate(row.date.toLocal()),
                             style: TextStyle(
                                 fontSize: 12.5,
                                 color: AppColors.ts(context)),
@@ -1325,6 +1328,7 @@ class _AllocationDetailScreenState
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${isPositive ? '+' : ''}${formatAmount(entry.amount, currency: entry.currency)}',
                       style: TextStyle(
@@ -1401,9 +1405,9 @@ class _AllocationDetailScreenState
         return _sectionContainer(children: [
           _sectionHeader(S.of(context).allocSpendingHistory),
           const SizedBox(height: 4),
-          SizedBox(
-            height: 105,
-            child: Row(
+          // Sized by its content: a fixed height overflowed at larger text
+          // sizes.
+          Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: months.map((m) {
                 final val = totals[m] ?? 0;
@@ -1412,7 +1416,7 @@ class _AllocationDetailScreenState
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           formatAmount(val, currency: _targetCurrencyController.text),
@@ -1447,7 +1451,6 @@ class _AllocationDetailScreenState
                 );
               }).toList(),
             ),
-          ),
         ]);
       },
       loading: () => const SizedBox.shrink(),
@@ -1533,15 +1536,23 @@ class _AllocationDetailScreenState
   // Withdraw from savings envelope
   // ---------------------------------------------------------------------------
 
+  /// This envelope's balance in its target currency (0 without one).
+  double _targetBalance() {
+    final currency = _targetCurrencyController.text;
+    if (currency.isEmpty) return 0;
+    final all = ref.read(allocationsProvider).value ?? const [];
+    final me = all
+        .where((a) => a.data.allocation.id == widget.allocationId)
+        .firstOrNull;
+    return me?.balanceByCurrency[currency] ?? 0;
+  }
+
   /// Move money out of this envelope — or, when it's overspent, cover it.
   Future<void> _moveMoney() async {
     final currency = _targetCurrencyController.text.isNotEmpty
         ? _targetCurrencyController.text
         : null;
-    final all = ref.read(allocationsProvider).value ?? const [];
-    final me = all.where((a) => a.data.allocation.id == widget.allocationId)
-        .firstOrNull;
-    final bal = currency != null ? (me?.balanceByCurrency[currency] ?? 0) : 0.0;
+    final bal = _targetBalance();
     // The sheet invalidates the allocation providers this screen watches.
     bal < 0
         ? await showMoveMoneySheet(context, ref,

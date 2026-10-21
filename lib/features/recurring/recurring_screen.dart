@@ -613,6 +613,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               final accounts =
                   ref.watch(accountsProvider).value ?? [];
               return DropdownButtonFormField<String>(
+                icon: AppIcons.dropdown,
                 initialValue: _accountId,
                 decoration:
                     InputDecoration(labelText: S.of(context).commonAccount),
@@ -903,6 +904,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             Builder(builder: (context) {
               final accounts = ref.watch(accountsProvider).value ?? [];
               return DropdownButtonFormField<String>(
+                icon: AppIcons.dropdown,
                 initialValue: _accountId,
                 decoration: InputDecoration(labelText: S.of(context).commonAccount),
                 items: accounts
