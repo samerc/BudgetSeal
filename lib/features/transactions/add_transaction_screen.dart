@@ -1070,6 +1070,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           content: Text(snackText),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
+          persist: false,
           action: undoAction,
         ));
         setState(() => _loading = false);
@@ -1084,6 +1085,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
         dismissDirection: DismissDirection.horizontal,
+        persist: false,
         action: undoAction,
       ));
       return; // skip finally setState since we're already popped

@@ -759,7 +759,7 @@ All UI icons are **Phosphor** (phosphor_flutter, MIT) through `AppIcons` (`lib/s
 - Section headers: Use `SectionHeader` widget or `TypographyTokens.sectionHeaderSize/Weight/LetterSpacing`
 - Screen titles: `TypographyTokens.screenTitleSize` (24) + `TypographyTokens.screenTitleWeight` (w800)
 - Chips: Pill-shaped (20px radius), colored border+bg when selected
-- SnackBars: Always `behavior: SnackBarBehavior.floating`. The theme makes them Cashew popups (popup surface, dark text, accent action) — don't pass a saturated `backgroundColor` (the theme's dark text would be unreadable on it); errors use the same style.
+- SnackBars: Always `behavior: SnackBarBehavior.floating`. A SnackBar with an `action` (Undo) must pass `persist: false` — since Flutter 3.29 an action makes it stay until tapped (no theme setting), which left Undo bars covering buttons and delayed `deleteTransactionsWithUndo`'s final delete. The theme makes them Cashew popups (popup surface, dark text, accent action) — don't pass a saturated `backgroundColor` (the theme's dark text would be unreadable on it); errors use the same style.
 - Accent-colored text (section headers, links): `AppColors.accentText(context)` — lifted in dark mode for contrast.
 - All list screens have `RefreshIndicator`
 

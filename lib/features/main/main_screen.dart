@@ -79,6 +79,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(S.of(context).recurringPostedN(n)),
       behavior: SnackBarBehavior.floating,
+      persist: false,
       action: SnackBarAction(
         label: S.of(context).commonSeeAll,
         onPressed: () => _onTabTapped(1),

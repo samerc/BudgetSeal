@@ -47,6 +47,7 @@ Future<void> deleteTransactionsWithUndo(
             : tr.txNDeleted(ids.length)),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 5),
+        persist: false,
         action: SnackBarAction(
           label: tr.txUndoAction,
           onPressed: () async {

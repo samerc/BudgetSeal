@@ -1551,6 +1551,7 @@ class _AssistedTransactionScreenState
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           dismissDirection: DismissDirection.horizontal,
+          persist: false,
           action: coverId != null
               ? SnackBarAction(
                   label: coverLabel,

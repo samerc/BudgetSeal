@@ -239,6 +239,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             content: Text(tr.billPersonRemoved),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 5),
+            persist: false,
             action: SnackBarAction(
               label: tr.txUndoAction,
               onPressed: () => setState(() {
@@ -634,6 +635,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         content: Text(tr.billOweCreated(
             payer, formatAmount(myShare, currency: _billCurrency))),
         behavior: SnackBarBehavior.floating,
+        persist: false,
         action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
       ));
       return;
@@ -685,6 +687,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       messenger.showSnackBar(SnackBar(
         content: Text(tr.billLoansCreated(loanIds.length)),
         behavior: SnackBarBehavior.floating,
+        persist: false,
         action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
       ));
     }
@@ -1217,6 +1220,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       content: Text(tr.billItemRemoved),
       behavior: SnackBarBehavior.floating,
       duration: const Duration(seconds: 4),
+      persist: false,
       action: SnackBarAction(
         label: tr.txUndoAction,
         onPressed: () => setState(() {
