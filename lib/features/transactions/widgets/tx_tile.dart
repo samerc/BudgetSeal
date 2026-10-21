@@ -597,7 +597,9 @@ class _BalanceText extends StatelessWidget {
     return LayoutBuilder(builder: (context, box) {
       final full = name == null || name!.isEmpty ? balance : '$name · $balance';
       final painter = TextPainter(
-        text: TextSpan(text: full, style: style),
+        // Measure in the font the Text will use (the app's, not the default).
+        text: TextSpan(
+            text: full, style: DefaultTextStyle.of(context).style.merge(style)),
         maxLines: 1,
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
