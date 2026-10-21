@@ -33,6 +33,7 @@ import 'move_money_sheet.dart';
 import 'period_summary_card.dart';
 import 'reorder_envelopes_sheet.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/theme/app_icons.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -270,8 +271,8 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 tooltip: l.allocSearchTooltip,
                 icon: Icon(
                   _showSearch
-                      ? Icons.search_off_rounded
-                      : Icons.search_rounded,
+                      ? AppIcons.magnifyingGlassMinus
+                      : AppIcons.magnifyingGlass,
                   color: AppColors.ts(context),
                 ),
                 onPressed: () {
@@ -285,7 +286,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                 },
               ),
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert_rounded,
+                icon: Icon(AppIcons.dotsThreeVertical,
                     color: AppColors.ts(context)),
                 onSelected: (v) {
                   if (v == 'reorder') {
@@ -300,7 +301,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   PopupMenuItem(
                     value: 'reorder',
                     child: Row(children: [
-                      Icon(Icons.reorder_rounded,
+                      Icon(AppIcons.list,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 12),
                       Text(l.allocReorderTitle),
@@ -309,7 +310,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   PopupMenuItem(
                     value: 'archived',
                     child: Row(children: [
-                      Icon(Icons.unarchive_rounded,
+                      Icon(AppIcons.boxArrowUp,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 12),
                       Text(l.allocArchivedTitle),
@@ -318,7 +319,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   PopupMenuItem(
                     value: 'help',
                     child: Row(children: [
-                      Icon(Icons.help_outline_rounded,
+                      Icon(AppIcons.question,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 12),
                       Text(l.allocHelpTooltip),
@@ -343,10 +344,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                     hintText: l.allocSearchHint,
                     hintStyle: TextStyle(color: AppColors.th(context)),
                     prefixIcon:
-                        Icon(Icons.search_rounded, color: AppColors.ts(context)),
+                        Icon(AppIcons.magnifyingGlass, color: AppColors.ts(context)),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 18),
+                            icon: const Icon(AppIcons.x, size: 18),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -388,7 +389,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.update_rounded,
+                      Icon(AppIcons.clockClockwise,
                           size: 20, color: AppColors.caution),
                       const SizedBox(width: 10),
                       Expanded(
@@ -572,7 +573,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.search_off_rounded,
+                        Icon(AppIcons.magnifyingGlassMinus,
                             size: 48, color: AppColors.th(context)),
                         const SizedBox(height: 12),
                         Text(
@@ -626,7 +627,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           if (!checkFreeLimit(context, ref, allocs.length, FreeLimits.maxEnvelopes, 'envelopes')) return;
           context.push('/allocations/new');
         },
-        child: const Icon(Icons.add_rounded),
+        child: const Icon(AppIcons.plus),
       ),
     );
   }
@@ -952,7 +953,7 @@ class _UnallocatedBannerState extends State<_UnallocatedBanner>
                                 AnimatedRotation(
                                   turns: _expanded ? 0.5 : 0,
                                   duration: const Duration(milliseconds: 250),
-                                  child: const Icon(Icons.expand_more_rounded,
+                                  child: const Icon(AppIcons.caretDown,
                                       color: ink, size: 18),
                                 ),
                               ],
@@ -1080,7 +1081,7 @@ class _GoalsLoansBanner extends ConsumerWidget {
                       light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: Icon(Icons.flag_rounded,
+                child: Icon(AppIcons.flag,
                     size: 18, color: AppColors.accent),
               ),
               const SizedBox(width: 12),
@@ -1100,7 +1101,7 @@ class _GoalsLoansBanner extends ConsumerWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
+              Icon(AppIcons.caretRight,
                   size: 18, color: AppColors.th(context)),
             ],
           ),
@@ -1121,7 +1122,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = S.of(context);
     return EmptyState(
-      icon: Icons.mail_rounded,
+      icon: AppIcons.envelopeSimple,
       title: l.allocNoYet,
       subtitle: l.allocCreateHelp,
       actionLabel: l.allocCreateButton,

@@ -17,6 +17,7 @@ import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/theme/app_icons.dart';
 
 class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
@@ -44,7 +45,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(AppIcons.arrowLeft),
                     onPressed: () => context.pop(),
                   ),
                   const SizedBox(width: 4),
@@ -64,7 +65,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     ),
                   ),
                   PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded,
+            icon: Icon(AppIcons.dotsThreeVertical,
                 color: AppColors.tp(context)),
             onSelected: (v) {
               if (v == 'archived') {
@@ -79,8 +80,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 child: Row(children: [
                   Icon(
                     _showArchived
-                        ? Icons.visibility_off_rounded
-                        : Icons.archive_rounded,
+                        ? AppIcons.eyeSlash
+                        : AppIcons.archive,
                     size: 18,
                     color: AppColors.ts(context),
                   ),
@@ -94,7 +95,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               PopupMenuItem(
                 value: 'sort_name',
                 child: Row(children: [
-                  Icon(Icons.sort_by_alpha_rounded, size: 18,
+                  Icon(AppIcons.sortAscending, size: 18,
                       color: _sortBy == 'name' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
                   Text(S.of(context).acctSortByName,
@@ -106,7 +107,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               PopupMenuItem(
                 value: 'sort_balance',
                 child: Row(children: [
-                  Icon(Icons.account_balance_wallet_rounded, size: 18,
+                  Icon(AppIcons.wallet, size: 18,
                       color: _sortBy == 'balance' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
                   Text(S.of(context).acctSortByBalance,
@@ -118,7 +119,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               PopupMenuItem(
                 value: 'sort_type',
                 child: Row(children: [
-                  Icon(Icons.category_rounded, size: 18,
+                  Icon(AppIcons.squaresFour, size: 18,
                       color: _sortBy == 'type' ? AppColors.accent : AppColors.ts(context)),
                   const SizedBox(width: 10),
                   Text(S.of(context).acctSortByType,
@@ -145,7 +146,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 children: [
                   const SizedBox(height: 200),
                   EmptyState(
-                    icon: Icons.credit_card_rounded,
+                    icon: AppIcons.creditCard,
                     title: S.of(context).acctNoYet,
                     subtitle: S.of(context).acctTapPlus,
                   ),
@@ -206,7 +207,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           if (!checkFreeLimit(context, ref, accounts.length, FreeLimits.maxAccounts, 'accounts')) return;
           context.push('/accounts/new');
         },
-        child: const Icon(Icons.add_rounded),
+        child: const Icon(AppIcons.plus),
       ),
     );
   }
@@ -414,10 +415,10 @@ class _AccountTile extends StatelessWidget {
   });
 
   IconData _accountIcon(String type) => switch (type) {
-        'bank' => Icons.account_balance_rounded,
-        'credit' => Icons.credit_card_rounded,
-        'wallet' => Icons.account_balance_wallet_rounded,
-        _ => Icons.money_rounded,
+        'bank' => AppIcons.bank,
+        'credit' => AppIcons.creditCard,
+        'wallet' => AppIcons.wallet,
+        _ => AppIcons.money,
       };
 
   // Same HSL scheme as the More page icons: one saturation/lightness for
@@ -480,7 +481,7 @@ class _AccountTile extends StatelessWidget {
               ),
               if (acc.isTravel) ...[
                 const SizedBox(width: 6),
-                Icon(Icons.flight_rounded, size: 14,
+                Icon(AppIcons.airplane, size: 14,
                     color: AppColors.accent),
               ],
             ],
@@ -514,10 +515,10 @@ class _ArchivedAccountTile extends StatelessWidget {
   });
 
   IconData _accountIcon(String type) => switch (type) {
-        'bank' => Icons.account_balance_rounded,
-        'credit' => Icons.credit_card_rounded,
-        'wallet' => Icons.account_balance_wallet_rounded,
-        _ => Icons.money_rounded,
+        'bank' => AppIcons.bank,
+        'credit' => AppIcons.creditCard,
+        'wallet' => AppIcons.wallet,
+        _ => AppIcons.money,
       };
 
   @override
@@ -568,11 +569,11 @@ class _ArchivedAccountTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Icon(Icons.archive_rounded, size: 14,
+                Icon(AppIcons.archive, size: 14,
                     color: AppColors.th(context)),
                 if (acc.isTravel) ...[
                   const SizedBox(width: 4),
-                  Icon(Icons.flight_rounded, size: 14,
+                  Icon(AppIcons.airplane, size: 14,
                       color: AppColors.th(context)),
                 ],
               ],
@@ -590,7 +591,7 @@ class _ArchivedAccountTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 IconButton(
-                  icon: Icon(Icons.unarchive_rounded,
+                  icon: Icon(AppIcons.boxArrowUp,
                       size: 20, color: AppColors.accent),
                   tooltip: S.of(context).acctUnarchive,
                   onPressed: onUnarchive,

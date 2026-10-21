@@ -36,6 +36,7 @@ import 'widgets/currency_sheet.dart';
 import 'widgets/save_feedback.dart';
 import 'widgets/transaction_form_widgets.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 enum _TxType { income, expense, transfer }
 
@@ -1099,7 +1100,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             IconButton(
               tooltip: S.of(context).txFormUseTemplate,
               onPressed: () => context.push('/templates'),
-              icon: const Icon(Icons.bolt_rounded),
+              icon: const Icon(AppIcons.lightning),
             ),
           const SizedBox(width: 4),
         ],
@@ -1134,7 +1135,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       counterText: '', // limit still enforced, counter hidden
                       hintText: S.of(context).txFormNoteHint,
                       hintStyle: TextStyle(color: AppColors.ts(context).withValues(alpha: 0.75)),
-                      prefixIcon: Icon(Icons.notes_rounded,
+                      prefixIcon: Icon(AppIcons.textAlignLeft,
                           size: 18, color: AppColors.ts(context)),
                       border: InputBorder.none,
                       filled: false,
@@ -1164,7 +1165,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_rounded,
+                    const Icon(AppIcons.warningFill,
                         size: 16, color: AppColors.overspent),
                     const SizedBox(width: 8),
                     Expanded(
@@ -1281,10 +1282,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         child: Icon(
           isTransfer
-              ? Icons.swap_horiz_rounded
+              ? AppIcons.arrowsLeftRight
               : multi
-                  ? Icons.list_alt_rounded
-                  : Icons.category_rounded,
+                  ? AppIcons.listBullets
+                  : AppIcons.squaresFour,
           size: 30,
           color: AppColors.pastel(context, typeColor,
               light: 0.5, dark: 0.4, inverse: true),
@@ -1335,7 +1336,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                     border:
                                         Border.all(color: bandColor, width: 2),
                                   ),
-                                  child: Icon(Icons.edit_rounded,
+                                  child: Icon(AppIcons.pencilSimple,
                                       size: 12, color: AppColors.ts(context)),
                                 ),
                               ),
@@ -1586,7 +1587,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today_rounded,
+                    Icon(AppIcons.calendarBlank,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(_dateLabel,
@@ -1614,7 +1615,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.access_time_rounded,
+                    Icon(AppIcons.clock,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(_timeLabel,
@@ -1659,7 +1660,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _buildAccountDropdown(
             value: _fromAccountId,
             hint: S.of(context).txFormFromAccount,
-            icon: Icons.arrow_upward_rounded,
+            icon: AppIcons.arrowUp,
             accounts: accounts,
             onChanged: (v) {
               _setFromAccount(v, accounts);
@@ -1672,7 +1673,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 tooltip: S.of(context).txFormSwapAccounts,
-                icon: Icon(Icons.swap_vert_rounded,
+                icon: Icon(AppIcons.arrowsDownUp,
                     size: 20, color: AppColors.accent),
                 onPressed: () => _swapTransferAccounts(accounts),
               ),
@@ -1683,7 +1684,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _buildAccountDropdown(
             value: _destAccountId,
             hint: S.of(context).txFormToAccount,
-            icon: Icons.arrow_downward_rounded,
+            icon: AppIcons.arrowDown,
             accounts: accounts.where((a) => a.id != _fromAccountId).toList(),
             onChanged: (v) {
               setState(() {
@@ -1705,7 +1706,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.currency_exchange_rounded,
+                        Icon(AppIcons.currencyCircleDollar,
                             size: 14, color: AppColors.accent),
                         const SizedBox(width: 8),
                         Text(
@@ -1784,7 +1785,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   light: 0.85, dark: 0.78),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(Icons.swap_vert_rounded,
+                            child: Icon(AppIcons.arrowsDownUp,
                                 size: 16, color: AppColors.accent),
                           ),
                         ),
@@ -1845,7 +1846,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       color: AppColors.ts(context), fontSize: 15)),
             ],
           ),
-          icon: Icon(Icons.chevron_right_rounded,
+          icon: Icon(AppIcons.caretRight,
               size: 18, color: AppColors.th(context)),
           items: () {
               final balances = ref.watch(accountsWithBalanceProvider).value ?? [];
@@ -1996,7 +1997,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             counterText: '', // limit still enforced, counter hidden
             hintText: S.of(context).txFormTitleHint,
             hintStyle: TextStyle(color: AppColors.ts(context).withValues(alpha: 0.75)),
-            prefixIcon: Icon(Icons.edit_rounded,
+            prefixIcon: Icon(AppIcons.pencilSimple,
                 size: 18, color: AppColors.ts(context)),
             border: InputBorder.none,
         filled: false,
@@ -2100,7 +2101,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.add_rounded,
+                icon: Icon(AppIcons.plus,
                     size: 18, color: AppColors.th(context)),
                 tooltip: S.of(context).txFormAddMore,
                 onPressed: () async {
@@ -2108,7 +2109,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.close_rounded,
+                icon: Icon(AppIcons.x,
                     size: 18, color: AppColors.th(context)),
                 onPressed: () => setState(() {
                   _receiptFilenames = [];
@@ -2124,18 +2125,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final chips = <Widget>[
       if (_type != _TxType.transfer)
         _ActionChip(
-          icon: Icons.add_rounded,
+          icon: AppIcons.plus,
           label: S.of(context).txFormAddItem,
           onTap: _addLine,
         ),
       if (receiptCard == null) ...[
         _ActionChip(
-          icon: Icons.camera_alt_rounded,
+          icon: AppIcons.camera,
           label: S.of(context).txFormScanReceipt,
           onTap: () => addReceipts(camera: true),
         ),
         _ActionChip(
-          icon: Icons.image_rounded,
+          icon: AppIcons.image,
           label: S.of(context).txFormGallery,
           onTap: () => addReceipts(camera: false),
         ),
@@ -2174,10 +2175,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   IconData _accountIcon(String type) => switch (type) {
-        'bank' => Icons.account_balance_rounded,
-        'credit' => Icons.credit_card_rounded,
-        'wallet' => Icons.account_balance_wallet_rounded,
-        _ => Icons.money_rounded,
+        'bank' => AppIcons.bank,
+        'credit' => AppIcons.creditCard,
+        'wallet' => AppIcons.wallet,
+        _ => AppIcons.money,
       };
 }
 

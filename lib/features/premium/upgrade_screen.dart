@@ -7,6 +7,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 class UpgradeScreen extends ConsumerWidget {
   final String? featureName;
@@ -18,19 +19,19 @@ class UpgradeScreen extends ConsumerWidget {
     final l = S.of(context);
 
     final features = <_FeatureItem>[
-      _FeatureItem(Icons.sync_rounded, l.upgradeFeatureSync),
-      _FeatureItem(Icons.laptop_rounded, l.upgradeFeatureWebCompanion),
-      _FeatureItem(Icons.receipt_long_rounded, l.upgradeFeatureBillSplitter),
-      _FeatureItem(Icons.flight_rounded, l.upgradeFeatureTravelExchange),
-      _FeatureItem(Icons.event_note_rounded, l.upgradeFeaturePlannedPayments),
+      _FeatureItem(AppIcons.arrowsClockwise, l.upgradeFeatureSync),
+      _FeatureItem(AppIcons.laptop, l.upgradeFeatureWebCompanion),
+      _FeatureItem(AppIcons.receipt, l.upgradeFeatureBillSplitter),
+      _FeatureItem(AppIcons.airplane, l.upgradeFeatureTravelExchange),
+      _FeatureItem(AppIcons.calendarDots, l.upgradeFeaturePlannedPayments),
       _FeatureItem(
-          Icons.all_inclusive_rounded, l.upgradeFeatureUnlimitedItems),
+          AppIcons.infinity, l.upgradeFeatureUnlimitedItems),
     ];
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
+          icon: const Icon(AppIcons.x),
           onPressed: () => context.pop(),
         ),
         title: const SizedBox.shrink(),
@@ -214,7 +215,7 @@ class UpgradeScreen extends ConsumerWidget {
             ),
           ),
         ),
-        Icon(Icons.check_rounded, size: 18, color: AppColors.healthy),
+        Icon(AppIcons.check, size: 18, color: AppColors.healthy),
       ],
     );
   }

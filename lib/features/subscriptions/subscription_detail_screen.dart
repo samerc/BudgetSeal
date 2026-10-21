@@ -15,6 +15,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../recurring/recurring_screen.dart' show EditRecurringSheet;
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 class SubscriptionDetailScreen extends ConsumerStatefulWidget {
   final String subscriptionId;
@@ -398,7 +399,7 @@ class _SubscriptionDetailScreenState
         title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_rounded),
+            icon: const Icon(AppIcons.pencilSimple),
             onPressed: () => _editSubscription(),
           ),
         ],
@@ -566,7 +567,7 @@ class _SubscriptionDetailScreenState
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _setCancellationDate,
-                  icon: const Icon(Icons.event_rounded, size: 18),
+                  icon: const Icon(AppIcons.calendarDots, size: 18),
                   label: Text(endDate != null
                       ? tr.subDetailChangeCancel
                       : tr.subDetailSetCancel),
@@ -582,8 +583,8 @@ class _SubscriptionDetailScreenState
                   onPressed: _togglePause,
                   icon: Icon(
                     enabled
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
+                        ? AppIcons.pause
+                        : AppIcons.play,
                     size: 18,
                   ),
                   label: Text(enabled ? tr.subPause : tr.subResume),
@@ -632,7 +633,7 @@ class _SubscriptionDetailScreenState
                   for (final date in upcoming)
                     ListTile(
                       dense: true,
-                      leading: Icon(Icons.schedule_rounded,
+                      leading: Icon(AppIcons.clock,
                           size: 18, color: AppColors.th(context)),
                       title: Text(
                         formatDate(date),
@@ -709,7 +710,7 @@ class _PastTransactionTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      leading: Icon(Icons.check_circle_rounded,
+      leading: Icon(AppIcons.checkCircleFill,
           size: 18, color: AppColors.healthy),
       title: Text(
         date != null ? formatDate(date) : '—',

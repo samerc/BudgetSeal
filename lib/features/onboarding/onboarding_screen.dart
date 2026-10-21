@@ -22,6 +22,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/theme/app_icons.dart';
 
 
 /// The phone's region currency (en_GB → GBP, fr_FR → EUR) when it's one
@@ -40,10 +41,10 @@ String _localeCurrency() {
 /// Account types offered in setup: (type, label, icon). Same icons as the
 /// account screen.
 List<(String, String, IconData)> _accountTypes(S s) => [
-      ('cash', s.onboardTypeCash, Icons.money_rounded),
-      ('bank', s.onboardTypeBank, Icons.account_balance_rounded),
-      ('credit', s.onboardTypeCredit, Icons.credit_card_rounded),
-      ('wallet', s.onboardTypeDigital, Icons.account_balance_wallet_rounded),
+      ('cash', s.onboardTypeCash, AppIcons.money),
+      ('bank', s.onboardTypeBank, AppIcons.bank),
+      ('credit', s.onboardTypeCredit, AppIcons.creditCard),
+      ('wallet', s.onboardTypeDigital, AppIcons.wallet),
     ];
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -663,7 +664,7 @@ class _SetupPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<int>(
                     initialValue: periodStartDay,
-                    icon: Icon(Icons.expand_more_rounded,
+                    icon: Icon(AppIcons.caretDown,
                         color: AppColors.th(context)),
                     decoration: InputDecoration(
                       labelText: s.onboardPeriodStart,
@@ -894,7 +895,7 @@ class _DonePage extends StatelessWidget {
                   color: AppColors.accentLight,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.check_rounded,
+                child: Icon(AppIcons.check,
                     size: 48, color: AppColors.accent),
               ),
             ),
@@ -980,7 +981,7 @@ class _SheetBody extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline_rounded,
+                      const Icon(AppIcons.warningCircle,
                           color: AppColors.overspent, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
@@ -1028,7 +1029,7 @@ class _RestoreButton extends ConsumerWidget {
           builder: (_) => _RestoreSheet(providers: providers),
         );
       },
-      icon: const Icon(Icons.restore_rounded, size: 20),
+      icon: const Icon(AppIcons.clockCounterClockwise, size: 20),
       label: Text(S.of(context).onboardRestoreCloud),
     );
   }
@@ -1105,8 +1106,8 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
               onPressed: () => _restore(provider),
               icon: Icon(
                   provider is GoogleDriveProvider
-                      ? Icons.add_to_drive_rounded
-                      : Icons.folder_open_rounded,
+                      ? AppIcons.googleDriveLogo
+                      : AppIcons.folderOpen,
                   size: 20),
               label: Text(provider is GoogleDriveProvider
                   ? s.onboardGoogleDrive
@@ -1132,7 +1133,7 @@ class _JoinHouseholdButton extends StatelessWidget {
         isScrollControlled: true,
         builder: (_) => const _JoinHouseholdSheet(),
       ),
-      icon: const Icon(Icons.people_outline_rounded, size: 20),
+      icon: const Icon(AppIcons.users, size: 20),
       label: Text(S.of(context).onboardJoinHousehold),
     );
   }
@@ -1231,7 +1232,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
             decoration: InputDecoration(
               labelText: s.onboardInviteCode,
               hintText: s.onboardInviteHint,
-              prefixIcon: const Icon(Icons.vpn_key_rounded),
+              prefixIcon: const Icon(AppIcons.key),
             ),
             style: const TextStyle(fontFamily: 'monospace', fontSize: 15),
             onSubmitted: (_) => _join(),
@@ -1239,7 +1240,7 @@ class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _join,
-            icon: const Icon(Icons.login_rounded, size: 20),
+            icon: const Icon(AppIcons.signIn, size: 20),
             label: Text(s.onboardJoinButton),
           ),
         ],

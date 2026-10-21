@@ -18,6 +18,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/tappable.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// A planned payment item with its resolved account, category, and lines.
 class _PlannedItem {
@@ -371,7 +372,7 @@ class _PlannedPaymentsScreenState
           final result = await context.push('/plan-payment');
           if (result == true) _load();
         },
-        child: const Icon(Icons.add),
+        child: const Icon(AppIcons.plus),
       ),
       body: SafeArea(
         bottom: false,
@@ -386,7 +387,7 @@ class _PlannedPaymentsScreenState
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(AppIcons.arrowLeft),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 4),
@@ -426,14 +427,14 @@ class _PlannedPaymentsScreenState
                       child: Row(
                         children: [
                           _SummaryChip(
-                            icon: Icons.schedule_send_rounded,
+                            icon: AppIcons.calendarCheck,
                             label: '$_totalCount',
                             subtitle: S.of(context).plannedChipLabel,
                             color: AppColors.accent,
                           ),
                           const SizedBox(width: 20),
                           _SummaryChip(
-                            icon: Icons.payments_rounded,
+                            icon: AppIcons.money,
                             label: formatAmount(_totalAmount,
                                 currency: _baseCurrency),
                             subtitle: _hasOtherCurrencies
@@ -455,7 +456,7 @@ class _PlannedPaymentsScreenState
               else if (_groups.isEmpty)
                 SliverFillRemaining(
                   child: EmptyState(
-                    icon: Icons.schedule_send_rounded,
+                    icon: AppIcons.calendarCheck,
                     title: S.of(context).plannedEmptyTitle,
                     subtitle: S.of(context).plannedEmptySubtitle,
                   ),
@@ -610,7 +611,7 @@ class _MonthHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_rounded,
+                  Icon(AppIcons.check,
                       size: 14, color: AppColors.accent),
                   const SizedBox(width: 4),
                   Text(
@@ -653,9 +654,9 @@ class _PlannedCard extends ConsumerWidget {
     final tx = item.tx;
 
     final typeIcon = switch (tx.type) {
-      'income' => Icons.arrow_downward_rounded,
-      'transfer' => Icons.swap_horiz_rounded,
-      _ => Icons.arrow_upward_rounded,
+      'income' => AppIcons.arrowDown,
+      'transfer' => AppIcons.arrowsLeftRight,
+      _ => AppIcons.arrowUp,
     };
 
     final typeColor = ref.watch(txColorsProvider).forType(tx.type);
@@ -676,7 +677,7 @@ class _PlannedCard extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.check_circle_rounded,
+              Icon(AppIcons.checkCircleFill,
                   color: AppColors.healthy, size: 22),
               const SizedBox(width: 8),
               Text(
@@ -708,7 +709,7 @@ class _PlannedCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.delete_rounded,
+              Icon(AppIcons.trash,
                   color: AppColors.overspent, size: 22),
             ],
           ),
@@ -766,7 +767,7 @@ class _PlannedCard extends ConsumerWidget {
                       Row(
                         children: [
                           if (item.categoryName != null) ...[
-                            Icon(Icons.label_rounded,
+                            Icon(AppIcons.tag,
                                 size: 12, color: AppColors.th(context)),
                             const SizedBox(width: 3),
                             Flexible(
@@ -782,7 +783,7 @@ class _PlannedCard extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                           ],
-                          Icon(Icons.account_balance_wallet_rounded,
+                          Icon(AppIcons.wallet,
                               size: 12, color: AppColors.th(context)),
                           const SizedBox(width: 3),
                           Flexible(

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/theme/app_icons.dart';
 
 class ImportExportScreen extends StatelessWidget {
   const ImportExportScreen({super.key});
@@ -19,7 +20,7 @@ class ImportExportScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
           _HubTile(
-            icon: Icons.upload_file_rounded,
+            icon: AppIcons.fileArrowUp,
             iconColor: const Color(0xFF26A69A),
             title: S.of(context).ieImportCsv,
             subtitle: S.of(context).ieImportCsvSub,
@@ -27,7 +28,7 @@ class ImportExportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _HubTile(
-            icon: Icons.download_rounded,
+            icon: AppIcons.downloadSimple,
             iconColor: const Color(0xFF66BB6A),
             title: S.of(context).ieExportCsv,
             subtitle: S.of(context).ieExportCsvSub,
@@ -35,7 +36,7 @@ class ImportExportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _HubTile(
-            icon: Icons.picture_as_pdf_rounded,
+            icon: AppIcons.filePdf,
             iconColor: const Color(0xFFEF5350),
             title: S.of(context).ieExportReport,
             subtitle: S.of(context).ieExportReportSub,
@@ -103,7 +104,7 @@ class _HubTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
+            Icon(AppIcons.caretRight,
                 size: 20, color: AppColors.th(context)),
           ],
         ),

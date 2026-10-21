@@ -27,6 +27,7 @@ import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'widgets/delete_with_undo.dart';
 import 'widgets/tx_form_args.dart';
+import '../../shared/theme/app_icons.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   final String transactionId;
@@ -49,7 +50,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               elevation: 0,
             ),
             body: EmptyState(
-              icon: Icons.receipt_long_rounded,
+              icon: AppIcons.receipt,
               title: S.of(context).txDetailNotFound,
             ),
           );
@@ -99,10 +100,10 @@ class _DetailBody extends ConsumerWidget {
             : AppColors.accent;
 
     final IconData icon = isIncome
-        ? Icons.arrow_downward_rounded
+        ? AppIcons.arrowDown
         : isExpense
-            ? Icons.arrow_upward_rounded
-            : Icons.swap_horiz_rounded;
+            ? AppIcons.arrowUp
+            : AppIcons.arrowsLeftRight;
 
     final typeLabel = switch (tx.type) {
       'income' => S.of(context).typeIncome,
@@ -129,12 +130,12 @@ class _DetailBody extends ConsumerWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_rounded),
+            icon: const Icon(AppIcons.pencilSimple),
             tooltip: S.of(context).commonEdit,
             onPressed: () => _editTransaction(context, ref),
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded, color: AppColors.ts(context)),
+            icon: Icon(AppIcons.dotsThreeVertical, color: AppColors.ts(context)),
             onSelected: (action) {
               switch (action) {
                 case 'duplicate':
@@ -154,7 +155,7 @@ class _DetailBody extends ConsumerWidget {
                 value: 'duplicate',
                 child: Row(
                   children: [
-                    Icon(Icons.copy_rounded, size: 20, color: AppColors.ts(context)),
+                    Icon(AppIcons.copy, size: 20, color: AppColors.ts(context)),
                     const SizedBox(width: 12),
                     Text(S.of(context).txContextDuplicate),
                   ],
@@ -164,7 +165,7 @@ class _DetailBody extends ConsumerWidget {
                 value: 'save_template',
                 child: Row(
                   children: [
-                    Icon(Icons.bolt_rounded, size: 20, color: AppColors.ts(context)),
+                    Icon(AppIcons.lightning, size: 20, color: AppColors.ts(context)),
                     const SizedBox(width: 12),
                     Text(S.of(context).txDetailSaveAsTemplate),
                   ],
@@ -174,7 +175,7 @@ class _DetailBody extends ConsumerWidget {
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.overspent),
+                    Icon(AppIcons.trash, size: 20, color: AppColors.overspent),
                     const SizedBox(width: 12),
                     Text(S.of(context).commonDelete,
                         style: TextStyle(color: AppColors.overspent)),
@@ -337,13 +338,13 @@ class _DetailBody extends ConsumerWidget {
             children: [
               _detailRow(context, S.of(context).txDetailDate,
                   formatDate(tx.createdAt.toLocal()),
-                  icon: Icons.calendar_today_rounded),
+                  icon: AppIcons.calendarBlank),
               _divider(context),
               _detailRow(context, S.of(context).txDetailTime,
                   // Follows the device's 12/24-hour setting.
                   TimeOfDay.fromDateTime(tx.createdAt.toLocal())
                       .format(context),
-                  icon: Icons.access_time_rounded),
+                  icon: AppIcons.clock),
               _divider(context),
               Builder(builder: (_) {
                 final involvedNames = entry.involvedAccountNames;
@@ -351,7 +352,7 @@ class _DetailBody extends ConsumerWidget {
                   // Multi-account: show all account names
                   return _detailRow(context, S.of(context).txDetailAccounts,
                       involvedNames.join(', '),
-                      icon: Icons.account_balance_wallet_rounded);
+                      icon: AppIcons.wallet);
                 }
                 // The line's account (per-line accounts), as shown in the name.
                 final accountId = entry.lines.isNotEmpty
@@ -361,20 +362,20 @@ class _DetailBody extends ConsumerWidget {
                   onTap: () => context.push('/accounts/$accountId'),
                   child: _detailRow(context, S.of(context).commonAccount,
                       '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
-                      icon: Icons.account_balance_wallet_rounded),
+                      icon: AppIcons.wallet),
                 );
               }),
               if (tx.note.isNotEmpty) ...[
                 _divider(context),
                 _detailRow(context, S.of(context).txDetailNote, visibleNote(tx.note),
-                    icon: Icons.notes_rounded),
+                    icon: AppIcons.textAlignLeft),
               ],
               if (tx.categoryId != null &&
                   categoryMap.containsKey(tx.categoryId)) ...[
                 _divider(context),
                 _detailRow(context, S.of(context).commonCategory,
                     categoryMap[tx.categoryId]!.name,
-                    icon: Icons.label_outline_rounded),
+                    icon: AppIcons.tag),
               ],
             ],
           ),
@@ -430,13 +431,13 @@ class _DetailBody extends ConsumerWidget {
     return _card(context, children: [
       if (line.categoryId != null && catMap.containsKey(line.categoryId))
         _detailRow(context, S.of(context).commonCategory, catMap[line.categoryId]!.name,
-            icon: Icons.label_outline_rounded),
+            icon: AppIcons.tag),
       if (line.categoryId != null &&
           catMap.containsKey(line.categoryId) &&
           line.note.isNotEmpty)
         _divider(context),
       if (line.note.isNotEmpty)
-        _detailRow(context, S.of(context).txDetailNote, line.note, icon: Icons.notes_rounded),
+        _detailRow(context, S.of(context).txDetailNote, line.note, icon: AppIcons.textAlignLeft),
     ]);
   }
 
@@ -507,7 +508,7 @@ class _DetailBody extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: [
-        Icon(Icons.label_outline_rounded,
+        Icon(AppIcons.tag,
             size: 16, color: AppColors.th(context)),
         const SizedBox(width: 10),
         Expanded(
@@ -719,8 +720,8 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                         ),
                         child: Icon(
                           isIncome
-                              ? Icons.arrow_downward_rounded
-                              : Icons.arrow_upward_rounded,
+                              ? AppIcons.arrowDown
+                              : AppIcons.arrowUp,
                           color: color,
                           size: 18,
                         ),
@@ -758,7 +759,7 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.chevron_right_rounded,
+                      Icon(AppIcons.caretRight,
                           size: 18, color: AppColors.th(context)),
                     ],
                   ),
@@ -890,7 +891,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(children: [
-                  Icon(Icons.receipt_long_rounded,
+                  Icon(AppIcons.receipt,
                       size: 16, color: AppColors.ts(context)),
                   const SizedBox(width: 8),
                   Text(
@@ -956,7 +957,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                                 color: Colors.black54,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.close_rounded,
+                              child: const Icon(AppIcons.x,
                                   size: 14, color: Colors.white),
                             ),
                           ),

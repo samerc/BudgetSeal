@@ -43,6 +43,7 @@ import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/brand_palette.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/utils/biometric_errors.dart';
+import '../../shared/theme/app_icons.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -70,19 +71,19 @@ class SettingsScreen extends ConsumerWidget {
 
             // ── Grouped list: Money / Tools / App ──
             _MoreGroup(title: l.moreMoneySection, rows: [
-              _MoreRow(icon: Icons.credit_card_rounded, title: l.navAccounts,
+              _MoreRow(icon: AppIcons.creditCard, title: l.navAccounts,
                   subtitle: l.settingsAccountsSub, hue: 215,
                   onTap: () => context.push('/accounts')),
-              _MoreRow(icon: Icons.label_rounded, title: l.navCategories,
+              _MoreRow(icon: AppIcons.tag, title: l.navCategories,
                   subtitle: l.settingsCategoriesSub, hue: 285,
                   onTap: () => context.push('/categories')),
-              _MoreRow(icon: Icons.repeat_rounded, title: l.tileRecurringBills,
+              _MoreRow(icon: AppIcons.repeat, title: l.tileRecurringBills,
                   subtitle: l.settingsRecurringSub, hue: 18,
                   onTap: () => context.push('/recurring')),
-              _MoreRow(icon: Icons.subscriptions_rounded, title: l.tileSubscriptions,
+              _MoreRow(icon: AppIcons.playCircle, title: l.tileSubscriptions,
                   subtitle: l.settingsSubscriptionsSub, hue: 340,
                   onTap: () => context.push('/subscriptions')),
-              _MoreRow(icon: Icons.event_note_rounded, title: l.plannedTitle,
+              _MoreRow(icon: AppIcons.calendarDots, title: l.plannedTitle,
                   subtitle: l.plannedSubtitle, hue: 255,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.plannedPayments)) return;
@@ -90,22 +91,22 @@ class SettingsScreen extends ConsumerWidget {
                   }),
             ]),
             _MoreGroup(title: l.settingsToolsSection, rows: [
-              _MoreRow(icon: Icons.flag_rounded, title: l.tileGoalsLoans,
+              _MoreRow(icon: AppIcons.flag, title: l.tileGoalsLoans,
                   subtitle: l.settingsGoalsSub, hue: 145,
                   onTap: () => context.push('/objectives')),
-              _MoreRow(icon: Icons.call_split_rounded, title: l.tileBillSplitter,
+              _MoreRow(icon: AppIcons.arrowsSplit, title: l.tileBillSplitter,
                   subtitle: l.settingsBillSplitterSub, hue: 172,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
                     context.push('/bill-splitter');
                   }),
-              _MoreRow(icon: Icons.flight_takeoff_rounded, title: l.tileTravelExchange,
+              _MoreRow(icon: AppIcons.airplaneTakeoff, title: l.tileTravelExchange,
                   subtitle: l.settingsTravelSub, hue: 198,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.travelExchange)) return;
                     context.push('/travel-exchange');
                   }),
-              _MoreRow(icon: Icons.computer_rounded, title: l.tileWebCompanion,
+              _MoreRow(icon: AppIcons.desktop, title: l.tileWebCompanion,
                   subtitle: l.settingsWebCompanionSub, hue: 232,
                   onTap: () {
                     if (!checkPremiumAccess(context, ref, PremiumFeature.webCompanion)) return;
@@ -113,13 +114,13 @@ class SettingsScreen extends ConsumerWidget {
                   }),
             ]),
             _MoreGroup(title: l.moreAppSection, rows: [
-              _MoreRow(icon: Icons.settings_rounded, title: l.settingsCustomization,
+              _MoreRow(icon: AppIcons.gear, title: l.settingsCustomization,
                   subtitle: l.settingsCustomizationSub, hue: 220, neutral: true,
                   onTap: () => context.push('/settings')),
-              _MoreRow(icon: Icons.help_outline_rounded, title: l.tileHelpGuide,
+              _MoreRow(icon: AppIcons.question, title: l.tileHelpGuide,
                   subtitle: l.settingsHelpSub, hue: 190,
                   onTap: () => context.push('/help')),
-              _MoreRow(icon: Icons.info_outline_rounded, title: l.settingsAbout,
+              _MoreRow(icon: AppIcons.info, title: l.settingsAbout,
                   subtitle: l.settingsVersionN(appVersion), hue: 220, neutral: true,
                   onTap: () => context.push('/about')),
             ]),
@@ -445,15 +446,15 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   // Color pickers
                   _colorPickerRow(tr.typeExpense, expenseColor, presets, (c) {
                     setSheetState(() => expenseColor = c);
-                  }, Icons.arrow_upward_rounded, ctx),
+                  }, AppIcons.arrowUp, ctx),
                   const SizedBox(height: 16),
                   _colorPickerRow(tr.typeIncome, incomeColor, presets, (c) {
                     setSheetState(() => incomeColor = c);
-                  }, Icons.arrow_downward_rounded, ctx),
+                  }, AppIcons.arrowDown, ctx),
                   const SizedBox(height: 16),
                   _colorPickerRow(tr.typeTransfer, transferColor, presets, (c) {
                     setSheetState(() => transferColor = c);
-                  }, Icons.swap_horiz_rounded, ctx),
+                  }, AppIcons.arrowsLeftRight, ctx),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () {
@@ -576,7 +577,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                           : null,
                     ),
                     child: isSelected
-                        ? Icon(Icons.check_rounded,
+                        ? Icon(AppIcons.check,
                             size: 18, color: AppColors.inkOn(p.$2))
                         : null,
                   ),
@@ -683,7 +684,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
           ])
             ListTile(
               leading: Icon(mode == entry.$1
-                  ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  ? AppIcons.radioButtonFill : AppIcons.circle,
                   color: AppColors.accent),
               title: Text(entry.$2),
               subtitle: entry.$3 != null ? Text(entry.$3!) : null,
@@ -744,8 +745,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(
                     current == 'system'
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
+                        ? AppIcons.radioButtonFill
+                        : AppIcons.circle,
                     color: AppColors.accent),
                 title: Text(tr.accentColorSystem),
                 subtitle: Text(tr.accentColorSystemSub),
@@ -774,9 +775,9 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     final tsColor = AppColors.ts(context);
     // Localized tab labels (homeTabLabels is English-only, used for storage).
     final labels = [tr.tabHome, tr.tabActivity, tr.tabBudget, tr.tabReports, tr.tabMore];
-    final icons = [Icons.dashboard_rounded, Icons.receipt_long_rounded,
-        Icons.account_balance_wallet_rounded, Icons.insights_rounded,
-        Icons.more_horiz_rounded];
+    final icons = [AppIcons.squaresFour, AppIcons.receipt,
+        AppIcons.wallet, AppIcons.chartLineUp,
+        AppIcons.dotsThree];
     final picked = await showModalBottomSheet<int>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -790,7 +791,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
           for (var i = 0; i < labels.length; i++)
             ListTile(
               leading: Icon(i == homeTab
-                  ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  ? AppIcons.radioButtonFill : AppIcons.circle,
                   color: AppColors.accent),
               title: Text(labels[i]),
               trailing: Icon(icons[i], size: 20, color: tsColor),
@@ -842,7 +843,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                 children: [
                   ...appFonts.keys.map((font) => ListTile(
                         leading: Icon(font == currentFont
-                            ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                            ? AppIcons.radioButtonFill : AppIcons.circle,
                             color: AppColors.accent),
                         title: Text(font, style: fontStyle(font, fontSize: 16)),
                         subtitle: Text(tr.fontPreview,
@@ -883,8 +884,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
           ...textScaleOptions.entries.map((e) => ListTile(
                 leading: Icon(
                     (e.key - current).abs() < 0.01
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
+                        ? AppIcons.radioButtonFill
+                        : AppIcons.circle,
                     color: AppColors.accent),
                 title: Text(scaleLabels[e.key] ?? e.value),
                 subtitle: Text(tr.textSizePreview,
@@ -923,8 +924,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             ListTile(
               leading: Icon(
                   current == code
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
+                      ? AppIcons.radioButtonFill
+                      : AppIcons.circle,
                   color: AppColors.accent),
               title: Text(label),
               subtitle: subtitle != null ? Text(subtitle,
@@ -972,7 +973,7 @@ class _EntryModeSheet extends ConsumerWidget {
                   height: 1.4)),
           const SizedBox(height: 20),
           _EntryModeCard(
-            icon: Icons.auto_fix_high_rounded,
+            icon: AppIcons.magicWand,
             title: S.of(context).entryModeAssisted,
             description: S.of(context).entryModeAssistedDesc,
             isSelected: currentMode == 'assisted',
@@ -983,7 +984,7 @@ class _EntryModeSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _EntryModeCard(
-            icon: Icons.list_alt_rounded,
+            icon: AppIcons.listBullets,
             title: S.of(context).entryModeClassic,
             description: S.of(context).entryModeClassicDesc,
             isSelected: currentMode == 'classic',
@@ -1061,7 +1062,7 @@ class _EntryModeCard extends StatelessWidget {
                                 color: AppColors.tp(context))),
                       ),
                       if (isSelected)
-                        Icon(Icons.check_circle_rounded,
+                        Icon(AppIcons.checkCircleFill,
                             size: 20, color: AppColors.accent),
                     ],
                   ),
@@ -1108,7 +1109,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           // ── Appearance ──
           _SectionHeader(title: l.settingsAppearanceSection),
           const SizedBox(height: 8),
-          _SettingsTile(icon: Icons.contrast_rounded, title: l.tileTheme,
+          _SettingsTile(icon: AppIcons.circleHalf, title: l.tileTheme,
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
           Builder(builder: (context) {
@@ -1116,22 +1117,22 @@ class SettingsDetailScreen extends ConsumerWidget {
             final accentLabel = accentVal == 'system'
                 ? S.of(context).accentColorSystemLabel
                 : accentPairName(S.of(context), accentVal);
-            return _SettingsTile(icon: Icons.colorize_rounded, title: S.of(context).tileAccentColor,
+            return _SettingsTile(icon: AppIcons.eyedropper, title: S.of(context).tileAccentColor,
                 subtitle: accentLabel, iconColor: AppColors.accent,
                 onTap: () => _showAccentColorPicker(context, ref));
           }),
-          _SettingsTile(icon: Icons.color_lens_rounded, title: l.tileColors,
+          _SettingsTile(icon: AppIcons.palette, title: l.tileColors,
               subtitle: l.tileColorsSub, iconColor: const Color(0xFFEC407A),
               onTap: () => _showColorConfig(context, ref)),
           Builder(builder: (context) {
             final mode = ref.watch(entryModeProvider);
-            return _SettingsTile(icon: Icons.touch_app_rounded, title: S.of(context).tileEntryMode,
+            return _SettingsTile(icon: AppIcons.handTap, title: S.of(context).tileEntryMode,
                 subtitle: mode == 'assisted' ? S.of(context).entryModeAssistedShort : S.of(context).entryModeClassicShort,
                 iconColor: const Color(0xFF42A5F5),
                 onTap: () => _showEntryModePicker(context, ref));
           }),
           _SettingsTile(
-            icon: Icons.auto_fix_high_rounded,
+            icon: AppIcons.magicWand,
             title: l.tileAutofill,
             subtitle: l.tileAutofillSub,
             iconColor: const Color(0xFF26A69A),
@@ -1141,14 +1142,14 @@ class SettingsDetailScreen extends ConsumerWidget {
             final homeTab = ref.watch(homeTabProvider);
             final sl = S.of(context);
             final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
-            return _SettingsTile(icon: Icons.home_rounded, title: sl.tileStartScreen,
+            return _SettingsTile(icon: AppIcons.house, title: sl.tileStartScreen,
                 subtitle: homeTabLabel,
                 iconColor: const Color(0xFF26A69A),
                 onTap: () => _showHomeTabPicker(context, ref));
           }),
           Builder(builder: (context) {
             final font = ref.watch(fontProvider);
-            return _SettingsTile(icon: Icons.text_fields_rounded, title: S.of(context).tileFont,
+            return _SettingsTile(icon: AppIcons.textAa, title: S.of(context).tileFont,
                 subtitle: font, iconColor: const Color(0xFF7E57C2),
                 onTap: () => _showFontPicker(context, ref));
           }),
@@ -1157,7 +1158,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final sl = S.of(context);
             final scaleLabels = <double, String>{0.85: sl.textScaleSmall, 1.0: sl.textScaleDefault, 1.15: sl.textScaleLarge, 1.3: sl.textScaleExtraLarge};
             final label = scaleLabels[scale] ?? '${(scale * 100).round()}%';
-            return _SettingsTile(icon: Icons.format_size_rounded, title: sl.tileTextSize,
+            return _SettingsTile(icon: AppIcons.textAa, title: sl.tileTextSize,
                 subtitle: label, iconColor: const Color(0xFF5C6BC0),
                 onTap: () => _showTextSizePicker(context, ref));
           }),
@@ -1169,7 +1170,7 @@ class SettingsDetailScreen extends ConsumerWidget {
               'fr' => S.of(context).languageFrench,
               _ => S.of(context).languageSystem,
             };
-            return _SettingsTile(icon: Icons.language_rounded, title: S.of(context).tileLanguage,
+            return _SettingsTile(icon: AppIcons.globe, title: S.of(context).tileLanguage,
                 subtitle: langLabel, iconColor: const Color(0xFF26A69A),
                 onTap: () => _showLanguagePicker(context, ref));
           }),
@@ -1185,7 +1186,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                 contentPadding:
                     const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
                 secondary: const _SettingsIcon(
-                    icon: Icons.format_list_numbered_rounded,
+                    icon: AppIcons.listNumbers,
                     color: Color(0xFF26A69A)),
                 title: Text(S.of(context).tileArabicDigits,
                     style: TextStyle(
@@ -1199,7 +1200,7 @@ class SettingsDetailScreen extends ConsumerWidget {
               ),
             );
           }),
-          _SettingsTile(icon: Icons.view_list_rounded, title: l.tileTxList,
+          _SettingsTile(icon: AppIcons.rows, title: l.tileTxList,
               subtitle: l.tileTxListSub,
               iconColor: const Color(0xFF42A5F5),
               onTap: () => context.push('/tx-list-settings')),
@@ -1223,7 +1224,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             } else {
               subtitle = l.tileCloudSyncSub;
             }
-            return _SettingsTile(icon: Icons.cloud_sync_rounded, title: l.tileCloudSync,
+            return _SettingsTile(icon: AppIcons.arrowsClockwise, title: l.tileCloudSync,
                 subtitle: subtitle,
                 iconColor: sync.status == SyncStatus.error
                     ? AppColors.overspent
@@ -1237,7 +1238,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final syncState = ref.watch(syncProvider);
             final isConnected = syncState.activeProvider is GoogleDriveProvider;
             return _SettingsTile(
-              icon: Icons.people_outline_rounded,
+              icon: AppIcons.users,
               title: S.of(context).tileShareHousehold,
               subtitle: isConnected
                   ? S.of(context).tileShareHouseholdConnected
@@ -1257,20 +1258,20 @@ class SettingsDetailScreen extends ConsumerWidget {
               },
             );
           }),
-          _SettingsTile(icon: Icons.backup_rounded, title: l.tileBackupRestore,
+          _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
               subtitle: l.tileBackupRestoreSub, iconColor: const Color(0xFF42A5F5),
               onTap: () => context.push('/backup')),
-          _SettingsTile(icon: Icons.import_export_rounded, title: l.tileImportExport,
+          _SettingsTile(icon: AppIcons.arrowsDownUp, title: l.tileImportExport,
               subtitle: l.tileImportExportSub, iconColor: const Color(0xFF66BB6A),
               onTap: () => context.push('/import-export')),
           _SettingsTile(
-              icon: Icons.notifications_active_rounded,
+              icon: AppIcons.bellRinging,
               title: l.tileNotifications,
               subtitle: l.tileNotificationsSub,
               iconColor: const Color(0xFFFF9800),
               onTap: () => context.push('/notifications')),
           _SettingsTile(
-              icon: Icons.monitor_heart_rounded,
+              icon: AppIcons.heartbeat,
               title: l.tileHealthCheck,
               subtitle: l.tileHealthCheckSub,
               iconColor: const Color(0xFF4DB6AC),
@@ -1290,7 +1291,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                     contentPadding:
                         const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
                     secondary: const _SettingsIcon(
-                      icon: Icons.photo_library_rounded,
+                      icon: AppIcons.images,
                       color: Color(0xFF7E57C2),
                     ),
                     title: Text(S.of(context).tileSyncReceipts,
@@ -1316,7 +1317,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
                     child: Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded,
+                        Icon(AppIcons.warning,
                             size: 14, color: AppColors.caution),
                         const SizedBox(width: 6),
                         Text(S.of(context).tileSyncReceiptsOff,
@@ -1334,7 +1335,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           _SectionHeader(title: l.settingsPreferencesSection),
           const SizedBox(height: 8),
           _SettingsTile(
-            icon: Icons.home_rounded,
+            icon: AppIcons.house,
             title: l.householdNameTitle,
             subtitle: household?.name ?? 'BudgetSeal',
             iconColor: AppColors.accent,
@@ -1349,7 +1350,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                 }),
           ),
           _SettingsTile(
-            icon: Icons.monetization_on_rounded,
+            icon: AppIcons.coins,
             title: l.tileBaseCurrency,
             subtitle: household?.baseCurrency ?? 'USD',
             iconColor: AppColors.caution,
@@ -1370,14 +1371,14 @@ class SettingsDetailScreen extends ConsumerWidget {
             },
           ),
           _SettingsTile(
-            icon: Icons.currency_exchange_rounded,
+            icon: AppIcons.currencyCircleDollar,
             title: l.tileExchangeRates,
             subtitle: l.tileExchangeRatesSub,
             iconColor: AppColors.caution,
             onTap: () => context.push('/exchange-rates'),
           ),
           _SettingsTile(
-            icon: Icons.calendar_today_rounded,
+            icon: AppIcons.calendarBlank,
             title: l.tilePeriodStartDay,
             subtitle: l.onboardDayN(household?.periodStartDay ?? 1),
             iconColor: AppColors.caution,
@@ -1394,7 +1395,7 @@ class SettingsDetailScreen extends ConsumerWidget {
                 }),
           ),
           _SettingsTile(
-            icon: Icons.attach_money_rounded,
+            icon: AppIcons.currencyDollar,
             title: l.tileCurrencySymbols,
             subtitle: l.tileCurrencySymbolsSub,
             iconColor: const Color(0xFF4DB6AC),
@@ -1404,7 +1405,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             ref.watch(numberFormatProvider);
             final preview = formatAmount(1234567.89);
             return _SettingsTile(
-              icon: Icons.format_list_numbered_rounded,
+              icon: AppIcons.listNumbers,
               title: l.tileNumberFormat,
               subtitle: l.settingsPreview(preview),
               iconColor: const Color(0xFF5C6BC0),
@@ -1415,7 +1416,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final dateFmt = ref.watch(dateFormatProvider);
             final preview = DateFormat(dateFmt).format(DateTime.now());
             return _SettingsTile(
-              icon: Icons.date_range_rounded,
+              icon: AppIcons.calendar,
               title: l.tileDateFormat,
               subtitle: preview,
               iconColor: const Color(0xFF7E57C2),
@@ -1431,7 +1432,7 @@ class SettingsDetailScreen extends ConsumerWidget {
           const SizedBox(height: 20),
 
           // ── Danger zone ──
-          _SettingsTile(icon: Icons.delete_forever_rounded, title: l.tileResetEverything,
+          _SettingsTile(icon: AppIcons.trash, title: l.tileResetEverything,
               subtitle: l.tileResetSub, iconColor: AppColors.overspent,
               onTap: () => _confirmReset(context, ref)),
         ],
@@ -1486,7 +1487,7 @@ class _SettingsTile extends StatelessWidget {
             style: TextStyle(
                 fontSize: 13.5, color: AppColors.ts(context))),
         trailing: onTap != null
-            ? Icon(Icons.chevron_right_rounded,
+            ? Icon(AppIcons.caretRight,
                 size: 20, color: AppColors.th(context))
             : null,
         onTap: onTap,
@@ -1624,7 +1625,7 @@ class _MoreRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
+            Icon(AppIcons.caretRight,
                 size: 20, color: AppColors.th(context)),
           ],
         ),
@@ -1645,7 +1646,7 @@ class _BiometricTile extends ConsumerWidget {
             borderRadius: BorderRadius.circular(CardTokens.radius)),
         contentPadding: const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
         leading: const _SettingsIcon(
-            icon: Icons.fingerprint_rounded, color: Color(0xFF7C4DFF)),
+            icon: AppIcons.fingerprint, color: Color(0xFF7C4DFF)),
         title: Text(S.of(context).tileBiometricLock,
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w700,
@@ -1837,10 +1838,10 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                           onTap: () => ref
                               .read(currencySymbolProvider.notifier)
                               .removeOverride(code),
-                          child: Icon(Icons.restart_alt_rounded,
+                          child: Icon(AppIcons.arrowCounterClockwise,
                               size: 18, color: AppColors.th(context)),
                         )
-                      : Icon(Icons.edit_rounded,
+                      : Icon(AppIcons.pencilSimple,
                           size: 16, color: AppColors.th(context)),
                   onTap: () => _editSymbol(context, code, currentSymbol),
                 );
@@ -2161,8 +2162,8 @@ class _DateFormatSheet extends ConsumerWidget {
                   ListTile(
                     leading: Icon(
                         current == entry.key
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_unchecked,
+                            ? AppIcons.radioButtonFill
+                            : AppIcons.circle,
                         color: AppColors.accent),
                     title: Text(DateFormat(entry.key).format(now)),
                     subtitle: Text(entry.key,
@@ -2211,7 +2212,7 @@ class _SettingsBackupBanner extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.cloud_upload_rounded,
+                Icon(AppIcons.cloudArrowUp,
                     size: 20, color: AppColors.caution),
                 const SizedBox(width: 8),
                 Expanded(
@@ -2243,7 +2244,7 @@ class _SettingsBackupBanner extends ConsumerWidget {
                 IconButton(
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   visualDensity: VisualDensity.compact,
-                  icon: Icon(Icons.close_rounded,
+                  icon: Icon(AppIcons.x,
                       size: 18, color: AppColors.ts(context)),
                   onPressed: () async {
                     await snoozeBackupReminder();
@@ -2363,7 +2364,7 @@ class _ShareHouseholdSettingsSheetState
                 decoration: InputDecoration(
                   labelText: S.of(context).syncTheirEmail,
                   hintText: S.of(context).syncEmailHint,
-                  prefixIcon: const Icon(Icons.email_rounded),
+                  prefixIcon: const Icon(AppIcons.envelopeSimple),
                 ),
               ),
               const SizedBox(height: 16),
@@ -2377,7 +2378,7 @@ class _ShareHouseholdSettingsSheetState
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: AppColors.onAccent),
                         )
-                      : const Icon(Icons.share_rounded, size: 20),
+                      : const Icon(AppIcons.shareNetwork, size: 20),
                   label: Text(
                     _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
@@ -2423,7 +2424,7 @@ class _ShareHouseholdSettingsSheetState
               SizedBox(
                 child: FilledButton.icon(
                   onPressed: _shareCode,
-                  icon: const Icon(Icons.share_rounded, size: 20),
+                  icon: const Icon(AppIcons.shareNetwork, size: 20),
                   label: Text(
                     S.of(context).syncShareCode,
                     style: TextStyle(
@@ -2443,7 +2444,7 @@ class _ShareHouseholdSettingsSheetState
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded,
+                    const Icon(AppIcons.warningCircle,
                         color: AppColors.overspent, size: 18),
                     const SizedBox(width: 8),
                     Expanded(

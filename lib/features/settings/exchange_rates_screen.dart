@@ -12,6 +12,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/theme/app_icons.dart';
 
 class _RateRow {
   final String currency;
@@ -216,7 +217,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(AppIcons.arrowClockwise),
             tooltip: tr.fxRefreshTooltip,
             onPressed: _loading ? null : () => _load(refresh: true),
           ),
@@ -235,7 +236,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.currency_exchange_rounded,
+                      Icon(AppIcons.currencyCircleDollar,
                           size: 20, color: AppColors.accent),
                       const SizedBox(width: 12),
                       Expanded(
@@ -325,7 +326,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                                   ? AppColors.accent
                                   : AppColors.ts(context)),
                         ),
-                        trailing: Icon(Icons.edit_rounded,
+                        trailing: Icon(AppIcons.pencilSimple,
                             size: 18, color: AppColors.th(context)),
                       ),
                     ),

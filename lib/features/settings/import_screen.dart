@@ -17,6 +17,7 @@ import '../../core/providers/transactions_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Date cells: `yyyy-MM-dd` or `d/M/yyyy` style, optional time after.
 final importDateRe =
@@ -72,19 +73,19 @@ extension ColumnRoleLabel on ColumnRole {
   IconData get icon {
     switch (this) {
       case ColumnRole.skip:
-        return Icons.block_rounded;
+        return AppIcons.prohibit;
       case ColumnRole.date:
-        return Icons.calendar_today_rounded;
+        return AppIcons.calendarBlank;
       case ColumnRole.description:
-        return Icons.notes_rounded;
+        return AppIcons.textAlignLeft;
       case ColumnRole.amount:
-        return Icons.attach_money_rounded;
+        return AppIcons.currencyDollar;
       case ColumnRole.category:
-        return Icons.category_rounded;
+        return AppIcons.squaresFour;
       case ColumnRole.debit:
-        return Icons.remove_circle_outline_rounded;
+        return AppIcons.minusCircle;
       case ColumnRole.credit:
-        return Icons.add_circle_outline_rounded;
+        return AppIcons.plusCircle;
     }
   }
 }
@@ -520,7 +521,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.upload_file_rounded, size: 24, color: AppColors.accent),
+              Icon(AppIcons.fileArrowUp, size: 24, color: AppColors.accent),
               const SizedBox(width: 12),
               Text(S.of(context).importFromBank,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -534,7 +535,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _pickFile,
-            icon: const Icon(Icons.folder_open_rounded, size: 18),
+            icon: const Icon(AppIcons.folderOpen, size: 18),
             label: Text(S.of(context).importLoadCsv),
           ),
         ],
@@ -559,7 +560,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.view_column_rounded, size: 20, color: AppColors.accent),
+              Icon(AppIcons.columns, size: 20, color: AppColors.accent),
               const SizedBox(width: 8),
               Text(
                 S.of(context).importColumnMapping,
@@ -645,7 +646,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           ),
                           dropdownColor: AppColors.sf(context),
                           icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
+                            AppIcons.caretDown,
                             size: 18,
                             color: AppColors.ts(context),
                           ),
@@ -736,7 +737,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.preview_rounded, size: 20, color: AppColors.accent),
+              Icon(AppIcons.eye, size: 20, color: AppColors.accent),
               const SizedBox(width: 8),
               Text(
                 S.of(context).importPreview,
@@ -816,7 +817,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               padding: const EdgeInsets.only(top: 12),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded,
+                  Icon(AppIcons.warning,
                       size: 16, color: AppColors.caution),
                   const SizedBox(width: 6),
                   Expanded(

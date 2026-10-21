@@ -7,6 +7,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/theme/app_icons.dart';
 
 const categoryPresetColors = [
   Color(0xFFE57373),
@@ -185,7 +186,7 @@ class _CategorySheetState extends State<CategorySheet>
                                 color: AppColors.tp(context))),
                         if (!_creating)
                           TextButton.icon(
-                            icon: const Icon(Icons.add_rounded, size: 16),
+                            icon: const Icon(AppIcons.plus, size: 16),
                             label: Text(S.of(context).catSheetNew),
                             onPressed: () =>
                                 setState(() => _creating = true),
@@ -220,7 +221,7 @@ class _CategorySheetState extends State<CategorySheet>
                             child: Text(S.of(context).catSheetAdd),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 18),
+                            icon: const Icon(AppIcons.x, size: 18),
                             onPressed: () =>
                                 setState(() => _creating = false),
                           ),
@@ -250,7 +251,7 @@ class _CategorySheetState extends State<CategorySheet>
                         hintText: S.of(context).catSheetSearchHint,
                         hintStyle:
                             TextStyle(color: AppColors.th(context)),
-                        prefixIcon: Icon(Icons.search_rounded,
+                        prefixIcon: Icon(AppIcons.magnifyingGlass,
                             size: 18, color: AppColors.th(context)),
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 10),

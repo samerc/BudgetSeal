@@ -6,6 +6,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/theme/app_icons.dart';
 
 class TxListSettingsScreen extends ConsumerWidget {
   const TxListSettingsScreen({super.key});
@@ -30,7 +31,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Date Banner Total ─────────────────────────────────────
           _SettingRow(
-            icon: Icons.calendar_today_rounded,
+            icon: AppIcons.calendarBlank,
             title: S.of(context).txListDateBanner,
             trailing: _DropdownChip(
               value: s.dateBannerTotal == 'dayTotal' ? S.of(context).txListDayTotal : S.of(context).txListNone,
@@ -45,7 +46,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Account Label ─────────────────────────────────────────
           _ToggleRow(
-            icon: Icons.account_balance_wallet_rounded,
+            icon: AppIcons.wallet,
             title: S.of(context).txListAccountLabel,
             subtitle: S.of(context).txListAccountSubtitle,
             value: s.showAccount,
@@ -56,7 +57,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Category Icon ─────────────────────────────────────────
           _ToggleRow(
-            icon: Icons.category_rounded,
+            icon: AppIcons.squaresFour,
             title: S.of(context).txListCategoryIcon,
             subtitle: S.of(context).txListCategorySubtitle,
             value: s.showCategoryIcon,
@@ -67,7 +68,7 @@ class TxListSettingsScreen extends ConsumerWidget {
 
           // ── Time ──────────────────────────────────────────────────
           _ToggleRow(
-            icon: Icons.schedule_rounded,
+            icon: AppIcons.clock,
             title: S.of(context).txListTime,
             subtitle: S.of(context).txListTimeSubtitle,
             value: s.showTime,
@@ -164,7 +165,7 @@ class _CompactPreviewRow extends StatelessWidget {
                   light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.restaurant_rounded, size: 16, color: AppColors.accent),
+            child: Icon(AppIcons.forkKnife, size: 16, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
         ],
@@ -223,7 +224,7 @@ class _ExpandedPreviewRow extends StatelessWidget {
                   light: 0.85, dark: 0.78),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.restaurant_rounded, size: 18, color: AppColors.accent),
+            child: Icon(AppIcons.forkKnife, size: 18, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
         ],
@@ -374,7 +375,7 @@ class _DropdownChip extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     color: AppColors.tp(context))),
             const SizedBox(width: 4),
-            Icon(Icons.arrow_drop_down_rounded, size: 18, color: AppColors.ts(context)),
+            Icon(AppIcons.caretDown, size: 18, color: AppColors.ts(context)),
           ],
         ),
       ),

@@ -36,6 +36,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
 import 'widgets/bills_boxes.dart';
+import '../../shared/theme/app_icons.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -96,13 +97,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               actions: [
                 IconButton(
                   tooltip: S.of(context).dashboardCustomizeTooltip,
-                  icon: Icon(Icons.tune_rounded,
+                  icon: Icon(AppIcons.slidersHorizontal,
                       color: AppColors.ts(context), size: 22),
                   onPressed: () => showDashboardCustomizeSheet(context),
                 ),
                 IconButton(
                   tooltip: S.of(context).dashboardSearchTooltip,
-                  icon: Icon(Icons.search_rounded,
+                  icon: Icon(AppIcons.magnifyingGlass,
                       color: AppColors.ts(context)),
                   onPressed: () => _showGlobalSearch(context, ref),
                 ),
@@ -271,21 +272,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     final sl = S.of(context);
                     if (topCat != null && topIncrease >= 30) {
                       message = sl.dashboardCatSpendingHigher(topCat, topIncrease.round());
-                      icon = Icons.trending_up_rounded;
+                      icon = AppIcons.trendUp;
                       color = AppColors.caution;
                     } else if (pctChange <= -15) {
                       message = sl.dashboardSpendingLowerNice(pctChange.abs());
-                      icon = Icons.trending_down_rounded;
+                      icon = AppIcons.trendDown;
                       color = AppColors.healthy;
                     } else if (pctChange >= 20) {
                       message = sl.dashboardSpendingHigher(pctChange);
-                      icon = Icons.trending_up_rounded;
+                      icon = AppIcons.trendUp;
                       color = AppColors.caution;
                     }
 
                     if (message == null) {
                       message = sl.dashboardSpendingOnTrack;
-                      icon = Icons.check_circle_outline_rounded;
+                      icon = AppIcons.checkCircle;
                       color = AppColors.healthy;
                     }
 
@@ -321,7 +322,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     return Row(
                     children: [
                       _QuickAction(
-                        icon: Icons.remove_rounded,
+                        icon: AppIcons.minus,
                         label: qs.typeExpense,
                         color: ref.watch(txColorsProvider).expense,
                         onTap: () => context.push('/add-transaction',
@@ -329,7 +330,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       ),
                       const SizedBox(width: 10),
                       _QuickAction(
-                        icon: Icons.add_rounded,
+                        icon: AppIcons.plus,
                         label: qs.typeIncome,
                         color: ref.watch(txColorsProvider).income,
                         onTap: () => context.push('/add-transaction',
@@ -337,7 +338,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       ),
                       const SizedBox(width: 10),
                       _QuickAction(
-                        icon: Icons.swap_horiz_rounded,
+                        icon: AppIcons.arrowsLeftRight,
                         label: qs.dashboardQuickTransfer,
                         color: ref.watch(txColorsProvider).transfer,
                         onTap: () => context.push('/add-transaction',
@@ -346,7 +347,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       if (hasEnvelopes) ...[
                         const SizedBox(width: 10),
                         _QuickAction(
-                          icon: Icons.savings_rounded,
+                          icon: AppIcons.piggyBank,
                           label: qs.dashboardQuickFund,
                           tooltip: qs.dashboardFundEnvelopesTooltip,
                           color: kPlannedColor,
@@ -355,7 +356,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       ],
                       const SizedBox(width: 10),
                       _QuickAction(
-                        icon: Icons.call_split_rounded,
+                        icon: AppIcons.arrowsSplit,
                         label: qs.dashboardQuickSplit,
                         tooltip: qs.dashboardSplitBillTooltip,
                         color: kSplitColor,
@@ -412,7 +413,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                       children: [
                                         Row(
                                           children: [
-                                            Icon(Icons.account_balance_rounded,
+                                            Icon(AppIcons.bank,
                                                 size: 13, color: AppColors.ts(context)),
                                             const SizedBox(width: 5),
                                             Text(S.of(context).dashboardNetWorth,
@@ -466,7 +467,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                         children: [
                                           Row(
                                             children: [
-                                              Icon(Icons.account_balance_wallet_rounded,
+                                              Icon(AppIcons.wallet,
                                                   size: 13, color: AppColors.ts(context)),
                                               const SizedBox(width: 5),
                                               Text(S.of(context).dashboardUnallocated,
@@ -538,7 +539,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           child: Center(
                             child: Column(
                               children: [
-                                Icon(Icons.receipt_long_rounded,
+                                Icon(AppIcons.receipt,
                                     size: 36, color: AppColors.th(context)),
                                 const SizedBox(height: 8),
                                 Text(S.of(context).dashboardNoTransactionsYet,
@@ -579,7 +580,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.wb_sunny_rounded,
+                                    Icon(AppIcons.sun,
                                         size: 16, color: AppColors.accent),
                                     const SizedBox(width: 8),
                                     Text(
@@ -782,7 +783,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.pie_chart_outline_rounded,
+                            Icon(AppIcons.chartPie,
                                 size: 32, color: AppColors.th(context)),
                             const SizedBox(height: 4),
                             Text(S.of(context).dashboardNoSpending,
@@ -1003,13 +1004,13 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
   List<Widget> buildActions(BuildContext context) => [
         if (query.isNotEmpty)
           IconButton(
-              icon: const Icon(Icons.clear_rounded),
+              icon: const Icon(AppIcons.x),
               onPressed: () => query = ''),
       ];
 
   @override
   Widget buildLeading(BuildContext context) => IconButton(
-      icon: const Icon(Icons.arrow_back_rounded),
+      icon: const Icon(AppIcons.arrowLeft),
       onPressed: () => close(context, null));
 
   @override
@@ -1052,7 +1053,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
     if (matchTx.isEmpty && matchAcct.isEmpty && matchCat.isEmpty) {
       return Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.search_off_rounded,
+        Icon(AppIcons.magnifyingGlassMinus,
             size: 48, color: AppColors.th(context)),
         const SizedBox(height: 12),
         Text(S.of(context).dashboardNoResultsFor(query),
@@ -1065,7 +1066,7 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         _sectionHead(context, S.of(context).dashboardSearchAccounts),
         ...matchAcct.map((a) => ListTile(
               leading:
-                  Icon(Icons.credit_card_rounded, color: AppColors.accent),
+                  Icon(AppIcons.creditCard, color: AppColors.accent),
               title: Text(a.account.name),
               subtitle: Text(
                   '${a.account.currency} \u00b7 ${formatAmount(a.balance, currency: a.account.currency)}'),
@@ -1104,10 +1105,10 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
           return ListTile(
             leading: Icon(
               e.tx.type == 'income'
-                  ? Icons.arrow_downward_rounded
+                  ? AppIcons.arrowDown
                   : e.tx.type == 'expense'
-                      ? Icons.arrow_upward_rounded
-                      : Icons.swap_horiz_rounded,
+                      ? AppIcons.arrowUp
+                      : AppIcons.arrowsLeftRight,
               color: e.tx.type == 'income'
                   ? AppColors.healthy
                   : e.tx.type == 'expense'
@@ -1265,7 +1266,7 @@ class _QuickTemplatesSectionState
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.bolt_rounded,
+                          Icon(AppIcons.lightning,
                               size: 14, color: color),
                           const SizedBox(width: 6),
                           Text(

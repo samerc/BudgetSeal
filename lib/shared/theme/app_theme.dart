@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/providers/font_provider.dart';
 import 'app_colors.dart';
+import 'app_icons.dart';
 import 'design_tokens.dart';
 
 /// Build the light theme. [accentColor] is the mode's accent (a pair's deep
@@ -99,6 +100,11 @@ ThemeData _buildTheme(String fontName, Color accent, _Variant v,
   );
 
   return ThemeData(
+    // Automatic AppBar back/close buttons use the app's Phosphor icons.
+    actionIconTheme: ActionIconThemeData(
+      backButtonIconBuilder: (_) => const Icon(AppIcons.arrowLeft),
+      closeButtonIconBuilder: (_) => const Icon(AppIcons.x),
+    ),
     useMaterial3: true,
     brightness: brightness,
     colorScheme: colorScheme,

@@ -11,6 +11,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Category → envelope link from the category side: pick an envelope,
 /// unlink, or create a new spending envelope named after the category
@@ -41,23 +42,23 @@ Future<void> showCategoryEnvelopeSheet(
             ),
             if (cat.allocationId == null)
               ListTile(
-                leading: const Icon(Icons.add_circle_outline_rounded),
+                leading: const Icon(AppIcons.plusCircle),
                 title: Text(tr.catCreateEnvelope(cat.name)),
                 onTap: () => Navigator.pop(ctx, '+'),
               ),
             for (final a in allocations)
               ListTile(
-                leading: const Icon(Icons.mail_outline_rounded),
+                leading: const Icon(AppIcons.envelopeSimple),
                 title: Text(a.data.allocation.name),
                 selected: a.data.allocation.id == cat.allocationId,
                 trailing: a.data.allocation.id == cat.allocationId
-                    ? const Icon(Icons.check_rounded)
+                    ? const Icon(AppIcons.check)
                     : null,
                 onTap: () => Navigator.pop(ctx, a.data.allocation.id),
               ),
             if (cat.allocationId != null)
               ListTile(
-                leading: const Icon(Icons.link_off_rounded),
+                leading: const Icon(AppIcons.linkBreak),
                 title: Text(tr.catUnlinkEnvelope),
                 onTap: () => Navigator.pop(ctx, ''),
               ),

@@ -11,6 +11,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/tappable.dart';
+import '../../../shared/theme/app_icons.dart';
 
 /// Enabled recurring bills, live from the database.
 final _enabledRecurringProvider =
@@ -65,7 +66,7 @@ class BillsBoxes extends ConsumerWidget {
           Expanded(
             child: _Box(
               label: S.of(context).dashUpcoming,
-              icon: Icons.event_rounded,
+              icon: AppIcons.calendarDots,
               color: dark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2),
               bills: upcoming,
               baseCurrency: baseCurrency,
@@ -79,7 +80,7 @@ class BillsBoxes extends ConsumerWidget {
           Expanded(
             child: _Box(
               label: S.of(context).dashOverdue,
-              icon: Icons.history_rounded,
+              icon: AppIcons.clockCounterClockwise,
               color: dark ? const Color(0xFF8395FF) : const Color(0xFF6577E0),
               bills: overdue,
               baseCurrency: baseCurrency,

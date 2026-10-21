@@ -17,6 +17,8 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/category_icon.dart';
 
 // ---------------------------------------------------------------------------
 // Colour helpers
@@ -72,7 +74,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         heroTag: 'fab_categories',
         tooltip: S.of(context).catAddTooltip,
         onPressed: () => _showForm(categories: categories),
-        child: const Icon(Icons.add_rounded),
+        child: const Icon(AppIcons.plus),
       ),
       body: SafeArea(
         bottom: false,
@@ -90,7 +92,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(AppIcons.arrowLeft),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 4),
@@ -152,11 +154,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     decoration: InputDecoration(
                       hintText: S.of(context).catSearchHint,
                       hintStyle: TextStyle(color: AppColors.th(context)),
-                      prefixIcon: Icon(Icons.search_rounded,
+                      prefixIcon: Icon(AppIcons.magnifyingGlass,
                           size: 20, color: AppColors.th(context)),
                       suffixIcon: _search.isNotEmpty
                           ? IconButton(
-                              icon: Icon(Icons.clear_rounded,
+                              icon: Icon(AppIcons.x,
                                   size: 18, color: AppColors.th(context)),
                               onPressed: () {
                                 _searchController.clear();
@@ -210,7 +212,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   if (cats.isEmpty) {
                     return SliverFillRemaining(
                       child: EmptyState(
-                        icon: Icons.label_outline_rounded,
+                        icon: AppIcons.tag,
                         title: S.of(context).catNoYet,
                         subtitle: S.of(context).catTapPlus,
                       ),
@@ -600,14 +602,16 @@ class _CategoriesSliver extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
-                      child: Text(
-                        hasEmoji ? group.icon : group.name[0],
-                        style: TextStyle(
-                          fontSize: hasEmoji ? 18 : 16,
-                          fontWeight: FontWeight.w700,
-                          color: hasEmoji ? null : color,
-                        ),
-                      ),
+                      child: hasEmoji
+                          ? EmojiGlyph(group.icon, size: 22)
+                          : Text(
+                              group.name[0],
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -641,7 +645,7 @@ class _CategoriesSliver extends ConsumerWidget {
                         if (allocMap[group.allocationId] != null)
                           Row(
                             children: [
-                              Icon(Icons.mail_outline_rounded,
+                              Icon(AppIcons.envelopeSimple,
                                   size: 12, color: AppColors.accent),
                               const SizedBox(width: 4),
                               Flexible(
@@ -660,7 +664,7 @@ class _CategoriesSliver extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded,
+                  Icon(AppIcons.caretRight,
                       size: 18, color: AppColors.th(context)),
                 ],
               ),
@@ -683,13 +687,10 @@ class _CategoriesSliver extends ConsumerWidget {
                   padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
                   child: Row(
                     children: [
-                      Text(
-                        subEmoji ? sub.icon : '·',
-                        style: TextStyle(
-                          fontSize: subEmoji ? 16 : 20,
-                          color: color,
-                        ),
-                      ),
+                      subEmoji
+                          ? EmojiGlyph(sub.icon, size: 20)
+                          : Text('·',
+                              style: TextStyle(fontSize: 20, color: color)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -735,7 +736,7 @@ class _CategoriesSliver extends ConsumerWidget {
                       color: AppColors.tp(ctx))),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.edit_rounded),
+                leading: const Icon(AppIcons.pencilSimple),
                 title: Text(S.of(ctx).catEdit),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -744,7 +745,7 @@ class _CategoriesSliver extends ConsumerWidget {
               ),
               if (cat.transactionType == 'expense')
                 ListTile(
-                  leading: const Icon(Icons.mail_outline_rounded),
+                  leading: const Icon(AppIcons.envelopeSimple),
                   title: Text(S.of(ctx).catLinkEnvelope),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -753,8 +754,8 @@ class _CategoriesSliver extends ConsumerWidget {
                 ),
               ListTile(
                 leading: Icon(cat.archived
-                    ? Icons.unarchive_rounded
-                    : Icons.archive_rounded),
+                    ? AppIcons.boxArrowUp
+                    : AppIcons.archive),
                 title: Text(cat.archived ? S.of(ctx).catUnarchive : S.of(ctx).catArchive),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -762,7 +763,7 @@ class _CategoriesSliver extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete_rounded,
+                leading: Icon(AppIcons.trash,
                     color: AppColors.overspent),
                 title: Text(S.of(ctx).commonDelete,
                     style: TextStyle(color: AppColors.overspent)),
@@ -918,8 +919,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                       ),
                     ),
                     child: Center(
-                      child: Text(_emoji,
-                          style: const TextStyle(fontSize: 24)),
+                      child: EmojiGlyph(_emoji, size: 28),
                     ),
                   ),
                 ),
@@ -993,7 +993,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                                       : null,
                                 ),
                                 child: Center(
-                                  child: Text(e, style: const TextStyle(fontSize: 20)),
+                                  child: EmojiGlyph(e, size: 24),
                                 ),
                               ),
                             );
@@ -1039,7 +1039,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                           : null,
                     ),
                     child: isSelected
-                        ? Icon(Icons.check_rounded,
+                        ? Icon(AppIcons.check,
                             size: 14, color: AppColors.inkOn(c))
                         : null,
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// A reusable error display with an icon, message, and retry button.
 /// Optionally shows expandable technical details.
@@ -56,7 +57,7 @@ class ErrorRetry extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.error_outline_rounded,
+              AppIcons.warningCircle,
               size: 48,
               color: AppColors.ts(context),
             ),
@@ -85,7 +86,7 @@ class ErrorRetry extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon: const Icon(AppIcons.arrowClockwise, size: 18),
               label: Text(
                 S.of(context).commonRetry,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -128,8 +129,8 @@ class _ExpandableDetailsState extends State<_ExpandableDetails> {
               ),
               Icon(
                 _expanded
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded,
+                    ? AppIcons.caretUp
+                    : AppIcons.caretDown,
                 size: 16,
                 color: AppColors.ts(context),
               ),

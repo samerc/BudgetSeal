@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// A read-only field that opens the currency picker sheet when tapped.
 class CurrencyPickerField extends ConsumerWidget {
@@ -61,7 +62,7 @@ class CurrencyPickerField extends ConsumerWidget {
           // other input.
           fillColor:
               textColor != null ? Colors.white.withValues(alpha: 0.07) : null,
-          suffixIcon: Icon(Icons.expand_more_rounded,
+          suffixIcon: Icon(AppIcons.caretDown,
               color: textColor?.withValues(alpha: 0.5) ??
                   AppColors.th(context)),
         ),

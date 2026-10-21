@@ -14,6 +14,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Generates and shares an HTML monthly report that can be printed as PDF.
 class ExportReportScreen extends ConsumerStatefulWidget {
@@ -62,7 +63,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(children: [
-                    Icon(Icons.picture_as_pdf_rounded,
+                    Icon(AppIcons.filePdf,
                         size: 24, color: AppColors.accent),
                     const SizedBox(width: 12),
                     Text(S.of(context).exportMonthlyTitle,
@@ -83,7 +84,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.chevron_left_rounded),
+                        icon: const Icon(AppIcons.caretLeft),
                         onPressed: () =>
                             setState(() => _selectedMonthsBack++),
                       ),
@@ -93,7 +94,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                               fontWeight: FontWeight.w700,
                               color: AppColors.tp(context))),
                       IconButton(
-                        icon: const Icon(Icons.chevron_right_rounded),
+                        icon: const Icon(AppIcons.caretRight),
                         onPressed: _selectedMonthsBack > 0
                             ? () =>
                                 setState(() => _selectedMonthsBack--)
@@ -110,7 +111,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
                             height: 16,
                             child: CircularProgressIndicator(
                                 color: AppColors.onAccent, strokeWidth: 2))
-                        : const Icon(Icons.share_rounded, size: 18),
+                        : const Icon(AppIcons.shareNetwork, size: 18),
                     label: Text(
                         _exporting ? S.of(context).exportGenerating : S.of(context).exportGenerateShare),
                   ),

@@ -2,157 +2,157 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// Maps common category names to their Cashew PNG icon filenames.
-/// Falls back to emoji if no matching icon found.
-const _categoryIconMap = <String, String>{
-  'groceries': 'groceries.png',
-  'dining': 'cutlery.png',
-  'restaurants': 'cutlery.png',
-  'food': 'fast-food.png',
-  'coffee': 'coffee-cup.png',
-  'shopping': 'shopping.png',
-  'clothes': 'dress.png',
-  'entertainment': 'tickets.png',
-  'movies': 'tickets.png',
-  'transit': 'tram.png',
-  'transport': 'tram.png',
-  'uber': 'taxi(1).png',
-  'taxi': 'taxi(1).png',
-  'fuel': 'fuel.png',
-  'gas': 'gas-station.png',
-  'bills': 'bills.png',
-  'utilities': 'lightning-bolt.png',
-  'electricity': 'lightning-bolt.png',
-  'water': 'water-tap.png',
-  'internet': 'wifi.png',
-  'phone': 'smartphone.png',
-  'rent': 'rent.png',
-  'mortgage': 'house.png',
-  'home': 'house.png',
-  'insurance': 'padlock.png',
-  'health': 'healthcare-and-medical.png',
-  'medical': 'healthcare-and-medical.png',
-  'pharmacy': 'multivitamin.png',
-  'gym': 'weight.png',
-  'fitness': 'weight.png',
-  'beauty': 'makeup.png',
-  'haircut': 'haircut.png',
-  'spa': 'skincare.png',
-  'gifts': 'gift.png',
-  'travel': 'plane.png',
-  'vacation': 'beach-umbrella.png',
-  'hotel': 'cottage.png',
-  'education': 'graduation.png',
-  'books': 'open-book.png',
-  'subscriptions': 'subscription.png',
-  'streaming': 'media-content.png',
-  'music': 'music.png',
-  'games': 'gamepad.png',
-  'pets': 'pet-bowl.png',
-  'cat': 'cat.png',
-  'dog': 'dog.png',
-  'kids': 'teddy-bear.png',
-  'baby': 'feeding-bottle.png',
-  'salary': 'money-bag.png',
-  'income': 'increase.png',
-  'freelance': 'laptop.png',
-  'investment': 'investment.png',
-  'savings': 'piggy-bank.png',
-  'work': 'briefcase.png',
-  'office': 'clipboard.png',
-  'car': 'car.png',
-  'maintenance': 'gears.png',
-  'parking': 'parking.png',
-  'laundry': 'washing-machine.png',
-  'cleaning': 'cleaning.png',
-  'furniture': 'furniture.png',
-  'electronics': 'desktop-computer.png',
-  'personal care': 'skincare.png',
-  'hobbies': 'color-palette.png',
-  'sports': 'sports.png',
-  'charity': 'heart.png',
-  'donation': 'heart.png',
-  'taxes': 'calculator.png',
-  'fees': 'paper-bill.png',
-  'bank': 'bank.png',
-  'atm': 'atm-machine(1).png',
-  'transfer': 'exchange-arrows.png',
-  'other': 'folder.png',
-  'misc': 'box.png',
+/// Emoji with a Microsoft Fluent Emoji (Flat, MIT) PNG in
+/// `assets/categories/`, named by code points without U+FE0F
+/// (`1f6d2.png` = 🛒). Covers the onboarding presets and both icon pickers;
+/// any other emoji falls back to the system font.
+const _fluentEmoji = <String>{
+  '1f17f', '1f32e', '1f331', '1f354', '1f355', '1f357', '1f35c', '1f35e',
+  '1f363', '1f369', '1f370', '1f377', '1f37a', '1f37c', '1f37d', '1f37f',
+  '1f381', '1f382', '1f389', '1f392', '1f393', '1f3a2', '1f3a3', '1f3a4',
+  '1f3a7', '1f3a8', '1f3aa', '1f3ac', '1f3ad', '1f3ae', '1f3af', '1f3b2',
+  '1f3b5', '1f3ca', '1f3cb', '1f3cd', '1f3d4', '1f3d6', '1f3d7', '1f3e0',
+  '1f3e1', '1f3e2', '1f3e5', '1f3e6', '1f3e7', '1f3e8', '1f3eb', '1f3f7',
+  '1f408', '1f415', '1f437', '1f43e', '1f453', '1f455', '1f457', '1f45c',
+  '1f45f', '1f464', '1f476', '1f484', '1f487', '1f489', '1f48a', '1f48e',
+  '1f4a1', '1f4a7', '1f4b0', '1f4b2', '1f4b3', '1f4b5', '1f4b8', '1f4bb',
+  '1f4bc', '1f4c8', '1f4ca', '1f4cc', '1f4d0', '1f4d1', '1f4da', '1f4dd',
+  '1f4e1', '1f4e6', '1f4f1', '1f4f6', '1f4f7', '1f4fa', '1f501', '1f50c',
+  '1f511', '1f516', '1f527', '1f52c', '1f576', '1f5a5', '1f5a8', '1f5c2',
+  '1f5fa', '1f64f', '1f680', '1f681', '1f686', '1f687', '1f68c', '1f695',
+  '1f697', '1f6b2', '1f6b4', '1f6cb', '1f6cd', '1f6cf', '1f6d2', '1f6de',
+  '1f6e1', '1f6eb', '1f6f3', '1f91d', '1f950', '1f957', '1f961', '1f964',
+  '1f966', '1f9b7', '1f9c1', '1f9c3', '1f9d2', '1f9d8', '1f9f3', '1f9f4',
+  '1f9f8', '1f9f9', '1f9fa', '1f9fe', '1fa79', '1fa7a', '1fa91', '1fa99',
+  '2615', '267b', '26a1', '26bd', '26f7', '26fa', '26fd', '2708', '270f',
+  '2764', '2b50',
 };
 
-/// Maps a category's stored emoji directly to a PNG icon. This is
-/// locale-independent (the emoji is the same regardless of the user's
-/// language), so Arabic/French users get the same icons as English users —
-/// unlike [_categoryIconMap], which matches the (translated) category name.
-/// Keys are the emojis used by the onboarding presets (category_presets.dart).
-const _emojiIconMap = <String, String>{
-  '🍕': 'fast-food.png',
-  '🛒': 'groceries.png',
-  '🍽': 'cutlery.png',
-  '☕': 'coffee-cup.png',
-  '🚗': 'car.png',
-  '⛽': 'fuel.png',
-  '🚌': 'tram.png',
-  '🅿': 'parking.png',
-  '🔧': 'gears.png',
-  '🛍': 'shopping.png',
-  '👕': 'tshirt.png',
-  '🖥': 'desktop-computer.png',
-  '🎁': 'gift.png',
-  '💡': 'bills.png',
-  '⚡': 'lightning-bolt.png',
-  '💧': 'water-tap.png',
-  '📶': 'wifi.png',
-  '📱': 'smartphone.png',
-  '📺': 'subscription.png',
-  '🛡': 'padlock.png',
-  '🏥': 'healthcare-and-medical.png',
-  '🏋': 'weight.png',
-  '💊': 'multivitamin.png',
-  '🎬': 'tickets.png',
-  '🍿': 'tickets.png',
-  '🎮': 'gamepad.png',
-  '💰': 'money-bag.png',
-  '💵': 'money-bag.png',
-  '💻': 'laptop.png',
-  '📈': 'investment.png',
-  '🪙': 'increase.png',
-  '🏠': 'house.png',
-  '🔑': 'rent.png',
-  '🛋': 'furniture.png',
-  '👤': 'user.png',
-  '💇': 'haircut.png',
-  '🧴': 'skincare.png',
-  '🎓': 'graduation.png',
-  '📚': 'open-book.png',
-  '✈': 'plane.png',
-  '🏨': 'cottage.png',
-  '🛫': 'plane.png',
-  '🐾': 'pet-bowl.png',
-  '📦': 'box.png',
+/// Category names (English keywords, longest first so "personal care" wins
+/// over "car") → emoji, for categories whose own emoji has no Fluent PNG.
+const _keywordEmoji = <String, String>{
+  'personal care': '🧴',
+  'groceries': '🛒',
+  'restaurants': '🍽',
+  'subscriptions': '📺',
+  'entertainment': '🎬',
+  'electronics': '🖥',
+  'maintenance': '🔧',
+  'electricity': '⚡',
+  'investment': '📈',
+  'streaming': '📺',
+  'education': '🎓',
+  'utilities': '💡',
+  'insurance': '🛡',
+  'furniture': '🛋',
+  'transport': '🚌',
+  'freelance': '💻',
+  'pharmacy': '💊',
+  'mortgage': '🏠',
+  'cleaning': '🧹',
+  'vacation': '🏖',
+  'internet': '📶',
+  'donation': '❤',
+  'shopping': '🛍',
+  'charity': '❤',
+  'clothes': '👕',
+  'transit': '🚌',
+  'medical': '🩺',
+  'fitness': '🏋',
+  'haircut': '💇',
+  'laundry': '🧺',
+  'hobbies': '🎨',
+  'parking': '🅿',
+  'savings': '🐷',
+  'transfer': '🔁',
+  'dining': '🍽',
+  'coffee': '☕',
+  'movies': '🎬',
+  'health': '🏥',
+  'beauty': '💄',
+  'travel': '✈',
+  'salary': '💰',
+  'income': '💵',
+  'office': '🏢',
+  'sports': '⚽',
+  'taxes': '🧾',
+  'bills': '🧾',
+  'water': '💧',
+  'phone': '📱',
+  'hotel': '🏨',
+  'books': '📚',
+  'music': '🎵',
+  'games': '🎮',
+  'gifts': '🎁',
+  'other': '📦',
+  'misc': '📦',
+  'food': '🍔',
+  'uber': '🚕',
+  'taxi': '🚕',
+  'fuel': '⛽',
+  'rent': '🔑',
+  'home': '🏠',
+  'gym': '🏋',
+  'spa': '🧴',
+  'pets': '🐾',
+  'kids': '🧸',
+  'baby': '🍼',
+  'work': '💼',
+  'fees': '🧾',
+  'bank': '🏦',
+  'atm': '🏧',
+  'cat': '🐈',
+  'dog': '🐕',
+  'car': '🚗',
+  'gas': '⛽',
 };
+
+/// The asset name for [emoji] (`1f6d2.png`), or null when it isn't bundled.
+String? _fluentFile(String emoji) {
+  final key = emoji.runes
+      .where((r) => r != 0xFE0F)
+      .map((r) => r.toRadixString(16))
+      .join('-');
+  return _fluentEmoji.contains(key) ? '$key.png' : null;
+}
+
+/// One emoji drawn as its Fluent PNG when bundled, else as text. Use this
+/// wherever a category/envelope/goal emoji is shown, so icons look the same
+/// on every device. [size] is the glyph's box in logical pixels.
+class EmojiGlyph extends StatelessWidget {
+  final String emoji;
+  final double size;
+
+  const EmojiGlyph(this.emoji, {super.key, this.size = 20});
+
+  @override
+  Widget build(BuildContext context) {
+    final file = _fluentFile(emoji);
+    if (file == null) {
+      return Text(emoji, style: TextStyle(fontSize: size * 0.85, height: 1.15));
+    }
+    return Image.asset('assets/categories/$file', width: size, height: size);
+  }
+}
 
 /// The PNG (in `assets/categories/`) drawn for a category, or null when it
 /// falls back to its emoji or first letter. Also used by the Web Companion.
 String? categoryIconFile(String categoryName, String? emoji) {
-  // 1. Locale-independent: map the stored emoji straight to a PNG. Strip
-  //    the U+FE0F variation selector so '✈️' and '✈' both match.
+  // 1. The category's own emoji (locale-independent).
   if (emoji != null && emoji.isNotEmpty) {
-    final file = _emojiIconMap[emoji] ??
-        _emojiIconMap[emoji.replaceAll('\u{FE0F}', '')];
+    final file = _fluentFile(emoji);
     if (file != null) return file;
   }
   // 2. Fallback: match the (possibly translated) name against English keywords.
   final lowerName = categoryName.toLowerCase();
-  for (final entry in _categoryIconMap.entries) {
-    if (lowerName.contains(entry.key)) return entry.value;
+  for (final entry in _keywordEmoji.entries) {
+    if (lowerName.contains(entry.key)) return _fluentFile(entry.value);
   }
   return null;
 }
 
-/// Widget that displays a category icon from the Cashew icon pack.
-/// Falls back to emoji or generic icon.
+/// Widget that displays a category icon (Fluent Emoji PNG).
+/// Falls back to the system emoji or the first letter.
 class CategoryIcon extends StatelessWidget {
   final String categoryName;
   final String? emoji;
@@ -205,7 +205,7 @@ class CategoryIcon extends StatelessWidget {
 
   Widget _fallback(BuildContext context) {
     if (_isEmoji(emoji)) {
-      return Text(emoji!, style: TextStyle(fontSize: size * 0.5));
+      return Text(emoji!, style: TextStyle(fontSize: size * 0.48));
     }
     return Text(
       categoryName.isNotEmpty ? categoryName[0].toUpperCase() : '?',

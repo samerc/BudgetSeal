@@ -28,6 +28,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/utils/save_errors.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
@@ -304,8 +305,8 @@ class _AssistedTransactionScreenState
                         : tr.commonTitle,
                     suffixIcon: Icon(
                         localType == 'transfer'
-                            ? Icons.notes_rounded
-                            : Icons.title_rounded,
+                            ? AppIcons.textAlignLeft
+                            : AppIcons.textT,
                         color: textHint),
                   ),
                   onChanged: (val) {
@@ -549,12 +550,12 @@ class _AssistedTransactionScreenState
                             hintText: tr.txAfSearchCategories,
                             hintStyle: TextStyle(
                                 color: catHint),
-                            prefixIcon: Icon(Icons.search_rounded,
+                            prefixIcon: Icon(AppIcons.magnifyingGlass,
                                 size: 18,
                                 color: catHint),
                             suffixIcon: searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: Icon(Icons.clear_rounded,
+                                    icon: Icon(AppIcons.x,
                                         size: 16,
                                         color: catHint),
                                     onPressed: () {
@@ -661,7 +662,7 @@ class _AssistedTransactionScreenState
                                   _showCategoryPopup();
                                 }
                               },
-                              icon: const Icon(Icons.add_rounded, size: 18),
+                              icon: const Icon(AppIcons.plus, size: 18),
                               label: Text(tr.txAfNewCategory),
                             ),
                           );
@@ -741,8 +742,8 @@ class _AssistedTransactionScreenState
                                     const SizedBox(width: 4),
                                     Icon(
                                       isExpanded
-                                          ? Icons.expand_less_rounded
-                                          : Icons.expand_more_rounded,
+                                          ? AppIcons.caretUp
+                                          : AppIcons.caretDown,
                                       size: 20,
                                       color: AppColors.ts(context),
                                     ),
@@ -888,8 +889,8 @@ class _AssistedTransactionScreenState
             children: [
               Icon(
                 isDestination
-                    ? Icons.arrow_forward_rounded
-                    : Icons.account_balance_wallet_rounded,
+                    ? AppIcons.arrowRight
+                    : AppIcons.wallet,
                 size: 18,
                 color: selected != null ? color : AppColors.ts(context),
               ),
@@ -925,7 +926,7 @@ class _AssistedTransactionScreenState
                   ],
                 ),
               ),
-              Icon(Icons.unfold_more_rounded,
+              Icon(AppIcons.caretUpDown,
                   size: 18, color: AppColors.ts(context)),
             ],
           ),
@@ -989,7 +990,7 @@ class _AssistedTransactionScreenState
                             light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(Icons.account_balance_wallet_rounded,
+                      child: Icon(AppIcons.wallet,
                           size: 18, color: color),
                     ),
                     title: Text(a.name,
@@ -1016,7 +1017,7 @@ class _AssistedTransactionScreenState
                               color: AppColors.ts(ctx)));
                     }(),
                     trailing: isSelected
-                        ? Icon(Icons.check_circle_rounded,
+                        ? Icon(AppIcons.checkCircleFill,
                             size: 20, color: color)
                         : null,
                   ),
@@ -1029,7 +1030,7 @@ class _AssistedTransactionScreenState
                   Navigator.pop(ctx);
                   context.push('/accounts/new');
                 },
-                icon: const Icon(Icons.add_rounded, size: 18),
+                icon: const Icon(AppIcons.plus, size: 18),
                 label: Text(tr.txAfAddAccount),
               ),
             ],
@@ -1642,7 +1643,7 @@ class _AssistedTransactionScreenState
                       radius: 22,
                       backgroundColor: AppColors.pastel(context, typeColor,
                           light: 0.8, dark: 0.7),
-                      child: Icon(Icons.swap_horiz_rounded,
+                      child: Icon(AppIcons.arrowsLeftRight,
                           color: typeColor, size: 24),
                     )
                   else
@@ -1698,7 +1699,7 @@ class _AssistedTransactionScreenState
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.title_rounded,
+                    Icon(AppIcons.textT,
                         size: 18, color: AppColors.ts(context)),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1717,7 +1718,7 @@ class _AssistedTransactionScreenState
                         ),
                       ),
                     ),
-                    Icon(Icons.edit_rounded,
+                    Icon(AppIcons.pencilSimple,
                         size: 16, color: AppColors.th(context)),
                   ],
                 ),
@@ -1743,7 +1744,7 @@ class _AssistedTransactionScreenState
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today_rounded,
+                    Icon(AppIcons.calendarBlank,
                         size: 18, color: AppColors.ts(context)),
                     const SizedBox(width: 10),
                     Text(
@@ -1772,7 +1773,7 @@ class _AssistedTransactionScreenState
                       },
                       child: Row(
                         children: [
-                          Icon(Icons.access_time_rounded,
+                          Icon(AppIcons.clock,
                               size: 16, color: AppColors.ts(context)),
                           const SizedBox(width: 6),
                           Text(
@@ -1787,7 +1788,7 @@ class _AssistedTransactionScreenState
                       ),
                     ),
                     const Spacer(),
-                    Icon(Icons.chevron_right_rounded,
+                    Icon(AppIcons.caretRight,
                         size: 20, color: AppColors.ts(context)),
                   ],
                 ),
@@ -1845,7 +1846,7 @@ class _AssistedTransactionScreenState
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.currency_exchange_rounded,
+                          Icon(AppIcons.currencyCircleDollar,
                               size: 18,
                               color: _transferExchangeRate <= 1.0
                                   ? AppColors.overspent
@@ -1904,7 +1905,7 @@ class _AssistedTransactionScreenState
                                     light: 0.85, dark: 0.78),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Icon(Icons.swap_vert_rounded,
+                              child: Icon(AppIcons.arrowsDownUp,
                                   size: 18, color: AppColors.accent),
                             ),
                           ),
@@ -1972,7 +1973,7 @@ class _AssistedTransactionScreenState
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.check_circle_rounded,
+                                Icon(AppIcons.checkCircleFill,
                                     size: 16, color: AppColors.healthy),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -2013,7 +2014,7 @@ class _AssistedTransactionScreenState
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.currency_exchange_rounded,
+                      Icon(AppIcons.currencyCircleDollar,
                           size: 16, color: AppColors.accent),
                       const SizedBox(width: 8),
                       Expanded(
@@ -2065,7 +2066,7 @@ class _AssistedTransactionScreenState
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: _addAnotherItem,
-                          icon: const Icon(Icons.add_rounded, size: 18),
+                          icon: const Icon(AppIcons.plus, size: 18),
                           label: Text(
                             _lineItems.length > 1
                                 ? S.of(context).txAfAnotherWithCount(_lineItems.length, _itemsTotalLabel())
@@ -2185,7 +2186,7 @@ class _AssistedTransactionScreenState
                           }),
                           child: Padding(
                             padding: const EdgeInsetsDirectional.only(start: 6),
-                            child: Icon(Icons.close_rounded,
+                            child: Icon(AppIcons.x,
                                 size: 14, color: typeColor),
                           ),
                         ),
@@ -2235,7 +2236,7 @@ class _AssistedTransactionScreenState
                   height: 54,
                   alignment: Alignment.center,
                   child: isBack
-                      ? Icon(Icons.backspace_rounded,
+                      ? Icon(AppIcons.backspace,
                           size: 20, color: AppColors.ts(context))
                       : Text(
                           key,
@@ -2272,13 +2273,13 @@ class _AssistedTransactionScreenState
       child: Row(
         children: [
           _buildToggleItemSheet(l.typeExpense, 'expense',
-              Icons.arrow_upward_rounded, txColors.expense, currentType,
+              AppIcons.arrowUp, txColors.expense, currentType,
               onChanged),
           _buildToggleItemSheet(l.typeIncome, 'income',
-              Icons.arrow_downward_rounded, txColors.income, currentType,
+              AppIcons.arrowDown, txColors.income, currentType,
               onChanged),
           _buildToggleItemSheet(l.typeTransfer, 'transfer',
-              Icons.swap_horiz_rounded, txColors.transfer, currentType,
+              AppIcons.arrowsLeftRight, txColors.transfer, currentType,
               onChanged),
         ],
       ),

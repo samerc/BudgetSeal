@@ -33,6 +33,7 @@ import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/utils/note_text.dart';
 import '../../l10n/s_lookup.dart';
+import '../../shared/theme/app_icons.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -90,7 +91,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
       showHintIfNeeded(
         context,
         hintId: 'reports_intro',
-        icon: Icons.insights_rounded,
+        icon: AppIcons.chartLineUp,
         title: S.of(context).reportsHintTitle,
         body: S.of(context).reportsHintBody,
       );
@@ -142,7 +143,7 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                   // Calendar months vs budget periods (start day ≠ 1 only).
                   if (periodDay != 1)
                     PopupMenuButton<bool>(
-                      icon: Icon(Icons.date_range_rounded,
+                      icon: Icon(AppIcons.calendar,
                           color: _reportsStartDay != null
                               ? AppColors.accent
                               : AppColors.ts(context)),
@@ -501,7 +502,7 @@ class _HeatmapSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Icon(Icons.grid_view_rounded, size: 16,
+            Icon(AppIcons.squaresFour, size: 16,
                 color: AppColors.ts(context)),
             const SizedBox(width: 8),
             Text(S.of(context).reportsSpendingActivity,
@@ -706,8 +707,8 @@ class _MonthlySummaryCard extends StatelessWidget {
               children: [
                 Icon(
                   expense <= lastMonthExpense
-                      ? Icons.trending_down_rounded
-                      : Icons.trending_up_rounded,
+                      ? AppIcons.trendDown
+                      : AppIcons.trendUp,
                   size: 16,
                   color: comparisonColor,
                 ),
@@ -1168,7 +1169,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             Expanded(
               child: filtered.isEmpty
                   ? EmptyState(
-                      icon: Icons.pie_chart_outline_rounded,
+                      icon: AppIcons.chartPie,
                       title: S.of(context).reportsNoExpenses)
                   : Builder(builder: (context) {
                       final rows = _showByTransactions
@@ -1931,7 +1932,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                                   light: 0.85, dark: 0.75),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.savings_rounded,
+                        child: Icon(AppIcons.piggyBank,
                             size: 20,
                             color: savingsRate >= 0.1
                                 ? AppColors.healthy
@@ -2003,7 +2004,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.lightbulb_outline_rounded,
+                          Icon(AppIcons.lightbulb,
                               size: 16, color: AppColors.accent),
                           const SizedBox(width: 10),
                           Expanded(
@@ -2069,7 +2070,7 @@ class _VelocityCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.speed_rounded, size: 18, color: velocityColor),
+              Icon(AppIcons.gauge, size: 18, color: velocityColor),
               const SizedBox(width: 8),
               Text(S.of(context).reportsVelocityTitle,
                   style: TextStyle(
@@ -2236,7 +2237,7 @@ class _BiggestExpenseCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: AppColors.overspent)),
             const SizedBox(width: 4),
-            Icon(Icons.chevron_right_rounded,
+            Icon(AppIcons.caretRight,
                 size: 18, color: AppColors.th(context)),
           ],
         ),
@@ -2309,7 +2310,7 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                           light: 0.85, dark: 0.78),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.autorenew_rounded,
+                    child: Icon(AppIcons.arrowsClockwise,
                         size: 20, color: AppColors.accent),
                   ),
                   const SizedBox(width: 14),
@@ -2332,7 +2333,7 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded,
+                  Icon(AppIcons.caretRight,
                       size: 18, color: AppColors.th(context)),
                 ],
               ),
@@ -2383,7 +2384,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.schedule_rounded, size: 18, color: color),
+              Icon(AppIcons.clock, size: 18, color: color),
               const SizedBox(width: 8),
               Text(S.of(context).reportsAgeTitle,
                   style: TextStyle(
@@ -2466,7 +2467,7 @@ class _MonthNav extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: const Icon(Icons.chevron_left_rounded),
+          icon: const Icon(AppIcons.caretLeft),
           onPressed: onPrev,
           color: AppColors.ts(context),
         ),
@@ -2493,7 +2494,7 @@ class _MonthNav extends StatelessWidget {
           maintainAnimation: true,
           maintainState: true,
           child: IconButton(
-            icon: const Icon(Icons.chevron_right_rounded),
+            icon: const Icon(AppIcons.caretRight),
             onPressed: onNext,
             color: AppColors.ts(context),
           ),
@@ -2648,7 +2649,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       data: (accounts) {
         if (accounts.isEmpty) {
           return EmptyState(
-              icon: Icons.account_balance_wallet_rounded,
+              icon: AppIcons.wallet,
               title: S.of(context).healthNoAccounts);
         }
 
@@ -2718,7 +2719,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.calendar_today_rounded,
+                        Icon(AppIcons.calendarBlank,
                             size: 14, color: AppColors.ts(context)),
                         const SizedBox(width: 8),
                         Text(
@@ -2730,7 +2731,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(Icons.expand_more_rounded,
+                        Icon(AppIcons.caretDown,
                             size: 18, color: AppColors.ts(context)),
                       ],
                     ),
@@ -2748,7 +2749,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                           fontWeight: FontWeight.w600,
                           color: AppColors.ts(context)),
                     ),
-                    Icon(Icons.arrow_forward_rounded,
+                    Icon(AppIcons.arrowRight,
                         size: 14, color: AppColors.th(context)),
                     Text(
                       formatDate(today),
@@ -2820,7 +2821,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                               ),
                             ),
                           ]),
-                          Icon(Icons.arrow_forward_rounded,
+                          Icon(AppIcons.arrowRight,
                               size: 16,
                               color: AppColors.th(context)),
                           Column(children: [
@@ -3089,7 +3090,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
           style: TextStyle(fontSize: 10, color: AppColors.th(context)));
     }
     return Icon(
-      diff > 0 ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+      diff > 0 ? AppIcons.arrowUp : AppIcons.arrowDown,
       size: 14,
       color: diff > 0 ? AppColors.healthy : AppColors.overspent,
     );
@@ -3111,7 +3112,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+            isUp ? AppIcons.trendUp : AppIcons.trendDown,
             size: 14,
             color: isUp ? AppColors.healthy : AppColors.overspent,
           ),
@@ -3132,11 +3133,11 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
 
   IconData _typeIcon(String type) {
     return switch (type.toLowerCase()) {
-      'bank' => Icons.account_balance_rounded,
-      'cash' => Icons.payments_rounded,
-      'credit' => Icons.credit_card_rounded,
-      'wallet' => Icons.account_balance_wallet_rounded,
-      _ => Icons.account_balance_rounded,
+      'bank' => AppIcons.bank,
+      'cash' => AppIcons.money,
+      'credit' => AppIcons.creditCard,
+      'wallet' => AppIcons.wallet,
+      _ => AppIcons.bank,
     };
   }
 

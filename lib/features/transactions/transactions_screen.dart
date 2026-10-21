@@ -39,6 +39,7 @@ import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/calculator_amount_field.dart' show showCalculatorSheet;
+import '../../shared/theme/app_icons.dart';
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -133,7 +134,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       showHintIfNeeded(
         context,
         hintId: 'transactions_intro',
-        icon: Icons.receipt_long_rounded,
+        icon: AppIcons.receipt,
         title: S.of(context).txIntroTitle,
         body: S.of(context).txIntroBody,
       );
@@ -257,7 +258,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               children: [
                 for (final a in accounts)
                   ListTile(
-                    leading: const Icon(Icons.account_balance_wallet_rounded),
+                    leading: const Icon(AppIcons.wallet),
                     title: Text(a.name),
                     trailing: Text(a.currency),
                     onTap: () => Navigator.pop(ctx, a.id),
@@ -518,7 +519,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.close_rounded),
+                            icon: const Icon(AppIcons.x),
                             onPressed: () => setState(() {
                               _selectionMode = false;
                               _selectedIds.clear();
@@ -532,7 +533,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                           ),
                           if (_selectedIds.length == 1) ...[
                             IconButton(
-                              icon: const Icon(Icons.edit_rounded),
+                              icon: const Icon(AppIcons.pencilSimple),
                               tooltip: S.of(context).txContextEdit,
                               onPressed: () {
                                 final id = _selectedIds.first;
@@ -544,20 +545,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                               },
                             ),
                             IconButton(
-                              icon: const Icon(Icons.copy_rounded),
+                              icon: const Icon(AppIcons.copy),
                               tooltip: S.of(context).txContextDuplicate,
                               onPressed: _duplicateSelected,
                             ),
                           ],
                           IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded),
+                            icon: const Icon(AppIcons.trash),
                             tooltip: S.of(context).txDeleteSelectedTooltip,
                             color: AppColors.overspent,
                             onPressed:
                                 _selectedIds.isEmpty ? null : _deleteSelected,
                           ),
                           PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert_rounded),
+                            icon: const Icon(AppIcons.dotsThreeVertical),
                             onSelected: _onBulkAction,
                             itemBuilder: (_) {
                               final tr = S.of(context);
@@ -672,7 +673,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.easeOut);
                 },
-                child: const Icon(Icons.arrow_upward_rounded, size: 20),
+                child: const Icon(AppIcons.arrowUp, size: 20),
               ),
               const SizedBox(height: 8),
             ],
@@ -687,7 +688,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
                 context.push('/bill-splitter');
               },
-              child: const Icon(Icons.call_split_rounded, size: 18),
+              child: const Icon(AppIcons.arrowsSplit, size: 18),
             ),
             const SizedBox(height: 8),
             // Cashew FAB: 60px rounded square in the accent color.
@@ -714,7 +715,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     _showTypePicker(context);
                   },
                   child: Center(
-                    child: Icon(Icons.add_rounded,
+                    child: Icon(AppIcons.plus,
                         size: 28, color: AppColors.onAccent),
                   ),
                 ),
@@ -760,7 +761,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               Row(
                 children: [
                   _TypeOption(
-                    icon: Icons.remove_rounded,
+                    icon: AppIcons.minus,
                     label: tr.typeExpense,
                     color: txColors.expense,
                     onTap: () async {
@@ -772,7 +773,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   ),
                   const SizedBox(width: 12),
                   _TypeOption(
-                    icon: Icons.add_rounded,
+                    icon: AppIcons.plus,
                     label: tr.typeIncome,
                     color: txColors.income,
                     onTap: () async {
@@ -784,7 +785,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   ),
                   const SizedBox(width: 12),
                   _TypeOption(
-                    icon: Icons.swap_horiz_rounded,
+                    icon: AppIcons.arrowsLeftRight,
                     label: tr.typeTransfer,
                     color: txColors.transfer,
                     onTap: () async {
@@ -834,7 +835,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
             IconButton(
               tooltip: S.of(context).txCloseSearch,
-              icon: const Icon(Icons.close_rounded, size: 22),
+              icon: const Icon(AppIcons.x, size: 22),
               onPressed: () {
                 setState(() {
                   _showSearch = false;
@@ -873,7 +874,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           IconButton(
             tooltip: S.of(context).txFilterTooltip,
             icon: Icon(
-              Icons.filter_list_rounded,
+              AppIcons.funnelSimple,
               size: 22,
               color: _showFilters || _hasAnyFilter
                   ? AppColors.accent
@@ -883,13 +884,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           ),
           IconButton(
             tooltip: S.of(context).txSearchTooltip,
-            icon: Icon(Icons.search_rounded,
+            icon: Icon(AppIcons.magnifyingGlass,
                 size: 22, color: AppColors.ts(context)),
             onPressed: () => setState(() => _showSearch = true),
           ),
           IconButton(
             tooltip: S.of(context).txListSettingsTooltip,
-            icon: Icon(Icons.tune_rounded,
+            icon: Icon(AppIcons.slidersHorizontal,
                 size: 21, color: AppColors.ts(context)),
             onPressed: () => context.push('/tx-list-settings'),
           ),
@@ -948,7 +949,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: AppColors.onAccent,
                 ),
-                icon: const Icon(Icons.arrow_upward_rounded, size: 20),
+                icon: const Icon(AppIcons.arrowUp, size: 20),
                 onPressed: () => _submitQuickAdd(context),
               ),
             ),
@@ -1075,7 +1076,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Icons.chevron_left_rounded,
+                    child: Icon(AppIcons.caretLeft,
                         size: 22, color: AppColors.ts(context)),
                   ),
                 ),
@@ -1106,7 +1107,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.accent)),
-                                Icon(Icons.expand_more_rounded,
+                                Icon(AppIcons.caretDown,
                                     size: 14, color: AppColors.accent),
                               ],
                             ),
@@ -1213,7 +1214,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Icons.chevron_right_rounded,
+                    child: Icon(AppIcons.caretRight,
                         size: 22, color: AppColors.ts(context)),
                   ),
                 ),
@@ -1270,7 +1271,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Row(
             children: [
-              Icon(Icons.calendar_today_rounded,
+              Icon(AppIcons.calendarBlank,
                   size: 16, color: AppColors.ts(context)),
               const SizedBox(width: 8),
               Expanded(
@@ -1339,7 +1340,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             children: [
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.vertical_align_bottom_rounded,
+                  icon: AppIcons.arrowLineDown,
                   label: _amountMin != null
                       ? formatNumber(_amountMin!)
                       : S.of(context).txMinAmount,
@@ -1355,7 +1356,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.vertical_align_top_rounded,
+                  icon: AppIcons.arrowLineUp,
                   label: _amountMax != null
                       ? formatNumber(_amountMax!)
                       : S.of(context).txMaxAmount,
@@ -1378,7 +1379,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             children: [
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.account_balance_wallet_rounded,
+                  icon: AppIcons.wallet,
                   label: _accountFilter != null
                       ? (ref
                               .watch(accountsProvider)
@@ -1395,7 +1396,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _FilterPickerBox(
-                  icon: Icons.category_rounded,
+                  icon: AppIcons.squaresFour,
                   label: _categoryFilterName ?? S.of(context).txAllCategories,
                   active: _categoryFilter != null,
                   onTap: _pickCategoryFilter,
@@ -1458,13 +1459,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           shrinkWrap: true,
           children: [
             ListTile(
-              leading: const Icon(Icons.all_inclusive_rounded),
+              leading: const Icon(AppIcons.infinity),
               title: Text(tr.txAllAccounts),
               onTap: () => Navigator.pop(ctx, ''),
             ),
             for (final a in accounts)
               ListTile(
-                leading: const Icon(Icons.account_balance_wallet_rounded),
+                leading: const Icon(AppIcons.wallet),
                 title: Text(a.name),
                 trailing: Text(a.currency),
                 selected: a.id == _accountFilter,
@@ -1726,7 +1727,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Icon(Icons.close_rounded,
+                      Icon(AppIcons.x,
                           size: 14, color: AppColors.accent),
                     ],
                   ),
@@ -1735,8 +1736,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
           EmptyState(
             icon: hasFilters
-                ? Icons.search_off_rounded
-                : Icons.receipt_long_rounded,
+                ? AppIcons.magnifyingGlassMinus
+                : AppIcons.receipt,
             title: _categoryFilter != null
                 ? S.of(context).txNoCategoryInMonth(_categoryFilterName ?? S.of(context).commonCategory, monthLabel)
                 : hasFilters
@@ -1933,7 +1934,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Icon(Icons.close_rounded,
+                        Icon(AppIcons.x,
                             size: 14, color: AppColors.accent),
                       ],
                     ),
@@ -2116,7 +2117,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           color: AppColors.accent,
           borderRadius: swipeRadius,
         ),
-        child: Icon(Icons.edit_rounded, color: AppColors.onAccent),
+        child: Icon(AppIcons.pencilSimple, color: AppColors.onAccent),
       ),
       // Swipe left → delete
       secondaryBackground: Container(
@@ -2126,7 +2127,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           color: AppColors.overspent,
           borderRadius: swipeRadius,
         ),
-        child: Icon(Icons.delete_rounded,
+        child: Icon(AppIcons.trash,
             color: AppColors.inkOn(AppColors.overspent)),
       ),
       confirmDismiss: (direction) async {
@@ -2324,10 +2325,10 @@ class _PlannedTile extends StatelessWidget {
               child: Center(
                 child: Icon(
                   tx.type == 'income'
-                      ? Icons.add_rounded
+                      ? AppIcons.plus
                       : tx.type == 'transfer'
-                          ? Icons.swap_horiz_rounded
-                          : Icons.remove_rounded,
+                          ? AppIcons.arrowsLeftRight
+                          : AppIcons.minus,
                   size: 16,
                   color: kPlannedColor,
                 ),
@@ -2470,7 +2471,7 @@ class _SelectCheck extends StatelessWidget {
           ),
         ),
         child: selected
-            ? Icon(Icons.check_rounded, size: 16, color: AppColors.onAccent)
+            ? Icon(AppIcons.check, size: 16, color: AppColors.onAccent)
             : null,
       ),
     );
@@ -2770,7 +2771,7 @@ class _FilterPickerBox extends StatelessWidget {
                             ? AppColors.accent
                             : AppColors.tp(context))),
               ),
-              Icon(Icons.expand_more_rounded,
+              Icon(AppIcons.caretDown,
                   size: 18, color: AppColors.th(context)),
             ],
           ),

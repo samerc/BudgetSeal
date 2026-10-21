@@ -17,6 +17,7 @@ import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/amount_field.dart';
 import '../transactions/widgets/category_sheet.dart';
 import '../transactions/widgets/transaction_form_widgets.dart';
+import '../../shared/theme/app_icons.dart';
 
 enum _PlanType { expense, income, transfer }
 
@@ -318,7 +319,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       width: 14,
                       child: CircularProgressIndicator(
                           color: AppColors.inkOn(_typeColor()), strokeWidth: 2))
-                  : const Icon(Icons.check_rounded, size: 18),
+                  : const Icon(AppIcons.check, size: 18),
               label: Text(S.of(context).plannedPlanButton,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
@@ -372,7 +373,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                         _type == _PlanType.transfer ? S.of(context).txFormFromAccount : S.of(context).commonAccount,
                     border: InputBorder.none,
         filled: false,
-                    prefixIcon: Icon(Icons.account_balance_rounded,
+                    prefixIcon: Icon(AppIcons.bank,
                         size: 18, color: AppColors.ts(context)),
                   ),
                   items: nonArchived
@@ -411,7 +412,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       labelText: S.of(context).txFormToAccount,
                       border: InputBorder.none,
         filled: false,
-                      prefixIcon: Icon(Icons.account_balance_rounded,
+                      prefixIcon: Icon(AppIcons.bank,
                           size: 18, color: AppColors.ts(context)),
                     ),
                     items: nonArchived
@@ -447,7 +448,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                         horizontal: 16, vertical: 14),
                     child: Row(
                       children: [
-                        Icon(Icons.label_outline_rounded,
+                        Icon(AppIcons.tag,
                             size: 18, color: AppColors.ts(context)),
                         const SizedBox(width: 12),
                         Expanded(
@@ -474,7 +475,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                                       fontSize: 14,
                                       color: AppColors.th(context))),
                         ),
-                        Icon(Icons.expand_more_rounded,
+                        Icon(AppIcons.caretDown,
                             size: 18, color: AppColors.ts(context)),
                       ],
                     ),
@@ -493,7 +494,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 decoration: InputDecoration(
                   hintText: S.of(context).commonTitle,
                   hintStyle: TextStyle(color: AppColors.th(context)),
-                  prefixIcon: Icon(Icons.short_text_rounded,
+                  prefixIcon: Icon(AppIcons.textAlignLeft,
                       size: 18, color: AppColors.ts(context)),
                   border: InputBorder.none,
         filled: false,
@@ -514,7 +515,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 decoration: InputDecoration(
                   hintText: S.of(context).plannedNoteHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
-                  prefixIcon: Icon(Icons.notes_rounded,
+                  prefixIcon: Icon(AppIcons.textAlignLeft,
                       size: 18, color: AppColors.ts(context)),
                   border: InputBorder.none,
         filled: false,
@@ -541,7 +542,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   child: Row(
                     children: [
-                      Icon(Icons.today_rounded,
+                      Icon(AppIcons.calendarDot,
                           size: 18, color: AppColors.ts(context)),
                       const SizedBox(width: 12),
                       Expanded(
@@ -560,7 +561,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       if (_exactDate != null)
                         GestureDetector(
                           onTap: () => setState(() => _exactDate = null),
-                          child: Icon(Icons.close_rounded,
+                          child: Icon(AppIcons.x,
                               size: 18, color: AppColors.ts(context)),
                         ),
                     ],
@@ -584,7 +585,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_rounded,
+                    const Icon(AppIcons.warningFill,
                         size: 16, color: AppColors.overspent),
                     const SizedBox(width: 8),
                     Expanded(
@@ -616,7 +617,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
       children: [
         TypeChip(
           label: tr.typeExpense,
-          icon: Icons.arrow_upward_rounded,
+          icon: AppIcons.arrowUp,
           selected: _type == _PlanType.expense,
           color: ref.watch(txColorsProvider).expense,
           onTap: () => setState(() => _type = _PlanType.expense),
@@ -624,7 +625,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
         const SizedBox(width: 8),
         TypeChip(
           label: tr.typeIncome,
-          icon: Icons.arrow_downward_rounded,
+          icon: AppIcons.arrowDown,
           selected: _type == _PlanType.income,
           color: ref.watch(txColorsProvider).income,
           onTap: () => setState(() => _type = _PlanType.income),
@@ -632,7 +633,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
         const SizedBox(width: 8),
         TypeChip(
           label: tr.typeTransfer,
-          icon: Icons.swap_horiz_rounded,
+          icon: AppIcons.arrowsLeftRight,
           selected: _type == _PlanType.transfer,
           color: ref.watch(txColorsProvider).transfer,
           onTap: () => setState(() => _type = _PlanType.transfer),
@@ -658,7 +659,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
             // Year selector
             Row(
               children: [
-                Icon(Icons.calendar_month_rounded,
+                Icon(AppIcons.calendar,
                     size: 18, color: AppColors.ts(context)),
                 const SizedBox(width: 12),
                 Text(S.of(context).plannedTargetMonth,
@@ -670,7 +671,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 IconButton(
                   onPressed: () =>
                       setState(() => _targetYear = _targetYear - 1),
-                  icon: Icon(Icons.chevron_left_rounded,
+                  icon: Icon(AppIcons.caretLeft,
                       size: 20, color: AppColors.ts(context)),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
@@ -684,7 +685,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 IconButton(
                   onPressed: () =>
                       setState(() => _targetYear = _targetYear + 1),
-                  icon: Icon(Icons.chevron_right_rounded,
+                  icon: Icon(AppIcons.caretRight,
                       size: 20, color: AppColors.ts(context)),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,

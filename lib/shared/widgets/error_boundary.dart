@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Catches build-phase errors in child widgets and shows a friendly
 /// fallback instead of a red/grey crash screen.
@@ -43,7 +44,7 @@ class _FallbackScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.warning_amber_rounded,
+              Icon(AppIcons.warning,
                   size: 56, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 16),
               Text(
@@ -67,7 +68,7 @@ class _FallbackScreen extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(AppIcons.arrowClockwise, size: 18),
                 label: Text(S.of(context).commonTryAgain),
               ),
               const SizedBox(height: 8),

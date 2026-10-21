@@ -160,7 +160,7 @@ lib/
         ├── animated_circular_progress.dart # Custom-painted progress ring (RepaintBoundary)
         ├── breathing_widget.dart     # Pulsing attention animation
         ├── calculator_amount_field.dart
-        ├── category_icon.dart        # Maps category names to PNG icons
+        ├── category_icon.dart        # CategoryIcon + EmojiGlyph: emoji → bundled Fluent Emoji PNG
         ├── currency_display.dart
         ├── currency_picker_field.dart
         ├── empty_state.dart
@@ -379,6 +379,7 @@ Notable additions:
 | crypto | ^3.0.0 | SHA-256 PIN hashing (Web Companion) |
 | webview_flutter | ^4.14.0 | In-app help guide WebView |
 | quick_actions | ^1.1.1 | Launcher app shortcuts |
+| phosphor_flutter | ^2.1.0 | UI icon font (via `AppIcons`) |
 
 ## Testing
 
@@ -733,7 +734,12 @@ Mixed-type items from the assisted flow (e.g., expense + income in one session) 
 
 ## Category Icons
 
-Users can pick from 120+ curated emojis organized by group, OR type/paste any emoji from the system keyboard via the text field at the top of the picker. The `CategoryIcon` widget resolves display priority: PNG asset by name match → emoji → first-letter fallback.
+Users can pick from 120+ curated emojis organized by group, OR type/paste any emoji from the system keyboard via the text field at the top of the picker.
+
+**Category icons are Microsoft Fluent Emoji Flat** (MIT, licence in `assets/categories/LICENSE-FluentEmoji.txt`, registered with `LicenseRegistry` in main.dart): ~150 PNGs (128 px) named by code points without U+FE0F (`1f6d2.png` = 🛒), covering the presets and both pickers; the set is listed in `_fluentEmoji` (category_icon.dart). `categoryIconFile()` resolves: the category's emoji → its PNG; else a name keyword (`_keywordEmoji`, longest first) → emoji → PNG; else null (the widget shows the system emoji or the first letter). Anywhere an emoji of a category/envelope/goal is drawn, use `EmojiGlyph(emoji, size:)` — never `Text(emoji)` — so it looks the same on every device. Adding an emoji to a picker: add its Fluent Flat PNG (render the repo's `_flat.svg` at 128 px) and its key to `_fluentEmoji`. The old Flaticon/Cashew-like PNGs are gone (licence risk).
+
+### UI Icons (Phosphor)
+All UI icons are **Phosphor** (phosphor_flutter, MIT) through `AppIcons` (`lib/shared/theme/app_icons.dart`): Regular weight, `…Fill` names for the selected nav tab and filled status marks (`checkCircleFill`, `radioButtonFill`, `warningFill`, `warningCircleFill`). Never use Material `Icons.*`. `AppIcons` declares its own `IconData` (font `PhosphorRegular`/`PhosphorFill`, package `phosphor_flutter`) because `PhosphorIconsRegular` marks every glyph `matchTextDirection` (a check would flip in Arabic); only arrows/carets set it. A new icon: add a line to `AppIcons` with the code point from `phosphor_icons_regular.dart`. The theme's `actionIconTheme` gives the automatic AppBar back/close buttons Phosphor icons too.
 
 ## UI Consistency
 

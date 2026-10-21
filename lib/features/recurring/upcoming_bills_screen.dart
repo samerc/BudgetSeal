@@ -19,6 +19,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Shows recurring transactions sorted by next due date,
 /// with visual urgency indicators for overdue / due soon items.
@@ -80,19 +81,19 @@ class _UpcomingBillsScreenState
                       fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             ListTile(
-              leading: const Icon(Icons.check_circle_outline_rounded),
+              leading: const Icon(AppIcons.checkCircle),
               title: Text(tr.upcomingPostNow),
               subtitle: Text(tr.upcomingPostNowDesc),
               onTap: () => Navigator.pop(ctx, 'post'),
             ),
             ListTile(
-              leading: const Icon(Icons.skip_next_rounded),
+              leading: const Icon(AppIcons.skipForward),
               title: Text(tr.upcomingSkip),
               subtitle: Text(tr.upcomingSkipDesc),
               onTap: () => Navigator.pop(ctx, 'skip'),
             ),
             ListTile(
-              leading: const Icon(Icons.edit_rounded),
+              leading: const Icon(AppIcons.pencilSimple),
               title: Text(tr.commonEdit),
               onTap: () => Navigator.pop(ctx, 'edit'),
             ),
@@ -137,7 +138,7 @@ class _UpcomingBillsScreenState
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(AppIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
         title: Text(S.of(context).upcomingTitle),
@@ -146,7 +147,7 @@ class _UpcomingBillsScreenState
           ? const Center(child: CircularProgressIndicator())
           : _bills.isEmpty
               ? EmptyState(
-                  icon: Icons.event_available_rounded,
+                  icon: AppIcons.calendarCheck,
                   title: S.of(context).upcomingNoTitle,
                   subtitle: S.of(context).upcomingNoSubtitle,
                 )
@@ -195,9 +196,9 @@ class _BillCard extends ConsumerWidget {
                 : tr.upcomingDueInDays(daysUntil);
 
     final typeIcon = switch (bill.type) {
-      'income' => Icons.arrow_downward_rounded,
-      'transfer' => Icons.swap_horiz_rounded,
-      _ => Icons.arrow_upward_rounded,
+      'income' => AppIcons.arrowDown,
+      'transfer' => AppIcons.arrowsLeftRight,
+      _ => AppIcons.arrowUp,
     };
 
     final typeColor = ref.watch(txColorsProvider).forType(bill.type);
@@ -277,7 +278,7 @@ class _BillCard extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(
-                  isOverdue ? Icons.warning_rounded : Icons.schedule_rounded,
+                  isOverdue ? AppIcons.warningFill : AppIcons.clock,
                   size: 14,
                   color: urgencyColor,
                 ),

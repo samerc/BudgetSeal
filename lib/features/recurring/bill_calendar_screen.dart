@@ -11,6 +11,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/theme/app_icons.dart';
 
 class BillCalendarScreen extends ConsumerStatefulWidget {
   const BillCalendarScreen({super.key});
@@ -146,7 +147,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child:
-                          Icon(Icons.repeat_rounded, color: color, size: 18),
+                          Icon(AppIcons.repeat, color: color, size: 18),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -229,7 +230,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
+            icon: const Icon(AppIcons.caretLeft),
             onPressed: () => setState(() => _viewMonth =
                 DateTime(_viewMonth.year, _viewMonth.month - 1)),
           ),
@@ -241,7 +242,7 @@ class _BillCalendarScreenState extends ConsumerState<BillCalendarScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right_rounded),
+            icon: const Icon(AppIcons.caretRight),
             onPressed: () => setState(() => _viewMonth =
                 DateTime(_viewMonth.year, _viewMonth.month + 1)),
           ),

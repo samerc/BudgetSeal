@@ -12,6 +12,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
   const ExportScreen({super.key});
@@ -137,7 +138,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.file_download_rounded,
+                      Icon(AppIcons.fileArrowDown,
                           size: 24, color: AppColors.accent),
                       const SizedBox(width: 12),
                       Text(S.of(context).exportTransTitle,
@@ -160,7 +161,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                             height: 16,
                             child: CircularProgressIndicator(
                                 color: AppColors.onAccent, strokeWidth: 2))
-                        : const Icon(Icons.share_rounded, size: 18),
+                        : const Icon(AppIcons.shareNetwork, size: 18),
                     label: Text(
                         _exporting ? S.of(context).backupExporting : S.of(context).backupExportShare),
                   ),

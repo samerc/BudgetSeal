@@ -7,6 +7,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/biometric_errors.dart';
+import '../../shared/theme/app_icons.dart';
 
 class LockScreen extends StatefulWidget {
   final VoidCallback onUnlocked;
@@ -93,7 +94,7 @@ class _LockScreenState extends State<LockScreen> {
                 color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Icon(Icons.lock_rounded,
+              child: Icon(AppIcons.lock,
                   size: 36, color: AppColors.accentBright),
             ),
             const SizedBox(height: 24),
@@ -117,7 +118,7 @@ class _LockScreenState extends State<LockScreen> {
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: _authenticating ? null : _authenticate,
-              icon: const Icon(Icons.fingerprint_rounded, size: 22),
+              icon: const Icon(AppIcons.fingerprint, size: 22),
               label: Text(S.of(context).lockUnlockButton),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white.withValues(alpha: 0.15),

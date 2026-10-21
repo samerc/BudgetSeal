@@ -4,6 +4,7 @@ import '../../core/services/daily_reminder_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/theme/app_icons.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -55,7 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // ── Daily Reminder ──
           _card(
             context,
-            icon: Icons.notifications_active_rounded,
+            icon: AppIcons.bellRinging,
             iconColor: const Color(0xFFFF9800),
             title: S.of(context).notifDailyTitle,
             children: [
@@ -82,7 +83,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 // Time picker
                 Row(
                   children: [
-                    Icon(Icons.schedule_rounded,
+                    Icon(AppIcons.clock,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(S.of(context).notifTime,
@@ -124,7 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     isDense: true,
                     suffixIcon: _message.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.clear_rounded,
+                            icon: Icon(AppIcons.x,
                                 size: 16, color: AppColors.th(context)),
                             onPressed: () async {
                               await DailyReminderService.setMessage('');
@@ -146,7 +147,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // ── Envelope Alerts ──
           _card(
             context,
-            icon: Icons.account_balance_wallet_rounded,
+            icon: AppIcons.wallet,
             iconColor: AppColors.overspent,
             title: S.of(context).notifEnvelopeTitle,
             children: [
@@ -162,7 +163,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // ── Bill Reminders ──
           _card(
             context,
-            icon: Icons.receipt_long_rounded,
+            icon: AppIcons.receipt,
             iconColor: AppColors.caution,
             title: S.of(context).notifBillsTitle,
             children: [

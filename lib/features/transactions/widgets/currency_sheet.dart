@@ -4,6 +4,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/theme/design_tokens.dart';
+import '../../../shared/theme/app_icons.dart';
 
 // ---------------------------------------------------------------------------
 // Currencies (ISO 4217, generated from a table — keep it sorted by code)
@@ -636,7 +637,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                 decoration: InputDecoration(
                   hintText: S.of(context).commonSearchHint,
                   prefixIcon:
-                      const Icon(Icons.search_rounded, size: 18),
+                      const Icon(AppIcons.magnifyingGlass, size: 18),
                   isDense: true,
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 12),
@@ -721,7 +722,7 @@ class _CurrencySheetState extends State<CurrencySheet>
         child: Center(
           child: flag != null
               ? Text(flag, style: const TextStyle(fontSize: 22))
-              : Icon(Icons.payments_outlined,
+              : Icon(AppIcons.money,
                   size: 20, color: AppColors.ts(context)),
         ),
       ),
@@ -748,7 +749,7 @@ class _CurrencySheetState extends State<CurrencySheet>
                     light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.check_rounded,
+              child: Icon(AppIcons.check,
                   color: AppColors.accent, size: 16),
             )
           : null,

@@ -15,6 +15,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../shared/theme/app_icons.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -270,7 +271,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           // ── Auto backup card ──
           _card(
             context,
-            icon: Icons.schedule_rounded,
+            icon: AppIcons.clock,
             iconColor: AppColors.accent,
             title: S.of(context).backupAutoTitle,
             children: [
@@ -297,7 +298,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 // Frequency picker
                 Row(
                   children: [
-                    Icon(Icons.timer_rounded,
+                    Icon(AppIcons.timer,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(S.of(context).backupFrequency,
@@ -333,7 +334,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 // Retention picker
                 Row(
                   children: [
-                    Icon(Icons.folder_rounded,
+                    Icon(AppIcons.folder,
                         size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(S.of(context).backupKeepLast,
@@ -381,7 +382,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           // ── Manual backup card ──
           _card(
             context,
-            icon: Icons.backup_rounded,
+            icon: AppIcons.cloudArrowUp,
             iconColor: AppColors.accent,
             title: S.of(context).backupManualTitle,
             children: [
@@ -401,7 +402,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                           height: 16,
                           child: CircularProgressIndicator(
                               color: AppColors.onAccent, strokeWidth: 2))
-                      : const Icon(Icons.share_rounded, size: 18),
+                      : const Icon(AppIcons.shareNetwork, size: 18),
                   label:
                       Text(_working ? S.of(context).backupExporting : S.of(context).backupExportShare),
                 ),
@@ -413,7 +414,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           // ── Restore card ──
           _card(
             context,
-            icon: Icons.restore_rounded,
+            icon: AppIcons.clockCounterClockwise,
             iconColor: AppColors.caution,
             title: S.of(context).backupRestoreTitle,
             children: [
@@ -427,7 +428,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _working ? null : _restoreFromFile,
-                  icon: const Icon(Icons.upload_file_rounded, size: 18),
+                  icon: const Icon(AppIcons.fileArrowUp, size: 18),
                   label: Text(S.of(context).backupRestoreFromFile),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.caution,
@@ -465,7 +466,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                               light: 0.85, dark: 0.78),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.storage_rounded,
+                        child: Icon(AppIcons.database,
                             size: 18, color: AppColors.accent),
                       ),
                       title: Text(
@@ -485,13 +486,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.restore_rounded,
+                            icon: Icon(AppIcons.clockCounterClockwise,
                                 size: 18, color: AppColors.accent),
                             tooltip: S.of(context).backupRestoreTitle,
                             onPressed: () => _restoreLocalBackup(b),
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete_outline_rounded,
+                            icon: Icon(AppIcons.trash,
                                 size: 18, color: AppColors.overspent),
                             tooltip: S.of(context).commonDelete,
                             onPressed: () => _deleteLocalBackup(b),

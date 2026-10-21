@@ -5,6 +5,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
 import '../utils/format_number.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// A read-only amount field that opens a calculator bottom sheet when tapped.
 ///
@@ -447,7 +448,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                     height: 60,
                     child: Center(
                       child: key == '⌫'
-                          ? Icon(Icons.backspace_rounded,
+                          ? Icon(AppIcons.backspace,
                               size: 22, color: AppColors.tp(context))
                           : Text(
                               key == '.' ? decimalSeparatorChar : key,

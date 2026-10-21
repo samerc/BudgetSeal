@@ -15,6 +15,7 @@ import '../../shared/theme/design_tokens.dart';
 import 'web_companion_auth.dart';
 import 'web_companion_service.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 class WebCompanionScreen extends ConsumerStatefulWidget {
   const WebCompanionScreen({super.key});
@@ -359,12 +360,12 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   Widget _buildStatusCard(WebCompanionState state) {
     final tr = S.of(context);
     final (statusText, statusColor, statusIcon) = !_hasWifi && !state.isRunning
-        ? (tr.wcNoWifi, AppColors.th(context), Icons.wifi_off_rounded)
+        ? (tr.wcNoWifi, AppColors.th(context), AppIcons.wifiSlash)
         : switch (state.status) {
-            WebServerStatus.stopped => (tr.wcStopped, AppColors.ts(context), Icons.stop_circle_rounded),
-            WebServerStatus.starting => (tr.wcStarting, AppColors.accent, Icons.hourglass_top_rounded),
-            WebServerStatus.running => (tr.wcRunning, AppColors.healthy, Icons.check_circle_rounded),
-            WebServerStatus.error => (tr.wcError, AppColors.overspent, Icons.error_outline_rounded),
+            WebServerStatus.stopped => (tr.wcStopped, AppColors.ts(context), AppIcons.stopCircle),
+            WebServerStatus.starting => (tr.wcStarting, AppColors.accent, AppIcons.hourglassHigh),
+            WebServerStatus.running => (tr.wcRunning, AppColors.healthy, AppIcons.checkCircleFill),
+            WebServerStatus.error => (tr.wcError, AppColors.overspent, AppIcons.warningCircle),
           };
 
     return Container(
@@ -486,7 +487,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                     SnackBar(content: Text(S.of(context).wcUrlCopied), behavior: SnackBarBehavior.floating),
                   );
                 },
-                icon: const Icon(Icons.copy_rounded),
+                icon: const Icon(AppIcons.copy),
                 tooltip: S.of(context).wcCopyUrl,
               ),
             ],
@@ -499,8 +500,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
               children: [
                 Icon(
                   _showQr
-                      ? Icons.qr_code_2_rounded
-                      : Icons.qr_code_rounded,
+                      ? AppIcons.qrCode
+                      : AppIcons.qrCode,
                   size: 18,
                   color: AppColors.accentText(context),
                 ),
@@ -558,7 +559,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
                 height: 42,
                 decoration: BoxDecoration(
                     color: AppColors.accentLight, shape: BoxShape.circle),
-                child: Icon(Icons.laptop_mac_rounded,
+                child: Icon(AppIcons.laptop,
                     size: 22, color: AppColors.accentText(context)),
               ),
               if (live)
@@ -633,8 +634,8 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             children: [
               Icon(
                 _hasPinSet
-                    ? Icons.lock_rounded
-                    : Icons.lock_open_rounded,
+                    ? AppIcons.lock
+                    : AppIcons.lockOpen,
                 size: 18,
                 color: _hasPinSet
                     ? AppColors.healthy
@@ -675,7 +676,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded,
+          Icon(AppIcons.warning,
               color: AppColors.caution, size: 20),
           const SizedBox(width: 10),
           Expanded(
@@ -704,7 +705,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.wifi_off_rounded,
+              Icon(AppIcons.wifiSlash,
                   color: AppColors.overspent,
                   size: 20),
               const SizedBox(width: 8),
@@ -767,7 +768,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           Row(
             children: [
               Icon(
-                isPublic ? Icons.warning_amber_rounded : Icons.shield_rounded,
+                isPublic ? AppIcons.warning : AppIcons.shieldCheck,
                 color: isPublic ? AppColors.caution : AppColors.accentText(context),
                 size: 20,
               ),
@@ -814,7 +815,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.shield_rounded,
+          Icon(AppIcons.shieldCheck,
               color: AppColors.caution, size: 20),
           const SizedBox(width: 10),
           Expanded(
@@ -857,16 +858,16 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _infoRow(Icons.wifi_rounded,
+          _infoRow(AppIcons.wifiHigh,
               S.of(context).wcInfo1),
           const SizedBox(height: 10),
-          _infoRow(Icons.timer_rounded,
+          _infoRow(AppIcons.timer,
               S.of(context).wcInfo2),
           const SizedBox(height: 10),
-          _infoRow(Icons.security_rounded,
+          _infoRow(AppIcons.shieldCheck,
               S.of(context).wcInfo3),
           const SizedBox(height: 10),
-          _infoRow(Icons.lock_outline_rounded,
+          _infoRow(AppIcons.lock,
               S.of(context).wcInfo4),
         ],
       ),

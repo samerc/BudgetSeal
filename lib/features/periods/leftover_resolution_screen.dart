@@ -11,6 +11,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
 class LeftoverResolutionArgs {
@@ -107,7 +108,7 @@ class _LeftoverResolutionScreenState
       return Scaffold(
         appBar: AppBar(title: Text(S.of(context).leftoverTitle)),
         body: EmptyState(
-          icon: Icons.savings_rounded,
+          icon: AppIcons.piggyBank,
           title: S.of(context).leftoverNoAllocation,
         ),
       );
@@ -126,7 +127,7 @@ class _LeftoverResolutionScreenState
           final allocation = _findAllocation(allocations);
           if (allocation == null) {
             return EmptyState(
-              icon: Icons.savings_rounded,
+              icon: AppIcons.piggyBank,
               title: S.of(context).leftoverNotFound,
             );
           }
@@ -170,7 +171,7 @@ class _LeftoverResolutionScreenState
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    Icons.account_balance_wallet_rounded,
+                                    AppIcons.wallet,
                                     color: AppColors.accent,
                                     size: 22,
                                   ),
@@ -234,7 +235,7 @@ class _LeftoverResolutionScreenState
                           child: Column(
                             children: [
                               Icon(
-                                Icons.info_outline_rounded,
+                                AppIcons.info,
                                 size: 40,
                                 color:
                                     AppColors.th(context).withValues(alpha: 0.6),
@@ -302,7 +303,7 @@ class _LeftoverResolutionScreenState
                         const SizedBox(height: 12),
 
                         _ResolutionOption(
-                          icon: Icons.replay_rounded,
+                          icon: AppIcons.arrowCounterClockwise,
                           title: S.of(context).periodReturnUnallocated,
                           subtitle:
                               S.of(context).leftoverReturnSubtitle,
@@ -316,7 +317,7 @@ class _LeftoverResolutionScreenState
                         const SizedBox(height: 8),
 
                         _ResolutionOption(
-                          icon: Icons.forward_rounded,
+                          icon: AppIcons.arrowBendUpRight,
                           title: S.of(context).periodCarryForward,
                           subtitle: S.of(context).leftoverKeepSubtitle,
                           value: LeftoverResolution.keep,
@@ -329,7 +330,7 @@ class _LeftoverResolutionScreenState
                         const SizedBox(height: 8),
 
                         _ResolutionOption(
-                          icon: Icons.swap_horiz_rounded,
+                          icon: AppIcons.arrowsLeftRight,
                           title: S.of(context).leftoverMoveTitle,
                           subtitle:
                               S.of(context).leftoverMoveSubtitle,
@@ -566,7 +567,7 @@ class _ResolutionOption extends StatelessWidget {
                 ),
               ),
               Icon(
-                selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                selected ? AppIcons.radioButtonFill : AppIcons.circle,
                 size: 20,
                 color: selected ? AppColors.accent : AppColors.th(context),
               ),

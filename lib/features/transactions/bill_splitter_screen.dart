@@ -27,6 +27,7 @@ import '../../shared/widgets/section_header.dart';
 import 'widgets/currency_sheet.dart' show kCurrencySymbols;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bill Splitter — 3-step guided flow
@@ -285,12 +286,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt_rounded),
+              leading: const Icon(AppIcons.camera),
               title: Text(S.of(ctx).billTakePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded),
+              leading: const Icon(AppIcons.images),
               title: Text(S.of(ctx).billFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
@@ -810,7 +811,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         actions: [
           if (_step == 0)
             IconButton(
-              icon: const Icon(Icons.camera_alt_rounded),
+              icon: const Icon(AppIcons.camera),
               tooltip: S.of(context).billScanTooltip,
               onPressed: _scanReceipt,
             ),
@@ -841,13 +842,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.payments_rounded, size: 16, color: AppColors.ts(context)),
+                    Icon(AppIcons.money, size: 16, color: AppColors.ts(context)),
                     const SizedBox(width: 6),
                     Text(S.of(context).billBillIn(_billCurrency),
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
                             color: AppColors.tp(context))),
                     const SizedBox(width: 4),
-                    Icon(Icons.edit_rounded, size: 12, color: AppColors.th(context)),
+                    Icon(AppIcons.pencilSimple, size: 12, color: AppColors.th(context)),
                   ],
                 ),
               ),
@@ -890,7 +891,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: _swapRateDirection,
-                        child: Icon(Icons.swap_vert_rounded,
+                        child: Icon(AppIcons.arrowsDownUp,
                             size: 20, color: AppColors.accent),
                       ),
                     ]),
@@ -901,20 +902,20 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             if (_items.isEmpty && _ocrResult == null) ...[
               const SizedBox(height: 40),
               EmptyState(
-                icon: Icons.receipt_long_rounded,
+                icon: AppIcons.receipt,
                 title: S.of(context).billEmptyTitle,
                 subtitle: S.of(context).billEmptySubtitle,
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _scanReceipt,
-                icon: const Icon(Icons.camera_alt_rounded, size: 20),
+                icon: const Icon(AppIcons.camera, size: 20),
                 label: Text(S.of(context).billScanButton),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _addManualItem,
-                icon: const Icon(Icons.edit_rounded, size: 18),
+                icon: const Icon(AppIcons.pencilSimple, size: 18),
                 label: Text(S.of(context).billAddManually),
               ),
             ] else ...[
@@ -927,7 +928,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 _buildReceiptCheck(),
               TextButton.icon(
                 onPressed: _addManualItem,
-                icon: const Icon(Icons.add_rounded, size: 18),
+                icon: const Icon(AppIcons.plus, size: 18),
                 label: Text(S.of(context).billAddItem),
               ),
             ],
@@ -973,7 +974,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: grandTotal > 0 ? _shareSplit : null,
-                icon: const Icon(Icons.share_rounded, size: 18),
+                icon: const Icon(AppIcons.shareNetwork, size: 18),
                 label: Text(S.of(context).billShare),
               ),
             ],
@@ -995,7 +996,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 child: _step == 2
                     ? FilledButton.icon(
                         onPressed: _canSave ? _save : null,
-                        icon: const Icon(Icons.check_rounded, size: 18),
+                        icon: const Icon(AppIcons.check, size: 18),
                         label: Text(S.of(context).commonSave),
                       )
                     : FilledButton(
@@ -1089,7 +1090,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: Icon(Icons.call_split_rounded,
+            icon: Icon(AppIcons.arrowsSplit,
                 size: 18, color: AppColors.ts(context)),
             tooltip: S.of(context).billSplitIntoUnits,
             onPressed: () => _splitItemIntoUnits(index),
@@ -1098,7 +1099,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: Icon(Icons.close_rounded,
+            icon: Icon(AppIcons.x,
                 size: 18, color: AppColors.ts(context)),
             tooltip: S.of(context).commonDelete,
             onPressed: () => _removeItem(index),
@@ -1209,7 +1210,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             )),
             const SizedBox(width: 8),
             IconButton.filled(onPressed: _addPerson,
-              icon: const Icon(Icons.add_rounded, size: 18),
+              icon: const Icon(AppIcons.plus, size: 18),
               style: IconButton.styleFrom(backgroundColor: AppColors.accent)),
           ]),
         ],
@@ -1350,7 +1351,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Row(children: [
-        Icon(matches ? Icons.check_circle_rounded : Icons.info_rounded,
+        Icon(matches ? AppIcons.checkCircleFill : AppIcons.info,
             size: 18, color: color),
         const SizedBox(width: 8),
         Expanded(
@@ -1380,8 +1381,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(
               selected
-                  ? Icons.radio_button_checked_rounded
-                  : Icons.radio_button_unchecked_rounded,
+                  ? AppIcons.radioButtonFill
+                  : AppIcons.circle,
               size: 20,
               color: selected ? AppColors.accent : AppColors.th(context),
             ),
@@ -1573,7 +1574,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   color: AppColors.pastel(context, AppColors.accent,
                       light: 0.85, dark: 0.78),
                   borderRadius: BorderRadius.circular(6)),
-                child: Icon(Icons.swap_vert_rounded, size: 16,
+                child: Icon(AppIcons.arrowsDownUp, size: 16,
                     color: AppColors.accent)),
             ),
           ]),
@@ -1611,7 +1612,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               const SizedBox(width: 4),
               GestureDetector(
                 onTap: () => _removePerson(name),
-                child: Icon(Icons.close_rounded,
+                child: Icon(AppIcons.x,
                     size: 14, color: AppColors.th(context)),
               ),
             ],
@@ -1788,8 +1789,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   const SizedBox(width: 4),
                   Icon(
                     expanded
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
+                        ? AppIcons.caretUp
+                        : AppIcons.caretDown,
                     size: 20,
                     color: AppColors.ts(context),
                   ),
@@ -1850,8 +1851,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             children: [
               Icon(
                 _showAllLines
-                    ? Icons.expand_less_rounded
-                    : Icons.expand_more_rounded,
+                    ? AppIcons.caretUp
+                    : AppIcons.caretDown,
                 size: 18,
                 color: AppColors.ts(context),
               ),
@@ -1901,7 +1902,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                           if (_addedLines.contains(i))
                             Padding(
                               padding: const EdgeInsetsDirectional.only(end: 6),
-                              child: Icon(Icons.check_circle_rounded,
+                              child: Icon(AppIcons.checkCircleFill,
                                   size: 14, color: AppColors.accent),
                             ),
                           Expanded(

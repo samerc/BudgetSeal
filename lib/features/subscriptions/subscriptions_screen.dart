@@ -13,6 +13,7 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../recurring/recurring_screen.dart' show AddRecurringSheet;
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 class SubscriptionsScreen extends ConsumerStatefulWidget {
   const SubscriptionsScreen({super.key});
@@ -202,7 +203,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
           );
           if (result == true) _load();
         },
-        child: const Icon(Icons.add),
+        child: const Icon(AppIcons.plus),
       ),
       body: SafeArea(
         bottom: false,
@@ -217,7 +218,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(AppIcons.arrowLeft),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 4),
@@ -294,7 +295,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                                         AnimatedRotation(
                                           turns: _showOtherCurrencies ? 0.5 : 0,
                                           duration: const Duration(milliseconds: 200),
-                                          child: Icon(Icons.expand_more_rounded,
+                                          child: Icon(AppIcons.caretDown,
                                               size: 16, color: AppColors.tp(context).withValues(alpha: 0.6)),
                                         ),
                                       ],
@@ -354,14 +355,14 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                       child: Row(
                         children: [
                           _CountChip(
-                            icon: Icons.subscriptions_rounded,
+                            icon: AppIcons.playCircle,
                             label: '${_subs.length}',
                             subtitle: S.of(context).subTotal,
                             color: AppColors.accent,
                           ),
                           const SizedBox(width: 16),
                           _CountChip(
-                            icon: Icons.play_arrow_rounded,
+                            icon: AppIcons.play,
                             label: '$activeCount',
                             subtitle: S.of(context).subActive,
                             color: AppColors.healthy,
@@ -369,7 +370,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                           if (cancelledCount > 0) ...[
                             const SizedBox(width: 16),
                             _CountChip(
-                              icon: Icons.cancel_rounded,
+                              icon: AppIcons.xCircle,
                               label: '$cancelledCount',
                               subtitle: S.of(context).subCancelled,
                               color: AppColors.overspent,
@@ -424,7 +425,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
               else if (_subs.isEmpty)
                 SliverFillRemaining(
                   child: EmptyState(
-                    icon: Icons.subscriptions_rounded,
+                    icon: AppIcons.playCircle,
                     title: S.of(context).subNoTitle,
                     subtitle: S.of(context).subNoSubtitle,
                   ),
@@ -694,8 +695,8 @@ class _SubscriptionTile extends StatelessWidget {
                   tooltip: isEnabled ? '${tr.subPause} subscription' : '${tr.subResume} subscription',
                   icon: Icon(
                     isEnabled
-                        ? Icons.pause_circle_rounded
-                        : Icons.play_circle_rounded,
+                        ? AppIcons.pauseCircle
+                        : AppIcons.playCircle,
                     color: isEnabled
                         ? AppColors.th(context)
                         : AppColors.healthy,

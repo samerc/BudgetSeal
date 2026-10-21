@@ -7,6 +7,8 @@ import '../../core/providers/database_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/category_icon.dart';
 
 /// Budget tab ⋮ → Reorder envelopes: drag to set the order the Budget tab
 /// (and funding screen) list envelopes in.
@@ -79,17 +81,15 @@ Future<void> showReorderEnvelopesSheet(
                       key: ValueKey(it.id),
                       leading: CircleAvatar(
                         backgroundColor: AppColors.sfv(ctx),
-                        child: Text(
-                          (it.icon?.isNotEmpty ?? false)
-                              ? it.icon!
-                              : it.name.characters.first.toUpperCase(),
-                          style: TextStyle(color: AppColors.tp(ctx)),
-                        ),
+                        child: (it.icon?.isNotEmpty ?? false)
+                            ? EmojiGlyph(it.icon!, size: 22)
+                            : Text(it.name.characters.first.toUpperCase(),
+                                style: TextStyle(color: AppColors.tp(ctx))),
                       ),
                       title: Text(it.name),
                       trailing: ReorderableDragStartListener(
                         index: i,
-                        child: Icon(Icons.drag_handle_rounded,
+                        child: Icon(AppIcons.dotsSixVertical,
                             color: AppColors.th(ctx)),
                       ),
                     );

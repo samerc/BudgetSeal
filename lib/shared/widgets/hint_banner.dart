@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Shows a one-time hint dialog. If the user has already dismissed it
 /// (tracked via SharedPreferences), nothing happens.
@@ -21,7 +22,7 @@ Future<void> showHintIfNeeded(
   required String hintId,
   required String title,
   required String body,
-  IconData icon = Icons.lightbulb_outline_rounded,
+  IconData icon = AppIcons.lightbulb,
 }) =>
     _enqueue(() => _showHint(context,
         hintId: hintId, title: title, body: body, icon: icon));

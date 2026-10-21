@@ -9,6 +9,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -80,7 +81,7 @@ class AboutScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _ActionCard(
-                    icon: Icons.share_rounded,
+                    icon: AppIcons.shareNetwork,
                     label: l.aboutShare,
                     onTap: () => SharePlus.instance.share(
                       ShareParams(text: l.aboutShareText),
@@ -90,7 +91,7 @@ class AboutScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _ActionCard(
-                    icon: Icons.mail_outline_rounded,
+                    icon: AppIcons.envelopeSimple,
                     label: l.aboutContact,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +143,7 @@ class AboutScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shield_rounded,
+                Icon(AppIcons.shieldCheck,
                     size: 14, color: AppColors.healthy),
                 const SizedBox(width: 6),
                 // Wraps on narrow phones instead of overflowing.

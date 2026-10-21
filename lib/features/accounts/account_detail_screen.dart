@@ -31,6 +31,7 @@ import '../../shared/widgets/currency_picker_field.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
   final String accountId;
@@ -66,10 +67,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   List<(String, String, IconData)> _accountTypes(BuildContext context) {
     final l = S.of(context);
     return [
-      ('cash', l.acctTypeCash, Icons.money_rounded),
-      ('bank', l.acctTypeBank, Icons.account_balance_rounded),
-      ('credit', l.acctTypeCredit, Icons.credit_card_rounded),
-      ('wallet', l.acctTypeDigital, Icons.account_balance_wallet_rounded),
+      ('cash', l.acctTypeCash, AppIcons.money),
+      ('bank', l.acctTypeBank, AppIcons.bank),
+      ('credit', l.acctTypeCredit, AppIcons.creditCard),
+      ('wallet', l.acctTypeDigital, AppIcons.wallet),
     ];
   }
 
@@ -185,7 +186,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         actions: [
           if (!_isNew)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded),
+              icon: const Icon(AppIcons.dotsThreeVertical),
               onSelected: (v) {
                 if (v == 'adjust') {
                   _showAdjustBalanceSheet();
@@ -202,7 +203,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   value: 'adjust',
                   child: Row(
                     children: [
-                      const Icon(Icons.tune_rounded, size: 18),
+                      const Icon(AppIcons.slidersHorizontal, size: 18),
                       const SizedBox(width: 10),
                       Text(l.acctAdjustBalance),
                     ],
@@ -213,7 +214,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     value: 'convert_back',
                     child: Row(
                       children: [
-                        const Icon(Icons.currency_exchange_rounded, size: 18),
+                        const Icon(AppIcons.currencyCircleDollar, size: 18),
                         const SizedBox(width: 10),
                         Text(l.acctConvertBackClose),
                       ],
@@ -223,7 +224,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   value: 'archive',
                   child: Row(
                     children: [
-                      Icon(Icons.archive_rounded,
+                      Icon(AppIcons.archive,
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
                       Text(l.acctArchiveTitle,
@@ -235,7 +236,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_forever_rounded,
+                      Icon(AppIcons.trash,
                           size: 18, color: AppColors.overspent),
                       const SizedBox(width: 10),
                       Text(l.allocDeletePermanently,
@@ -341,7 +342,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.flight_land_rounded,
+                        Icon(AppIcons.airplaneLanding,
                             size: 18, color: AppColors.accent),
                         const SizedBox(width: 8),
                         Text(l.acctBackFromTrip,
@@ -364,7 +365,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: _convertBack,
-                        icon: const Icon(Icons.currency_exchange_rounded, size: 16),
+                        icon: const Icon(AppIcons.currencyCircleDollar, size: 16),
                         label: Text(l.acctConvertBackClose),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.accent,
@@ -393,7 +394,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.settings_rounded,
+                      Icon(AppIcons.gear,
                           size: 18, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
@@ -404,8 +405,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       ),
                       Icon(
                         _showSettings
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
+                            ? AppIcons.caretUp
+                            : AppIcons.caretDown,
                         color: AppColors.th(context),
                       ),
                     ],
@@ -420,7 +421,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               // ── Name ──
               _formSection(
                 context,
-                icon: Icons.label_outline_rounded,
+                icon: AppIcons.tag,
                 title: l.acctNameSection,
                 child: TextField(
                   controller: _nameController,
@@ -440,7 +441,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               // ── Type ──
               _formSection(
                 context,
-                icon: Icons.category_rounded,
+                icon: AppIcons.squaresFour,
                 title: l.acctTypeSection,
                 child: Wrap(
                   spacing: 8,
@@ -498,7 +499,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               // ── Currency ──
               _formSection(
                 context,
-                icon: Icons.attach_money_rounded,
+                icon: AppIcons.currencyDollar,
                 title: l.acctCurrencySection,
                 child: CurrencyPickerField(
                   label: l.acctSelectCurrency,
@@ -514,7 +515,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(height: 12),
               _formSection(
                 context,
-                icon: Icons.pin_rounded,
+                icon: AppIcons.password,
                 title: l.acctDecimalSection,
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int?>(
@@ -543,7 +544,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 const SizedBox(height: 12),
                 _formSection(
                   context,
-                  icon: Icons.account_balance_rounded,
+                  icon: AppIcons.bank,
                   title: l.acctOpeningBalance,
                   child: CalculatorAmountField(
                     value: _initialBalance,
@@ -585,7 +586,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Icon(Icons.receipt_long_rounded,
+                  Icon(AppIcons.receipt,
                       size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
                   Text(

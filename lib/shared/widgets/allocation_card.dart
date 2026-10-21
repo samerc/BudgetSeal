@@ -5,6 +5,8 @@ import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 import '../theme/design_tokens.dart';
 import 'budget_progress.dart';
+import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/category_icon.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -77,11 +79,11 @@ class AllocationCard extends StatelessWidget {
   Widget _buildIcon(BuildContext context, Color color, IconData savingsIcon) {
     final Widget inner;
     if (envelopeIcon != null && envelopeIcon!.isNotEmpty) {
-      inner = Text(envelopeIcon!, style: const TextStyle(fontSize: 22));
+      inner = EmojiGlyph(envelopeIcon!, size: 24);
     } else if (categoryIcon != null &&
         categoryIcon!.isNotEmpty &&
         categoryIcon != 'category') {
-      inner = Text(categoryIcon!, style: const TextStyle(fontSize: 22));
+      inner = EmojiGlyph(categoryIcon!, size: 24);
     } else if (_isFlexible) {
       inner = Icon(savingsIcon,
           size: 22,
@@ -155,8 +157,8 @@ class AllocationCard extends StatelessWidget {
 
     // Icon for savings envelopes when no category icon
     final IconData savingsIcon = _isFlexibleWithGoal
-        ? Icons.track_changes_rounded
-        : Icons.savings_rounded;
+        ? AppIcons.target
+        : AppIcons.piggyBank;
 
     // Build semantic label for screen readers
     final semanticParts = <String>[name];
@@ -264,7 +266,7 @@ class AllocationCard extends StatelessWidget {
                                 const Padding(
                                   padding:
                                       EdgeInsetsDirectional.only(end: 4),
-                                  child: Icon(Icons.warning_amber_rounded,
+                                  child: Icon(AppIcons.warning,
                                       size: 16, color: AppColors.overspent),
                                 ),
                               Text(
@@ -351,7 +353,7 @@ class AllocationCard extends StatelessWidget {
                             onTap: onSpend,
                             child: Padding(
                               padding: const EdgeInsets.all(8),
-                              child: Icon(Icons.shopping_cart_rounded,
+                              child: Icon(AppIcons.shoppingCart,
                                   size: 18, color: AppColors.tp(context)),
                             ),
                           ),

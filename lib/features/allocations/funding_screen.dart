@@ -17,6 +17,7 @@ import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_display.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/theme/app_icons.dart';
 
 class FundingScreen extends ConsumerStatefulWidget {
   const FundingScreen({super.key});
@@ -312,7 +313,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                       if (_lastFunded.isNotEmpty)
                                         ActionChip(
                                           avatar: const Icon(
-                                              Icons.replay_rounded,
+                                              AppIcons.arrowCounterClockwise,
                                               size: 16),
                                           label: Text(S
                                               .of(context)
@@ -325,7 +326,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                       if (_lastSpent.isNotEmpty)
                                         ActionChip(
                                           avatar: const Icon(
-                                              Icons.receipt_long_rounded,
+                                              AppIcons.receipt,
                                               size: 16),
                                           label: Text(
                                               S.of(context).fundPresetSpent),
@@ -337,7 +338,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                       if (_amounts.isNotEmpty)
                                         ActionChip(
                                           avatar: const Icon(
-                                              Icons.clear_rounded,
+                                              AppIcons.x,
                                               size: 16),
                                           label: Text(
                                               S.of(context).fundPresetClear),
@@ -439,7 +440,7 @@ class _InstructionsPanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
-                  Icon(Icons.help_outline_rounded,
+                  Icon(AppIcons.question,
                       size: 18, color: AppColors.accent),
                   const SizedBox(width: 10),
                   Expanded(
@@ -454,8 +455,8 @@ class _InstructionsPanel extends StatelessWidget {
                   ),
                   Icon(
                     expanded
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
+                        ? AppIcons.caretUp
+                        : AppIcons.caretDown,
                     size: 20,
                     color: AppColors.ts(context),
                   ),
@@ -702,7 +703,7 @@ class _FundingBanner extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.warning_amber_rounded,
+                const Icon(AppIcons.warning,
                     color: AppColors.overspent, size: 16),
                 const SizedBox(width: 6),
                 Expanded(
@@ -767,7 +768,7 @@ class _QuickFillTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    Icons.auto_fix_high_rounded,
+                    AppIcons.magicWand,
                     size: 18,
                     color: AppColors.accent,
                   ),
@@ -802,7 +803,7 @@ class _QuickFillTile extends StatelessWidget {
                 ),
                 if (hasEnvelopes)
                   Icon(
-                    Icons.arrow_forward_ios_rounded,
+                    AppIcons.caretRight,
                     size: 14,
                     color: AppColors.accent.withValues(alpha: 0.6),
                   ),
@@ -885,7 +886,7 @@ class _FundingAllocationTile extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_circle_rounded,
+                        const Icon(AppIcons.checkCircleFill,
                             size: 13, color: AppColors.healthy),
                         const SizedBox(width: 4),
                         Text(
@@ -1100,7 +1101,7 @@ class _BottomFundBar extends StatelessWidget {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.account_balance_wallet_rounded,
+                      const Icon(AppIcons.wallet,
                           size: 20),
                       const SizedBox(width: 10),
                       Flexible(

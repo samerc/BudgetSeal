@@ -14,6 +14,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
 class _AllocationResolution {
@@ -174,7 +175,7 @@ class _PeriodTransitionScreenState
                             light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(Icons.calendar_today_rounded,
+                      child: Icon(AppIcons.calendarBlank,
                           color: AppColors.accent, size: 22),
                     ),
                     const SizedBox(width: 14),
@@ -232,7 +233,7 @@ class _PeriodTransitionScreenState
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.check_circle_outline_rounded,
+                              AppIcons.checkCircle,
                               size: 56,
                               color: AppColors.healthy.withValues(alpha: 0.5),
                             ),
@@ -392,7 +393,7 @@ class _ResolutionCard extends StatelessWidget {
 
             // Resolution options
             _RadioOption(
-              icon: Icons.replay_rounded,
+              icon: AppIcons.arrowCounterClockwise,
               label: overspent
                   ? S.of(context).periodCoverFromRta
                   : S.of(context).periodReturnUnallocated,
@@ -408,7 +409,7 @@ class _ResolutionCard extends StatelessWidget {
               },
             ),
             _RadioOption(
-              icon: Icons.forward_rounded,
+              icon: AppIcons.arrowBendUpRight,
               label: overspent
                   ? S.of(context).periodCarryDebt
                   : S.of(context).periodCarryForward,
@@ -425,7 +426,7 @@ class _ResolutionCard extends StatelessWidget {
             ),
             if (!overspent)
             _RadioOption(
-              icon: Icons.swap_horiz_rounded,
+              icon: AppIcons.arrowsLeftRight,
               label: S.of(context).periodMoveTo,
               description: S.of(context).periodMoveDesc,
               value: LeftoverResolution.toOtherAllocation,
@@ -535,7 +536,7 @@ class _RadioOption extends StatelessWidget {
               ),
             ),
             Icon(
-              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+              selected ? AppIcons.radioButtonFill : AppIcons.circle,
               size: 20,
               color: selected ? AppColors.accent : AppColors.th(context),
             ),

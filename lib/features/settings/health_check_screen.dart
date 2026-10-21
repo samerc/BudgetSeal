@@ -22,6 +22,7 @@ import '../../core/services/auto_backup_service.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/theme/app_icons.dart';
 
 class HealthCheckScreen extends ConsumerStatefulWidget {
   const HealthCheckScreen({super.key});
@@ -421,12 +422,12 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         actions: [
           if (_report != null) ...[
             IconButton(
-              icon: const Icon(Icons.share_rounded),
+              icon: const Icon(AppIcons.shareNetwork),
               tooltip: S.of(context).healthExportTooltip,
               onPressed: _exportReport,
             ),
             IconButton(
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(AppIcons.arrowClockwise),
               tooltip: S.of(context).healthRerunTooltip,
               onPressed: _running ? null : _runCheck,
             ),
@@ -483,7 +484,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         if (!allHealthy)
           FilledButton.icon(
             onPressed: _repair,
-            icon: const Icon(Icons.build_rounded),
+            icon: const Icon(AppIcons.wrench),
             label: Text(S.of(context).healthRepairButton),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.caution,
@@ -493,7 +494,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         if (report.softDeletedCount > 0)
           OutlinedButton.icon(
             onPressed: _purgeSoftDeleted,
-            icon: const Icon(Icons.delete_sweep_rounded),
+            icon: const Icon(AppIcons.broom),
             label: Text(S.of(context).healthPurgeButtonN(report.softDeletedCount)),
           ),
         const SizedBox(height: 32),
@@ -514,8 +515,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         children: [
           Icon(
             healthy
-                ? Icons.check_circle_rounded
-                : Icons.warning_rounded,
+                ? AppIcons.checkCircleFill
+                : AppIcons.warningFill,
             color: tone,
             size: 48,
           ),
@@ -590,8 +591,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         children: [
           Icon(
             check.healthy
-                ? Icons.check_circle_rounded
-                : Icons.error_rounded,
+                ? AppIcons.checkCircleFill
+                : AppIcons.warningCircleFill,
             color: check.healthy ? AppColors.healthy : AppColors.overspent,
             size: 20,
           ),
@@ -736,7 +737,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         children: [
           _dataRow(
             context,
-            icon: Icons.receipt_long_rounded,
+            icon: AppIcons.receipt,
             label: S.of(context).healthTransactionsStat,
             value: '${report.totalTransactions}',
           ),
@@ -744,7 +745,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
               color: AppColors.bd(context)),
           _dataRow(
             context,
-            icon: Icons.menu_book_rounded,
+            icon: AppIcons.bookOpen,
             label: S.of(context).healthLedgerEntries,
             value: '${report.totalLedgerEntries}',
           ),
@@ -752,7 +753,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
               color: AppColors.bd(context)),
           _dataRow(
             context,
-            icon: Icons.delete_outline_rounded,
+            icon: AppIcons.trash,
             label: S.of(context).healthSoftDeleted,
             value: '${report.softDeletedCount}',
             valueColor: report.softDeletedCount > 0
@@ -763,7 +764,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
               color: AppColors.bd(context)),
           _dataRow(
             context,
-            icon: Icons.link_off_rounded,
+            icon: AppIcons.linkBreak,
             label: S.of(context).healthOrphanEntries,
             value: '${report.orphanLedgerCount}',
             valueColor: report.orphanLedgerCount > 0
@@ -774,7 +775,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
               color: AppColors.bd(context)),
           _dataRow(
             context,
-            icon: Icons.backup_rounded,
+            icon: AppIcons.cloudArrowUp,
             label: S.of(context).healthLastBackup,
             value: report.lastBackup != null
                 ? _formatDateTime(report.lastBackup!)

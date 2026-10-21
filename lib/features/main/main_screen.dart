@@ -15,6 +15,7 @@ import '../reports/reports_hub_screen.dart';
 import '../settings/settings_screen.dart';
 import '../transactions/transactions_screen.dart';
 import '../../shared/widgets/hint_banner.dart';
+import '../../shared/theme/app_icons.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -58,7 +59,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       showHintIfNeeded(
         context,
         hintId: 'dashboard_welcome',
-        icon: Icons.waving_hand_rounded,
+        icon: AppIcons.handWaving,
         title: s.dashboardWelcomeTitle,
         body: s.dashboardWelcomeBody,
       );
@@ -205,28 +206,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home_rounded),
+                icon: const Icon(AppIcons.house),
+                selectedIcon: const Icon(AppIcons.houseFill),
                 label: S.of(context).tabHome,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.swap_vert_rounded),
-                selectedIcon: const Icon(Icons.swap_vert_rounded),
+                icon: const Icon(AppIcons.arrowsDownUp),
+                selectedIcon: const Icon(AppIcons.arrowsDownUpFill),
                 label: S.of(context).tabActivity,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.account_balance_wallet_outlined),
-                selectedIcon: const Icon(Icons.account_balance_wallet_rounded),
+                icon: const Icon(AppIcons.wallet),
+                selectedIcon: const Icon(AppIcons.walletFill),
                 label: S.of(context).tabBudget,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.pie_chart_outline_rounded),
-                selectedIcon: const Icon(Icons.pie_chart_rounded),
+                icon: const Icon(AppIcons.chartPie),
+                selectedIcon: const Icon(AppIcons.chartPieFill),
                 label: S.of(context).tabReports,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.grid_view_outlined),
-                selectedIcon: const Icon(Icons.grid_view_rounded),
+                icon: const Icon(AppIcons.squaresFour),
+                selectedIcon: const Icon(AppIcons.squaresFourFill),
                 label: S.of(context).tabMore,
               ),
             ],

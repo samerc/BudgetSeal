@@ -22,6 +22,7 @@ import '../transactions/widgets/category_sheet.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 class RecurringScreen extends ConsumerStatefulWidget {
   const RecurringScreen({super.key});
@@ -92,7 +93,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
           if (!checkFreeLimit(context, ref, _items.length, FreeLimits.maxRecurring, 'recurring')) return;
           _showAddSheet();
         },
-        child: const Icon(Icons.add),
+        child: const Icon(AppIcons.plus),
       ),
       body: SafeArea(
         bottom: false,
@@ -107,7 +108,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(AppIcons.arrowLeft),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 4),
@@ -128,7 +129,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       ),
                       IconButton(
                         tooltip: S.of(context).billCalTitle,
-                        icon: Icon(Icons.calendar_month_rounded,
+                        icon: Icon(AppIcons.calendar,
                             color: AppColors.ts(context)),
                         onPressed: () =>
                             context.push('/bill-calendar'),
@@ -153,14 +154,14 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                       child: Row(
                         children: [
                           _SummaryChip(
-                            icon: Icons.repeat_rounded,
+                            icon: AppIcons.repeat,
                             label: '${_items.length}',
                             subtitle: S.of(context).recurringSummaryTotal,
                             color: AppColors.accent,
                           ),
                           const SizedBox(width: 16),
                           _SummaryChip(
-                            icon: Icons.play_arrow_rounded,
+                            icon: AppIcons.play,
                             label: '$activeCount',
                             subtitle: S.of(context).recurringSummaryActive,
                             color: AppColors.healthy,
@@ -168,7 +169,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                           if (pausedCount > 0) ...[
                             const SizedBox(width: 16),
                             _SummaryChip(
-                              icon: Icons.pause_rounded,
+                              icon: AppIcons.pause,
                               label: '$pausedCount',
                               subtitle: S.of(context).recurringSummaryPaused,
                               color: AppColors.caution,
@@ -221,7 +222,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
               else if (_items.isEmpty)
                 SliverFillRemaining(
                   child: EmptyState(
-                    icon: Icons.repeat_rounded,
+                    icon: AppIcons.repeat,
                     title: S.of(context).recurringEmptyTitle,
                     subtitle: S.of(context).recurringEmptySubtitle,
                   ),
@@ -440,7 +441,7 @@ class _RecurringTile extends ConsumerWidget {
                   light: 0.85, dark: 0.78),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.repeat_rounded, color: color, size: 20),
+            child: Icon(AppIcons.repeat, color: color, size: 20),
           ),
           title: Text(
             item.title.isNotEmpty ? item.title : item.note,
@@ -513,8 +514,8 @@ class _RecurringTile extends ConsumerWidget {
                   tooltip: item.enabled ? S.of(context).recurringPauseTooltip : S.of(context).recurringResumeTooltip,
                   icon: Icon(
                     item.enabled
-                        ? Icons.pause_circle_rounded
-                        : Icons.play_circle_rounded,
+                        ? AppIcons.pauseCircle
+                        : AppIcons.playCircle,
                     color: item.enabled
                         ? AppColors.th(context)
                         : AppColors.healthy,
@@ -680,7 +681,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 );
                 if (picked != null) setState(() => _startDate = picked);
               },
-              icon: const Icon(Icons.calendar_today_rounded, size: 16),
+              icon: const Icon(AppIcons.calendarBlank, size: 16),
               label: Text(
                   S.of(context).recurringFormStarts(formatDate(_startDate))),
             ),
@@ -698,7 +699,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                   setState(() => _endDate = picked);
                 }
               },
-              icon: const Icon(Icons.event_busy_rounded, size: 16),
+              icon: const Icon(AppIcons.calendarX, size: 16),
               label: Text(_endDate != null
                   ? S.of(context).recurringFormEnds(formatDate(_endDate!))
                   : S.of(context).recurringFormEndsNever),
@@ -947,7 +948,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 );
                 if (picked != null) setState(() => _startDate = picked);
               },
-              icon: const Icon(Icons.calendar_today_rounded, size: 16),
+              icon: const Icon(AppIcons.calendarBlank, size: 16),
               label: Text(
                   S.of(context).recurringFormNextDue(formatDate(_startDate))),
             ),
@@ -965,7 +966,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                   setState(() => _endDate = picked);
                 }
               },
-              icon: const Icon(Icons.event_busy_rounded, size: 16),
+              icon: const Icon(AppIcons.calendarX, size: 16),
               label: Text(_endDate != null
                   ? S.of(context).recurringFormEnds(formatDate(_endDate!))
                   : S.of(context).recurringFormEndsNever),
@@ -1144,7 +1145,7 @@ class _RecurringCategoryField extends ConsumerWidget {
                   style: TextStyle(color: AppColors.th(context)),
                 ),
               ),
-            Icon(Icons.arrow_drop_down, color: AppColors.ts(context)),
+            Icon(AppIcons.caretDown, color: AppColors.ts(context)),
           ],
         ),
       ),

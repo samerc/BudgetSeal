@@ -16,6 +16,7 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/theme/app_icons.dart';
 
 class TravelExchangeScreen extends ConsumerStatefulWidget {
   const TravelExchangeScreen({super.key});
@@ -76,7 +77,7 @@ class _TravelExchangeScreenState
               ),
               child: Row(
                 children: [
-                  Icon(Icons.flight_takeoff_rounded,
+                  Icon(AppIcons.airplaneTakeoff,
                       color: AppColors.accent, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
@@ -103,13 +104,13 @@ class _TravelExchangeScreenState
                   value: _fromAccountId,
                   isExpanded: true,
                   hint: Row(children: [
-                    Icon(Icons.account_balance_rounded,
+                    Icon(AppIcons.bank,
                         size: 16, color: AppColors.th(context)),
                     const SizedBox(width: 10),
                     Text(S.of(context).travelSelectAccount,
                         style: TextStyle(color: AppColors.th(context))),
                   ]),
-                  icon: Icon(Icons.expand_more_rounded,
+                  icon: Icon(AppIcons.caretDown,
                       color: AppColors.th(context)),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 4),
@@ -178,7 +179,7 @@ class _TravelExchangeScreenState
                       light: 0.85, dark: 0.78),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.arrow_downward_rounded,
+                child: Icon(AppIcons.arrowDown,
                     color: AppColors.accent, size: 20),
               ),
             ),
@@ -231,7 +232,7 @@ class _TravelExchangeScreenState
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.currency_exchange_rounded,
+                    Icon(AppIcons.currencyCircleDollar,
                         size: 14, color: AppColors.ts(context)),
                     const SizedBox(width: 8),
                     Text(
@@ -250,7 +251,7 @@ class _TravelExchangeScreenState
             if (openWallet != null) ...[
               const SizedBox(height: 12),
               Row(children: [
-                Icon(Icons.flight_rounded, size: 14, color: AppColors.accent),
+                Icon(AppIcons.airplane, size: 14, color: AppColors.accent),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -272,7 +273,7 @@ class _TravelExchangeScreenState
                       height: 18,
                       child: CircularProgressIndicator(
                           color: AppColors.onAccent, strokeWidth: 2))
-                  : const Icon(Icons.flight_takeoff_rounded, size: 18),
+                  : const Icon(AppIcons.airplaneTakeoff, size: 18),
               label: Text(
                   openWallet != null
                       ? S.of(context).travelExchangeTopUp
@@ -448,7 +449,7 @@ class _TravelExchangeScreenState
               ),
               child: Row(
                 children: [
-                  Icon(Icons.flight_rounded,
+                  Icon(AppIcons.airplane,
                       size: 20, color: AppColors.accent),
                   const SizedBox(width: 10),
                   Expanded(
@@ -489,10 +490,10 @@ class _TravelExchangeScreenState
   }
 
   IconData _accountIcon(String type) => switch (type) {
-        'bank' => Icons.account_balance_rounded,
-        'credit' => Icons.credit_card_rounded,
-        'wallet' => Icons.account_balance_wallet_rounded,
-        _ => Icons.money_rounded,
+        'bank' => AppIcons.bank,
+        'credit' => AppIcons.creditCard,
+        'wallet' => AppIcons.wallet,
+        _ => AppIcons.money,
       };
 }
 

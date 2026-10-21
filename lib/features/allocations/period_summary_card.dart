@@ -11,6 +11,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/theme/app_icons.dart';
 
 const _dismissedKey = 'period_summary_dismissed';
 
@@ -91,7 +92,7 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.event_repeat_rounded,
+              Icon(AppIcons.calendarDots,
                   size: 20, color: AppColors.accent),
               const SizedBox(width: 8),
               Expanded(
@@ -101,7 +102,7 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: Icon(Icons.close_rounded,
+                icon: Icon(AppIcons.x,
                     size: 18, color: AppColors.th(context)),
                 onPressed: _dismiss,
               ),

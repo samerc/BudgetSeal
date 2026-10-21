@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
 
 // ── Receipt path encoding helpers ──────────────────────────────────────────
 
@@ -173,18 +174,18 @@ Future<_PickerChoice?> _showPickerSheet(BuildContext context) async {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: const Icon(Icons.camera_alt_rounded),
+            leading: const Icon(AppIcons.camera),
             title: Text(S.of(ctx).receiptTakePhoto),
             onTap: () => Navigator.pop(ctx, _PickerChoice.camera),
           ),
           ListTile(
-            leading: const Icon(Icons.photo_library_rounded),
+            leading: const Icon(AppIcons.images),
             title: Text(S.of(ctx).receiptChooseGallery),
             subtitle: Text(S.of(ctx).receiptSelectMultiple),
             onTap: () => Navigator.pop(ctx, _PickerChoice.gallery),
           ),
           ListTile(
-            leading: const Icon(Icons.close_rounded),
+            leading: const Icon(AppIcons.x),
             title: Text(S.of(ctx).commonCancel),
             onTap: () => Navigator.pop(ctx),
           ),

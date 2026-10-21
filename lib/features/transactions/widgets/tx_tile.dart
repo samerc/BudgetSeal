@@ -14,6 +14,7 @@ import '../../../shared/utils/format_number.dart';
 import '../../../shared/utils/receipt_helper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/utils/note_text.dart';
+import '../../../shared/theme/app_icons.dart';
 
 // ---------------------------------------------------------------------------
 // Transaction tile — Cashew transactionEntry layout. Shared by the Activity
@@ -113,7 +114,7 @@ class TxTile extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.swap_horiz_rounded,
+                    AppIcons.arrowsLeftRight,
                     color: AppColors.pastel(context, typeColor,
                         light: 0.5, dark: 0.5, inverse: true),
                     size: 24,
@@ -266,7 +267,7 @@ class TxTile extends ConsumerWidget {
                     return Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        Icon(Icons.receipt_long_rounded,
+                        Icon(AppIcons.receipt,
                             size: 14, color: AppColors.th(context)),
                         PositionedDirectional(
                           top: -6,
@@ -290,7 +291,7 @@ class TxTile extends ConsumerWidget {
                       ],
                     );
                   }
-                  return Icon(Icons.receipt_long_rounded,
+                  return Icon(AppIcons.receipt,
                       size: 14, color: AppColors.th(context));
                 }(),
               ),

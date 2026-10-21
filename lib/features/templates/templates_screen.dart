@@ -19,6 +19,7 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/utils/dispose_later.dart';
+import '../../shared/theme/app_icons.dart';
 
 enum _SortMode { mostUsed, alphabetical, newest, amount }
 enum _GroupMode { none, type, category }
@@ -217,7 +218,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(AppIcons.arrowLeft),
                     onPressed: () => context.pop(),
                   ),
                   const SizedBox(width: 4),
@@ -235,7 +236,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   // Sort button
                   PopupMenuButton<_SortMode>(
-                    icon: Icon(Icons.sort_rounded,
+                    icon: Icon(AppIcons.sortAscending,
                         color: AppColors.ts(context)),
                     tooltip: S.of(context).tmplSortTooltip,
                     onSelected: (v) => setState(() => _sort = v),
@@ -248,7 +249,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ),
                   // Group button
                   PopupMenuButton<_GroupMode>(
-                    icon: Icon(Icons.workspaces_rounded,
+                    icon: Icon(AppIcons.circlesThree,
                         color: AppColors.ts(context)),
                     tooltip: S.of(context).tmplGroupTooltip,
                     onSelected: (v) => setState(() => _group = v),
@@ -271,7 +272,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 decoration: InputDecoration(
                   hintText: S.of(context).tmplSearchHint,
                   hintStyle: TextStyle(color: AppColors.th(context)),
-                  prefixIcon: Icon(Icons.search_rounded,
+                  prefixIcon: Icon(AppIcons.magnifyingGlass,
                       size: 20, color: AppColors.th(context)),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   isDense: true,
@@ -308,7 +309,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : filtered.isEmpty
                       ? EmptyState(
-                          icon: Icons.bolt_rounded,
+                          icon: AppIcons.lightning,
                           title: S.of(context).tmplNoTitle,
                           subtitle: S.of(context).tmplNoSubtitle,
                         )
@@ -327,7 +328,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       floatingActionButton: FloatingActionButton(
         tooltip: S.of(context).tmplAddTooltip,
         onPressed: () => _showAddSheet(accounts, categories),
-        child: const Icon(Icons.add),
+        child: const Icon(AppIcons.plus),
       ),
     );
   }
@@ -526,7 +527,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.play_arrow_rounded,
+              leading: Icon(AppIcons.play,
                   color: AppColors.accent),
               title: Text(S.of(ctx).tmplUse),
               onTap: () {
@@ -535,7 +536,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.edit_rounded, color: AppColors.ts(ctx)),
+              leading: Icon(AppIcons.pencilSimple, color: AppColors.ts(ctx)),
               title: Text(S.of(ctx).commonEdit),
               onTap: () {
                 Navigator.pop(ctx);
@@ -547,7 +548,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete_outline_rounded,
+              leading: Icon(AppIcons.trash,
                   color: AppColors.overspent),
               title: Text(S.of(ctx).commonDelete),
               onTap: () {
@@ -592,7 +593,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       child: Row(
         children: [
           if (_sort == mode)
-            Icon(Icons.check_rounded, size: 16, color: AppColors.accent)
+            Icon(AppIcons.check, size: 16, color: AppColors.accent)
           else
             const SizedBox(width: 16),
           const SizedBox(width: 8),
@@ -608,7 +609,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       child: Row(
         children: [
           if (_group == mode)
-            Icon(Icons.check_rounded, size: 16, color: AppColors.accent)
+            Icon(AppIcons.check, size: 16, color: AppColors.accent)
           else
             const SizedBox(width: 16),
           const SizedBox(width: 8),

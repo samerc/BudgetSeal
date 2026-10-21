@@ -38,6 +38,12 @@ void main() {
     // Load the real app version/build so the About & Settings screens never
     // show a stale hardcoded version.
     await initAppInfo();
+    // Category icons are Microsoft Fluent Emoji PNGs (not a package, so
+    // their licence isn't picked up automatically).
+    LicenseRegistry.addLicense(() async* {
+      yield LicenseEntryWithLineBreaks(['Fluent Emoji'],
+          await rootBundle.loadString('assets/categories/LICENSE-FluentEmoji.txt'));
+    });
     await _startApp();
   }, (error, stackTrace) {
     debugPrint('[Uncaught] $error');

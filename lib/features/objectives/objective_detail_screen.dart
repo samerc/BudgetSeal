@@ -23,6 +23,8 @@ import '../../shared/utils/save_errors.dart';
 import '../../shared/utils/note_text.dart';
 import '../transactions/widgets/category_sheet.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/category_icon.dart';
 
 class ObjectiveDetailScreen extends ConsumerStatefulWidget {
   final String objectiveId; // 'new' for creating
@@ -408,7 +410,7 @@ class _ObjectiveDetailScreenState
                     border: Border.all(color: bdColor),
                   ),
                   child: Row(children: [
-                    Icon(Icons.label_rounded, size: 16, color: tsColor),
+                    Icon(AppIcons.tag, size: 16, color: tsColor),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -419,7 +421,7 @@ class _ObjectiveDetailScreenState
                         ),
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, size: 18, color: tsColor),
+                    Icon(AppIcons.caretRight, size: 18, color: tsColor),
                   ]),
                 ),
               ),
@@ -553,7 +555,7 @@ class _ObjectiveDetailScreenState
         title: Text(_nameCtrl.text.isEmpty ? 'Objective' : _nameCtrl.text),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded, color: AppColors.tp(context)),
+            icon: Icon(AppIcons.dotsThreeVertical, color: AppColors.tp(context)),
             onSelected: (v) {
               if (v == 'edit') setState(() => _showSettings = !_showSettings);
               if (v == 'delete') _confirmDelete();
@@ -562,7 +564,7 @@ class _ObjectiveDetailScreenState
               PopupMenuItem(
                 value: 'edit',
                 child: Row(children: [
-                  Icon(_showSettings ? Icons.visibility_off_rounded : Icons.settings_rounded,
+                  Icon(_showSettings ? AppIcons.eyeSlash : AppIcons.gear,
                       size: 18, color: AppColors.ts(context)),
                   const SizedBox(width: 10),
                   Text(_showSettings ? S.of(context).objHideSettings : S.of(context).objEditSettings),
@@ -571,7 +573,7 @@ class _ObjectiveDetailScreenState
               PopupMenuItem(
                 value: 'delete',
                 child: Row(children: [
-                  Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.overspent),
+                  Icon(AppIcons.trash, size: 18, color: AppColors.overspent),
                   const SizedBox(width: 10),
                   Text(S.of(context).commonDelete, style: TextStyle(color: AppColors.overspent)),
                 ]),
@@ -640,7 +642,7 @@ class _ObjectiveDetailScreenState
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     onPressed: _updateAmount,
-                    icon: const Icon(Icons.add_rounded, size: 20),
+                    icon: const Icon(AppIcons.plus, size: 20),
                     label: Text(isLoan
                         ? S.of(context).objRecordPayment
                         : S.of(context).objAddFunds),
@@ -742,7 +744,7 @@ class _ObjectiveDetailScreenState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isIncome ? Icons.call_received_rounded : Icons.call_made_rounded,
+                        isIncome ? AppIcons.arrowDownLeft : AppIcons.arrowUpRight,
                         size: 15,
                         color: isIncome ? AppColors.healthy : AppColors.overspent,
                       ),
@@ -822,7 +824,7 @@ class _ObjectiveDetailScreenState
               icon: _loading
                   ? SizedBox(height: 14, width: 14,
                       child: CircularProgressIndicator(color: AppColors.onAccent, strokeWidth: 2))
-                  : const Icon(Icons.check_rounded, size: 18),
+                  : const Icon(AppIcons.check, size: 18),
               label: Text(S.of(context).commonSave),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -862,13 +864,13 @@ class _ObjectiveDetailScreenState
   Widget _buildTypeToggle() {
     return Row(children: [
       _TypeChip(
-        label: S.of(context).objGoalChip, icon: Icons.flag_rounded,
+        label: S.of(context).objGoalChip, icon: AppIcons.flag,
         selected: _type == 'goal',
         onTap: () => setState(() => _type = 'goal'),
       ),
       const SizedBox(width: 8),
       _TypeChip(
-        label: S.of(context).objLoanChip, icon: Icons.handshake_rounded,
+        label: S.of(context).objLoanChip, icon: AppIcons.handshake,
         selected: _type == 'loan',
         onTap: () => setState(() { _type = 'loan'; _direction ??= 'lent'; }),
       ),
@@ -894,11 +896,11 @@ class _ObjectiveDetailScreenState
                 ),
                 child: Center(
                   child: _icon != null && _icon!.isNotEmpty
-                      ? Text(_icon!, style: const TextStyle(fontSize: 20))
+                      ? EmojiGlyph(_icon!, size: 24)
                       : Icon(
                           _type == 'loan'
-                              ? Icons.handshake_rounded
-                              : Icons.flag_rounded,
+                              ? AppIcons.handshake
+                              : AppIcons.flag,
                           color: color, size: 20),
                 ),
               ),
@@ -984,8 +986,7 @@ class _ObjectiveDetailScreenState
                                   : null,
                             ),
                             child: Center(
-                                child: Text(e,
-                                    style: const TextStyle(fontSize: 20))),
+                                child: EmojiGlyph(e, size: 24)),
                           ),
                         );
                       }).toList(),
@@ -1010,7 +1011,7 @@ class _ObjectiveDetailScreenState
                 hintText: S.of(context).objPersonHint,
                 border: InputBorder.none,
         filled: false,
-                prefixIcon: Icon(Icons.person_rounded, size: 18, color: AppColors.ts(context)),
+                prefixIcon: Icon(AppIcons.user, size: 18, color: AppColors.ts(context)),
               ),
             ),
             Divider(height: 1, color: AppColors.bd(context)),
@@ -1087,7 +1088,7 @@ class _ObjectiveDetailScreenState
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(children: [
-              Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.ts(context)),
+              Icon(AppIcons.calendarBlank, size: 18, color: AppColors.ts(context)),
               const SizedBox(width: 10),
               Text(
                 _endDate != null
@@ -1100,7 +1101,7 @@ class _ObjectiveDetailScreenState
               if (_endDate != null)
                 GestureDetector(
                   onTap: () => setState(() => _endDate = null),
-                  child: Icon(Icons.close_rounded, size: 16, color: AppColors.th(context)),
+                  child: Icon(AppIcons.x, size: 16, color: AppColors.th(context)),
                 ),
             ]),
           ),
@@ -1127,7 +1128,7 @@ class _ObjectiveDetailScreenState
                   color: c, shape: BoxShape.circle,
                   border: selected ? Border.all(color: AppColors.tp(context), width: 3) : null,
                 ),
-                child: selected ? Icon(Icons.check_rounded, color: AppColors.inkOn(c), size: 16) : null,
+                child: selected ? Icon(AppIcons.check, color: AppColors.inkOn(c), size: 16) : null,
               ),
             );
           }).toList(),

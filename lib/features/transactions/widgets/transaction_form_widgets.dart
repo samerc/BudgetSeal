@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/amount_field.dart';
+import '../../../shared/theme/app_icons.dart';
 
 // ---------------------------------------------------------------------------
 // Shared card wrapper
@@ -169,7 +170,7 @@ class CategoryPill extends StatelessWidget {
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               )
             else
-              Icon(Icons.label_outline_rounded,
+              Icon(AppIcons.tag,
                   size: 14, color: AppColors.ts(context)),
             const SizedBox(width: 6),
             Flexible(
@@ -186,7 +187,7 @@ class CategoryPill extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Icon(
-              Icons.expand_more_rounded,
+              AppIcons.caretDown,
               size: 14,
               color: hasCategory
                   ? color.withValues(alpha: 0.7)
@@ -275,10 +276,10 @@ class LineCard extends StatelessWidget {
   });
 
   IconData _accountIcon(String type) => switch (type) {
-        'bank' => Icons.account_balance_rounded,
-        'credit' => Icons.credit_card_rounded,
-        'wallet' => Icons.account_balance_wallet_rounded,
-        _ => Icons.money_rounded,
+        'bank' => AppIcons.bank,
+        'credit' => AppIcons.creditCard,
+        'wallet' => AppIcons.wallet,
+        _ => AppIcons.money,
       };
 
   bool get _showRate => line.currency != baseCurrency;
@@ -308,7 +309,7 @@ class LineCard extends StatelessWidget {
                     isDense: true,
                     hint: Row(
                       children: [
-                        Icon(Icons.account_balance_rounded,
+                        Icon(AppIcons.bank,
                             size: 16, color: AppColors.th(context)),
                         const SizedBox(width: 8),
                         Text(S.of(context).txWidgetSelectAccount,
@@ -316,7 +317,7 @@ class LineCard extends StatelessWidget {
                                 color: AppColors.ts(context), fontSize: 15)),
                       ],
                     ),
-                    icon: Icon(Icons.expand_more_rounded,
+                    icon: Icon(AppIcons.caretDown,
                         size: 16, color: AppColors.th(context)),
                     // Selected value: name only — the currency badge beside
                     // it already shows the currency.
@@ -385,7 +386,7 @@ class LineCard extends StatelessWidget {
                       color: AppColors.bd(context),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Icon(Icons.close_rounded,
+                    child: Icon(AppIcons.x,
                         size: 16, color: AppColors.ts(context)),
                   ),
                 ),
@@ -433,7 +434,7 @@ class LineCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.currency_exchange_rounded,
+                  Icon(AppIcons.currencyCircleDollar,
                       size: 14, color: AppColors.accent),
                   const SizedBox(width: 6),
                   Text(
@@ -525,7 +526,7 @@ class LineCard extends StatelessWidget {
                             light: 0.85, dark: 0.78),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(Icons.swap_vert_rounded,
+                      child: Icon(AppIcons.arrowsDownUp,
                           size: 14, color: AppColors.accent),
                     ),
                   ),
@@ -565,7 +566,7 @@ class LineCard extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               prefixIcon: Padding(
                 padding: const EdgeInsetsDirectional.only(end: 8),
-                child: Icon(Icons.notes_rounded,
+                child: Icon(AppIcons.textAlignLeft,
                     size: 14, color: AppColors.th(context)),
               ),
               prefixIconConstraints:

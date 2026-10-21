@@ -14,6 +14,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../shared/theme/app_icons.dart';
 
 class SyncScreen extends ConsumerWidget {
   const SyncScreen({super.key});
@@ -84,7 +85,7 @@ class SyncScreen extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline_rounded,
+                        const Icon(AppIcons.warningCircle,
                             color: AppColors.overspent, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
@@ -108,7 +109,7 @@ class SyncScreen extends ConsumerWidget {
           // ── Connected actions ──────────────────────────────────
           if (isConnected) ...[
             _ActionButton(
-              icon: Icons.sync_rounded,
+              icon: AppIcons.arrowsClockwise,
               label: S.of(context).syncNow,
               color: AppColors.accent,
               loading: syncState.status == SyncStatus.syncing,
@@ -119,7 +120,7 @@ class SyncScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             if (syncState.activeProvider is GoogleDriveProvider)
               _ActionButton(
-                icon: Icons.people_outline_rounded,
+                icon: AppIcons.users,
                 label: S.of(context).syncShareHousehold,
                 color: AppColors.accent,
                 onTap: () => _showShareSheet(context, notifier),
@@ -127,7 +128,7 @@ class SyncScreen extends ConsumerWidget {
             if (syncState.activeProvider is GoogleDriveProvider)
               const SizedBox(height: 12),
             _ActionButton(
-              icon: Icons.link_off_rounded,
+              icon: AppIcons.linkBreak,
               label: S.of(context).syncDisconnect,
               color: AppColors.overspent,
               onTap: () => _confirmDisconnect(context, notifier),
@@ -206,11 +207,11 @@ class SyncScreen extends ConsumerWidget {
     }
 
     final (IconData icon, Color color) = switch (status) {
-      SyncStatus.success => (Icons.check_circle_rounded, AppColors.healthy),
-      SyncStatus.error => (Icons.error_rounded, AppColors.overspent),
+      SyncStatus.success => (AppIcons.checkCircleFill, AppColors.healthy),
+      SyncStatus.error => (AppIcons.warningCircleFill, AppColors.overspent),
       _ => connected
-          ? (Icons.cloud_done_rounded, AppColors.accent)
-          : (Icons.cloud_off_rounded, AppColors.ts(context)),
+          ? (AppIcons.cloudCheck, AppColors.accent)
+          : (AppIcons.cloudSlash, AppColors.ts(context)),
     };
 
     return Container(
@@ -379,11 +380,11 @@ class _ProviderOptionTile extends StatelessWidget {
   });
 
   IconData _iconForKey(String key) => switch (key) {
-        'google_drive' => Icons.add_to_drive_rounded,
-        'onedrive' => Icons.cloud_rounded,
-        'dropbox' => Icons.cloud_circle_rounded,
-        'local' => Icons.folder_open_rounded,
-        _ => Icons.cloud_rounded,
+        'google_drive' => AppIcons.googleDriveLogo,
+        'onedrive' => AppIcons.cloud,
+        'dropbox' => AppIcons.cloud,
+        'local' => AppIcons.folderOpen,
+        _ => AppIcons.cloud,
       };
 
   Color _colorForKey(String key) => switch (key) {
@@ -425,7 +426,7 @@ class _ProviderOptionTile extends StatelessWidget {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           subtitle: Text(subtitle,
               style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-          trailing: Icon(Icons.chevron_right_rounded,
+          trailing: Icon(AppIcons.caretRight,
               size: 18, color: AppColors.th(context)),
           onTap: onTap,
         ),
@@ -578,7 +579,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 decoration: InputDecoration(
                   labelText: S.of(context).syncTheirEmail,
                   hintText: S.of(context).syncEmailHint,
-                  prefixIcon: const Icon(Icons.email_rounded),
+                  prefixIcon: const Icon(AppIcons.envelopeSimple),
                 ),
               ),
               const SizedBox(height: 16),
@@ -592,7 +593,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: AppColors.onAccent),
                         )
-                      : const Icon(Icons.share_rounded, size: 20),
+                      : const Icon(AppIcons.shareNetwork, size: 20),
                   label: Text(
                     _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
                     style: const TextStyle(
@@ -638,7 +639,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
               SizedBox(
                 child: FilledButton.icon(
                   onPressed: _shareCode,
-                  icon: const Icon(Icons.share_rounded, size: 20),
+                  icon: const Icon(AppIcons.shareNetwork, size: 20),
                   label: Text(
                     S.of(context).syncShareCode,
                     style: TextStyle(
@@ -658,7 +659,7 @@ class _ShareHouseholdSheetState extends State<_ShareHouseholdSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded,
+                    const Icon(AppIcons.warningCircle,
                         color: AppColors.overspent, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
@@ -851,7 +852,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
           Row(
             children: [
               Icon(
-                _hasPassword ? Icons.lock_rounded : Icons.lock_open_rounded,
+                _hasPassword ? AppIcons.lock : AppIcons.lockOpen,
                 size: 18,
                 color: _hasPassword ? AppColors.healthy : AppColors.caution,
               ),
@@ -885,7 +886,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.warning_amber_rounded,
+                Icon(AppIcons.warning,
                     size: 14, color: AppColors.caution),
                 const SizedBox(width: 6),
                 Expanded(

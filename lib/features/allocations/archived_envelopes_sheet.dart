@@ -9,6 +9,7 @@ import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/category_icon.dart';
 
 /// Lists archived envelopes with an Unarchive action (Budget tab menu).
 Future<void> showArchivedEnvelopesSheet(
@@ -58,13 +59,12 @@ Future<void> showArchivedEnvelopesSheet(
                       ListTile(
                         leading: CircleAvatar(
                           backgroundColor: AppColors.sfv(sheetCtx),
-                          child: Text(
-                            (a.icon?.isNotEmpty ?? false)
-                                ? a.icon!
-                                : a.name.characters.first.toUpperCase(),
-                            style: TextStyle(
-                                fontSize: 18, color: AppColors.tp(sheetCtx)),
-                          ),
+                          child: (a.icon?.isNotEmpty ?? false)
+                              ? EmojiGlyph(a.icon!, size: 22)
+                              : Text(a.name.characters.first.toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: AppColors.tp(sheetCtx))),
                         ),
                         title: Text(a.name,
                             style:

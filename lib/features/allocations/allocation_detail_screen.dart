@@ -31,6 +31,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/theme/app_icons.dart';
 
 class AllocationDetailScreen extends ConsumerStatefulWidget {
   final String allocationId;
@@ -184,7 +185,7 @@ class _AllocationDetailScreenState
         actions: [
           if (!_isNew)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded),
+              icon: const Icon(AppIcons.dotsThreeVertical),
               onSelected: (v) {
                 if (v == 'settings') {
                   setState(() => _showSettings = !_showSettings);
@@ -204,7 +205,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'settings',
                   child: Row(children: [
-                    Icon(Icons.settings_rounded,
+                    Icon(AppIcons.gear,
                         size: 18, color: AppColors.ts(context)),
                     const SizedBox(width: 10),
                     Text(l.allocEditSettings),
@@ -213,7 +214,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'move',
                   child: Row(children: [
-                    Icon(Icons.swap_horiz_rounded,
+                    Icon(AppIcons.arrowsLeftRight,
                         size: 18, color: AppColors.accent),
                     const SizedBox(width: 10),
                     Text(l.allocMoveMenu),
@@ -222,7 +223,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                     value: 'withdraw',
                     child: Row(children: [
-                      Icon(Icons.output_rounded,
+                      Icon(AppIcons.signOut,
                           size: 18, color: AppColors.accent),
                       const SizedBox(width: 10),
                       Text(l.allocWithdrawMenu),
@@ -231,7 +232,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'revalue',
                   child: Row(children: [
-                    Icon(Icons.currency_exchange_rounded,
+                    Icon(AppIcons.currencyCircleDollar,
                         size: 18, color: AppColors.accent),
                     const SizedBox(width: 10),
                     Text(l.allocRevalueMenu),
@@ -240,7 +241,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'archive',
                   child: Row(children: [
-                    Icon(Icons.archive_rounded,
+                    Icon(AppIcons.archive,
                         size: 18, color: AppColors.caution),
                     const SizedBox(width: 10),
                     Text(l.allocArchiveMenu,
@@ -250,7 +251,7 @@ class _AllocationDetailScreenState
                 PopupMenuItem(
                   value: 'delete',
                   child: Row(children: [
-                    Icon(Icons.delete_forever_rounded,
+                    Icon(AppIcons.trash,
                         size: 18, color: AppColors.overspent),
                     const SizedBox(width: 10),
                     Text(l.commonDelete,
@@ -320,8 +321,8 @@ class _AllocationDetailScreenState
                       ),
                       child: Center(
                         child: _icon != null
-                            ? Text(_icon!, style: const TextStyle(fontSize: 24))
-                            : Icon(Icons.add_reaction_rounded,
+                            ? EmojiGlyph(_icon!, size: 28)
+                            : Icon(AppIcons.smiley,
                                 size: 22, color: AppColors.accent),
                       ),
                     ),
@@ -411,8 +412,7 @@ class _AllocationDetailScreenState
                                         : null,
                                   ),
                                   child: Center(
-                                    child: Text(e,
-                                        style: const TextStyle(fontSize: 20)),
+                                    child: EmojiGlyph(e, size: 24),
                                   ),
                                 ),
                               );
@@ -432,7 +432,7 @@ class _AllocationDetailScreenState
               _sectionContainer(children: [
                 _sectionHeader(l.allocTypeSection),
                 _buildTypeOptionCard(
-                  icon: Icons.shopping_bag_rounded,
+                  icon: AppIcons.shoppingBag,
                   title: l.allocSpendingTitle,
                   description: l.allocSpendingDesc,
                   isSelected: _type == 'spending',
@@ -443,7 +443,7 @@ class _AllocationDetailScreenState
                 ),
                 const SizedBox(height: 8),
                 _buildTypeOptionCard(
-                  icon: Icons.tune_rounded,
+                  icon: AppIcons.slidersHorizontal,
                   title: l.allocFlexibleTitle,
                   description: l.allocFlexibleDesc,
                   isSelected: _type == 'flexible' || _type == 'saving',
@@ -462,7 +462,7 @@ class _AllocationDetailScreenState
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline_rounded,
+                      Icon(AppIcons.info,
                           size: 16, color: AppColors.ts(context)),
                       const SizedBox(width: 8),
                       Expanded(
@@ -483,8 +483,8 @@ class _AllocationDetailScreenState
                 _sectionHeader(l.allocPurposeSection),
                 _buildSegmentedSelector<String>(
                   options: [
-                    ('spending', l.allocSpendingTitle, Icons.shopping_bag_rounded),
-                    ('flexible', l.allocFlexibleTitle, Icons.tune_rounded),
+                    ('spending', l.allocSpendingTitle, AppIcons.shoppingBag),
+                    ('flexible', l.allocFlexibleTitle, AppIcons.slidersHorizontal),
                   ],
                   selected: _type == 'saving' ? 'flexible' : _type,
                   onChanged: (v) => setState(() {
@@ -509,8 +509,8 @@ class _AllocationDetailScreenState
                 ),
                 _buildSegmentedSelector<String>(
                   options: [
-                    ('periodic', l.allocPeriodic, Icons.event_repeat_rounded),
-                    ('permanent', l.allocPermanent, Icons.all_inclusive_rounded),
+                    ('periodic', l.allocPeriodic, AppIcons.calendarDots),
+                    ('permanent', l.allocPermanent, AppIcons.infinity),
                   ],
                   selected: _periodicity,
                   onChanged: (v) => setState(() => _periodicity = v),
@@ -524,7 +524,7 @@ class _AllocationDetailScreenState
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                     child: Row(children: [
-                      Icon(Icons.replay_rounded,
+                      Icon(AppIcons.arrowCounterClockwise,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
@@ -553,7 +553,7 @@ class _AllocationDetailScreenState
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Row(children: [
-                      Icon(Icons.auto_mode_rounded,
+                      Icon(AppIcons.arrowsClockwise,
                           size: 20, color: AppColors.ts(context)),
                       const SizedBox(width: 10),
                       Expanded(
@@ -640,7 +640,7 @@ class _AllocationDetailScreenState
                           color: AppColors.caution.withValues(alpha: 0.3)),
                     ),
                     child: Row(children: [
-                      const Icon(Icons.info_outline_rounded,
+                      const Icon(AppIcons.info,
                           size: 16, color: AppColors.caution),
                       const SizedBox(width: 8),
                       Expanded(
@@ -673,7 +673,7 @@ class _AllocationDetailScreenState
                         ),
                         GestureDetector(
                           onTap: () => _unlinkCategory(cat.id),
-                          child: Icon(Icons.close_rounded,
+                          child: Icon(AppIcons.x,
                               size: 16, color: AppColors.th(context)),
                         ),
                       ]),
@@ -681,7 +681,7 @@ class _AllocationDetailScreenState
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
                   onPressed: _showLinkCategorySheet,
-                  icon: const Icon(Icons.add_rounded, size: 16),
+                  icon: const Icon(AppIcons.plus, size: 16),
                   label: Text(l.allocLinkCategory),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
@@ -909,7 +909,7 @@ class _AllocationDetailScreenState
           // Fund button — tonal on the pastel card
           FilledButton.icon(
             onPressed: () => _showFundSheet(targetCurrency),
-            icon: const Icon(Icons.add_rounded, size: 20),
+            icon: const Icon(AppIcons.plus, size: 20),
             label: Text(S.of(context).allocFund),
             style: FilledButton.styleFrom(
               backgroundColor:
@@ -1267,15 +1267,15 @@ class _AllocationDetailScreenState
               };
 
               final icon = switch (entry.entryType) {
-                'funding' => Icons.add_circle_outline_rounded,
-                'consumption' => Icons.remove_circle_outline_rounded,
-                'adjustment' => Icons.tune_rounded,
-                'period_reset' => Icons.refresh_rounded,
-                'carry_forward' => Icons.forward_rounded,
-                'withdrawal' => Icons.outbox_rounded,
-                'revaluation' => Icons.currency_exchange_rounded,
-                'transfer' => Icons.swap_horiz_rounded,
-                _ => Icons.radio_button_unchecked_rounded,
+                'funding' => AppIcons.plusCircle,
+                'consumption' => AppIcons.minusCircle,
+                'adjustment' => AppIcons.slidersHorizontal,
+                'period_reset' => AppIcons.arrowClockwise,
+                'carry_forward' => AppIcons.arrowBendUpRight,
+                'withdrawal' => AppIcons.tray,
+                'revaluation' => AppIcons.currencyCircleDollar,
+                'transfer' => AppIcons.arrowsLeftRight,
+                _ => AppIcons.circle,
               };
 
               // A spending row opens its transaction.
@@ -1520,7 +1520,7 @@ class _AllocationDetailScreenState
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle_rounded,
+              Icon(AppIcons.checkCircleFill,
                   size: 20, color: AppColors.accent),
           ],
         ),
@@ -1731,7 +1731,7 @@ class _AllocationDetailScreenState
                             hintText: tr.allocSearchCategories,
                             hintStyle: TextStyle(
                                 color: linkHintColor),
-                            prefixIcon: Icon(Icons.search_rounded,
+                            prefixIcon: Icon(AppIcons.magnifyingGlass,
                                 size: 18,
                                 color: linkHintColor),
                             filled: true,
@@ -2415,7 +2415,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             child: Row(
               children: [
-                Icon(Icons.currency_exchange_rounded,
+                Icon(AppIcons.currencyCircleDollar,
                     size: 22, color: AppColors.accent),
                 const SizedBox(width: 10),
                 Text(
@@ -2587,7 +2587,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 height: 42,
                 child: OutlinedButton.icon(
                   onPressed: () => _fetchRate(fb.currency),
-                  icon: const Icon(Icons.sync_rounded, size: 16),
+                  icon: const Icon(AppIcons.arrowsClockwise, size: 16),
                   label: Text(S.of(context).allocFetch),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,

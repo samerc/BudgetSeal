@@ -14,6 +14,8 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/category_icon.dart';
 
 class ObjectivesScreen extends ConsumerWidget {
   const ObjectivesScreen({super.key});
@@ -33,7 +35,7 @@ class ObjectivesScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(AppIcons.arrowLeft),
                     onPressed: () => context.pop(),
                   ),
                   const SizedBox(width: 4),
@@ -57,7 +59,7 @@ class ObjectivesScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   FilledButton.icon(
                     onPressed: () => context.push('/objectives/new'),
-                    icon: const Icon(Icons.add_rounded, size: 18),
+                    icon: const Icon(AppIcons.plus, size: 18),
                     label: Text(S.of(context).commonAdd),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -79,7 +81,7 @@ class ObjectivesScreen extends ConsumerWidget {
         data: (items) {
           if (items.isEmpty) {
             return EmptyState(
-              icon: Icons.flag_rounded,
+              icon: AppIcons.flag,
               title: S.of(context).objNoTitle,
               subtitle: S.of(context).objIntro,
               actionLabel: S.of(context).objCreateFirst,
@@ -201,9 +203,9 @@ class _ObjectiveCard extends StatelessWidget {
                   ),
                   child: Center(
                     child: o.icon != null && o.icon!.isNotEmpty
-                        ? Text(o.icon!, style: const TextStyle(fontSize: 22))
+                        ? EmojiGlyph(o.icon!, size: 26)
                         : Icon(
-                            isLoan ? Icons.handshake_rounded : Icons.flag_rounded,
+                            isLoan ? AppIcons.handshake : AppIcons.flag,
                             color: AppColors.pastel(context, color,
                                 light: 0.5, dark: 0.5, inverse: true),
                             size: 22),
@@ -274,7 +276,7 @@ class _ObjectiveCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded,
+                  Icon(AppIcons.calendarBlank,
                       size: 13, color: AppColors.th(context)),
                   const SizedBox(width: 6),
                   Text(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/dashboard_layout_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 
 /// Bottom sheet for reordering and toggling dashboard sections.
 void showDashboardCustomizeSheet(BuildContext context) {
@@ -94,7 +95,7 @@ class _CustomizeSheet extends ConsumerWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       leading: Icon(
-                        Icons.drag_handle_rounded,
+                        AppIcons.dotsSixVertical,
                         color: AppColors.th(context),
                       ),
                       title: Text(_sectionLabel(S.of(context), config.section),
