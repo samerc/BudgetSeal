@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../core/database/app_database.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -40,6 +39,7 @@ import '../../shared/widgets/skeleton_loader.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/calculator_amount_field.dart' show showCalculatorSheet;
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/seal_mark.dart';
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -1793,15 +1793,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
     final groups = _buildGroups(filtered);
-    final txColors = ref.watch(txColorsProvider);
     final net = monthIncome - monthExpense;
+    final showDayTotal =
+        ref.watch(txListSettingsProvider).dateBannerTotal == 'dayTotal';
 
-    // Budget context bar (#2) — sum of base-currency allocation targets only
+    // The month card's "budgeted": spending envelopes' targets in the base
+    // currency (flexible targets are savings totals, not a month's budget).
     final allocations = ref.watch(allocationsProvider).value ?? [];
     double totalBudget = 0;
     for (final a in allocations) {
       final target = a.data.allocation.targetAmount ?? 0;
-      if (target <= 0) continue;
+      if (target <= 0 || a.data.allocation.type != 'spending') continue;
       final targetCcy = a.data.allocation.targetCurrency ?? baseCurrency;
       // Only include envelopes in base currency to avoid mixing
       if (targetCcy == baseCurrency) {
@@ -1811,96 +1813,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     return Column(
       children: [
-        // ── Summary strip ──────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-          child: Row(
-            children: [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: _SummaryDot(
-                    color: txColors.income,
-                    label: formatSignedAmount(monthIncome, currency: baseCurrency, type: 'income'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: _SummaryDot(
-                    color: txColors.expense,
-                    label: formatSignedAmount(monthExpense, currency: baseCurrency, type: 'expense'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    '= ${formatAmount(net, currency: baseCurrency)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: net >= 0 ? AppColors.healthy : AppColors.overspent,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // ── Budget progress bar (#2) ──────────────────────────
-        if (totalBudget > 0)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 2, 20, 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      S.of(context).txSpentOfBudget(formatAmount(monthExpense, currency: baseCurrency), formatAmount(totalBudget, currency: baseCurrency)),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.ts(context),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${(monthExpense / totalBudget * 100).clamp(0, 999).toStringAsFixed(0)}%',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: monthExpense > totalBudget
-                            ? AppColors.overspent
-                            : AppColors.ts(context),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: (monthExpense / totalBudget).clamp(0.0, 1.0),
-                    minHeight: 4,
-                    backgroundColor: AppColors.sfv(context),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      monthExpense > totalBudget
-                          ? AppColors.overspent
-                          : monthExpense > totalBudget * 0.8
-                              ? AppColors.caution
-                              : AppColors.healthy,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         // ── Category quick filter chip (#5) ───────────────────
         if (_categoryFilter != null)
           Padding(
@@ -1948,8 +1860,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           child: CustomScrollView(
             controller: _listScrollCtrl,
             slivers: [
-              // Filtered expense/income/net summary — only when filters
-              // narrow the list (otherwise it repeats the month strip above).
+              // The month's budget on top; with filters, the filtered
+              // expense/income/net instead.
+              if (!hasAnyFilter && !_allMonths)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: _MonthBudgetCard(
+                      year: _selectedYear,
+                      month: _selectedMonth,
+                      spent: monthExpense,
+                      income: monthIncome,
+                      budgeted: totalBudget,
+                      currency: baseCurrency,
+                    ),
+                  ),
+                ),
               if (hasAnyFilter)
               SliverToBoxAdapter(
                 child: Padding(
@@ -1974,37 +1900,34 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     ),
                   ),
                 ),
-              // Date-grouped slivers with sticky headers
-              for (final group in groups)
-                MultiSliver(
-                  pushPinnedChildren: true,
-                  children: [
-                    SliverPinnedHeader(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: _DateHeaderTile(
-                          date: group.date,
-                          dayTotal: group.dayTotal,
-                          baseCurrency: group.baseCurrency,
-                          showTotal: ref.watch(txListSettingsProvider).dateBannerTotal == 'dayTotal',
+              // One card per day: date header, then the rows with hairlines.
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, gi) {
+                      final group = groups[gi];
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: _DayCard(
+                          header: _DateHeaderTile(
+                            date: group.date,
+                            dayTotal: group.dayTotal,
+                            baseCurrency: group.baseCurrency,
+                            showTotal: showDayTotal,
+                          ),
+                          rows: [
+                            for (var i = 0; i < group.entries.length; i++)
+                              _buildTxRow(context, group.entries[i],
+                                  group.entries, i, categoryMap),
+                          ],
                         ),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, i) {
-                            if (i >= group.entries.length) return const SizedBox.shrink();
-                            final e = group.entries[i];
-                            return _buildTxRow(context, e, group.entries, i, categoryMap);
-                          },
-                          childCount: group.entries.length,
-                        ),
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                    childCount: groups.length,
+                  ),
                 ),
+              ),
               // Footer
               SliverToBoxAdapter(
                 child: Padding(
@@ -2042,13 +1965,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Widget _buildTxRow(BuildContext context, TransactionEntry e,
       List<TransactionEntry> siblings, int i, Map<String, Category> categoryMap) {
     final isSelected = _selectedIds.contains(e.tx.id);
-    bool sel(int j) =>
-        j >= 0 && j < siblings.length && _selectedIds.contains(siblings[j].tx.id);
-    const r = Radius.circular(12);
-    final radius = BorderRadius.vertical(
-      top: isSelected && sel(i - 1) ? Radius.zero : r,
-      bottom: isSelected && sel(i + 1) ? Radius.zero : r,
-    );
+    // Rows fill their day card edge to edge (the card clips the corners),
+    // so adjacent selected rows read as one block.
+    const radius = BorderRadius.zero;
 
     final row = AnimatedContainer(
       // Flash for a just-added transaction (fades over 1.5s).
@@ -2085,6 +2004,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               child: TxTile(
                 entry: e,
                 categoryMap: categoryMap,
+                balanceAccountId: _accountFilter,
                 onCategoryTap: _selectionMode
                     ? null
                     : (catId, catName) {
@@ -2105,7 +2025,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     if (_selectionMode) return row;
 
-    final swipeRadius = BorderRadius.circular(12);
+    const swipeRadius = BorderRadius.zero;
     return Dismissible(
       key: ValueKey(e.tx.id),
       direction: DismissDirection.horizontal,
@@ -2478,6 +2398,40 @@ class _SelectCheck extends StatelessWidget {
   }
 }
 
+/// One day of Activity: a card holding the date header and the rows,
+/// separated by hairlines. Clips so swipe and selection fills keep the
+/// card's corners.
+class _DayCard extends StatelessWidget {
+  final Widget header;
+  final List<Widget> rows;
+  const _DayCard({required this.header, required this.rows});
+
+  @override
+  Widget build(BuildContext context) {
+    final edge = AppColors.cardBorder(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        boxShadow: AppColors.cardShadow(context),
+        border: edge == Colors.transparent ? null : Border.all(color: edge),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0)
+              Divider(height: 1, thickness: 1, color: AppColors.bd(context)),
+            rows[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _DateHeaderTile extends StatelessWidget {
   final DateTime date;
   final double dayTotal;
@@ -2492,29 +2446,41 @@ class _DateHeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Clean Cashew-style date header: text-only row, no card wrapper
-    return Container(
-      color: AppColors.bg(context),
-      // Inset matches the row content (12 gutter + 8 row padding).
-      padding: const EdgeInsetsDirectional.fromSTEB(8, 16, 10, 6),
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
           Text(
-            _label(context, date),
+            _name(context),
             style: TextStyle(
-              fontSize: TypographyTokens.dateHeaderSize,
-              fontWeight: TypographyTokens.dateHeaderWeight,
-              color: AppColors.ts(context),
+              fontFamily: TypographyTokens.displayFamily,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: AppColors.tp(context),
             ),
           ),
-          if (showTotal && dayTotal != 0)
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              formatDate(date),
+              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (showTotal && dayTotal.abs() >= 0.005)
             Text(
-              formatSignedAmount(dayTotal.abs(), currency: baseCurrency, type: dayTotal < 0 ? 'expense' : 'income'),
+              dayTotal > 0
+                  ? '+${formatAmount(dayTotal, currency: baseCurrency)}'
+                  : formatAmount(dayTotal, currency: baseCurrency),
               style: TextStyle(
-                fontSize: TypographyTokens.dateHeaderSize,
-                fontWeight: FontWeight.w500,
-                color: dayTotal < 0 ? AppColors.overspent : AppColors.healthy,
+                fontFamily: TypographyTokens.displayFamily,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ts(context),
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
         ],
@@ -2522,42 +2488,148 @@ class _DateHeaderTile extends StatelessWidget {
     );
   }
 
-  String _label(BuildContext context, DateTime date) {
+  /// Today / Yesterday / the weekday.
+  String _name(BuildContext context) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
     final diff = today.difference(d).inDays;
-    if (diff == 0) return '${S.of(context).commonToday}, ${formatDate(date)}';
-    if (diff == 1) return '${S.of(context).commonYesterday}, ${formatDate(date)}';
-    return formatDate(date);
+    if (diff == 0) return S.of(context).commonToday;
+    if (diff == 1) return S.of(context).commonYesterday;
+    return _capitalized(DateFormat.EEEE().format(date));
   }
 }
 
-// ---------------------------------------------------------------------------
-// Summary dot — colored bullet + amount
-// ---------------------------------------------------------------------------
+String _capitalized(String s) =>
+    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
-class _SummaryDot extends StatelessWidget {
-  final Color color;
-  final String label;
+/// Top of Activity: the month's budget — what's left of the spending
+/// envelopes' targets, a gold bar, spent of budgeted and income. A past
+/// month that stayed within budget closes as "September sealed".
+class _MonthBudgetCard extends StatelessWidget {
+  final int year;
+  final int month;
+  final double spent;
+  final double income;
+  final double budgeted;
+  final String currency;
 
-  const _SummaryDot({required this.color, required this.label});
+  const _MonthBudgetCard({
+    required this.year,
+    required this.month,
+    required this.spent,
+    required this.income,
+    required this.budgeted,
+    required this.currency,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    final s = S.of(context);
+    final now = DateTime.now();
+    final isPast = year < now.year || (year == now.year && month < now.month);
+    final monthName =
+        _capitalized(DateFormat.MMMM().format(DateTime(year, month, 15)));
+    String f(double v) => formatAmount(v, currency: currency);
+    final hasBudget = budgeted > 0;
+    final left = budgeted - spent;
+    final over = left < -0.005;
+    final detail = hasBudget
+        ? s.txMonthSpentOf(f(spent), f(budgeted), f(income))
+        : s.txMonthSpent(f(spent), f(income));
+    const tabular = [FontFeature.tabularFigures()];
+    final titleStyle = TextStyle(
+      fontFamily: TypographyTokens.displayFamily,
+      fontWeight: FontWeight.w700,
+      color: AppColors.tp(context),
+    );
+    final edge = AppColors.cardBorder(context);
+    final decoration = BoxDecoration(
+      color: AppColors.sf(context),
+      borderRadius: BorderRadius.circular(CardTokens.radius),
+      boxShadow: AppColors.cardShadow(context),
+      border: edge == Colors.transparent ? null : Border.all(color: edge),
+    );
+    final detailStyle = TextStyle(fontSize: 13, color: AppColors.ts(context));
+
+    // A finished month within its budget: one calm line with the seal.
+    if (isPast && hasBudget && !over) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: decoration,
+        child: Row(
+          children: [
+            const SealMark(size: 34),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.periodSealedTitle(monthName),
+                      style: titleStyle.copyWith(fontSize: 16)),
+                  const SizedBox(height: 2),
+                  Text(detail, style: detailStyle.copyWith(fontSize: 12.5)),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 6),
-        Text(label,
-            style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: color)),
-      ],
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: decoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    hasBudget ? s.txMonthBudget(monthName) : monthName,
+                    style: titleStyle.copyWith(fontSize: 20),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+              if (hasBudget) ...[
+                const SizedBox(width: 12),
+                Text(
+                  over ? s.txImpactOver(f(-left)) : s.txImpactLeft(f(left)),
+                  style: titleStyle.copyWith(
+                    fontSize: 16,
+                    color: over
+                        ? AppColors.overspent
+                        : AppColors.accentText(context),
+                    fontFeatures: tabular,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (hasBudget) ...[
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (spent / budgeted).clamp(0.0, 1.0),
+                minHeight: 8,
+                backgroundColor: AppColors.sfv(context),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    over ? AppColors.overspent : AppColors.accentBright),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(detail, style: detailStyle),
+        ],
+      ),
     );
   }
 }

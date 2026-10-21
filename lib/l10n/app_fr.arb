@@ -5572,5 +5572,11 @@
   "sealFullyFunded": "Entièrement approvisionnée",
   "sealAllSealed": "Tout est scellé",
   "sealAllSealedBody": "Tout votre argent a une mission.",
-  "periodSealedTitle": "{month} scellé"
+  "periodSealedTitle": "{month} scellé",
+  "txImpactLeft": "{amount} restants",
+  "txImpactOver": "dépassé de {amount}",
+  "txImpactNotBudgeted": "Hors budget",
+  "txMonthBudget": "Budget de {month}",
+  "txMonthSpentOf": "Dépensé {spent} sur {budgeted} prévus · revenus {income}",
+  "txMonthSpent": "Dépensé {spent} · revenus {income}"
 }

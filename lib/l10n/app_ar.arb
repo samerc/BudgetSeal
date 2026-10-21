@@ -5572,5 +5572,11 @@
   "sealFullyFunded": "مموّل بالكامل",
   "sealAllSealed": "كلّه مختوم",
   "sealAllSealedBody": "لكل جزء من أموالك مهمّة.",
-  "periodSealedTitle": "تم ختم {month}"
+  "periodSealedTitle": "تم ختم {month}",
+  "txImpactLeft": "متبقٍّ {amount}",
+  "txImpactOver": "تجاوز بـ {amount}",
+  "txImpactNotBudgeted": "خارج الميزانية",
+  "txMonthBudget": "ميزانية {month}",
+  "txMonthSpentOf": "أُنفق {spent} من {budgeted} مخصّصة · الدخل {income}",
+  "txMonthSpent": "أُنفق {spent} · الدخل {income}"
 }

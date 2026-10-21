@@ -7438,4 +7438,32 @@ class SEn extends S {
   String periodSealedTitle(String month) {
     return '$month sealed';
   }
+
+  @override
+  String txImpactLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String txImpactOver(String amount) {
+    return 'over by $amount';
+  }
+
+  @override
+  String get txImpactNotBudgeted => 'Not budgeted';
+
+  @override
+  String txMonthBudget(String month) {
+    return '$month budget';
+  }
+
+  @override
+  String txMonthSpentOf(String spent, String budgeted, String income) {
+    return 'Spent $spent of $budgeted budgeted · income $income';
+  }
+
+  @override
+  String txMonthSpent(String spent, String income) {
+    return 'Spent $spent · income $income';
+  }
 }

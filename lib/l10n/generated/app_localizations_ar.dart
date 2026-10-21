@@ -7463,4 +7463,32 @@ class SAr extends S {
   String periodSealedTitle(String month) {
     return 'تم ختم $month';
   }
+
+  @override
+  String txImpactLeft(String amount) {
+    return 'متبقٍّ $amount';
+  }
+
+  @override
+  String txImpactOver(String amount) {
+    return 'تجاوز بـ $amount';
+  }
+
+  @override
+  String get txImpactNotBudgeted => 'خارج الميزانية';
+
+  @override
+  String txMonthBudget(String month) {
+    return 'ميزانية $month';
+  }
+
+  @override
+  String txMonthSpentOf(String spent, String budgeted, String income) {
+    return 'أُنفق $spent من $budgeted مخصّصة · الدخل $income';
+  }
+
+  @override
+  String txMonthSpent(String spent, String income) {
+    return 'أُنفق $spent · الدخل $income';
+  }
 }

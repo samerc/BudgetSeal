@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/providers/budget_impact_provider.dart';
 import '../../../core/providers/date_format_provider.dart';
 import '../../../core/providers/transactions_provider.dart';
 import '../../../core/providers/tx_colors_provider.dart';
@@ -15,9 +16,13 @@ import '../../../shared/utils/receipt_helper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/utils/note_text.dart';
 import '../../../shared/theme/app_icons.dart';
+import '../../allocations/move_money_sheet.dart';
 
 // ---------------------------------------------------------------------------
-// Transaction tile — Cashew transactionEntry layout. Shared by the Activity
+// Transaction row — BudgetSeal's own: what the transaction did to the budget.
+// Title, then its budget impact ("Food & drink · $142.80 left", over by +
+// Cover, Not budgeted, → Ready to assign, Bank → Cash); on the end the
+// amount and the account's balance right after it. Shared by the Activity
 // list and the dashboard's recent transactions.
 // ---------------------------------------------------------------------------
 
@@ -25,6 +30,7 @@ class TxTile extends ConsumerWidget {
   final TransactionEntry entry;
   final Map<String, Category> categoryMap;
   final void Function(String catId, String catName)? onCategoryTap;
+
   /// Overrides the default tap (open detail) — used by selection mode.
   final VoidCallback? onTap;
 
@@ -35,8 +41,12 @@ class TxTile extends ConsumerWidget {
   /// dashboard, where balances are only approximate.
   final bool showBalance;
 
-  /// Show the transaction date in the subtitle (lists without date headers).
+  /// Show the transaction date under the amount (lists without date headers).
   final bool showDate;
+
+  /// The list shows one account (account filter): its balance is shown
+  /// without the account's name, and a transfer shows that side.
+  final String? balanceAccountId;
 
   const TxTile({
     super.key,
@@ -47,265 +57,452 @@ class TxTile extends ConsumerWidget {
     this.onLongPress,
     this.showBalance = true,
     this.showDate = false,
+    this.balanceAccountId,
   });
+
+  static const _tabular = [FontFeature.tabularFigures()];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     final tx = entry.tx;
     final txColors = ref.watch(txColorsProvider);
     final listSettings = ref.watch(txListSettingsProvider);
     final isTransfer = tx.type == 'transfer';
-    final typeColor = txColors.forType(tx.type);
+    final isIncome = tx.type == 'income';
+    final impact = tx.type == 'expense'
+        ? ref.watch(txEnvelopeImpactProvider.select((m) => m.value?[tx.id]))
+        : null;
 
-    // Resolve category
     final cat = _resolveCategory();
     final catName = cat?.name;
     final catColor =
         cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent;
+    final title = _title(s, catName);
+    final amount = _displayAmount();
 
-    // For transfers, build a Cashew-style 2-line display
-    final String displayName;
-    final String? note;
-    final String? transferFrom;
-    final String? transferTo;
-    final double? transferDestAmt;
-    final String? transferDestCcy;
-    if (isTransfer) {
-      transferFrom = entry.accountName.isNotEmpty ? entry.accountName : 'account';
-      transferTo = entry.destinationAccountName ?? 'account';
-      final arrow = Directionality.of(context) == TextDirection.rtl ? '←' : '→';
-      displayName = '$transferFrom $arrow $transferTo';
-      note = tx.note.isNotEmpty ? visibleNote(tx.note) : null;
-      transferDestAmt = tx.amount * tx.exchangeRateToBase;
-      transferDestCcy = entry.destinationAccountCurrency ?? tx.currency;
-    } else {
-      transferFrom = null;
-      transferTo = null;
-      transferDestAmt = null;
-      transferDestCcy = null;
-      displayName = _buildDisplayName(context, catName);
-      note = _buildNote(catName);
-    }
-    final notePreview = _buildNotePreview(catName, displayName);
+    // Expenses in the normal text color (red is kept for overspending),
+    // income green with a "+", transfers grey.
+    final amountColor = isIncome
+        ? txColors.income
+        : isTransfer
+            ? AppColors.ts(context)
+            : AppColors.tp(context);
+    final amountText = isIncome
+        ? '+${formatAmount(amount.value, currency: amount.currency)}'
+        : formatAmount(amount.value, currency: amount.currency);
 
     return Semantics(
-      label: '$displayName, ${formatSignedAmount(tx.amount, currency: tx.currency, type: tx.type)}, ${tx.type}',
-      hint: S.of(context).txLongPressHint,
+      label: '$title, $amountText, ${_typeLabel(s, tx.type)}',
+      hint: s.txLongPressHint,
       button: true,
-      // Cashew transactionEntry: ripple row, radius 12, inner padding 8/10.
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap ?? () => context.push('/transactions/${tx.id}'),
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 10, 8),
-          child: Row(
-            children: [
-              // ── Circular category icon (tap to filter #5) ─────
-            if (listSettings.showCategoryIcon) ...[
-              if (isTransfer)
-                Container(
-                  width: CategoryIconTokens.listSize,
-                  height: CategoryIconTokens.listSize,
-                  decoration: BoxDecoration(
-                    color: AppColors.pastel(context, typeColor),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    AppIcons.arrowsLeftRight,
-                    color: AppColors.pastel(context, typeColor,
-                        light: 0.5, dark: 0.5, inverse: true),
-                    size: 24,
-                  ),
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    final catId = cat?.id;
-                    if (catId != null && onCategoryTap != null) {
-                      onCategoryTap!(
-                          catId, catName ?? S.of(context).commonUncategorized);
-                    }
-                  },
-                  child: Hero(
-                    tag: 'tx_${tx.id}',
-                    child: CategoryIcon(
-                      categoryName: catName ?? '',
-                      emoji: cat?.icon,
-                      color: catColor,
-                      size: CategoryIconTokens.listSize,
-                      circular: true,
-                    ),
+          onTap: onTap ?? () => context.push('/transactions/${tx.id}'),
+          onLongPress: onLongPress,
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+                16,
+                listSettings.compact ? 7 : 10,
+                16,
+                listSettings.compact ? 7 : 10),
+            child: Row(
+              children: [
+                if (listSettings.showCategoryIcon) ...[
+                  _icon(context, cat, catName, catColor, isTransfer,
+                      txColors.forType(tx.type)),
+                  const SizedBox(width: 12),
+                ],
+                // Two aligned lines: title | amount, impact | balance.
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tp(context),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (tx.receiptPath != null &&
+                              tx.receiptPath!.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                  start: 6, end: 8),
+                              child: _receiptMark(context),
+                            ),
+                          const SizedBox(width: 8),
+                          Text(
+                            amountText,
+                            style: TextStyle(
+                              fontFamily: TypographyTokens.displayFamily,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: amountColor,
+                              fontFeatures: _tabular,
+                            ),
+                          ),
+                        ],
+                      ),
+                      ..._secondLine(context, ref, s, impact, catName, title,
+                          listSettings, amount),
+                    ],
                   ),
                 ),
-              const SizedBox(width: 12),
-            ],
-            // ── Name + note (or transfer sub-rows) ──────────────
-            Expanded(
-              child: isTransfer
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title: "AccountA → AccountB"
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Source account line
-                        _transferSubRow(
-                          context,
-                          transferFrom!,
-                          tx.amount,
-                          tx.currency,
-                          txColors.expense,
-                        ),
-                        const SizedBox(height: 2),
-                        // Destination account line
-                        _transferSubRow(
-                          context,
-                          transferTo!,
-                          transferDestAmt!,
-                          transferDestCcy!,
-                          txColors.income,
-                        ),
-                        if (note != null) ...[
-                          const SizedBox(height: 2),
-                          Text(note,
-                              style: TextStyle(
-                                  fontSize: 11, color: AppColors.th(context)),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                        ],
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (!listSettings.compact) ...[
-                          if (note != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              note,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                color: AppColors.ts(context),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          if (notePreview != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              notePreview,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.th(context),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                        if (showDate) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            formatDate(tx.createdAt.toLocal()),
-                            style: TextStyle(
-                                fontSize: 12, color: AppColors.th(context)),
-                          ),
-                        ],
-                        // Account label + time
-                        if (!showDate &&
-                            (listSettings.showAccount || listSettings.showTime)) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            [
-                              if (listSettings.showAccount && entry.accountName.isNotEmpty)
-                                entry.accountName,
-                              if (listSettings.showTime)
-                                // Follows the phone's 12/24-hour setting.
-                                TimeOfDay.fromDateTime(tx.createdAt)
-                                    .format(context),
-                            ].join(' · '),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.th(context),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+              ],
             ),
-            // ── Receipt indicator ────────────────────────────────
-            if (tx.receiptPath != null && tx.receiptPath!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 6),
-                child: () {
-                  final receiptCount = parseReceiptPaths(tx.receiptPath).length;
-                  if (receiptCount > 1) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(AppIcons.receipt,
-                            size: 14, color: AppColors.th(context)),
-                        PositionedDirectional(
-                          top: -6,
-                          end: -8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: AppColors.accent,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '$receiptCount',
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.onAccent),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return Icon(AppIcons.receipt,
-                      size: 14, color: AppColors.th(context));
-                }(),
-              ),
-            // ── Amount (right-aligned #3) — hidden for transfers (shown inline)
-            if (!isTransfer)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildAmountColumn(context, ref, typeColor),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  // ── Icon: 44 px rounded square, category pastel ─────────────────
+  Widget _icon(BuildContext context, Category? cat, String? catName,
+      Color catColor, bool isTransfer, Color typeColor) {
+    const size = 44.0;
+    if (isTransfer) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: AppColors.pastel(context, typeColor),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(
+          AppIcons.arrowsLeftRight,
+          color: AppColors.pastel(context, typeColor,
+              light: 0.5, dark: 0.5, inverse: true),
+          size: 22,
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () {
+        final catId = cat?.id;
+        if (catId != null && onCategoryTap != null) {
+          onCategoryTap!(catId, catName ?? S.of(context).commonUncategorized);
+        }
+      },
+      child: Hero(
+        tag: 'tx_${entry.tx.id}',
+        child: CategoryIcon(
+          categoryName: catName ?? '',
+          emoji: cat?.icon,
+          color: catColor,
+          size: size,
+        ),
       ),
+    );
+  }
+
+  // ── Second line: the budget impact ──────────────────────────────
+  Widget _impactLine(
+      BuildContext context,
+      WidgetRef ref,
+      S s,
+      EnvelopeImpact? impact,
+      String? catName,
+      String title,
+      TxListSettings settings) {
+    final tx = entry.tx;
+    final ts = AppColors.ts(context);
+    final base = TextStyle(fontSize: 12.5, color: ts);
+    final time = settings.showTime
+        ? TimeOfDay.fromDateTime(tx.createdAt.toLocal()).format(context)
+        : null;
+    final children = <Widget>[];
+
+    if (tx.type == 'transfer') {
+      final arrow = Directionality.of(context) == TextDirection.rtl ? '←' : '→';
+      final from = entry.accountName;
+      final to = entry.destinationAccountName ?? '';
+      var text = '$from $arrow $to';
+      final destCcy = entry.destinationAccountCurrency ?? tx.currency;
+      if (destCcy != _displayAmount().currency &&
+          (tx.exchangeRateToBase - 1.0).abs() > 0.001) {
+        text +=
+            ' · ${formatAmount(tx.amount * tx.exchangeRateToBase, currency: destCcy)}';
+      }
+      children.add(Flexible(
+        child: Text(text,
+            style: base, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ));
+    } else if (tx.type == 'income') {
+      children.add(Flexible(
+          child: _pill(
+        context,
+        fill: AppColors.accentLight,
+        ink: AppColors.accentText(context),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(AppIcons.arrowRight,
+                size: 11, color: AppColors.accentText(context)),
+            const SizedBox(width: 3),
+            Flexible(child: Text(s.allocReadyToAssign)),
+          ],
+        ),
+      )));
+    } else if (impact != null) {
+      final amt =
+          formatAmount(impact.balanceAfter.abs(), currency: impact.currency);
+      final name = impact.envelopeCount > 1
+          ? '${impact.name} +${impact.envelopeCount - 1}'
+          : impact.name;
+      final color = impact.overspent ? AppColors.overspent : ts;
+      children
+        ..add(Icon(AppIcons.envelopeSimple, size: 13, color: color))
+        ..add(const SizedBox(width: 5));
+      if (impact.overspent) {
+        children.add(Flexible(
+          child: Text('$name · ${s.txImpactOver(amt)}',
+              style: base.copyWith(color: color, fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
+        ));
+        if (impact.stillOverspent && onTap == null) {
+          children
+            ..add(const SizedBox(width: 6))
+            ..add(_pill(
+              context,
+              fill: AppColors.overspent,
+              ink: AppColors.inkOn(AppColors.overspent),
+              child: Text(s.allocCoverButton),
+              onTap: () => showMoveMoneySheet(context, ref,
+                  toId: impact.allocationId,
+                  currency: impact.currency,
+                  amount: -impact.balanceNow,
+                  cover: true),
+            ));
+        }
+      } else {
+        // "Food & drink · $142.80 left" with the amount in bold.
+        final left = s.txImpactLeft(amt);
+        final at = left.indexOf(amt);
+        children.add(Flexible(
+          child: Text.rich(
+            TextSpan(children: [
+              TextSpan(text: '$name · '),
+              if (at >= 0) ...[
+                TextSpan(text: left.substring(0, at)),
+                TextSpan(
+                    text: amt,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tp(context))),
+                TextSpan(text: left.substring(at + amt.length)),
+              ] else
+                TextSpan(text: left),
+            ]),
+            style: base,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ));
+      }
+    } else {
+      // An expense no envelope paid for.
+      if (catName != null && catName != title) {
+        children
+          ..add(Flexible(
+            child: Text(catName,
+                style: base, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ))
+          ..add(const SizedBox(width: 6));
+      }
+      children.add(Flexible(
+        child: _pill(
+          context,
+          fill: AppColors.pastel(context, AppColors.caution,
+              light: 0.85, dark: 0.78),
+          ink: AppColors.caution,
+          child: Text(s.txImpactNotBudgeted),
+        ),
+      ));
+    }
+
+    if (time != null) {
+      children.add(Text(' · $time', style: base));
+    }
+    return Row(children: children);
+  }
+
+  Widget _pill(BuildContext context,
+      {required Color fill,
+      required Color ink,
+      required Widget child,
+      VoidCallback? onTap}) {
+    final body = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1.5),
+      child: DefaultTextStyle.merge(
+        style:
+            TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: ink),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        child: child,
       ),
+    );
+    return Material(
+      color: fill,
+      shape: const StadiumBorder(),
+      child: onTap == null
+          ? body
+          : InkWell(
+              customBorder: const StadiumBorder(), onTap: onTap, child: body),
+    );
+  }
+
+  /// Impact on the start, balance after (or date) on the end; then the
+  /// base-currency value and "No rate" under the amount when they apply.
+  List<Widget> _secondLine(
+      BuildContext context,
+      WidgetRef ref,
+      S s,
+      EnvelopeImpact? impact,
+      String? catName,
+      String title,
+      TxListSettings settings,
+      ({double value, String currency}) amount) {
+    final under = _underAmount(context, s, amount);
+    final end = under.isEmpty ? null : under.first;
+    final showImpact = !settings.compact;
+    if (!showImpact && !showBalance && !showDate) return const [];
+    return [
+      const SizedBox(height: 4),
+      LayoutBuilder(
+          builder: (context, box) => Row(
+                children: [
+                  if (showImpact)
+                    Expanded(
+                      child: _impactLine(
+                          context, ref, s, impact, catName, title, settings),
+                    )
+                  else
+                    const Spacer(),
+                  if (end != null) ...[
+                    const SizedBox(width: 8),
+                    // Long balances (LBP) give way before the impact does.
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: box.maxWidth * 0.4),
+                      child: DefaultTextStyle.merge(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: end,
+                      ),
+                    ),
+                  ],
+                ],
+              )),
+      for (final w in under.skip(1))
+        Align(alignment: AlignmentDirectional.centerEnd, child: w),
+    ];
+  }
+
+  // ── Under the amount: balance after / date / conversion ─────────
+  List<Widget> _underAmount(
+      BuildContext context, S s, ({double value, String currency}) amount) {
+    final tx = entry.tx;
+    final lines = entry.lines;
+    final isTransfer = tx.type == 'transfer';
+    final small = TextStyle(
+        fontSize: 11.5, color: AppColors.ts(context), fontFeatures: _tabular);
+    final out = <Widget>[];
+
+    // A foreign line saved without a rate is left out of totals and reports
+    // — flag it so the user can open it and add one.
+    final missingRate = !isTransfer &&
+        lines.any(
+            (l) => !isRealRate(l.currency, tx.currency, l.exchangeRateToBase));
+
+    if (showDate) {
+      out.add(Text(formatDate(tx.createdAt.toLocal()), style: small));
+    } else if (!showBalance) {
+      out.add(const SizedBox.shrink());
+    } else {
+      final single = entry.involvedAccountNames.length <= 1;
+      if (isTransfer || single) {
+        // A transfer shows the destination (where the money is now),
+        // unless the list is filtered to the source account.
+        final dest = isTransfer &&
+            entry.destinationAccountBalanceAfter != null &&
+            balanceAccountId != tx.accountId;
+        final name = dest ? entry.destinationAccountName : entry.accountName;
+        final bal = formatAmount(
+            dest
+                ? entry.destinationAccountBalanceAfter!
+                : entry.accountBalanceAfter,
+            currency: dest
+                ? (entry.destinationAccountCurrency ?? tx.currency)
+                : entry.accountCurrency);
+        out.add(_BalanceText(
+            name: balanceAccountId != null ? null : name,
+            balance: bal,
+            style: small));
+      } else {
+        out.add(Text(s.txNAccounts(entry.involvedAccountNames.length),
+            style: small));
+      }
+    }
+
+    // Foreign amount: its value in the base currency.
+    final hasRealConversion =
+        lines.any((l) => (l.exchangeRateToBase - 1.0).abs() > 0.001);
+    if (!isTransfer && amount.currency != tx.currency && hasRealConversion) {
+      out.add(Text('≈ ${formatAmount(tx.amount, currency: tx.currency)}',
+          style: small));
+    }
+    if (missingRate) {
+      out.add(Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: _pill(
+          context,
+          fill: AppColors.pastel(context, AppColors.caution,
+              light: 0.85, dark: 0.78),
+          ink: AppColors.caution,
+          child: Text(s.txNoRate, style: const TextStyle(fontSize: 9.5)),
+        ),
+      ));
+    }
+    return out;
+  }
+
+  Widget _receiptMark(BuildContext context) {
+    final count = parseReceiptPaths(entry.tx.receiptPath).length;
+    final icon = Icon(AppIcons.receipt, size: 14, color: AppColors.th(context));
+    if (count <= 1) return icon;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        icon,
+        PositionedDirectional(
+          top: -6,
+          end: -8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            decoration: BoxDecoration(
+              color: AppColors.accent,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$count',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onAccent),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -321,274 +518,94 @@ class TxTile extends ConsumerWidget {
     return null;
   }
 
-  String _buildDisplayName(BuildContext context, String? catName) {
+  /// The payee/note when there is one ("Carrefour"), else the category,
+  /// else the split's categories, else the type.
+  String _title(S s, String? catName) {
     final tx = entry.tx;
     final lines = entry.lines;
-
-    if (catName != null) return catName;
-
-    // Multi-line: show first category names
+    final note = visibleNote(tx.note).trim();
+    if (note.isNotEmpty) return note;
+    if (lines.length == 1 && lines.first.note.trim().isNotEmpty) {
+      return lines.first.note.trim();
+    }
+    if (tx.type == 'transfer') return s.typeTransfer;
     if (lines.length > 1) {
       final names = lines
-          .take(2)
           .map((l) =>
               l.categoryId != null ? categoryMap[l.categoryId]?.name : null)
           .whereType<String>()
+          .toSet()
+          .take(2)
           .toList();
-      if (names.isEmpty) return S.of(context).txNItems(lines.length);
+      if (names.isEmpty) return s.txNItems(lines.length);
       final extra = lines.length - names.length;
       return extra > 0
-          ? '${names.join(', ')} ${S.of(context).txNMore(extra)}'
+          ? '${names.join(', ')} ${s.txNMore(extra)}'
           : names.join(', ');
     }
-
-    if (tx.note.isNotEmpty) return visibleNote(tx.note);
-    return _typeLabel(context, tx.type);
+    return catName ?? _typeLabel(s, tx.type);
   }
 
-  String? _buildNote(String? catName) {
+  /// The amount in the line's own currency (all lines in one foreign
+  /// currency → their total; mixed → base total of lines with a rate).
+  ({double value, String currency}) _displayAmount() {
     final tx = entry.tx;
     final lines = entry.lines;
-
-    // If we have a category name, show note as subtitle (if any)
-    if (catName != null && tx.note.isNotEmpty) {
-      return visibleNote(tx.note);
+    if (tx.type == 'transfer' || lines.isEmpty) {
+      return (value: tx.amount, currency: tx.currency);
     }
-
-    // Show account name as subtitle if we have a display name already
-    final involvedAccounts = entry.involvedAccountNames;
-    if (involvedAccounts.length > 1) {
-      return involvedAccounts.join(' · ');
-    }
-
-    // Show single line note if different from display name
-    if (lines.isNotEmpty && lines.first.note.isNotEmpty && catName != null) {
-      return lines.first.note;
-    }
-
-    return null;
-  }
-
-  /// Note preview (#7): show tx note as a third line if it isn't already
-  /// used as the display name or the subtitle from _buildNote.
-  String? _buildNotePreview(String? catName, String displayName) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-    if (tx.note.isEmpty && (lines.isEmpty || lines.first.note.isEmpty)) {
-      return null;
-    }
-    // If note is already the display name, skip
-    if (tx.note == displayName) return null;
-    // If _buildNote already returns the tx.note as subtitle, skip
-    if (catName != null && tx.note.isNotEmpty) return null;
-    // Show line-level note if it exists and differs from display
-    if (lines.isNotEmpty && lines.first.note.isNotEmpty) {
-      final lineNote = lines.first.note;
-      if (lineNote != displayName) return lineNote;
-    }
-    // Show tx note as preview if it exists and not shown elsewhere
-    if (tx.note.isNotEmpty) return visibleNote(tx.note);
-    return null;
-  }
-
-  Widget _transferSubRow(
-    BuildContext context,
-    String accountName,
-    double amount,
-    String currency,
-    Color dotColor,
-  ) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: dotColor.withValues(alpha: 0.7),
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            accountName,
-            style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Text(
-          '• ${formatAmount(amount, currency: currency)}',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.tp(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildAmountColumn(BuildContext context, WidgetRef ref, Color typeColor) {
-    final tx = entry.tx;
-    final lines = entry.lines;
-    final isTransfer = tx.type == 'transfer';
-
-    String displayCurrency = tx.currency;
-    double displayAmount = tx.amount;
-
     if (lines.length == 1) {
-      // Single line: show in the line's native currency
-      displayCurrency = lines.first.currency;
-      displayAmount = lines.first.amount;
-    } else if (lines.length > 1) {
-      // Multi-line: check if all lines share the same currency
-      final currencies = lines.map((l) => l.currency).toSet();
-      if (currencies.length == 1 && currencies.first != tx.currency) {
-        // All lines same foreign currency — show total in that currency
-        displayCurrency = currencies.first;
-        displayAmount = lines.fold(0.0, (s, l) => s + l.amount);
-      } else {
-        // Mixed currencies: compute base total, skipping lines with unset rate
-        double baseTotal = 0;
-        for (final l in lines) {
-          if (l.currency == tx.currency) {
-            baseTotal += l.amount;
-          } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
-            baseTotal += l.amount * l.exchangeRateToBase;
-          }
-        }
-        displayAmount = baseTotal;
+      return (value: lines.first.amount, currency: lines.first.currency);
+    }
+    final currencies = lines.map((l) => l.currency).toSet();
+    if (currencies.length == 1) {
+      return (
+        value: lines.fold(0.0, (s, l) => s + l.amount),
+        currency: currencies.first,
+      );
+    }
+    double baseTotal = 0;
+    for (final l in lines) {
+      if (l.currency == tx.currency) {
+        baseTotal += l.amount;
+      } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
+        baseTotal += l.amount * l.exchangeRateToBase;
       }
     }
-
-    // For transfers: show source amount in source currency
-    // with destination amount as conversion badge
-    final destAmount = isTransfer ? tx.amount * tx.exchangeRateToBase : 0.0;
-    final destCurrency = isTransfer
-        ? (entry.destinationAccountCurrency ?? tx.currency)
-        : tx.currency;
-
-    final baseCurrency = tx.currency;
-    final baseAmount = tx.amount;
-    // Only show conversion badge if currencies differ AND at least one line
-    // has a real exchange rate (not the default 1.0).
-    final hasRealConversion = lines.isNotEmpty &&
-        lines.any((l) => (l.exchangeRateToBase - 1.0).abs() > 0.001);
-    final showConversion =
-        !isTransfer && displayCurrency != baseCurrency && hasRealConversion;
-    // For transfers: show destination currency if different
-    final showTransferConversion = isTransfer &&
-        destCurrency != displayCurrency &&
-        (tx.exchangeRateToBase - 1.0).abs() > 0.001;
-
-    final effectiveType = tx.type;
-    // A foreign line saved without a rate is left out of totals and reports
-    // — flag it so the user can open it and add one.
-    final missingRate = !isTransfer &&
-        lines.any((l) =>
-            !isRealRate(l.currency, baseCurrency, l.exchangeRateToBase));
-
-    // Show running balance only when a single account is involved
-    final isSingleAccount = entry.involvedAccountNames.length <= 1;
-
-    return [
-      // Amount right-aligned (#3)
-      Text(
-        formatSignedAmount(displayAmount, currency: displayCurrency, type: effectiveType),
-        textAlign: TextAlign.end,
-        style: TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 18,
-          color: typeColor,
-        ),
-      ),
-      // Multi-currency badge (#8) — show pill instead of full conversion text
-      if (showConversion)
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.accent,
-                      light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  displayCurrency,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                formatAmount(baseAmount, currency: baseCurrency),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.th(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      if (missingRate)
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-            decoration: BoxDecoration(
-              color: AppColors.pastel(context, AppColors.caution,
-                  light: 0.85, dark: 0.78),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              S.of(context).txNoRate,
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: AppColors.caution,
-              ),
-            ),
-          ),
-        ),
-      // Transfer: show destination amount if cross-currency
-      if (showTransferConversion)
-        Text(
-          '→ ${formatAmount(destAmount, currency: destCurrency)}',
-          textAlign: TextAlign.end,
-          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-        ),
-      if (showBalance && (isSingleAccount || isTransfer))
-        Text(
-          '${entry.accountName}: ${formatAmount(entry.accountBalanceAfter, currency: entry.accountCurrency)}',
-          textAlign: TextAlign.end,
-          style: TextStyle(fontSize: 11, color: AppColors.th(context)),
-        ),
-      if (showBalance && !isSingleAccount)
-        Text(
-          S.of(context).txNAccounts(entry.involvedAccountNames.length),
-          textAlign: TextAlign.end,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppColors.th(context),
-          ),
-        ),
-    ];
+    return (value: baseTotal, currency: tx.currency);
   }
 
-  String _typeLabel(BuildContext context, String type) => switch (type) {
-        'income' => S.of(context).typeIncome,
-        'expense' => S.of(context).typeExpense,
-        'transfer' => S.of(context).typeTransfer,
+  String _typeLabel(S s, String type) => switch (type) {
+        'income' => s.typeIncome,
+        'expense' => s.typeExpense,
+        'transfer' => s.typeTransfer,
         _ => type,
       };
+}
+
+/// "Bank · $5,260.80" when it fits; when space is short the account name
+/// goes first and the amount stays whole as long as it can.
+class _BalanceText extends StatelessWidget {
+  final String? name;
+  final String balance;
+  final TextStyle style;
+  const _BalanceText(
+      {required this.name, required this.balance, required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, box) {
+      final full = name == null || name!.isEmpty ? balance : '$name · $balance';
+      final painter = TextPainter(
+        text: TextSpan(text: full, style: style),
+        maxLines: 1,
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final fits = painter.width <= box.maxWidth;
+      painter.dispose();
+      return Text(fits ? full : balance,
+          style: style, maxLines: 1, overflow: TextOverflow.ellipsis);
+    });
+  }
 }

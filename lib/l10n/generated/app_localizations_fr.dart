@@ -7524,4 +7524,32 @@ class SFr extends S {
   String periodSealedTitle(String month) {
     return '$month scellé';
   }
+
+  @override
+  String txImpactLeft(String amount) {
+    return '$amount restants';
+  }
+
+  @override
+  String txImpactOver(String amount) {
+    return 'dépassé de $amount';
+  }
+
+  @override
+  String get txImpactNotBudgeted => 'Hors budget';
+
+  @override
+  String txMonthBudget(String month) {
+    return 'Budget de $month';
+  }
+
+  @override
+  String txMonthSpentOf(String spent, String budgeted, String income) {
+    return 'Dépensé $spent sur $budgeted prévus · revenus $income';
+  }
+
+  @override
+  String txMonthSpent(String spent, String income) {
+    return 'Dépensé $spent · revenus $income';
+  }
 }

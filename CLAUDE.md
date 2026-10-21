@@ -867,9 +867,12 @@ The brand's wax seal (`shared/widgets/seal_mark.dart`: `SealMark` painted scallo
 
 Both the assisted flow and classic form check for duplicate transactions before saving. If a transaction with the same amount, category, and date already exists, a "Possible Duplicate" dialog shows the matched transaction's title, amount, and date so the user can compare before confirming. Skipped when editing existing transactions or for transfers.
 
-## Transfer Display
+## Activity List (BudgetSeal's own, Oct 2026)
 
-Transfers render as a single row in the transaction list (not two rows). Shows "Source → Destination" as the title with two sub-lines: source account with amount (red dot) and destination account with converted amount (green dot). Amounts shown in each account's native currency.
+The list answers "what did this do to my budget" (no longer Cashew's rows):
+- **Month card** (`_MonthBudgetCard`, first sliver unless filters/all months): "<Month> budget" + "$X left"/"over by", gold 8 px bar, "Spent A of B budgeted · income C". Budgeted = targets of **spending** envelopes in the base currency; spent/income = the month's base-currency totals. A past month within budget collapses to "<Month> sealed" with `SealMark`. With filters, `_MonthlySummaryBar` (filtered totals) shows instead.
+- **Day cards** (`_DayCard`): one card per day (sf, radius 16, card shadow, clips), `_DateHeaderTile` = Today/Yesterday/weekday in Bricolage + date + day net (grey, follows `dateBannerTotal`), rows split by `bd` hairlines. No sticky headers. Rows are edge to edge (selection and swipe fills have no radius; the card clips).
+- **`TxTile`**: 44 px rounded-square icon; title = note/payee, else category, else split categories, else type; second line = budget impact from `txEnvelopeImpactProvider` (`core/providers/budget_impact_provider.dart`): one watched query over the household's ledger replayed per envelope+currency in time order (consumption at its transaction's date, other rows at their own time) → "Envelope · **$X** left", red "over by $X" + Cover pill (only while `balanceNow` < 0, not in selection mode; opens `showMoveMoneySheet(cover: true)`), amber "Not budgeted" (expense with no consumption row), income → accent "→ Ready to assign" pill, transfer "Bank → Cash". End column: amount in Bricolage 16 tabular (expense = text color, income green "+", transfer grey), then "Account · balance after" (transfer: destination side), date instead when `showDate` (dashboard), "≈ base" for foreign lines, "No rate" pill. `balanceAccountId` (the Activity account filter) drops the name and shows that account's side of a transfer. `compact` hides the impact line; `showTime` appends the time.
 
 ## Theme System
 

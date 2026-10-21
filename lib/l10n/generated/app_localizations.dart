@@ -13191,6 +13191,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{month} sealed'**
   String periodSealedTitle(String month);
+
+  /// Activity row: envelope balance right after the expense, e.g. "$142.80 left" (the envelope name is shown before it)
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String txImpactLeft(String amount);
+
+  /// Activity row / month card: how far below zero, e.g. "over by $8.00"
+  ///
+  /// In en, this message translates to:
+  /// **'over by {amount}'**
+  String txImpactOver(String amount);
+
+  /// Activity row pill: expense whose category has no envelope
+  ///
+  /// In en, this message translates to:
+  /// **'Not budgeted'**
+  String get txImpactNotBudgeted;
+
+  /// Activity month card title, e.g. "October budget"
+  ///
+  /// In en, this message translates to:
+  /// **'{month} budget'**
+  String txMonthBudget(String month);
+
+  /// Activity month card line
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {spent} of {budgeted} budgeted · income {income}'**
+  String txMonthSpentOf(String spent, String budgeted, String income);
+
+  /// Activity month card line when no envelope has a target
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {spent} · income {income}'**
+  String txMonthSpent(String spent, String income);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

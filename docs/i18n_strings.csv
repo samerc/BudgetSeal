@@ -2505,3 +2505,9 @@ seal_fully_funded,Envelope detail: shown next to the seal when the envelope reac
 seal_all_sealed,Ready to assign banner when every bit of money is in an envelope,All sealed,كلّه مختوم,Tout est scellé
 seal_all_sealed_body,Ready to assign banner subtitle when all money is assigned,Every bit of your money has a job.,لكل جزء من أموالك مهمّة.,Tout votre argent a une mission.
 period_sealed_title,"Budget tab: card in the first week of a period about the last one, e.g. ""September sealed""",{month} sealed,تم ختم {month},{month} scellé
+tx_impact_left,"Activity row: envelope balance right after the expense, e.g. ""$142.80 left"" (the envelope name is shown before it)",{amount} left,متبقٍّ {amount},{amount} restants
+tx_impact_over,"Activity row / month card: how far below zero, e.g. ""over by $8.00""",over by {amount},تجاوز بـ {amount},dépassé de {amount}
+tx_impact_not_budgeted,Activity row pill: expense whose category has no envelope,Not budgeted,خارج الميزانية,Hors budget
+tx_month_budget,"Activity month card title, e.g. ""October budget""",{month} budget,ميزانية {month},Budget de {month}
+tx_month_spent_of,Activity month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
+tx_month_spent,Activity month card line when no envelope has a target,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}

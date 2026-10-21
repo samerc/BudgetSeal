@@ -6158,6 +6158,18 @@
   "sealAllSealedBody": "Every bit of your money has a job.",
   "@sealAllSealedBody": { "description": "Ready to assign banner subtitle when all money is assigned" },
   "periodSealedTitle": "{month} sealed",
-  "@periodSealedTitle": { "description": "Budget tab: card in the first week of a period about the last one, e.g. \"September sealed\"", "placeholders": { "month": { "type": "String" } } }
+  "@periodSealedTitle": { "description": "Budget tab: card in the first week of a period about the last one, e.g. \"September sealed\"", "placeholders": { "month": { "type": "String" } } },
+  "txImpactLeft": "{amount} left",
+  "@txImpactLeft": { "description": "Activity row: envelope balance right after the expense, e.g. \"$142.80 left\" (the envelope name is shown before it)", "placeholders": { "amount": { "type": "String" } } },
+  "txImpactOver": "over by {amount}",
+  "@txImpactOver": { "description": "Activity row / month card: how far below zero, e.g. \"over by $8.00\"", "placeholders": { "amount": { "type": "String" } } },
+  "txImpactNotBudgeted": "Not budgeted",
+  "@txImpactNotBudgeted": { "description": "Activity row pill: expense whose category has no envelope" },
+  "txMonthBudget": "{month} budget",
+  "@txMonthBudget": { "description": "Activity month card title, e.g. \"October budget\"", "placeholders": { "month": { "type": "String" } } },
+  "txMonthSpentOf": "Spent {spent} of {budgeted} budgeted · income {income}",
+  "@txMonthSpentOf": { "description": "Activity month card line", "placeholders": { "spent": { "type": "String" }, "budgeted": { "type": "String" }, "income": { "type": "String" } } },
+  "txMonthSpent": "Spent {spent} · income {income}",
+  "@txMonthSpent": { "description": "Activity month card line when no envelope has a target", "placeholders": { "spent": { "type": "String" }, "income": { "type": "String" } } }
 }
 
