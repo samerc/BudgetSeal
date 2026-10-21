@@ -243,7 +243,9 @@ class TxTile extends ConsumerWidget {
                               if (listSettings.showAccount && entry.accountName.isNotEmpty)
                                 entry.accountName,
                               if (listSettings.showTime)
-                                '${tx.createdAt.hour.toString().padLeft(2, '0')}:${tx.createdAt.minute.toString().padLeft(2, '0')}',
+                                // Follows the phone's 12/24-hour setting.
+                                TimeOfDay.fromDateTime(tx.createdAt)
+                                    .format(context),
                             ].join(' · '),
                             style: TextStyle(
                               fontSize: 11,

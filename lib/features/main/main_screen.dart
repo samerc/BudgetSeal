@@ -14,6 +14,7 @@ import '../dashboard/dashboard_screen.dart';
 import '../reports/reports_hub_screen.dart';
 import '../settings/settings_screen.dart';
 import '../transactions/transactions_screen.dart';
+import '../../shared/widgets/hint_banner.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -47,12 +48,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     _currentIndex = 0;
-    // First launch with a budget (also right after onboarding): ask for the
-    // Android 13+ notification permission so bill/envelope alerts can show.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      NotificationService.requestPermissionOnce().catchError((_) {});
+      if (!mounted) return;
       // Bills posted at launch (before this screen existed).
       _showPostedNotice();
+      // First launch with a budget (also right after onboarding): one
+      // welcome tip, whichever tab opens first…
+      final s = S.of(context);
+      showHintIfNeeded(
+        context,
+        hintId: 'dashboard_welcome',
+        icon: Icons.waving_hand_rounded,
+        title: s.dashboardWelcomeTitle,
+        body: s.dashboardWelcomeBody,
+      );
+      // …then the Android 13+ notification permission, so the system prompt
+      // never covers a tip.
+      afterHints(() =>
+          NotificationService.requestPermissionOnce().catchError((_) {}));
     });
     RecurringEngine.postedNotice.addListener(_showPostedNotice);
   }

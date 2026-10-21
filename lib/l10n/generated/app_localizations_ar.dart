@@ -2520,7 +2520,7 @@ class SAr extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.';
+      'سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -2633,9 +2633,6 @@ class SAr extends S {
   }
 
   @override
-  String get dashboardAddFirstExpense => 'أضف أول مصروف';
-
-  @override
   String get dashboardFundEnvelopesTooltip => 'تمويل الأظرف';
 
   @override
@@ -2673,14 +2670,11 @@ class SAr extends S {
   String get dashboardNoSpendingSemantic => 'لا إنفاق في هذه الفترة';
 
   @override
-  String get txTitle => 'المعاملات';
-
-  @override
   String get txIntroTitle => 'معاملاتك';
 
   @override
   String get txIntroBody =>
-      'تظهر معاملاتك هنا مجمّعة حسب التاريخ. مرر لليسار للحذف، لليمين للتعديل. اضغط مطوّلاً لمزيد من الخيارات.';
+      'تظهر معاملاتك هنا مجمّعة حسب اليوم. اسحب لليسار للحذف، ولليمين للتعديل. اضغط مطوّلاً لتحديد عدة معاملات.';
 
   @override
   String get txDeleteSelectedTitle => 'حذف المحددة؟';
@@ -3750,7 +3744,8 @@ class SAr extends S {
   }
 
   @override
-  String get allocCreateHelp => 'أنشئ ظرفاً لبدء الميزانية.\nاضغط ؟ للمساعدة.';
+  String get allocCreateHelp =>
+      'أنشئ ظرفاً لكل ما تنفق عليه، ثم موّله من «جاهز للتوزيع».';
 
   @override
   String allocNEnvelopesNeedReset(int count) {
@@ -3852,11 +3847,6 @@ class SAr extends S {
 
   @override
   String get fundSuccess => 'تم تمويل الأظرف بنجاح';
-
-  @override
-  String fundErrorMsg(String error) {
-    return 'خطأ في تمويل الأظرف: $error';
-  }
 
   @override
   String get acctTitle => 'الحسابات';
@@ -6492,11 +6482,6 @@ class SAr extends S {
   String get lockUnlockReason => 'فتح BudgetSeal';
 
   @override
-  String lockFailed(String error) {
-    return 'فشل الفتح: $error';
-  }
-
-  @override
   String get lockTapToUnlock => 'اضغط للفتح';
 
   @override
@@ -7077,13 +7062,6 @@ class SAr extends S {
   String get languageSystemDesc => 'اتباع إعدادات الجهاز';
 
   @override
-  String get dashboardQuickActionsHintTitle => 'إجراءات سريعة';
-
-  @override
-  String get dashboardQuickActionsHintBody =>
-      'التمويل يوزع المال على أظرفك. التقسيم يتيح لك مشاركة فاتورة مع آخرين.';
-
-  @override
   String fundDistributing(String distributed, String available) {
     return 'توزيع $distributed من $available';
   }
@@ -7378,4 +7356,34 @@ class SAr extends S {
 
   @override
   String get currencySelected => 'المختارة';
+
+  @override
+  String get dashboardRecordIncome => 'سجّل دخلك';
+
+  @override
+  String get allocWithdrawTooMuch => 'هذا الظرف لا يحتوي على هذا المبلغ.';
+
+  @override
+  String get fundFailed => 'تعذّر تمويل الأظرف. حاول مرة أخرى.';
+
+  @override
+  String get lockUnlockFailed => 'تعذّر فتح القفل. حاول مرة أخرى.';
+
+  @override
+  String healthAccountsVsEnvelopes(String accounts, String envelopes) {
+    return 'الحسابات: $accounts | الأظرف: $envelopes';
+  }
+
+  @override
+  String txAfItemsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n عنصر',
+      few: '$n عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0';
+  }
 }

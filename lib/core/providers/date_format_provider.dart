@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/s_lookup.dart';
 
 const _key = 'date_format';
 
@@ -68,7 +69,7 @@ String formatDateSmart(DateTime date, [String? pattern]) {
   final diff = today.difference(d).inDays;
 
   final formatted = DateFormat(p).format(date);
-  if (diff == 0) return 'Today, $formatted';
-  if (diff == 1) return 'Yesterday, $formatted';
+  if (diff == 0) return '${currentS().commonToday}, $formatted';
+  if (diff == 1) return '${currentS().commonYesterday}, $formatted';
   return formatted;
 }

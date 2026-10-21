@@ -870,7 +870,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.",
+  "dashboardWelcomeBody": "سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -1022,10 +1022,6 @@
       "count": { "type": "int" }
     }
   },
-  "dashboardAddFirstExpense": "أضف أول مصروف",
-  "@dashboardAddFirstExpense": {
-    "description": "Button text when no transactions exist"
-  },
   "dashboardFundEnvelopesTooltip": "تمويل الأظرف",
   "@dashboardFundEnvelopesTooltip": {
     "description": "Tooltip for Fund quick action"
@@ -1079,15 +1075,11 @@
   "@dashboardNoSpendingSemantic": {
     "description": "Accessibility label when no spending"
   },
-  "txTitle": "المعاملات",
-  "@txTitle": {
-    "description": "Screen title"
-  },
   "txIntroTitle": "معاملاتك",
   "@txIntroTitle": {
     "description": "Hint banner title"
   },
-  "txIntroBody": "تظهر معاملاتك هنا مجمّعة حسب التاريخ. مرر لليسار للحذف، لليمين للتعديل. اضغط مطوّلاً لمزيد من الخيارات.",
+  "txIntroBody": "تظهر معاملاتك هنا مجمّعة حسب اليوم. اسحب لليسار للحذف، ولليمين للتعديل. اضغط مطوّلاً لتحديد عدة معاملات.",
   "@txIntroBody": {
     "description": "Hint banner body"
   },
@@ -1888,7 +1880,7 @@
   "@allocNoYet": {
     "description": "Empty state title"
   },
-  "allocCreateHelp": "أنشئ ظرفاً لبدء الميزانية.\nاضغط ؟ للمساعدة.",
+  "allocCreateHelp": "أنشئ ظرفاً لكل ما تنفق عليه، ثم موّله من «جاهز للتوزيع».",
   "@allocCreateHelp": {
     "description": "Empty state subtitle"
   },
@@ -2113,15 +2105,6 @@
   "fundSuccess": "تم تمويل الأظرف بنجاح",
   "@fundSuccess": {
     "description": "Snackbar"
-  },
-  "fundErrorMsg": "خطأ في تمويل الأظرف: {error}",
-  "@fundErrorMsg": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "acctTitle": "الحسابات",
   "@acctTitle": {
@@ -3957,15 +3940,6 @@
   "@lockUnlockReason": {
     "description": "Biometric reason"
   },
-  "lockFailed": "فشل الفتح: {error}",
-  "@lockFailed": {
-    "description": "Snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "lockTapToUnlock": "اضغط للفتح",
   "@lockTapToUnlock": {
     "description": "Instruction"
@@ -5486,8 +5460,6 @@
 
   "languageSystemDesc": "اتباع إعدادات الجهاز",
   "@languageSystemDesc": { "description": "Language picker subtitle for system option" },
-  "dashboardQuickActionsHintTitle": "إجراءات سريعة",
-  "dashboardQuickActionsHintBody": "التمويل يوزع المال على أظرفك. التقسيم يتيح لك مشاركة فاتورة مع آخرين.",
 
   "fundDistributing": "توزيع {distributed} من {available}",
   "catDeleteTxCount": "{count, plural, =1{معاملة واحدة تستخدم هذه الفئة} =2{معاملتان تستخدمان هذه الفئة} few{{count} معاملات تستخدم هذه الفئة} many{{count} معاملةً تستخدم هذه الفئة} other{{count} معاملة تستخدم هذه الفئة}}",
@@ -5578,5 +5550,11 @@
   "recurringFormAccountRequired": "الحساب مطلوب",
   "recurringFormStarts": "تبدأ: {date}",
   "onboardSeedCategories": "إضافة الفئات المقترحة",
-  "currencySelected": "المختارة"
+  "currencySelected": "المختارة",
+  "dashboardRecordIncome": "سجّل دخلك",
+  "allocWithdrawTooMuch": "هذا الظرف لا يحتوي على هذا المبلغ.",
+  "fundFailed": "تعذّر تمويل الأظرف. حاول مرة أخرى.",
+  "lockUnlockFailed": "تعذّر فتح القفل. حاول مرة أخرى.",
+  "healthAccountsVsEnvelopes": "الحسابات: {accounts} | الأظرف: {envelopes}",
+  "txAfItemsCount": "{n, plural, =1{عنصر واحد} =2{عنصران} few{{n} عناصر} other{{n} عنصر}}"
 }

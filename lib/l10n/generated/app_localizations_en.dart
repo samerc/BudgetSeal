@@ -2501,7 +2501,7 @@ class SEn extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'This is your financial overview. Tap the quick actions below to start recording transactions.';
+      'Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -2616,9 +2616,6 @@ class SEn extends S {
   }
 
   @override
-  String get dashboardAddFirstExpense => 'Add your first expense';
-
-  @override
   String get dashboardFundEnvelopesTooltip => 'Fund envelopes';
 
   @override
@@ -2656,14 +2653,11 @@ class SEn extends S {
   String get dashboardNoSpendingSemantic => 'No spending this period';
 
   @override
-  String get txTitle => 'Transactions';
-
-  @override
   String get txIntroTitle => 'Your transactions';
 
   @override
   String get txIntroBody =>
-      'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.';
+      'Your transactions appear here grouped by day. Swipe left to delete, right to edit. Long-press to select several.';
 
   @override
   String get txDeleteSelectedTitle => 'Delete selected?';
@@ -3731,7 +3725,7 @@ class SEn extends S {
 
   @override
   String get allocCreateHelp =>
-      'Create an envelope to start budgeting.\nTap ? for help.';
+      'Create an envelope for each thing you spend on, then fund it from Ready to assign.';
 
   @override
   String allocNEnvelopesNeedReset(int count) {
@@ -3829,11 +3823,6 @@ class SEn extends S {
 
   @override
   String get fundSuccess => 'Allocations funded successfully';
-
-  @override
-  String fundErrorMsg(String error) {
-    return 'Error funding allocations: $error';
-  }
 
   @override
   String get acctTitle => 'Accounts';
@@ -6480,11 +6469,6 @@ class SEn extends S {
   String get lockUnlockReason => 'Unlock BudgetSeal';
 
   @override
-  String lockFailed(String error) {
-    return 'Unlock failed: $error';
-  }
-
-  @override
   String get lockTapToUnlock => 'Tap to unlock';
 
   @override
@@ -7063,13 +7047,6 @@ class SEn extends S {
   String get languageSystemDesc => 'Follow device settings';
 
   @override
-  String get dashboardQuickActionsHintTitle => 'Quick Actions';
-
-  @override
-  String get dashboardQuickActionsHintBody =>
-      'Fund assigns money to your envelopes. Split lets you divide a bill with others.';
-
-  @override
   String fundDistributing(String distributed, String available) {
     return 'Distributing $distributed of $available';
   }
@@ -7358,4 +7335,32 @@ class SEn extends S {
 
   @override
   String get currencySelected => 'Selected';
+
+  @override
+  String get dashboardRecordIncome => 'Record your income';
+
+  @override
+  String get allocWithdrawTooMuch => 'This envelope doesn\'t hold that much.';
+
+  @override
+  String get fundFailed => 'Couldn\'t fund the envelopes. Try again.';
+
+  @override
+  String get lockUnlockFailed => 'Couldn\'t unlock. Try again.';
+
+  @override
+  String healthAccountsVsEnvelopes(String accounts, String envelopes) {
+    return 'Accounts: $accounts | Envelopes: $envelopes';
+  }
+
+  @override
+  String txAfItemsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
 }

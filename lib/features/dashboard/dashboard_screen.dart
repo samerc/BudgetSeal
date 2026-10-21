@@ -27,7 +27,6 @@ import '../../shared/widgets/animated_amount.dart';
 import '../../shared/widgets/rolling_number.dart';
 import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
-import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/utils/note_text.dart';
@@ -59,26 +58,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       if (mounted) {
         setState(() => _showWeekly = prefs.getBool('dashboard_show_weekly') ?? false);
       }
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      final s = S.of(context);
-      // Sequential: showing both at once stacks two dialogs.
-      await showHintIfNeeded(
-        context,
-        hintId: 'dashboard_welcome',
-        icon: Icons.waving_hand_rounded,
-        title: s.dashboardWelcomeTitle,
-        body: s.dashboardWelcomeBody,
-      );
-      if (!mounted) return;
-      await showHintIfNeeded(
-        context,
-        hintId: 'dashboard_quick_actions_hint',
-        icon: Icons.lightbulb_outline_rounded,
-        title: s.dashboardQuickActionsHintTitle,
-        body: s.dashboardQuickActionsHintBody,
-      );
     });
   }
 
@@ -569,8 +548,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                 FilledButton.tonal(
                                   onPressed: () => context.push(
                                       '/add-transaction',
-                                      extra: {'editType': 'expense'}),
-                                  child: Text(S.of(context).dashboardAddFirstExpense),
+                                      extra: {'editType': 'income'}),
+                                  // Money comes in first, then gets jobs.
+                                  child: Text(S.of(context).dashboardRecordIncome),
                                 ),
                               ],
                             ),

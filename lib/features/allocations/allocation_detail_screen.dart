@@ -1693,10 +1693,14 @@ class _AllocationDetailScreenState
           );
         }
       } catch (e) {
+        debugPrint('[AllocationDetail] Withdraw failed: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('$e'),
+              // StateError = the envelope holds less than asked.
+              content: Text(e is StateError
+                  ? S.of(context).allocWithdrawTooMuch
+                  : S.of(context).commonErrorDesc),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -1864,10 +1868,9 @@ class _AllocationDetailScreenState
                                                     color:
                                                         linkTextPrimary)),
                                             Text(
-                                              cat.transactionType[0]
-                                                      .toUpperCase() +
-                                                  cat.transactionType
-                                                      .substring(1),
+                                              cat.transactionType == 'income'
+                                                  ? S.of(context).typeIncome
+                                                  : S.of(context).typeExpense,
                                               style: TextStyle(
                                                   fontSize: 11,
                                                   color: linkTextSecondary),

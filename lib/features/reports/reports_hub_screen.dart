@@ -32,6 +32,7 @@ import '../../shared/widgets/spending_heatmap.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/utils/note_text.dart';
+import '../../l10n/s_lookup.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -2873,8 +2874,16 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
   Map<String, List<AccountWithBalance>> _groupByType(
       List<AccountWithBalance> accounts) {
     final groups = <String, List<AccountWithBalance>>{};
+    final s = currentS();
     for (final a in accounts) {
-      final type = a.account.type[0].toUpperCase() + a.account.type.substring(1);
+      // Translated type name (the raw value is an English db code).
+      final type = switch (a.account.type) {
+        'cash' => s.acctTypeCash,
+        'bank' => s.acctTypeBank,
+        'credit' => s.acctTypeCredit,
+        'wallet' => s.acctTypeDigital,
+        final t => t.isEmpty ? t : t[0].toUpperCase() + t.substring(1),
+      };
       groups.putIfAbsent(type, () => []).add(a);
     }
     return groups;

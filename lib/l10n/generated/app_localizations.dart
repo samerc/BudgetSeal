@@ -4399,7 +4399,7 @@ abstract class S {
   /// First-visit hint banner body
   ///
   /// In en, this message translates to:
-  /// **'This is your financial overview. Tap the quick actions below to start recording transactions.'**
+  /// **'Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.'**
   String get dashboardWelcomeBody;
 
   /// Fallback household name
@@ -4612,12 +4612,6 @@ abstract class S {
   /// **'+ {count} other'**
   String dashboardOtherCount(int count);
 
-  /// Button text when no transactions exist
-  ///
-  /// In en, this message translates to:
-  /// **'Add your first expense'**
-  String get dashboardAddFirstExpense;
-
   /// Tooltip for Fund quick action
   ///
   /// In en, this message translates to:
@@ -4672,12 +4666,6 @@ abstract class S {
   /// **'No spending this period'**
   String get dashboardNoSpendingSemantic;
 
-  /// Screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Transactions'**
-  String get txTitle;
-
   /// Hint banner title
   ///
   /// In en, this message translates to:
@@ -4687,7 +4675,7 @@ abstract class S {
   /// Hint banner body
   ///
   /// In en, this message translates to:
-  /// **'Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.'**
+  /// **'Your transactions appear here grouped by day. Swipe left to delete, right to edit. Long-press to select several.'**
   String get txIntroBody;
 
   /// Bulk delete dialog title
@@ -6541,7 +6529,7 @@ abstract class S {
   /// Empty state subtitle
   ///
   /// In en, this message translates to:
-  /// **'Create an envelope to start budgeting.\nTap ? for help.'**
+  /// **'Create an envelope for each thing you spend on, then fund it from Ready to assign.'**
   String get allocCreateHelp;
 
   /// No description provided for @allocNEnvelopesNeedReset.
@@ -6681,12 +6669,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Allocations funded successfully'**
   String get fundSuccess;
-
-  /// Error snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Error funding allocations: {error}'**
-  String fundErrorMsg(String error);
 
   /// Screen title
   ///
@@ -11608,12 +11590,6 @@ abstract class S {
   /// **'Unlock BudgetSeal'**
   String get lockUnlockReason;
 
-  /// Biometric error snackbar
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock failed: {error}'**
-  String lockFailed(String error);
-
   /// Lock screen hint
   ///
   /// In en, this message translates to:
@@ -12592,18 +12568,6 @@ abstract class S {
   /// **'Follow device settings'**
   String get languageSystemDesc;
 
-  /// Hint banner title for quick actions
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Actions'**
-  String get dashboardQuickActionsHintTitle;
-
-  /// Hint banner body explaining Fund and Split
-  ///
-  /// In en, this message translates to:
-  /// **'Fund assigns money to your envelopes. Split lets you divide a bill with others.'**
-  String get dashboardQuickActionsHintBody;
-
   /// Funding progress
   ///
   /// In en, this message translates to:
@@ -13077,6 +13041,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Selected'**
   String get currencySelected;
+
+  /// Home empty state button (opens the income form)
+  ///
+  /// In en, this message translates to:
+  /// **'Record your income'**
+  String get dashboardRecordIncome;
+
+  /// Snackbar: withdraw more than the envelope holds
+  ///
+  /// In en, this message translates to:
+  /// **'This envelope doesn\'t hold that much.'**
+  String get allocWithdrawTooMuch;
+
+  /// Snackbar: funding envelopes failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t fund the envelopes. Try again.'**
+  String get fundFailed;
+
+  /// Lock screen snackbar: unlock failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unlock. Try again.'**
+  String get lockUnlockFailed;
+
+  /// Health check per-currency totals
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts: {accounts} | Envelopes: {envelopes}'**
+  String healthAccountsVsEnvelopes(String accounts, String envelopes);
+
+  /// Assisted save summary item count
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 item} other{{n} items}}'**
+  String txAfItemsCount(int n);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -870,7 +870,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.",
+  "dashboardWelcomeBody": "Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l'Accueil. Puis répartissez votre argent dans l'onglet Budget.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -1022,10 +1022,6 @@
       "count": { "type": "int" }
     }
   },
-  "dashboardAddFirstExpense": "Ajoutez votre première dépense",
-  "@dashboardAddFirstExpense": {
-    "description": "Button text when no transactions exist"
-  },
   "dashboardFundEnvelopesTooltip": "Alimenter les enveloppes",
   "@dashboardFundEnvelopesTooltip": {
     "description": "Tooltip for Fund quick action"
@@ -1079,15 +1075,11 @@
   "@dashboardNoSpendingSemantic": {
     "description": "Accessibility label when no spending"
   },
-  "txTitle": "Transactions",
-  "@txTitle": {
-    "description": "Screen title"
-  },
   "txIntroTitle": "Vos transactions",
   "@txIntroTitle": {
     "description": "Hint banner title"
   },
-  "txIntroBody": "Vos transactions apparaissent ici groupées par date. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour plus d'options.",
+  "txIntroBody": "Vos transactions apparaissent ici groupées par jour. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour en sélectionner plusieurs.",
   "@txIntroBody": {
     "description": "Hint banner body"
   },
@@ -1888,7 +1880,7 @@
   "@allocNoYet": {
     "description": "Empty state title"
   },
-  "allocCreateHelp": "Créez une enveloppe pour commencer.\nAppuyez sur ? pour l'aide.",
+  "allocCreateHelp": "Créez une enveloppe pour chaque poste de dépense, puis financez-la depuis « Prêt à répartir ».",
   "@allocCreateHelp": {
     "description": "Empty state subtitle"
   },
@@ -2113,15 +2105,6 @@
   "fundSuccess": "Enveloppes financées avec succès",
   "@fundSuccess": {
     "description": "Snackbar"
-  },
-  "fundErrorMsg": "Erreur lors du financement : {error}",
-  "@fundErrorMsg": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "acctTitle": "Comptes",
   "@acctTitle": {
@@ -3957,15 +3940,6 @@
   "@lockUnlockReason": {
     "description": "Biometric reason"
   },
-  "lockFailed": "Échec du déverrouillage : {error}",
-  "@lockFailed": {
-    "description": "Snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "lockTapToUnlock": "Appuyez pour déverrouiller",
   "@lockTapToUnlock": {
     "description": "Instruction"
@@ -5486,8 +5460,6 @@
 
   "languageSystemDesc": "Suivre les paramètres de l'appareil",
   "@languageSystemDesc": { "description": "Language picker subtitle for system option" },
-  "dashboardQuickActionsHintTitle": "Actions rapides",
-  "dashboardQuickActionsHintBody": "Financer affecte de l'argent à vos enveloppes. Diviser vous permet de partager une addition.",
 
   "fundDistributing": "Distribution de {distributed} sur {available}",
   "catDeleteTxCount": "{count, plural, =1{1 transaction utilise cette catégorie} other{{count} transactions utilisent cette catégorie}}",
@@ -5578,5 +5550,11 @@
   "recurringFormAccountRequired": "Le compte est requis",
   "recurringFormStarts": "Début : {date}",
   "onboardSeedCategories": "Ajouter les catégories suggérées",
-  "currencySelected": "Sélectionnée"
+  "currencySelected": "Sélectionnée",
+  "dashboardRecordIncome": "Enregistrer vos revenus",
+  "allocWithdrawTooMuch": "Cette enveloppe ne contient pas autant.",
+  "fundFailed": "Impossible de financer les enveloppes. Réessayez.",
+  "lockUnlockFailed": "Déverrouillage impossible. Réessayez.",
+  "healthAccountsVsEnvelopes": "Comptes : {accounts} | Enveloppes : {envelopes}",
+  "txAfItemsCount": "{n, plural, =1{1 article} other{{n} articles}}"
 }

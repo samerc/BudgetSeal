@@ -627,7 +627,7 @@ class _SubscriptionTile extends StatelessWidget {
           ),
           subtitle: Text(
             nextDue != null
-                ? 'Next: ${formatDate(nextDue)} $frequencySuffix'
+                ? '${S.of(context).recurringTileNext(formatDate(nextDue))} $frequencySuffix'
                 : frequencySuffix,
             style: TextStyle(
               fontSize: 12,

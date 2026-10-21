@@ -1458,7 +1458,7 @@ class _AssistedTransactionScreenState
           final amountLabel = byCur.entries
               .map((c) => formatAmount(c.value, currency: c.key))
               .join(' + ');
-          return '$typeLabel: $amountLabel (${e.value.length} ${e.value.length == 1 ? 'item' : 'items'})';
+          return '$typeLabel: $amountLabel (${S.of(context).txAfItemsCount(e.value.length)})';
         }).join('\n');
 
         final tr = S.of(context);

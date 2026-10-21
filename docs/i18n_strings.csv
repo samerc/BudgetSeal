@@ -66,7 +66,7 @@ type_all,Filter chip,All,الكل,Tout
 # DASHBOARD,,,,
 # ──────────────────────────────────────────────,,,,
 dashboard_welcome_title,First-visit hint banner title,Welcome to BudgetSeal!,مرحباً بك في BudgetSeal!,Bienvenue sur BudgetSeal !
-dashboard_welcome_body,First-visit hint banner body,This is your financial overview. Tap the quick actions below to start recording transactions.,هذه نظرتك المالية العامة. اضغط على الإجراءات السريعة أدناه لبدء تسجيل المعاملات.,Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.
+dashboard_welcome_body,First-launch welcome tip body,"Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.",سجّل المصاريف والدخل والتحويلات، أو قسّم فاتورة، بالأزرار في أعلى الرئيسية. ثم وزّع أموالك على الأظرف في تبويب الميزانية.,"Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l'Accueil. Puis répartissez votre argent dans l'onglet Budget."
 dashboard_default_name,Fallback household name,BudgetSeal,BudgetSeal,BudgetSeal
 dashboard_customize_tooltip,Customize button tooltip,Customize,تخصيص,Personnaliser
 dashboard_search_tooltip,Search button tooltip,Search,بحث,Rechercher
@@ -105,9 +105,8 @@ dashboard_section_activity_desc,Section description,Templates and recent transac
 # ──────────────────────────────────────────────,,,,
 # TRANSACTIONS — List screen,,,,
 # ──────────────────────────────────────────────,,,,
-tx_title,Screen title,Transactions,المعاملات,Transactions
 tx_intro_title,Hint banner title,Your transactions,معاملاتك,Vos transactions
-tx_intro_body,Hint banner body,"Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.",تظهر معاملاتك هنا مجمّعة حسب التاريخ. مرر لليسار للحذف، لليمين للتعديل. اضغط مطوّلاً لمزيد من الخيارات.,"Vos transactions apparaissent ici groupées par date. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour plus d'options."
+tx_intro_body,Hint banner body,"Your transactions appear here grouped by day. Swipe left to delete, right to edit. Long-press to select several.",تظهر معاملاتك هنا مجمّعة حسب اليوم. اسحب لليسار للحذف، ولليمين للتعديل. اضغط مطوّلاً لتحديد عدة معاملات.,"Vos transactions apparaissent ici groupées par jour. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour en sélectionner plusieurs."
 tx_delete_selected_title,Bulk delete dialog title,Delete selected?,حذف المحددة؟,Supprimer la sélection ?
 tx_delete_selected_content,Bulk delete dialog,Delete {count} transaction(s)? This will reverse any envelope deductions.,حذف {count} معاملة(ات)؟ سيتم التراجع عن أي خصومات من الأظرف.,Supprimer {count} transaction(s) ? Cela annulera les déductions des enveloppes.
 tx_n_deleted,Snackbar after bulk delete,{count} transaction(s) deleted,تم حذف {count} معاملة(ات),{count} transaction(s) supprimée(s)
@@ -313,7 +312,7 @@ alloc_section_flexible,Section header,Rollover,مُرحَّل,Cumulatif
 alloc_no_match,Search empty state,"No envelopes match ""{query}""","لا أظرف تطابق """"{query}""""",Aucune enveloppe ne correspond à « {query} »
 alloc_create_tooltip,FAB tooltip,Create envelope,إنشاء ظرف,Créer une enveloppe
 alloc_no_yet,Empty state title,No envelopes yet,لا أظرف بعد,Aucune enveloppe pour le moment
-alloc_create_help,Empty state subtitle,Create an envelope to start budgeting.\nTap ? for help.,أنشئ ظرفاً لبدء الميزانية.\nاضغط ؟ للمساعدة.,Créez une enveloppe pour commencer.\nAppuyez sur ? pour l'aide.
+alloc_create_help,Budget tab empty state,"Create an envelope for each thing you spend on, then fund it from Ready to assign.",أنشئ ظرفاً لكل ما تنفق عليه، ثم موّله من «جاهز للتوزيع».,"Créez une enveloppe pour chaque poste de dépense, puis financez-la depuis « Prêt à répartir »."
 alloc_create_button,Empty state button,Create Envelope,إنشاء ظرف,Créer une enveloppe
 # ──────────────────────────────────────────────,,,,
 # ALLOCATIONS / ENVELOPES — Detail,,,,
@@ -373,7 +372,6 @@ fund_overfunding_msg,Warning dialog content,You're assigning {details}. Your una
 fund_anyway,Dialog button,Fund Anyway,تمويل على أي حال,Financer quand même
 fund_note,Ledger note,Funded from Unallocated,موّل من غير الموزع,Financé depuis Non affecté
 fund_success,Snackbar,Allocations funded successfully,تم تمويل الأظرف بنجاح,Enveloppes financées avec succès
-fund_error_msg,Error snackbar,Error funding allocations: {error},خطأ في تمويل الأظرف: {error},Erreur lors du financement : {error}
 # ──────────────────────────────────────────────,,,,
 # ACCOUNTS — List,,,,
 # ──────────────────────────────────────────────,,,,
@@ -855,7 +853,6 @@ onboard_invalid_code_error,Validation,Invalid invite code. It should start with 
 # ──────────────────────────────────────────────,,,,
 lock_setup_reason,Biometric reason,Set up a screen lock to protect BudgetSeal,أعدّ قفل الشاشة لحماية BudgetSeal,Configurez un verrouillage d'écran pour protéger BudgetSeal
 lock_unlock_reason,Biometric reason,Unlock BudgetSeal,فتح BudgetSeal,Déverrouiller BudgetSeal
-lock_failed,Snackbar,Unlock failed: {error},فشل الفتح: {error},Échec du déverrouillage : {error}
 lock_tap_to_unlock,Instruction,Tap to unlock,اضغط للفتح,Appuyez pour déverrouiller
 lock_unlock_button,Button,Unlock,فتح,Déverrouiller
 # ──────────────────────────────────────────────,,,,
@@ -1287,7 +1284,6 @@ common_title,,Title,العنوان,Titre
 dashboard_net_worth,,Net Worth,صافي الثروة,Patrimoine net
 dashboard_unallocated,,Unallocated,غير مخصص,Non alloué
 dashboard_other_count,,+ {count} other,+ {count} أخرى,+ {count} autre(s)
-dashboard_add_first_expense,,Add your first expense,أضف أول مصروف,Ajoutez votre première dépense
 dashboard_fund_envelopes_tooltip,,Fund envelopes,تمويل الأظرف,Alimenter les enveloppes
 dashboard_split_bill_tooltip,,Split a bill,تقسيم فاتورة,Partager une note
 dashboard_cat_spending_higher,,{category} spending is {percent}% higher than last month,إنفاق {category} أعلى بنسبة {percent}% من الشهر الماضي,Les dépenses en {category} sont {percent}% plus élevées que le mois dernier
@@ -1731,8 +1727,6 @@ sync_last_synced,,Last synced {time} · {suffix},آخر مزامنة {time} · {
 sync_changes_merged,,"{count, plural, =1{1 change merged} other{{count} changes merged}}","{count, plural, =1{تم دمج تغيير واحد} =2{تم دمج تغييرين} few{تم دمج {count} تغييرات} other{تم دمج {count} تغيير}}","{count, plural, =1{1 modification fusionnée} other{{count} modifications fusionnées}}"
 sync_up_to_date,,up to date,محدّث,à jour
 language_system_desc,,Follow device settings,اتباع إعدادات الجهاز,Suivre les paramètres de l'appareil
-dashboard_quick_actions_hint_title,,Quick Actions,إجراءات سريعة,Actions rapides
-dashboard_quick_actions_hint_body,,Fund assigns money to your envelopes. Split lets you divide a bill with others.,التمويل يوزع المال على أظرفك. التقسيم يتيح لك مشاركة فاتورة مع آخرين.,Financer affecte de l'argent à vos enveloppes. Diviser vous permet de partager une addition.
 fund_distributing,,Distributing {distributed} of {available},توزيع {distributed} من {available},Distribution de {distributed} sur {available}
 cat_delete_tx_count,,"{count, plural, =1{1 transaction uses this category} other{{count} transactions use this category}}","{count, plural, =1{معاملة واحدة تستخدم هذه الفئة} =2{معاملتان تستخدمان هذه الفئة} few{{count} معاملات تستخدم هذه الفئة} many{{count} معاملةً تستخدم هذه الفئة} other{{count} معاملة تستخدم هذه الفئة}}","{count, plural, =1{1 transaction utilise cette catégorie} other{{count} transactions utilisent cette catégorie}}"
 cat_delete_linked_envelope,,"linked to envelope ""{name}""","مرتبطة بالظرف ""{name}""",liée à l'enveloppe « {name} »
@@ -2486,3 +2480,9 @@ currency_name_zmw,,Zambian Kwacha,كواشا زامبي,Kwacha zambien
 currency_name_zwg,,Zimbabwe Gold,ذهب زيمبابوي,Or du Zimbabwe
 onboard_seed_categories,Switch title,Add suggested categories,إضافة الفئات المقترحة,Ajouter les catégories suggérées
 currency_selected,Currency sheet section header (the chosen currency),Selected,المختارة,Sélectionnée
+dashboard_record_income,Home empty state button (opens the income form),Record your income,سجّل دخلك,Enregistrer vos revenus
+alloc_withdraw_too_much,Snackbar: withdraw more than the envelope holds,This envelope doesn't hold that much.,هذا الظرف لا يحتوي على هذا المبلغ.,Cette enveloppe ne contient pas autant.
+fund_failed,Snackbar: funding envelopes failed,Couldn't fund the envelopes. Try again.,تعذّر تمويل الأظرف. حاول مرة أخرى.,Impossible de financer les enveloppes. Réessayez.
+lock_unlock_failed,Lock screen snackbar: unlock failed,Couldn't unlock. Try again.,تعذّر فتح القفل. حاول مرة أخرى.,Déverrouillage impossible. Réessayez.
+health_accounts_vs_envelopes,Health check per-currency totals,Accounts: {accounts} | Envelopes: {envelopes},الحسابات: {accounts} | الأظرف: {envelopes},Comptes : {accounts} | Enveloppes : {envelopes}
+tx_af_items_count,Assisted save summary item count,"{n, plural, =1{1 item} other{{n} items}}","{n, plural, =1{عنصر واحد} =2{عنصران} few{{n} عناصر} other{{n} عنصر}}","{n, plural, =1{1 article} other{{n} articles}}"

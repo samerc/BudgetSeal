@@ -198,10 +198,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         context.pop();
       }
     } catch (e) {
+      debugPrint('[Funding] Fund failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).fundErrorMsg('$e')),
+            content: Text(S.of(context).fundFailed),
             behavior: SnackBarBehavior.floating,
           ),
         );

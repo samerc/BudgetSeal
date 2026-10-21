@@ -7,19 +7,45 @@ import '../theme/app_colors.dart';
 /// Shows a one-time hint dialog. If the user has already dismissed it
 /// (tracked via SharedPreferences), nothing happens.
 ///
-/// Call from `initState` inside a `addPostFrameCallback`:
+/// Call from `initState` inside an `addPostFrameCallback`:
 /// ```dart
 /// WidgetsBinding.instance.addPostFrameCallback((_) {
 ///   showHintIfNeeded(context, hintId: 'x', title: 'T', body: 'B');
 /// });
 /// ```
+///
+/// Hints are queued: a second call waits until the first dialog is closed,
+/// so two tabs (or a tab and the welcome) never stack dialogs.
 Future<void> showHintIfNeeded(
   BuildContext context, {
   required String hintId,
   required String title,
   required String body,
   IconData icon = Icons.lightbulb_outline_rounded,
+}) =>
+    _enqueue(() => _showHint(context,
+        hintId: hintId, title: title, body: body, icon: icon));
+
+/// Runs [task] once every hint queued so far has been closed (e.g. a system
+/// permission prompt that must not appear on top of a hint).
+Future<void> afterHints(Future<void> Function() task) => _enqueue(task);
+
+Future<void> _hintQueue = Future.value();
+
+Future<void> _enqueue(Future<void> Function() task) {
+  final next = _hintQueue.then((_) => task());
+  _hintQueue = next.catchError((_) {});
+  return next;
+}
+
+Future<void> _showHint(
+  BuildContext context, {
+  required String hintId,
+  required String title,
+  required String body,
+  required IconData icon,
 }) async {
+  if (!context.mounted) return;
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool('hint_dismissed_$hintId') ?? false) return;
   if (!context.mounted) return;

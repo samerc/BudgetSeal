@@ -42,6 +42,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/brand_palette.dart';
 import '../../shared/widgets/tappable.dart';
+import '../../shared/utils/biometric_errors.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -147,40 +148,27 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
   }
 
   void _showAutofillSettings(BuildContext context, WidgetRef ref) {
+    // Strings captured before the sheet (S.of inside a sheet builder is the
+    // _dependents.isEmpty crash pattern); a Consumer rebuilds the switches.
+    final al = S.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.sf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            final settings = ref.watch(autofillProvider);
-            final notifier = ref.read(autofillProvider.notifier);
+        return Consumer(
+          builder: (ctx, sheetRef, _) {
+            final settings = sheetRef.watch(autofillProvider);
+            final notifier = sheetRef.read(autofillProvider.notifier);
 
             void toggle(AutofillSettings Function(AutofillSettings) update) {
               notifier.update(update(settings));
-              setSheetState(() {}); // force sheet rebuild
             }
 
-            final al = S.of(ctx);
             return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 36, height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.th(ctx),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   Text(al.autofillTitle,
                       style: TextStyle(
                           fontSize: 18,
@@ -1768,17 +1756,8 @@ class _BiometricTile extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        String message = S.of(context).biometricError;
-        final errorStr = e.toString();
-        if (errorStr.contains('NotAvailable') || errorStr.contains('NotEnrolled')) {
-          message = S.of(context).biometricNotEnrolled;
-        } else if (errorStr.contains('LockedOut')) {
-          message = S.of(context).biometricLockedOut;
-        } else if (errorStr.contains('PasscodeNotSet')) {
-          message = S.of(context).biometricPasscodeNotSet;
-        } else {
-          message = '${S.of(context).biometricError}: $errorStr';
-        }
+        final message = biometricErrorText(S.of(context), e,
+            fallback: S.of(context).biometricError);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),

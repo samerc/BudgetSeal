@@ -270,7 +270,7 @@ Both forms have a swap button (↕) on the exchange rate field to toggle between
 Always filter `deleted.equals(false)` on transactions. `getById()` must include this filter — it's easy to miss. All list queries already have it.
 
 ### Error Handling
-All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages and expandable technical details.
+Never show `e.toString()`/`'$e'` to the user: map known errors to strings (`txSaveErrorText()`, `syncErrorText()`, `biometricErrorText()` in `shared/utils/biometric_errors.dart`) and log the rest with `debugPrint`. All `.when()` error handlers use `ErrorRetry` widget with user-friendly messages and expandable technical details.
 
 ## Known Crash Patterns — Read Before Touching These Areas
 
@@ -288,7 +288,7 @@ Never close the database and wait for providers. Instead: `db.batch()` delete al
 
 ### Resume Work
 
-On every resume `app.dart` runs `_processDueWork()`: `processRecurring()` (invalidates transaction/balance providers if anything posted) then `NotificationService.runChecks()` (each check keeps its 24h cooldown). `MainScreen` asks for the Android 13+ notification permission once (`NotificationService.requestPermissionOnce`). Upcoming-bill views use `recurringAmountOn(rec, date)` so subscription price changes show before they post.
+On every resume `app.dart` runs `_processDueWork()`: `processRecurring()` (invalidates transaction/balance providers if anything posted) then `NotificationService.runChecks()` (each check keeps its 24h cooldown). `MainScreen` shows the one welcome tip (`dashboard_welcome`, on whichever tab opens first), then asks for the Android 13+ notification permission once (`NotificationService.requestPermissionOnce`) via `afterHints()`. First-visit tips go through `showHintIfNeeded()` (`shared/widgets/hint_banner.dart`), which queues them — never two dialogs (or a dialog and the system prompt) at once. Upcoming-bill views use `recurringAmountOn(rec, date)` so subscription price changes show before they post.
 
 ## Daily Reminder Timezone
 Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it everything runs as UTC. Use `flutter_timezone` to get the device identifier.

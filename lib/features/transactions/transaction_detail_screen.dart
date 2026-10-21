@@ -689,8 +689,11 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
             ...related.map((r) {
               final isIncome = r.type == 'income';
               final color = isIncome ? AppColors.healthy : AppColors.overspent;
-              final typeLabel =
-                  r.type[0].toUpperCase() + r.type.substring(1);
+              final typeLabel = switch (r.type) {
+                'income' => S.of(context).typeIncome,
+                'transfer' => S.of(context).typeTransfer,
+                _ => S.of(context).typeExpense,
+              };
               final cat =
                   r.categoryId != null ? categoryMap[r.categoryId] : null;
 

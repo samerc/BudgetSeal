@@ -609,8 +609,9 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                         fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 2),
                 Text(
-                  'Accounts: ${formatNumber(check.accountTotal)}  |  '
-                  'Envelopes: ${formatNumber(check.allocationTotal)}',
+                  S.of(context).healthAccountsVsEnvelopes(
+                      formatNumber(check.accountTotal),
+                      formatNumber(check.allocationTotal)),
                   style: TextStyle(
                       fontSize: 11, color: AppColors.ts(context)),
                 ),

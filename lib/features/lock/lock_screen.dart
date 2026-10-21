@@ -6,6 +6,7 @@ import 'package:local_auth/local_auth.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/biometric_errors.dart';
 
 class LockScreen extends StatefulWidget {
   final VoidCallback onUnlocked;
@@ -62,7 +63,8 @@ class _LockScreenState extends State<LockScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).lockFailed(e.toString())),
+            content: Text(biometricErrorText(S.of(context), e,
+                fallback: S.of(context).lockUnlockFailed)),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 4),
           ),

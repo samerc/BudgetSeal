@@ -866,20 +866,24 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
       child: Row(
         children: [
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              S.of(context).txTitle,
-              style: TextStyle(
-                fontSize: TypographyTokens.screenTitleSize,
-                fontFamily: TypographyTokens.displayFamily,
-                fontWeight: TypographyTokens.screenTitleWeight,
-                color: AppColors.tp(context),
+          // Expanded gives the title a width, so it shrinks instead of
+          // pushing the actions off screen at large text sizes. Same name
+          // as the tab.
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                S.of(context).tabActivity,
+                style: TextStyle(
+                  fontSize: TypographyTokens.screenTitleSize,
+                  fontFamily: TypographyTokens.displayFamily,
+                  fontWeight: TypographyTokens.screenTitleWeight,
+                  color: AppColors.tp(context),
+                ),
               ),
             ),
           ),
-          const Spacer(),
           IconButton(
             tooltip: S.of(context).txFilterTooltip,
             icon: Icon(

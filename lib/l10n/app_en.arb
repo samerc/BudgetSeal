@@ -1010,7 +1010,7 @@
   "@dashboardWelcomeTitle": {
     "description": "First-visit hint banner title"
   },
-  "dashboardWelcomeBody": "This is your financial overview. Tap the quick actions below to start recording transactions.",
+  "dashboardWelcomeBody": "Record expenses, income and transfers, or split a bill, with the buttons at the top of Home. Then give your money jobs on the Budget tab.",
   "@dashboardWelcomeBody": {
     "description": "First-visit hint banner body"
   },
@@ -1162,10 +1162,6 @@
       "count": { "type": "int" }
     }
   },
-  "dashboardAddFirstExpense": "Add your first expense",
-  "@dashboardAddFirstExpense": {
-    "description": "Button text when no transactions exist"
-  },
   "dashboardFundEnvelopesTooltip": "Fund envelopes",
   "@dashboardFundEnvelopesTooltip": {
     "description": "Tooltip for Fund quick action"
@@ -1219,15 +1215,11 @@
   "@dashboardNoSpendingSemantic": {
     "description": "Accessibility label when no spending"
   },
-  "txTitle": "Transactions",
-  "@txTitle": {
-    "description": "Screen title"
-  },
   "txIntroTitle": "Your transactions",
   "@txIntroTitle": {
     "description": "Hint banner title"
   },
-  "txIntroBody": "Your transactions appear here grouped by date. Swipe left to delete, right to edit. Long-press for more options.",
+  "txIntroBody": "Your transactions appear here grouped by day. Swipe left to delete, right to edit. Long-press to select several.",
   "@txIntroBody": {
     "description": "Hint banner body"
   },
@@ -2480,7 +2472,7 @@
   "@allocLoansCount": { "placeholders": { "count": { "type": "int" } } },
   "allocNoMatch": "No envelopes match \"{query}\"",
   "@allocNoMatch": { "placeholders": { "query": { "type": "String" } } },
-  "allocCreateHelp": "Create an envelope to start budgeting.\nTap ? for help.",
+  "allocCreateHelp": "Create an envelope for each thing you spend on, then fund it from Ready to assign.",
   "allocNEnvelopesNeedReset": "{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}",
   "@allocNEnvelopesNeedReset": { "placeholders": { "count": { "type": "int" } } },
 
@@ -2532,15 +2524,6 @@
   "fundSuccess": "Allocations funded successfully",
   "@fundSuccess": {
     "description": "Snackbar"
-  },
-  "fundErrorMsg": "Error funding allocations: {error}",
-  "@fundErrorMsg": {
-    "description": "Error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
   },
   "acctTitle": "Accounts",
   "@acctTitle": {
@@ -5398,15 +5381,6 @@
   "@lockUnlockReason": {
     "description": "Biometric unlock prompt"
   },
-  "lockFailed": "Unlock failed: {error}",
-  "@lockFailed": {
-    "description": "Biometric error snackbar",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "lockTapToUnlock": "Tap to unlock",
   "@lockTapToUnlock": {
     "description": "Lock screen hint"
@@ -5973,10 +5947,6 @@
   "languageSystemDesc": "Follow device settings",
   "@languageSystemDesc": { "description": "Language picker subtitle for system option" },
 
-  "dashboardQuickActionsHintTitle": "Quick Actions",
-  "@dashboardQuickActionsHintTitle": { "description": "Hint banner title for quick actions" },
-  "dashboardQuickActionsHintBody": "Fund assigns money to your envelopes. Split lets you divide a bill with others.",
-  "@dashboardQuickActionsHintBody": { "description": "Hint banner body explaining Fund and Split" },
 
   "fundDistributing": "Distributing {distributed} of {available}",
   "@fundDistributing": { "description": "Funding progress", "placeholders": { "distributed": { "type": "String" }, "available": { "type": "String" } } },
@@ -6139,6 +6109,18 @@
   "onboardSeedCategories": "Add suggested categories",
   "@onboardSeedCategories": { "description": "Switch title" },
   "currencySelected": "Selected",
-  "@currencySelected": { "description": "Currency sheet section header (the chosen currency)" }
+  "@currencySelected": { "description": "Currency sheet section header (the chosen currency)" },
+  "dashboardRecordIncome": "Record your income",
+  "@dashboardRecordIncome": { "description": "Home empty state button (opens the income form)" },
+  "allocWithdrawTooMuch": "This envelope doesn't hold that much.",
+  "@allocWithdrawTooMuch": { "description": "Snackbar: withdraw more than the envelope holds" },
+  "fundFailed": "Couldn't fund the envelopes. Try again.",
+  "@fundFailed": { "description": "Snackbar: funding envelopes failed" },
+  "lockUnlockFailed": "Couldn't unlock. Try again.",
+  "@lockUnlockFailed": { "description": "Lock screen snackbar: unlock failed" },
+  "healthAccountsVsEnvelopes": "Accounts: {accounts} | Envelopes: {envelopes}",
+  "@healthAccountsVsEnvelopes": { "description": "Health check per-currency totals", "placeholders": { "accounts": { "type": "String" }, "envelopes": { "type": "String" } } },
+  "txAfItemsCount": "{n, plural, =1{1 item} other{{n} items}}",
+  "@txAfItemsCount": { "description": "Assisted save summary item count", "placeholders": { "n": { "type": "int" } } }
 }
 

@@ -2519,7 +2519,7 @@ class SFr extends S {
 
   @override
   String get dashboardWelcomeBody =>
-      'Voici votre aperçu financier. Appuyez sur les actions rapides ci-dessous pour commencer à enregistrer des transactions.';
+      'Enregistrez dépenses, revenus et virements, ou partagez une addition, avec les boutons en haut de l\'Accueil. Puis répartissez votre argent dans l\'onglet Budget.';
 
   @override
   String get dashboardDefaultName => 'BudgetSeal';
@@ -2635,9 +2635,6 @@ class SFr extends S {
   }
 
   @override
-  String get dashboardAddFirstExpense => 'Ajoutez votre première dépense';
-
-  @override
   String get dashboardFundEnvelopesTooltip => 'Alimenter les enveloppes';
 
   @override
@@ -2676,14 +2673,11 @@ class SFr extends S {
   String get dashboardNoSpendingSemantic => 'Aucune dépense cette période';
 
   @override
-  String get txTitle => 'Transactions';
-
-  @override
   String get txIntroTitle => 'Vos transactions';
 
   @override
   String get txIntroBody =>
-      'Vos transactions apparaissent ici groupées par date. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour plus d\'options.';
+      'Vos transactions apparaissent ici groupées par jour. Glissez à gauche pour supprimer, à droite pour modifier. Appui long pour en sélectionner plusieurs.';
 
   @override
   String get txDeleteSelectedTitle => 'Supprimer la sélection ?';
@@ -3763,7 +3757,7 @@ class SFr extends S {
 
   @override
   String get allocCreateHelp =>
-      'Créez une enveloppe pour commencer.\nAppuyez sur ? pour l\'aide.';
+      'Créez une enveloppe pour chaque poste de dépense, puis financez-la depuis « Prêt à répartir ».';
 
   @override
   String allocNEnvelopesNeedReset(int count) {
@@ -3865,11 +3859,6 @@ class SFr extends S {
 
   @override
   String get fundSuccess => 'Enveloppes financées avec succès';
-
-  @override
-  String fundErrorMsg(String error) {
-    return 'Erreur lors du financement : $error';
-  }
 
   @override
   String get acctTitle => 'Comptes';
@@ -6555,11 +6544,6 @@ class SFr extends S {
   String get lockUnlockReason => 'Déverrouiller BudgetSeal';
 
   @override
-  String lockFailed(String error) {
-    return 'Échec du déverrouillage : $error';
-  }
-
-  @override
   String get lockTapToUnlock => 'Appuyez pour déverrouiller';
 
   @override
@@ -7145,13 +7129,6 @@ class SFr extends S {
   String get languageSystemDesc => 'Suivre les paramètres de l\'appareil';
 
   @override
-  String get dashboardQuickActionsHintTitle => 'Actions rapides';
-
-  @override
-  String get dashboardQuickActionsHintBody =>
-      'Financer affecte de l\'argent à vos enveloppes. Diviser vous permet de partager une addition.';
-
-  @override
   String fundDistributing(String distributed, String available) {
     return 'Distribution de $distributed sur $available';
   }
@@ -7441,4 +7418,32 @@ class SFr extends S {
 
   @override
   String get currencySelected => 'Sélectionnée';
+
+  @override
+  String get dashboardRecordIncome => 'Enregistrer vos revenus';
+
+  @override
+  String get allocWithdrawTooMuch => 'Cette enveloppe ne contient pas autant.';
+
+  @override
+  String get fundFailed => 'Impossible de financer les enveloppes. Réessayez.';
+
+  @override
+  String get lockUnlockFailed => 'Déverrouillage impossible. Réessayez.';
+
+  @override
+  String healthAccountsVsEnvelopes(String accounts, String envelopes) {
+    return 'Comptes : $accounts | Enveloppes : $envelopes';
+  }
+
+  @override
+  String txAfItemsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
 }

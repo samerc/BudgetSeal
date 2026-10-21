@@ -838,7 +838,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (missingRateLines.isNotEmpty) {
       final items = missingRateLines
           .map((i) => _lines.length > 1
-              ? 'Item ${i + 1} (${_lines[i].currency})'
+              ? '${S.of(context).txAfItemN(i + 1)} (${_lines[i].currency})'
               : _lines[i].currency)
           .join(', ');
       final proceed = await showDialog<bool>(
