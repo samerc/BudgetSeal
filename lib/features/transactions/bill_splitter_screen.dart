@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 
 import 'package:drift/drift.dart' show Value;
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
@@ -280,6 +282,61 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   // ─── OCR ──────────────────────────────────────────────────────────────────
 
   Future<void> _scanReceipt() async {
+    final path = await _receiptImage();
+    if (path == null || !mounted) return;
+
+    setState(() => _scanning = true);
+
+    final result =
+        await OcrService.scanReceipt(path, currency: _billCurrency);
+
+    if (mounted) {
+      setState(() {
+        _scanning = false;
+        _ocrResult = result;
+        _addedLines.clear();
+        _items.clear();
+      });
+      if (result.lines.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).billNoText),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+  }
+
+  /// The receipt photo to read. On Android, Google's document scanner
+  /// (finds the edges, crops, flattens, cleans up; offers the gallery too) —
+  /// a much better image for the text reader. Elsewhere, or when the scanner
+  /// can't start (no Play services), the camera / gallery picker.
+  Future<String?> _receiptImage() async {
+    if (Platform.isAndroid) {
+      final scanner = DocumentScanner(
+        options: DocumentScannerOptions(
+          mode: ScannerMode.full,
+          isGalleryImport: true,
+        ),
+      );
+      try {
+        final scan = await scanner.scanDocument();
+        final images = scan.images ?? const [];
+        if (images.isNotEmpty) return images.first;
+        return null;
+      } on PlatformException catch (e) {
+        if ((e.message ?? '').contains('cancel')) return null;
+        debugPrint('[BillSplitter] Document scanner unavailable: $e');
+      } catch (e) {
+        debugPrint('[BillSplitter] Document scanner unavailable: $e');
+      } finally {
+        scanner.close();
+      }
+      if (!mounted) return null;
+    }
+    return _pickImage();
+  }
+
+  Future<String?> _pickImage() async {
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -301,7 +358,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         ),
       ),
     );
-    if (source == null) return;
+    if (source == null) return null;
 
     XFile? image;
     try {
@@ -315,29 +372,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           behavior: SnackBarBehavior.floating,
         ));
       }
-      return;
+      return null;
     }
-    if (image == null) return;
-    if (!mounted) return; // user may have left during camera/gallery
-
-    setState(() => _scanning = true);
-
-    final result = await OcrService.scanReceipt(image.path);
-
-    if (mounted) {
-      setState(() {
-        _scanning = false;
-        _ocrResult = result;
-        _addedLines.clear();
-        _items.clear();
-      });
-      if (result.lines.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).billNoText),
-          behavior: SnackBarBehavior.floating,
-        ));
-      }
-    }
+    // The user may have left during camera/gallery.
+    if (image == null || !mounted) return null;
+    return image.path;
   }
 
   void _onLineTapped(int lineIndex) {
