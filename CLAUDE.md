@@ -1081,6 +1081,9 @@ Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jaka
 ### Date Format
 `formatDate()` and `formatDateSmart()` in `date_format_provider.dart` use the user's preferred pattern. Global `setDateFormatPattern()` called from `app.dart`. All user-facing date displays use `formatDate()` — month-only headers (`MMMM yyyy`) and machine formats (`yyyy-MM-dd`) are intentionally hardcoded. Settings apply instantly without restart.
 
+### Currency Symbols
+`defaultCurrencySymbols` (format_number.dart) is a getter that depends on the app language: a symbol in Arabic script (LBP ل.ل, AED د.إ, SAR ﷼) is used only when `Intl.defaultLocale` is Arabic; other languages get the code ("LBP 1,200,000.00", spaced like any symbol longer than 2 characters). A user override from Settings › Currency symbols always wins. `kCurrencySymbols` in currency_sheet.dart is the picker's reference list, not the display symbol. Tests: `test/core/currency_symbol_test.dart`.
+
 ### Key Rules
 - Parsing typed/imported amounts: `parseLooseAmount()` (format_number.dart) accepts `1,234.56`, `1.234,56`, `12,50`, `(5)`. Times: `TimeOfDay.format(context)` (follows the device 12/24h setting), never a hardcoded `h:mm a`.
 - Never use `toStringAsFixed()` for user-visible currency amounts — use `formatAmount()` or `formatNumber()`.

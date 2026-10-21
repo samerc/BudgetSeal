@@ -2,8 +2,9 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/number_format_provider.dart';
 
-/// Default map of currency codes to their display symbols.
-const defaultCurrencySymbols = <String, String>{
+/// Currency codes → their native display symbols. Use
+/// [defaultCurrencySymbols] (language-aware) for display.
+const _nativeCurrencySymbols = <String, String>{
   'USD': '\$',
   'EUR': '€',
   'GBP': '£',
@@ -19,6 +20,21 @@ const defaultCurrencySymbols = <String, String>{
   'INR': '₹',
   'BRL': 'R\$',
 };
+
+final _arabicScript = RegExp(r'[؀-ۿﷰ-﷿]');
+
+/// The default symbol of each currency for the app's language: a symbol in
+/// Arabic script (ل.ل, د.إ, ﷼) is only used in Arabic; other languages show
+/// the code ("LBP 1,200,000"). Users can still pick any symbol in
+/// Settings › Currency symbols.
+Map<String, String> get defaultCurrencySymbols {
+  final arabic = (Intl.defaultLocale ?? '').startsWith('ar');
+  if (arabic) return _nativeCurrencySymbols;
+  return {
+    for (final e in _nativeCurrencySymbols.entries)
+      e.key: _arabicScript.hasMatch(e.value) ? e.key : e.value,
+  };
+}
 
 /// User overrides for currency symbols.
 Map<String, String> _userOverrides = {};
@@ -53,7 +69,16 @@ String get decimalSeparatorChar =>
 
 /// Resolved symbols: user overrides take precedence over defaults.
 String? _resolveSymbol(String code) {
-  return _userOverrides[code] ?? defaultCurrencySymbols[code];
+  final override = _userOverrides[code];
+  if (override != null) return override;
+  final native = _nativeCurrencySymbols[code];
+  if (native == null) return null;
+  // Arabic-script symbols only in Arabic; elsewhere the code.
+  if (_arabicScript.hasMatch(native) &&
+      !(Intl.defaultLocale ?? '').startsWith('ar')) {
+    return code;
+  }
+  return native;
 }
 
 const _defaultSpacedSymbols = <String>{'ل.ل', 'د.إ', 'CHF', '﷼'};
