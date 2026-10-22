@@ -9,9 +9,14 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/bottom_action_bar.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/theme/app_icons.dart';
+import '../allocations/option_card.dart';
 
 /// Data passed to the [LeftoverResolutionScreen] via GoRouter extras.
 class LeftoverResolutionArgs {
@@ -84,7 +89,15 @@ class _LeftoverResolutionScreenState
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
 
-      if (mounted) context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(S.of(context).leftoverResolved),
+          ),
+        );
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,7 +130,10 @@ class _LeftoverResolutionScreenState
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).leftoverTitle)),
       body: allocationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList()),
         error: (e, _) => ErrorRetry(
           message: S.of(context).leftoverLoadError,
           details: '$e',
@@ -147,33 +163,28 @@ class _LeftoverResolutionScreenState
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Allocation info card
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.sf(context),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: AppColors.cardShadow(context),
-                        ),
+                      AppCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(10),
+                                  width: CategoryIconTokens.compactSize,
+                                  height: CategoryIconTokens.compactSize,
                                   decoration: BoxDecoration(
                                     color: AppColors.accentLight,
-                                    borderRadius: BorderRadius.circular(12),
+                                    shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     AppIcons.wallet,
                                     color: AppColors.accent,
-                                    size: 22,
+                                    size: 20,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -230,25 +241,10 @@ class _LeftoverResolutionScreenState
                       ),
 
                       if (!hasPositiveBalance) ...[
-                        const SizedBox(height: 32),
-                        Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                AppIcons.info,
-                                size: 40,
-                                color:
-                                    AppColors.th(context).withValues(alpha: 0.6),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                S.of(context).leftoverNoPositive,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.ts(context),
-                                ),
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 16),
+                        EmptyState(
+                          icon: AppIcons.info,
+                          title: S.of(context).leftoverNoPositive,
                         ),
                       ],
 
@@ -257,15 +253,16 @@ class _LeftoverResolutionScreenState
 
                         // Currency selector (if multi-currency)
                         if (positiveBalances.length > 1) ...[
-                          Text(
+                          SectionHeader(
                             S.of(context).leftoverCurrencyToResolve,
-                            style: textTheme.titleMedium,
+                            padding: const EdgeInsetsDirectional.only(
+                                start: 4, bottom: Spacing.headerToCard),
                           ),
-                          const SizedBox(height: 8),
                           Container(
                             decoration: BoxDecoration(
                               color: AppColors.sfv(context),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius:
+                                  BorderRadius.circular(RadiusTokens.md),
                             ),
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 12),
@@ -283,7 +280,7 @@ class _LeftoverResolutionScreenState
                                     (e) => DropdownMenuItem(
                                       value: e.key,
                                       child: Text(
-                                        '${e.key} — ${formatNumber(e.value)}',
+                                        formatAmount(e.value, currency: e.key),
                                       ),
                                     ),
                                   ),
@@ -297,48 +294,47 @@ class _LeftoverResolutionScreenState
                         ],
 
                         // Resolution choices
-                        Text(
+                        SectionHeader(
                           S.of(context).leftoverWhatToDo,
-                          style: textTheme.titleMedium,
+                          padding: const EdgeInsetsDirectional.only(
+                              start: 4, bottom: Spacing.headerToCard),
                         ),
-                        const SizedBox(height: 12),
 
-                        _ResolutionOption(
+                        OptionCard(
                           icon: AppIcons.arrowCounterClockwise,
                           title: S.of(context).periodReturnUnallocated,
                           subtitle:
                               S.of(context).leftoverReturnSubtitle,
-                          value: LeftoverResolution.toUnallocated,
-                          groupValue: _resolution,
-                          onChanged: (v) => setState(() {
-                            _resolution = v;
+                          selected: _resolution ==
+                              LeftoverResolution.toUnallocated,
+                          onTap: () => setState(() {
+                            _resolution = LeftoverResolution.toUnallocated;
                             _targetAllocationId = null;
                           }),
                         ),
                         const SizedBox(height: 8),
 
-                        _ResolutionOption(
+                        OptionCard(
                           icon: AppIcons.arrowBendUpRight,
                           title: S.of(context).periodCarryForward,
                           subtitle: S.of(context).leftoverKeepSubtitle,
-                          value: LeftoverResolution.keep,
-                          groupValue: _resolution,
-                          onChanged: (v) => setState(() {
-                            _resolution = v;
+                          selected: _resolution == LeftoverResolution.keep,
+                          onTap: () => setState(() {
+                            _resolution = LeftoverResolution.keep;
                             _targetAllocationId = null;
                           }),
                         ),
                         const SizedBox(height: 8),
 
-                        _ResolutionOption(
+                        OptionCard(
                           icon: AppIcons.arrowsLeftRight,
                           title: S.of(context).leftoverMoveTitle,
                           subtitle:
                               S.of(context).leftoverMoveSubtitle,
-                          value: LeftoverResolution.toOtherAllocation,
-                          groupValue: _resolution,
-                          onChanged: (v) =>
-                              setState(() => _resolution = v),
+                          selected: _resolution ==
+                              LeftoverResolution.toOtherAllocation,
+                          onTap: () => setState(() => _resolution =
+                              LeftoverResolution.toOtherAllocation),
                         ),
 
                         // Target allocation picker
@@ -350,7 +346,8 @@ class _LeftoverResolutionScreenState
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppColors.sfv(context),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius:
+                                    BorderRadius.circular(RadiusTokens.md),
                               ),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12),
@@ -382,24 +379,9 @@ class _LeftoverResolutionScreenState
 
               // Bottom save button
               if (hasPositiveBalance)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    boxShadow: Theme.of(context).brightness ==
-                            Brightness.light
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 8,
-                              offset: const Offset(0, -2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: FilledButton(
+                BottomActionBar(
+                  children: [
+                    FilledButton(
                       onPressed: _saving ||
                               (_resolution ==
                                       LeftoverResolution.toOtherAllocation &&
@@ -415,15 +397,9 @@ class _LeftoverResolutionScreenState
                                 strokeWidth: 2,
                               ),
                             )
-                          : Text(
-                              S.of(context).commonSave,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                          : Text(S.of(context).commonSave),
                     ),
-                  ),
+                  ],
                 ),
             ],
           );
@@ -474,10 +450,10 @@ class _BalanceRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
             ),
             child: Text(
-              formatNumber(amount),
+              formatAmount(amount, currency: currency),
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w600,
@@ -486,96 +462,6 @@ class _BalanceRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Resolution option radio card
-// ---------------------------------------------------------------------------
-
-class _ResolutionOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final LeftoverResolution value;
-  final LeftoverResolution groupValue;
-  final ValueChanged<LeftoverResolution> onChanged;
-
-  const _ResolutionOption({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = value == groupValue;
-
-    return Material(
-      color: selected
-          ? AppColors.accentLight.withValues(alpha: 0.3)
-          : AppColors.sf(context),
-      borderRadius: BorderRadius.circular(CardTokens.radius),
-      child: InkWell(
-        onTap: () => onChanged(value),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: selected
-                  ? AppColors.accent.withValues(alpha: 0.4)
-                  : AppColors.bd(context),
-              width: selected ? 1.5 : 1,
-            ),
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 22,
-                color: selected ? AppColors.accent : AppColors.th(context),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: selected
-                            ? AppColors.tp(context)
-                            : AppColors.ts(context),
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.th(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                selected ? AppIcons.radioButtonFill : AppIcons.circle,
-                size: 20,
-                color: selected ? AppColors.accent : AppColors.th(context),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

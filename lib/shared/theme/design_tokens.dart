@@ -4,6 +4,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 // ── Spacing scale (multiples of 4) ──────────────────────────────────────────
 abstract final class Spacing {
   static const double xs = 4;
@@ -62,6 +64,10 @@ abstract final class RadiusTokens {
 
   /// Snackbars (Cashew: 13)
   static const double snackbar = 13;
+
+  /// Hero and banner cards (Ready to assign, envelope/goal/account heroes,
+  /// More groups) — a step rounder than ordinary cards.
+  static const double hero = 20;
 }
 
 // ── Category icon tokens ────────────────────────────────────────────────────
@@ -139,6 +145,10 @@ abstract final class TypographyTokens {
   // Date group header: 14 / w600
   static const double dateHeaderSize = 14;
   static const FontWeight dateHeaderWeight = FontWeight.w600;
+
+  /// Bottom sheet and dialog-like sheet titles ([SheetTitle]).
+  static const double sheetTitleSize = 18;
+  static const FontWeight sheetTitleWeight = FontWeight.w700;
 }
 
 // ── Input validation limits ──────────────────────────────────────────────────
@@ -165,4 +175,11 @@ abstract final class DialogButtons {
   static final outlined = OutlinedButton.styleFrom(
       minimumSize: const Size(64, 44),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10));
+
+  /// The confirm button of a destructive dialog (Delete, Discard, Remove).
+  static final destructive = FilledButton.styleFrom(
+      minimumSize: const Size(64, 44),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      backgroundColor: AppColors.overspent,
+      foregroundColor: Colors.white);
 }

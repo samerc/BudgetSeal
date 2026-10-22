@@ -241,8 +241,13 @@ function catChip(c, cls = '') {
 }
 
 function transferChip(cls = '') {
-  return `<span class="chip-icon ${cls}" style="background:var(--accent-fill);color:var(--accent)">${IC.transfer}</span>`;
+  return `<span class="chip-icon ${cls}" style="background:color-mix(in srgb, var(--transfer) 16%, var(--card));color:var(--transfer)">${IC.transfer}</span>`;
 }
+
+/** CSS class coloring an amount by transaction type (--income/--expense/--transfer,
+ *  the app's txColors defaults). Status (overspent, negative balances) uses
+ *  `overspent` instead. */
+function typeCls(type) { return { income: 'income', expense: 'expense', transfer: 'transfer' }[type] || ''; }
 
 // ── Icons (inline SVG, stroke = currentColor) ────────────────────────────────
 
@@ -333,7 +338,8 @@ async function refs(force) {
     if (a) cache.accounts = a.items || [];
     if (c) cache.categories = c.items || [];
   }
-  return { accounts: cache.accounts || [], categories: cache.categories || [] };
+  // failed: the lists couldn't be loaded (not "there are none").
+  return { accounts: cache.accounts || [], categories: cache.categories || [], failed: !cache.accounts || !cache.categories };
 }
 function invalidate() { for (const k of Object.keys(cache)) delete cache[k]; }
 
@@ -369,20 +375,20 @@ let modalReturnFocus = null;
  * Opens a dialog. `onSubmit` returns true (or a promise of true) to close.
  * Enter submits (except in textareas), Esc cancels, Tab stays inside.
  */
-function openModal({ title, body, submit, onSubmit, danger = false, narrow = false, extra = null, onOpen = null }) {
+function openModal({ title, body, submit, onSubmit, danger = false, narrow = false, extra = null, onOpen = null, confirm = false }) {
   closeModal();
   modalReturnFocus = document.activeElement;
   const o = document.createElement('div');
   o.className = 'modal-overlay';
   o.id = 'modal-overlay';
   o.innerHTML = `
-    <form class="modal${narrow ? ' narrow' : ''}" role="dialog" aria-modal="true" aria-labelledby="modal-title" novalidate>
+    <form class="modal${narrow || confirm ? ' narrow' : ''}${confirm ? ' confirm' : ''}" role="${confirm ? 'alertdialog' : 'dialog'}" aria-modal="true" aria-labelledby="modal-title" novalidate>
       <h2 class="modal-title" id="modal-title">${esc(title)}</h2>
       ${body}
       <div class="hp-field" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
       <div class="modal-actions">
-        ${extra ? `<button type="button" class="btn btn-ghost" data-modal="extra">${esc(extra.label)}</button><span class="spacer"></span>` : ''}
-        <button type="button" class="btn btn-ghost" data-modal="cancel">${esc(t('common_cancel'))}</button>
+        ${extra ? `<button type="button" class="btn ${extra.danger ? 'btn-danger-text' : 'btn-ghost'}" data-modal="extra">${esc(extra.label)}</button><span class="spacer"></span>` : ''}
+        <button type="button" class="btn btn-outlined" data-modal="cancel">${esc(t('common_cancel'))}</button>
         ${submit ? `<button type="submit" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-modal="ok">${esc(submit)}</button>` : ''}
       </div>
     </form>`;
@@ -434,12 +440,18 @@ function closeModal() {
   setTimeout(liveFlush, 400);
 }
 
+/**
+ * The one confirm dialog (the app's showConfirmDialog): a question for a
+ * title ("Delete X?"), an optional message, Cancel (outlined) and the action
+ * side by side — red for destructive actions, accent otherwise.
+ * Resolves true when confirmed.
+ */
 function confirmDialog(title, msg, label, danger = true) {
   return new Promise(resolve => {
     let done = false;
     openModal({
-      title, narrow: true, danger, submit: label || t('common_delete'),
-      body: `<p class="modal-text">${esc(msg)}</p>`,
+      title, confirm: true, danger, submit: label || t('common_delete'),
+      body: msg ? `<p class="modal-text">${esc(msg)}</p>` : '',
       onSubmit: () => { done = true; resolve(true); return true; },
     });
     const o = document.getElementById('modal-overlay');
@@ -469,9 +481,23 @@ function emptyState(icon, title, sub, action) {
     <div class="empty-icon">${icon}</div>
     <div class="empty-title">${esc(title)}</div>
     ${sub ? `<p class="empty-sub">${esc(sub)}</p>` : ''}
-    ${action ? `<button class="btn btn-tonal" data-action="${action.action}">${IC.plus}${esc(action.label)}</button>` : ''}
+    ${action ? `<button class="btn btn-primary" data-action="${action.action}">${IC.plus}${esc(action.label)}</button>` : ''}
   </div>`;
 }
+
+/** Load failure (the app's ErrorRetry): the empty-state layout with a
+ *  warning icon, a message and Retry — never the "nothing yet" text. */
+function errorState(retry = 'retry') {
+  return `<div class="card"><div class="empty error" role="alert">
+    <div class="empty-icon">${IC.alert}</div>
+    <div class="empty-title">${esc(t('web_load_failed'))}</div>
+    <p class="empty-sub">${esc(t('web_load_failed_sub'))}</p>
+    <button class="btn btn-primary" data-action="${retry}">${esc(t('common_retry'))}</button>
+  </div></div>`;
+}
+
+/** A page whose data didn't load: keep its title, show errorState(). */
+function loadFailed(title) { setContent(pageHead(title, '') + errorState()); }
 
 function pageHead(title, sub, actions = '') {
   return `<div class="page-head">
@@ -762,7 +788,8 @@ function gettingStartedCard(gs) {
 async function renderHome(quiet) {
   if (!quiet) setContent(pageHead(t('web_nav_home'), '') + skeleton(5));
   const [d, up] = await Promise.all([api('/api/dashboard'), api('/api/upcoming?days=7', { quiet: true })]);
-  if (!d || state.route !== '#/' && state.route !== '') return;
+  if (state.route !== '#/' && state.route !== '') return;
+  if (!d) { if (!quiet) loadFailed(t('web_nav_home')); return; }
   const { household = {}, accounts = [], envelopes = [], unallocated = {}, recentTransactions = [] } = d;
   const base = household.baseCurrency || 'USD';
   state.baseCurrency = base;
@@ -783,7 +810,7 @@ async function renderHome(quiet) {
       ${over.map(({ e, f }) => `<div class="row">
         ${envChip(e, 'sm')}
         <div class="row-main"><div class="row-title">${esc(e.name)}</div>
-          <div class="row-sub expense">${esc(t('web_env_over_by', { amount: fmt(-f.bal, f.cur) }))}</div></div>
+          <div class="row-sub overspent">${esc(t('web_env_over_by', { amount: fmt(-f.bal, f.cur) }))}</div></div>
         <button class="btn btn-sm btn-cover" data-action="cover" data-id="${esc(e.id)}">${esc(t('web_env_cover'))}</button>
       </div>`).join('')}
     </div>` : '';
@@ -795,8 +822,8 @@ async function renderHome(quiet) {
       <div class="card card-flush list">${bills.slice(0, 5).map(b => `<div class="row clickable" data-action="bill" data-id="${esc(b.id)}" tabindex="0">
         ${b.type === 'transfer' ? transferChip('sm') : catChip(b, 'sm')}
         <div class="row-main"><div class="row-title">${esc(b.title || b.categoryName || t(`type_${b.type}`))}</div>
-          <div class="row-sub${b.daysUntil < 0 ? ' overdue' : ''}">${esc(dueLabel(b.daysUntil))}</div></div>
-        <div class="row-end"><div class="row-amount ${b.type === 'income' ? 'income' : ''}">${esc(fmt(b.amount, b.currency))}</div></div>
+          <div class="row-sub">${dueSpan(b.daysUntil)}</div></div>
+        <div class="row-end"><div class="row-amount ${typeCls(b.type)}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div></div>
       </div>`).join('')}</div>
     </div>` : '';
   cache.bills = up?.items || [];
@@ -887,10 +914,10 @@ function envIcon(e, cls = '') {
 }
 
 function barColor(f) {
-  if (f.over) return 'var(--expense)';
-  if (!f.flexible && f.pct >= 100) return 'var(--expense)';
+  if (f.over) return 'var(--overspent)';
+  if (!f.flexible && f.pct >= 100) return 'var(--overspent)';
   if (!f.flexible && f.pct >= 85) return 'var(--caution)';
-  return f.flexible ? 'var(--income)' : 'var(--accent)';
+  return f.flexible ? 'var(--healthy)' : 'var(--accent)';
 }
 
 function envMini(e) {
@@ -898,7 +925,7 @@ function envMini(e) {
   return `<a class="env-mini row clickable" href="#/envelopes">
     ${envIcon(e, 'sm')}
     <div class="row-main">
-      <div class="env-mini-top"><span class="row-title">${esc(e.name)}</span><span class="row-amount ${f.over ? 'expense' : ''}">${esc(fmt(f.bal, f.cur))}</span></div>
+      <div class="env-mini-top"><span class="row-title">${esc(e.name)}</span><span class="row-amount ${f.over ? 'overspent' : ''}">${esc(fmt(f.bal, f.cur))}</span></div>
       ${f.pct != null ? `<div class="bar thin"><span style="width:${f.pct.toFixed(1)}%;background:${barColor(f)}"></span></div>` : ''}
       ${f.meta ? `<div class="row-sub">${esc(f.meta)}${f.metaEnd ? ` · ${esc(f.metaEnd)}` : ''}</div>` : ''}
     </div>
@@ -908,7 +935,8 @@ function envMini(e) {
 async function renderBudget(quiet) {
   if (!quiet) setContent(pageHead(t('web_nav_budget'), '') + skeleton(4));
   const d = await api('/api/envelopes');
-  if (!d || state.route !== '#/envelopes') return;
+  if (state.route !== '#/envelopes') return;
+  if (!d) { if (!quiet) loadFailed(t('web_nav_budget')); return; }
   const base = d.baseCurrency || state.baseCurrency;
   state.baseCurrency = base;
   cache.envelopes = d.items || [];
@@ -1149,7 +1177,7 @@ async function renderTransactions(opts = {}) {
 
   const head = account
     ? `<a class="back-link" href="#/accounts">${IC.back}${esc(t('nav_accounts'))}</a>
-       ${pageHead(account.name, `<span class="num acct-head-bal${account.balance < 0 ? ' expense' : ''}">${esc(fmt(account.balance, account.currency))}</span>
+       ${pageHead(account.name, `<span class="num acct-head-bal${account.balance < 0 ? ' overspent' : ''}">${esc(fmt(account.balance, account.currency))}</span>
            <span class="acct-head-meta">${esc(account.reconciledAt ? t('web_acct_reconciled_on', { date: fmtDate(account.reconciledAt, true) }) : t('web_acct_never_reconciled'))}</span>
            ${account.archived ? `<span class="tag warn">${esc(t('web_acct_archived'))}</span>` : ''}`,
          `<button class="btn btn-ghost" data-action="edit-account" data-id="${esc(account.id)}">${IC.edit}${esc(t('web_goal_edit'))}</button>
@@ -1229,7 +1257,14 @@ async function loadTx(reset) {
   if (!v) return;
   if (reset) { v.page = 1; v.items = []; }
   const d = await api(`/api/transactions?${txQuery(v.page)}`);
-  if (!d || txView !== v) return;
+  if (txView !== v) return;
+  if (!d) {
+    // A first page that didn't load shows Retry; a failed "Load more" keeps
+    // the rows and re-enables its button.
+    if (reset) { const box = document.getElementById('tx-results'); if (box) box.innerHTML = errorState('retry-tx'); }
+    else { v.page--; drawTx(); }
+    return;
+  }
   state.baseCurrency = d.baseCurrency || state.baseCurrency;
   v.items = reset ? d.items : v.items.concat(d.items);
   if (reset) v.summary = d.summary || null;
@@ -1264,7 +1299,7 @@ function monthCard(s, year, month) {
       <span class="month-title">${esc(hasBudget ? t('web_month_budget', { month: monthName }) : monthName)}</span>
       ${hasBudget ? `<span class="month-left num${over ? ' over' : ''}">${esc(over ? t('web_impact_over', { amount: f(-left) }) : t('web_impact_left', { amount: f(left) }))}</span>` : ''}
     </div>
-    ${hasBudget ? `<div class="bar"><span style="width:${pct.toFixed(1)}%;background:${over ? 'var(--expense)' : 'var(--acc-bright)'}"></span></div>` : ''}
+    ${hasBudget ? `<div class="bar"><span style="width:${pct.toFixed(1)}%;background:${over ? 'var(--overspent)' : 'var(--acc-bright)'}"></span></div>` : ''}
     <div class="month-detail">${esc(detail)}</div>
   </div>`;
 }
@@ -1291,7 +1326,11 @@ function drawTx() {
   // The month card: a month of the whole list (no type/search filter).
   const card = !v.accountId && v.month >= 0 && !v.type && !v.search ? monthCard(v.summary, v.year, v.month) : '';
   if (!visible.length) {
-    box.innerHTML = card + `<div class="card">${emptyState(IC.receipt, v.search ? t('web_tx_no_match') : t('web_tx_empty_title'), v.search ? '' : t('web_tx_empty_sub'), v.search ? null : { action: 'add-tx', label: t('web_tx_add') })}</div>`;
+    // A search or type filter with no match gets its own message.
+    const html = v.search ? emptyState(IC.search, t('web_tx_no_match'), t('web_filter_no_match_sub'))
+      : v.type ? emptyState(IC.receipt, t('web_filter_no_match'), t('web_filter_no_match_sub'))
+      : emptyState(IC.receipt, t('web_tx_empty_title'), t('web_tx_empty_sub'), { action: 'add-tx', label: t('web_tx_add') });
+    box.innerHTML = card + `<div class="card">${html}</div>`;
     return;
   }
   const base = state.baseCurrency;
@@ -1452,7 +1491,7 @@ async function openTxForm(pre = null, mode = 'add') {
   const form = openModal({
     title,
     submit: editing ? t('common_save') : t('web_tx_add_short'),
-    extra: editing ? { label: t('common_delete'), run: () => { closeModal(); deleteTx(pre.id); } }
+    extra: editing ? { label: t('common_delete'), danger: true, run: () => { closeModal(); deleteTx(pre.id); } }
       : { label: t('web_save_add_another'), run: f => f.dispatchEvent(new CustomEvent('submit-another', { cancelable: true })) },
     body: `
       <div class="field"><div class="seg full" id="f-type" role="tablist">
@@ -1639,8 +1678,9 @@ function bulkRow(prev) {
 
 async function renderBulk() {
   setContent(pageHead(t('web_bulk_title'), '') + skeleton(4));
-  const { accounts, categories } = await refs();
+  const { accounts, categories, failed } = await refs();
   if (state.route !== '#/bulk') return;
+  if (failed) { loadFailed(t('web_bulk_title')); return; }
   if (!accounts.length) { location.hash = '#/transactions'; toast(t('web_need_account'), true); return; }
   bulk = { accounts, categories, rows: bulkLoad() || [], bad: -1 };
   bulk.rows = bulk.rows.filter(r => accounts.some(a => a.id === r.account));
@@ -1953,8 +1993,9 @@ function importRows() {
 }
 
 async function renderImport() {
-  const { accounts } = await refs();
+  const { accounts, failed } = await refs();
   if (state.route !== '#/import') return;
+  if (failed) { loadFailed(t('web_import_title')); return; }
   if (!imp) imp = { data: null, roles: [], header: true, name: '', accountId: lsGet('bs_import_account') || lsGet('bs_last_account') };
   if (!accounts.some(a => a.id === imp.accountId)) imp.accountId = accounts[0]?.id || '';
   const head = `<a class="back-link" href="#/transactions">${IC.back}${esc(t('nav_transactions'))}</a>${pageHead(t('web_import_title'), esc(t('web_import_sub')))}`;
@@ -2048,7 +2089,7 @@ async function runImport() {
     check.duplicates ? t('web_import_dupes', { n: check.duplicates }) : '',
   ].filter(Boolean);
   openModal({
-    title: t('web_import_confirm_title'), narrow: true,
+    title: t('web_import_confirm_title'), confirm: true,
     submit: t('web_import_go', { n: check.ready }),
     body: lines.map(l => `<p class="modal-text">${esc(l)}</p>`).join(''),
     onSubmit: async () => {
@@ -2069,7 +2110,8 @@ async function runImport() {
 async function renderAccounts(quiet) {
   if (!quiet) setContent(pageHead(t('nav_accounts'), '') + skeleton(5));
   const d = await api('/api/accounts?archived=1');
-  if (!d || state.route !== '#/accounts') return;
+  if (state.route !== '#/accounts') return;
+  if (!d) { if (!quiet) loadFailed(t('nav_accounts')); return; }
   const archived = (d.items || []).filter(a => a.archived);
   cache.accounts = (d.items || []).filter(a => !a.archived);
   const add = `<button class="btn btn-primary" data-action="add-account">${IC.plus}${esc(t('web_acct_add'))}</button>`;
@@ -2086,14 +2128,14 @@ async function renderAccounts(quiet) {
   setContent(`
     ${pageHead(t('nav_accounts'), '', add)}
     <div class="stats">${Object.entries(worth).map(([c, v]) => `
-      <div class="card stat"><div class="label">${esc(t('web_net_worth_cur', { cur: c }))}</div><div class="value num${v < 0 ? ' expense' : ''}">${esc(fmt(v, c))}</div></div>`).join('')}</div>
+      <div class="card stat"><div class="label">${esc(t('web_net_worth_cur', { cur: c }))}</div><div class="value num${v < 0 ? ' overspent' : ''}">${esc(fmt(v, c))}</div></div>`).join('')}</div>
     ${order.filter(k => groups[k]).map(k => `
       <div class="section-head"><span class="section-title">${esc(t(`web_acct_group_${k}`))}</span></div>
       <div class="card card-flush list">${groups[k].map(a => `
         <a class="row clickable" href="#/accounts/${esc(a.id)}">
           <span class="type-icon">${a.isTravel ? IC.plane : TYPE_ICON[a.type] || IC.wallet}</span>
           <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${esc(a.currency)}${a.isTravel ? ` · ${esc(t('web_acct_travel'))}` : ''}</div></div>
-          <div class="row-end"><div class="row-amount${a.balance < 0 ? ' expense' : ''}">${esc(fmt(a.balance, a.currency))}</div></div>
+          <div class="row-end"><div class="row-amount${a.balance < 0 ? ' overspent' : ''}">${esc(fmt(a.balance, a.currency))}</div></div>
           <span class="chev hint" style="display:inline-grid">${IC.right}</span>
         </a>`).join('')}</div>`).join('')}
     ${archived.length ? `<div class="section-head"><span class="section-title">${esc(t('web_acct_archived_section'))}</span></div>
@@ -2251,7 +2293,8 @@ let catType = 'expense';
 async function renderCategories(quiet) {
   if (!quiet) setContent(pageHead(t('nav_categories'), '') + skeleton(6));
   const d = await api('/api/categories');
-  if (!d || state.route !== '#/categories') return;
+  if (state.route !== '#/categories') return;
+  if (!d) { if (!quiet) loadFailed(t('nav_categories')); return; }
   cache.categories = d.items || [];
   const all = cache.categories;
   const ofType = all.filter(c => (catType === 'income') === (c.transactionType === 'income'));
@@ -2397,7 +2440,8 @@ async function renderGoals(quiet) {
   const head = actions => pageHead(t('web_nav_goals'), esc(t('web_goals_sub')), actions);
   if (!quiet) setContent(head('') + skeleton(4));
   const d = await api('/api/objectives');
-  if (!d || state.route !== '#/goals') return;
+  if (state.route !== '#/goals') return;
+  if (!d) { if (!quiet) setContent(head('') + errorState()); return; }
   cache.goals = d.items || [];
   const add = `<button class="btn btn-primary" data-action="add-goal">${IC.plus}${esc(t('web_goal_new'))}</button>`;
   if (!cache.goals.length) {
@@ -2411,7 +2455,7 @@ async function renderGoals(quiet) {
         <div class="row-main"><div class="env-name">${esc(o.name)}</div><div class="env-kind">${esc(f.sub)}</div></div>
       </div>
       <div><div class="env-amount num">${esc(fmt(f.big, f.cur))}</div><div class="env-kind">${esc(f.label)}</div></div>
-      ${f.pct != null ? `<div class="bar"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--income)' : safeHex(o.colorHex)}"></span></div>` : ''}
+      ${f.pct != null ? `<div class="bar"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--healthy)' : safeHex(o.colorHex)}"></span></div>` : ''}
       ${f.meta || f.metaEnd ? `<div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
       <div class="env-foot">
         <span class="env-kind">${o.monthlyPace ? esc(t('web_goal_per_month', { amount: fmt(o.monthlyPace, f.cur) })) : ''}</span>
@@ -2438,7 +2482,7 @@ async function openGoal(id) {
       <div class="goal-hero">${goalChip(o, 'lg')}
         <div><div class="env-amount num">${esc(fmt(f.big, f.cur))}</div><div class="env-kind">${esc(f.label)} · ${esc(f.sub)}</div></div>
       </div>
-      ${f.pct != null ? `<div class="bar" style="margin:14px 0 6px"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--income)' : safeHex(o.colorHex)}"></span></div>
+      ${f.pct != null ? `<div class="bar" style="margin:14px 0 6px"><span style="width:${f.pct.toFixed(1)}%;background:${f.done ? 'var(--healthy)' : safeHex(o.colorHex)}"></span></div>
         <div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
       <div class="goal-stats">
         ${stat(f.loan ? t('web_goal_paid_back_label') : t('web_goal_saved'), fmt(f.paid, f.cur))}
@@ -2516,7 +2560,7 @@ async function openGoalForm(o = null) {
   openModal({
     title: o ? t('web_goal_edit') : t('web_goal_new'),
     submit: o ? t('common_save') : t('web_goal_create'),
-    extra: o ? { label: t('common_delete'), run: () => deleteGoal(o) } : null,
+    extra: o ? { label: t('common_delete'), danger: true, run: () => deleteGoal(o) } : null,
     body: `
       ${o ? '' : `<div class="field"><div class="seg full" id="g-type">
         <button type="button" data-type="goal" class="${type === 'goal' ? 'active' : ''}">${esc(t('web_goal_kind_goal'))}</button>
@@ -2604,7 +2648,7 @@ function deleteGoal(o) {
     return;
   }
   openModal({
-    title: t('web_goal_delete_title', { name: o.name }), narrow: true, danger: true,
+    title: t('web_goal_delete_title', { name: o.name }), confirm: true, danger: true,
     submit: t('web_goal_delete_all'),
     extra: { label: t('web_goal_delete_keep'), run: () => del('keep') },
     body: `<p class="modal-text">${esc(t('web_goal_delete_payments', { n: o.paymentCount }))}</p>`,
@@ -2615,6 +2659,9 @@ function deleteGoal(o) {
 // ── Upcoming: bills + planned payments ────────────────────────────────────────
 
 let upDays = Number(lsGet('bs_up_days')) || 30;
+
+/** "In 3 days" in the bill colors: calm blue upcoming, indigo overdue. */
+function dueSpan(n) { return `<span class="due-label${n < 0 ? ' overdue' : ''}">${esc(dueLabel(n))}</span>`; }
 
 function dueLabel(n) {
   if (n < 0) return t('web_up_overdue', { n: -n });
@@ -2627,7 +2674,8 @@ async function renderUpcoming(quiet) {
   const plan = `<button class="btn btn-primary" data-action="add-plan">${IC.plus}${esc(t('web_plan_add'))}</button>`;
   if (!quiet) setContent(pageHead(t('web_nav_upcoming'), '') + skeleton(6));
   const [bills, planned] = await Promise.all([api(`/api/upcoming?days=${upDays}`), api('/api/planned'), refs()]);
-  if (!bills || !planned || state.route !== '#/upcoming') return;
+  if (state.route !== '#/upcoming') return;
+  if (!bills || !planned) { if (!quiet) loadFailed(t('web_nav_upcoming')); return; }
   cache.bills = bills.items || [];
   cache.planned = planned.items || [];
   const base = planned.baseCurrency || state.baseCurrency;
@@ -2646,13 +2694,13 @@ async function renderUpcoming(quiet) {
   const billRow = b => {
     const isT = b.type === 'transfer';
     const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
-    const sub = [dueLabel(b.daysUntil), freqLabel(b.frequency, b.interval), isT ? `${b.accountName || ''} ${arrow} ${b.destinationAccountName || ''}` : b.accountName].filter(Boolean).join(' · ');
-    const cls = b.type === 'income' ? 'income' : b.type === 'expense' ? 'expense' : '';
+    const rest = [freqLabel(b.frequency, b.interval), isT ? `${b.accountName || ''} ${arrow} ${b.destinationAccountName || ''}` : b.accountName].filter(Boolean).join(' · ');
+    const cls = typeCls(b.type);
     const first = b.occurrence === 0;
     return `<div class="row${first ? ' clickable' : ' dim'}"${first ? ` data-action="bill" data-id="${esc(b.id)}" tabindex="0"` : ''}>
       ${isT ? transferChip() : catChip(b)}
       <div class="row-main"><div class="row-title">${esc(b.title || b.categoryName || t(`type_${b.type}`))}${b.isSubscription ? ` <span class="tag accent">${esc(t('web_up_sub_tag'))}</span>` : ''}</div>
-        <div class="row-sub${b.daysUntil < 0 ? ' overdue' : ''}">${esc(sub)}</div></div>
+        <div class="row-sub">${dueSpan(b.daysUntil)}${rest ? ` · ${esc(rest)}` : ''}</div></div>
       <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div></div>
     </div>`;
   };
@@ -2669,7 +2717,7 @@ async function renderUpcoming(quiet) {
   const planRow = p => {
     const isT = p.type === 'transfer';
     const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
-    const cls = p.type === 'income' ? 'income' : p.type === 'expense' ? 'expense' : '';
+    const cls = typeCls(p.type);
     const sub = [fmtDate(p.date, true), isT ? `${p.accountName || ''} ${arrow} ${p.destinationAccountName || ''}` : p.accountName].filter(Boolean).join(' · ');
     return `<div class="row clickable" data-action="plan" data-id="${esc(p.id)}" tabindex="0">
       ${isT ? transferChip() : catChip(p)}
@@ -2720,7 +2768,7 @@ function openBill(id) {
     submit: t('web_up_post_now'),
     extra: { label: t('web_up_skip'), run: () => act(false) },
     body: `<div class="goal-hero">${b.type === 'transfer' ? transferChip('lg') : catChip(b, 'lg')}
-        <div><div class="env-amount num">${esc(fmtSigned(b.amount, b.currency, b.type))}</div><div class="env-kind">${esc(dueLabel(b.daysUntil))} · ${esc(fmtDate(b.dueDate, true))}</div></div></div>
+        <div><div class="env-amount num ${typeCls(b.type)}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div><div class="env-kind">${dueSpan(b.daysUntil)} · ${esc(fmtDate(b.dueDate, true))}</div></div></div>
       <p class="help" style="margin-top:14px">${esc(t('web_up_post_help'))}</p>`,
     onSubmit: () => act(true),
   });
@@ -2734,7 +2782,7 @@ function openPlan(id) {
     submit: t('web_plan_post'),
     extra: { label: t('web_goal_edit'), run: () => openPlanForm(p) },
     body: `<div class="goal-hero">${p.type === 'transfer' ? transferChip('lg') : catChip(p, 'lg')}
-        <div><div class="env-amount num">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div><div class="env-kind">${esc(fmtDate(p.date, true))} · ${esc(p.accountName || '')}</div></div></div>
+        <div><div class="env-amount num ${typeCls(p.type)}">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div><div class="env-kind">${esc(fmtDate(p.date, true))} · ${esc(p.accountName || '')}</div></div></div>
       <p class="help" style="margin-top:14px">${esc(t('web_plan_post_help'))}</p>`,
     onSubmit: () => postPlans([id]),
   });
@@ -2763,7 +2811,7 @@ async function openPlanForm(p = null) {
   openModal({
     title: p ? t('web_plan_edit') : t('web_plan_add'),
     submit: p ? t('common_save') : t('web_plan_save'),
-    extra: p ? { label: t('common_delete'), run: async () => {
+    extra: p ? { label: t('common_delete'), danger: true, run: async () => {
       if (!(await confirmDialog(t('web_plan_delete_title'), t('web_plan_delete_msg')))) return;
       const r = await api(`/api/planned/${encodeURIComponent(p.id)}`, { method: 'DELETE' });
       if (r) { toast(t('web_plan_deleted')); refresh(true); }
@@ -2827,7 +2875,8 @@ async function renderRecurring(subs, quiet) {
   const title = subs ? t('nav_subscriptions') : t('nav_recurring');
   if (!quiet) setContent(pageHead(title, '') + skeleton(5));
   const [d] = await Promise.all([api(subs ? '/api/subscriptions' : '/api/recurring'), refs()]);
-  if (!d || state.route !== route) return;
+  if (state.route !== route) return;
+  if (!d) { if (!quiet) loadFailed(title); return; }
   const items = d.items || [];
   cache[subs ? 'subs' : 'recurring'] = items;
 
@@ -2842,11 +2891,15 @@ async function renderRecurring(subs, quiet) {
     return;
   }
 
+  // A subscription is cancelled once its end date has passed, paused while
+  // it's switched off (the app's rule); recurring items are on or paused.
+  const status = r => (subs && r.endDate && toDate(r.endDate) < new Date() ? 'cancelled' : r.enabled ? 'active' : 'paused');
+
   // Subscriptions: what they cost per month and per year, per currency.
   let summary = '';
   if (subs) {
     const monthly = {};
-    items.filter(r => r.enabled).forEach(r => { monthly[r.currency] = (monthly[r.currency] || 0) + perMonth(r); });
+    items.filter(r => status(r) === 'active').forEach(r => { monthly[r.currency] = (monthly[r.currency] || 0) + perMonth(r); });
     summary = `<div class="stats">${Object.entries(monthly).map(([c, v]) => `
       <div class="card stat"><div class="label">${esc(t('web_sub_monthly'))}</div><div class="value num">${esc(fmt(v, c))}</div><div class="help">${esc(t('web_sub_yearly', { amount: fmt(v * 12, c) }))}</div></div>`).join('')}</div>`;
   }
@@ -2856,22 +2909,28 @@ async function renderRecurring(subs, quiet) {
     const arrow = document.documentElement.dir === 'rtl' ? '←' : '→';
     const sub = [freqLabel(r.frequency, r.interval), t('web_rec_next', { date: fmtDate(r.nextDueDate) }),
       isT ? `${r.accountName || ''} ${arrow} ${r.destinationAccountName || ''}` : r.accountName].filter(Boolean).join(' · ');
-    const cls = r.type === 'income' ? 'income' : r.type === 'expense' ? 'expense' : '';
-    return `<div class="row clickable${r.enabled ? '' : ' dim'}" data-action="edit-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" tabindex="0">
+    const cls = typeCls(r.type);
+    const st = status(r);
+    const tag = !subs || st === 'active' ? ''
+      : ` <span class="tag${st === 'cancelled' ? ' over' : ''}">${esc(st === 'cancelled' ? t('web_sub_cancelled') : t('web_rec_paused'))}</span>`;
+    return `<div class="row clickable${st === 'active' ? '' : ' dim'}" data-action="edit-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" tabindex="0">
       ${isT ? transferChip() : catChip(r)}
-      <div class="row-main"><div class="row-title">${esc(r.title || r.categoryName || t(`type_${r.type}`))}</div><div class="row-sub">${esc(sub)}</div></div>
+      <div class="row-main"><div class="row-title">${esc(r.title || r.categoryName || t(`type_${r.type}`))}${tag}</div><div class="row-sub">${esc(sub)}</div></div>
       <div class="row-actions"><button class="icon-btn danger" data-action="del-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" aria-label="${esc(t('common_delete'))}" title="${esc(t('common_delete'))}">${IC.trash}</button></div>
       <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(r.amount, r.currency, r.type))}</div></div>
       <label class="toggle" title="${esc(r.enabled ? t('web_rec_on') : t('web_rec_off'))}" data-stop><input type="checkbox" data-action="toggle-rec" data-id="${esc(r.id)}" data-subs="${subs ? 1 : 0}" ${r.enabled ? 'checked' : ''} aria-label="${esc(t('web_rec_on'))}"><span></span></label>
     </div>`;
   };
 
-  const active = items.filter(r => r.enabled), paused = items.filter(r => !r.enabled);
+  const active = items.filter(r => status(r) === 'active'), paused = items.filter(r => status(r) === 'paused');
+  const cancelled = items.filter(r => status(r) === 'cancelled');
+  const section = (label, list) => list.length ? `<div class="section-head"><span class="section-title">${esc(label)}</span></div><div class="card card-flush list">${list.map(row).join('')}</div>` : '';
   setContent(`
     ${pageHead(title, '', actions)}
     ${summary}
     ${active.length ? `<div class="card card-flush list">${active.map(row).join('')}</div>` : ''}
-    ${paused.length ? `<div class="section-head"><span class="section-title">${esc(t('web_rec_paused'))}</span></div><div class="card card-flush list">${paused.map(row).join('')}</div>` : ''}`);
+    ${section(t('web_rec_paused'), paused)}
+    ${section(t('web_sub_cancelled'), cancelled)}`);
 }
 
 function openRecurringForm(subs, r = null) {
@@ -2886,7 +2945,7 @@ function openRecurringForm(subs, r = null) {
   openModal({
     title,
     submit: r ? t('common_save') : (subs ? t('web_sub_add') : t('web_rec_add')),
-    extra: r ? { label: t('common_delete'), run: () => { closeModal(); deleteRecurring(r.id, subs); } } : null,
+    extra: r ? { label: t('common_delete'), danger: true, run: () => { closeModal(); deleteRecurring(r.id, subs); } } : null,
     body: `
       ${subs ? '' : `<div class="field"><div class="seg full" id="r-type">
         ${['expense', 'income', 'transfer'].map(k => `<button type="button" data-type="${k}" class="${type === k ? 'active' : ''}"${r ? ' disabled' : ''}>${esc(t(`type_${k}`))}</button>`).join('')}
@@ -3017,7 +3076,8 @@ async function renderReports(quiet) {
     api(`/api/reports/by-category?${q}`),
     api(`/api/reports/by-category?${q}&type=income`),
   ]);
-  if (!cf || state.route !== '#/reports') return;
+  if (state.route !== '#/reports') return;
+  if (!cf) { if (!quiet) setContent(head + errorState()); return; }
   charts.forEach(c => c.destroy());
   charts = [];
 
@@ -3248,7 +3308,7 @@ async function reloadTx() {
   if (acct) {
     v.account = acct;
     const el = document.querySelector('.acct-head-bal');
-    if (el) { el.textContent = fmt(acct.balance, acct.currency); el.classList.toggle('expense', acct.balance < 0); }
+    if (el) { el.textContent = fmt(acct.balance, acct.currency); el.classList.toggle('overspent', acct.balance < 0); }
   }
   drawTx();
 }
@@ -3271,6 +3331,8 @@ const actions = {
   'theme': cycleTheme,
   'shortcuts': showShortcuts,
   'retry-conn': () => checkConnection(),
+  'retry': () => refresh(),
+  'retry-tx': () => loadTx(true),
   'sign-out': signOut,
   'add-tx': () => openTxForm(null, 'add').then(() => {
     // From an account page, default the form to that account.

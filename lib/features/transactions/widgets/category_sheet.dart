@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/transactions_provider.dart';
+import '../../../core/providers/tx_colors_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/haptics.dart';
+import '../../../shared/widgets/app_chip.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/sheet_title.dart';
 import '../../../shared/theme/app_icons.dart';
 
 const categoryPresetColors = [
@@ -37,7 +41,7 @@ List<String> recentCategoryIds(List<TransactionEntry> entries,
   return ids;
 }
 
-class CategorySheet extends StatefulWidget {
+class CategorySheet extends ConsumerStatefulWidget {
   final List<Category> categories;
   final String? selectedId;
   final String? householdId;
@@ -65,10 +69,10 @@ class CategorySheet extends StatefulWidget {
   });
 
   @override
-  State<CategorySheet> createState() => _CategorySheetState();
+  ConsumerState<CategorySheet> createState() => _CategorySheetState();
 }
 
-class _CategorySheetState extends State<CategorySheet>
+class _CategorySheetState extends ConsumerState<CategorySheet>
     with WidgetsBindingObserver {
   bool _creating = false;
   final _newCatCtrl = TextEditingController();
@@ -174,24 +178,18 @@ class _CategorySheetState extends State<CategorySheet>
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 14),
                     // Title + New button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(S.of(context).commonCategory,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.tp(context))),
-                        if (!_creating)
-                          TextButton.icon(
-                            icon: const Icon(AppIcons.plus, size: 16),
-                            label: Text(S.of(context).catSheetNew),
-                            onPressed: () =>
-                                setState(() => _creating = true),
-                          ),
-                      ],
+                    SheetTitle(
+                      S.of(context).commonCategory,
+                      padding: const EdgeInsetsDirectional.only(top: 8),
+                      trailing: _creating
+                          ? null
+                          : TextButton.icon(
+                              icon: const Icon(AppIcons.plus, size: 16),
+                              label: Text(S.of(context).catSheetNew),
+                              onPressed: () =>
+                                  setState(() => _creating = true),
+                            ),
                     ),
                     // New category input
                     if (_creating) ...[
@@ -232,9 +230,11 @@ class _CategorySheetState extends State<CategorySheet>
                     // Type toggle
                     Row(
                       children: [
-                        _typeChip(S.of(context).typeExpense, 'expense', AppColors.overspent),
+                        _typeChip(S.of(context).typeExpense, 'expense',
+                            ref.watch(txColorsProvider).expense),
                         const SizedBox(width: 8),
-                        _typeChip(S.of(context).typeIncome, 'income', AppColors.healthy),
+                        _typeChip(S.of(context).typeIncome, 'income',
+                            ref.watch(txColorsProvider).income),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -286,30 +286,14 @@ class _CategorySheetState extends State<CategorySheet>
   }
 
   Widget _typeChip(String label, String value, Color color) {
-    final selected = _typeFilter == value;
-    return GestureDetector(
+    return AppChip(
+      label: label,
+      selected: _typeFilter == value,
+      color: color,
       onTap: () => setState(() {
         _typeFilter = value;
         _openParentId = null;
       }),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-          border: selected
-              ? Border.all(color: color.withValues(alpha: 0.4))
-              : null,
-        ),
-        child: Text(label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? color : AppColors.ts(context),
-            )),
-      ),
     );
   }
 
@@ -398,8 +382,8 @@ class _CategorySheetState extends State<CategorySheet>
                     child: Text(
                       openParent.name,
                       style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TypographyTokens.sheetTitleSize,
+                        fontWeight: TypographyTokens.sheetTitleWeight,
                         color: AppColors.tp(context),
                       ),
                     ),

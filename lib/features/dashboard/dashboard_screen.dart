@@ -11,7 +11,6 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
-import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -29,13 +28,18 @@ import '../../shared/widgets/error_retry.dart';
 import 'dashboard_customize_sheet.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
-import '../../shared/utils/note_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../accounts/account_type.dart';
+import '../accounts/widgets/balance_hero.dart';
+import '../reports/widgets/income_expense_summary.dart';
 import '../../core/providers/getting_started_provider.dart';
 import 'widgets/getting_started_card.dart';
 import 'widgets/budget_focus.dart';
@@ -301,7 +305,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       decoration: BoxDecoration(
                         color: AppColors.pastel(context, color!,
                             light: 0.88, dark: 0.8),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: Row(
                         children: [
@@ -309,8 +313,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(message,
-                                style: TextStyle(fontSize: 12, color: color,
-                                    fontWeight: FontWeight.w500)),
+                                style: TextStyle(
+                                    fontSize: TypographyTokens.captionSize,
+                                    color: color,
+                                    fontWeight: TypographyTokens.captionWeight)),
                           ),
                         ],
                       ),
@@ -398,63 +404,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
                       return unallocatedAsync.when(
                         data: (_) {
-
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.sf(context),
-                              borderRadius: BorderRadius.circular(CardTokens.radius),
-                              boxShadow: AppColors.cardShadow(context),
-                            ),
-                            child: Row(
+                          // The shared balance hero (Accounts, account
+                          // detail, Reports balance sheet).
+                          return BalanceHero(
+                            onTap: () => context.push('/accounts'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Net Worth
-                                Expanded(
-                                  child: Tappable(
-                                    onTap: () => context.push('/accounts'),
-                                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(AppIcons.bank,
-                                                size: 13, color: AppColors.ts(context)),
-                                            const SizedBox(width: 5),
-                                            Text(S.of(context).dashboardNetWorth,
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    color: AppColors.ts(context))),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        // Large amounts shrink to one line instead of wrapping.
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          alignment: AlignmentDirectional.centerStart,
-                                          child: RollingNumber(
-                                            amount: baseNetWorth,
-                                            currency: baseCurrency,
-                                            lazyFirstRender: false,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontFamily: TypographyTokens.displayFamily,
-                                              fontWeight: FontWeight.w800,
-                                              color: AppColors.tp(context),
-                                            ),
-                                          ),
-                                        ),
-                                        if (otherNetWorthCount > 0)
-                                          Text(
-                                            S.of(context).dashboardOtherCount(otherNetWorthCount),
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                color: AppColors.th(context)),
-                                          ),
-                                      ],
-                                    ),
+                                Text(S.of(context).dashboardNetWorth,
+                                    style: balanceHeroLabelStyle(context)),
+                                const SizedBox(height: Spacing.xs),
+                                // Large amounts shrink to one line instead of wrapping.
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: RollingNumber(
+                                    amount: baseNetWorth,
+                                    currency: baseCurrency,
+                                    lazyFirstRender: false,
+                                    style: balanceHeroAmountStyle(context,
+                                        value: baseNetWorth),
                                   ),
                                 ),
+                                if (otherNetWorthCount > 0)
+                                  Text(
+                                    S.of(context).dashboardOtherCount(otherNetWorthCount),
+                                    style: TextStyle(
+                                        fontSize: TypographyTokens.captionSize,
+                                        color: AppColors.ts(context)),
+                                  ),
                               ],
                             ),
                           );
@@ -481,36 +459,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   recentTxAsync.when(
                     data: (entries) {
                       if (entries.isEmpty) {
-                        return Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: AppColors.sf(context),
-                            borderRadius: BorderRadius.circular(CardTokens.radius),
-                          ),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Icon(AppIcons.receipt,
-                                    size: 36, color: AppColors.th(context)),
-                                const SizedBox(height: 8),
-                                Text(S.of(context).dashboardNoTransactionsYet,
-                                    style: TextStyle(
-                                        color: AppColors.ts(context))),
-                                // Money comes in first, then gets jobs. The
-                                // checklist already offers this step.
-                                if (!checklistShown) ...[
-                                  const SizedBox(height: 12),
-                                  FilledButton(
-                                    onPressed: () => context.push(
-                                        '/add-transaction',
-                                        extra: {'editType': 'income'}),
-                                    child: Text(
-                                        S.of(context).dashboardRecordIncome),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
+                        // Money comes in first, then gets jobs. The
+                        // checklist already offers this step.
+                        return EmptyState(
+                          icon: AppIcons.receipt,
+                          title: S.of(context).dashboardNoTransactionsYet,
+                          actionLabel: checklistShown
+                              ? null
+                              : S.of(context).dashboardRecordIncome,
+                          onAction: checklistShown
+                              ? null
+                              : () => context.push('/add-transaction',
+                                  extra: {'editType': 'income'}),
                         );
                       }
                       final recent = entries.take(5).toList();
@@ -531,19 +491,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                                     horizontal: 14, vertical: 10),
                                 decoration: BoxDecoration(
                                   color: AppColors.accentLight,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                                 ),
                                 child: Row(
                                   children: [
                                     Icon(AppIcons.sun,
-                                        size: 16, color: AppColors.accent),
+                                        size: 16, color: AppColors.accentText(context)),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         S.of(context).dashboardNoTransactionsToday,
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.accent,
+                                          fontSize: TypographyTokens.captionSize,
+                                          fontWeight: TypographyTokens.captionWeight,
+                                          color: AppColors.accentText(context),
                                         ),
                                       ),
                                     ),
@@ -619,38 +580,24 @@ class _SpendingOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final net = income - expense;
     final periodLabel =
         showWeekly ? S.of(context).dashboardLast7Days : DateFormat('MMMM').format(DateTime.now());
     final sorted = categorySpend.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final topCategories = sorted.take(5).toList();
-    final defaultColors = [
-      const Color(0xFF6366F1),
-      const Color(0xFF10B981),
-      const Color(0xFFF59E0B),
-      const Color(0xFFEF4444),
-      const Color(0xFF8B5CF6),
-      const Color(0xFF64748B),
-    ];
     // Subcategories inherit their parent's color, so siblings would draw as
-    // one solid ring — shift the shade each time a color repeats.
+    // one solid ring — shift the shade each time a color repeats. A slice
+    // without a category color (uncategorized) uses the accent, as in
+    // Reports > Categories.
     final sliceColors = <Color>[];
     final seen = <int, int>{};
     for (var i = 0; i < topCategories.length; i++) {
-      final base = categoryColors[topCategories[i].key] ??
-          defaultColors[i % defaultColors.length];
+      final base = categoryColors[topCategories[i].key] ?? AppColors.accent;
       final repeat = seen.update(base.toARGB32(), (n) => n + 1, ifAbsent: () => 0);
       sliceColors.add(AppColors.repeatShade(base, repeat));
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -659,9 +606,9 @@ class _SpendingOverviewCard extends StatelessWidget {
             children: [
               Text(periodLabel,
                   style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ts(context))),
+                      fontSize: TypographyTokens.cardTitleSize,
+                      fontWeight: TypographyTokens.cardTitleWeight,
+                      color: AppColors.tp(context))),
               Tappable(
                 onTap: onTogglePeriod,
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -677,8 +624,8 @@ class _SpendingOverviewCard extends StatelessWidget {
                     showWeekly ? S.of(context).dashboardThisMonth : S.of(context).dashboardLast7Days,
                     style: TextStyle(
                       fontSize: TypographyTokens.overlineSize,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
+                      fontWeight: TypographyTokens.overlineWeight,
+                      color: AppColors.accentText(context),
                     ),
                   ),
                 ),
@@ -724,14 +671,15 @@ class _SpendingOverviewCard extends StatelessWidget {
                                       amount: expense,
                                       currency: currency,
                                       style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: TypographyTokens.amountRegularSize,
+                                          fontFamily: TypographyTokens.displayFamily,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.tp(context))),
                                 ),
                               ),
                               Text(S.of(context).dashboardSpent,
                                   style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: TypographyTokens.miniSize,
                                       color: AppColors.ts(context))),
                             ],
                           ),
@@ -746,7 +694,7 @@ class _SpendingOverviewCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(S.of(context).dashboardNoSpending,
                                 style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: TypographyTokens.overlineSize,
                                     color: AppColors.ts(context))),
                           ],
                         ),
@@ -754,37 +702,10 @@ class _SpendingOverviewCard extends StatelessWidget {
               )),
               const SizedBox(width: 20),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _MiniStat(
-                        label: S.of(context).typeIncome,
-                        amount: income,
-                        color: AppColors.healthy,
-                        currency: currency,
-                        prefix: '+'),
-                    const SizedBox(height: 8),
-                    _MiniStat(
-                        label: S.of(context).dashboardLabelExpenses,
-                        amount: expense,
-                        color: AppColors.overspent,
-                        currency: currency,
-                        prefix: '-'),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Divider(
-                          height: 1, color: AppColors.bd(context)),
-                    ),
-                    _MiniStat(
-                        label: S.of(context).dashboardLabelNet,
-                        amount: net.abs(),
-                        color: net >= 0
-                            ? AppColors.healthy
-                            : AppColors.overspent,
-                        currency: currency,
-                        prefix: net >= 0 ? '+' : '-',
-                        bold: true),
-                  ],
+                child: IncomeExpenseSummary(
+                  income: income,
+                  expense: expense,
+                  currency: currency,
                 ),
               ),
             ],
@@ -807,7 +728,8 @@ class _SpendingOverviewCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(e.value.key,
                         style: TextStyle(
-                            fontSize: 12.5, color: AppColors.ts(context))),
+                            fontSize: TypographyTokens.captionSize,
+                            color: AppColors.ts(context))),
                   ],
                 );
               }).toList(),
@@ -815,54 +737,6 @@ class _SpendingOverviewCard extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _MiniStat extends StatelessWidget {
-  final String label;
-  final double amount;
-  final Color color;
-  final String prefix;
-  final bool bold;
-  final String? currency;
-
-  const _MiniStat({
-    required this.label,
-    required this.amount,
-    required this.color,
-    this.prefix = '',
-    this.bold = false,
-    this.currency,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(label,
-            style:
-                TextStyle(fontSize: 13, color: AppColors.ts(context))),
-        const SizedBox(width: 6),
-        // Narrow phones / large text: the amount shrinks instead of
-        // running past the card edge.
-        Expanded(
-          child: Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: AnimatedAmount(
-                  amount: amount,
-                  currency: currency,
-                  prefix: prefix.isNotEmpty ? prefix : null,
-                  style: TextStyle(
-                      fontSize: bold ? 16 : 14,
-                      fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-                      color: color)),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -903,8 +777,8 @@ class _QuickAction extends StatelessWidget {
               ),
               child: Column(children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: CategoryIconTokens.compactSize,
+                  height: CategoryIconTokens.compactSize,
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, color,
                         light: 0.6, dark: 0.5),
@@ -922,7 +796,7 @@ class _QuickAction extends StatelessWidget {
                     child: Text(label,
                         maxLines: 1,
                         style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: TypographyTokens.captionSize,
                             fontWeight: FontWeight.w700,
                             color: AppColors.tp(context))),
                   ),
@@ -949,9 +823,9 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
   @override
   ThemeData appBarTheme(BuildContext context) {
     final theme = Theme.of(context);
+    // The app's AppBar theme as is; only the search field drops the
+    // filled input look so it reads as the bar's title.
     return theme.copyWith(
-      appBarTheme: theme.appBarTheme.copyWith(
-          backgroundColor: AppColors.sf(context), elevation: 0),
       inputDecorationTheme: InputDecorationTheme(
           hintStyle: TextStyle(color: AppColors.th(context)),
           border: InputBorder.none),
@@ -978,9 +852,10 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
 
   Widget _body(BuildContext context) {
     if (query.length < 2) {
-      return Center(
-          child: Text(S.of(context).dashboardTypeAtLeast2,
-              style: TextStyle(color: AppColors.ts(context))));
+      return EmptyState(
+        icon: AppIcons.magnifyingGlass,
+        title: S.of(context).dashboardTypeAtLeast2,
+      );
     }
     final q = query.toLowerCase();
     final entries =
@@ -1009,86 +884,75 @@ class _GlobalSearchDelegate extends SearchDelegate<String?> {
         .toList();
 
     if (matchTx.isEmpty && matchAcct.isEmpty && matchCat.isEmpty) {
-      return Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(AppIcons.magnifyingGlassMinus,
-            size: 48, color: AppColors.th(context)),
-        const SizedBox(height: 12),
-        Text(S.of(context).dashboardNoResultsFor(query),
-            style: TextStyle(color: AppColors.ts(context))),
-      ]));
+      return EmptyState(
+        icon: AppIcons.magnifyingGlassMinus,
+        title: S.of(context).searchNoMatches,
+        subtitle: S.of(context).dashboardNoResultsFor(query),
+      );
     }
 
-    return ListView(padding: const EdgeInsets.all(16), children: [
+    final s = S.of(context);
+    String typeLabel(String type) => switch (type) {
+          'income' => s.typeIncome,
+          'transfer' => s.typeTransfer,
+          _ => s.typeExpense,
+        };
+
+    return ListView(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
+        children: [
       if (matchAcct.isNotEmpty) ...[
-        _sectionHead(context, S.of(context).dashboardSearchAccounts),
+        _sectionHead(context, s.dashboardSearchAccounts),
         ...matchAcct.map((a) => ListTile(
-              leading:
-                  Icon(AppIcons.creditCard, color: AppColors.accent),
+              leading: AccountTypeBadge(a.account.type,
+                  size: CategoryIconTokens.compactSize),
               title: Text(a.account.name),
               subtitle: Text(
-                  '${a.account.currency} \u00b7 ${formatAmount(a.balance, currency: a.account.currency)}'),
+                  '${accountTypeLabel(s, a.account.type)} · ${formatAmount(a.balance, currency: a.account.currency)}'),
               onTap: () {
                 close(context, null);
                 context.push('/accounts/${a.account.id}');
               },
             )),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
       ],
       if (matchCat.isNotEmpty) ...[
-        _sectionHead(context, S.of(context).dashboardSearchCategories),
-        ...matchCat.map((c) {
-          final color = AppColors.fromHex(c.colorHex);
-          return ListTile(
-            leading: CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.pastel(context, color,
-                    light: 0.82, dark: 0.72),
-                child: Text(c.name[0],
-                    style: TextStyle(
-                        color: color, fontWeight: FontWeight.w600))),
-            title: Text(c.name),
-            subtitle: Text(c.transactionType),
-            onTap: () => close(context, null),
-          );
-        }),
-        const SizedBox(height: 8),
+        _sectionHead(context, s.dashboardSearchCategories),
+        ...matchCat.map((c) => ListTile(
+              leading: CategoryIcon(
+                categoryName: c.name,
+                emoji: c.icon,
+                color: AppColors.fromHex(c.colorHex),
+                size: CategoryIconTokens.compactSize,
+                circular: true,
+              ),
+              title: Text(c.name),
+              subtitle: Text(typeLabel(c.transactionType)),
+              onTap: () => close(context, null),
+            )),
+        const SizedBox(height: Spacing.sm),
       ],
       if (matchTx.isNotEmpty) ...[
-        _sectionHead(context, S.of(context).dashboardSearchTransactions),
-        ...matchTx.map((e) {
-          final cat = e.tx.categoryId != null
-              ? catMap[e.tx.categoryId]
-              : null;
-          return ListTile(
-            leading: Icon(
-              e.tx.type == 'income'
-                  ? AppIcons.arrowDown
-                  : e.tx.type == 'expense'
-                      ? AppIcons.arrowUp
-                      : AppIcons.arrowsLeftRight,
-              color: e.tx.type == 'income'
-                  ? AppColors.healthy
-                  : e.tx.type == 'expense'
-                      ? AppColors.overspent
-                      : AppColors.accent,
-            ),
-            title: Text(cat?.name ??
-                (e.tx.note.isNotEmpty ? visibleNote(e.tx.note) : e.tx.type)),
-            subtitle: Text(
-                '${formatDate(e.tx.createdAt.toLocal())} \u00b7 ${formatAmount(e.tx.amount, currency: e.tx.currency)}'),
-            onTap: () {
-              close(context, null);
-              context.push('/transactions/${e.tx.id}');
-            },
-          );
-        }),
+        _sectionHead(context, s.dashboardSearchTransactions),
+        // The same rows as Activity and Home: category emoji, the line's
+        // own amount and currency, the user's income/expense colors.
+        ...matchTx.map((e) => TxTile(
+              entry: e,
+              categoryMap: catMap,
+              showBalance: false,
+              showDate: true,
+              onTap: () {
+                close(context, null);
+                context.push('/transactions/${e.tx.id}');
+              },
+            )),
       ],
     ]);
   }
 
   Widget _sectionHead(BuildContext context, String t) => SectionHeader(t,
-      padding: const EdgeInsets.only(bottom: 4, top: 4));
+      padding: const EdgeInsetsDirectional.fromSTEB(
+          Spacing.lg, Spacing.xs, Spacing.lg, Spacing.xs));
 
 }
 
@@ -1130,6 +994,7 @@ class _QuickTemplatesSectionState
     final categories = ref.watch(categoriesProvider).value ?? [];
     final catMap = {for (final c in categories) c.id: c};
     final db = ref.read(databaseProvider);
+    final txColors = ref.watch(txColorsProvider);
 
     return FutureBuilder<List<TransactionTemplate>>(
       future: _templatesFuture,
@@ -1144,44 +1009,25 @@ class _QuickTemplatesSectionState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    S.of(context).dashboardQuickTemplates,
-                    style: TextStyle(
-                      fontSize: TypographyTokens.cardTitleSize,
-                      fontWeight: TypographyTokens.cardTitleWeight,
-                      color: AppColors.tp(context),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => context.push('/templates'),
-                    child: Text(
-                      S.of(context).dashboardViewAll,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ),
-                ],
+              SectionHeader(
+                S.of(context).dashboardQuickTemplates,
+                trailing: TextButton(
+                  onPressed: () => context.push('/templates'),
+                  child: Text(S.of(context).dashboardViewAll),
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.headerToCard),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: templates.map((t) {
-                  final isIncome = t.type == 'income';
-                  final color =
-                      isIncome ? AppColors.healthy : AppColors.overspent;
+                  final color = txColors.forType(t.type);
                   final cat = t.categoryId != null
                       ? catMap[t.categoryId]
                       : null;
 
                   return Tappable(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                     scaleFactor: 0.95,
                     haptic: true,
                     onTap: () async {
@@ -1217,9 +1063,7 @@ class _QuickTemplatesSectionState
                       decoration: BoxDecoration(
                         color: AppColors.pastel(context, color,
                             light: 0.88, dark: 0.8),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: color.withValues(alpha: 0.2)),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1230,7 +1074,7 @@ class _QuickTemplatesSectionState
                           Text(
                             t.title,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: TypographyTokens.captionSize,
                               fontWeight: FontWeight.w600,
                               color: AppColors.tp(context),
                             ),
@@ -1239,8 +1083,8 @@ class _QuickTemplatesSectionState
                           Text(
                             formatAmount(t.amount, currency: t.currency),
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                              fontSize: TypographyTokens.captionSize,
+                              fontWeight: TypographyTokens.amountSmallWeight,
                               color: color,
                             ),
                           ),

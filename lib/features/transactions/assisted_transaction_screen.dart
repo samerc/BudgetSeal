@@ -29,6 +29,12 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/utils/save_errors.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/bottom_action_bar.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
+import 'widgets/tx_ui.dart';
 
 /// Assisted transaction entry: 3 popup steps.
 /// 1) Enter Title  2) Select Category  3) Enter Amount + Account + Save
@@ -188,29 +194,7 @@ class _AssistedTransactionScreenState
   }
 
   // ── Back button handling with cancel confirmation ────────────
-  Future<bool> _onWillPop() async {
-    final tr = S.of(context);
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(tr.txAfDiscardTitle),
-        content: Text(tr.txAfDiscardContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(tr.txAfKeepEditing),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.txAfDiscard),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
+  Future<bool> _onWillPop() => confirmDiscardTransaction(context);
 
   // ── Popup 1: Enter Title ──────────────────────────────────
 
@@ -250,7 +234,6 @@ class _AssistedTransactionScreenState
     final textPrimary = AppColors.tp(context);
     final textHint = AppColors.th(context);
     final surfaceVariant = AppColors.sfv(context);
-    final borderColor = AppColors.bd(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     showModalBottomSheet(
@@ -281,18 +264,9 @@ class _AssistedTransactionScreenState
                   setState(() => _type = newType);
                 }, tr: tr, bgColor: surfaceVariant),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(tr.txAfEnterTitle,
-                          style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: textPrimary)),
-                    ),
-                    _StepIndicator(current: 1),
-                  ],
-                ),
+                SheetTitle(tr.txAfEnterTitle,
+                    padding: EdgeInsets.zero,
+                    trailing: const _StepIndicator(current: 1)),
                 const SizedBox(height: 16),
                 TextField(
                   controller: ctrl,
@@ -331,7 +305,8 @@ class _AssistedTransactionScreenState
                     spacing: 8,
                     runSpacing: 6,
                     children: filteredSuggestions.map((s) {
-                      return GestureDetector(
+                      return Tappable(
+                        borderRadius: BorderRadius.circular(RadiusTokens.pill),
                         onTap: () {
                           _title = s;
                           movedForward = true;
@@ -356,8 +331,7 @@ class _AssistedTransactionScreenState
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: surfaceVariant,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: borderColor),
+                            borderRadius: BorderRadius.circular(RadiusTokens.pill),
                           ),
                           child: Text(s,
                               maxLines: 1,
@@ -377,9 +351,7 @@ class _AssistedTransactionScreenState
                   child: Text(
                       localType == 'transfer'
                           ? tr.txAfEnterAmountButton
-                          : tr.txAfSelectCategoryButton,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                          : tr.txAfSelectCategoryButton),
                 ),
               ],
             ),
@@ -523,18 +495,9 @@ class _AssistedTransactionScreenState
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(tr.txAfSelectCategoryTitle,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: catTextPrimary)),
-                            ),
-                            _StepIndicator(current: 2),
-                          ],
-                        ),
+                        SheetTitle(tr.txAfSelectCategoryTitle,
+                            padding: EdgeInsets.zero,
+                            trailing: const _StepIndicator(current: 2)),
                         const SizedBox(height: 10),
                         TextField(
                           controller: searchCtrl,
@@ -566,8 +529,6 @@ class _AssistedTransactionScreenState
                                     },
                                   )
                                 : null,
-                            filled: true,
-                            fillColor: catSurfaceVariant,
                             contentPadding:
                                 const EdgeInsets.symmetric(
                                     vertical: 10),
@@ -695,7 +656,9 @@ class _AssistedTransactionScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Parent header (tap to expand)
-                            GestureDetector(
+                            Tappable(
+                              borderRadius:
+                                  BorderRadius.circular(RadiusTokens.md),
                               onTap: () => setSheetState(() {
                                 expandedParentId =
                                     isExpanded ? null : parent.id;
@@ -708,7 +671,8 @@ class _AssistedTransactionScreenState
                                 decoration: BoxDecoration(
                                   color: AppColors.pastel(context, color,
                                       light: 0.88, dark: 0.8),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius:
+                                      BorderRadius.circular(RadiusTokens.md),
                                 ),
                                 child: Row(
                                   children: [
@@ -806,15 +770,13 @@ class _AssistedTransactionScreenState
 
   Widget _buildCategoryTile(
       Category cat, Color color, VoidCallback onTap) {
-    return GestureDetector(
+    return Tappable(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
       child: Container(
         padding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         margin: const EdgeInsets.only(top: 2, bottom: 2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Row(
           children: [
             CategoryIcon(
@@ -862,7 +824,8 @@ class _AssistedTransactionScreenState
             ? accounts.where((a) => a.id == selectedId).firstOrNull
             : null;
 
-    return GestureDetector(
+    return Tappable(
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
       onTap: () => _showAccountPicker(
         label: label,
         accounts: accounts,
@@ -878,12 +841,7 @@ class _AssistedTransactionScreenState
             color: selected != null
                 ? AppColors.pastel(context, color, light: 0.88, dark: 0.78)
                 : AppColors.sfv(context),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected != null
-                  ? color.withValues(alpha: 0.4)
-                  : AppColors.bd(context),
-            ),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
           child: Row(
             children: [
@@ -935,109 +893,26 @@ class _AssistedTransactionScreenState
     );
   }
 
-  void _showAccountPicker({
+  Future<void> _showAccountPicker({
     required String label,
     required List<Account> accounts,
     required String? selectedId,
     required Color color,
     required void Function(Account) onSelected,
-  }) {
+  }) async {
     final tr = S.of(context);
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Text(label,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(ctx))),
-              const SizedBox(height: 12),
-              ...() {
-                // Pre-fetch balances once for all accounts
-                final allBalances = ref.read(accountsWithBalanceProvider).value ?? [];
-                final balanceMap = {for (final ab in allBalances) ab.account.id: ab.balance};
-                return accounts.map((a) {
-                final isSelected = a.id == selectedId;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.pastel(ctx, color, light: 0.85, dark: 0.75)
-                        : AppColors.sfv(ctx),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: isSelected
-                        ? Border.all(color: color.withValues(alpha: 0.4))
-                        : null,
-                  ),
-                  child: ListTile(
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      onSelected(a);
-                    },
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 14),
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.pastel(context, color,
-                            light: 0.85, dark: 0.78),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(AppIcons.wallet,
-                          size: 18, color: color),
-                    ),
-                    title: Text(a.name,
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(ctx))),
-                    subtitle: () {
-                      final bal = balanceMap[a.id];
-                      if (bal != null) {
-                        return Text(
-                          '${a.currency} · ${formatAmount(bal, currency: a.currency)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: bal >= 0
-                                ? AppColors.ts(ctx)
-                                : AppColors.overspent,
-                          ),
-                        );
-                      }
-                      return Text(a.currency,
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.ts(ctx)));
-                    }(),
-                    trailing: isSelected
-                        ? Icon(AppIcons.checkCircleFill,
-                            size: 20, color: color)
-                        : null,
-                  ),
-                );
-              });
-              }(),
-              const SizedBox(height: 4),
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  context.push('/accounts/new');
-                },
-                icon: const Icon(AppIcons.plus, size: 18),
-                label: Text(tr.txAfAddAccount),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    final picked = await showAccountPickerSheet(context,
+        accounts: accounts,
+        title: label,
+        selectedId: selectedId,
+        addLabel: tr.txAfAddAccount);
+    if (picked == null || !mounted) return;
+    if (picked == kAddAccountPick) {
+      context.push('/accounts/new');
+      return;
+    }
+    final account = accounts.where((a) => a.id == picked).firstOrNull;
+    if (account != null) onSelected(account);
   }
 
   void _applyAutofill(String categoryId) {
@@ -1319,7 +1194,7 @@ class _AssistedTransactionScreenState
   }
 
   /// Check if a transaction with the same amount, category, and date exists.
-  Future<bool> _checkForDuplicate() async {
+  Future<Transaction?> _checkForDuplicate() async {
     final existingEntries =
         ref.read(transactionEntriesProvider).value ?? [];
     final selectedDay = DateTime(
@@ -1356,10 +1231,10 @@ class _AssistedTransactionScreenState
             break;
           }
         }
-        if (categoryMatch) return true;
+        if (categoryMatch) return existing.tx;
       }
     }
-    return false;
+    return null;
   }
 
   Future<void> _save() async {
@@ -1395,35 +1270,10 @@ class _AssistedTransactionScreenState
     }
 
     // Duplicate detection
-    final hasDuplicate = await _checkForDuplicate();
-    if (hasDuplicate && mounted) {
-      final tr = S.of(context);
-      final proceed = await showDialog<bool>(
-        context: context,
-        builder: (dialogCtx) => AlertDialog(
-          title: Text(tr.txFormDuplicateTitle,
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          content: Text(
-            tr.txFormDuplicateContent,
-            style: TextStyle(color: AppColors.ts(context)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, false),
-              child: Text(tr.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, true),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accent),
-              child: Text(tr.commonSaveAnyway),
-            ),
-          ],
-        ),
-      );
-      if (proceed != true) return;
+    final duplicate = await _checkForDuplicate();
+    if (duplicate != null && mounted) {
+      final proceed = await confirmDuplicateTransaction(context, duplicate);
+      if (!proceed) return;
     }
 
     final validItems = _lineItems.where((item) => item.amount > 0).toList();
@@ -1452,26 +1302,14 @@ class _AssistedTransactionScreenState
         }).join('\n');
 
         final tr = S.of(context);
-        final proceed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(tr.txAfMixedTitle),
-            content: Text(
-              tr.txAfMixedContent(byType.length, summaryLines),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(tr.commonCancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(tr.commonSave),
-              ),
-            ],
-          ),
+        final proceed = await showConfirmDialog(
+          context,
+          title: tr.txAfMixedTitle,
+          message: tr.txAfMixedContent(byType.length, summaryLines),
+          confirmLabel: tr.commonSave,
+          destructive: false,
         );
-        if (proceed != true) return;
+        if (!proceed) return;
       }
     }
 
@@ -1650,7 +1488,7 @@ class _AssistedTransactionScreenState
                 child: Column(
                   children: [
             // Category / Transfer banner
-            GestureDetector(
+            Tappable(
               onTap: isTransfer ? null : () {
                 // Re-open category selection as bottom sheet (don't pop)
                 if (mounted) _showCategoryPopup();
@@ -1693,9 +1531,9 @@ class _AssistedTransactionScreenState
                           child: Text(
                             '$_selectedCurrency ${_amountText()}',
                             style: TextStyle(
-                              fontSize: 30,
+                              fontSize: kHeroAmountSize,
                               fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
                               color: typeColor,
                             ),
                           ),
@@ -1713,7 +1551,8 @@ class _AssistedTransactionScreenState
                             fontWeight: _midCalculation
                                 ? FontWeight.w700
                                 : FontWeight.w400,
-                            color: typeColor.withValues(alpha: 0.7),
+                            color: AppColors.pastel(context, typeColor,
+                                light: 0.25, dark: 0.25),
                           ),
                         ),
                       ],
@@ -1723,7 +1562,7 @@ class _AssistedTransactionScreenState
               ),
             )),
             // Title — editable without going back through the flow.
-            InkWell(
+            Tappable(
               onTap: _editTitle,
               child: Padding(
                 padding:
@@ -1756,7 +1595,7 @@ class _AssistedTransactionScreenState
               ),
             ),
             // Date picker
-            GestureDetector(
+            Tappable(
               onTap: () async {
                 final now = DateTime.now();
                 final picked = await showDatePicker(
@@ -1792,7 +1631,8 @@ class _AssistedTransactionScreenState
                       onPick: (d) => setState(() => _selectedDate = d),
                     ),
                     const SizedBox(width: 4),
-                    GestureDetector(
+                    Tappable(
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       onTap: () async {
                         final picked = await showTimePicker(
                           context: context,
@@ -1866,11 +1706,6 @@ class _AssistedTransactionScreenState
                         : AppColors.pastel(context, AppColors.healthy,
                             light: 0.9, dark: 0.8),
                     borderRadius: BorderRadius.circular(CardTokens.radius),
-                    border: Border.all(
-                        color: _transferExchangeRate <= 1.0
-                            ? AppColors.overspent.withValues(alpha: 0.4)
-                            : AppColors.healthy.withValues(alpha: 0.3),
-                        width: 1.5),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1907,7 +1742,9 @@ class _AssistedTransactionScreenState
                                   color: AppColors.ts(context)),
                             ),
                           ),
-                          GestureDetector(
+                          Tappable(
+                            borderRadius:
+                                BorderRadius.circular(RadiusTokens.sm),
                             onTap: () {
                               setState(() {
                                 if (_transferExchangeRate > 0 &&
@@ -1934,7 +1771,8 @@ class _AssistedTransactionScreenState
                               decoration: BoxDecoration(
                                 color: AppColors.pastel(context, AppColors.accent,
                                     light: 0.85, dark: 0.78),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius:
+                                    BorderRadius.circular(RadiusTokens.sm),
                               ),
                               child: Icon(AppIcons.arrowsDownUp,
                                   size: 18, color: AppColors.accent),
@@ -1946,11 +1784,8 @@ class _AssistedTransactionScreenState
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.sf(context),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: AppColors.cardShadow(context),
-                        ),
+                        decoration:
+                            AppColors.card(context, radius: RadiusTokens.md),
                         child: Row(
                           children: [
                             Text(
@@ -2000,7 +1835,8 @@ class _AssistedTransactionScreenState
                             decoration: BoxDecoration(
                               color: AppColors.pastel(context, AppColors.healthy,
                                   light: 0.88, dark: 0.8),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius:
+                                  BorderRadius.circular(RadiusTokens.sm),
                             ),
                             child: Row(
                               children: [
@@ -2039,9 +1875,7 @@ class _AssistedTransactionScreenState
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, AppColors.accent,
                         light: 0.88, dark: 0.8),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.2)),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Row(
                     children: [
@@ -2070,7 +1904,8 @@ class _AssistedTransactionScreenState
               decoration: BoxDecoration(
                 color: AppColors.sfv(context),
                 borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+                    const BorderRadius.vertical(
+                        top: Radius.circular(RadiusTokens.hero)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -2086,64 +1921,39 @@ class _AssistedTransactionScreenState
               ),
             ),
             // Add another item + Save buttons
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Column(
-                  children: [
-                    // Add another item (hidden for transfers)
-                    if (!isTransfer) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: _addAnotherItem,
-                          icon: const Icon(AppIcons.plus, size: 18),
-                          label: Text(
-                            _lineItems.length > 1
-                                ? S.of(context).txAfAnotherWithCount(_lineItems.length, _itemsTotalLabel())
-                                : S.of(context).txAfAddAnother,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                                color: AppColors.bd(context)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    // Save button
-                    SizedBox(
+            BottomActionBar(
+              // Add another item (hidden for transfers)
+              above: isTransfer
+                  ? null
+                  : SizedBox(
                       width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _saving ? null : _save,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: typeColor,
-                          foregroundColor: AppColors.inkOn(typeColor),
-                          disabledBackgroundColor:
-                              typeColor.withValues(alpha: 0.7),
+                      child: OutlinedButton.icon(
+                        onPressed: _addAnotherItem,
+                        icon: const Icon(AppIcons.plus, size: 18),
+                        label: Text(
+                          _lineItems.length > 1
+                              ? S.of(context).txAfAnotherWithCount(
+                                  _lineItems.length, _itemsTotalLabel())
+                              : S.of(context).txAfAddAnother,
                         ),
-                        child: _saving
-                            ? SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    color: AppColors.inkOn(typeColor),
-                                    strokeWidth: 2))
-                            : Text(
-                                isTransfer
-                                    ? S.of(context).txAfSaveTransfer
-                                    : _lineItems.length > 1
-                                        ? S.of(context).txAfSaveNItems(_lineItems.length)
-                                        : S.of(context).txAfAddTransaction,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600)),
                       ),
                     ),
-                  ],
+              children: [
+                FilledButton(
+                  onPressed: _saving ? null : _save,
+                  child: _saving
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: AppColors.onAccent, strokeWidth: 2))
+                      : Text(isTransfer
+                          ? S.of(context).txAfSaveTransfer
+                          : _lineItems.length > 1
+                              ? S.of(context).txAfSaveNItems(_lineItems.length)
+                              : S.of(context).txAfAddTransaction),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -2174,10 +1984,12 @@ class _AssistedTransactionScreenState
           itemBuilder: (_, i) {
             final item = _lineItems[i];
             final isActive = i == _activeLineIndex;
-            return GestureDetector(
+            return Padding(
+              padding: const EdgeInsetsDirectional.only(end: 6),
+              child: Tappable(
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
               onTap: () => setState(() => _activeLineIndex = i),
               child: Container(
-                margin: const EdgeInsetsDirectional.only(end: 6),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -2185,7 +1997,7 @@ class _AssistedTransactionScreenState
                       ? AppColors.pastel(context, typeColor,
                           light: 0.8, dark: 0.7)
                       : AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
                   border: isActive
                       ? Border.all(color: typeColor, width: 1.5)
                       : null,
@@ -2209,7 +2021,9 @@ class _AssistedTransactionScreenState
                       Semantics(
                         button: true,
                         label: S.of(context).txAfRemoveItem,
-                        child: GestureDetector(
+                        child: Tappable(
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.pill),
                           onTap: () => setState(() {
                             _lineItems.removeAt(i);
                             _activeLineIndex = _activeLineIndex
@@ -2224,6 +2038,7 @@ class _AssistedTransactionScreenState
                       ),
                   ],
                 ),
+              ),
               ),
             );
           },
@@ -2244,9 +2059,9 @@ class _AssistedTransactionScreenState
               color: isOp
                   ? AppColors.accentLight
                   : AppColors.sf(context),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
                 onTap: () {
                   if (isBack) {
                     _calcBackspace();
@@ -2321,7 +2136,8 @@ class _AssistedTransactionScreenState
       Color color, String currentType, ValueChanged<String> onChanged) {
     final isSelected = currentType == value;
     return Expanded(
-      child: GestureDetector(
+      child: Tappable(
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
         onTap: () => onChanged(value),
         // Same look as the classic form's type pill: a raised surface pill
         // on a neutral track, the type's color only on the icon.
@@ -2360,27 +2176,8 @@ class _AssistedTransactionScreenState
 
   Widget _buildSmallTypeChip(
       String label, bool isSelected, Color color, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? color : AppColors.sfv(context),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Text(label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isSelected ? AppColors.inkOn(color) : AppColors.ts(context),
-                )),
-          ),
-        ),
-      ),
-    );
+    return AppChip(
+        label: label, selected: isSelected, color: color, onTap: onTap);
   }
 
 }
@@ -2402,9 +2199,10 @@ class _StepIndicator extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(
               color: i <= current
-                  ? AppColors.accent.withValues(alpha: 0.8)
-                  : AppColors.accent.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(4),
+                  ? AppColors.accent
+                  : AppColors.pastel(context, AppColors.accent,
+                      light: 0.75, dark: 0.6),
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
           ),
         ],

@@ -101,11 +101,7 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 8, 12),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -123,7 +119,8 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
                         ? tr.periodSealedTitle(month)
                         : tr.txMonthBudget(month),
                     style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700)),
+                        fontSize: TypographyTokens.cardTitleSize,
+                        fontWeight: FontWeight.w700)),
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,

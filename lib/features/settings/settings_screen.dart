@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +29,6 @@ import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
-import '../../core/sync/invite_code.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/large_title_header.dart';
@@ -42,6 +40,11 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/brand_palette.dart';
 import '../../shared/widgets/tappable.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/settings_row.dart';
+import '../../shared/widgets/sheet_title.dart';
+import 'share_household_sheet.dart';
 import '../../shared/utils/biometric_errors.dart';
 import '../../shared/theme/app_icons.dart';
 
@@ -135,20 +138,24 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
+/// A floating SnackBar for a settings action's outcome.
+void _snack(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    behavior: SnackBarBehavior.floating,
+  ));
+}
+
+/// A [SheetTitle] inside a sheet that already pads its content.
+const _inSheetTitlePad = EdgeInsetsDirectional.only(bottom: 12);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Shared helper functions (used by both SettingsScreen and SettingsDetailScreen)
 // ═══════════════════════════════════════════════════════════════════════════
 
 void _showShareHousehold(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(syncProvider.notifier);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _ShareHouseholdSettingsSheet(
-        googleDrive: notifier.googleDrive,
-      ),
-    );
+    showShareHouseholdSheet(context, notifier.googleDrive);
   }
 
   void _showAutofillSettings(BuildContext context, WidgetRef ref) {
@@ -168,63 +175,41 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(al.autofillTitle,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(ctx))),
-                  const SizedBox(height: 4),
-                  Text(
-                    al.autofillDesc,
-                    style: TextStyle(
-                        fontSize: 12, color: AppColors.ts(ctx)),
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(al.autofillAccount, style: const TextStyle(fontSize: 14)),
-                    subtitle: Text(al.autofillAccountSub,
-                        style: const TextStyle(fontSize: 11)),
+                  SheetTitle(al.autofillTitle,
+                      subtitle: al.autofillDesc, padding: _inSheetTitlePad),
+                  SettingsSwitchRow(
+                    title: al.autofillAccount,
+                    subtitle: al.autofillAccountSub,
                     value: settings.account,
                     onChanged: (v) => toggle((s) => s.copyWith(account: v)),
                   ),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(al.autofillTitleToggle, style: const TextStyle(fontSize: 14)),
-                    subtitle: Text(al.autofillTitleSub,
-                        style: const TextStyle(fontSize: 11)),
+                  SettingsSwitchRow(
+                    title: al.autofillTitleToggle,
+                    subtitle: al.autofillTitleSub,
                     value: settings.title,
                     onChanged: (v) => toggle((s) => s.copyWith(title: v)),
                   ),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(al.autofillAmountToggle, style: const TextStyle(fontSize: 14)),
-                    subtitle: Text(al.autofillAmountSub,
-                        style: const TextStyle(fontSize: 11)),
+                  SettingsSwitchRow(
+                    title: al.autofillAmountToggle,
+                    subtitle: al.autofillAmountSub,
                     value: settings.amount,
                     onChanged: (v) => toggle((s) => s.copyWith(amount: v)),
                   ),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(al.autofillCategoryToggle, style: const TextStyle(fontSize: 14)),
-                    subtitle: Text(al.autofillCategorySub,
-                        style: const TextStyle(fontSize: 11)),
+                  SettingsSwitchRow(
+                    title: al.autofillCategoryToggle,
+                    subtitle: al.autofillCategorySub,
                     value: settings.category,
                     onChanged: (v) => toggle((s) => s.copyWith(category: v)),
                   ),
-                  const Divider(),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(al.autofillOverride,
-                        style: const TextStyle(fontSize: 14)),
-                    subtitle: Text(
-                        al.autofillOverrideSub,
-                        style: const TextStyle(fontSize: 11)),
+                  Divider(color: AppColors.bd(ctx)),
+                  SettingsSwitchRow(
+                    title: al.autofillOverride,
+                    subtitle: al.autofillOverrideSub,
                     value: settings.overrideExisting,
                     onChanged: (v) =>
                         toggle((s) => s.copyWith(overrideExisting: v)),
@@ -249,27 +234,14 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     final l = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l.resetTitle),
-        content: Text(l.resetContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(l.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
-            style: TextButton.styleFrom(
-                foregroundColor: AppColors.overspent),
-            child: Text(l.resetButton),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l.resetConfirmTitle,
+      message: l.resetContent,
+      confirmLabel: l.resetButton,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       final db = ref.read(databaseProvider);
 
       // Delete all rows from all tables (keeps DB connection alive for providers)
@@ -325,16 +297,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700)),
-            if (description != null) ...[
-              const SizedBox(height: 8),
-              Text(description,
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.ts(ctx))),
-            ],
-            const SizedBox(height: 16),
+            SheetTitle(title,
+                subtitle: description, padding: _inSheetTitlePad),
             TextField(
               controller: ctrl,
               autofocus: true,
@@ -350,9 +314,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: Text(S.of(ctx).commonSave,
-                  style: const
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: Text(S.of(ctx).commonSave),
             ),
           ],
         ),
@@ -366,131 +328,112 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
 
   void _showColorConfig(BuildContext context, WidgetRef ref) {
     final current = ref.read(txColorsProvider);
+    final tr = S.of(context);
+    final base = ref.read(householdProvider).value?.baseCurrency ?? 'USD';
+    const defaults = TxColors();
 
     final presets = [
-      ('Red', const Color(0xFFEF4444)),
-      ('Orange', const Color(0xFFF97316)),
-      ('Amber', const Color(0xFFF59E0B)),
-      ('Green', const Color(0xFF10B981)),
-      ('Teal', const Color(0xFF14B8A6)),
-      ('Blue', const Color(0xFF3B82F6)),
-      ('Indigo', const Color(0xFF6366F1)),
-      ('Purple', const Color(0xFF8B5CF6)),
-      ('Pink', const Color(0xFFEC4899)),
-      ('Slate', const Color(0xFF64748B)),
+      (tr.txColorRed, const Color(0xFFEF4444)),
+      (tr.txColorOrange, const Color(0xFFF97316)),
+      (tr.txColorAmber, const Color(0xFFF59E0B)),
+      (tr.txColorGreen, const Color(0xFF10B981)),
+      (tr.txColorTeal, const Color(0xFF14B8A6)),
+      (tr.txColorBlue, const Color(0xFF3B82F6)),
+      (tr.txColorIndigo, const Color(0xFF6366F1)),
+      (tr.txColorPurple, const Color(0xFF8B5CF6)),
+      (tr.txColorPink, const Color(0xFFEC4899)),
+      (tr.txColorSlate, const Color(0xFF64748B)),
     ];
 
-    Color incomeColor = current.income;
-    Color expenseColor = current.expense;
-    Color transferColor = current.transfer;
+    // null = the theme-adaptive default (strong green/red, lifted in dark).
+    Color? income = current.customIncome;
+    Color? expense = current.customExpense;
+    Color? transfer = current.customTransfer;
 
-    final tr = S.of(context);
-    final colorSurfaceVariant = AppColors.sfv(context);
-    final colorTextPrimary = AppColors.tp(context);
-    final colorTextSecondary = AppColors.ts(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      enableDrag: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Container(
+        builder: (ctx, setSheetState) => ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.popup(context),
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
           ),
           child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Drag handle
-                  const SizedBox(height: 16),
-                  Text(tr.txColorsTitle,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: colorTextPrimary)),
-                  const SizedBox(height: 6),
-                  Text(
-                    tr.txColorsDesc,
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: colorTextSecondary,
-                        height: 1.4),
-                  ),
-                  const SizedBox(height: 20),
+                  SheetTitle(tr.txColorsTitle,
+                      subtitle: tr.txColorsDesc, padding: _inSheetTitlePad),
                   // Preview
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: colorSurfaceVariant,
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
+                      color: AppColors.sfv(ctx),
+                      borderRadius: CardTokens.borderRadius,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _colorPreviewChip(
-                            tr.typeIncome, '+\$500', incomeColor, ctx),
+                            tr.typeIncome,
+                            formatSignedAmount(500,
+                                currency: base, type: 'income'),
+                            income ?? defaults.income,
+                            ctx),
                         _colorPreviewChip(
-                            tr.typeExpense, '-\$120', expenseColor, ctx),
+                            tr.typeExpense,
+                            formatSignedAmount(120,
+                                currency: base, type: 'expense'),
+                            expense ?? defaults.expense,
+                            ctx),
                         _colorPreviewChip(
-                            tr.typeTransfer, '\$200', transferColor, ctx),
+                            tr.typeTransfer,
+                            formatAmount(200, currency: base),
+                            transfer ?? defaults.transfer,
+                            ctx),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Color pickers
-                  _colorPickerRow(tr.typeExpense, expenseColor, presets, (c) {
-                    setSheetState(() => expenseColor = c);
+                  _colorPickerRow(tr.typeExpense, expense, defaults.expense,
+                      tr.txColorDefault, presets, (c) {
+                    setSheetState(() => expense = c);
                   }, AppIcons.arrowUp, ctx),
                   const SizedBox(height: 16),
-                  _colorPickerRow(tr.typeIncome, incomeColor, presets, (c) {
-                    setSheetState(() => incomeColor = c);
+                  _colorPickerRow(tr.typeIncome, income, defaults.income,
+                      tr.txColorDefault, presets, (c) {
+                    setSheetState(() => income = c);
                   }, AppIcons.arrowDown, ctx),
                   const SizedBox(height: 16),
-                  _colorPickerRow(tr.typeTransfer, transferColor, presets, (c) {
-                    setSheetState(() => transferColor = c);
+                  _colorPickerRow(tr.typeTransfer, transfer, defaults.transfer,
+                      tr.txColorDefault, presets, (c) {
+                    setSheetState(() => transfer = c);
                   }, AppIcons.arrowsLeftRight, ctx),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () {
-                      // Unchanged colors stay null so they keep following
-                      // the theme-adaptive defaults.
                       ref.read(txColorsProvider.notifier).update(TxColors(
-                        income: incomeColor == current.income
-                            ? current.customIncome
-                            : incomeColor,
-                        expense: expenseColor == current.expense
-                            ? current.customExpense
-                            : expenseColor,
-                        transfer: transferColor == current.transfer
-                            ? current.customTransfer
-                            : transferColor,
-                      ));
+                          income: income,
+                          expense: expense,
+                          transfer: transfer));
                       Navigator.pop(ctx);
                     },
-                    child: Text(tr.commonSave,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
+                    child: Text(tr.commonSave),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
                       // Clear the custom colors so all three follow the
                       // theme-adaptive defaults again.
-                      ref.read(txColorsProvider.notifier).update(const TxColors());
+                      ref
+                          .read(txColorsProvider.notifier)
+                          .update(const TxColors());
                       Navigator.pop(ctx);
                     },
-                    child: Text(tr.txColorsReset,
-                        style: TextStyle(
-                            color: colorTextSecondary, fontSize: 13)),
+                    child: Text(tr.txColorsReset),
                   ),
                 ],
               ),
@@ -508,9 +451,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: AppColors.pastel(context, color,
-                light: 0.85, dark: 0.78),
-            borderRadius: BorderRadius.circular(10),
+            color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
           child: Text(amount,
               style: TextStyle(
@@ -518,14 +460,65 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         ),
         const SizedBox(height: 4),
         Text(label,
-            style: TextStyle(fontSize: 11, color: AppColors.ts(context))),
+            style: TextStyle(
+                fontSize: TypographyTokens.overlineSize,
+                color: AppColors.ts(context))),
       ],
     );
   }
 
-  Widget _colorPickerRow(String label, Color selected,
-      List<(String, Color)> presets, ValueChanged<Color> onChanged,
-      IconData icon, BuildContext context) {
+  /// One type's colors: a "Default" swatch (null) then the presets — all
+  /// circles, like the accent swatches.
+  Widget _colorPickerRow(
+      String label,
+      Color? selected,
+      Color defaultColor,
+      String defaultLabel,
+      List<(String, Color)> presets,
+      ValueChanged<Color?> onChanged,
+      IconData icon,
+      BuildContext context) {
+    final shown = selected ?? defaultColor;
+    Widget swatch(String name, Color color, bool isSelected, Color? value) {
+      return Tappable(
+        onTap: () => onChanged(value),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        child: SizedBox(
+          width: 52,
+          child: Column(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: isSelected
+                          ? AppColors.tp(context)
+                          : AppColors.bd(context),
+                      width: isSelected ? 2.5 : 1),
+                ),
+                child: isSelected
+                    ? Icon(AppIcons.check,
+                        size: 18, color: AppColors.inkOn(color))
+                    : null,
+              ),
+              const SizedBox(height: 3),
+              Text(name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: TypographyTokens.miniSize,
+                      color: isSelected
+                          ? AppColors.tp(context)
+                          : AppColors.ts(context))),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -535,11 +528,10 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppColors.pastel(context, selected,
-                    light: 0.85, dark: 0.78),
+                color: AppColors.pastel(context, shown, light: 0.85, dark: 0.78),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 16, color: selected),
+              child: Icon(icon, size: 16, color: shown),
             ),
             const SizedBox(width: 10),
             Text(label,
@@ -551,50 +543,17 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         ),
         const SizedBox(height: 10),
         Wrap(
-          spacing: 8,
+          spacing: 4,
           runSpacing: 8,
-          children: presets.map((p) {
-            final isSelected = p.$2.toARGB32() == selected.toARGB32();
-            return GestureDetector(
-              onTap: () => onChanged(p.$2),
-              child: Column(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: p.$2,
-                      borderRadius: BorderRadius.circular(10),
-                      border: isSelected
-                          ? Border.all(
-                              color: AppColors.tp(context), width: 2.5)
-                          : Border.all(
-                              color: AppColors.bd(context), width: 1),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                  color: p.$2.withValues(alpha: 0.4),
-                                  blurRadius: 6,
-                                  spreadRadius: 1)
-                            ]
-                          : null,
-                    ),
-                    child: isSelected
-                        ? Icon(AppIcons.check,
-                            size: 18, color: AppColors.inkOn(p.$2))
-                        : null,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(p.$1,
-                      style: TextStyle(
-                          fontSize: 9,
-                          color: isSelected
-                              ? AppColors.tp(context)
-                              : AppColors.th(context))),
-                ],
-              ),
-            );
-          }).toList(),
+          children: [
+            swatch(defaultLabel, defaultColor, selected == null, null),
+            for (final p in presets)
+              swatch(
+                  p.$1,
+                  p.$2,
+                  selected != null && p.$2.toARGB32() == selected.toARGB32(),
+                  p.$2),
+          ],
         ),
       ],
     );
@@ -626,16 +585,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700)),
-            if (description != null) ...[
-              const SizedBox(height: 8),
-              Text(description,
-                  style: TextStyle(
-                      fontSize: 13, color: AppColors.ts(context))),
-            ],
-            const SizedBox(height: 16),
+            SheetTitle(title,
+                subtitle: description, padding: _inSheetTitlePad),
             TextField(
               controller: ctrl,
               autofocus: true,
@@ -652,9 +603,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
                   Navigator.pop(ctx, val);
                 }
               },
-              child: Text(S.of(context).commonSave,
-                  style: const
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: Text(S.of(context).commonSave),
             ),
           ],
         ),
@@ -671,14 +620,11 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     // Capture localized strings + colors before the sheet (avoids the
     // _dependents.isEmpty pattern from using the outer context in the builder).
     final tr = S.of(context);
-    final tpColor = AppColors.tp(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.themeTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: tpColor))),
+          SheetTitle(tr.themeTitle),
           for (final entry in [
             ('system', tr.themeSystem, tr.themeFollowDevice),
             ('light', tr.themeLight, null),
@@ -704,7 +650,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     final current = ref.read(accentColorProvider);
     final tr = S.of(context);
     final tpColor = AppColors.tp(context);
-    final tsColor = AppColors.ts(context);
     final ringBg = AppColors.popup(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
@@ -715,15 +660,9 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr.accentColorTitle,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: tpColor)),
-              const SizedBox(height: 6),
-              Text(tr.accentColorPairHint,
-                  style: TextStyle(fontSize: 14, color: tsColor)),
-              const SizedBox(height: 20),
+              SheetTitle(tr.accentColorTitle,
+                  subtitle: tr.accentColorPairHint,
+                  padding: const EdgeInsetsDirectional.only(bottom: 20)),
               GridView.count(
                 crossAxisCount: 4,
                 shrinkWrap: true,
@@ -774,23 +713,18 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
   void _showHomeTabPicker(BuildContext context, WidgetRef ref) async {
     final homeTab = ref.read(homeTabProvider);
     final tr = S.of(context);
-    final tpColor = AppColors.tp(context);
     final tsColor = AppColors.ts(context);
     // Localized tab labels (homeTabLabels is English-only, used for storage).
     final labels = [tr.tabHome, tr.tabActivity, tr.tabBudget, tr.tabReports, tr.tabMore];
-    final icons = [AppIcons.squaresFour, AppIcons.receipt,
-        AppIcons.wallet, AppIcons.chartLineUp,
-        AppIcons.dotsThree];
+    // The nav bar's icons (main_screen.dart), so the choice is recognisable.
+    final icons = [AppIcons.house, AppIcons.arrowsDownUp,
+        AppIcons.wallet, AppIcons.chartPie,
+        AppIcons.squaresFour];
     final picked = await showModalBottomSheet<int>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.startScreenTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: tpColor))),
-          Text(tr.startScreenDesc,
-              style: TextStyle(fontSize: 13, color: tsColor)),
-          const SizedBox(height: 8),
+          SheetTitle(tr.startScreenTitle, subtitle: tr.startScreenDesc),
           for (var i = 0; i < labels.length; i++)
             ListTile(
               leading: Icon(i == homeTab
@@ -830,15 +764,12 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
   void _showFontPicker(BuildContext context, WidgetRef ref) async {
     final currentFont = ref.read(fontProvider);
     final tr = S.of(context);
-    final tpColor = AppColors.tp(context);
     final tsColor = AppColors.ts(context);
     final picked = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.chooseFontTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: tpColor))),
+          SheetTitle(tr.chooseFontTitle),
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -868,7 +799,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
   void _showTextSizePicker(BuildContext context, WidgetRef ref) async {
     final current = ref.read(textScaleProvider);
     final tr = S.of(context);
-    final tpColor = AppColors.tp(context);
     final tsColor = AppColors.ts(context);
     // Localized labels (textScaleOptions values are English-only fallbacks).
     final scaleLabels = <double, String>{
@@ -881,9 +811,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.textSizeTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: tpColor))),
+          SheetTitle(tr.textSizeTitle),
           ...textScaleOptions.entries.map((e) => ListTile(
                 leading: Icon(
                     (e.key - current).abs() < 0.01
@@ -908,7 +836,6 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
     // Capture all context-dependent values before the sheet to avoid
     // _dependents.isEmpty crash when locale change rebuilds MaterialApp.
     final tr = S.of(context);
-    final titleColor = AppColors.tp(context);
     final subtitleColor = AppColors.ts(context);
     final options = <(String?, String, String?)>[
       (null, tr.languageSystem, tr.languageSystemDesc),
@@ -920,9 +847,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(padding: const EdgeInsets.all(16),
-              child: Text(tr.languagePickerTitle, style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w700, color: titleColor))),
+          SheetTitle(tr.languagePickerTitle),
           for (final (code, label, subtitle) in options)
             ListTile(
               leading: Icon(
@@ -953,7 +878,7 @@ class _EntryModeSheet extends ConsumerWidget {
     final currentMode = ref.watch(entryModeProvider);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       decoration: BoxDecoration(
         color: AppColors.popup(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
@@ -962,19 +887,9 @@ class _EntryModeSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 16),
-          Text(S.of(context).entryModeTitle,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.tp(context))),
-          const SizedBox(height: 6),
-          Text(S.of(context).entryModeDesc,
-              style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.ts(context),
-                  height: 1.4)),
-          const SizedBox(height: 20),
+          SheetTitle(S.of(context).entryModeTitle,
+              subtitle: S.of(context).entryModeDesc,
+              padding: const EdgeInsetsDirectional.only(bottom: 16)),
           _EntryModeCard(
             icon: AppIcons.magicWand,
             title: S.of(context).entryModeAssisted,
@@ -1019,15 +934,16 @@ class _EntryModeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Tappable(
       onTap: onTap,
+      borderRadius: CardTokens.borderRadius,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.accentLight
               : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
+          borderRadius: CardTokens.borderRadius,
           border: isSelected
               ? Border.all(color: AppColors.accent, width: 1.5)
               : null,
@@ -1035,21 +951,9 @@ class _EntryModeCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.accentLight
-                    : AppColors.th(context).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon,
-                  size: 20,
-                  color: isSelected
-                      ? AppColors.accent
-                      : AppColors.ts(context)),
-            ),
+            SettingsIcon(
+                icon: icon,
+                color: isSelected ? AppColors.accent : AppColors.ts(context)),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1059,10 +963,7 @@ class _EntryModeCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(title,
-                            style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.tp(context))),
+                            style: SettingsRowStyle.title(context)),
                       ),
                       if (isSelected)
                         Icon(AppIcons.checkCircleFill,
@@ -1071,10 +972,8 @@ class _EntryModeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(description,
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.ts(context),
-                          height: 1.4)),
+                      style: SettingsRowStyle.subtitle(context)
+                          .copyWith(height: 1.4)),
                 ],
               ),
             ),
@@ -1111,7 +1010,6 @@ class SettingsDetailScreen extends ConsumerWidget {
         children: [
           // ── Appearance ──
           _SectionHeader(title: l.settingsAppearanceSection),
-          const SizedBox(height: 8),
           _SettingsTile(icon: AppIcons.circleHalf, title: l.tileTheme,
               subtitle: themeLabel, iconColor: AppColors.accent,
               onTap: () => _showThemePicker(context, ref)),
@@ -1125,20 +1023,20 @@ class SettingsDetailScreen extends ConsumerWidget {
                 onTap: () => _showAccentColorPicker(context, ref));
           }),
           _SettingsTile(icon: AppIcons.palette, title: l.tileColors,
-              subtitle: l.tileColorsSub, iconColor: const Color(0xFFEC407A),
+              subtitle: l.tileColorsSub, iconColor: SettingsRowStyle.hue(340),
               onTap: () => _showColorConfig(context, ref)),
           Builder(builder: (context) {
             final mode = ref.watch(entryModeProvider);
             return _SettingsTile(icon: AppIcons.handTap, title: S.of(context).tileEntryMode,
                 subtitle: mode == 'assisted' ? S.of(context).entryModeAssistedShort : S.of(context).entryModeClassicShort,
-                iconColor: const Color(0xFF42A5F5),
+                iconColor: SettingsRowStyle.hue(207),
                 onTap: () => _showEntryModePicker(context, ref));
           }),
           _SettingsTile(
             icon: AppIcons.magicWand,
             title: l.tileAutofill,
             subtitle: l.tileAutofillSub,
-            iconColor: const Color(0xFF26A69A),
+            iconColor: SettingsRowStyle.hue(174),
             onTap: () => _showAutofillSettings(context, ref),
           ),
           Builder(builder: (context) {
@@ -1147,13 +1045,13 @@ class SettingsDetailScreen extends ConsumerWidget {
             final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
             return _SettingsTile(icon: AppIcons.house, title: sl.tileStartScreen,
                 subtitle: homeTabLabel,
-                iconColor: const Color(0xFF26A69A),
+                iconColor: SettingsRowStyle.hue(174),
                 onTap: () => _showHomeTabPicker(context, ref));
           }),
           Builder(builder: (context) {
             final font = ref.watch(fontProvider);
             return _SettingsTile(icon: AppIcons.textAa, title: S.of(context).tileFont,
-                subtitle: font, iconColor: const Color(0xFF7E57C2),
+                subtitle: font, iconColor: SettingsRowStyle.hue(262),
                 onTap: () => _showFontPicker(context, ref));
           }),
           Builder(builder: (context) {
@@ -1162,7 +1060,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             final scaleLabels = <double, String>{0.85: sl.textScaleSmall, 1.0: sl.textScaleDefault, 1.15: sl.textScaleLarge, 1.3: sl.textScaleExtraLarge};
             final label = scaleLabels[scale] ?? '${(scale * 100).round()}%';
             return _SettingsTile(icon: AppIcons.textAa, title: sl.tileTextSize,
-                subtitle: label, iconColor: const Color(0xFF5C6BC0),
+                subtitle: label, iconColor: SettingsRowStyle.hue(231),
                 onTap: () => _showTextSizePicker(context, ref));
           }),
           Builder(builder: (context) {
@@ -1174,7 +1072,7 @@ class SettingsDetailScreen extends ConsumerWidget {
               _ => S.of(context).languageSystem,
             };
             return _SettingsTile(icon: AppIcons.globe, title: S.of(context).tileLanguage,
-                subtitle: langLabel, iconColor: const Color(0xFF26A69A),
+                subtitle: langLabel, iconColor: SettingsRowStyle.hue(174),
                 onTap: () => _showLanguagePicker(context, ref));
           }),
           // Arabic-Indic digits toggle — only visible when Arabic locale
@@ -1183,35 +1081,23 @@ class SettingsDetailScreen extends ConsumerWidget {
             final resolvedLocale = localeNow ?? WidgetsBinding.instance.platformDispatcher.locale.languageCode;
             if (resolvedLocale != 'ar') return const SizedBox.shrink();
             final useArabic = ref.watch(arabicDigitsProvider);
-            return Material(
-              type: MaterialType.transparency,
-              child: SwitchListTile(
-                contentPadding:
-                    const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
-                secondary: const _SettingsIcon(
-                    icon: AppIcons.listNumbers,
-                    color: Color(0xFF26A69A)),
-                title: Text(S.of(context).tileArabicDigits,
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
-                subtitle: Text(useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789',
-                    style: TextStyle(
-                        fontSize: 13.5, color: AppColors.ts(context))),
-                value: useArabic,
-                onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
-              ),
+            return SettingsSwitchRow(
+              icon: AppIcons.listNumbers,
+              iconColor: SettingsRowStyle.hue(174),
+              title: S.of(context).tileArabicDigits,
+              subtitle: useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789',
+              value: useArabic,
+              onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
             );
           }),
           _SettingsTile(icon: AppIcons.rows, title: l.tileTxList,
               subtitle: l.tileTxListSub,
-              iconColor: const Color(0xFF42A5F5),
+              iconColor: SettingsRowStyle.hue(207),
               onTap: () => context.push('/tx-list-settings')),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.sectionGap),
 
           // ── Data & Sync ──
           _SectionHeader(title: l.settingsDataSection),
-          const SizedBox(height: 8),
           // Shows the live sync state instead of a fixed description.
           Builder(builder: (context) {
             final sync = ref.watch(syncProvider);
@@ -1246,7 +1132,7 @@ class SettingsDetailScreen extends ConsumerWidget {
               subtitle: isConnected
                   ? S.of(context).tileShareHouseholdConnected
                   : S.of(context).tileShareHouseholdDisconnected,
-              iconColor: const Color(0xFF7E57C2),
+              iconColor: SettingsRowStyle.hue(262),
               onTap: () {
                 if (isConnected) {
                   _showShareHousehold(context, ref);
@@ -1262,22 +1148,22 @@ class SettingsDetailScreen extends ConsumerWidget {
             );
           }),
           _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
-              subtitle: l.tileBackupRestoreSub, iconColor: const Color(0xFF42A5F5),
+              subtitle: l.tileBackupRestoreSub, iconColor: SettingsRowStyle.hue(207),
               onTap: () => context.push('/backup')),
           _SettingsTile(icon: AppIcons.arrowsDownUp, title: l.tileImportExport,
-              subtitle: l.tileImportExportSub, iconColor: const Color(0xFF66BB6A),
+              subtitle: l.tileImportExportSub, iconColor: SettingsRowStyle.hue(123),
               onTap: () => context.push('/import-export')),
           _SettingsTile(
               icon: AppIcons.bellRinging,
               title: l.tileNotifications,
               subtitle: l.tileNotificationsSub,
-              iconColor: const Color(0xFFFF9800),
+              iconColor: SettingsRowStyle.hue(36),
               onTap: () => context.push('/notifications')),
           _SettingsTile(
               icon: AppIcons.heartbeat,
               title: l.tileHealthCheck,
               subtitle: l.tileHealthCheckSub,
-              iconColor: const Color(0xFF4DB6AC),
+              iconColor: SettingsRowStyle.hue(174),
               onTap: () => context.push('/health-check')),
           // ── Receipt Sync toggle ──
           Builder(builder: (context) {
@@ -1288,32 +1174,16 @@ class SettingsDetailScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    contentPadding:
-                        const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
-                    secondary: const _SettingsIcon(
-                      icon: AppIcons.images,
-                      color: Color(0xFF7E57C2),
-                    ),
-                    title: Text(S.of(context).tileSyncReceipts,
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.tp(context))),
-                    subtitle: Text(
-                      receiptSyncEnabled
-                          ? S.of(context).tileSyncReceiptsOn
-                          : S.of(context).tileSyncReceiptsOff,
-                      style: TextStyle(
-                          fontSize: 13.5, color: AppColors.ts(context)),
-                    ),
-                    value: receiptSyncEnabled,
-                    onChanged: (_) =>
-                        ref.read(receiptSyncProvider.notifier).toggle(),
-                    activeTrackColor: AppColors.accent,
-                  ),
+                SettingsSwitchRow(
+                  icon: AppIcons.images,
+                  iconColor: SettingsRowStyle.hue(262),
+                  title: S.of(context).tileSyncReceipts,
+                  subtitle: receiptSyncEnabled
+                      ? S.of(context).tileSyncReceiptsOn
+                      : S.of(context).tileSyncReceiptsOff,
+                  value: receiptSyncEnabled,
+                  onChanged: (_) =>
+                      ref.read(receiptSyncProvider.notifier).toggle(),
                 ),
                 if (!receiptSyncEnabled)
                   Padding(
@@ -1325,18 +1195,18 @@ class SettingsDetailScreen extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(S.of(context).tileSyncReceiptsOff,
                             style: TextStyle(
-                                fontSize: 11, color: AppColors.caution)),
+                                fontSize: TypographyTokens.overlineSize,
+                                color: AppColors.caution)),
                       ],
                     ),
                   ),
               ],
             );
           }),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.sectionGap),
 
           // ── Preferences ──
           _SectionHeader(title: l.settingsPreferencesSection),
-          const SizedBox(height: 8),
           _SettingsTile(
             icon: AppIcons.house,
             title: l.householdNameTitle,
@@ -1347,16 +1217,24 @@ class SettingsDetailScreen extends ConsumerWidget {
                 currentValue: household?.name ?? '',
                 onSave: (val) async {
                   final db = ref.read(databaseProvider);
-                  await (db.update(db.households)
-                        ..where((h) => h.id.equals(household!.id)))
-                      .write(HouseholdsCompanion(name: Value(val)));
+                  try {
+                    await (db.update(db.households)
+                          ..where((h) => h.id.equals(household!.id)))
+                        .write(HouseholdsCompanion(name: Value(val)));
+                    if (context.mounted) _snack(context, l.householdNameSaved);
+                  } catch (e) {
+                    debugPrint('[Settings] Rename household failed: $e');
+                    if (context.mounted) {
+                      _snack(context, l.commonSomethingWentWrong);
+                    }
+                  }
                 }),
           ),
           _SettingsTile(
             icon: AppIcons.coins,
             title: l.tileBaseCurrency,
             subtitle: household?.baseCurrency ?? 'USD',
-            iconColor: AppColors.caution,
+            iconColor: SettingsRowStyle.hue(35),
             onTap: () async {
               final result = await showModalBottomSheet<String>(
                 context: context,
@@ -1365,11 +1243,23 @@ class SettingsDetailScreen extends ConsumerWidget {
                 builder: (_) => CurrencySheet(
                     current: household?.baseCurrency ?? 'USD'),
               );
-              if (result != null && household != null) {
+              if (result != null &&
+                  household != null &&
+                  result != household.baseCurrency) {
                 final db = ref.read(databaseProvider);
-                await (db.update(db.households)
-                      ..where((h) => h.id.equals(household.id)))
-                    .write(HouseholdsCompanion(baseCurrency: Value(result)));
+                try {
+                  await (db.update(db.households)
+                        ..where((h) => h.id.equals(household.id)))
+                      .write(HouseholdsCompanion(baseCurrency: Value(result)));
+                  if (context.mounted) {
+                    _snack(context, l.baseCurrencySaved(result));
+                  }
+                } catch (e) {
+                  debugPrint('[Settings] Change base currency failed: $e');
+                  if (context.mounted) {
+                    _snack(context, l.commonSomethingWentWrong);
+                  }
+                }
               }
             },
           ),
@@ -1377,14 +1267,14 @@ class SettingsDetailScreen extends ConsumerWidget {
             icon: AppIcons.currencyCircleDollar,
             title: l.tileExchangeRates,
             subtitle: l.tileExchangeRatesSub,
-            iconColor: AppColors.caution,
+            iconColor: SettingsRowStyle.hue(35),
             onTap: () => context.push('/exchange-rates'),
           ),
           _SettingsTile(
             icon: AppIcons.calendarBlank,
             title: l.tilePeriodStartDay,
             subtitle: l.onboardDayN(household?.periodStartDay ?? 1),
-            iconColor: AppColors.caution,
+            iconColor: SettingsRowStyle.hue(35),
             onTap: () => _editNumber(context, ref,
                 title: l.tilePeriodStartDay,
                 currentValue: household?.periodStartDay ?? 1,
@@ -1401,7 +1291,7 @@ class SettingsDetailScreen extends ConsumerWidget {
             icon: AppIcons.currencyDollar,
             title: l.tileCurrencySymbols,
             subtitle: l.tileCurrencySymbolsSub,
-            iconColor: const Color(0xFF4DB6AC),
+            iconColor: SettingsRowStyle.hue(174),
             onTap: () => _showCurrencySymbolEditor(context, ref),
           ),
           Builder(builder: (context) {
@@ -1411,7 +1301,7 @@ class SettingsDetailScreen extends ConsumerWidget {
               icon: AppIcons.listNumbers,
               title: l.tileNumberFormat,
               subtitle: l.settingsPreview(preview),
-              iconColor: const Color(0xFF5C6BC0),
+              iconColor: SettingsRowStyle.hue(231),
               onTap: () => _showNumberFormatEditor(context, ref),
             );
           }),
@@ -1422,17 +1312,16 @@ class SettingsDetailScreen extends ConsumerWidget {
               icon: AppIcons.calendar,
               title: l.tileDateFormat,
               subtitle: preview,
-              iconColor: const Color(0xFF7E57C2),
+              iconColor: SettingsRowStyle.hue(262),
               onTap: () => _showDateFormatPicker(context, ref),
             );
           }),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.sectionGap),
 
           // ── Security ──
           _SectionHeader(title: l.settingsSecuritySection),
-          const SizedBox(height: 8),
           _BiometricTile(),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.sectionGap),
 
           // ── Danger zone ──
           _SettingsTile(icon: AppIcons.trash, title: l.tileResetEverything,
@@ -1451,7 +1340,8 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionHeader(title,
-        padding: const EdgeInsets.fromLTRB(4, 12, 4, 6));
+        padding: const EdgeInsetsDirectional.fromSTEB(
+            4, 0, 4, Spacing.headerToCard));
   }
 }
 
@@ -1474,48 +1364,12 @@ class _SettingsTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius)),
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
-        leading: _SettingsIcon(icon: icon, color: iconColor),
-        title: Text(title,
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700,
-                color: AppColors.tp(context))),
-        subtitle: Text(subtitle,
-            style: TextStyle(
-                fontSize: 13.5, color: AppColors.ts(context))),
-        trailing: onTap != null
-            ? Icon(AppIcons.caretRight,
-                size: 20, color: AppColors.th(context))
-            : null,
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _SettingsIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  const _SettingsIcon({required this.icon, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        color: AppColors.pastel(context, color, light: 0.82, dark: 0.7),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: color, size: 21),
-    );
-  }
+  Widget build(BuildContext context) => SettingsRow(
+      icon: icon,
+      iconColor: iconColor,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap);
 }
 
 /// A titled, rounded card of related More-page rows with thin dividers.
@@ -1526,21 +1380,15 @@ class _MoreGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(CardTokens.radius + 4);
+    final radius = BorderRadius.circular(RadiusTokens.hero);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: Spacing.sectionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _SectionHeader(title: title),
-          const SizedBox(height: 4),
           Container(
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: radius,
-              boxShadow: AppColors.cardShadow(context),
-              border: Border.all(color: AppColors.cardBorder(context)),
-            ),
+            decoration: AppColors.card(context, radius: RadiusTokens.hero),
             child: ClipRRect(
               borderRadius: radius,
               child: Material(
@@ -1589,24 +1437,14 @@ class _MoreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = HSLColor.fromAHSL(1, hue, neutral ? 0.12 : 0.62,
-            AppColors.isDark ? 0.62 : 0.5)
-        .toColor();
-    return InkWell(
+    final color = SettingsRowStyle.hue(hue, neutral: neutral);
+    return Tappable(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 10, 12),
         child: Row(
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, color, light: 0.82, dark: 0.72),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 21, color: color),
-            ),
+            SettingsIcon(icon: icon, color: color),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1615,16 +1453,12 @@ class _MoreRow extends StatelessWidget {
                   Text(title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
+                      style: SettingsRowStyle.title(context)),
                   const SizedBox(height: 1),
                   Text(subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 13.5, color: AppColors.ts(context))),
+                      style: SettingsRowStyle.subtitle(context)),
                 ],
               ),
             ),
@@ -1642,35 +1476,28 @@ class _BiometricTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(biometricLockProvider);
 
-    return Material(
-      type: MaterialType.transparency,
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CardTokens.radius)),
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(8, 2, 8, 2),
-        leading: const _SettingsIcon(
-            icon: AppIcons.fingerprint, color: Color(0xFF7C4DFF)),
-        title: Text(S.of(context).tileBiometricLock,
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700,
-                color: AppColors.tp(context))),
-        subtitle: Text(S.of(context).tileBiometricSub,
-            style: TextStyle(fontSize: 13.5, color: AppColors.ts(context))),
-        trailing: Switch.adaptive(
-          value: enabled,
-          activeTrackColor: AppColors.accent,
-          onChanged: (value) => _toggle(context, ref, value),
-        ),
-        onTap: () => _toggle(context, ref, !enabled),
-      ),
+    return SettingsSwitchRow(
+      icon: AppIcons.fingerprint,
+      iconColor: SettingsRowStyle.hue(256),
+      title: S.of(context).tileBiometricLock,
+      subtitle: S.of(context).tileBiometricSub,
+      value: enabled,
+      onChanged: (value) => _toggle(context, ref, value),
     );
   }
 
   Future<void> _toggle(
       BuildContext context, WidgetRef ref, bool turning0n) async {
+    final verifyReason = S.of(context).biometricVerify;
     if (!turning0n) {
       // Disabling — no verification needed.
       await ref.read(biometricLockProvider.notifier).disable();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).biometricOffSnack),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
       return;
     }
 
@@ -1692,13 +1519,19 @@ class _BiometricTile extends ConsumerWidget {
       }
 
       final didAuth = await auth.authenticate(
-        localizedReason: S.of(context).biometricVerify,
+        localizedReason: verifyReason,
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
 
       if (didAuth) {
         await ref.read(biometricLockProvider.notifier).enable();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(S.of(context).biometricOnSnack),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1755,28 +1588,11 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
       ),
       child: Column(
         children: [
+          SheetTitle(S.of(context).currencySymbolsTitle,
+              subtitle: S.of(context).currencySymbolsDesc),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                Text(S.of(context).currencySymbolsTitle,
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.tp(context))),
-                const SizedBox(height: 6),
-                Text(
-                  S.of(context).currencySymbolsDesc,
-                  style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.ts(context),
-                      height: 1.4),
-                ),
-                const SizedBox(height: 12),
-                Divider(height: 1, color: AppColors.bd(context)),
-              ],
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Divider(height: 1, color: AppColors.bd(context)),
           ),
           Expanded(
             child: ListView.builder(
@@ -1811,12 +1627,12 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 8),
                   leading: Container(
-                    width: 44,
-                    height: 44,
+                    width: SettingsRowStyle.iconSize,
+                    height: SettingsRowStyle.iconSize,
                     decoration: BoxDecoration(
                       color: AppColors.pastel(context, AppColors.accent,
-                          light: 0.88, dark: 0.8),
-                      borderRadius: BorderRadius.circular(12),
+                          light: 0.82, dark: 0.7),
+                      shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Text(currentSymbol,
@@ -1833,15 +1649,16 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
                   subtitle: isOverridden
                       ? Text(S.of(context).currencySymbolDefault(defaultSymbol),
                           style: TextStyle(
-                              fontSize: 11,
+                              fontSize: TypographyTokens.captionSize,
                               color: AppColors.ts(context)))
                       : null,
                   trailing: isOverridden
-                      ? GestureDetector(
-                          onTap: () => ref
+                      ? IconButton(
+                          tooltip: S.of(context).commonReset,
+                          onPressed: () => ref
                               .read(currencySymbolProvider.notifier)
                               .removeOverride(code),
-                          child: Icon(AppIcons.arrowCounterClockwise,
+                          icon: Icon(AppIcons.arrowCounterClockwise,
                               size: 18, color: AppColors.th(context)),
                         )
                       : Icon(AppIcons.pencilSimple,
@@ -1868,7 +1685,8 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
           controller: ctrl,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'e.g. ${defaultCurrencySymbols[code]}',
+            hintText: tr.currencySymbolExample(
+                defaultCurrencySymbols[code] ?? ''),
           ),
         ),
         actions: [
@@ -1939,23 +1757,13 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 16),
-            Text(S.of(context).numberFormatTitle,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.tp(context))),
-            const SizedBox(height: 6),
-            Text(S.of(context).numberFormatDesc,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.ts(context),
-                    height: 1.4)),
-            const SizedBox(height: 16),
+            SheetTitle(S.of(context).numberFormatTitle,
+                subtitle: S.of(context).numberFormatDesc,
+                padding: _inSheetTitlePad),
 
             // Preview
             Container(
@@ -1968,7 +1776,7 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
                 children: [
                   Text(S.of(context).numberFormatPreview,
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: TypographyTokens.overlineSize,
                           fontWeight: FontWeight.w600,
                           color: AppColors.ts(context))),
                   const SizedBox(height: 6),
@@ -1993,40 +1801,17 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
               spacing: 8,
               runSpacing: 8,
               children: ThousandsSeparator.values.map((t) {
-                final selected = t == _thousands;
                 // Skip combinations where thousands == decimal
                 final conflicts = (t == ThousandsSeparator.comma &&
                         _decimal == DecimalSeparator.comma) ||
                     (t == ThousandsSeparator.period &&
                         _decimal == DecimalSeparator.period);
-                return GestureDetector(
-                  onTap: conflicts
+                return _option(
+                  _thousandsLabel(t),
+                  t == _thousands,
+                  conflicts
                       ? null
                       : () { setState(() => _thousands = t); _applyImmediately(); },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.accentLight
-                          : AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: selected
-                              ? AppColors.accent
-                              : AppColors.bd(context)),
-                    ),
-                    child: Text(t.label,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: conflicts
-                                ? AppColors.th(context)
-                                : selected
-                                    ? AppColors.accent
-                                    : AppColors.tp(context))),
-                  ),
                 );
               }).toList(),
             ),
@@ -2036,7 +1821,9 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(S.of(context).numberFormatConflict,
-                    style: TextStyle(fontSize: 11, color: AppColors.th(context))),
+                    style: TextStyle(
+                        fontSize: TypographyTokens.overlineSize,
+                        color: AppColors.ts(context))),
               ),
             const SizedBox(height: 20),
 
@@ -2050,39 +1837,16 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
             Wrap(
               spacing: 8,
               children: DecimalSeparator.values.map((d) {
-                final selected = d == _decimal;
                 final conflicts = (d == DecimalSeparator.comma &&
                         _thousands == ThousandsSeparator.comma) ||
                     (d == DecimalSeparator.period &&
                         _thousands == ThousandsSeparator.period);
-                return GestureDetector(
-                  onTap: conflicts
+                return _option(
+                  _decimalLabel(d),
+                  d == _decimal,
+                  conflicts
                       ? null
                       : () { setState(() => _decimal = d); _applyImmediately(); },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.accentLight
-                          : AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: selected
-                              ? AppColors.accent
-                              : AppColors.bd(context)),
-                    ),
-                    child: Text(d.label,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: conflicts
-                                ? AppColors.th(context)
-                                : selected
-                                    ? AppColors.accent
-                                    : AppColors.tp(context))),
-                  ),
                 );
               }).toList(),
             ),
@@ -2098,31 +1862,10 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
             Wrap(
               spacing: 8,
               children: NegativeFormat.values.map((n) {
-                final selected = n == _negative;
-                return GestureDetector(
-                  onTap: () { setState(() => _negative = n); _applyImmediately(); },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.accentLight
-                          : AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: selected
-                              ? AppColors.accent
-                              : AppColors.bd(context)),
-                    ),
-                    child: Text(n.label,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: selected
-                                ? AppColors.accent
-                                : AppColors.tp(context))),
-                  ),
+                return _option(
+                  n.label,
+                  n == _negative,
+                  () { setState(() => _negative = n); _applyImmediately(); },
                 );
               }).toList(),
             ),
@@ -2131,6 +1874,31 @@ class _NumberFormatSheetState extends ConsumerState<_NumberFormatSheet> {
         ),
       ),
     );
+  }
+
+  /// One choice: an [AppChip]; a choice that clashes with the other
+  /// separator is dimmed and can't be picked.
+  Widget _option(String label, bool selected, VoidCallback? onTap) {
+    final chip = AppChip(label: label, selected: selected, onTap: onTap);
+    return onTap == null ? Opacity(opacity: 0.4, child: chip) : chip;
+  }
+
+  String _thousandsLabel(ThousandsSeparator t) {
+    final s = S.of(context);
+    return switch (t) {
+      ThousandsSeparator.comma => s.nfThousandsComma,
+      ThousandsSeparator.period => s.nfThousandsPeriod,
+      ThousandsSeparator.space => s.nfThousandsSpace,
+      ThousandsSeparator.none => s.nfThousandsNone,
+    };
+  }
+
+  String _decimalLabel(DecimalSeparator d) {
+    final s = S.of(context);
+    return switch (d) {
+      DecimalSeparator.period => s.nfDecimalPeriod,
+      DecimalSeparator.comma => s.nfDecimalComma,
+    };
   }
 }
 
@@ -2150,14 +1918,7 @@ class _DateFormatSheet extends ConsumerWidget {
           maxHeight: MediaQuery.sizeOf(context).height * 0.7,
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(S.of(context).dateFormatTitle,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-          ),
+          SheetTitle(S.of(context).dateFormatTitle),
           Flexible(
             child: ListView(
               shrinkWrap: true,
@@ -2175,6 +1936,7 @@ class _DateFormatSheet extends ConsumerWidget {
                             fontSize: 12, color: AppColors.ts(context))),
                     onTap: () {
                       ref.read(dateFormatProvider.notifier).setFormat(entry.key);
+                      Navigator.pop(context);
                     },
                   ),
               ],
@@ -2212,7 +1974,7 @@ class _SettingsBackupBanner extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.pastel(context, AppColors.caution,
                   light: 0.85, dark: 0.78),
-              borderRadius: BorderRadius.circular(CardTokens.radius + 4),
+              borderRadius: BorderRadius.circular(RadiusTokens.hero),
             ),
             child: Row(
               children: [
@@ -2234,14 +1996,8 @@ class _SettingsBackupBanner extends ConsumerWidget {
                 TextButton(
                   onPressed: () => context.push('/backup'),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.tp(context),
-                    backgroundColor: AppColors.pastel(
-                        context, AppColors.caution,
-                        light: 0.6, dark: 0.55),
                     minimumSize: const Size(0, 34),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    textStyle: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   child: Text(l.backupNowButton),
                 ),
@@ -2262,209 +2018,6 @@ class _SettingsBackupBanner extends ConsumerWidget {
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-}
-
-// ── Share Household Sheet (settings) ─────────────────────────────────────────
-
-class _ShareHouseholdSettingsSheet extends StatefulWidget {
-  final GoogleDriveProvider googleDrive;
-
-  const _ShareHouseholdSettingsSheet({required this.googleDrive});
-
-  @override
-  State<_ShareHouseholdSettingsSheet> createState() =>
-      _ShareHouseholdSettingsSheetState();
-}
-
-class _ShareHouseholdSettingsSheetState
-    extends State<_ShareHouseholdSettingsSheet> {
-  final _emailController = TextEditingController();
-  bool _loading = false;
-  String? _error;
-  String? _inviteCode;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _share() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = S.of(context).syncValidEmailError);
-      return;
-    }
-
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
-    try {
-      await widget.googleDrive.shareFolder(email);
-      final folderId = await widget.googleDrive.getFolderId();
-      final code = generateInviteCode(folderId);
-      setState(() {
-        _inviteCode = code;
-        _loading = false;
-      });
-    } catch (e) {
-      debugPrint('[ShareHousehold] Failed: $e');
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = S.of(context).shareHouseholdFailed;
-      });
-    }
-  }
-
-  void _shareCode() {
-    if (_inviteCode == null) return;
-    SharePlus.instance.share(
-      ShareParams(
-        text: S.of(context).syncShareInviteText(_inviteCode!),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-        decoration: BoxDecoration(
-          color: AppColors.popup(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              S.of(context).syncShareHousehold,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              S.of(context).syncShareDesc,
-              style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-            ),
-            const SizedBox(height: 20),
-            if (_inviteCode == null) ...[
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: S.of(context).syncTheirEmail,
-                  hintText: S.of(context).syncEmailHint,
-                  prefixIcon: const Icon(AppIcons.envelopeSimple),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                child: FilledButton.icon(
-                  onPressed: _loading ? null : _share,
-                  icon: _loading
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: AppColors.onAccent),
-                        )
-                      : const Icon(AppIcons.shareNetwork, size: 20),
-                  label: Text(
-                    _loading ? S.of(context).syncSharing : S.of(context).syncGenerateInvite,
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.accent,
-                      light: 0.88, dark: 0.8),
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                  border: Border.all(
-                      color: AppColors.accent.withValues(alpha: 0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).syncInviteCode,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.ts(context),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SelectableText(
-                      _inviteCode!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'monospace',
-                        color: AppColors.tp(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                child: FilledButton.icon(
-                  onPressed: _shareCode,
-                  icon: const Icon(AppIcons.shareNetwork, size: 20),
-                  label: Text(
-                    S.of(context).syncShareCode,
-                    style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ],
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.overspent,
-                      light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(AppIcons.warningCircle,
-                        color: AppColors.overspent, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.overspent),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }
@@ -2508,7 +2061,7 @@ class _AccentSwatch extends StatelessWidget {
       label: label,
       child: Tappable(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: CardTokens.borderRadius,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

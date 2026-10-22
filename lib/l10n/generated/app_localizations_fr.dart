@@ -2041,7 +2041,7 @@ class SFr extends S {
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override
-  String get allocNoArchived => 'Aucune enveloppe archivée.';
+  String get allocNoArchived => 'Aucune enveloppe archivée';
 
   @override
   String allocUnarchived(String name) {
@@ -3104,12 +3104,6 @@ class SFr extends S {
   }
 
   @override
-  String get billGoBackBtn => 'Retour';
-
-  @override
-  String get billContinueAnyway => 'Continuer quand même';
-
-  @override
   String get txFormCouldNotSave =>
       'Impossible d\'enregistrer la transaction. Veuillez réessayer.';
 
@@ -3330,7 +3324,7 @@ class SFr extends S {
   String get allocApplyRevaluation => 'Appliquer la réévaluation';
 
   @override
-  String get allocArchiveTitle => 'Archiver l\'enveloppe';
+  String get allocArchiveTitle => 'Archiver l\'enveloppe ?';
 
   @override
   String get allocArchiveMsg =>
@@ -3340,7 +3334,7 @@ class SFr extends S {
   String get allocArchived => 'Enveloppe archivée';
 
   @override
-  String get allocDeleteTitle => 'Supprimer l\'enveloppe';
+  String get allocDeleteTitle => 'Supprimer l\'enveloppe ?';
 
   @override
   String get allocArchiveInstead => 'Archiver à la place';
@@ -3523,7 +3517,7 @@ class SFr extends S {
       'La suppression va :\n  • Délier toutes les catégories de cette enveloppe\n  • Supprimer tout l\'historique du grand livre\n\nEnvisagez l\'archivage pour préserver l\'historique.';
 
   @override
-  String get allocDeleteNoLinksTitle => 'Supprimer l\'enveloppe définitivement';
+  String get allocDeleteNoLinksTitle => 'Supprimer l\'enveloppe ?';
 
   @override
   String get allocDeleteNoLinksMsg =>
@@ -3617,8 +3611,7 @@ class SFr extends S {
   String get fundCouldntLoad => 'Impossible de charger les enveloppes';
 
   @override
-  String get fundNoAllocations =>
-      'Aucune enveloppe à financer.\nCréez d\'abord des enveloppes.';
+  String get fundNoAllocations => 'Aucune enveloppe à financer';
 
   @override
   String get fundHowTitle => 'Comment fonctionne le financement ?';
@@ -3995,7 +3988,7 @@ class SFr extends S {
   String get catArchived => 'Catégorie archivée';
 
   @override
-  String get catDeleteTitle => 'Supprimer la catégorie';
+  String get catDeleteTitle => 'Supprimer la catégorie ?';
 
   @override
   String get catDeleteNoTx =>
@@ -4180,9 +4173,6 @@ class SFr extends S {
   String get subDetailScheduled => 'prévu';
 
   @override
-  String get subDetailCancelTitle => 'Annuler l\'abonnement';
-
-  @override
   String get tmplTitle => 'Modèles';
 
   @override
@@ -4359,9 +4349,6 @@ class SFr extends S {
   String get objColorSection => 'Couleur';
 
   @override
-  String get objDeleteTitle => 'Supprimer l\'objectif';
-
-  @override
   String get objCannotUndo => 'Cette action est irréversible.';
 
   @override
@@ -4400,9 +4387,6 @@ class SFr extends S {
   @override
   String get objIntro =>
       'Les objectifs suivent l\'épargne vers une cible. Les prêts suivent l\'argent prêté ou emprunté.';
-
-  @override
-  String get objCreateFirst => 'Créez votre premier objectif';
 
   @override
   String objDeleteLinkedPayments(int count) {
@@ -7015,9 +6999,6 @@ class SFr extends S {
   String get plannedPostFailed => 'Échec de l\'enregistrement du paiement';
 
   @override
-  String get plannedPostAllTitle => 'Enregistrer tous les paiements';
-
-  @override
   String plannedPostAllContent(int count, String month) {
     return 'Enregistrer les $count paiements planifiés pour $month ?';
   }
@@ -7034,9 +7015,6 @@ class SFr extends S {
   String plannedPostAllResultPartial(int posted, int failed) {
     return '$posted enregistrés, $failed échoués';
   }
-
-  @override
-  String get plannedDeleteTitle => 'Supprimer le paiement planifié';
 
   @override
   String get plannedDeleteContent =>
@@ -7612,4 +7590,334 @@ class SFr extends S {
 
   @override
   String get billPersonName => 'Nom';
+
+  @override
+  String get emojiGroupFood => 'Alimentation et boissons';
+
+  @override
+  String get emojiGroupTransport => 'Transport';
+
+  @override
+  String get emojiGroupHome => 'Maison et factures';
+
+  @override
+  String get emojiGroupShopping => 'Shopping';
+
+  @override
+  String get emojiGroupHealth => 'Santé et forme';
+
+  @override
+  String get emojiGroupEntertainment => 'Divertissement';
+
+  @override
+  String get emojiGroupWork => 'Études et travail';
+
+  @override
+  String get emojiGroupMoney => 'Argent';
+
+  @override
+  String get emojiGroupFamily => 'Famille et animaux';
+
+  @override
+  String get emojiGroupTravel => 'Voyages et loisirs';
+
+  @override
+  String get emojiGroupOther => 'Autre';
+
+  @override
+  String tmplNoMatch(String query) {
+    return 'Aucun modèle ne correspond à « $query »';
+  }
+
+  @override
+  String get tmplDeleted => 'Modèle supprimé';
+
+  @override
+  String get allocDeleted => 'Enveloppe supprimée';
+
+  @override
+  String get allocOrderSaved => 'Ordre enregistré';
+
+  @override
+  String get leftoverResolved => 'Reliquat traité';
+
+  @override
+  String get periodTransitionDone => 'Nouvelle période prête';
+
+  @override
+  String catEnvelopeLinked(String name) {
+    return 'Liée à $name';
+  }
+
+  @override
+  String get catEnvelopeUnlinked => 'Enveloppe dissociée';
+
+  @override
+  String get txDetailRemoveReceiptTitle => 'Retirer ce reçu ?';
+
+  @override
+  String get txDetailRemoveReceiptBody =>
+      'La photo sera supprimée de cette transaction.';
+
+  @override
+  String get txDetailReceiptRemoved => 'Reçu retiré';
+
+  @override
+  String get txExportFailed => 'Impossible d\'exporter les transactions';
+
+  @override
+  String get acctDeleteConfirmTitle => 'Supprimer le compte ?';
+
+  @override
+  String get acctArchiveConfirmTitle => 'Archiver le compte ?';
+
+  @override
+  String get acctUnarchiveConfirmTitle => 'Désarchiver le compte ?';
+
+  @override
+  String acctArchivedSnack(String name) {
+    return '$name archivé';
+  }
+
+  @override
+  String acctDeletedSnack(String name) {
+    return '$name supprimé';
+  }
+
+  @override
+  String get acctSaveFailed => 'Impossible d\'enregistrer le compte';
+
+  @override
+  String get acctAdjustFailed => 'Impossible d\'ajuster le solde';
+
+  @override
+  String get customizeResetDone =>
+      'Disposition du tableau de bord réinitialisée';
+
+  @override
+  String get exportReportFailed => 'Impossible de créer le rapport';
+
+  @override
+  String exportShareText(String month) {
+    return 'Rapport BudgetSeal – $month';
+  }
+
+  @override
+  String exportHtmlSubtitle(String month) {
+    return 'Rapport mensuel – $month';
+  }
+
+  @override
+  String exportHtmlTransactions(int count) {
+    return 'Transactions ($count)';
+  }
+
+  @override
+  String exportHtmlFooter(String date) {
+    return 'Généré par BudgetSeal – $date';
+  }
+
+  @override
+  String get reportsNothingThisMonth => 'Rien d\'enregistré ce mois-ci';
+
+  @override
+  String get reportsNothingThisMonthHint =>
+      'Balayez ou utilisez les flèches pour voir d\'autres mois.';
+
+  @override
+  String get searchNoMatches => 'Aucun résultat';
+
+  @override
+  String get recurringNoExpenses => 'Aucune dépense récurrente';
+
+  @override
+  String get recurringNoIncome => 'Aucun revenu récurrent';
+
+  @override
+  String get recurringPausedSnack => 'Transaction récurrente mise en pause';
+
+  @override
+  String get recurringResumedSnack => 'Transaction récurrente reprise';
+
+  @override
+  String get recurringUpdateFailed =>
+      'Impossible de mettre à jour la transaction récurrente';
+
+  @override
+  String get recurringDeleteFailed =>
+      'Impossible de supprimer la transaction récurrente';
+
+  @override
+  String get recurringSaveFailed =>
+      'Impossible d\'enregistrer la transaction récurrente';
+
+  @override
+  String get recurringLoadFailed =>
+      'Impossible de charger les transactions récurrentes';
+
+  @override
+  String get subPausedSnack => 'Abonnement mis en pause';
+
+  @override
+  String get subResumedSnack => 'Abonnement repris';
+
+  @override
+  String get subPauseTooltip => 'Mettre l\'abonnement en pause';
+
+  @override
+  String get subResumeTooltip => 'Reprendre l\'abonnement';
+
+  @override
+  String get subNoMatch => 'Aucun abonnement avec ce statut';
+
+  @override
+  String get subLoadFailed => 'Impossible de charger les abonnements';
+
+  @override
+  String get subDeleteTitle => 'Supprimer l\'abonnement ?';
+
+  @override
+  String get subDeleteBody =>
+      'Ses transactions passées restent dans votre historique.';
+
+  @override
+  String get subDeleted => 'Abonnement supprimé';
+
+  @override
+  String get subDeleteFailed => 'Impossible de supprimer l\'abonnement';
+
+  @override
+  String get subCancelConfirmTitle => 'Annuler l\'abonnement ?';
+
+  @override
+  String get subCancelDateSet => 'Date d\'annulation définie';
+
+  @override
+  String get plannedDeleteConfirmTitle => 'Supprimer le paiement planifié ?';
+
+  @override
+  String get plannedPostAllConfirmTitle => 'Enregistrer tous les paiements ?';
+
+  @override
+  String get plannedLoadFailed =>
+      'Impossible de charger les paiements planifiés';
+
+  @override
+  String get objDeleteConfirmTitle => 'Supprimer l\'objectif ?';
+
+  @override
+  String get objDeleted => 'Objectif supprimé';
+
+  @override
+  String get txColorDefault => 'Par défaut';
+
+  @override
+  String get txColorRed => 'Rouge';
+
+  @override
+  String get txColorOrange => 'Orange';
+
+  @override
+  String get txColorAmber => 'Ambre';
+
+  @override
+  String get txColorGreen => 'Vert';
+
+  @override
+  String get txColorTeal => 'Bleu sarcelle';
+
+  @override
+  String get txColorBlue => 'Bleu';
+
+  @override
+  String get txColorIndigo => 'Indigo';
+
+  @override
+  String get txColorPurple => 'Violet';
+
+  @override
+  String get txColorPink => 'Rose';
+
+  @override
+  String get txColorSlate => 'Ardoise';
+
+  @override
+  String get nfThousandsComma => 'Virgule (1,000)';
+
+  @override
+  String get nfThousandsPeriod => 'Point (1.000)';
+
+  @override
+  String get nfThousandsSpace => 'Espace (1 000)';
+
+  @override
+  String get nfThousandsNone => 'Aucun (1000)';
+
+  @override
+  String get nfDecimalPeriod => 'Point (0.50)';
+
+  @override
+  String get nfDecimalComma => 'Virgule (0,50)';
+
+  @override
+  String currencySymbolExample(String symbol) {
+    return 'ex. $symbol';
+  }
+
+  @override
+  String get resetConfirmTitle => 'Tout réinitialiser ?';
+
+  @override
+  String get backupRestoreConfirmTitle => 'Restaurer cette sauvegarde ?';
+
+  @override
+  String get syncDisconnectConfirmTitle => 'Déconnecter la synchronisation ?';
+
+  @override
+  String get syncOtherBudgetConfirmTitle => 'Utiliser le budget synchronisé ?';
+
+  @override
+  String get healthRepairConfirmTitle => 'Réparer les soldes ?';
+
+  @override
+  String get healthPurgeConfirmTitle => 'Purger les transactions supprimées ?';
+
+  @override
+  String get householdNameSaved => 'Nom du foyer enregistré';
+
+  @override
+  String baseCurrencySaved(String code) {
+    return 'Devise de base changée en $code';
+  }
+
+  @override
+  String get backupAutoOnSnack => 'Sauvegardes automatiques activées';
+
+  @override
+  String get backupAutoOffSnack => 'Sauvegardes automatiques désactivées';
+
+  @override
+  String get backupSettingsSaved => 'Paramètres de sauvegarde enregistrés';
+
+  @override
+  String get notifReminderOnSnack => 'Rappel quotidien activé';
+
+  @override
+  String get notifReminderOffSnack => 'Rappel quotidien désactivé';
+
+  @override
+  String get notifReminderSaved => 'Rappel mis à jour';
+
+  @override
+  String get syncDisconnectedSnack => 'Synchronisation déconnectée';
+
+  @override
+  String get biometricOnSnack => 'Verrouillage biométrique activé';
+
+  @override
+  String get biometricOffSnack => 'Verrouillage biométrique désactivé';
+
+  @override
+  String get wcStoppedNoWifi =>
+      'Arrêté : le téléphone a quitté le réseau Wi-Fi. Reconnectez-vous pour relancer.';
 }

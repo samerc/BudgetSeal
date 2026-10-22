@@ -26,6 +26,9 @@ Sum(account balances) = Unallocated + Sum(allocation balances)
 
 ## Subscriptions
 Recurring transactions can be flagged as subscriptions (`isSubscription` column). The `subscriptions/` feature provides a dedicated list and detail view with price history tracking (`priceHistory` JSON column). Subscriptions are still recurring transactions under the hood — the flag enables the separate UI.
+- **Status** (`subscriptionStatus()` in `features/recurring/recurring_format.dart`, shared by list and detail): *Cancelled* only once the end (cancellation) date has passed; switched off = *Paused* (grey, same as Recurring); within 30 days of the end date = *Ending soon*; else *Active*. Paused and cancelled ones are left out of the monthly/yearly cost.
+- Pause/resume and delete go through `RecurringEngine.toggleEnabled` / `.delete` (soft delete, moves `last_modified`); setting a cancellation date is a typed update that also moves `last_modified`. The detail screen's trash button deletes (confirm → SnackBar → pop); payments already posted stay.
+- Recurring, Subscriptions, Upcoming bills and Planned share one wording/widget set in `recurring_format.dart`: `recurringFrequencyLabel`, `recurringNextLine` ("Next: {date} · Monthly"), `recurringPriceSuffix` ("/month"), `recurringMonthlyEquivalent`, `SummaryChip`/`SummaryStrip`; `RecurringStatusDot` lives in `recurring_screen.dart`.
 
 ## Multi-Currency Amount Safety
 When computing base-currency totals (summaries, reports, dashboard), always use `isRealRate()` from `format_number.dart` to skip lines where the currency differs from base but `exchangeRateToBase` is 1.0 (rate not set). Without this check, foreign-currency amounts inflate totals (e.g., LBP 1,200,000 counted as $1,200,000).
@@ -42,7 +45,7 @@ Each `_LineItem` stores its own `currency`, `accountId`, and `exchangeRateToBase
 `_buildEntry()` in `transactions_provider.dart` uses the line's `accountId` (not the header's `tx.accountId`) for single-line transactions where the line has a per-line account. This ensures the transaction list and detail screen show the correct account name, currency, and running balance.
 
 ## Envelope Detail Layout
-The envelope detail screen shows: balance hero card (pastel of the linked category color, `BudgetProgress` bar with percent + pace marker, tonal fund button; label reads "$X spent" for spending envelopes and "$X to go" for flexible ones) → settings form (hidden, via 3-dot menu) → recent activity (`LedgerDao.watchByAllocation`: spending dated and sorted by its transaction's date, rows of deleted transactions left out) → spending history. Settings, withdraw, revalue, archive, and delete are in the 3-dot menu. No duplicate transaction lists.
+The envelope detail screen shows: balance hero card (pastel of the linked category color, `BudgetProgress` bar with percent + pace marker, theme Fund button; label reads "$X spent" for spending envelopes and "$X to go" for flexible ones) → settings form (hidden, via 3-dot menu) → recent activity (`LedgerDao.watchByAllocation`: spending dated and sorted by its transaction's date, rows of deleted transactions left out) → spending history. Settings, withdraw, revalue, archive, and delete are in the 3-dot menu. No duplicate transaction lists.
 
 ## Multi-Currency Envelopes
 Envelopes can hold balances in multiple currencies. The fund sheet offers a currency picker showing all available unallocated currencies. The balance hero card shows the target currency balance prominently, with other currencies as `+ $50`. The allocation card does the same.
@@ -54,6 +57,7 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 - Funding screen presets: Quick Fill (to target), Same as last period (`LedgerDao.fundedInPeriod`: funding + incoming moves by ledger date), What I spent last period (`watchSpendingInPeriod(...).first`), Clear. Fund All runs in one db transaction; funded rows keep their input.
 - Envelope fund sheet chips: To target, All available.
 - Budget tab: `PeriodSummaryCard` (first 7 days of a period, dismissed per period via `period_summary_dismissed`); ⋮ → Reorder envelopes (`allocations.sortOrder`, schema v20, `AllocationsDao.saveOrder`; `watchAll` orders sortOrder nulls-last, then name).
+- Shared pieces in this area: `OptionCard` (`features/allocations/option_card.dart`) is the one single-choice card (new-envelope type, both leftover screens); `InlineEmojiGrid` + `emojiPickerGroups()` (`features/categories/emoji_groups.dart`) are the one localized emoji picker for envelopes and categories. Envelope delete: with linked categories a Cancel / Archive instead / Delete dialog, else `showConfirmDialog`; archive is a non-destructive `showConfirmDialog`.
 - Period review includes negative balances: `resolveLeftover` with a negative amount → `toUnallocated` writes a covering `funding` row, `keep` a `carry_forward` marker. Pending detection counts any non-zero balance.
 - Categories: envelope badge + long-press → Envelope (`category_envelope_sheet.dart`: link/unlink/create envelope named after the category).
 - Goals: `_monthlyPace` = remaining / months left (started month counts) shown as "Needed per month".

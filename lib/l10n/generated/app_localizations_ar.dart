@@ -2033,7 +2033,7 @@ class SAr extends S {
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override
-  String get allocNoArchived => 'لا توجد أظرف مؤرشفة.';
+  String get allocNoArchived => 'لا توجد أظرف مؤرشفة';
 
   @override
   String allocUnarchived(String name) {
@@ -3089,12 +3089,6 @@ class SAr extends S {
   }
 
   @override
-  String get billGoBackBtn => 'الرجوع';
-
-  @override
-  String get billContinueAnyway => 'المتابعة على أي حال';
-
-  @override
   String get txFormCouldNotSave => 'تعذّر حفظ المعاملة. حاول مجدداً.';
 
   @override
@@ -3310,7 +3304,7 @@ class SAr extends S {
   String get allocApplyRevaluation => 'تطبيق إعادة التقييم';
 
   @override
-  String get allocArchiveTitle => 'أرشفة الظرف';
+  String get allocArchiveTitle => 'أرشفة الظرف؟';
 
   @override
   String get allocArchiveMsg =>
@@ -3320,7 +3314,7 @@ class SAr extends S {
   String get allocArchived => 'تم أرشفة الظرف';
 
   @override
-  String get allocDeleteTitle => 'حذف الظرف';
+  String get allocDeleteTitle => 'حذف الظرف؟';
 
   @override
   String get allocArchiveInstead => 'أرشفة بدلاً من ذلك';
@@ -3499,7 +3493,7 @@ class SAr extends S {
       'سيؤدي الحذف إلى:\n  • إلغاء ربط جميع الفئات من هذا الظرف\n  • حذف كل سجل الدفتر لهذا الظرف\n\nفكر في الأرشفة بدلاً من ذلك للحفاظ على السجل.';
 
   @override
-  String get allocDeleteNoLinksTitle => 'حذف الظرف نهائياً';
+  String get allocDeleteNoLinksTitle => 'حذف الظرف؟';
 
   @override
   String get allocDeleteNoLinksMsg =>
@@ -3605,7 +3599,7 @@ class SAr extends S {
   String get fundCouldntLoad => 'تعذّر تحميل الأظرف';
 
   @override
-  String get fundNoAllocations => 'لا أظرف لتمويلها.\nأنشئ أظرفاً أولاً.';
+  String get fundNoAllocations => 'لا أظرف لتمويلها';
 
   @override
   String get fundHowTitle => 'كيف يعمل التمويل؟';
@@ -3982,7 +3976,7 @@ class SAr extends S {
   String get catArchived => 'تم أرشفة الفئة';
 
   @override
-  String get catDeleteTitle => 'حذف الفئة';
+  String get catDeleteTitle => 'حذف الفئة؟';
 
   @override
   String get catDeleteNoTx => 'هذه الفئة ليس لها معاملات. حذف نهائي؟';
@@ -4164,9 +4158,6 @@ class SAr extends S {
   String get subDetailScheduled => 'مجدول';
 
   @override
-  String get subDetailCancelTitle => 'إلغاء الاشتراك';
-
-  @override
   String get tmplTitle => 'القوالب';
 
   @override
@@ -4343,9 +4334,6 @@ class SAr extends S {
   String get objColorSection => 'اللون';
 
   @override
-  String get objDeleteTitle => 'حذف الهدف';
-
-  @override
   String get objCannotUndo => 'لا يمكن التراجع عن هذا.';
 
   @override
@@ -4382,9 +4370,6 @@ class SAr extends S {
   @override
   String get objIntro =>
       'الأهداف تتبّع الادخار نحو غاية. القروض تتبّع الأموال التي أقرضتها أو اقترضتها.';
-
-  @override
-  String get objCreateFirst => 'أنشئ هدفك الأول';
 
   @override
   String objDeleteLinkedPayments(int count) {
@@ -6951,9 +6936,6 @@ class SAr extends S {
   String get plannedPostFailed => 'فشل ترحيل الدفعة';
 
   @override
-  String get plannedPostAllTitle => 'ترحيل جميع المدفوعات';
-
-  @override
   String plannedPostAllContent(int count, String month) {
     return 'ترحيل جميع المدفوعات المخططة ($count) لـ$month؟';
   }
@@ -6970,9 +6952,6 @@ class SAr extends S {
   String plannedPostAllResultPartial(int posted, int failed) {
     return 'تم ترحيل $posted، فشل $failed';
   }
-
-  @override
-  String get plannedDeleteTitle => 'حذف الدفعة المخططة';
 
   @override
   String get plannedDeleteContent =>
@@ -7544,4 +7523,326 @@ class SAr extends S {
 
   @override
   String get billPersonName => 'الاسم';
+
+  @override
+  String get emojiGroupFood => 'طعام وشراب';
+
+  @override
+  String get emojiGroupTransport => 'مواصلات';
+
+  @override
+  String get emojiGroupHome => 'المنزل والفواتير';
+
+  @override
+  String get emojiGroupShopping => 'تسوّق';
+
+  @override
+  String get emojiGroupHealth => 'صحة ولياقة';
+
+  @override
+  String get emojiGroupEntertainment => 'ترفيه';
+
+  @override
+  String get emojiGroupWork => 'تعليم وعمل';
+
+  @override
+  String get emojiGroupMoney => 'مال';
+
+  @override
+  String get emojiGroupFamily => 'العائلة والحيوانات الأليفة';
+
+  @override
+  String get emojiGroupTravel => 'سفر وترفيه';
+
+  @override
+  String get emojiGroupOther => 'أخرى';
+
+  @override
+  String tmplNoMatch(String query) {
+    return 'لا توجد قوالب تطابق \"$query\"';
+  }
+
+  @override
+  String get tmplDeleted => 'تم حذف القالب';
+
+  @override
+  String get allocDeleted => 'تم حذف الظرف';
+
+  @override
+  String get allocOrderSaved => 'تم حفظ الترتيب';
+
+  @override
+  String get leftoverResolved => 'تمت معالجة المتبقي';
+
+  @override
+  String get periodTransitionDone => 'الفترة الجديدة جاهزة';
+
+  @override
+  String catEnvelopeLinked(String name) {
+    return 'تم الربط بـ $name';
+  }
+
+  @override
+  String get catEnvelopeUnlinked => 'تم فك ربط الظرف';
+
+  @override
+  String get txDetailRemoveReceiptTitle => 'إزالة هذا الإيصال؟';
+
+  @override
+  String get txDetailRemoveReceiptBody => 'سيتم حذف الصورة من هذه المعاملة.';
+
+  @override
+  String get txDetailReceiptRemoved => 'تمت إزالة الإيصال';
+
+  @override
+  String get txExportFailed => 'تعذّر تصدير المعاملات';
+
+  @override
+  String get acctDeleteConfirmTitle => 'حذف الحساب؟';
+
+  @override
+  String get acctArchiveConfirmTitle => 'أرشفة الحساب؟';
+
+  @override
+  String get acctUnarchiveConfirmTitle => 'إلغاء أرشفة الحساب؟';
+
+  @override
+  String acctArchivedSnack(String name) {
+    return 'تمت أرشفة $name';
+  }
+
+  @override
+  String acctDeletedSnack(String name) {
+    return 'تم حذف $name';
+  }
+
+  @override
+  String get acctSaveFailed => 'تعذّر حفظ الحساب';
+
+  @override
+  String get acctAdjustFailed => 'تعذّر تعديل الرصيد';
+
+  @override
+  String get customizeResetDone => 'تمت إعادة ضبط ترتيب الرئيسية';
+
+  @override
+  String get exportReportFailed => 'تعذّر إنشاء التقرير';
+
+  @override
+  String exportShareText(String month) {
+    return 'تقرير BudgetSeal – $month';
+  }
+
+  @override
+  String exportHtmlSubtitle(String month) {
+    return 'التقرير الشهري – $month';
+  }
+
+  @override
+  String exportHtmlTransactions(int count) {
+    return 'المعاملات ($count)';
+  }
+
+  @override
+  String exportHtmlFooter(String date) {
+    return 'أُنشئ بواسطة BudgetSeal – $date';
+  }
+
+  @override
+  String get reportsNothingThisMonth => 'لا شيء مسجّل هذا الشهر';
+
+  @override
+  String get reportsNothingThisMonthHint =>
+      'اسحب أو استخدم الأسهم لعرض أشهر أخرى.';
+
+  @override
+  String get searchNoMatches => 'لا توجد نتائج';
+
+  @override
+  String get recurringNoExpenses => 'لا توجد مصروفات متكررة';
+
+  @override
+  String get recurringNoIncome => 'لا يوجد دخل متكرر';
+
+  @override
+  String get recurringPausedSnack => 'تم إيقاف المعاملة المتكررة مؤقتًا';
+
+  @override
+  String get recurringResumedSnack => 'تم استئناف المعاملة المتكررة';
+
+  @override
+  String get recurringUpdateFailed => 'تعذر تحديث المعاملة المتكررة';
+
+  @override
+  String get recurringDeleteFailed => 'تعذر حذف المعاملة المتكررة';
+
+  @override
+  String get recurringSaveFailed => 'تعذر حفظ المعاملة المتكررة';
+
+  @override
+  String get recurringLoadFailed => 'تعذر تحميل المعاملات المتكررة';
+
+  @override
+  String get subPausedSnack => 'تم إيقاف الاشتراك مؤقتًا';
+
+  @override
+  String get subResumedSnack => 'تم استئناف الاشتراك';
+
+  @override
+  String get subPauseTooltip => 'إيقاف الاشتراك مؤقتًا';
+
+  @override
+  String get subResumeTooltip => 'استئناف الاشتراك';
+
+  @override
+  String get subNoMatch => 'لا توجد اشتراكات بهذه الحالة';
+
+  @override
+  String get subLoadFailed => 'تعذر تحميل الاشتراكات';
+
+  @override
+  String get subDeleteTitle => 'حذف الاشتراك؟';
+
+  @override
+  String get subDeleteBody => 'ستبقى معاملاته السابقة في سجلك.';
+
+  @override
+  String get subDeleted => 'تم حذف الاشتراك';
+
+  @override
+  String get subDeleteFailed => 'تعذر حذف الاشتراك';
+
+  @override
+  String get subCancelConfirmTitle => 'إلغاء الاشتراك؟';
+
+  @override
+  String get subCancelDateSet => 'تم تحديد تاريخ الإلغاء';
+
+  @override
+  String get plannedDeleteConfirmTitle => 'حذف الدفعة المخططة؟';
+
+  @override
+  String get plannedPostAllConfirmTitle => 'ترحيل جميع المدفوعات؟';
+
+  @override
+  String get plannedLoadFailed => 'تعذر تحميل المدفوعات المخططة';
+
+  @override
+  String get objDeleteConfirmTitle => 'حذف الهدف؟';
+
+  @override
+  String get objDeleted => 'تم حذف الهدف';
+
+  @override
+  String get txColorDefault => 'الافتراضي';
+
+  @override
+  String get txColorRed => 'أحمر';
+
+  @override
+  String get txColorOrange => 'برتقالي';
+
+  @override
+  String get txColorAmber => 'كهرماني';
+
+  @override
+  String get txColorGreen => 'أخضر';
+
+  @override
+  String get txColorTeal => 'أزرق مخضر';
+
+  @override
+  String get txColorBlue => 'أزرق';
+
+  @override
+  String get txColorIndigo => 'نيلي';
+
+  @override
+  String get txColorPurple => 'بنفسجي';
+
+  @override
+  String get txColorPink => 'وردي';
+
+  @override
+  String get txColorSlate => 'رمادي';
+
+  @override
+  String get nfThousandsComma => 'فاصلة (1,000)';
+
+  @override
+  String get nfThousandsPeriod => 'نقطة (1.000)';
+
+  @override
+  String get nfThousandsSpace => 'مسافة (1 000)';
+
+  @override
+  String get nfThousandsNone => 'بدون (1000)';
+
+  @override
+  String get nfDecimalPeriod => 'نقطة (0.50)';
+
+  @override
+  String get nfDecimalComma => 'فاصلة (0,50)';
+
+  @override
+  String currencySymbolExample(String symbol) {
+    return 'مثال: $symbol';
+  }
+
+  @override
+  String get resetConfirmTitle => 'إعادة ضبط كل شيء؟';
+
+  @override
+  String get backupRestoreConfirmTitle => 'استعادة هذه النسخة الاحتياطية؟';
+
+  @override
+  String get syncDisconnectConfirmTitle => 'قطع اتصال المزامنة؟';
+
+  @override
+  String get syncOtherBudgetConfirmTitle => 'استخدام الميزانية المتزامنة؟';
+
+  @override
+  String get healthRepairConfirmTitle => 'إصلاح الأرصدة؟';
+
+  @override
+  String get healthPurgeConfirmTitle => 'حذف المعاملات المحذوفة نهائيًا؟';
+
+  @override
+  String get householdNameSaved => 'تم حفظ اسم الأسرة';
+
+  @override
+  String baseCurrencySaved(String code) {
+    return 'تم تغيير العملة الأساسية إلى $code';
+  }
+
+  @override
+  String get backupAutoOnSnack => 'النسخ الاحتياطي التلقائي مفعّل';
+
+  @override
+  String get backupAutoOffSnack => 'النسخ الاحتياطي التلقائي متوقف';
+
+  @override
+  String get backupSettingsSaved => 'تم حفظ إعدادات النسخ الاحتياطي';
+
+  @override
+  String get notifReminderOnSnack => 'التذكير اليومي مفعّل';
+
+  @override
+  String get notifReminderOffSnack => 'التذكير اليومي متوقف';
+
+  @override
+  String get notifReminderSaved => 'تم تحديث التذكير';
+
+  @override
+  String get syncDisconnectedSnack => 'تم قطع اتصال المزامنة';
+
+  @override
+  String get biometricOnSnack => 'القفل البيومتري مفعّل';
+
+  @override
+  String get biometricOffSnack => 'القفل البيومتري متوقف';
+
+  @override
+  String get wcStoppedNoWifi =>
+      'توقف: غادر الهاتف شبكة WiFi. أعد الاتصال للتشغيل مجدداً.';
 }

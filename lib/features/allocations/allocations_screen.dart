@@ -205,6 +205,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         ),
         actions: [
           FilledButton(
+            style: DialogButtons.filled,
             onPressed: () => Navigator.pop(ctx),
             child: Text(l.allocGotIt),
           ),
@@ -223,7 +224,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           decoration: BoxDecoration(
             color: AppColors.pastel(context, AppColors.accent,
                 light: 0.85, dark: 0.78),
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
           child: Center(
             child: Text(num,
@@ -383,9 +384,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, AppColors.caution,
                         light: 0.85, dark: 0.78),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppColors.caution.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Row(
                     children: [
@@ -579,22 +578,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
 
               if (filtered.isEmpty) {
                 return SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(AppIcons.magnifyingGlassMinus,
-                            size: 48, color: AppColors.th(context)),
-                        const SizedBox(height: 12),
-                        Text(
-                          l.allocNoMatch(_searchQuery),
-                          style: TextStyle(
-                            color: AppColors.ts(context),
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
+                  hasScrollBody: false,
+                  child: EmptyState(
+                    icon: AppIcons.magnifyingGlassMinus,
+                    title: l.allocNoMatch(_searchQuery),
                   ),
                 );
               }
@@ -863,25 +850,22 @@ class _GoalsLoansBanner extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       // Shadow outside, fill on Tappable's Material so the ripple is visible.
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: AppColors.cardShadow(context),
-        ),
+        decoration: AppColors.card(context),
         child: Tappable(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: CardTokens.borderRadius,
         color: AppColors.sf(context),
         onTap: () => context.push('/objectives'),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: CardTokens.padding,
           child: Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: CategoryIconTokens.compactSize,
+                height: CategoryIconTokens.compactSize,
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, AppColors.accent,
                       light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(9),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(AppIcons.flag,
                     size: 18, color: AppColors.accent),

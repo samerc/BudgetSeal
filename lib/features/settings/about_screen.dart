@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/app_info.dart';
-import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_icon_hero.dart';
+import '../premium/redeem_dialog.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -26,33 +27,9 @@ class AboutScreen extends ConsumerWidget {
           children: [
             const Spacer(flex: 2),
 
-            // ── App icon ──
-            ClipRRect(
-              borderRadius: BorderRadius.circular(22),
-              child: Image.asset('assets/icon/app_icon.png',
-                  width: 88, height: 88),
-            ),
-            const SizedBox(height: 20),
-
-            // ── Name + tagline ──
-            Text(
-              'BudgetSeal',
-              style: TextStyle(
-                fontSize: 26,
-                fontFamily: TypographyTokens.displayFamily,
-                fontWeight: FontWeight.w800,
-                color: AppColors.tp(context),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l.appTaglineAbout,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.ts(context),
-              ),
-            ),
-            const SizedBox(height: 8),
+            // ── App icon, name + tagline (same hero as Upgrade) ──
+            AppIconHero(title: l.appName, subtitle: l.appTaglineAbout),
+            const SizedBox(height: Spacing.sm),
 
             // ── Version + build date ──
             Container(
@@ -60,16 +37,16 @@ class AboutScreen extends ConsumerWidget {
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
                 color: AppColors.sfv(context),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
               child: Text(
                 appBuildNumber.isEmpty
                     ? 'v$appVersion'
                     : 'v$appVersion ($appBuildNumber)',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: TypographyTokens.captionSize,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.th(context),
+                  color: AppColors.ts(context),
                 ),
               ),
             ),
@@ -115,7 +92,8 @@ class AboutScreen extends ConsumerWidget {
                 TextButton(
                   onPressed: () => context.push('/privacy'),
                   child: Text(l.aboutPrivacyTerms,
-                      style: TextStyle(fontSize: 12, color: AppColors.accent)),
+                      style: const TextStyle(
+                          fontSize: TypographyTokens.captionSize)),
                 ),
                 Text('·', style: TextStyle(color: AppColors.th(context))),
                 TextButton(
@@ -126,16 +104,17 @@ class AboutScreen extends ConsumerWidget {
                     applicationLegalese: l.aboutLegalese(DateTime.now().year),
                   ),
                   child: Text(l.aboutLicenses,
-                      style: TextStyle(fontSize: 12, color: AppColors.accent)),
+                      style: const TextStyle(
+                          fontSize: TypographyTokens.captionSize)),
                 ),
               ],
             ),
             // ── Redeem code ──
             TextButton(
-              onPressed: () => _showRedeemDialog(context, ref),
+              onPressed: () => showRedeemDialog(context, ref),
               child: Text(
                 l.upgradeRedeemCode,
-                style: TextStyle(fontSize: 12, color: AppColors.accent),
+                style: const TextStyle(fontSize: TypographyTokens.captionSize),
               ),
             ),
 
@@ -175,63 +154,6 @@ class AboutScreen extends ConsumerWidget {
       ),
     );
   }
-
-  static Future<void> _showRedeemDialog(
-      BuildContext context, WidgetRef ref) async {
-    final l = S.of(context);
-    final controller = TextEditingController();
-    String? errorText;
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (sbCtx, setDialogState) => AlertDialog(
-          title: Text(l.upgradeRedeemCode),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              hintText: l.upgradeRedeemHint,
-              errorText: errorText,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx),
-              child: Text(l.commonCancel),
-            ),
-            FilledButton(
-              style: DialogButtons.filled,
-              onPressed: () async {
-                final code = controller.text.trim();
-                if (code.isEmpty) return;
-                if (!isValidRedeemCode(code)) {
-                  setDialogState(
-                      () => errorText = l.upgradeRedeemInvalid);
-                  return;
-                }
-                await ref
-                    .read(hasPremiumProvider.notifier)
-                    .redeemCode(code);
-                if (!dialogCtx.mounted) return;
-                Navigator.pop(dialogCtx);
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l.upgradeRedeemSuccess),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              child: Text(l.upgradeRedeemButton),
-            ),
-          ],
-        ),
-      ),
-    );
-    disposeAfterRouteAnimation(controller);
-  }
 }
 
 class _ActionCard extends StatelessWidget {
@@ -247,15 +169,11 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppCard(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          boxShadow: AppColors.cardShadow(context),
-        ),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: SizedBox(
+        width: double.infinity,
         child: Column(
           children: [
             Icon(icon, size: 22, color: AppColors.accent),

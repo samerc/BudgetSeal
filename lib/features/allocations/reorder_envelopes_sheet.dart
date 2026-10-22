@@ -9,6 +9,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/sheet_title.dart';
 
 /// Budget tab ⋮ → Reorder envelopes: drag to set the order the Budget tab
 /// (and funding screen) list envelopes in.
@@ -37,34 +38,18 @@ Future<void> showReorderEnvelopesSheet(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 12, 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(tr.allocReorderTitle,
-                          style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: TypographyTokens.displayFamily)),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      // The theme's minimum size is full-width; in a Row
-                      // that would be infinite.
-                      style: FilledButton.styleFrom(
-                          minimumSize: const Size(0, 44),
-                          padding: const EdgeInsets.symmetric(horizontal: 18)),
-                      child: Text(tr.commonSave),
-                    ),
-                  ],
+              SheetTitle(
+                tr.allocReorderTitle,
+                subtitle: tr.allocReorderHint,
+                trailing: FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  // The theme's minimum size is full-width; in a Row
+                  // that would be infinite.
+                  style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 18)),
+                  child: Text(tr.commonSave),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: Text(tr.allocReorderHint,
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.ts(ctx))),
               ),
               Flexible(
                 child: ReorderableListView.builder(
@@ -79,12 +64,12 @@ Future<void> showReorderEnvelopesSheet(
                     final it = items[i];
                     return ListTile(
                       key: ValueKey(it.id),
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.sfv(ctx),
-                        child: (it.icon?.isNotEmpty ?? false)
-                            ? EmojiGlyph(it.icon!, size: 22)
-                            : Text(it.name.characters.first.toUpperCase(),
-                                style: TextStyle(color: AppColors.tp(ctx))),
+                      leading: CategoryIcon(
+                        categoryName: it.name,
+                        emoji: it.icon,
+                        color: AppColors.accent,
+                        size: CategoryIconTokens.compactSize,
+                        circular: true,
                       ),
                       title: Text(it.name),
                       trailing: ReorderableDragStartListener(
@@ -108,6 +93,10 @@ Future<void> showReorderEnvelopesSheet(
     await AllocationsDao(ref.read(databaseProvider))
         .saveOrder([for (final it in items) it.id]);
     ref.invalidate(allocationsProvider);
+    messenger.showSnackBar(SnackBar(
+      content: Text(tr.allocOrderSaved),
+      behavior: SnackBarBehavior.floating,
+    ));
   } catch (e) {
     debugPrint('[ReorderEnvelopes] Save failed: $e');
     messenger.showSnackBar(SnackBar(

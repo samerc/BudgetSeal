@@ -12,6 +12,7 @@ import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/ready_to_assign_banner.dart';
 import '../../allocations/move_money_sheet.dart';
+import '../../../shared/widgets/tappable.dart';
 import 'bills_boxes.dart';
 
 /// Home's first section — what the budget needs now: money waiting in
@@ -94,11 +95,7 @@ class _OverspentCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,8 +104,8 @@ class _OverspentCard extends ConsumerWidget {
             padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 4),
             child: Text(s.homeOverspentTitle(items.length),
                 style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: TypographyTokens.cardTitleSize,
+                    fontWeight: TypographyTokens.cardTitleWeight,
                     color: AppColors.overspent)),
           ),
           for (final a in items) _row(context, ref, a),
@@ -126,7 +123,7 @@ class _OverspentCard extends ConsumerWidget {
     final cat = linked[alloc.id] ?? a.data.category;
     final color =
         cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent;
-    return InkWell(
+    return Tappable(
       onTap: () => context.push('/allocations/${alloc.id}'),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 12, 8),
@@ -148,33 +145,31 @@ class _OverspentCard extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: TypographyTokens.txTitleSize,
+                          fontWeight: TypographyTokens.txTitleWeight,
                           color: AppColors.tp(context))),
                   Text(s.homeOverBy(formatAmount(over, currency: cur)),
                       style: TextStyle(
-                          fontSize: 13,
+                          fontSize: TypographyTokens.amountSmallSize,
                           color: AppColors.overspent)),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            Material(
+            Tappable(
               color: AppColors.overspent,
-              shape: const StadiumBorder(),
-              child: InkWell(
-                customBorder: const StadiumBorder(),
-                onTap: () => showMoveMoneySheet(context, ref,
-                    toId: alloc.id, currency: cur, amount: over, cover: true),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  child: Text(s.allocCoverButton,
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.inkOn(AppColors.overspent))),
-                ),
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
+              scaleFactor: 0.95,
+              onTap: () => showMoveMoneySheet(context, ref,
+                  toId: alloc.id, currency: cur, amount: over, cover: true),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                child: Text(s.allocCoverButton,
+                    style: TextStyle(
+                        fontSize: TypographyTokens.amountSmallSize,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.inkOn(AppColors.overspent))),
               ),
             ),
           ],

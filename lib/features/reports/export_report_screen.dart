@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -13,8 +13,12 @@ import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/utils/note_text.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import 'widgets/month_nav.dart';
 
 /// Generates and shares an HTML monthly report that can be printed as PDF.
 class ExportReportScreen extends ConsumerStatefulWidget {
@@ -34,8 +38,8 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
     return DateTime(now.year, now.month - _selectedMonthsBack, 1);
   }
 
-  DateTime get _monthEnd =>
-      DateTime(_month.year, _month.month + 1, 0, 23, 59, 59);
+  /// Exclusive: the first moment of the next month.
+  DateTime get _monthEnd => DateTime(_month.year, _month.month + 1, 1);
 
   @override
   Widget build(BuildContext context) {
@@ -44,88 +48,70 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(S.of(context).exportReportTitle),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.cardShadow(context),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(Spacing.lg),
+        child: AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: [
+                Icon(AppIcons.filePdf,
+                    size: 22, color: AppColors.accentText(context)),
+                const SizedBox(width: Spacing.md),
+                Expanded(
+                  child: Text(S.of(context).exportMonthlyTitle,
+                      style: TextStyle(
+                          fontSize: TypographyTokens.cardTitleSize,
+                          fontWeight: TypographyTokens.cardTitleWeight,
+                          color: AppColors.tp(context))),
+                ),
+              ]),
+              const SizedBox(height: Spacing.md),
+              Text(
+                S.of(context).exportMonthlyDesc,
+                style: TextStyle(
+                    fontSize: TypographyTokens.amountSmallSize,
+                    color: AppColors.ts(context)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Icon(AppIcons.filePdf,
-                        size: 24, color: AppColors.accent),
-                    const SizedBox(width: 12),
-                    Text(S.of(context).exportMonthlyTitle,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.tp(context))),
-                  ]),
-                  const SizedBox(height: 12),
-                  Text(
-                    S.of(context).exportMonthlyDesc,
-                    style: TextStyle(
-                        fontSize: 13, color: AppColors.ts(context)),
-                  ),
-                  const SizedBox(height: 20),
-                  // Month selector
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(AppIcons.caretLeft),
-                        onPressed: () =>
-                            setState(() => _selectedMonthsBack++),
-                      ),
-                      Text(monthLabel,
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.tp(context))),
-                      IconButton(
-                        icon: const Icon(AppIcons.caretRight),
-                        onPressed: _selectedMonthsBack > 0
-                            ? () =>
-                                setState(() => _selectedMonthsBack--)
-                            : null,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    onPressed: _exporting ? null : _export,
-                    icon: _exporting
-                        ? SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                                color: AppColors.onAccent, strokeWidth: 2))
-                        : const Icon(AppIcons.shareNetwork, size: 18),
-                    label: Text(
-                        _exporting ? S.of(context).exportGenerating : S.of(context).exportGenerateShare),
-                  ),
-                ],
+              const SizedBox(height: Spacing.lg),
+              // The same month navigator as Reports.
+              MonthNav(
+                label: monthLabel,
+                onPrev: () => setState(() => _selectedMonthsBack++),
+                onNext: _selectedMonthsBack > 0
+                    ? () => setState(() => _selectedMonthsBack--)
+                    : null,
               ),
-            ),
-          ],
+              const SizedBox(height: Spacing.lg),
+              FilledButton.icon(
+                onPressed: _exporting ? null : _export,
+                icon: _exporting
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            color: AppColors.onAccent, strokeWidth: 2))
+                    : const Icon(AppIcons.shareNetwork, size: 18),
+                label: Text(_exporting
+                    ? S.of(context).exportGenerating
+                    : S.of(context).exportGenerateShare),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Future<void> _export() async {
-    final uncategorized = S.of(context).commonUncategorized;
+    final s = S.of(context);
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final messenger = ScaffoldMessenger.of(context);
+    final uncategorized = s.commonUncategorized;
+    final fileName =
+        'budgetseal_report_${DateFormat('yyyy_MM').format(_month)}.html';
+    File? file;
     setState(() => _exporting = true);
     try {
       final entries =
@@ -137,9 +123,10 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       final baseCurrency = household?.baseCurrency ?? 'USD';
       final householdName = household?.name ?? 'BudgetSeal';
 
+      // [start, end): a transaction at 00:00 on the 1st belongs here.
       final filtered = entries
           .where((e) =>
-              e.tx.createdAt.isAfter(_month) &&
+              !e.tx.createdAt.isBefore(_month) &&
               e.tx.createdAt.isBefore(_monthEnd))
           .toList();
 
@@ -148,12 +135,18 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       final catSpend = <String, double>{};
 
       for (final e in filtered) {
+        // Lines without a real rate to the base currency are left out, as
+        // everywhere else in Reports.
         double baseAmt = 0;
         if (e.lines.isNotEmpty) {
           for (final l in e.lines) {
+            if (!isRealRate(l.currency, baseCurrency, l.exchangeRateToBase)) {
+              continue;
+            }
             baseAmt += l.amount * l.exchangeRateToBase;
           }
-        } else {
+        } else if (isRealRate(
+            e.tx.currency, baseCurrency, e.tx.exchangeRateToBase)) {
           baseAmt = e.tx.amount * e.tx.exchangeRateToBase;
         }
         if (e.tx.type == 'income') totalIncome += baseAmt;
@@ -174,6 +167,8 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       final net = totalIncome - totalExpense;
 
       final html = _buildHtml(
+        s: s,
+        rtl: rtl,
         householdName: householdName,
         monthLabel: monthLabel,
         baseCurrency: baseCurrency,
@@ -183,60 +178,68 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
         categoryBreakdown: sortedCats,
         transactions: filtered,
         categoryMap: categoryMap,
-        spendingByCatLabel: S.of(context).exportSpendingByCat,
       );
 
       final tempDir = await getTemporaryDirectory();
-      final fileName =
-          'budgetseal_report_${DateFormat('yyyy_MM').format(_month)}.html';
-      final file = File('${tempDir.path}/$fileName');
+      file = File('${tempDir.path}/$fileName');
       await file.writeAsString(html);
 
       if (mounted) {
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(file.path)],
-            text: 'BudgetSeal Report - $monthLabel',
+            text: s.exportShareText(monthLabel),
           ),
         );
       }
+    } catch (e) {
+      debugPrint('[ExportReport] Failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(s.exportReportFailed),
+        behavior: SnackBarBehavior.floating,
+      ));
     } finally {
       if (mounted) setState(() => _exporting = false);
       // Clean up temp file after sharing
       try {
-        final tempDir = await getTemporaryDirectory();
-        final fileName =
-            'budgetseal_report_${DateFormat('yyyy_MM').format(_month)}.html';
-        final file = File('${tempDir.path}/$fileName');
-        if (file.existsSync()) await file.delete();
+        if (file != null && file.existsSync()) await file.delete();
       } catch (_) {}
     }
   }
 
   String _buildHtml({
+    required S s,
+    required bool rtl,
     required String householdName,
     required String monthLabel,
     required String baseCurrency,
     required double totalIncome,
     required double totalExpense,
-    required String spendingByCatLabel,
     required double net,
     required List<MapEntry<String, double>> categoryBreakdown,
     required List<TransactionEntry> transactions,
-    required Map<String, dynamic> categoryMap,
+    required Map<String, Category> categoryMap,
   }) {
+    String typeLabel(String type) => switch (type) {
+          'income' => s.typeIncome,
+          'transfer' => s.typeTransfer,
+          _ => s.typeExpense,
+        };
+    final start = rtl ? 'right' : 'left';
+    final end = rtl ? 'left' : 'right';
+
     final txRows = transactions.map((e) {
       final tx = e.tx;
       final cat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
-      final catName = cat != null ? (cat as Category).name : '';
-      final color = tx.type == 'income' ? '#10B981' : tx.type == 'expense' ? '#EF4444' : '#6366F1';
+      final catName = _escHtml(cat?.name ?? '');
+      final color = tx.type == 'income' ? '#059669' : tx.type == 'expense' ? '#DC2626' : '#6577E0';
       return '''
         <tr>
           <td>${formatDate(tx.createdAt.toLocal())}</td>
-          <td>${tx.note.isNotEmpty ? _escHtml(tx.note) : catName}</td>
+          <td>${tx.note.isNotEmpty ? _escHtml(visibleNote(tx.note)) : catName}</td>
           <td>$catName</td>
-          <td>${_capitalize(tx.type)}</td>
-          <td style="color:$color;font-weight:600;text-align:right">${formatSignedAmount(tx.amount, currency: baseCurrency, type: tx.type)}</td>
+          <td>${typeLabel(tx.type)}</td>
+          <td style="color:$color;font-weight:600;text-align:$end">${formatSignedAmount(tx.amount, currency: baseCurrency, type: tx.type)}</td>
         </tr>''';
     }).join('\n');
 
@@ -247,18 +250,21 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       return '''
         <tr>
           <td>${_escHtml(e.key)}</td>
-          <td style="text-align:right">${formatAmount(e.value, currency: baseCurrency)}</td>
-          <td style="text-align:right">$pct%</td>
+          <td style="text-align:$end">${formatAmount(e.value, currency: baseCurrency)}</td>
+          <td style="text-align:$end">$pct%</td>
         </tr>''';
     }).join('\n');
 
+    final name = _escHtml(householdName);
+    final subtitle = _escHtml(s.exportHtmlSubtitle(monthLabel));
+
     return '''
 <!DOCTYPE html>
-<html>
+<html dir="${rtl ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>$householdName - $monthLabel Report</title>
+<title>$name – $subtitle</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #1a1a2e; }
   h1 { font-size: 24px; margin-bottom: 4px; }
@@ -266,56 +272,53 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
   .subtitle { color: #64748b; font-size: 14px; }
   .summary { display: flex; gap: 24px; margin: 20px 0; }
   .summary-card { flex: 1; padding: 16px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
-  .summary-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; }
+  .summary-card .label { font-size: 12px; color: #64748b; }
   .summary-card .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
-  .income { color: #10B981; }
-  .expense { color: #EF4444; }
-  .net { color: ${net >= 0 ? '#10B981' : '#EF4444'}; }
+  .income { color: #059669; }
+  .expense { color: #DC2626; }
+  .net { color: ${net >= 0 ? '#059669' : '#DC2626'}; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 8px 12px; background: #f1f5f9; font-weight: 600; font-size: 11px; text-transform: uppercase; color: #64748b; }
+  th { text-align: $start; padding: 8px 12px; background: #f1f5f9; font-weight: 600; font-size: 11px; color: #64748b; }
   td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; }
   .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; }
 </style>
 </head>
 <body>
-<h1>$householdName</h1>
-<p class="subtitle">Monthly Report &mdash; $monthLabel</p>
+<h1>$name</h1>
+<p class="subtitle">$subtitle</p>
 
 <div class="summary">
   <div class="summary-card">
-    <div class="label">Income</div>
+    <div class="label">${s.typeIncome}</div>
     <div class="value income">${formatSignedAmount(totalIncome, currency: baseCurrency, type: 'income')}</div>
   </div>
   <div class="summary-card">
-    <div class="label">Expenses</div>
+    <div class="label">${s.dashboardLabelExpenses}</div>
     <div class="value expense">${formatSignedAmount(totalExpense, currency: baseCurrency, type: 'expense')}</div>
   </div>
   <div class="summary-card">
-    <div class="label">Net</div>
+    <div class="label">${s.dashboardLabelNet}</div>
     <div class="value net">${formatSignedAmount(net.abs(), currency: baseCurrency, type: net >= 0 ? 'income' : 'expense')}</div>
   </div>
 </div>
 
-<h2>$spendingByCatLabel</h2>
+<h2>${s.exportSpendingByCat}</h2>
 <table>
-  <thead><tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">%</th></tr></thead>
+  <thead><tr><th>${s.commonCategory}</th><th style="text-align:$end">${s.commonAmount}</th><th style="text-align:$end">%</th></tr></thead>
   <tbody>$catRows</tbody>
 </table>
 
-<h2>Transactions (${transactions.length})</h2>
+<h2>${s.exportHtmlTransactions(transactions.length)}</h2>
 <table>
-  <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th style="text-align:right">Amount</th></tr></thead>
+  <thead><tr><th>${s.txDetailDate}</th><th>${s.importColDescription}</th><th>${s.commonCategory}</th><th>${s.acctTypeSection}</th><th style="text-align:$end">${s.commonAmount}</th></tr></thead>
   <tbody>$txRows</tbody>
 </table>
 
-<div class="footer">Generated by BudgetSeal &mdash; ${formatDate(DateTime.now())}</div>
+<div class="footer">${s.exportHtmlFooter(formatDate(DateTime.now()))}</div>
 </body>
 </html>''';
   }
 
   String _escHtml(String s) =>
       s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-
-  String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }

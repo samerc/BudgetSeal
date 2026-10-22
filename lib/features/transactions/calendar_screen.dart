@@ -10,6 +10,7 @@ import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
@@ -18,7 +19,10 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 import 'widgets/tx_tile.dart';
+import 'widgets/tx_ui.dart';
+import '../../shared/utils/calendar_days.dart';
 
 /// More › Calendar (also the Recurring screen's calendar button): the month
 /// as a grid. Past days show what they cost (base currency, like Activity's
@@ -136,7 +140,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(tr.calendarTitle)),
       body: entriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(child: SkeletonList()),
         error: (e, _) => ErrorRetry(
           message: tr.commonCouldntLoadData,
           details: '$e',
@@ -152,7 +156,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           final selectedBills = bills[_selected.day] ?? const [];
           final canAdd = !_selected.isAfter(_today);
           String f(double v) => formatAmount(v, currency: base);
-          return ListView(
+          return RefreshIndicator(
+            onRefresh: () async {
+              final key = (year: _month.year, month: _month.month);
+              await _loadBills();
+              if (isFutureMonth) return;
+              ref.invalidate(monthlyTransactionsProvider(key));
+              await ref.read(monthlyTransactionsProvider(key).future);
+            },
+            child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
             children: [
               _MonthHeader(
@@ -205,7 +218,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       bill: b.bill,
                       amount: b.amount,
                       category: categoryMap[b.bill.categoryId],
-                      daysUntil: _selected.difference(_today).inDays,
+                      daysUntil: calendarDaysBetween(_today, _selected),
                     ),
                 ],
               ),
@@ -223,6 +236,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ],
             ],
+          ),
           );
         },
       ),
@@ -264,14 +278,6 @@ class _Day {
   final entries = <TransactionEntry>[];
 }
 
-String _capitalized(String s) =>
-    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
-
-/// Upcoming bills' calm blue (upcoming_bills_screen.dart), for days with
-/// bills due.
-Color _billColor() =>
-    AppColors.isDark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2);
-
 /// A short amount for a cell: 26, 1.2K, 2.3M (the user's decimal mark).
 String _short(double v) {
   String one(double x) {
@@ -305,7 +311,7 @@ class _MonthHeader extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsetsDirectional.only(start: 4),
           child: Text(
-            _capitalized(DateFormat.yMMMM().format(month)),
+            capitalizedFirst(DateFormat.yMMMM().format(month)),
             style: TextStyle(
               fontFamily: TypographyTokens.displayFamily,
               fontSize: 22,
@@ -331,7 +337,7 @@ class _MonthHeader extends StatelessWidget {
 /// what it cost (or "+income" on a day with income only); today and later
 /// show the bills due, in the bills' blue. Today has an accent ring; the
 /// selected day is filled.
-class _MonthGrid extends StatelessWidget {
+class _MonthGrid extends ConsumerWidget {
   final DateTime month;
   final DateTime today;
   final DateTime selected;
@@ -350,7 +356,7 @@ class _MonthGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final firstWeekday =
         MaterialLocalizations.of(context).firstDayOfWeekIndex; // 0 = Sunday
     final lead =
@@ -358,14 +364,11 @@ class _MonthGrid extends StatelessWidget {
     final count = DateTime(month.year, month.month + 1, 0).day;
     final rows = ((lead + count) / 7).ceil();
     final weekdayNames = DateFormat.E().dateSymbols.NARROWWEEKDAYS;
+    final incomeColor = ref.watch(txColorsProvider).income;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Column(children: [
         Row(children: [
           for (var i = 0; i < 7; i++)
@@ -386,13 +389,14 @@ class _MonthGrid extends StatelessWidget {
         for (var r = 0; r < rows; r++)
           Row(children: [
             for (var c = 0; c < 7; c++)
-              Expanded(child: _cell(context, r * 7 + c - lead + 1, count)),
+              Expanded(child: _cell(context, r * 7 + c - lead + 1, count, incomeColor)),
           ]),
       ]),
     );
   }
 
-  Widget _cell(BuildContext context, int day, int count) {
+  Widget _cell(
+      BuildContext context, int day, int count, Color incomeColor) {
     if (day < 1 || day > count) return const SizedBox(height: 56);
     final date = DateTime(month.year, month.month, day);
     final isToday = date == today;
@@ -411,13 +415,13 @@ class _MonthGrid extends StatelessWidget {
       labelColor = AppColors.ts(context);
     } else if (d != null && d.income >= 0.005) {
       label = '+${_short(d.income)}';
-      labelColor = AppColors.healthy;
+      labelColor = incomeColor;
     } else if (due != null) {
       // Bills can be in other currencies: the amount only when one bill.
       label = due.length == 1 && dueTotal > 0
           ? _short(dueTotal)
           : '•' * due.length.clamp(1, 3);
-      labelColor = _billColor();
+      labelColor = AppColors.billUpcoming;
     }
 
     return Padding(
@@ -488,14 +492,8 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final edge = AppColors.cardBorder(context);
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-        border: edge == Colors.transparent ? null : Border.all(color: edge),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -533,12 +531,12 @@ class _DayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tr = S.of(context);
-    final diff = today.difference(day).inDays;
+    final diff = calendarDaysBetween(day, today);
     final name = diff == 0
         ? tr.commonToday
         : diff == 1
             ? tr.commonYesterday
-            : _capitalized(DateFormat.EEEE().format(day));
+            : capitalizedFirst(DateFormat.EEEE().format(day));
     return _Card(
       header: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 4),
@@ -567,7 +565,7 @@ class _DayCard extends StatelessWidget {
             if (total.abs() >= 0.005)
               Text(
                 total > 0
-                    ? '+${formatAmount(total, currency: currency)}'
+                    ? bidiSafeAmount('+${formatAmount(total, currency: currency)}')
                     : formatAmount(total, currency: currency),
                 style: TextStyle(
                   fontFamily: TypographyTokens.displayFamily,
@@ -582,13 +580,23 @@ class _DayCard extends StatelessWidget {
       ),
       rows: rows.isEmpty
           ? [
+              // A quiet row in the card's row slot, not an empty state:
+              // the day card stays the same shape.
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 6, 16, 16),
-                child: Text(
-                  emptyText,
-                  style:
-                      TextStyle(fontSize: 13.5, color: AppColors.ts(context)),
-                ),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 14),
+                child: Row(children: [
+                  Icon(AppIcons.calendarBlank,
+                      size: 18, color: AppColors.th(context)),
+                  const SizedBox(width: Spacing.md),
+                  Expanded(
+                    child: Text(
+                      emptyText,
+                      style: TextStyle(
+                          fontSize: TypographyTokens.bodySize,
+                          color: AppColors.ts(context)),
+                    ),
+                  ),
+                ]),
               ),
             ]
           : rows,
@@ -598,7 +606,7 @@ class _DayCard extends StatelessWidget {
 
 /// A bill due on the selected day; tapping it opens Upcoming bills, where
 /// it can be paid or skipped.
-class _BillRow extends StatelessWidget {
+class _BillRow extends ConsumerWidget {
   final RecurringTransaction bill;
   final double amount;
   final Category? category;
@@ -611,7 +619,7 @@ class _BillRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tr = S.of(context);
     final isIncome = bill.type == 'income';
     final title = bill.title.isNotEmpty
@@ -652,7 +660,7 @@ class _BillRow extends StatelessWidget {
                       : daysUntil == 1
                           ? tr.upcomingDueTomorrow
                           : tr.upcomingDueInDays(daysUntil),
-                  style: TextStyle(fontSize: 12.5, color: _billColor()),
+                  style: TextStyle(fontSize: 12.5, color: AppColors.billUpcoming),
                 ),
               ],
             ),
@@ -660,14 +668,16 @@ class _BillRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             isIncome
-                ? '+${formatAmount(amount, currency: bill.currency)}'
+                ? bidiSafeAmount('+${formatAmount(amount, currency: bill.currency)}')
                 : formatAmount(amount, currency: bill.currency),
             style: TextStyle(
               fontFamily: TypographyTokens.displayFamily,
               fontSize: 16,
               fontWeight: FontWeight.w700,
               fontFeatures: const [FontFeature.tabularFigures()],
-              color: isIncome ? AppColors.healthy : AppColors.tp(context),
+              color: isIncome
+                  ? ref.watch(txColorsProvider).income
+                  : AppColors.tp(context),
             ),
           ),
         ]),

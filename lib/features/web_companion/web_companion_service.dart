@@ -22,6 +22,7 @@ import 'web_companion_router.dart';
 // 6 hours — matches Android 15+ dataSync foreground service cap
 const _autoStopDuration = Duration(hours: 6);
 const _sessionPruneDuration = Duration(minutes: 30);
+const _wifiCheckInterval = Duration(seconds: 10);
 
 class WebCompanionService {
   final Ref _ref;
@@ -30,6 +31,8 @@ class WebCompanionService {
   HttpServer? _server;
   Timer? _autoStopTimer;
   Timer? _sessionPruneTimer;
+  Timer? _wifiWatchTimer;
+  int _wifiMisses = 0;
   ChangeFeed? _changes;
 
   WebCompanionService(this._ref);
@@ -85,6 +88,23 @@ class WebCompanionService {
       _sessionPruneTimer = Timer.periodic(_sessionPruneDuration, (_) {
         auth.pruneExpiredSessions();
       });
+
+      // Stop when the phone leaves that Wi-Fi: the server would keep
+      // listening on a dead address and the browser would just hang.
+      _wifiMisses = 0;
+      _wifiWatchTimer = Timer.periodic(_wifiCheckInterval, (_) async {
+        if (_server == null) return;
+        final now = await wifiIp();
+        // Two misses in a row (~20 s), so a brief roam doesn't stop it.
+        _wifiMisses = now == ip ? 0 : _wifiMisses + 1;
+        if (_wifiMisses < 2) return;
+        try {
+          await stop();
+        } catch (e) {
+          debugPrint('[WebCompanion] Stop after Wi-Fi loss failed: $e');
+        }
+        notifier.setError(currentS().wcStoppedNoWifi);
+      });
     } catch (e) {
       // Usually the port is still held by a previous run; details stay in
       // the log, the user gets a sentence.
@@ -101,6 +121,8 @@ class WebCompanionService {
     _autoStopTimer = null;
     _sessionPruneTimer?.cancel();
     _sessionPruneTimer = null;
+    _wifiWatchTimer?.cancel();
+    _wifiWatchTimer = null;
 
     auth.revokeAllSessions();
 

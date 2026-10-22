@@ -21,6 +21,13 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 
 enum _SortMode { mostUsed, alphabetical, newest, amount }
 enum _GroupMode { none, type, category }
@@ -35,6 +42,7 @@ class TemplatesScreen extends ConsumerStatefulWidget {
 class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   List<TransactionTemplate> _templates = [];
   bool _loading = true;
+  bool _loadFailed = false;
   String _search = '';
   String? _typeFilter; // null = all, 'expense', 'income'
   _SortMode _sort = _SortMode.mostUsed;
@@ -60,15 +68,29 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     try {
       final db = ref.read(databaseProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
       final items = await (db.select(db.transactionTemplates)
             ..where((t) => t.householdId.equals(householdId))
             ..where((t) => t.deleted.equals(false)))
           .get();
-      if (mounted) setState(() { _templates = items; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _templates = items;
+          _loading = false;
+          _loadFailed = false;
+        });
+      }
     } catch (e) {
       debugPrint('[Templates] Error loading: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadFailed = true;
+        });
+      }
     }
   }
 
@@ -158,44 +180,32 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
 
   Future<void> _delete(String id) async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(tr.tmplDeleteTitle),
-        content: Text(tr.tmplDeleteMsg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonDelete),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.tmplDeleteTitle,
+      message: tr.tmplDeleteMsg,
+      confirmLabel: tr.commonDelete,
     );
-    if (confirmed == true) {
-      try {
-        final db = ref.read(databaseProvider);
-        await (db.update(db.transactionTemplates)
-              ..where((t) => t.id.equals(id)))
-            .write(TransactionTemplatesCompanion(
-                deleted: const Value(true),
-                lastModified: Value(DateTime.now())));
-        _load();
-      } catch (e) {
-        debugPrint('[Templates] Error deleting: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(S.of(context).tmplDeleteError),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
+    if (!confirmed || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.transactionTemplates)
+            ..where((t) => t.id.equals(id)))
+          .write(TransactionTemplatesCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
+      _load();
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.tmplDeleted),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (e) {
+      debugPrint('[Templates] Error deleting: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.tmplDeleteError),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -208,124 +218,137 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     final txColors = ref.watch(txColorsProvider);
     final filtered = _filtered;
 
+    final Widget listSliver;
+    if (_loading) {
+      listSliver = const SliverToBoxAdapter(child: SkeletonList());
+    } else if (_loadFailed) {
+      listSliver = SliverFillRemaining(
+        hasScrollBody: false,
+        child: ErrorRetry(
+          message: S.of(context).commonCouldntLoadData,
+          onRetry: () {
+            setState(() => _loading = true);
+            _load();
+          },
+        ),
+      );
+    } else if (_templates.isEmpty) {
+      listSliver = SliverFillRemaining(
+        hasScrollBody: false,
+        child: EmptyState(
+          icon: AppIcons.lightning,
+          title: S.of(context).tmplNoTitle,
+          subtitle: S.of(context).tmplNoSubtitle,
+        ),
+      );
+    } else if (filtered.isEmpty) {
+      listSliver = SliverFillRemaining(
+        hasScrollBody: false,
+        child: EmptyState(
+          icon: AppIcons.magnifyingGlassMinus,
+          title: _search.isNotEmpty
+              ? S.of(context).tmplNoMatch(_search)
+              : S.of(context).tmplNoTitle,
+        ),
+      );
+    } else {
+      listSliver = SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+        sliver: SliverList(
+          delegate: SliverChildListDelegate(_group == _GroupMode.none
+              ? _buildFlatList(filtered, catMap, acctMap, txColors)
+              : _buildGroupedList(filtered, catMap, acctMap, txColors)),
+        ),
+      );
+    }
+
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Header ───────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(AppIcons.arrowLeft),
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(S.of(context).tmplTitle,
-                          style: TextStyle(
-                              fontSize: TypographyTokens.screenTitleSize,
-                              fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.tp(context))),
-                    ),
-                  ),
-                  // Sort button
-                  PopupMenuButton<_SortMode>(
-                    icon: Icon(AppIcons.sortAscending,
-                        color: AppColors.ts(context)),
-                    tooltip: S.of(context).tmplSortTooltip,
-                    onSelected: (v) => setState(() => _sort = v),
-                    itemBuilder: (_) => [
-                      _sortItem(_SortMode.mostUsed, S.of(context).tmplSortMostUsed),
-                      _sortItem(_SortMode.alphabetical, S.of(context).tmplSortAz),
-                      _sortItem(_SortMode.newest, S.of(context).tmplSortNewest),
-                      _sortItem(_SortMode.amount, S.of(context).tmplSortHighest),
-                    ],
-                  ),
-                  // Group button
-                  PopupMenuButton<_GroupMode>(
-                    icon: Icon(AppIcons.circlesThree,
-                        color: AppColors.ts(context)),
-                    tooltip: S.of(context).tmplGroupTooltip,
-                    onSelected: (v) => setState(() => _group = v),
-                    itemBuilder: (_) => [
-                      _groupItem(_GroupMode.none, S.of(context).tmplGroupNone),
-                      _groupItem(_GroupMode.type, S.of(context).tmplGroupType),
-                      _groupItem(_GroupMode.category, S.of(context).tmplGroupCategory),
-                    ],
-                  ),
-                ],
-              ),
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(
+              title: S.of(context).tmplTitle,
+              back: true,
+              actions: [
+                // Sort button
+                PopupMenuButton<_SortMode>(
+                  icon: Icon(AppIcons.sortAscending,
+                      color: AppColors.ts(context)),
+                  tooltip: S.of(context).tmplSortTooltip,
+                  onSelected: (v) => setState(() => _sort = v),
+                  itemBuilder: (_) => [
+                    _sortItem(_SortMode.mostUsed, S.of(context).tmplSortMostUsed),
+                    _sortItem(_SortMode.alphabetical, S.of(context).tmplSortAz),
+                    _sortItem(_SortMode.newest, S.of(context).tmplSortNewest),
+                    _sortItem(_SortMode.amount, S.of(context).tmplSortHighest),
+                  ],
+                ),
+                // Group button
+                PopupMenuButton<_GroupMode>(
+                  icon: Icon(AppIcons.circlesThree,
+                      color: AppColors.ts(context)),
+                  tooltip: S.of(context).tmplGroupTooltip,
+                  onSelected: (v) => setState(() => _group = v),
+                  itemBuilder: (_) => [
+                    _groupItem(_GroupMode.none, S.of(context).tmplGroupNone),
+                    _groupItem(_GroupMode.type, S.of(context).tmplGroupType),
+                    _groupItem(_GroupMode.category, S.of(context).tmplGroupCategory),
+                  ],
+                ),
+              ],
             ),
             // ── Search + type filter ─────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: TextField(
-                onChanged: (v) => setState(() => _search = v),
-                textInputAction: TextInputAction.search,
-                style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
-                decoration: InputDecoration(
-                  hintText: S.of(context).tmplSearchHint,
-                  hintStyle: TextStyle(color: AppColors.th(context)),
-                  prefixIcon: Icon(AppIcons.magnifyingGlass,
-                      size: 20, color: AppColors.th(context)),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  isDense: true,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: TextField(
+                  onChanged: (v) => setState(() => _search = v),
+                  textInputAction: TextInputAction.search,
+                  style: TextStyle(fontSize: 14, color: AppColors.tp(context)),
+                  decoration: InputDecoration(
+                    hintText: S.of(context).tmplSearchHint,
+                    hintStyle: TextStyle(color: AppColors.th(context)),
+                    prefixIcon: Icon(AppIcons.magnifyingGlass,
+                        size: 20, color: AppColors.th(context)),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    isDense: true,
+                  ),
                 ),
               ),
             ),
             // Type chips
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-              child: Row(
-                children: [
-                  _typeChip(S.of(context).typeAll, null, txColors),
-                  const SizedBox(width: 8),
-                  _typeChip(S.of(context).typeExpense, 'expense', txColors),
-                  const SizedBox(width: 8),
-                  _typeChip(S.of(context).typeIncome, 'income', txColors),
-                ],
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                child: Row(
+                  children: [
+                    _typeChip(S.of(context).typeAll, null, txColors),
+                    const SizedBox(width: 8),
+                    _typeChip(S.of(context).typeExpense, 'expense', txColors),
+                    const SizedBox(width: 8),
+                    _typeChip(S.of(context).typeIncome, 'income', txColors),
+                  ],
+                ),
               ),
             ),
             // ── Summary ──────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: Text(
-                filtered.length == 1
-                    ? S.of(context).tmplCountOne(filtered.length)
-                    : S.of(context).tmplCountOther(filtered.length),
-                style: TextStyle(
-                    fontSize: 12, color: AppColors.ts(context)),
+            if (!_loading && !_loadFailed && filtered.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                  child: Text(
+                    filtered.length == 1
+                        ? S.of(context).tmplCountOne(filtered.length)
+                        : S.of(context).tmplCountOther(filtered.length),
+                    style: TextStyle(
+                        fontSize: TypographyTokens.captionSize,
+                        color: AppColors.ts(context)),
+                  ),
+                ),
               ),
-            ),
             // ── List ─────────────────────────────────────────────
-            Expanded(
-              child: _loading
-                  ? const SingleChildScrollView(
-              physics: NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.only(top: 8),
-              child: SkeletonList())
-                  : filtered.isEmpty
-                      ? EmptyState(
-                          icon: AppIcons.lightning,
-                          title: S.of(context).tmplNoTitle,
-                          subtitle: S.of(context).tmplNoSubtitle,
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _load,
-                          child: _group == _GroupMode.none
-                              ? _buildFlatList(
-                                  filtered, catMap, acctMap, txColors)
-                              : _buildGroupedList(
-                                  filtered, catMap, acctMap, txColors),
-                        ),
-            ),
+            listSliver,
           ],
         ),
       ),
@@ -337,21 +360,15 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     );
   }
 
-  Widget _buildFlatList(
+  List<Widget> _buildFlatList(
     List<TransactionTemplate> list,
     Map<String, Category> catMap,
     Map<String, Account> acctMap,
     TxColors txColors,
-  ) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-      itemCount: list.length,
-      itemBuilder: (_, i) =>
-          _buildTile(list[i], catMap, acctMap, txColors),
-    );
-  }
+  ) =>
+      [for (final t in list) _buildTile(t, catMap, acctMap, txColors)];
 
-  Widget _buildGroupedList(
+  List<Widget> _buildGroupedList(
     List<TransactionTemplate> list,
     Map<String, Category> catMap,
     Map<String, Account> acctMap,
@@ -367,38 +384,19 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       groups.putIfAbsent(key, () => []).add(t);
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-      children: groups.entries.map((entry) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(entry.key,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ts(context)),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  const SizedBox(width: 6),
-                  Text('${entry.value.length}',
-                      style: TextStyle(
-                          fontSize: 12, color: AppColors.th(context))),
-                ],
-              ),
-            ),
-            ...entry.value
-                .map((t) => _buildTile(t, catMap, acctMap, txColors)),
-          ],
-        );
-      }).toList(),
-    );
+    return [
+      for (final entry in groups.entries) ...[
+        SectionHeader(
+          entry.key,
+          padding: const EdgeInsetsDirectional.fromSTEB(4, 12, 4, 6),
+          trailing: Text('${entry.value.length}',
+              style: TextStyle(
+                  fontSize: TypographyTokens.captionSize,
+                  color: AppColors.th(context))),
+        ),
+        for (final t in entry.value) _buildTile(t, catMap, acctMap, txColors),
+      ],
+    ];
   }
 
   Widget _buildTile(
@@ -416,16 +414,16 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: GestureDetector(
-        onTap: () => _useTemplate(t),
-        onLongPress: () => _showTemplateActions(t),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.sf(context),
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-            boxShadow: AppColors.cardShadow(context),
-          ),
+      child: DecoratedBox(
+        decoration: AppColors.card(context),
+        child: Tappable(
+          onTap: () => _useTemplate(t),
+          onLongPress: () => _showTemplateActions(t),
+          borderRadius: CardTokens.borderRadius,
+          scaleFactor: 0.97,
+          haptic: true,
+          child: Padding(
+          padding: CardTokens.padding,
           child: Row(
             children: [
               // Category icon
@@ -433,7 +431,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 categoryName: cat?.name ?? t.title,
                 emoji: cat?.icon,
                 color: catColor,
-                size: 42,
+                size: CategoryIconTokens.listSize,
                 circular: true,
               ),
               const SizedBox(width: 14),
@@ -458,7 +456,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                           decoration: BoxDecoration(
                             color: AppColors.pastel(context, color,
                                 light: 0.85, dark: 0.78),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius:
+                                BorderRadius.circular(RadiusTokens.sm),
                           ),
                           child: Text(
                             _localizedType(t.type),
@@ -518,6 +517,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -530,6 +530,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            SheetTitle(t.title),
             ListTile(
               leading: Icon(AppIcons.play,
                   color: AppColors.accent),
@@ -567,27 +568,14 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   }
 
   Widget _typeChip(String label, String? type, TxColors txColors) {
-    final isSelected = _typeFilter == type;
-    final color = type == null
-        ? AppColors.accent
-        : txColors.forType(type);
-    return GestureDetector(
+    return AppChip(
+      label: label,
+      selected: _typeFilter == type,
+      color: type == null ? null : txColors.forType(type),
       onTap: () {
         hapticLight();
         setState(() => _typeFilter = type);
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected ? color : AppColors.pastel(context, color, light: 0.85, dark: 0.75),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.inkOn(color) : color)),
-      ),
     );
   }
 
@@ -644,8 +632,6 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
 
     final tr = S.of(context);
-    final tmplTextPrimary = AppColors.tp(context);
-    final tmplTextSecondary = AppColors.ts(context);
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -667,19 +653,12 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 16),
-                  Text(existing != null ? tr.tmplEditTitle : tr.tmplNewTitle,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: tmplTextPrimary)),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr.tmplNewDesc,
-                    style: TextStyle(
-                        fontSize: 13, color: tmplTextSecondary),
+                  SheetTitle(
+                    existing != null ? tr.tmplEditTitle : tr.tmplNewTitle,
+                    subtitle: tr.tmplNewDesc,
+                    padding: const EdgeInsetsDirectional.only(
+                        top: 4, bottom: 16),
                   ),
-                  const SizedBox(height: 20),
                   TextFormField(
                     controller: titleCtrl,
                     autofocus: existing == null,
@@ -767,6 +746,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                       if (householdId == null) return;
 
                       final db = ref.read(databaseProvider);
+                      try {
                       if (existing != null) {
                         await (db.update(db.transactionTemplates)
                               ..where((t) => t.id.equals(existing.id)))
@@ -804,11 +784,17 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                         );
                         Navigator.pop(ctx, true);
                       }
+                      } catch (e) {
+                        debugPrint('[Templates] Save failed: $e');
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                            content: Text(tr.commonSomethingWentWrong),
+                            behavior: SnackBarBehavior.floating,
+                          ));
+                        }
+                      }
                     },
-                    child: Text(tr.tmplSaveButton,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600)),
+                    child: Text(tr.tmplSaveButton),
                   ),
                 ],
               ),

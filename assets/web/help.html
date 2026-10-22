@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BudgetSeal — Help Guide</title>
+<title>BudgetSeal — Help guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -342,7 +342,7 @@
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <h2>BudgetSeal</h2>
-    <span>Help Guide</span>
+    <span>Help guide</span>
   </div>
 
   <div class="section-label">Getting Started</div>
@@ -390,7 +390,7 @@
 <!-- ── Content ── -->
 <main class="content">
 
-<h1>BudgetSeal Help Guide</h1>
+<h1>BudgetSeal help guide</h1>
 <p class="subtitle">Everything you need to know about managing your budget with BudgetSeal.</p>
 
 <!-- ══════════════════════════════════════════ -->
@@ -599,7 +599,7 @@
 <p>When you pick a category, BudgetSeal can automatically fill in the account, title, and amount from your last transaction with that category. Configure what gets auto-filled in <strong>Settings</strong> → <strong>Auto-fill</strong>.</p>
 
 <h3>Receipt Scanning</h3>
-<p>In Classic mode, tap the camera icon next to the title field to scan a receipt. The app uses offline OCR to extract text — no internet required. You can also attach receipt photos to any transaction.</p>
+<p>In Classic mode, tap the camera icon next to the title field to scan a receipt. The app uses offline OCR to extract text — no internet required. You can also attach receipt photos to any transaction; removing one asks first.</p>
 
 <h3>Duplicate Detection</h3>
 <p>If you try to save a transaction with the same amount, category, and date as an existing one, BudgetSeal will warn you. You can still save it if it's intentional.</p>
@@ -623,7 +623,7 @@
   <li><strong>Duplicate</strong> — select a single transaction and tap the copy icon (or ⋮ → Duplicate on its detail screen). Splits and transfers are copied with all their lines and accounts</li>
   <li><strong>No rate</strong> — an amber tag on a transaction means a foreign-currency amount was saved without an exchange rate, so totals and reports leave it out. Open it and add a rate, or set one in Settings → Exchange rates</li>
   <li><strong>Search</strong> — tap the search icon on the Activity tab. Searching (or setting a date range) looks through every month, not just the one open</li>
-  <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), account, category (includes its subcategories), date range, or amount range (<code>1,200</code> works). Active filters show as chips under the month tabs: tap × to remove one, or <strong>Clear all</strong></li>
+  <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), account, category (includes its subcategories), date range, or amount range (<code>1,200</code> works). Active filters show as chips under the month tabs: tap a chip to remove that filter, or <strong>Clear all</strong></li>
   <li><strong>See all</strong> — on an account or envelope, opens the Activity tab filtered to it across all months</li>
   <li><strong>Bulk changes</strong> — select transactions, then ⋮ for <strong>Select all</strong>, <strong>Change category</strong>, <strong>Change account</strong>, <strong>Change date</strong> or <strong>Export CSV</strong>. Envelope balances update; transfers only take a new date</li>
   <li><strong>Open from anywhere</strong> — tap a row in an envelope's activity, a transaction in a Reports category list, or a donut slice to drill in. The year picker goes back to your first transaction</li>
@@ -780,7 +780,7 @@
   <li>Tap <strong>Save</strong></li>
 </ol>
 
-<p>Recurring transactions are auto-posted when they're due — when the app opens and whenever you come back to it. A message tells you how many were posted. You can enable or disable them with the toggle switch.</p>
+<p>Recurring transactions are auto-posted when they're due — when the app opens and whenever you come back to it. A message tells you how many were posted. You can enable or disable them with the toggle switch. To delete one, tap it and choose <strong>Delete</strong> under Save.</p>
 
 <h3>Calendar</h3>
 <p>Go to <strong>More</strong> → <strong>Calendar</strong> (or the calendar button on Recurring) to see your month as a grid. Each past day shows what it cost; today and the days ahead show the bills due, in blue. Tap a day to see its transactions and bills — tap a bill to pay or skip it. To add a transaction on a past day, use <strong>Add on this day</strong> under the list, or double-tap the day.</p>
@@ -818,7 +818,7 @@
   <li><strong>Upcoming</strong> — next scheduled payment</li>
 </ul>
 
-<p>You can <strong>Pause</strong> (disable) or set a <strong>Cancellation Date</strong> from the detail screen.</p>
+<p>From the detail screen you can <strong>Pause</strong> it (it shows as <em>Paused</em> and stops billing until you resume it), set a <strong>cancellation date</strong> (it shows as <em>Cancelled</em> once that date has passed), or <strong>Delete</strong> it with the trash button — the payments it already recorded stay in your history.</p>
 
 <!-- ══════════════════════════════════════════ -->
 <h2 id="planned">Planned Payments</h2>
@@ -1184,6 +1184,7 @@
 <ul>
   <li>PIN is required — the page shows how many tries are left; 5 failed attempts lock the interface for 30 minutes</li>
   <li>Only devices on the same WiFi network can connect</li>
+  <li>It only starts on WiFi (not mobile data), and stops by itself about 20 seconds after your phone leaves the WiFi</li>
   <li>While the server runs, the phone shows how many browsers have the page open (a green dot when at least one does). <strong>Sign out all</strong> ends every browser session at once — open pages go straight back to the PIN screen. Changing the PIN does the same.</li>
   <li>Server stops automatically after 6 hours</li>
   <li>On Android, the server runs in the background (you can lock your phone)</li>
@@ -1216,7 +1217,7 @@
   <tr><td><strong>Accent color</strong></td><td>Gold (default), Wax red, Copper, Sage, Teal, Sapphire, Plum or Rose — each color has a bright tone for dark mode and a deeper one for light mode, so text stays readable in both. Or System (Material You on Android 12+).</td></tr>
   <tr><td><strong>Font</strong></td><td>Plus Jakarta Sans (default), DM Sans, Inter, Nunito Sans, Poppins, Nunito, Rubik, Space Grotesk</td></tr>
   <tr><td><strong>Text size</strong></td><td>Small, Default, Large, Extra Large</td></tr>
-  <tr><td><strong>Transaction colors</strong></td><td>Custom colors for Income, Expense, and Transfer</td></tr>
+  <tr><td><strong>Transaction colors</strong></td><td>Colors for income, expense and transfer amounts — green and red by default. Your choice applies everywhere amounts are colored: Activity, Home, Reports, accounts, bills and the calendar</td></tr>
   <tr><td><strong>Entry mode</strong></td><td>Assisted (step-by-step) or Classic (single form)</td></tr>
   <tr><td><strong>Start screen</strong></td><td>Which tab opens when you launch the app</td></tr>
   <tr><td><strong>Transaction list</strong></td><td>Layout style, date banner totals, account labels, category icons, time display</td></tr>

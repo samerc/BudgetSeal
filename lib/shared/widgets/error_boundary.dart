@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
-import '../../shared/theme/app_icons.dart';
+import 'error_retry.dart';
 
 /// Catches build-phase errors in child widgets and shows a friendly
 /// fallback instead of a red/grey crash screen.
@@ -37,51 +37,26 @@ class _FallbackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The app's one error look (ErrorRetry, styled like EmptyState), plus a
+    // way back.
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(AppIcons.warning,
-                  size: 56, color: Theme.of(context).colorScheme.error),
-              const SizedBox(height: 16),
-              Text(
-                S.of(context).commonSomethingWentWrong,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                S.of(context).commonErrorDesc,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(AppIcons.arrowClockwise, size: 18),
-                label: Text(S.of(context).commonTryAgain),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: Text(S.of(context).commonGoBack),
-              ),
-            ],
-          ),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ErrorRetry(
+              message: S.of(context).commonErrorDesc,
+              onRetry: onRetry,
+            ),
+            TextButton(
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text(S.of(context).commonGoBack),
+            ),
+          ],
         ),
       ),
     );

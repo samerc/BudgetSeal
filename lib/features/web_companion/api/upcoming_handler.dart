@@ -14,6 +14,7 @@ import '../../../core/providers/household_provider.dart';
 import '_serializers.dart';
 import '_validation.dart';
 import 'transactions_handler.dart' show parseWebDate;
+import '../../../shared/utils/calendar_days.dart';
 
 // Upcoming bills (enabled recurring items and subscriptions, every occurrence
 // in the window) and planned payments (transactions with status 'planned',
@@ -72,7 +73,7 @@ Handler upcomingBillsHandler(Ref ref) {
             ...recurringToJson(r, cats, accts),
             'occurrence': i,
             'dueDate': due.toIso8601String(),
-            'daysUntil': day.difference(today).inDays,
+            'daysUntil': calendarDaysBetween(today, day),
             'amount': recurringAmountOn(r, due),
             'accountCurrency': accts[r.accountId]?.currency,
           });

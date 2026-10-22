@@ -2027,7 +2027,7 @@ class SEn extends S {
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override
-  String get allocNoArchived => 'No archived envelopes.';
+  String get allocNoArchived => 'No archived envelopes';
 
   @override
   String allocUnarchived(String name) {
@@ -3077,12 +3077,6 @@ class SEn extends S {
   }
 
   @override
-  String get billGoBackBtn => 'Go back';
-
-  @override
-  String get billContinueAnyway => 'Continue anyway';
-
-  @override
   String get txFormCouldNotSave =>
       'Could not save transaction. Please try again.';
 
@@ -3301,7 +3295,7 @@ class SEn extends S {
   String get allocApplyRevaluation => 'Apply revaluation';
 
   @override
-  String get allocArchiveTitle => 'Archive envelope';
+  String get allocArchiveTitle => 'Archive envelope?';
 
   @override
   String get allocArchiveMsg =>
@@ -3311,7 +3305,7 @@ class SEn extends S {
   String get allocArchived => 'Envelope archived';
 
   @override
-  String get allocDeleteTitle => 'Delete envelope';
+  String get allocDeleteTitle => 'Delete envelope?';
 
   @override
   String get allocArchiveInstead => 'Archive instead';
@@ -3491,7 +3485,7 @@ class SEn extends S {
       'Deleting will:\n  • Unlink all categories from this envelope\n  • Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.';
 
   @override
-  String get allocDeleteNoLinksTitle => 'Delete envelope permanently';
+  String get allocDeleteNoLinksTitle => 'Delete envelope?';
 
   @override
   String get allocDeleteNoLinksMsg =>
@@ -3585,8 +3579,7 @@ class SEn extends S {
   String get fundCouldntLoad => 'Couldn\'t load envelopes';
 
   @override
-  String get fundNoAllocations =>
-      'No allocations to fund.\nCreate allocations first.';
+  String get fundNoAllocations => 'No envelopes to fund';
 
   @override
   String get fundHowTitle => 'How does funding work?';
@@ -3958,7 +3951,7 @@ class SEn extends S {
   String get catArchived => 'Category archived';
 
   @override
-  String get catDeleteTitle => 'Delete category';
+  String get catDeleteTitle => 'Delete category?';
 
   @override
   String get catDeleteNoTx =>
@@ -4143,9 +4136,6 @@ class SEn extends S {
   String get subDetailScheduled => 'scheduled';
 
   @override
-  String get subDetailCancelTitle => 'Cancel subscription';
-
-  @override
   String get tmplTitle => 'Templates';
 
   @override
@@ -4320,9 +4310,6 @@ class SEn extends S {
   String get objColorSection => 'Color';
 
   @override
-  String get objDeleteTitle => 'Delete objective';
-
-  @override
   String get objCannotUndo => 'This cannot be undone.';
 
   @override
@@ -4361,9 +4348,6 @@ class SEn extends S {
   @override
   String get objIntro =>
       'Goals track savings toward a target. Loans track money you lent or borrowed.';
-
-  @override
-  String get objCreateFirst => 'Create your first goal';
 
   @override
   String objDeleteLinkedPayments(int count) {
@@ -4861,7 +4845,7 @@ class SEn extends S {
   String get tileBillSplitter => 'Bill splitter';
 
   @override
-  String get tileHelpGuide => 'Help Guide';
+  String get tileHelpGuide => 'Help guide';
 
   @override
   String get settingsHelpSub => 'How to use BudgetSeal';
@@ -6250,7 +6234,7 @@ class SEn extends S {
 
   @override
   String get onboardHelpHint =>
-      'Need help? Check our guide anytime from More > Help Guide.';
+      'Need help? Check our guide anytime from More > Help guide.';
 
   @override
   String get lockSetupReason => 'Set up a screen lock to protect BudgetSeal';
@@ -6624,7 +6608,7 @@ class SEn extends S {
   String get subCouldNotUpdate => 'Could not update subscription';
 
   @override
-  String get helpGuideTitle => 'Help Guide';
+  String get helpGuideTitle => 'Help guide';
 
   @override
   String get receiptTakePhoto => 'Take photo';
@@ -6933,9 +6917,6 @@ class SEn extends S {
   String get plannedPostFailed => 'Failed to post payment';
 
   @override
-  String get plannedPostAllTitle => 'Post all payments';
-
-  @override
   String plannedPostAllContent(int count, String month) {
     return 'Post all $count planned payments for $month?';
   }
@@ -6952,9 +6933,6 @@ class SEn extends S {
   String plannedPostAllResultPartial(int posted, int failed) {
     return '$posted posted, $failed failed';
   }
-
-  @override
-  String get plannedDeleteTitle => 'Delete planned payment';
 
   @override
   String get plannedDeleteContent =>
@@ -7043,7 +7021,7 @@ class SEn extends S {
   String get tileArabicDigits => 'Arabic-Indic numerals';
 
   @override
-  String get upgradeTitle => 'Upgrade to Premium';
+  String get upgradeTitle => 'Upgrade to premium';
 
   @override
   String get upgradeSubtitle =>
@@ -7524,4 +7502,327 @@ class SEn extends S {
 
   @override
   String get billPersonName => 'Name';
+
+  @override
+  String get emojiGroupFood => 'Food & drink';
+
+  @override
+  String get emojiGroupTransport => 'Transport';
+
+  @override
+  String get emojiGroupHome => 'Home & bills';
+
+  @override
+  String get emojiGroupShopping => 'Shopping';
+
+  @override
+  String get emojiGroupHealth => 'Health & fitness';
+
+  @override
+  String get emojiGroupEntertainment => 'Entertainment';
+
+  @override
+  String get emojiGroupWork => 'Education & work';
+
+  @override
+  String get emojiGroupMoney => 'Money';
+
+  @override
+  String get emojiGroupFamily => 'Family & pets';
+
+  @override
+  String get emojiGroupTravel => 'Travel & leisure';
+
+  @override
+  String get emojiGroupOther => 'Other';
+
+  @override
+  String tmplNoMatch(String query) {
+    return 'No templates match \"$query\"';
+  }
+
+  @override
+  String get tmplDeleted => 'Template deleted';
+
+  @override
+  String get allocDeleted => 'Envelope deleted';
+
+  @override
+  String get allocOrderSaved => 'Order saved';
+
+  @override
+  String get leftoverResolved => 'Leftover resolved';
+
+  @override
+  String get periodTransitionDone => 'New period ready';
+
+  @override
+  String catEnvelopeLinked(String name) {
+    return 'Linked to $name';
+  }
+
+  @override
+  String get catEnvelopeUnlinked => 'Envelope unlinked';
+
+  @override
+  String get txDetailRemoveReceiptTitle => 'Remove this receipt?';
+
+  @override
+  String get txDetailRemoveReceiptBody =>
+      'The photo will be deleted from this transaction.';
+
+  @override
+  String get txDetailReceiptRemoved => 'Receipt removed';
+
+  @override
+  String get txExportFailed => 'Couldn\'t export the transactions';
+
+  @override
+  String get acctDeleteConfirmTitle => 'Delete account?';
+
+  @override
+  String get acctArchiveConfirmTitle => 'Archive account?';
+
+  @override
+  String get acctUnarchiveConfirmTitle => 'Unarchive account?';
+
+  @override
+  String acctArchivedSnack(String name) {
+    return '$name archived';
+  }
+
+  @override
+  String acctDeletedSnack(String name) {
+    return '$name deleted';
+  }
+
+  @override
+  String get acctSaveFailed => 'Couldn\'t save the account';
+
+  @override
+  String get acctAdjustFailed => 'Couldn\'t adjust the balance';
+
+  @override
+  String get customizeResetDone => 'Dashboard layout reset';
+
+  @override
+  String get exportReportFailed => 'Couldn\'t create the report';
+
+  @override
+  String exportShareText(String month) {
+    return 'BudgetSeal report – $month';
+  }
+
+  @override
+  String exportHtmlSubtitle(String month) {
+    return 'Monthly report – $month';
+  }
+
+  @override
+  String exportHtmlTransactions(int count) {
+    return 'Transactions ($count)';
+  }
+
+  @override
+  String exportHtmlFooter(String date) {
+    return 'Generated by BudgetSeal – $date';
+  }
+
+  @override
+  String get reportsNothingThisMonth => 'Nothing recorded this month';
+
+  @override
+  String get reportsNothingThisMonthHint =>
+      'Swipe or use the arrows to see other months.';
+
+  @override
+  String get searchNoMatches => 'No matches';
+
+  @override
+  String get recurringNoExpenses => 'No recurring expenses';
+
+  @override
+  String get recurringNoIncome => 'No recurring income';
+
+  @override
+  String get recurringPausedSnack => 'Recurring transaction paused';
+
+  @override
+  String get recurringResumedSnack => 'Recurring transaction resumed';
+
+  @override
+  String get recurringUpdateFailed => 'Could not update recurring transaction';
+
+  @override
+  String get recurringDeleteFailed => 'Could not delete recurring transaction';
+
+  @override
+  String get recurringSaveFailed => 'Could not save recurring transaction';
+
+  @override
+  String get recurringLoadFailed => 'Could not load recurring transactions';
+
+  @override
+  String get subPausedSnack => 'Subscription paused';
+
+  @override
+  String get subResumedSnack => 'Subscription resumed';
+
+  @override
+  String get subPauseTooltip => 'Pause subscription';
+
+  @override
+  String get subResumeTooltip => 'Resume subscription';
+
+  @override
+  String get subNoMatch => 'No subscriptions with this status';
+
+  @override
+  String get subLoadFailed => 'Could not load subscriptions';
+
+  @override
+  String get subDeleteTitle => 'Delete subscription?';
+
+  @override
+  String get subDeleteBody => 'Its past transactions stay in your history.';
+
+  @override
+  String get subDeleted => 'Subscription deleted';
+
+  @override
+  String get subDeleteFailed => 'Could not delete subscription';
+
+  @override
+  String get subCancelConfirmTitle => 'Cancel subscription?';
+
+  @override
+  String get subCancelDateSet => 'Cancellation date set';
+
+  @override
+  String get plannedDeleteConfirmTitle => 'Delete planned payment?';
+
+  @override
+  String get plannedPostAllConfirmTitle => 'Post all payments?';
+
+  @override
+  String get plannedLoadFailed => 'Could not load planned payments';
+
+  @override
+  String get objDeleteConfirmTitle => 'Delete objective?';
+
+  @override
+  String get objDeleted => 'Objective deleted';
+
+  @override
+  String get txColorDefault => 'Default';
+
+  @override
+  String get txColorRed => 'Red';
+
+  @override
+  String get txColorOrange => 'Orange';
+
+  @override
+  String get txColorAmber => 'Amber';
+
+  @override
+  String get txColorGreen => 'Green';
+
+  @override
+  String get txColorTeal => 'Teal';
+
+  @override
+  String get txColorBlue => 'Blue';
+
+  @override
+  String get txColorIndigo => 'Indigo';
+
+  @override
+  String get txColorPurple => 'Purple';
+
+  @override
+  String get txColorPink => 'Pink';
+
+  @override
+  String get txColorSlate => 'Slate';
+
+  @override
+  String get nfThousandsComma => 'Comma (1,000)';
+
+  @override
+  String get nfThousandsPeriod => 'Period (1.000)';
+
+  @override
+  String get nfThousandsSpace => 'Space (1 000)';
+
+  @override
+  String get nfThousandsNone => 'None (1000)';
+
+  @override
+  String get nfDecimalPeriod => 'Period (0.50)';
+
+  @override
+  String get nfDecimalComma => 'Comma (0,50)';
+
+  @override
+  String currencySymbolExample(String symbol) {
+    return 'e.g. $symbol';
+  }
+
+  @override
+  String get resetConfirmTitle => 'Reset everything?';
+
+  @override
+  String get backupRestoreConfirmTitle => 'Restore this backup?';
+
+  @override
+  String get syncDisconnectConfirmTitle => 'Disconnect sync?';
+
+  @override
+  String get syncOtherBudgetConfirmTitle => 'Use the synced budget?';
+
+  @override
+  String get healthRepairConfirmTitle => 'Repair balances?';
+
+  @override
+  String get healthPurgeConfirmTitle => 'Purge deleted transactions?';
+
+  @override
+  String get householdNameSaved => 'Household name saved';
+
+  @override
+  String baseCurrencySaved(String code) {
+    return 'Base currency changed to $code';
+  }
+
+  @override
+  String get backupAutoOnSnack => 'Automatic backups on';
+
+  @override
+  String get backupAutoOffSnack => 'Automatic backups off';
+
+  @override
+  String get backupSettingsSaved => 'Backup settings saved';
+
+  @override
+  String get notifReminderOnSnack => 'Daily reminder on';
+
+  @override
+  String get notifReminderOffSnack => 'Daily reminder off';
+
+  @override
+  String get notifReminderSaved => 'Reminder updated';
+
+  @override
+  String get syncDisconnectedSnack => 'Sync disconnected';
+
+  @override
+  String get biometricOnSnack => 'Biometric lock on';
+
+  @override
+  String get biometricOffSnack => 'Biometric lock off';
+
+  @override
+  String get wcStoppedNoWifi =>
+      'Stopped: the phone left the Wi-Fi network. Reconnect to start again.';
 }

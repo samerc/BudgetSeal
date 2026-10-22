@@ -1,11 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
+import 'tappable.dart';
 
 /// A reusable error display with an icon, message, and retry button.
-/// Optionally shows expandable technical details.
+/// Technical details are logged, and shown (expandable) in debug builds only.
 ///
 /// Details are automatically sanitized to remove exception type names,
 /// file paths, and stack traces. Full technical details are logged via
@@ -42,55 +44,61 @@ class ErrorRetry extends StatelessWidget {
     s = s.replaceAll(RegExp(r'#\d+\s+.*', multiLine: true), '');
     // Clean up leftover whitespace
     s = s.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
-    // If nothing left after stripping, use generic message
-    if (s.isEmpty) s = 'An unexpected error occurred';
+    // Nothing left after stripping: no details line.
     return s;
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayMessage = message ?? S.of(context).commonSomethingWentWrong;
+    final tr = S.of(context);
+    final displayMessage = message ?? tr.commonSomethingWentWrong;
+    // Details are for us, not users: logged always, shown in debug only.
+    final shown = details == null ? '' : _sanitize(details!);
+    final showDetails = kDebugMode && shown.isNotEmpty;
+    // Same layout as EmptyState (pastel circle, 18/w700 title, theme button)
+    // so a failed screen looks like part of the app.
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              AppIcons.warningCircle,
-              size: 48,
-              color: AppColors.ts(context),
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: AppColors.pastel(context, AppColors.accent,
+                    light: 0.82, dark: 0.75),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(AppIcons.warningCircle,
+                  size: 44, color: AppColors.accent),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 18),
             Text(
               displayMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: AppColors.ts(context),
-                height: 1.4,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.tp(context),
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            if (details != null) ...[
+            if (showDetails) ...[
               const SizedBox(height: 8),
-              _ExpandableDetails(details: _sanitize(details!)),
+              _ExpandableDetails(details: shown),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: onRetry,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.sf(context),
-                foregroundColor: AppColors.tp(context),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
               ),
               icon: const Icon(AppIcons.arrowClockwise, size: 18),
-              label: Text(
-                S.of(context).commonRetry,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              ),
+              label: Text(tr.commonRetry),
             ),
           ],
         ),
@@ -114,7 +122,7 @@ class _ExpandableDetailsState extends State<_ExpandableDetails> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        GestureDetector(
+        Tappable(
           onTap: () => setState(() => _expanded = !_expanded),
           child: Row(
             mainAxisSize: MainAxisSize.min,

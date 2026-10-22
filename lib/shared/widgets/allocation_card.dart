@@ -8,6 +8,7 @@ import 'budget_progress.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
 import 'seal_mark.dart';
+import 'tappable.dart';
 
 class AllocationCard extends StatelessWidget {
   final String name;
@@ -163,13 +164,13 @@ class AllocationCard extends StatelessWidget {
     // Determine urgency border color
     final Color borderColor;
     if (needsReview) {
-      borderColor = AppColors.caution.withValues(alpha: 0.6);
+      borderColor = AppColors.pastel(context, AppColors.caution, light: 0.3, dark: 0.25);
     } else if (isTargetOverspent) {
-      borderColor = AppColors.overspent.withValues(alpha: 0.5);
+      borderColor = AppColors.pastel(context, AppColors.overspent, light: 0.4, dark: 0.35);
     } else if (hasCrossDebt) {
-      borderColor = AppColors.caution.withValues(alpha: 0.5);
+      borderColor = AppColors.pastel(context, AppColors.caution, light: 0.4, dark: 0.35);
     } else if (!_isFlexible && hasTarget && targetCcyBalance > 0 && targetCcyBalance < targetAmount! * 0.1) {
-      borderColor = AppColors.caution.withValues(alpha: 0.45);
+      borderColor = AppColors.pastel(context, AppColors.caution, light: 0.45, dark: 0.4);
     } else {
       // Healthy/full cards stay borderless — the bar already says it.
       borderColor = AppColors.bd(context);
@@ -232,7 +233,7 @@ class AllocationCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+          borderRadius: BorderRadius.circular(RadiusTokens.hero),
           // Status signals keep a colored edge; healthy cards have none.
           border: borderColor == AppColors.bd(context)
               ? null
@@ -240,8 +241,8 @@ class AllocationCard extends StatelessWidget {
         ),
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+          child: Tappable(
+            borderRadius: BorderRadius.circular(RadiusTokens.hero),
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 14),
@@ -271,8 +272,7 @@ class AllocationCard extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontSize: 12.5,
-                                        color: AppColors.tp(context)
-                                            .withValues(alpha: 0.6))),
+                                        color: AppColors.ts(context))),
                               ),
                           ],
                         ),
@@ -331,8 +331,7 @@ class AllocationCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.tp(context)
-                                      .withValues(alpha: 0.55),
+                                  color: AppColors.ts(context),
                                 ),
                               ),
                             ),
@@ -344,8 +343,10 @@ class AllocationCard extends StatelessWidget {
                               child: Material(
                                 color: AppColors.overspent,
                                 shape: const StadiumBorder(),
-                                child: InkWell(
-                                  customBorder: const StadiumBorder(),
+                                child: Tappable(
+                                  borderRadius: BorderRadius.circular(
+                                      RadiusTokens.pill),
+                                  haptic: true,
                                   onTap: onCover,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -368,8 +369,9 @@ class AllocationCard extends StatelessWidget {
                           color: AppColors.pastel(context, iconColor,
                               light: 0.6, dark: 0.55),
                           shape: const CircleBorder(),
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
+                          child: Tappable(
+                            borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                            haptic: true,
                             onTap: onSpend,
                             child: Padding(
                               padding: const EdgeInsets.all(8),

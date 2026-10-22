@@ -11,6 +11,7 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/sheet_title.dart';
 
 /// Sentinel for "Ready to assign" (Unallocated) in the From/To pickers.
 const _readyToAssign = '';
@@ -64,8 +65,6 @@ Future<bool> showMoveMoneySheet(
   }
   var value = amount;
 
-  final secondary = AppColors.ts(context);
-
   final moved = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
@@ -110,13 +109,11 @@ Future<bool> showMoveMoneySheet(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(cover ? tr.allocCoverTitle : tr.allocMoveTitle,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text(cover ? tr.allocCoverDesc : tr.allocMoveDesc,
-                  style: TextStyle(fontSize: 13, color: secondary)),
-              const SizedBox(height: 16),
+              SheetTitle(
+                cover ? tr.allocCoverTitle : tr.allocMoveTitle,
+                subtitle: cover ? tr.allocCoverDesc : tr.allocMoveDesc,
+                padding: const EdgeInsetsDirectional.only(bottom: 16),
+              ),
               picker(tr.allocMoveFrom, from, (v) => from = v, exclude: to),
               const SizedBox(height: 12),
               picker(tr.allocMoveTo, to, (v) => to = v, exclude: from),
@@ -134,7 +131,8 @@ Future<bool> showMoveMoneySheet(
                   tr.allocMoveNotEnough(
                       names[from] ?? '', formatAmount(fromBal, currency: cur)),
                   style: const TextStyle(
-                      fontSize: 12, color: AppColors.overspent),
+                      fontSize: TypographyTokens.captionSize,
+                      color: AppColors.overspent),
                 ),
               ],
               const SizedBox(height: 20),

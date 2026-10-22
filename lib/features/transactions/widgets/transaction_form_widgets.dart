@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/amount_field.dart';
+import '../../../shared/widgets/tappable.dart';
 import '../../../shared/theme/app_icons.dart';
 
 // ---------------------------------------------------------------------------
@@ -19,11 +20,7 @@ class TxCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: child,
     );
   }
@@ -60,8 +57,9 @@ class TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
+      child: Tappable(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -69,10 +67,7 @@ class TypeChip extends StatelessWidget {
             color: selected
                 ? color
                 : AppColors.pastel(context, color, light: 0.88, dark: 0.78),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? color : color.withValues(alpha: 0.25),
-            ),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -110,8 +105,7 @@ class CurrencyBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.bd(context)),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Text(
         currency,
@@ -145,8 +139,10 @@ class CategoryPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasCategory = name != null;
-    return GestureDetector(
+    final radius = BorderRadius.circular(RadiusTokens.pill);
+    return Tappable(
       onTap: onTap,
+      borderRadius: radius,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
@@ -154,11 +150,9 @@ class CategoryPill extends StatelessWidget {
               ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
               : AppColors.sfv(context),
           border: Border.all(
-            color: hasCategory
-                ? color.withValues(alpha: 0.35)
-                : AppColors.bd(context),
+            color: hasCategory ? color : Colors.transparent,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: radius,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -189,9 +183,7 @@ class CategoryPill extends StatelessWidget {
             Icon(
               AppIcons.caretDown,
               size: 14,
-              color: hasCategory
-                  ? color.withValues(alpha: 0.7)
-                  : AppColors.ts(context),
+              color: hasCategory ? color : AppColors.ts(context),
             ),
           ],
         ),
@@ -216,7 +208,7 @@ class LineState {
   Color categoryColor;
   double exchangeRateToBase;
   bool rateInverted = false;
-  double? _originalRate; // stored before first inversion to avoid precision loss
+  String? _originalText; // the typed rate, restored as it was
 
   LineState({required this.currency})
       : amountCtrl = TextEditingController(),
@@ -317,8 +309,7 @@ class LineCard extends StatelessWidget {
                                 color: AppColors.ts(context), fontSize: 15)),
                       ],
                     ),
-                    icon: Icon(AppIcons.caretDown,
-                        size: 16, color: AppColors.th(context)),
+                    icon: AppIcons.dropdown,
                     // Selected value: name only — the currency badge beside
                     // it already shows the currency.
                     selectedItemBuilder: (context) => accounts
@@ -371,20 +362,22 @@ class LineCard extends StatelessWidget {
               ),
               if (compact) ...[
                 const SizedBox(width: 12),
-                GestureDetector(
+                Tappable(
                   onTap: onPickCurrency,
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                   child: CurrencyBadge(currency: line.currency),
                 ),
               ],
               if (canRemove) ...[
                 const SizedBox(width: 8),
-                GestureDetector(
+                Tappable(
                   onTap: onRemove,
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: AppColors.bd(context),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
                     ),
                     child: Icon(AppIcons.x,
                         size: 16, color: AppColors.ts(context)),
@@ -413,8 +406,9 @@ class LineCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              GestureDetector(
+              Tappable(
                 onTap: onPickCurrency,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
                 child: CurrencyBadge(currency: line.currency),
               ),
             ],
@@ -428,9 +422,7 @@ class LineCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.pastel(context, AppColors.accent,
                     light: 0.88, dark: 0.8),
-                borderRadius: BorderRadius.circular(8),
-                border:
-                    Border.all(color: AppColors.accent.withValues(alpha: 0.15)),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
               child: Row(
                 children: [
@@ -493,7 +485,8 @@ class LineCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  GestureDetector(
+                  Tappable(
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                     onTap: () {
                       final currentText = line.rateCtrl.text;
                       final currentRate =
@@ -502,18 +495,14 @@ class LineCard extends StatelessWidget {
                       if (currentRate != null && currentRate > 0) {
                         if (!line.rateInverted) {
                           // Going from normal → inverted: store original
-                          line._originalRate = currentRate;
-                          final inverted = 1.0 / currentRate;
-                          line.rateCtrl.text = inverted >= 1
-                              ? inverted.toStringAsFixed(6)
-                              : inverted.toStringAsFixed(6);
+                          line._originalText = currentText;
+                          line.rateCtrl.text =
+                              formatRateForInput(1.0 / currentRate);
                         } else {
                           // Going from inverted → normal: restore original
-                          final restored = line._originalRate ?? (1.0 / currentRate);
-                          line.rateCtrl.text = restored >= 100
-                              ? restored.toStringAsFixed(0)
-                              : restored.toStringAsFixed(2);
-                          line._originalRate = null;
+                          line.rateCtrl.text = line._originalText ??
+                              formatRateForInput(1.0 / currentRate);
+                          line._originalText = null;
                         }
                       }
                       line.rateInverted = !line.rateInverted;
@@ -524,7 +513,7 @@ class LineCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.pastel(context, AppColors.accent,
                             light: 0.85, dark: 0.78),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Icon(AppIcons.arrowsDownUp,
                           size: 14, color: AppColors.accent),
@@ -538,7 +527,7 @@ class LineCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.accent.withValues(alpha: 0.8),
+                          color: AppColors.accentText(context),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -602,20 +591,20 @@ class DateQuickChip extends StatelessWidget {
         isToday ? S.of(context).commonYesterday : S.of(context).commonToday;
     return Padding(
       padding: const EdgeInsetsDirectional.only(end: 8),
-      child: Material(
-        color: AppColors.accentLight,
+      child: Tappable(
         borderRadius: BorderRadius.circular(RadiusTokens.pill),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(RadiusTokens.pill),
-          onTap: () => onPick(target),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent)),
+        onTap: () => onPick(target),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.accentLight,
+            borderRadius: BorderRadius.circular(RadiusTokens.pill),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.accentText(context))),
         ),
       ),
     );

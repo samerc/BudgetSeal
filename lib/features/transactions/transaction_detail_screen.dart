@@ -15,11 +15,14 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/section_header.dart';
@@ -27,6 +30,8 @@ import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'widgets/delete_with_undo.dart';
 import 'widgets/tx_form_args.dart';
+import 'widgets/tx_tile.dart';
+import 'widgets/tx_ui.dart';
 import '../../shared/theme/app_icons.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
@@ -45,10 +50,7 @@ class TransactionDetailScreen extends ConsumerWidget {
       data: (entry) {
         if (entry == null) {
           return Scaffold(
-            appBar: AppBar(
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-            ),
+            appBar: AppBar(),
             body: EmptyState(
               icon: AppIcons.receipt,
               title: S.of(context).txDetailNotFound,
@@ -59,13 +61,11 @@ class TransactionDetailScreen extends ConsumerWidget {
         return _DetailBody(entry: entry, categoryMap: categoryMap);
       },
       loading: () => Scaffold(
-        appBar: AppBar(
-            surfaceTintColor: Colors.transparent, elevation: 0),
+        appBar: AppBar(),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(
-            surfaceTintColor: Colors.transparent, elevation: 0),
+        appBar: AppBar(),
         body: ErrorRetry(
           message: S.of(context).txCouldNotLoad,
           details: '$e',
@@ -93,11 +93,7 @@ class _DetailBody extends ConsumerWidget {
     final baseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
 
-    final Color typeColor = isIncome
-        ? AppColors.healthy
-        : isExpense
-            ? AppColors.overspent
-            : AppColors.accent;
+    final Color typeColor = ref.watch(txColorsProvider).forType(tx.type);
 
     final IconData icon = isIncome
         ? AppIcons.arrowDown
@@ -126,8 +122,6 @@ class _DetailBody extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: bandColor,
         title: Text(S.of(context).txDetailTitle),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(AppIcons.pencilSimple),
@@ -260,7 +254,8 @@ class _DetailBody extends ConsumerWidget {
                           for (final l in entry.lines) {
                             if (l.currency == baseCurrency) {
                               baseTotal += l.amount;
-                            } else if ((l.exchangeRateToBase - 1.0).abs() >= 0.001) {
+                            } else if (isRealRate(l.currency, baseCurrency,
+                                l.exchangeRateToBase)) {
                               baseTotal += l.amount * l.exchangeRateToBase;
                             }
                             // else: skip lines with unset rate
@@ -280,7 +275,7 @@ class _DetailBody extends ConsumerWidget {
                             );
                           },
                           child: SizedBox(
-                            height: 46,
+                            height: 50,
                             width: double.infinity,
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -288,7 +283,7 @@ class _DetailBody extends ConsumerWidget {
                               child: Text(
                                 amountText,
                                 style: TextStyle(
-                                  fontSize: 36,
+                                  fontSize: kHeroAmountSize,
                                   fontFamily: TypographyTokens.displayFamily,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.5,
@@ -305,7 +300,7 @@ class _DetailBody extends ConsumerWidget {
                           '= ${formatAmount(tx.amount, currency: baseCurrency)}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.tp(context).withValues(alpha: 0.6),
+                            color: AppColors.ts(context),
                           ),
                         ),
                       const SizedBox(height: 2),
@@ -358,7 +353,7 @@ class _DetailBody extends ConsumerWidget {
                 final accountId = entry.lines.isNotEmpty
                     ? (entry.lines.first.accountId ?? tx.accountId)
                     : tx.accountId;
-                return GestureDetector(
+                return Tappable(
                   onTap: () => context.push('/accounts/$accountId'),
                   child: _detailRow(context, S.of(context).commonAccount,
                       '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
@@ -443,11 +438,7 @@ class _DetailBody extends ConsumerWidget {
 
   Widget _card(BuildContext context, {required List<Widget> children}) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(children: children),
@@ -687,85 +678,29 @@ class _RelatedTransactionsState extends ConsumerState<_RelatedTransactions> {
                     : S.of(context).txDetailRelatedPlural,
                 padding:
                     const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
-            ...related.map((r) {
-              final isIncome = r.type == 'income';
-              final color = isIncome ? AppColors.healthy : AppColors.overspent;
-              final typeLabel = switch (r.type) {
-                'income' => S.of(context).typeIncome,
-                'transfer' => S.of(context).typeTransfer,
-                _ => S.of(context).typeExpense,
-              };
-              final cat =
-                  r.categoryId != null ? categoryMap[r.categoryId] : null;
-
-              return GestureDetector(
-                onTap: () => context.push('/transactions/${r.id}'),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: AppColors.pastel(context, color,
-                              light: 0.85, dark: 0.78),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          isIncome
-                              ? AppIcons.arrowDown
-                              : AppIcons.arrowUp,
-                          color: color,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              cat?.name ?? typeLabel,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.tp(context),
-                              ),
-                            ),
-                            Text(
-                              typeLabel,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.ts(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        formatSignedAmount(r.amount,
-                            currency: r.currency, type: r.type),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: color,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(AppIcons.caretRight,
-                          size: 18, color: AppColors.th(context)),
-                    ],
-                  ),
-                ),
-              );
-            }),
+            // The Activity row, so a linked transaction looks the same
+            // everywhere.
+            Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: AppColors.card(context),
+              child: Column(children: [
+                for (var i = 0; i < related.length; i++) ...[
+                  if (i > 0)
+                    Divider(height: 1, color: AppColors.bd(context)),
+                  Consumer(builder: (context, ref, _) {
+                    final e = ref
+                        .watch(transactionByIdProvider(related[i].id))
+                        .value;
+                    if (e == null) return const SizedBox.shrink();
+                    return TxTile(
+                        entry: e,
+                        categoryMap: categoryMap,
+                        showBalance: false,
+                        showDate: true);
+                  }),
+                ],
+              ]),
+            ),
           ],
         );
       },
@@ -816,39 +751,74 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
   }
 
   Future<void> _addReceipts() async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final newFilenames = await pickAndSaveReceipts(context);
     if (newFilenames.isEmpty || !mounted) return;
 
     final updated = [..._filenames, ...newFilenames];
-    final encoded = encodeReceiptPaths(updated);
-
-    final db = ref.read(databaseProvider);
-    await (db.update(db.transactions)
-          ..where((t) => t.id.equals(widget.transactionId)))
-        .write(TransactionsCompanion(
-            receiptPath: Value(encoded),
-            // Bump so the receipt change syncs.
-            lastModified: Value(DateTime.now())));
+    try {
+      await _writeReceipts(encodeReceiptPaths(updated));
+    } catch (e) {
+      debugPrint('[TxDetail] Adding receipts failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
     if (!mounted) return;
     ref.invalidate(transactionEntriesProvider);
+    messenger.showSnackBar(SnackBar(
+      content: Text(newFilenames.length == 1
+          ? tr.txFormReceiptAttached
+          : tr.txFormNReceipts(newFilenames.length)),
+      behavior: SnackBarBehavior.floating,
+    ));
 
     _filenames = updated;
     _resolveFiles();
   }
 
-  Future<void> _removeReceipt(int index) async {
-    final updated = [..._filenames]..removeAt(index);
-    final encoded = updated.isEmpty ? null : encodeReceiptPaths(updated);
-
+  Future<void> _writeReceipts(String? encoded) {
     final db = ref.read(databaseProvider);
-    await (db.update(db.transactions)
+    return (db.update(db.transactions)
           ..where((t) => t.id.equals(widget.transactionId)))
         .write(TransactionsCompanion(
             receiptPath: Value(encoded),
             // Bump so the receipt change syncs.
             lastModified: Value(DateTime.now())));
+  }
+
+  Future<void> _removeReceipt(int index) async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await showConfirmDialog(
+      context,
+      title: tr.txDetailRemoveReceiptTitle,
+      message: tr.txDetailRemoveReceiptBody,
+      confirmLabel: tr.commonRemove,
+    );
+    if (!ok || !mounted) return;
+
+    final updated = [..._filenames]..removeAt(index);
+    try {
+      await _writeReceipts(
+          updated.isEmpty ? null : encodeReceiptPaths(updated));
+    } catch (e) {
+      debugPrint('[TxDetail] Removing receipt failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
     if (!mounted) return;
     ref.invalidate(transactionEntriesProvider);
+    messenger.showSnackBar(SnackBar(
+      content: Text(tr.txDetailReceiptRemoved),
+      behavior: SnackBarBehavior.floating,
+    ));
 
     _filenames = updated;
     _resolveFiles();
@@ -863,7 +833,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
           onTap: () => Navigator.pop(ctx),
           child: InteractiveViewer(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
               child: Image.file(File(path)),
             ),
           ),
@@ -877,11 +847,7 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
     final hasReceipts = _resolvedPaths.isNotEmpty;
 
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -904,14 +870,19 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                         color: AppColors.ts(context)),
                   ),
                 ]),
-                GestureDetector(
+                Tappable(
                   onTap: _addReceipts,
-                  child: Text(
-                    S.of(context).txDetailAttach,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 2),
+                    child: Text(
+                      S.of(context).txDetailAttach,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.accentText(context),
+                      ),
                     ),
                   ),
                 ),
@@ -931,10 +902,13 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                     final path = _resolvedPaths[index];
                     return Stack(
                       children: [
-                        GestureDetector(
+                        Tappable(
                           onTap: () => _viewReceipt(path),
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.md),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius:
+                                BorderRadius.circular(RadiusTokens.md),
                             child: Image.file(
                               File(path),
                               width: 100,
@@ -948,6 +922,8 @@ class _ReceiptSectionState extends ConsumerState<_ReceiptSection> {
                         PositionedDirectional(
                           top: 4,
                           end: 4,
+                          // On the photo itself: a dark scrim badge reads on
+                          // any image, so it isn't theme-colored.
                           child: GestureDetector(
                             onTap: () => _removeReceipt(index),
                             child: Container(

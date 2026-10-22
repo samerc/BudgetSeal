@@ -6,6 +6,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/app_icons.dart';
 
 class TxListSettingsScreen extends ConsumerWidget {
@@ -127,19 +128,21 @@ class _PreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final radius = BorderRadius.circular(CardTokens.radius);
+    // A choice tile: the accent ring marks the picked layout (like a
+    // selected AppChip); unselected tiles have no border.
+    return Tappable(
       onTap: onTap,
+      borderRadius: radius,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
+          borderRadius: radius,
           border: Border.all(
-            color: selected
-                ? AppColors.accent.withValues(alpha: 0.6)
-                : AppColors.bd(context),
-            width: selected ? 2 : 1,
+            color: selected ? AppColors.accent : Colors.transparent,
+            width: 2,
           ),
         ),
         child: child,
@@ -186,7 +189,7 @@ class _CompactPreviewRow extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
                     color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                   child: Text(S.of(context).acctTypeBank,
                       style: TextStyle(
@@ -358,13 +361,15 @@ class _DropdownChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final radius = BorderRadius.circular(RadiusTokens.sm);
+    return Tappable(
       onTap: onTap,
+      borderRadius: radius,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: radius,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

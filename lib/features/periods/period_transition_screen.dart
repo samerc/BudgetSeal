@@ -15,7 +15,11 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/bottom_action_bar.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../allocations/option_card.dart';
 
 /// Tracks the user's chosen resolution for a single allocation + currency pair.
 class _AllocationResolution {
@@ -115,6 +119,12 @@ class _PeriodTransitionScreenState
       ref.invalidate(pendingResetProvider);
 
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(S.of(context).periodTransitionDone),
+          ),
+        );
         context.pop(); // close period transition
         context.push('/funding'); // open funding as a new route
       }
@@ -161,26 +171,20 @@ class _PeriodTransitionScreenState
               final household = householdAsync.value;
               final startDay = household?.periodStartDay ?? 1;
               final periodStart = budgetPeriodFor(startDay, now).start;
-              return Container(
-                width: double.infinity,
+              return AppCard(
                 margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: AppColors.sf(context),
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
-                  boxShadow: AppColors.cardShadow(context),
-                ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      width: CategoryIconTokens.compactSize,
+                      height: CategoryIconTokens.compactSize,
                       decoration: BoxDecoration(
                         color: AppColors.pastel(context, AppColors.accent,
                             light: 0.85, dark: 0.78),
-                        borderRadius: BorderRadius.circular(12),
+                        shape: BoxShape.circle,
                       ),
                       child: Icon(AppIcons.calendarBlank,
-                          color: AppColors.accent, size: 22),
+                          color: AppColors.accent, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -190,8 +194,8 @@ class _PeriodTransitionScreenState
                           Text(S.of(context).periodNewTitle,
                               style: TextStyle(
                                 color: AppColors.tp(context),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
+                                fontSize: TypographyTokens.sheetTitleSize,
+                                fontWeight: TypographyTokens.sheetTitleWeight,
                               )),
                           const SizedBox(height: 3),
                           Text(
@@ -210,53 +214,22 @@ class _PeriodTransitionScreenState
             }),
 
             // Subheading
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              child: Row(
-                children: [
-                  Text(
-                    S.of(context).periodResolveLeftovers,
-                    style: textTheme.titleMedium,
-                  ),
-                  const Spacer(),
-                  Text(
-                    S.of(context).periodNItems(_resolutions.length),
-                    style: textTheme.bodySmall,
-                  ),
-                ],
+            SectionHeader(
+              S.of(context).periodResolveLeftovers,
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 4, 20, 4),
+              trailing: Text(
+                S.of(context).periodNItems(_resolutions.length),
+                style: textTheme.bodySmall,
               ),
             ),
 
             // Allocation list
             Expanded(
               child: _resolutions.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              AppIcons.checkCircle,
-                              size: 56,
-                              color: AppColors.healthy.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              S.of(context).periodNoLeftovers,
-                              style: textTheme.titleMedium?.copyWith(
-                                color: AppColors.ts(context),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              S.of(context).periodAllZero,
-                              style: textTheme.bodySmall,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
+                  ? EmptyState(
+                      icon: AppIcons.checkCircle,
+                      title: S.of(context).periodNoLeftovers,
+                      subtitle: S.of(context).periodAllZero,
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -277,23 +250,9 @@ class _PeriodTransitionScreenState
             ),
 
             // Bottom action area
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                boxShadow: Theme.of(context).brightness == Brightness.light
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 8,
-                          offset: const Offset(0, -2),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: SafeArea(
-                top: false,
-                child: FilledButton(
+            BottomActionBar(
+              children: [
+                FilledButton(
                   onPressed: _completing ? null : _completeTransition,
                   child: _completing
                       ? SizedBox(
@@ -304,15 +263,9 @@ class _PeriodTransitionScreenState
                             strokeWidth: 2,
                           ),
                         )
-                      : Text(
-                          S.of(context).periodCompleteButton,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      : Text(S.of(context).periodCompleteButton),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -344,9 +297,8 @@ class _ResolutionCard extends StatelessWidget {
 
     return AppCard(
       margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -378,7 +330,7 @@ class _ResolutionCard extends StatelessWidget {
                     color: AppColors.pastel(context,
                         overspent ? AppColors.overspent : AppColors.healthy,
                         light: 0.85, dark: 0.75),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(RadiusTokens.pill),
                   ),
                   child: Text(
                     formatAmount(resolution.balance, currency: resolution.currency),
@@ -392,63 +344,63 @@ class _ResolutionCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
 
             // Resolution options
-            _RadioOption(
+            OptionCard(
               icon: AppIcons.arrowCounterClockwise,
-              label: overspent
+              title: overspent
                   ? S.of(context).periodCoverFromRta
                   : S.of(context).periodReturnUnallocated,
-              description: overspent
+              subtitle: overspent
                   ? S.of(context).periodCoverFromRtaDesc
                   : S.of(context).periodReturnDesc,
-              value: LeftoverResolution.toUnallocated,
-              groupValue: resolution.resolution,
-              onChanged: (v) {
-                resolution.resolution = v;
+              selected:
+                  resolution.resolution == LeftoverResolution.toUnallocated,
+              onTap: () {
+                resolution.resolution = LeftoverResolution.toUnallocated;
                 resolution.targetAllocationId = null;
                 onChanged();
               },
             ),
-            _RadioOption(
+            const SizedBox(height: 8),
+            OptionCard(
               icon: AppIcons.arrowBendUpRight,
-              label: overspent
+              title: overspent
                   ? S.of(context).periodCarryDebt
                   : S.of(context).periodCarryForward,
-              description: overspent
+              subtitle: overspent
                   ? S.of(context).periodCarryDebtDesc
                   : S.of(context).periodCarryDesc,
-              value: LeftoverResolution.keep,
-              groupValue: resolution.resolution,
-              onChanged: (v) {
-                resolution.resolution = v;
+              selected: resolution.resolution == LeftoverResolution.keep,
+              onTap: () {
+                resolution.resolution = LeftoverResolution.keep;
                 resolution.targetAllocationId = null;
                 onChanged();
               },
             ),
-            if (!overspent)
-            _RadioOption(
-              icon: AppIcons.arrowsLeftRight,
-              label: S.of(context).periodMoveTo,
-              description: S.of(context).periodMoveDesc,
-              value: LeftoverResolution.toOtherAllocation,
-              groupValue: resolution.resolution,
-              onChanged: (v) {
-                resolution.resolution = v;
-                onChanged();
-              },
-            ),
+            if (!overspent) ...[
+              const SizedBox(height: 8),
+              OptionCard(
+                icon: AppIcons.arrowsLeftRight,
+                title: S.of(context).periodMoveTo,
+                subtitle: S.of(context).periodMoveDesc,
+                selected: resolution.resolution ==
+                    LeftoverResolution.toOtherAllocation,
+                onTap: () {
+                  resolution.resolution = LeftoverResolution.toOtherAllocation;
+                  onChanged();
+                },
+              ),
+            ],
 
             // Target allocation picker
             if (resolution.resolution == LeftoverResolution.toOtherAllocation)
               Padding(
-                padding: const EdgeInsetsDirectional.only(start: 40, top: 8),
+                padding: const EdgeInsets.only(top: 8),
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButtonHideUnderline(
@@ -471,80 +423,6 @@ class _ResolutionCard extends StatelessWidget {
                   ),
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Styled radio option row
-// ---------------------------------------------------------------------------
-
-class _RadioOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String description;
-  final LeftoverResolution value;
-  final LeftoverResolution groupValue;
-  final ValueChanged<LeftoverResolution> onChanged;
-
-  const _RadioOption({
-    required this.icon,
-    required this.label,
-    required this.description,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = value == groupValue;
-
-    return InkWell(
-      onTap: () => onChanged(value),
-      borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: selected ? AppColors.accent : AppColors.th(context),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: selected
-                          ? AppColors.tp(context)
-                          : AppColors.ts(context),
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.th(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              selected ? AppIcons.radioButtonFill : AppIcons.circle,
-              size: 20,
-              color: selected ? AppColors.accent : AppColors.th(context),
-            ),
           ],
         ),
       ),

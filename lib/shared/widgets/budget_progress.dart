@@ -101,7 +101,7 @@ class BudgetProgress extends StatelessWidget {
                 child: Container(
                   width: 3,
                   decoration: BoxDecoration(
-                    color: AppColors.tp(context).withValues(alpha: 0.45),
+                    color: AppColors.ts(context),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),

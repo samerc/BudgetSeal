@@ -5,6 +5,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/theme/app_icons.dart';
+import '../../../shared/widgets/sheet_title.dart';
 
 // ---------------------------------------------------------------------------
 // Currencies (ISO 4217, generated from a table — keep it sorted by code)
@@ -617,18 +618,7 @@ class _CurrencySheetState extends State<CurrencySheet>
         snapSizes: const [0.6, 0.92],
         builder: (_, scrollCtrl) => Column(
           children: [
-            const SizedBox(height: 12),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(S.of(context).commonCurrency,
-                      style: Theme.of(context).textTheme.titleMedium),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
+            SheetTitle(S.of(context).commonCurrency),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
@@ -747,7 +737,7 @@ class _CurrencySheetState extends State<CurrencySheet>
               decoration: BoxDecoration(
                 color: AppColors.pastel(context, AppColors.accent,
                     light: 0.85, dark: 0.78),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
               child: Icon(AppIcons.check,
                   color: AppColors.accent, size: 16),
@@ -755,7 +745,8 @@ class _CurrencySheetState extends State<CurrencySheet>
           : null,
       selected: isSelected,
       selectedTileColor: AppColors.accentLight,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md)),
       onTap: () => Navigator.pop(context, code),
     );
   }

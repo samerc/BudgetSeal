@@ -453,5 +453,10 @@
   "web_overspent_title": "Enveloppes dépassées",
   "web_env_over_by": "Dépassée de {amount}",
   "web_bills_week": "Factures de la semaine",
-  "web_n_accounts": "{n} comptes"
+  "web_n_accounts": "{n} comptes",
+  "web_load_failed": "Impossible de charger cette page",
+  "web_load_failed_sub": "Vérifiez que votre téléphone est sur le même Wi‑Fi avec le Web Companion lancé, puis réessayez.",
+  "web_filter_no_match": "Aucun résultat pour ce filtre",
+  "web_filter_no_match_sub": "Essayez un autre filtre, ou retirez-le pour tout afficher.",
+  "web_sub_cancelled": "Annulé"
 }

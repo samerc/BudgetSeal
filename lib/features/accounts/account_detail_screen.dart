@@ -26,12 +26,21 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
-import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../transactions/widgets/tx_tile.dart';
+import 'account_type.dart';
+import 'widgets/balance_hero.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
   final String accountId;
@@ -50,6 +59,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   int? _decimalPlaces; // null = auto-detect from currency
   bool _isTravel = false;
   bool _loading = false;
+  bool _loadFailed = false;
   double? _currentBalance;
   DateTime? _lastReconciled;
 
@@ -67,10 +77,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   List<(String, String, IconData)> _accountTypes(BuildContext context) {
     final l = S.of(context);
     return [
-      ('cash', l.acctTypeCash, AppIcons.money),
-      ('bank', l.acctTypeBank, AppIcons.bank),
-      ('credit', l.acctTypeCredit, AppIcons.creditCard),
-      ('wallet', l.acctTypeDigital, AppIcons.wallet),
+      for (final t in const ['cash', 'bank', 'credit', 'wallet'])
+        (t, accountTypeLabel(l, t), accountTypeIcon(t)),
     ];
   }
 
@@ -90,6 +98,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   }
 
   Future<void> _loadAccount() async {
+    if (_loadFailed) setState(() => _loadFailed = false);
     try {
       final db = ref.read(databaseProvider);
       final acc = await AccountsDao(db).getById(widget.accountId);
@@ -112,6 +121,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       }
     } catch (e) {
       debugPrint('[AccountDetail] Error loading: $e');
+      if (mounted) setState(() => _loadFailed = true);
     }
   }
 
@@ -128,30 +138,12 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     required String title,
     required Widget child,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: AppColors.ts(context)),
-              const SizedBox(width: 6),
-              Text(title,
-                  style: TextStyle(
-                    fontSize: TypographyTokens.sectionHeaderSize,
-                    fontWeight: TypographyTokens.sectionHeaderWeight,
-                    letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                    color: AppColors.accentText(context),
-                  )),
-            ],
-          ),
-          const SizedBox(height: 12),
+          SectionHeader(title, padding: EdgeInsets.zero),
+          const SizedBox(height: Spacing.md),
           child,
         ],
       ),
@@ -248,7 +240,12 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ),
         ],
       ),
-      body: GestureDetector(
+      body: _loadFailed
+          ? ErrorRetry(
+              message: S.of(context).commonCouldntLoadAccounts,
+              onRetry: _loadAccount,
+            )
+          : GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -257,22 +254,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           children: [
             // Current balance display card (existing accounts only)
             if (!_isNew && _currentBalance != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-                // Cashew wallet header: pastel accent, dark text.
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.accent,
-                      light: 0.82, dark: 0.75),
-                  borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
-                ),
+              BalanceHero(
+                padding: const EdgeInsets.all(Spacing.xl),
                 child: Column(
                   children: [
                     Text(
                       l.acctCurrentBalance,
-                      style: TextStyle(
-                          color: AppColors.tp(context).withValues(alpha: 0.6),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600),
+                      style: balanceHeroLabelStyle(context),
                     ),
                     const SizedBox(height: 6),
                     FittedBox(
@@ -280,15 +268,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       child: Text(
                         formatAmount(_currentBalance!,
                             currency: _currencyController.text),
-                        style: TextStyle(
-                          color: _currentBalance! < 0
-                              ? AppColors.overspent
-                              : AppColors.tp(context),
-                          fontSize: 36,
-                          fontFamily: TypographyTokens.displayFamily,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
+                        style: balanceHeroAmountStyle(context,
+                            value: _currentBalance, size: 36),
                       ),
                     ),
                     if (_lastReconciled != null)
@@ -297,9 +278,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         child: Text(
                           l.acctLastReconciled(formatDate(_lastReconciled!)),
                           style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.tp(context)
-                                  .withValues(alpha: 0.6)),
+                              fontSize: TypographyTokens.captionSize,
+                              color: AppColors.ts(context)),
                         ),
                       ),
                     const SizedBox(height: 8),
@@ -315,7 +295,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         _currencyController.text,
                         style: TextStyle(
                           color: AppColors.tp(context),
-                          fontSize: 12.5,
+                          fontSize: TypographyTokens.captionSize,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -329,13 +309,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             // Travel wallet helper banner
             if (!_isNew && _isTravel && _currentBalance != null && _currentBalance! > 0) ...[
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: CardTokens.padding,
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, AppColors.accent,
                       light: 0.88, dark: 0.8),
                   borderRadius: BorderRadius.circular(CardTokens.radius),
-                  border: Border.all(
-                      color: AppColors.accent.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,8 +325,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         const SizedBox(width: 8),
                         Text(l.acctBackFromTrip,
                             style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontSize: TypographyTokens.cardTitleSize,
+                                fontWeight: TypographyTokens.cardTitleWeight,
                                 color: AppColors.tp(context))),
                       ],
                     ),
@@ -367,10 +345,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         onPressed: _convertBack,
                         icon: const Icon(AppIcons.currencyCircleDollar, size: 16),
                         label: Text(l.acctConvertBackClose),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.accent,
-                          side: BorderSide(color: AppColors.accent.withValues(alpha: 0.3)),
-                        ),
                       ),
                     ),
                   ],
@@ -382,17 +356,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             // Settings section
             if (!_isNew) ...[
               // Collapsible settings toggle
-              GestureDetector(
+              AppCard(
                 onTap: () => setState(() => _showSettings = !_showSettings),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
-                  child: Row(
+                child: Row(
                     children: [
                       Icon(AppIcons.gear,
                           size: 18, color: AppColors.ts(context)),
@@ -400,8 +366,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       Expanded(
                         child: Text(l.acctSettings,
                             style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600)),
+                                fontSize: TypographyTokens.cardTitleSize,
+                                fontWeight: TypographyTokens.cardTitleWeight,
+                                color: AppColors.tp(context))),
                       ),
                       Icon(
                         _showSettings
@@ -411,7 +378,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       ),
                     ],
                   ),
-                ),
               ),
             ],
             if (_isNew || _showSettings) ...[
@@ -448,48 +414,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   runSpacing: 8,
                   children: _accountTypes(context).map((entry) {
                     final (value, label, icon) = entry;
-                    final selected = _type == value;
-                    return GestureDetector(
+                    return AppChip(
+                      label: label,
+                      icon: icon,
+                      selected: _type == value,
                       onTap: () => setState(() => _type = value),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.accentLight
-                              : AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: selected
-                                ? AppColors.accent
-                                : AppColors.bd(context),
-                            width: selected ? 1.5 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(icon,
-                                size: 18,
-                                color: selected
-                                    ? AppColors.accent
-                                    : AppColors.ts(context)),
-                            const SizedBox(width: 8),
-                            Text(label,
-                                style: TextStyle(
-                                  color: selected
-                                      ? AppColors.accent
-                                      : AppColors.tp(context),
-                                  fontWeight: selected
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                  fontSize: 13,
-                                )),
-                          ],
-                        ),
-                      ),
                     );
                   }).toList(),
                 ),
@@ -527,12 +456,12 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       DropdownMenuItem<int?>(
                         value: null,
                         child: Text(l.acctDecimalAuto(currencyDecimals(_currencyController.text)),
-                            style: TextStyle(fontSize: 14, color: AppColors.tp(context))),
+                            style: TextStyle(fontSize: TypographyTokens.bodySize, color: AppColors.tp(context))),
                       ),
                       for (final d in [0, 1, 2, 3])
                         DropdownMenuItem<int?>(
                           value: d,
-                          child: Text('$d', style: TextStyle(fontSize: 14, color: AppColors.tp(context))),
+                          child: Text('$d', style: TextStyle(fontSize: TypographyTokens.bodySize, color: AppColors.tp(context))),
                         ),
                     ],
                     onChanged: (v) => setState(() => _decimalPlaces = v),
@@ -561,10 +490,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             SizedBox(
               child: FilledButton(
                 onPressed: _loading ? null : _save,
-                style: FilledButton.styleFrom(
-                  disabledBackgroundColor:
-                      AppColors.accent.withValues(alpha: 0.5),
-                ),
                 child: _loading
                     ? SizedBox(
                         height: 20,
@@ -572,47 +497,27 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         child: CircularProgressIndicator(
                             color: AppColors.onAccent, strokeWidth: 2),
                       )
-                    : Text(
-                        _isNew ? l.acctCreateAccount : l.commonSave,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    : Text(_isNew ? l.acctCreateAccount : l.commonSave),
               ),
             ),
             ],
             // Account transactions (existing accounts only)
             if (!_isNew) ...[
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Icon(AppIcons.receipt,
-                      size: 18, color: AppColors.accent),
-                  const SizedBox(width: 8),
-                  Text(
-                    l.acctRecentTransactions,
-                    style: TextStyle(
-                      fontSize: TypographyTokens.sectionHeaderSize,
-                      fontWeight: TypographyTokens.sectionHeaderWeight,
-                      letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                      color: AppColors.accentText(context),
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      ref.read(activityFilterRequestProvider.notifier).request(
-                          (accountId: widget.accountId,
-                           categoryId: null,
-                           categoryName: null));
-                      context.go('/');
-                    },
-                    child: Text(l.commonSeeAll),
-                  ),
-                ],
+              SectionHeader(
+                l.acctRecentTransactions,
+                trailing: TextButton(
+                  onPressed: () {
+                    ref.read(activityFilterRequestProvider.notifier).request(
+                        (accountId: widget.accountId,
+                         categoryId: null,
+                         categoryName: null));
+                    context.go('/');
+                  },
+                  child: Text(l.commonSeeAll),
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.headerToCard),
               _buildAccountTransactions(),
             ],
           ],
@@ -640,116 +545,36 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         }).take(10).toList();
 
         if (filtered.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(S.of(context).acctNoTransactions,
-                  style: TextStyle(color: AppColors.th(context))),
-            ),
+          return EmptyState(
+            icon: AppIcons.receipt,
+            title: S.of(context).acctNoTransactions,
           );
         }
 
+        // The same rows as Activity and Home (category emoji, the user's
+        // income/expense colors, the date under the amount).
         return Column(
-          children: filtered.map((e) {
-            final tx = e.tx;
-            final isIncome = tx.type == 'income';
-            final isTransfer = tx.type == 'transfer';
-            final sign = isIncome || (isTransfer && tx.destinationAccountId == widget.accountId) ? '+' : '-';
-            final color = sign == '+'
-                ? AppColors.healthy
-                : AppColors.overspent;
-            final cat = tx.categoryId != null ? catMap[tx.categoryId] : null;
-            final catName = cat?.name ?? '';
-            final label = tx.note.isNotEmpty
-                ? tx.note
-                : catName.isNotEmpty
-                    ? catName
-                    : tx.type;
-            final catColor = cat != null
-                ? AppColors.fromHex(cat.colorHex)
-                : AppColors.ts(context);
-
-            // Determine display amount from lines
-            final lines = e.lines;
-            final acctLine = lines.where(
-                (l) => l.accountId == widget.accountId).firstOrNull;
-            final displayAmt = acctLine?.amount ?? tx.amount;
-            final displayCur = acctLine?.currency ?? tx.currency;
-            final showBase = displayCur != tx.currency;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 4),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(10),
+          children: [
+            for (final e in filtered)
+              TxTile(
+                entry: e,
+                categoryMap: catMap,
+                showBalance: false,
+                showDate: true,
+                balanceAccountId: widget.accountId,
               ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () => context.push('/transactions/${tx.id}'),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
-                  child: Row(
-                    children: [
-                      CategoryIcon(
-                        categoryName: cat?.name ?? tx.type,
-                        color: catColor,
-                        size: 40,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(label,
-                                style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 2),
-                            Text(
-                              formatDate(tx.createdAt.toLocal()),
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.th(context)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            formatSignedAmount(displayAmt, currency: displayCur, type: sign == '+' ? 'income' : 'expense'),
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: color),
-                          ),
-                          if (showBase)
-                            Text(
-                              '\u2248 ${formatAmount(tx.amount, currency: tx.currency)}',
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: AppColors.th(context)),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+          ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const SizedBox.shrink(),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(Spacing.xl),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => ErrorRetry(
+        message: S.of(context).commonCouldntLoadData,
+        details: '$e',
+        onRetry: () => ref.invalidate(transactionEntriesProvider),
+      ),
     );
   }
 
@@ -768,46 +593,30 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final result = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
         final diff = entered != null && _currentBalance != null
             ? entered! - _currentBalance!
             : null;
-        return Container(
+        return Padding(
           padding: EdgeInsets.fromLTRB(
-              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
-          decoration: BoxDecoration(
-            color: AppColors.popup(ctx),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
-          ),
+              20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
+              SheetTitle(
                 tr.acctAdjustBalance,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(ctx),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                tr.acctAdjustDesc,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.ts(ctx),
-                ),
+                subtitle: tr.acctAdjustDesc,
+                padding: const EdgeInsetsDirectional.only(top: 20),
               ),
               if (_currentBalance != null) ...[
                 const SizedBox(height: 12),
                 Text(
                   tr.acctCurrentBalanceLabel(formatAmount(_currentBalance!, currency: currency)),
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: TypographyTokens.bodySize,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.accent,
+                    color: AppColors.accentText(ctx),
                   ),
                 ),
               ],
@@ -831,7 +640,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                           currency: currency,
                           type: diff > 0 ? 'income' : 'expense')),
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: TypographyTokens.amountSmallSize,
                     fontWeight: FontWeight.w600,
                     color: diff.abs() < 0.005
                         ? AppColors.healthy
@@ -847,12 +656,9 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     Navigator.pop(ctx, val);
                   }
                 },
-                child: Text(
-                    diff != null && diff.abs() < 0.005
-                        ? tr.acctReconcileConfirm
-                        : tr.acctApplyAdjustment,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: Text(diff != null && diff.abs() < 0.005
+                    ? tr.acctReconcileConfirm
+                    : tr.acctApplyAdjustment),
               ),
             ],
           ),
@@ -931,6 +737,14 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ),
           );
         }
+      } catch (e) {
+        debugPrint('[AccountDetail] Adjust failed: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(tr.acctAdjustFailed),
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
       } finally {
         if (mounted) setState(() => _loading = false);
       }
@@ -970,31 +784,25 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     double receivedAmount = sameCurrencyAmount(destAccountId);
 
     final tr = S.of(context);
-    final surfaceColor = AppColors.sf(context);
-    final textPrimaryColor = AppColors.tp(context);
-    final textSecondaryColor = AppColors.ts(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: surfaceColor,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Padding(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
+              20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(tr.acctConvertBack,
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                    color: textPrimaryColor)),
-            const SizedBox(height: 4),
-            Text(
-              tr.acctConvertBackMsg(formatAmount(balance, currency: _currencyController.text)),
-              style: TextStyle(fontSize: 13, color: textSecondaryColor),
+            SheetTitle(
+              tr.acctConvertBack,
+              subtitle: tr.acctConvertBackMsg(
+                  formatAmount(balance, currency: _currencyController.text)),
+              padding: const EdgeInsetsDirectional.only(top: 20),
             ),
             const SizedBox(height: 20),
             // Destination account picker
             DropdownButtonFormField<String>(
               icon: AppIcons.dropdown,
-              value: destAccountId,
+              initialValue: destAccountId,
               decoration: InputDecoration(
                 labelText: tr.acctTransferTo,
               ),
@@ -1132,37 +940,41 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   Future<void> _confirmArchive() async {
     if (!await _canArchive() || !mounted) return;
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(tr.acctArchiveTitle),
-        content: Text(
-          tr.acctArchiveMsg,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonArchive),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.acctArchiveConfirmTitle,
+      message: tr.acctArchiveMsg,
+      confirmLabel: tr.commonArchive,
+      destructive: false,
     );
+    if (confirmed && mounted) await _archive();
+  }
 
-    if (confirmed == true && mounted) {
+  /// Archives the account, says so, and leaves the screen.
+  Future<void> _archive() async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final name = _nameController.text;
+    try {
       final db = ref.read(databaseProvider);
       await (db.update(db.accounts)
             ..where((a) => a.id.equals(widget.accountId)))
           .write(AccountsCompanion(
               archived: const Value(true),
               lastModified: Value(DateTime.now())));
+      ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.acctArchivedSnack(name)),
+        behavior: SnackBarBehavior.floating,
+      ));
       if (mounted) context.pop();
+    } catch (e) {
+      debugPrint('[AccountDetail] Archive failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -1199,32 +1011,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
     // ── No transactions: simple permanent delete ──
     if (refTxIds.isEmpty) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dctx) => AlertDialog(
-          title: Text(tr.acctDeleteTitle),
-          content: Text(tr.acctDeleteMsg),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(dctx, false),
-                child: Text(tr.commonCancel)),
-            TextButton(
-              onPressed: () => Navigator.pop(dctx, true),
-              style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(tr.allocDeletePermanently),
-            ),
-          ],
-        ),
+      final confirmed = await showConfirmDialog(
+        context,
+        title: tr.acctDeleteConfirmTitle,
+        message: tr.acctDeleteMsg,
+        confirmLabel: tr.allocDeletePermanently,
       );
-      if (confirmed == true && mounted) {
-        await (db.update(db.accounts)..where((a) => a.id.equals(accId))).write(
-          AccountsCompanion(
-              deleted: const Value(true),
-              lastModified: Value(DateTime.now())));
-        ref.invalidate(accountsProvider);
-        ref.invalidate(accountsWithBalanceProvider);
-        if (mounted) context.pop();
-      }
+      if (confirmed && mounted) await _deleteAccount(const {});
       return;
     }
 
@@ -1232,20 +1025,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final action = await showDialog<String>(
       context: context,
       builder: (dctx) => AlertDialog(
-        title: Text(tr.acctDeleteTitle),
+        title: Text(tr.acctDeleteConfirmTitle),
         content: Text(tr.acctHasTxnsMsg(refTxIds.length)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(dctx, 'cancel'),
               child: Text(tr.commonCancel)),
-          TextButton(
+          OutlinedButton(
+            style: DialogButtons.outlined,
             onPressed: () => Navigator.pop(dctx, 'archive'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.accent),
             child: Text(tr.acctArchiveInstead),
           ),
-          TextButton(
+          FilledButton(
+            style: DialogButtons.destructive,
             onPressed: () => Navigator.pop(dctx, 'delete'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
             child: Text(tr.acctDeleteWithTxns),
           ),
         ],
@@ -1256,13 +1049,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
     if (action == 'archive') {
       if (!await _canArchive() || !mounted) return;
-      await (db.update(db.accounts)..where((a) => a.id.equals(accId)))
-          .write(AccountsCompanion(
-              archived: const Value(true),
-              lastModified: Value(DateTime.now())));
-      ref.invalidate(accountsProvider);
-      ref.invalidate(accountsWithBalanceProvider);
-      if (mounted) context.pop();
+      await _archive();
       return;
     }
 
@@ -1302,51 +1089,55 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     }
 
     if (!mounted) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dctx) => AlertDialog(
-        title: Text(tr.acctDeleteTitle),
-        content: Text(sharedCount > 0
-            ? tr.acctDeleteSharedMsg(sharedCount)
-            : tr.acctDeleteCountConfirm(refTxIds.length)),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(dctx, false),
-              child: Text(tr.commonCancel)),
-          TextButton(
-            onPressed: () => Navigator.pop(dctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.allocDeletePermanently),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.acctDeleteConfirmTitle,
+      message: sharedCount > 0
+          ? tr.acctDeleteSharedMsg(sharedCount)
+          : tr.acctDeleteCountConfirm(refTxIds.length),
+      confirmLabel: tr.allocDeletePermanently,
     );
+    if (!confirmed || !mounted) return;
+    await _deleteAccount(refTxIds);
+  }
 
-    if (confirmed != true || !mounted) return;
-
+  /// Soft-deletes [txIds] through the engine (ledger rows go too, so balances
+  /// and sync stay correct), then the account; says so and leaves the screen.
+  /// No Undo here: the account itself is gone, so `deleteTransactionsWithUndo`
+  /// (which restores transactions into their account) doesn't fit.
+  Future<void> _deleteAccount(Set<String> txIds) async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final name = _nameController.text;
     try {
-      // Soft-delete each referencing transaction through the engine so ledger
-      // entries are removed and balances/sync stay correct, then drop the account.
+      final db = ref.read(databaseProvider);
       final engine = ref.read(allocationEngineProvider);
-      for (final id in refTxIds) {
+      for (final id in txIds) {
         await engine.deleteTransaction(id);
       }
-      await (db.update(db.accounts)..where((a) => a.id.equals(accId))).write(
-          AccountsCompanion(
+      await (db.update(db.accounts)
+            ..where((a) => a.id.equals(widget.accountId)))
+          .write(AccountsCompanion(
               deleted: const Value(true),
               lastModified: Value(DateTime.now())));
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
-      ref.invalidate(allocationsProvider);
-      ref.invalidate(unallocatedProvider);
-      ref.invalidate(transactionEntriesProvider);
+      if (txIds.isNotEmpty) {
+        ref.invalidate(allocationsProvider);
+        ref.invalidate(unallocatedProvider);
+        ref.invalidate(transactionEntriesProvider);
+      }
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.acctDeletedSnack(name)),
+        behavior: SnackBarBehavior.floating,
+      ));
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(S.of(context).commonSomethingWentWrong),
-            behavior: SnackBarBehavior.floating));
-      }
+      debugPrint('[AccountDetail] Delete failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -1400,6 +1191,14 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           ),
         );
         context.pop();
+      }
+    } catch (e) {
+      debugPrint('[AccountDetail] Save failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).acctSaveFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
       }
     } finally {
       if (mounted) setState(() => _loading = false);

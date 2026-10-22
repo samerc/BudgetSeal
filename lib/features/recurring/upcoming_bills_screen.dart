@@ -17,10 +17,16 @@ import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/sheet_title.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import 'recurring_format.dart';
+import '../../shared/utils/calendar_days.dart';
 
 /// Shows recurring transactions sorted by next due date,
 /// with visual urgency indicators for overdue / due soon items.
@@ -36,6 +42,7 @@ class _UpcomingBillsScreenState
     extends ConsumerState<UpcomingBillsScreen> {
   List<RecurringTransaction> _bills = [];
   bool _loading = true;
+  Object? _error;
 
   @override
   void initState() {
@@ -47,7 +54,10 @@ class _UpcomingBillsScreenState
     try {
       final db = ref.read(databaseProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
 
       final items = await (db.select(db.recurringTransactions)
             ..where((r) => r.householdId.equals(householdId))
@@ -56,10 +66,21 @@ class _UpcomingBillsScreenState
             ..orderBy([(r) => OrderingTerm.asc(r.nextDueDate)]))
           .get();
 
-      if (mounted) setState(() { _bills = items; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _bills = items;
+          _loading = false;
+          _error = null;
+        });
+      }
     } catch (e) {
       debugPrint('[UpcomingBills] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e;
+        });
+      }
     }
   }
 
@@ -74,13 +95,7 @@ class _UpcomingBillsScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-              child: Text(
-                  bill.title.isNotEmpty ? bill.title : tr.subUntitled,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-            ),
+            SheetTitle(bill.title.isNotEmpty ? bill.title : tr.subUntitled),
             ListTile(
               leading: const Icon(AppIcons.checkCircle),
               title: Text(tr.upcomingPostNow),
@@ -157,37 +172,56 @@ class _UpcomingBillsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final tr = S.of(context);
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(AppIcons.arrowLeft),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(S.of(context).upcomingTitle),
-      ),
-      body: _loading
-          ? const SingleChildScrollView(
-              physics: NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.only(top: 8),
-              child: SkeletonList())
-          : _bills.isEmpty
-              ? EmptyState(
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(title: tr.upcomingTitle, back: true),
+            if (_loading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: SkeletonList(),
+                ),
+              )
+            else if (_error != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorRetry(
+                  message: tr.recurringLoadFailed,
+                  details: '$_error',
+                  onRetry: () {
+                    setState(() => _loading = true);
+                    _load();
+                  },
+                ),
+              )
+            else if (_bills.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
                   icon: AppIcons.calendarCheck,
-                  title: S.of(context).upcomingNoTitle,
-                  subtitle: S.of(context).upcomingNoSubtitle,
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    itemCount: _bills.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (_, i) => _BillCard(
-                      bill: _bills[i],
-                      onTap: () => _showBillActions(_bills[i]),
-                    ),
+                  title: tr.upcomingNoTitle,
+                  subtitle: tr.upcomingNoSubtitle,
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                sliver: SliverList.separated(
+                  itemCount: _bills.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => _BillCard(
+                    bill: _bills[i],
+                    onTap: () => _showBillActions(_bills[i]),
                   ),
                 ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -201,15 +235,13 @@ class _BillCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
     final due = bill.nextDueDate;
-    final daysUntil = due.difference(DateTime(now.year, now.month, now.day)).inDays;
+    final daysUntil = calendarDaysBetween(now, due);
     final isOverdue = daysUntil < 0;
 
     // Cashew's bill colors: blue for upcoming, indigo for overdue — calm,
     // not alarming red/amber/green.
-    final dark = AppColors.isDark;
-    final urgencyColor = isOverdue
-        ? (dark ? const Color(0xFF8395FF) : const Color(0xFF6577E0))
-        : (dark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2));
+    final urgencyColor =
+        isOverdue ? AppColors.billOverdue : AppColors.billUpcoming;
 
     final tr = S.of(context);
     final urgencyLabel = isOverdue
@@ -228,28 +260,16 @@ class _BillCard extends ConsumerWidget {
 
     final typeColor = ref.watch(txColorsProvider).forType(bill.type);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-        border: Border.all(color: AppColors.cardBorder(context)),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          onTap: onTap,
-          child: Padding(
-            padding: CardTokens.padding,
-            child: Column(
+    return AppCard(
+      onTap: onTap,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: CategoryIconTokens.compactSize,
+                height: CategoryIconTokens.compactSize,
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, typeColor,
                       light: 0.8, dark: 0.7),
@@ -271,9 +291,10 @@ class _BillCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      _formatFrequency(bill, tr),
+                      recurringFrequencyLabel(
+                          tr, bill.frequency, bill.interval),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: TypographyTokens.txSubtitleSize,
                         color: AppColors.ts(context),
                       ),
                     ),
@@ -281,8 +302,8 @@ class _BillCard extends ConsumerWidget {
                 ),
               ),
               Text(
-                formatAmount(recurringAmountOn(bill, bill.nextDueDate),
-                    currency: bill.currency),
+                formatSignedAmount(recurringAmountOn(bill, bill.nextDueDate),
+                    currency: bill.currency, type: bill.type),
                 style: TextStyle(
                   fontSize: TypographyTokens.amountRegularSize,
                   fontWeight: TypographyTokens.amountRegularWeight,
@@ -298,7 +319,7 @@ class _BillCard extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.pastel(context, urgencyColor,
                   light: 0.85, dark: 0.8),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
             child: Row(
               children: [
@@ -329,28 +350,6 @@ class _BillCard extends ConsumerWidget {
           ),
         ],
       ),
-          ),
-        ),
-      ),
     );
-  }
-
-  String _formatFrequency(RecurringTransaction r, S tr) {
-    if (r.interval <= 1) {
-      return switch (r.frequency) {
-        'daily' => tr.freqDaily,
-        'weekly' => tr.freqWeekly,
-        'monthly' => tr.freqMonthly,
-        'yearly' => tr.freqYearly,
-        _ => r.frequency,
-      };
-    }
-    return switch (r.frequency) {
-      'daily' => tr.freqEveryNDays(r.interval),
-      'weekly' => tr.freqEveryNWeeks(r.interval),
-      'monthly' => tr.freqEveryNMonths(r.interval),
-      'yearly' => tr.freqEveryNYears(r.interval),
-      _ => 'Every ${r.interval} ${r.frequency}',
-    };
   }
 }

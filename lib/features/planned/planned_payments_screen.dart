@@ -15,11 +15,15 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../recurring/recurring_format.dart';
 
 /// A planned payment item with its resolved account, category, and lines.
 class _PlannedItem {
@@ -69,6 +73,7 @@ class _PlannedPaymentsScreenState
     extends ConsumerState<PlannedPaymentsScreen> {
   List<_MonthGroup> _groups = [];
   bool _loading = true;
+  Object? _error;
   String _baseCurrency = 'USD';
 
   @override
@@ -106,6 +111,7 @@ class _PlannedPaymentsScreenState
             _groups = [];
             _baseCurrency = baseCurrency;
             _loading = false;
+            _error = null;
           });
         }
         return;
@@ -200,11 +206,17 @@ class _PlannedPaymentsScreenState
           _groups = groups;
           _baseCurrency = baseCurrency;
           _loading = false;
+          _error = null;
         });
       }
     } catch (e) {
       debugPrint('[PlannedPayments] Error loading: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e;
+        });
+      }
     }
   }
 
@@ -276,26 +288,14 @@ class _PlannedPaymentsScreenState
 
   Future<void> _postAll(_MonthGroup group) async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.plannedPostAllTitle),
-        content: Text(
-          tr.plannedPostAllContent(group.items.length, group.label),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr.plannedPostAll),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.plannedPostAllConfirmTitle,
+      message: tr.plannedPostAllContent(group.items.length, group.label),
+      confirmLabel: tr.plannedPostAll,
+      destructive: false,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     var posted = 0;
     var failed = 0;
@@ -321,25 +321,13 @@ class _PlannedPaymentsScreenState
 
   Future<void> _deleteItem(_PlannedItem item) async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.plannedDeleteTitle),
-        content: Text(tr.plannedDeleteContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonDelete),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.plannedDeleteConfirmTitle,
+      message: tr.plannedDeleteContent,
+      confirmLabel: tr.commonDelete,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     try {
       final engine = ref.read(allocationEngineProvider);
@@ -375,77 +363,34 @@ class _PlannedPaymentsScreenState
         },
         child: const Icon(AppIcons.plus),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () async => _load(),
+      body: RefreshIndicator(
+          onRefresh: _load,
           child: CustomScrollView(
             slivers: [
-              // ── Header ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(AppIcons.arrowLeft),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            S.of(context).plannedTitle,
-                            style: TextStyle(
-                              fontSize: TypographyTokens.screenTitleSize,
-                              fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.tp(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              LargeTitleHeader(title: S.of(context).plannedTitle, back: true),
 
-              // ── Summary banner ──
+              // ── Summary strip ──
               if (!_loading && _groups.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
-                        borderRadius:
-                            BorderRadius.circular(CardTokens.radius),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: SummaryStrip(chips: [
+                      SummaryChip(
+                        icon: AppIcons.calendarCheck,
+                        label: '$_totalCount',
+                        subtitle: S.of(context).plannedChipLabel,
+                        color: AppColors.accent,
                       ),
-                      child: Row(
-                        children: [
-                          _SummaryChip(
-                            icon: AppIcons.calendarCheck,
-                            label: '$_totalCount',
-                            subtitle: S.of(context).plannedChipLabel,
-                            color: AppColors.accent,
-                          ),
-                          const SizedBox(width: 20),
-                          _SummaryChip(
-                            icon: AppIcons.money,
-                            label: formatAmount(_totalAmount,
-                                currency: _baseCurrency),
-                            subtitle: _hasOtherCurrencies
-                                ? S.of(context).plannedTotalOther
-                                : S.of(context).plannedTotalLabel,
-                            color: AppColors.caution,
-                          ),
-                        ],
+                      SummaryChip(
+                        icon: AppIcons.money,
+                        label: formatAmount(_totalAmount,
+                            currency: _baseCurrency),
+                        subtitle: _hasOtherCurrencies
+                            ? S.of(context).plannedTotalOther
+                            : S.of(context).plannedTotalLabel,
+                        color: AppColors.caution,
                       ),
-                    ),
+                    ]),
                   ),
                 ),
 
@@ -457,8 +402,21 @@ class _PlannedPaymentsScreenState
                     child: SkeletonList(),
                   ),
                 )
+              else if (_error != null)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: ErrorRetry(
+                    message: S.of(context).plannedLoadFailed,
+                    details: '$_error',
+                    onRetry: () {
+                      setState(() => _loading = true);
+                      _load();
+                    },
+                  ),
+                )
               else if (_groups.isEmpty)
                 SliverFillRemaining(
+                  hasScrollBody: false,
                   child: EmptyState(
                     icon: AppIcons.calendarCheck,
                     title: S.of(context).plannedEmptyTitle,
@@ -520,47 +478,7 @@ class _PlannedPaymentsScreenState
                 ),
             ],
           ),
-        ),
       ),
-    );
-  }
-}
-
-// ─── Summary Chip ─────────────────────────────────────────────────────────────
-
-class _SummaryChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final Color color;
-
-  const _SummaryChip({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: AppColors.tp(context),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
-        ),
-      ],
     );
   }
 }
@@ -590,8 +508,8 @@ class _MonthHeader extends StatelessWidget {
               trailing: Text(
                 formatAmount(group.total, currency: baseCurrency),
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontSize: TypographyTokens.amountSmallSize,
+                  fontWeight: TypographyTokens.amountSmallWeight,
                   color: AppColors.ts(context),
                 ),
               ),
@@ -608,22 +526,19 @@ class _MonthHeader extends StatelessWidget {
                 color: AppColors.pastel(context, AppColors.accent,
                     light: 0.85, dark: 0.78),
                 borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                border: Border.all(
-                  color: AppColors.accent.withValues(alpha: 0.3),
-                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(AppIcons.check,
-                      size: 14, color: AppColors.accent),
+                      size: 14, color: AppColors.accentText(context)),
                   const SizedBox(width: 4),
                   Text(
                     S.of(context).plannedPostAll,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: TypographyTokens.captionSize,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
+                      color: AppColors.accentText(context),
                     ),
                   ),
                 ],
@@ -732,21 +647,17 @@ class _PlannedCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(CardTokens.radius),
           child: Container(
             padding: CardTokens.padding,
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(CardTokens.radius),
-              boxShadow: AppColors.cardShadow(context),
-            ),
+            decoration: AppColors.card(context, radius: CardTokens.radius),
             child: Row(
               children: [
                 // Type icon
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: CategoryIconTokens.listSize,
+                  height: CategoryIconTokens.listSize,
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, typeColor,
                         light: 0.85, dark: 0.78),
-                    borderRadius: BorderRadius.circular(12),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(typeIcon, size: 18, color: typeColor),
                 ),

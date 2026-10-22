@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../l10n/generated/app_localizations.dart';
@@ -87,12 +86,14 @@ class _LockScreenState extends State<LockScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Deliberately the fixed night brand surface in every theme
+            // (it covers the app), so its colors are the dark-theme ones.
             Container(
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(24),
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(RadiusTokens.hero),
               ),
               child: Icon(AppIcons.lock,
                   size: 36, color: AppColors.accentBright),
@@ -104,15 +105,15 @@ class _LockScreenState extends State<LockScreen> {
                 fontSize: 24,
                 fontFamily: TypographyTokens.displayFamily,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: AppColors.darkTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               S.of(context).lockTapToUnlock,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.white60,
+              style: const TextStyle(
+                fontSize: TypographyTokens.bodySize,
+                color: AppColors.darkTextSecondary,
               ),
             ),
             const SizedBox(height: 32),
@@ -120,11 +121,11 @@ class _LockScreenState extends State<LockScreen> {
               onPressed: _authenticating ? null : _authenticate,
               icon: const Icon(AppIcons.fingerprint, size: 22),
               label: Text(S.of(context).lockUnlockButton),
+              // Theme filled button (accent fill, onAccent text); sized to
+              // its label instead of the theme's full width.
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                minimumSize: const Size(0, 52),
+                padding: const EdgeInsets.symmetric(horizontal: 32),
               ),
             ),
           ],

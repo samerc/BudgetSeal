@@ -18,7 +18,10 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_display.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/bottom_action_bar.dart';
+import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/widgets/tappable.dart';
 
 class FundingScreen extends ConsumerStatefulWidget {
   const FundingScreen({super.key});
@@ -285,14 +288,19 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
               // -- Allocation list --
               Expanded(
                 child: allocations.isEmpty
-                    ? Center(
-                        child: Text(
-                          S.of(context).fundNoAllocations,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: AppColors.ts(context)),
-                        ),
+                    ? EmptyState(
+                        icon: AppIcons.envelopeSimple,
+                        title: S.of(context).fundNoAllocations,
+                        subtitle: S.of(context).allocCreateHelp,
                       )
-                    : ListView.builder(
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(allocationsProvider);
+                          ref.invalidate(unallocatedProvider);
+                          await Future.delayed(
+                              const Duration(milliseconds: 300));
+                        },
+                        child: ListView.builder(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
                         // +1 for the quick-fill tile at the top
@@ -393,6 +401,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                           );
                         },
                       ),
+                      ),
               ),
 
               // -- Bottom action bar --
@@ -431,16 +440,16 @@ class _InstructionsPanel extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
+        borderRadius: CardTokens.borderRadius,
       ),
       child: Column(
         children: [
-          InkWell(
+          Tappable(
             onTap: onToggle,
             borderRadius: expanded
-                ? const BorderRadius.vertical(top: Radius.circular(14))
-                : BorderRadius.circular(CardTokens.radius),
+                ? const BorderRadius.vertical(
+                    top: Radius.circular(CardTokens.radius))
+                : CardTokens.borderRadius,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
@@ -516,7 +525,7 @@ class _InstructionStep extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.pastel(context, AppColors.accent,
                 light: 0.85, dark: 0.78),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
           child: Center(
             child: Text(
@@ -584,7 +593,7 @@ class _FundingBanner extends StatelessWidget {
         color: AppColors.pastel(
             context, exceeds ? AppColors.overspent : AppColors.accent,
             light: 0.82, dark: 0.75),
-        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+        borderRadius: BorderRadius.circular(RadiusTokens.hero),
       ),
       child: Column(
         children: [
@@ -595,7 +604,7 @@ class _FundingBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(S.of(context).fundAvailableToDistribute,
-                      style: TextStyle(color: AppColors.tp(context).withValues(alpha: 0.65), fontSize: 13.5, fontWeight: FontWeight.w600)),
+                      style: TextStyle(color: AppColors.ts(context), fontSize: 13, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
                   // Large amounts shrink to one line instead of wrapping.
                   FittedBox(
@@ -622,7 +631,7 @@ class _FundingBanner extends StatelessWidget {
                       .map((e) => Text(
                             formatAmount(e.value, currency: e.key),
                             style: TextStyle(
-                                color: AppColors.tp(context).withValues(alpha: 0.65), fontSize: 12),
+                                color: AppColors.ts(context), fontSize: 12),
                           ))
                       .toList(),
                 ),
@@ -644,7 +653,7 @@ class _FundingBanner extends StatelessWidget {
                         formatAmount(available, currency: baseCurrency),
                       ),
                       style: TextStyle(
-                        color: AppColors.tp(context).withValues(alpha: 0.65),
+                        color: AppColors.ts(context),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -654,9 +663,9 @@ class _FundingBanner extends StatelessWidget {
                   ),
                   if (available > 0)
                     Text(
-                      '${(progress * 100).toStringAsFixed(0)}%',
+                      '${formatNumber(progress * 100, decimals: 0)}%',
                       style: TextStyle(
-                        color: AppColors.tp(context).withValues(alpha: 0.65),
+                        color: AppColors.ts(context),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -684,16 +693,16 @@ class _FundingBanner extends StatelessWidget {
                             formatAmount(unallocated[entry.key] ?? 0,
                                 currency: entry.key)),
                         style: TextStyle(
-                          color: AppColors.tp(context).withValues(alpha: 0.65),
+                          color: AppColors.ts(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       if ((unallocated[entry.key] ?? 0) > 0)
                         Text(
-                          '${((entry.value / (unallocated[entry.key] ?? 1)) * 100).clamp(0, 999).toStringAsFixed(0)}%',
+                          '${formatNumber(((entry.value / (unallocated[entry.key] ?? 1)) * 100).clamp(0, 999).toDouble(), decimals: 0)}%',
                           style: TextStyle(
-                            color: AppColors.tp(context).withValues(alpha: 0.65),
+                            color: AppColors.ts(context),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -748,29 +757,22 @@ class _QuickFillTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.pastel(context, AppColors.accent,
             light: 0.88, dark: 0.8),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(
-          color: AppColors.accent.withValues(alpha: 0.2),
-        ),
+        borderRadius: CardTokens.borderRadius,
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        child: InkWell(
+      child: Tappable(
           onTap: hasEnvelopes ? onQuickFill : null,
-          borderRadius: BorderRadius.circular(CardTokens.radius),
+          borderRadius: CardTokens.borderRadius,
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: CardTokens.padding,
             child: Row(
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: CategoryIconTokens.compactSize,
+                  height: CategoryIconTokens.compactSize,
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, AppColors.accent,
-                        light: 0.85, dark: 0.78),
-                    borderRadius: BorderRadius.circular(10),
+                        light: 0.78, dark: 0.7),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(
                     AppIcons.magicWand,
@@ -810,13 +812,12 @@ class _QuickFillTile extends StatelessWidget {
                   Icon(
                     AppIcons.caretRight,
                     size: 14,
-                    color: AppColors.accent.withValues(alpha: 0.6),
+                    color: AppColors.accent,
                   ),
               ],
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -856,13 +857,9 @@ class _FundingAllocationTile extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: CardTokens.padding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -886,7 +883,7 @@ class _FundingAllocationTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.pastel(context, AppColors.healthy,
                           light: 0.85, dark: 0.78),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -920,16 +917,10 @@ class _FundingAllocationTile extends StatelessWidget {
             // Row 2: progress bar + balance/target text
             if (hasTarget && targetProgress != null) ...[
               const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  value: targetProgress,
-                  minHeight: 5,
-                  backgroundColor: AppColors.bd(context),
-                  color: isFunded
-                      ? AppColors.healthy
-                      : AppColors.accent,
-                ),
+              BudgetProgress(
+                progress: targetProgress,
+                height: 6,
+                color: isFunded ? AppColors.healthy : AppColors.accent,
               ),
               const SizedBox(height: 4),
               Text(
@@ -963,7 +954,7 @@ class _FundingAllocationTile extends StatelessWidget {
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
                     child: Text(
                       currency,
@@ -979,7 +970,7 @@ class _FundingAllocationTile extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: CalculatorAmountField(
                         value: amount,
@@ -999,18 +990,12 @@ class _FundingAllocationTile extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: () => onAmountChanged(suggestedAmount!),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.accentLight,
-                        foregroundColor: AppColors.accent,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 10),
-                        minimumSize: const Size(0, 0),
+                        minimumSize: const Size(0, 44),
                       ),
                       child: Text(
                         S.of(context).fundFill(formatAmount(suggestedAmount!, currency: currency)),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ],
@@ -1067,64 +1052,35 @@ class _BottomFundBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final canFund = hasAnyAmount && !isFunding;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        boxShadow: Theme.of(context).brightness == Brightness.light
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4),
-                ),
-              ]
-            : null,
-      ),
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 8),
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: canFund ? onFund : null,
-            style: FilledButton.styleFrom(
-              disabledBackgroundColor: AppColors.sfv(context),
-              disabledForegroundColor: AppColors.th(context),
-              elevation: canFund ? 2 : 0,
-              shadowColor: AppColors.accent.withValues(alpha: 0.4),
-            ),
-            child: isFunding
-                ? SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: AppColors.onAccent,
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(AppIcons.wallet,
-                          size: 20),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          _fundLabel(context),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+    return BottomActionBar(
+      children: [
+        FilledButton(
+          onPressed: canFund ? onFund : null,
+          child: isFunding
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.onAccent,
                   ),
-          ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(AppIcons.wallet, size: 20),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        _fundLabel(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
         ),
-      ),
+      ],
     );
   }
 }

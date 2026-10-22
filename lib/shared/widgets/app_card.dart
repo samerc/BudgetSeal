@@ -6,9 +6,9 @@ import 'tappable.dart';
 
 /// Standardized card container used across all screens.
 ///
-/// Uses the design token values: radius 16, padding 16h/14v, an
-/// accent-tinted surface and a soft shadow in light mode (Cashew style —
-/// no border except a faint edge in the black theme). Tappable cards get a
+/// Uses the design token values: radius 16, padding 16h/14v, the warm
+/// neutral surface and a soft shadow in light mode (Cashew style — no border
+/// except a faint edge in the black theme). Tappable cards get a
 /// platform-aware ripple.
 class AppCard extends StatelessWidget {
   const AppCard({

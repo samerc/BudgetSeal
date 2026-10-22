@@ -3636,7 +3636,7 @@ abstract class S {
   /// No description provided for @allocNoArchived.
   ///
   /// In en, this message translates to:
-  /// **'No archived envelopes.'**
+  /// **'No archived envelopes'**
   String get allocNoArchived;
 
   /// No description provided for @allocUnarchived.
@@ -5440,18 +5440,6 @@ abstract class S {
   /// **'Bill is in {currency} but no rate was entered.\nThe transaction will be saved without conversion.'**
   String billRateNotSetContent(String currency);
 
-  /// Dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Go back'**
-  String get billGoBackBtn;
-
-  /// Dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Continue anyway'**
-  String get billContinueAnyway;
-
   /// Error snackbar
   ///
   /// In en, this message translates to:
@@ -5869,7 +5857,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Archive envelope'**
+  /// **'Archive envelope?'**
   String get allocArchiveTitle;
 
   /// Dialog content
@@ -5887,7 +5875,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Delete envelope'**
+  /// **'Delete envelope?'**
   String get allocDeleteTitle;
 
   /// Dialog button
@@ -6175,7 +6163,7 @@ abstract class S {
   /// No description provided for @allocDeleteNoLinksTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete envelope permanently'**
+  /// **'Delete envelope?'**
   String get allocDeleteNoLinksTitle;
 
   /// No description provided for @allocDeleteNoLinksMsg.
@@ -6283,7 +6271,7 @@ abstract class S {
   /// No description provided for @fundNoAllocations.
   ///
   /// In en, this message translates to:
-  /// **'No allocations to fund.\nCreate allocations first.'**
+  /// **'No envelopes to fund'**
   String get fundNoAllocations;
 
   /// No description provided for @fundHowTitle.
@@ -6907,7 +6895,7 @@ abstract class S {
   /// No description provided for @catDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete category'**
+  /// **'Delete category?'**
   String get catDeleteTitle;
 
   /// No description provided for @catDeleteNoTx.
@@ -7239,12 +7227,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'scheduled'**
   String get subDetailScheduled;
-
-  /// Dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel subscription'**
-  String get subDetailCancelTitle;
 
   /// Screen title
   ///
@@ -7582,12 +7564,6 @@ abstract class S {
   /// **'Color'**
   String get objColorSection;
 
-  /// Dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete objective'**
-  String get objDeleteTitle;
-
   /// Dialog content
   ///
   /// In en, this message translates to:
@@ -7653,12 +7629,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Goals track savings toward a target. Loans track money you lent or borrowed.'**
   String get objIntro;
-
-  /// Goals & loans
-  ///
-  /// In en, this message translates to:
-  /// **'Create your first goal'**
-  String get objCreateFirst;
 
   /// No description provided for @objDeleteLinkedPayments.
   ///
@@ -8599,7 +8569,7 @@ abstract class S {
   /// Tile title
   ///
   /// In en, this message translates to:
-  /// **'Help Guide'**
+  /// **'Help guide'**
   String get tileHelpGuide;
 
   /// Tile subtitle
@@ -11209,7 +11179,7 @@ abstract class S {
   /// Help guide reference on the onboarding done page
   ///
   /// In en, this message translates to:
-  /// **'Need help? Check our guide anytime from More > Help Guide.'**
+  /// **'Need help? Check our guide anytime from More > Help guide.'**
   String get onboardHelpHint;
 
   /// Biometric setup prompt
@@ -11863,7 +11833,7 @@ abstract class S {
   /// Help screen app bar title
   ///
   /// In en, this message translates to:
-  /// **'Help Guide'**
+  /// **'Help guide'**
   String get helpGuideTitle;
 
   /// Receipt picker option
@@ -12328,12 +12298,6 @@ abstract class S {
   /// **'Failed to post payment'**
   String get plannedPostFailed;
 
-  /// Dialog title for posting all planned payments in a month
-  ///
-  /// In en, this message translates to:
-  /// **'Post all payments'**
-  String get plannedPostAllTitle;
-
   /// Dialog body for posting all planned payments
   ///
   /// In en, this message translates to:
@@ -12357,12 +12321,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{posted} posted, {failed} failed'**
   String plannedPostAllResultPartial(int posted, int failed);
-
-  /// Dialog title for deleting a planned payment
-  ///
-  /// In en, this message translates to:
-  /// **'Delete planned payment'**
-  String get plannedDeleteTitle;
 
   /// Dialog body for deleting a planned payment
   ///
@@ -12517,7 +12475,7 @@ abstract class S {
   /// Upgrade screen title
   ///
   /// In en, this message translates to:
-  /// **'Upgrade to Premium'**
+  /// **'Upgrade to premium'**
   String get upgradeTitle;
 
   /// Upgrade screen subtitle
@@ -13275,6 +13233,606 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Name'**
   String get billPersonName;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Food & drink'**
+  String get emojiGroupFood;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get emojiGroupTransport;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Home & bills'**
+  String get emojiGroupHome;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get emojiGroupShopping;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Health & fitness'**
+  String get emojiGroupHealth;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get emojiGroupEntertainment;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Education & work'**
+  String get emojiGroupWork;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get emojiGroupMoney;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Family & pets'**
+  String get emojiGroupFamily;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Travel & leisure'**
+  String get emojiGroupTravel;
+
+  /// Emoji picker group label
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get emojiGroupOther;
+
+  /// Templates: search found nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No templates match \"{query}\"'**
+  String tmplNoMatch(String query);
+
+  /// Templates: SnackBar after deleting
+  ///
+  /// In en, this message translates to:
+  /// **'Template deleted'**
+  String get tmplDeleted;
+
+  /// Envelope: SnackBar after deleting
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope deleted'**
+  String get allocDeleted;
+
+  /// Reorder envelopes: SnackBar after saving
+  ///
+  /// In en, this message translates to:
+  /// **'Order saved'**
+  String get allocOrderSaved;
+
+  /// Leftover screen: SnackBar after saving
+  ///
+  /// In en, this message translates to:
+  /// **'Leftover resolved'**
+  String get leftoverResolved;
+
+  /// Period transition: SnackBar after completing
+  ///
+  /// In en, this message translates to:
+  /// **'New period ready'**
+  String get periodTransitionDone;
+
+  /// Category: SnackBar after linking it to an envelope
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {name}'**
+  String catEnvelopeLinked(String name);
+
+  /// Category: SnackBar after unlinking its envelope
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope unlinked'**
+  String get catEnvelopeUnlinked;
+
+  /// Confirm dialog title before removing a receipt photo from a transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this receipt?'**
+  String get txDetailRemoveReceiptTitle;
+
+  /// Confirm dialog body before removing a receipt photo
+  ///
+  /// In en, this message translates to:
+  /// **'The photo will be deleted from this transaction.'**
+  String get txDetailRemoveReceiptBody;
+
+  /// SnackBar after removing a receipt photo
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt removed'**
+  String get txDetailReceiptRemoved;
+
+  /// SnackBar when exporting selected transactions to CSV fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t export the transactions'**
+  String get txExportFailed;
+
+  /// Account detail: delete confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account?'**
+  String get acctDeleteConfirmTitle;
+
+  /// Account detail: archive confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Archive account?'**
+  String get acctArchiveConfirmTitle;
+
+  /// Accounts: unarchive confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive account?'**
+  String get acctUnarchiveConfirmTitle;
+
+  /// Account detail: SnackBar after archiving
+  ///
+  /// In en, this message translates to:
+  /// **'{name} archived'**
+  String acctArchivedSnack(String name);
+
+  /// Account detail: SnackBar after deleting
+  ///
+  /// In en, this message translates to:
+  /// **'{name} deleted'**
+  String acctDeletedSnack(String name);
+
+  /// Account detail: save failed SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the account'**
+  String get acctSaveFailed;
+
+  /// Account detail: adjust balance failed SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t adjust the balance'**
+  String get acctAdjustFailed;
+
+  /// Customize dashboard sheet: SnackBar after Reset
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard layout reset'**
+  String get customizeResetDone;
+
+  /// Export report: failure SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the report'**
+  String get exportReportFailed;
+
+  /// Export report: share sheet text
+  ///
+  /// In en, this message translates to:
+  /// **'BudgetSeal report – {month}'**
+  String exportShareText(String month);
+
+  /// Export report HTML: subtitle under the household name
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly report – {month}'**
+  String exportHtmlSubtitle(String month);
+
+  /// Export report HTML: transactions table heading
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions ({count})'**
+  String exportHtmlTransactions(int count);
+
+  /// Export report HTML: footer
+  ///
+  /// In en, this message translates to:
+  /// **'Generated by BudgetSeal – {date}'**
+  String exportHtmlFooter(String date);
+
+  /// Reports Overview/Insights: empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded this month'**
+  String get reportsNothingThisMonth;
+
+  /// Reports Overview/Insights: empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe or use the arrows to see other months.'**
+  String get reportsNothingThisMonthHint;
+
+  /// Global search: empty state title when nothing matches
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get searchNoMatches;
+
+  /// Recurring list: expense filter matches nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring expenses'**
+  String get recurringNoExpenses;
+
+  /// Recurring list: income filter matches nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring income'**
+  String get recurringNoIncome;
+
+  /// SnackBar after pausing a recurring transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction paused'**
+  String get recurringPausedSnack;
+
+  /// SnackBar after resuming a recurring transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction resumed'**
+  String get recurringResumedSnack;
+
+  /// SnackBar when pausing/resuming fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update recurring transaction'**
+  String get recurringUpdateFailed;
+
+  /// SnackBar when deleting a recurring transaction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete recurring transaction'**
+  String get recurringDeleteFailed;
+
+  /// SnackBar when creating/editing a recurring transaction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save recurring transaction'**
+  String get recurringSaveFailed;
+
+  /// Error state on the Recurring and Upcoming bills screens
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load recurring transactions'**
+  String get recurringLoadFailed;
+
+  /// SnackBar after pausing a subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription paused'**
+  String get subPausedSnack;
+
+  /// SnackBar after resuming a subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription resumed'**
+  String get subResumedSnack;
+
+  /// Tooltip of the pause button on a subscription row
+  ///
+  /// In en, this message translates to:
+  /// **'Pause subscription'**
+  String get subPauseTooltip;
+
+  /// Tooltip of the resume button on a subscription row
+  ///
+  /// In en, this message translates to:
+  /// **'Resume subscription'**
+  String get subResumeTooltip;
+
+  /// Subscriptions list: status filter matches nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions with this status'**
+  String get subNoMatch;
+
+  /// Error state on the Subscriptions screen
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load subscriptions'**
+  String get subLoadFailed;
+
+  /// Confirm dialog title for deleting a subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Delete subscription?'**
+  String get subDeleteTitle;
+
+  /// Confirm dialog body for deleting a subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Its past transactions stay in your history.'**
+  String get subDeleteBody;
+
+  /// SnackBar after deleting a subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription deleted'**
+  String get subDeleted;
+
+  /// SnackBar when deleting a subscription fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete subscription'**
+  String get subDeleteFailed;
+
+  /// Confirm dialog title for setting a subscription's cancellation date
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel subscription?'**
+  String get subCancelConfirmTitle;
+
+  /// SnackBar after setting a subscription's cancellation date
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation date set'**
+  String get subCancelDateSet;
+
+  /// Confirm dialog title for deleting a planned payment
+  ///
+  /// In en, this message translates to:
+  /// **'Delete planned payment?'**
+  String get plannedDeleteConfirmTitle;
+
+  /// Confirm dialog title for posting a month's planned payments
+  ///
+  /// In en, this message translates to:
+  /// **'Post all payments?'**
+  String get plannedPostAllConfirmTitle;
+
+  /// Error state on the Planned payments screen
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load planned payments'**
+  String get plannedLoadFailed;
+
+  /// Confirm dialog title for deleting a goal or loan
+  ///
+  /// In en, this message translates to:
+  /// **'Delete objective?'**
+  String get objDeleteConfirmTitle;
+
+  /// SnackBar after deleting a goal or loan
+  ///
+  /// In en, this message translates to:
+  /// **'Objective deleted'**
+  String get objDeleted;
+
+  /// Swatch that restores the default transaction color
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get txColorDefault;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get txColorRed;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get txColorOrange;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Amber'**
+  String get txColorAmber;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get txColorGreen;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Teal'**
+  String get txColorTeal;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get txColorBlue;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Indigo'**
+  String get txColorIndigo;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get txColorPurple;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Pink'**
+  String get txColorPink;
+
+  /// Color preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Slate'**
+  String get txColorSlate;
+
+  /// Thousands separator option
+  ///
+  /// In en, this message translates to:
+  /// **'Comma (1,000)'**
+  String get nfThousandsComma;
+
+  /// Thousands separator option
+  ///
+  /// In en, this message translates to:
+  /// **'Period (1.000)'**
+  String get nfThousandsPeriod;
+
+  /// Thousands separator option
+  ///
+  /// In en, this message translates to:
+  /// **'Space (1 000)'**
+  String get nfThousandsSpace;
+
+  /// Thousands separator option
+  ///
+  /// In en, this message translates to:
+  /// **'None (1000)'**
+  String get nfThousandsNone;
+
+  /// Decimal separator option
+  ///
+  /// In en, this message translates to:
+  /// **'Period (0.50)'**
+  String get nfDecimalPeriod;
+
+  /// Decimal separator option
+  ///
+  /// In en, this message translates to:
+  /// **'Comma (0,50)'**
+  String get nfDecimalComma;
+
+  /// Hint in the currency symbol dialog
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. {symbol}'**
+  String currencySymbolExample(String symbol);
+
+  /// Reset confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Reset everything?'**
+  String get resetConfirmTitle;
+
+  /// Restore confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get backupRestoreConfirmTitle;
+
+  /// Disconnect confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect sync?'**
+  String get syncDisconnectConfirmTitle;
+
+  /// Dialog title when the cloud holds another budget
+  ///
+  /// In en, this message translates to:
+  /// **'Use the synced budget?'**
+  String get syncOtherBudgetConfirmTitle;
+
+  /// Repair confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Repair balances?'**
+  String get healthRepairConfirmTitle;
+
+  /// Purge confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Purge deleted transactions?'**
+  String get healthPurgeConfirmTitle;
+
+  /// SnackBar after renaming the household
+  ///
+  /// In en, this message translates to:
+  /// **'Household name saved'**
+  String get householdNameSaved;
+
+  /// SnackBar after changing base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency changed to {code}'**
+  String baseCurrencySaved(String code);
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups on'**
+  String get backupAutoOnSnack;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups off'**
+  String get backupAutoOffSnack;
+
+  /// SnackBar after changing backup frequency/retention
+  ///
+  /// In en, this message translates to:
+  /// **'Backup settings saved'**
+  String get backupSettingsSaved;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder on'**
+  String get notifReminderOnSnack;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder off'**
+  String get notifReminderOffSnack;
+
+  /// SnackBar after changing reminder time or message
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder updated'**
+  String get notifReminderSaved;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Sync disconnected'**
+  String get syncDisconnectedSnack;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric lock on'**
+  String get biometricOnSnack;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric lock off'**
+  String get biometricOffSnack;
+
+  /// Web Companion: server stopped itself because Wi-Fi was lost
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped: the phone left the Wi-Fi network. Reconnect to start again.'**
+  String get wcStoppedNoWifi;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

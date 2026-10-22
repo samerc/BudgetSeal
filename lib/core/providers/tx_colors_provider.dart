@@ -19,11 +19,13 @@ class TxColors {
         customExpense = expense,
         customTransfer = transfer;
 
-  // Cashew's softened amount colors, brighter on dark surfaces.
+  // The app's income/expense colors (AppColors.healthy/overspent), lifted on
+  // dark surfaces. Every type-colored amount reads them from here so a
+  // color picked in Settings applies everywhere.
   Color get income => customIncome ??
-      (AppColors.isDark ? const Color(0xFF62CA77) : const Color(0xFF59A849));
+      (AppColors.isDark ? const Color(0xFF10B981) : AppColors.healthy);
   Color get expense => customExpense ??
-      (AppColors.isDark ? const Color(0xFFDA7272) : const Color(0xFFCA5A5A));
+      (AppColors.isDark ? const Color(0xFFEF4444) : AppColors.overspent);
   Color get transfer => customTransfer ??
       (AppColors.isDark ? const Color(0xFF8395FF) : const Color(0xFF6577E0));
 

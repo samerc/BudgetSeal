@@ -33,8 +33,13 @@ import 'widgets/feature_colors.dart';
 import 'widgets/export_entries.dart';
 import 'widgets/tx_form_args.dart';
 import 'widgets/tx_tile.dart';
+import 'widgets/tx_ui.dart';
 import '../../core/providers/premium_provider.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
@@ -42,6 +47,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/calculator_amount_field.dart' show showCalculatorSheet;
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/seal_mark.dart';
+import '../../shared/utils/calendar_days.dart';
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -192,25 +198,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Future<void> _deleteSelected() async {
     final count = _selectedIds.length;
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(tr.txDeleteSelectedTitle),
-        content: Text(tr.txDeleteSelectedContent(count)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonDelete),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.txDeleteSelectedTitle,
+      message: tr.txDeleteSelectedContent(count),
+      confirmLabel: tr.commonDelete,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final ids = _selectedIds.toList();
     setState(() {
@@ -227,6 +221,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         setState(() => _selectedIds.addAll(_lastFiltered.map((e) => e.tx.id)));
       case 'export':
         final cats = ref.read(categoriesProvider).value ?? const <Category>[];
+        final tr = S.of(context);
+        final messenger = ScaffoldMessenger.of(context);
         try {
           await shareEntriesCsv(
               _lastFiltered
@@ -235,6 +231,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               {for (final c in cats) c.id: c});
         } catch (e) {
           debugPrint('[Transactions] Export failed: $e');
+          messenger.showSnackBar(SnackBar(
+            content: Text(tr.txExportFailed),
+            behavior: SnackBarBehavior.floating,
+          ));
         }
       case 'category':
         final selected = _lastFiltered
@@ -269,23 +269,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             (e) => e.tx.type == pickedType, categoryId: picked);
       case 'account':
         final accounts = ref.read(accountsProvider).value ?? const <Account>[];
-        final picked = await showModalBottomSheet<String>(
-          context: context,
-          builder: (ctx) => SafeArea(
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                for (final a in accounts)
-                  ListTile(
-                    leading: const Icon(AppIcons.wallet),
-                    title: Text(a.name),
-                    trailing: Text(a.currency),
-                    onTap: () => Navigator.pop(ctx, a.id),
-                  ),
-              ],
-            ),
-          ),
-        );
+        final picked = await showAccountPickerSheet(context,
+            accounts: accounts, title: S.of(context).txBulkAccount);
         if (picked == null) return;
         await _bulkRewrite((e) => e.tx.type != 'transfer', accountId: picked);
       case 'date':
@@ -680,14 +665,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   child: entriesAsync.when(
                     data: (entries) =>
                         _buildContent(entries, categoryMap, context),
-                    loading: () => const SkeletonList(),
-                    error: (e, _) => ErrorRetry(
+                    loading: () => _pullable(const SkeletonList(),
+                        center: false),
+                    error: (e, _) => _pullable(ErrorRetry(
                       message: S.of(context).commonCouldntLoadData,
                       details: '$e',
                       onRetry: () => ref.invalidate(
                           monthlyTransactionsProvider(
                               (year: _selectedYear, month: _selectedMonth))),
-                    ),
+                    )),
                   ),
                 ),
               ),
@@ -768,6 +754,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     );
   }
 
+  /// A non-list body (skeleton, empty, error) made scrollable so
+  /// pull-to-refresh still works; [center] keeps it vertically centered.
+  Widget _pullable(Widget child, {bool center = true}) {
+    return LayoutBuilder(
+      builder: (context, c) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: c.maxHeight),
+          child: center ? Center(child: child) : child,
+        ),
+      ),
+    );
+  }
+
   void _flashTx(String? txId) {
     if (txId != null && mounted) {
       setState(() => _highlightedTxId = txId);
@@ -781,25 +781,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     hapticMedium();
     final txColors = ref.read(txColorsProvider);
     // Capture context-dependent values BEFORE the sheet opens
-    final bgColor = AppColors.sf(context);
-    final textColor = AppColors.tp(context);
     final tr = S.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: bgColor,
       builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Text(tr.txNewTransactionSheet,
-                  style: TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.w700,
-                      color: textColor)),
-              const SizedBox(height: 16),
-              Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SheetTitle(tr.txNewTransactionSheet),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
                 children: [
                   _TypeOption(
                     icon: AppIcons.minus,
@@ -838,8 +830,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -959,21 +951,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   fontSize: 15,
                   color: AppColors.tp(context),
                 ),
+                // The theme's filled input; only made compact for the bar.
                 decoration: InputDecoration(
                   hintText: S.of(context).txQuickAddHint,
-                  hintStyle: TextStyle(
-                    color: AppColors.th(context),
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.sfv(context),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
                 ),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _submitQuickAdd(context),
@@ -986,10 +969,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               child: IconButton.filled(
                 tooltip: S.of(context).txSendTooltip,
                 padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: AppColors.onAccent,
-                ),
                 icon: const Icon(AppIcons.arrowUp, size: 20),
                 onPressed: () => _submitQuickAdd(context),
               ),
@@ -1115,7 +1094,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             child: Row(
               children: [
                 // Left arrow
-                GestureDetector(
+                Tappable(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                   onTap: () {
                     hapticLight();
                     if (_selectedMonth == 1) {
@@ -1149,7 +1129,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     itemBuilder: (_, i) {
                       // First item: year selector
                       if (i == 0) {
-                        return GestureDetector(
+                        return Tappable(
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.md),
                           onTap: () => _showYearPicker(context),
                           child: Container(
                             width: _kYearSlot,
@@ -1174,13 +1156,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       final isCurrent =
                           _selectedYear == now.year && month == now.month;
                       final label =
-                          DateFormat('MMMM').format(DateTime(2000, month));
+                          capitalizedFirst(
+                              DateFormat.MMMM().format(DateTime(2000, month)));
                       // Cashew monthSelector: fixed 100px slot, track line,
                       // animated pill under the selected month.
                       return SizedBox(
                         width: _kMonthSlot,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.md),
                           onTap: () {
                             hapticSelection();
                             _setMonth(_selectedYear, month);
@@ -1252,7 +1236,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 )),
                 // Right arrow (hidden if at current month)
                 if (!_isFutureMonth && !(_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month))
-                GestureDetector(
+                Tappable(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                   onTap: () {
                     final now = DateTime.now();
                     hapticLight();
@@ -1292,27 +1277,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 2),
           child: Row(
             children: [
-              _FilterChip(
+              AppChip(
                 label: S.of(context).typeAll,
                 selected: _typeFilter == null,
                 onTap: () { setState(() => _typeFilter = null); _saveFilters(); },
               ),
               const SizedBox(width: 8),
-              _FilterChip(
+              AppChip(
                 label: S.of(context).typeIncome,
                 selected: _typeFilter == 'income',
                 color: ref.watch(txColorsProvider).income,
                 onTap: () { setState(() => _typeFilter = 'income'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
-              _FilterChip(
+              AppChip(
                 label: S.of(context).typeExpense,
                 selected: _typeFilter == 'expense',
                 color: ref.watch(txColorsProvider).expense,
                 onTap: () { setState(() => _typeFilter = 'expense'); _saveFilters(); },
               ),
               const SizedBox(width: 8),
-              _FilterChip(
+              AppChip(
                 label: S.of(context).typeTransfer,
                 selected: _typeFilter == 'transfer',
                 color: ref.watch(txColorsProvider).transfer,
@@ -1330,26 +1315,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   size: 16, color: AppColors.ts(context)),
               const SizedBox(width: 8),
               Expanded(
-                child: GestureDetector(
+                child: Tappable(
                   onTap: () => _pickDate(isFrom: true),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.bd(context)),
+                  borderRadius: BorderRadius.circular(RadiusTokens.input),
+                  child: InputDecorator(
+                    isEmpty: _dateFrom == null,
+                    decoration: InputDecoration(
+                      hintText: S.of(context).txFromDate,
+                      isDense: true,
                     ),
                     child: Text(
-                      _dateFrom != null
-                          ? formatDate(_dateFrom!)
-                          : S.of(context).txFromDate,
+                      _dateFrom != null ? formatDate(_dateFrom!) : '',
                       style: TextStyle(
-                        fontSize: 13,
-                        color: _dateFrom != null
-                            ? AppColors.tp(context)
-                            : AppColors.th(context),
-                      ),
+                          fontSize: 13, color: AppColors.tp(context)),
                     ),
                   ),
                 ),
@@ -1361,26 +1339,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                         color: AppColors.ts(context), fontSize: 16)),
               ),
               Expanded(
-                child: GestureDetector(
+                child: Tappable(
                   onTap: () => _pickDate(isFrom: false),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.bd(context)),
+                  borderRadius: BorderRadius.circular(RadiusTokens.input),
+                  child: InputDecorator(
+                    isEmpty: _dateTo == null,
+                    decoration: InputDecoration(
+                      hintText: S.of(context).txToDate,
+                      isDense: true,
                     ),
                     child: Text(
-                      _dateTo != null
-                          ? formatDate(_dateTo!)
-                          : S.of(context).txToDate,
+                      _dateTo != null ? formatDate(_dateTo!) : '',
                       style: TextStyle(
-                        fontSize: 13,
-                        color: _dateTo != null
-                            ? AppColors.tp(context)
-                            : AppColors.th(context),
-                      ),
+                          fontSize: 13, color: AppColors.tp(context)),
                     ),
                   ),
                 ),
@@ -1464,14 +1435,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         if (hasAdvancedFilters || _hasAnyFilter)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-            child: GestureDetector(
-              onTap: _clearAllFilters,
-              child: Text(
-                S.of(context).txClearAllFilters,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accent,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Tappable(
+                onTap: _clearAllFilters,
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                child: Text(
+                  S.of(context).txClearAllFilters,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accentText(context),
+                  ),
                 ),
               ),
             ),
@@ -1507,29 +1482,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Future<void> _pickAccountFilter() async {
     final tr = S.of(context);
     final accounts = ref.read(accountsProvider).value ?? const <Account>[];
-    final picked = await showModalBottomSheet<String>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            ListTile(
-              leading: const Icon(AppIcons.infinity),
-              title: Text(tr.txAllAccounts),
-              onTap: () => Navigator.pop(ctx, ''),
-            ),
-            for (final a in accounts)
-              ListTile(
-                leading: const Icon(AppIcons.wallet),
-                title: Text(a.name),
-                trailing: Text(a.currency),
-                selected: a.id == _accountFilter,
-                onTap: () => Navigator.pop(ctx, a.id),
-              ),
-          ],
-        ),
-      ),
-    );
+    final picked = await showAccountPickerSheet(context,
+        accounts: accounts,
+        title: tr.commonAccount,
+        selectedId: _accountFilter,
+        allLabel: tr.txAllAccounts);
     if (picked == null || !mounted) return;
     setState(() => _accountFilter = picked.isEmpty ? null : picked);
   }
@@ -1627,19 +1584,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           for (final (label, onRemove) in chips)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 6),
-              child: InputChip(
-                label: Text(label),
-                onDeleted: onRemove,
-                onPressed: () => setState(() => _showFilters = true),
-                visualDensity: VisualDensity.compact,
-                shape: const StadiumBorder(),
-                side: BorderSide.none,
-                backgroundColor: AppColors.accentLight,
-                labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.accent),
-                deleteIconColor: AppColors.accent,
+              // Tap removes the filter (the × says so); the funnel opens
+              // the panel.
+              child: AppChip(
+                label: label,
+                selected: true,
+                icon: AppIcons.x,
+                onTap: onRemove,
               ),
             ),
           if (chips.length > 1)
@@ -1747,46 +1698,23 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     if (filtered.isEmpty) {
       final hasFilters = _searchQuery.isNotEmpty || _hasAnyFilter;
-      final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      final monthLabel = '${monthNames[_selectedMonth - 1]} $_selectedYear';
-      return Column(
+      final monthLabel = capitalizedFirst(DateFormat.yMMM()
+          .format(DateTime(_selectedYear, _selectedMonth)));
+      return _pullable(Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_categoryFilter != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
+              child: AppChip(
+                label: S.of(context).txFilteredCategory(
+                    _categoryFilterName ?? S.of(context).commonCategory),
+                selected: true,
+                icon: AppIcons.x,
                 onTap: () => setState(() {
                   _categoryFilter = null;
                   _categoryFilterName = null;
                 }),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.pastel(context, AppColors.accent,
-                        light: 0.85, dark: 0.78),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).commonCategory),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.accent,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(AppIcons.x,
-                          size: 14, color: AppColors.accent),
-                    ],
-                  ),
-                ),
               ),
             ),
           EmptyState(
@@ -1815,7 +1743,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 : null,
           ),
         ],
-      );
+      ));
     }
 
     // Compute month summary — skip lines where currency differs from base
@@ -1872,42 +1800,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         if (_categoryFilter != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => setState(() {
-                    _categoryFilter = null;
-                    _categoryFilterName = null;
-                  }),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.pastel(context, AppColors.accent,
-                          light: 0.85, dark: 0.78),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: AppColors.accent.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          S.of(context).txFilteredCategory(_categoryFilterName ?? S.of(context).commonCategory),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.accent,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(AppIcons.x,
-                            size: 14, color: AppColors.accent),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AppChip(
+                label: S.of(context).txFilteredCategory(
+                    _categoryFilterName ?? S.of(context).commonCategory),
+                selected: true,
+                icon: AppIcons.x,
+                onTap: () => setState(() {
+                  _categoryFilter = null;
+                  _categoryFilterName = null;
+                }),
+              ),
             ),
           ),
         // ── Transaction list (sticky date headers) ──────────────
@@ -2205,7 +2109,7 @@ class _PlannedSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, kPlannedColor,
                       light: 0.85, dark: 0.75),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: Text(
                   S.of(context).plannedBadge,
@@ -2276,7 +2180,7 @@ class _PlannedTile extends StatelessWidget {
     // Date
     final date = tx.createdAt.toLocal();
 
-    return GestureDetector(
+    return Tappable(
       onTap: () async {
         await context.push('/plan-payment', extra: {
           'transaction': tx,
@@ -2372,47 +2276,6 @@ class _PlannedTile extends StatelessWidget {
 // Filter chip
 // ---------------------------------------------------------------------------
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color? color;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? AppColors.accent;
-    return GestureDetector(
-      onTap: () {
-        hapticLight();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? c : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected ? AppColors.inkOn(c) : AppColors.tp(context),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Date header tile — natural case, like "Today, April 11"
 // ---------------------------------------------------------------------------
@@ -2441,7 +2304,8 @@ class _SelectCheck extends StatelessWidget {
           border: Border.all(
             color: selected
                 ? AppColors.accent
-                : AppColors.accent.withValues(alpha: 0.6),
+                : AppColors.pastel(context, AppColors.accent,
+                    light: 0.35, dark: 0.3),
             width: 2,
           ),
         ),
@@ -2463,14 +2327,8 @@ class _DayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final edge = AppColors.cardBorder(context);
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-        border: edge == Colors.transparent ? null : Border.all(color: edge),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2528,7 +2386,7 @@ class _DateHeaderTile extends StatelessWidget {
           if (showTotal && dayTotal.abs() >= 0.005)
             Text(
               dayTotal > 0
-                  ? '+${formatAmount(dayTotal, currency: baseCurrency)}'
+                  ? bidiSafeAmount('+${formatAmount(dayTotal, currency: baseCurrency)}')
                   : formatAmount(dayTotal, currency: baseCurrency),
               style: TextStyle(
                 fontFamily: TypographyTokens.displayFamily,
@@ -2548,15 +2406,12 @@ class _DateHeaderTile extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
-    final diff = today.difference(d).inDays;
+    final diff = calendarDaysBetween(d, today);
     if (diff == 0) return S.of(context).commonToday;
     if (diff == 1) return S.of(context).commonYesterday;
-    return _capitalized(DateFormat.EEEE().format(date));
+    return capitalizedFirst(DateFormat.EEEE().format(date));
   }
 }
-
-String _capitalized(String s) =>
-    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
 /// Top of Activity: the month's budget — what's left of the spending
 /// envelopes' targets, a gold bar, spent of budgeted and income. A past
@@ -2584,7 +2439,7 @@ class _MonthBudgetCard extends StatelessWidget {
     final now = DateTime.now();
     final isPast = year < now.year || (year == now.year && month < now.month);
     final monthName =
-        _capitalized(DateFormat.MMMM().format(DateTime(year, month, 15)));
+        capitalizedFirst(DateFormat.MMMM().format(DateTime(year, month, 15)));
     String f(double v) => formatAmount(v, currency: currency);
     final hasBudget = budgeted > 0;
     final left = budgeted - spent;
@@ -2598,13 +2453,7 @@ class _MonthBudgetCard extends StatelessWidget {
       fontWeight: FontWeight.w700,
       color: AppColors.tp(context),
     );
-    final edge = AppColors.cardBorder(context);
-    final decoration = BoxDecoration(
-      color: AppColors.sf(context),
-      borderRadius: BorderRadius.circular(CardTokens.radius),
-      boxShadow: AppColors.cardShadow(context),
-      border: edge == Colors.transparent ? null : Border.all(color: edge),
-    );
+    final decoration = AppColors.card(context);
     final detailStyle = TextStyle(fontSize: 13, color: AppColors.ts(context));
 
     // A finished month within its budget: one calm line with the seal.
@@ -2723,7 +2572,7 @@ class _MonthlySummaryBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Row(
         children: [
@@ -2825,15 +2674,17 @@ class _TypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(CardTokens.radius);
     return Expanded(
-      child: GestureDetector(
+      child: Tappable(
         onTap: onTap,
+        borderRadius: radius,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             color: AppColors.pastel(context, color,
                 light: 0.88, dark: 0.8),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: radius,
           ),
           child: Column(children: [
             Container(
@@ -2875,9 +2726,9 @@ class _FilterPickerBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: active ? AppColors.accentLight : AppColors.sfv(context),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

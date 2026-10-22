@@ -29,8 +29,35 @@ All UI icons are **Phosphor** (phosphor_flutter, MIT) through `AppIcons` (`lib/s
 
 ### Screen Design Patterns
 - **Tab screens** (Dashboard, Activity, Budget, Reports, More): no back button. Home, Budget and More use `LargeTitleHeader` (`lib/shared/widgets/large_title_header.dart`) as the first sliver — Cashew's PageFrame title that shrinks from 28pt into a pinned 56px bar on scroll (actions stay top-end, optional subtitle fades). It pads for the status bar itself — no SafeArea around it.
-- **Sub-screens** (Recurring, Subscriptions, Templates, Categories): Custom SafeArea header, 24px bold title, back IconButton, filter chips, summary banner, pull-to-refresh
+- **List sub-screens** (Accounts, Categories, Recurring, Subscriptions, Upcoming bills, Goals & loans, Planned payments, Templates): `LargeTitleHeader(back: true)` as the first sliver (collapses like the tabs), filter chips (`AppChip`), summary banner, pull-to-refresh
 - **Detail/form screens** (Account detail, Allocation detail, etc.): Standard AppBar with auto back
+
+### The standard (Oct 23 2026 consistency pass)
+
+One way to do each thing. New code follows this; the Oct 23 pass moved existing screens onto it.
+
+| Thing | Use | Not |
+|---|---|---|
+| List sub-screen header | `LargeTitleHeader(title, back: true)` | hand-built SafeArea rows, AppBar on a list screen |
+| Detail / form / settings screen header | plain `AppBar` (theme; no `surfaceTintColor`/`elevation`/`centerTitle` overrides) | |
+| Card | `AppCard`; when it can't be (custom radius/clip) `AppColors.card(context, radius:)` | `sf + cardShadow` by hand (misses the black-mode edge), borders on cards |
+| Hero / banner / More group card radius | `RadiusTokens.hero` (20) | `lg + 4`, `dialog - 5`, `CardTokens.radius + 4` |
+| Other radii | `CardTokens.radius` 16 · `RadiusTokens.md` 12 (icon tiles, small boxes) · `sm` 8 · `pill` 20 | literals 10/14/24 |
+| List row leading icon | `CategoryIconTokens.listSize` 48 / `compactSize` 36, circle; envelope/category emoji via `CategoryIcon`/`EmojiGlyph` | 38/40/42/44/46 squares |
+| Sheet title | `SheetTitle(title, subtitle:, trailing:)` (18/w700), no handle or spacer above | 15–22 px literals, leftover `SizedBox` where a handle was |
+| Bottom sheet | theme sheet (`showModalBottomSheet` without colors/shape) or self-decorated `AppColors.popup` + `RadiusTokens.sheet` | `backgroundColor: sf` |
+| Confirm / delete dialog | `showConfirmDialog(context, title: '…?', message:, confirmLabel:, destructive:)` — Cancel outlined + red filled (`DialogButtons.destructive`) or accent filled | red `TextButton`s, `FilledButton.styleFrom(backgroundColor:)` |
+| Chip (filter / choice / type) | `AppChip(label, selected, onTap, icon:, color:)` | `_TypeChip`/`_FilterChip` copies, r10/r12 boxes |
+| Bottom bar under a form / flow | `BottomActionBar(children: [...], above:)` | hand-built shadows (`Colors.black26`, `0x14000000`) |
+| Loading | `SkeletonList` on list screens, spinner only on detail screens | |
+| Empty | `EmptyState` (also for "no search match", with its own message — never the "nothing yet" text) | Text in a Center |
+| Load failure | `ErrorRetry` (now styled like `EmptyState`) — never fall through to the empty state | |
+| Income/expense amount color | `ref.watch(txColorsProvider).forType(type)` / `.income` / `.expense` — defaults are the strong `healthy`/`overspent`, the user can change them in Settings | `AppColors.healthy/overspent` for a *type* (those stay for status: overspent, warnings, success) |
+| Bill colors | `AppColors.billUpcoming` / `billOverdue` | hex pairs |
+| Tap feedback | `Tappable` (or `AppCard(onTap:)`, `ListTile`) | bare `GestureDetector`/`InkWell` on visible surfaces |
+| Tints | `AppColors.pastel(...)`; secondary text `AppColors.ts` | `withValues(alpha:)` fills/borders/text |
+| Feedback | every save/delete/toggle: success and failure SnackBar | silent success, `try/finally` without catch |
+| Button labels | theme text style | `fontSize`/`fontWeight` on button labels |
 
 ### Standard Widgets
 - Loading: `SkeletonList` (Cashew ghost rows: circle + bars, theme-aware shimmer) for lists, `CircularProgressIndicator` for detail screens (list screens never show a bare centered spinner: in a sliver list `SliverToBoxAdapter(child: SkeletonList())`, in a box body a non-scrolling `SingleChildScrollView(child: SkeletonList())`)
@@ -74,7 +101,7 @@ All UI icons are **Phosphor** (phosphor_flutter, MIT) through `AppIcons` (`lib/s
 
 **Get started checklist** (`widgets/getting_started_card.dart`, always first): Record income → Create envelopes → Fund → Log an expense. `gettingStartedProvider` (`core/providers/getting_started_provider.dart`) is one watched SQL `EXISTS` query (posted income/expense, a live envelope, a `funding` ledger row); steps tick themselves and tap through to the screen. Once all four are done — or the user taps × — `gettingStartedHiddenProvider` stores `getting_started_hidden` and the card never returns. While it shows, the empty recent-activity card drops its "Record your income" button.
 
-Home is **budget-first**. Dashboard flow: Your budget (`widgets/budget_focus.dart` `BudgetFocus`: the shared `ReadyToAssignBanner` (`shared/widgets/ready_to_assign_banner.dart`, also the Budget tab's banner) when there are envelopes or unassigned money → "N envelopes overspent" card (target-currency balance < 0, rows open the envelope, red Cover pill → `showMoveMoneySheet(cover: true)`) → Cashew Upcoming/Overdue bill boxes from `widgets/bills_boxes.dart`) → Quick Actions → Spending Overview (donut + income/expense/net + spending insight) → Your Money (net worth card) → Activity (templates + recent transactions). Bill boxes: Upcoming = enabled recurring due within 7 days; the Overdue box only appears when something is past due (the recurring engine normally posts due bills at launch); only base-currency amounts are summed. Donut slices that share a color (subcategories inherit the parent's) get shifted shades. Status card and envelope health were removed — those live in Reports > Insights and Budget tab respectively.
+Home is **budget-first**. Dashboard flow: Your budget (`widgets/budget_focus.dart` `BudgetFocus`: the shared `ReadyToAssignBanner` (`shared/widgets/ready_to_assign_banner.dart`, also the Budget tab's banner) when there are envelopes or unassigned money → "N envelopes overspent" card (target-currency balance < 0, rows open the envelope, red Cover pill → `showMoveMoneySheet(cover: true)`) → Cashew Upcoming/Overdue bill boxes from `widgets/bills_boxes.dart`) → Quick Actions → Spending Overview (donut + `IncomeExpenseSummary` + spending insight) → Your Money (net worth in the shared `BalanceHero`, `features/accounts/widgets/balance_hero.dart` — the same hero as the Accounts total, an account's balance and the Reports balance sheet) → Activity (templates + recent transactions). Bill boxes: Upcoming = enabled recurring due within 7 days; the Overdue box only appears when something is past due (the recurring engine normally posts due bills at launch); only base-currency amounts are summed. Donut slices that share a color (subcategories inherit the parent's) get shifted shades. Status card and envelope health were removed — those live in Reports > Insights and Budget tab respectively.
 
 `lib/features/dashboard/dashboard_customize_sheet.dart` — bottom sheet with `ReorderableListView`, drag handles, and visibility switches. Opened via the tune icon in the dashboard header.
 
@@ -106,22 +133,25 @@ All three themes come from one `_buildTheme()`; surfaces are fixed warm neutrals
 ### Shared Layout Widgets
 - `SectionHeader` (`lib/shared/widgets/section_header.dart`): sentence case, 15px w700, accent color, optional trailing action
 - `AppCard` (`lib/shared/widgets/app_card.dart`): theme-aware bg/border, radius 16, standard padding, optional onTap
+- Settings-style rows (`lib/shared/widgets/settings_row.dart`): `SettingsRow` (42px pastel icon circle `SettingsIcon`, 16/w700 title, 13.5 description, chevron), `SettingsSwitchRow` (same typography; without an icon it sits flush inside a card — Backup, Notifications, Auto-fill, Onboarding). `SettingsRowStyle.hue(h, neutral:)` gives row icon colors from one saturation/lightness — no hand-picked hex.
+- `IconHeaderCard` (`lib/shared/widgets/icon_header_card.dart`): `AppCard` with a `SettingsIcon` + title header, optional description and trailing, then children — the section card of Backup, Notifications, Export, Import, Sync encryption.
+- `AppIconHero` (`lib/shared/widgets/app_icon_hero.dart`): app icon (84, `RadiusTokens.hero`) over a 28/w800 display title + subtitle — About and Upgrade.
 
 ## More Tab Structure
 
 The More tab is split into two screens:
 
 **More page** (tab) — feature hub:
-- Grouped list (`_MoreGroup` cards of `_MoreRow`s with dividers): **Money** (Accounts, Categories, Recurring & Bills, Subscriptions, Planned Payments), **Tools** (Goals & Loans, Bill Splitter, Travel Exchange, Web Companion), **App** (Settings, Help, About). Rows: icon circle, name, one-line description, chevron. Icon colors come from `HSLColor` hues at one shared saturation/lightness — don't hand-pick hex colors (they turn muddy as pastels).
+- Grouped list (`_MoreGroup` cards, `RadiusTokens.hero`, of `_MoreRow`s with dividers; rows use `Tappable` + `SettingsIcon`): **Money** (Accounts, Categories, Recurring & Bills, Subscriptions, Planned Payments), **Tools** (Goals & Loans, Bill Splitter, Travel Exchange, Web Companion), **App** (Settings, Help, About). Rows: icon circle, name, one-line description, chevron. Icon colors come from `SettingsRowStyle.hue()` (one shared saturation/lightness) — don't hand-pick hex colors (they turn muddy as pastels).
 - Backup reminder: one slim amber row (message · Backup Now · dismiss) above the groups
 - App group: Settings & Customization → navigates to `/settings`
-- Help Guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
+- Help guide → navigates to `/help` (WebView loading bundled `assets/web/help.html`)
 - About PocketPlan
 - Household name + currency shown as subtitle under "More" header (no separate card)
 
 Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) and long-press on the Activity tab FAB.
 
-**Settings screen** (`/settings`) — all configuration. Rows are flat Cashew `SettingsContainer`s (`_SettingsTile`: transparent Material + ListTile, 42px pastel icon circle, 16/w700 title) — never wrap a ListTile in a colored DecoratedBox (hides the ripple).
+**Settings screen** (`/settings`) — all configuration. Rows are flat Cashew `SettingsContainer`s (`SettingsRow` / `SettingsSwitchRow`: transparent Material + ListTile, 42px pastel icon circle, 16/w700 title, icon color from `SettingsRowStyle.hue`) — never wrap a ListTile in a colored DecoratedBox (hides the ripple). Sections are `SectionHeader` + `Spacing.headerToCard`, separated by `Spacing.sectionGap`. Every sheet starts with `SheetTitle` (no handle/spacer); single-choice pickers (theme, start screen, font, text size, language, date format) close on tap; the start-screen picker shows the nav bar's icons. Saves show a SnackBar (household name, base currency, biometric on/off). Transaction colors: a "Default" swatch (the theme's strong green/red, `TxColors` with no custom color) before the presets; the preview uses `formatSignedAmount` with the base currency. Number format options are `AppChip`s with localized labels. Share household is one sheet (`settings/share_household_sheet.dart`, `showShareHouseholdSheet`) used by Settings and Sync; Redeem code is one dialog (`premium/redeem_dialog.dart`) used by About and Upgrade. Confirms (reset, restore, disconnect, remove encryption, purge, repair) use `showConfirmDialog`.
 - **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
 - **PREFERENCES**: Household Name, Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
@@ -130,7 +160,7 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button) 
 
 ## Onboarding
 
-3-page flow on the app's own theme (paper/night surfaces, theme-aware colors, status bar icons follow the brightness): Welcome (the seal app icon `assets/icon/splash_logo.png` as on the splash, how-it-works card; Get started / Restore my budget / Join a household are pinned under the scrolling content so they're reachable at any text size) → Setup (household name, currency, period day; first account name, type chips, opening balance; "Add suggested categories" switch) → Done (next step: income → envelopes). Inputs use the theme's filled style (`CurrencyPickerField` and the opening balance `InputDecorator` match the TextFields); buttons are theme Filled/Outlined/Text with no overrides; sheets use the theme sheet (radius 20, no handle) and show `syncErrorText(e)`, never `e.toString()`. The account name follows the type chip while it still equals the previous type's label. Back on Setup returns to Welcome (`PopScope` + an app-bar back arrow); back on Done goes to `/`. Setup uses `db.batch()` for atomic account + category creation; with "Create envelopes for main categories" on (default, shown only with suggested categories) it also creates a spending envelope per group in `kEnvelopeGroupKeys` (category_presets.dart) and links the group via `categories.allocationId`. Validation errors (theme error style) clear on typing, and the page scrolls to the first one (`Scrollable.ensureVisible` on the field's GlobalKey). With no accounts yet, `CurrencySheet` pins the chosen currency under "Selected".
+3-page flow on the app's own theme (paper/night surfaces, theme-aware colors, status bar icons follow the brightness): Welcome (the seal app icon `assets/icon/splash_logo.png` as on the splash, how-it-works card; Get started / Restore my budget / Join a household are pinned under the scrolling content so they're reachable at any text size) → Setup (household name, currency, period day; first account name, type `AppChip`s, opening balance; "Add suggested categories" `SettingsSwitchRow`) → Done (next step: income → envelopes). Cards are `AppCard`s and sheets start with `SheetTitle`. Inputs use the theme's filled style (`CurrencyPickerField` and the opening balance `InputDecorator` match the TextFields); buttons are theme Filled/Outlined/Text with no overrides; sheets use the theme sheet (radius 20, no handle) and show `syncErrorText(e)`, never `e.toString()`. The account name follows the type chip while it still equals the previous type's label. Back on Setup returns to Welcome (`PopScope` + an app-bar back arrow); back on Done goes to `/`. Setup uses `db.batch()` for atomic account + category creation; with "Create envelopes for main categories" on (default, shown only with suggested categories) it also creates a spending envelope per group in `kEnvelopeGroupKeys` (category_presets.dart) and links the group via `categories.allocationId`. Validation errors (theme error style) clear on typing, and the page scrolls to the first one (`Scrollable.ensureVisible` on the field's GlobalKey). With no accounts yet, `CurrencySheet` pins the chosen currency under "Selected".
 
 ## Navigation Bar (5 tabs)
 
@@ -159,4 +189,4 @@ Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jaka
 
 **In-app delivery:** `lib/features/settings/help_screen.dart` — `WebView` loads the HTML from `rootBundle`. Injects dark mode CSS variables based on current app theme. Supports deep-linking to sections via `?section=` query parameter (e.g., `context.push('/help?section=envelopes')`).
 
-Route: `/help`, accessible from More > Help Guide.
+Route: `/help`, accessible from More > Help guide.

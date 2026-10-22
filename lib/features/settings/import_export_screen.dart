@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/generated/app_localizations.dart';
-import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/settings_row.dart';
 
 class ImportExportScreen extends StatelessWidget {
   const ImportExportScreen({super.key});
@@ -12,32 +13,29 @@ class ImportExportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).ieTitle),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(S.of(context).ieTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
           _HubTile(
             icon: AppIcons.fileArrowUp,
-            iconColor: const Color(0xFF26A69A),
+            iconColor: SettingsRowStyle.hue(174),
             title: S.of(context).ieImportCsv,
             subtitle: S.of(context).ieImportCsvSub,
             onTap: () => context.push('/import'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.sm),
           _HubTile(
             icon: AppIcons.downloadSimple,
-            iconColor: const Color(0xFF66BB6A),
+            iconColor: SettingsRowStyle.hue(123),
             title: S.of(context).ieExportCsv,
             subtitle: S.of(context).ieExportCsvSub,
             onTap: () => context.push('/export'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.sm),
           _HubTile(
             icon: AppIcons.filePdf,
-            iconColor: const Color(0xFFEF5350),
+            iconColor: SettingsRowStyle.hue(1),
             title: S.of(context).ieExportReport,
             subtitle: S.of(context).ieExportReportSub,
             onTap: () => context.push('/export-report'),
@@ -65,49 +63,14 @@ class _HubTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          boxShadow: AppColors.cardShadow(context),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, iconColor,
-                    light: 0.85, dark: 0.78),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context))),
-                  const SizedBox(height: 2),
-                  Text(subtitle,
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.ts(context))),
-                ],
-              ),
-            ),
-            Icon(AppIcons.caretRight,
-                size: 20, color: AppColors.th(context)),
-          ],
-        ),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: SettingsRow(
+        icon: icon,
+        iconColor: iconColor,
+        title: title,
+        subtitle: subtitle,
+        onTap: onTap,
       ),
     );
   }

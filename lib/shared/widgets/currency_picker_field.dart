@@ -5,6 +5,8 @@ import '../../core/providers/accounts_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
+import '../theme/design_tokens.dart';
+import 'tappable.dart';
 
 /// A read-only field that opens the currency picker sheet when tapped.
 class CurrencyPickerField extends ConsumerWidget {
@@ -43,7 +45,8 @@ class CurrencyPickerField extends ConsumerWidget {
     return LayoutBuilder(builder: (context, box) {
       final showFlag = flag != null && box.maxWidth >= 160;
       final showSymbol = symbol != null && box.maxWidth >= 200;
-      return GestureDetector(
+      return Tappable(
+        borderRadius: BorderRadius.circular(RadiusTokens.input),
         onTap: () async {
           final result = await showModalBottomSheet<String>(
             context: context,

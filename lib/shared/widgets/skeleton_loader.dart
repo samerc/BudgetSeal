@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/design_tokens.dart';
 
 
 /// A shimmer skeleton placeholder for loading states.
@@ -14,7 +15,7 @@ class SkeletonLoader extends StatelessWidget {
     super.key,
     required this.height,
     this.width,
-    this.borderRadius = 16,
+    this.borderRadius = CardTokens.radius,
   });
 
   @override

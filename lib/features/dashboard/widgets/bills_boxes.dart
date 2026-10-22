@@ -12,6 +12,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/tappable.dart';
 import '../../../shared/theme/app_icons.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Enabled recurring bills, live from the database.
 final _enabledRecurringProvider =
@@ -58,7 +59,6 @@ class BillsBoxes extends ConsumerWidget {
       }
     }
 
-    final dark = AppColors.isDark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -67,7 +67,7 @@ class BillsBoxes extends ConsumerWidget {
             child: _Box(
               label: S.of(context).dashUpcoming,
               icon: AppIcons.calendarDots,
-              color: dark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2),
+              color: AppColors.billUpcoming,
               bills: upcoming,
               baseCurrency: baseCurrency,
               wide: overdue.isEmpty,
@@ -81,7 +81,7 @@ class BillsBoxes extends ConsumerWidget {
             child: _Box(
               label: S.of(context).dashOverdue,
               icon: AppIcons.clockCounterClockwise,
-              color: dark ? const Color(0xFF8395FF) : const Color(0xFF6577E0),
+              color: AppColors.billOverdue,
               bills: overdue,
               baseCurrency: baseCurrency,
             ),
@@ -130,8 +130,8 @@ class _Box extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontSize: TypographyTokens.cardTitleSize,
+              fontWeight: TypographyTokens.cardTitleWeight,
               color: AppColors.tp(context),
             ),
           ),
@@ -144,8 +144,9 @@ class _Box extends StatelessWidget {
       child: Text(
         formatAmount(total, currency: baseCurrency),
         style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
+          fontSize: TypographyTokens.amountDisplaySize,
+          fontFamily: TypographyTokens.displayFamily,
+          fontWeight: TypographyTokens.amountDisplayWeight,
           color: color,
         ),
       ),
@@ -153,18 +154,18 @@ class _Box extends StatelessWidget {
     final count = Text(
       S.of(context).dashBillsCount(bills.length),
       style: TextStyle(
-        fontSize: 13,
-        color: AppColors.tp(context).withValues(alpha: 0.6),
+        fontSize: TypographyTokens.amountSmallSize,
+        color: AppColors.ts(context),
       ),
     );
 
     // The fill goes on Tappable's Material so the ripple shows on top of it.
     return Tappable(
       onTap: () => context.push('/upcoming-bills'),
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: CardTokens.borderRadius,
       color: bg,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        padding: CardTokens.padding,
         child: wide
             // Amount hugs the end; capped so large text scales it down
             // instead of overflowing.

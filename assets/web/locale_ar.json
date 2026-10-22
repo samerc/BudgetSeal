@@ -453,5 +453,10 @@
   "web_overspent_title": "أظرف متجاوزة",
   "web_env_over_by": "تجاوز بـ {amount}",
   "web_bills_week": "فواتير مستحقة هذا الأسبوع",
-  "web_n_accounts": "حسابات: {n}"
+  "web_n_accounts": "حسابات: {n}",
+  "web_load_failed": "تعذّر تحميل هذه الصفحة",
+  "web_load_failed_sub": "تأكد أن هاتفك على شبكة Wi‑Fi نفسها وأن Web Companion قيد التشغيل، ثم حاول مجددًا.",
+  "web_filter_no_match": "لا شيء يطابق هذا الفلتر",
+  "web_filter_no_match_sub": "جرّب فلترًا آخر، أو أزله لعرض كل شيء.",
+  "web_sub_cancelled": "ملغى"
 }

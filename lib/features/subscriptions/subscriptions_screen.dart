@@ -4,14 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/database_provider.dart';
-import '../../core/providers/date_format_provider.dart';
+import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../recurring/recurring_screen.dart' show AddRecurringSheet;
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/tappable.dart';
+import '../recurring/recurring_format.dart';
+import '../recurring/recurring_screen.dart'
+    show AddRecurringSheet, RecurringStatusDot;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
@@ -30,6 +37,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   Map<String, String> _categoryIcons = {};
   Map<String, String> _categoryColors = {};
   bool _loading = true;
+  Object? _error;
 
   @override
   void initState() {
@@ -40,7 +48,10 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
   Future<void> _load() async {
     try {
       final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
       final db = ref.read(databaseProvider);
 
       final rows = await db.customSelect(
@@ -70,72 +81,44 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
           _categoryIcons = catIcons;
           _categoryColors = catColors;
           _loading = false;
+          _error = null;
         });
       }
     } catch (e) {
       debugPrint('[Subscriptions] Error loading: $e');
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  /// Toggle enabled/disabled state for a subscription (Bug 2 fix)
-  Future<void> _toggleEnabled(Map<String, dynamic> sub) async {
-    try {
-      final db = ref.read(databaseProvider);
-      final subId = sub['id']?.toString() ?? '';
-      if (subId.isEmpty) return;
-      final currentlyEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
-      final enabled = !currentlyEnabled;
-      await db.customStatement(
-        'UPDATE recurring_transactions SET enabled = ? WHERE id = ?',
-        [enabled ? 1 : 0, subId],
-      );
-      _load();
-    } catch (e) {
-      debugPrint('[Subscriptions] Error toggling: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).subCouldNotUpdate),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() {
+          _loading = false;
+          _error = e;
+        });
       }
     }
   }
 
-  double _monthlyEquivalent(double amount, String frequency, int interval) {
-    final iv = interval > 0 ? interval : 1; // guard malformed interval (÷0)
-    return switch (frequency) {
-      'daily' => amount * (30.0 / iv),
-      'weekly' => amount * (52.0 / (12.0 * iv)),
-      'monthly' => amount / iv,
-      'yearly' => amount / (12.0 * iv),
-      _ => amount,
-    };
-  }
-
-  String _frequencySuffix(String frequency, int interval) {
+  /// Pause or resume a subscription through the recurring engine (moves
+  /// last_modified so sync picks it up).
+  Future<void> _toggleEnabled(Map<String, dynamic> sub) async {
     final tr = S.of(context);
-    if (interval == 1) {
-      return switch (frequency) {
-        'daily' => tr.subFreqDay,
-        'weekly' => tr.subFreqWeek,
-        'monthly' => tr.subFreqMonth,
-        'yearly' => tr.subFreqYear,
-        _ => '/$frequency',
-      };
+    final messenger = ScaffoldMessenger.of(context);
+    void snack(String m) => messenger.showSnackBar(
+        SnackBar(content: Text(m), behavior: SnackBarBehavior.floating));
+    try {
+      final subId = sub['id']?.toString() ?? '';
+      if (subId.isEmpty) return;
+      final enabled = !_isEnabled(sub);
+      await ref.read(recurringEngineProvider).toggleEnabled(subId, enabled);
+      snack(enabled ? tr.subResumedSnack : tr.subPausedSnack);
+    } catch (e) {
+      debugPrint('[Subscriptions] Error toggling: $e');
+      snack(tr.subCouldNotUpdate);
     }
-    return switch (frequency) {
-      'daily' => tr.subFreqDays(interval),
-      'weekly' => tr.subFreqWeeks(interval),
-      'monthly' => tr.subFreqMonths(interval),
-      'yearly' => tr.subFreqYears(interval),
-      _ => '/$interval $frequency',
-    };
+    _load();
   }
 
-  DateTime? _parseDate(dynamic value) {
+  static bool _isEnabled(Map<String, dynamic> sub) =>
+      sub['enabled'] == 1 || sub['enabled'] == true;
+
+  static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
     if (value is DateTime) return value;
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
@@ -143,47 +126,45 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
     return null;
   }
 
-  /// Determine subscription status: 'active', 'cancelled', or 'ending_soon'
-  String _status(Map<String, dynamic> sub) {
-    final enabled = sub['enabled'] == 1 || sub['enabled'] == true;
-    final endDate = _parseDate(sub['end_date']);
-    if (!enabled || (endDate != null && endDate.isBefore(DateTime.now()))) {
-      return 'cancelled';
-    }
-    if (endDate != null &&
-        endDate.difference(DateTime.now()).inDays <= 30) {
-      return 'ending_soon';
-    }
-    return 'active';
-  }
+  String _status(Map<String, dynamic> sub) => subscriptionStatus(
+      enabled: _isEnabled(sub), endDate: _parseDate(sub['end_date']));
 
-  String? _statusFilter; // null = all, 'active', 'cancelled'
+  String? _statusFilter; // null = all, 'active', 'paused', 'cancelled'
   bool _showOtherCurrencies = false;
 
   List<Map<String, dynamic>> get _filtered {
     if (_statusFilter == null) return _subs;
-    return _subs.where((s) => _status(s) == _statusFilter).toList();
+    // "Active" includes the ones ending soon (still billing).
+    return _subs.where((s) {
+      final st = _status(s);
+      return _statusFilter == 'active'
+          ? (st == 'active' || st == 'ending_soon')
+          : st == _statusFilter;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final tr = S.of(context);
     final filtered = _filtered;
+    final statuses = _subs.map(_status).toList();
     final activeCount =
-        _subs.where((s) => _status(s) == 'active').length;
-    final cancelledCount =
-        _subs.where((s) => _status(s) == 'cancelled').length;
+        statuses.where((s) => s == 'active' || s == 'ending_soon').length;
+    final pausedCount = statuses.where((s) => s == 'paused').length;
+    final cancelledCount = statuses.where((s) => s == 'cancelled').length;
 
-    // Group monthly totals by currency to avoid mixing
+    // Group monthly totals by currency to avoid mixing; only what still bills.
     final baseCurrency = ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
     final monthlyByCurrency = <String, double>{};
     for (final s in _subs) {
-      if (_status(s) == 'cancelled') continue;
+      final st = _status(s);
+      if (st == 'cancelled' || st == 'paused') continue;
       final amount = (s['amount'] as num?)?.toDouble() ?? 0;
       final currency = s['currency'] as String? ?? baseCurrency;
       final freq = s['frequency'] as String? ?? 'monthly';
       final interval = (s['interval'] as int?) ?? 1;
-      monthlyByCurrency[currency] =
-          (monthlyByCurrency[currency] ?? 0) + _monthlyEquivalent(amount, freq, interval);
+      monthlyByCurrency[currency] = (monthlyByCurrency[currency] ?? 0) +
+          recurringMonthlyEquivalent(amount, freq, interval);
     }
     final monthlyTotal = monthlyByCurrency[baseCurrency] ?? 0.0;
     final annualTotal = monthlyTotal * 12;
@@ -192,7 +173,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        tooltip: S.of(context).subAddTooltip,
+        tooltip: tr.subAddTooltip,
         onPressed: () async {
           final result = await showModalBottomSheet<bool>(
             context: context,
@@ -206,361 +187,241 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
         },
         child: const Icon(AppIcons.plus),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: _load,
-          child: CustomScrollView(
-            slivers: [
-              // ── Header ──
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(title: tr.subTitle, back: true),
+
+            // ── Cost banner ──
+            if (_subs.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(AppIcons.arrowLeft),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: FittedBox(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.pastel(context, AppColors.accent,
+                          light: 0.8, dark: 0.75),
+                      borderRadius: BorderRadius.circular(RadiusTokens.hero),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,
                           child: Text(
-                            S.of(context).subTitle,
+                            '${formatAmount(monthlyTotal, currency: baseCurrency)}${tr.subFreqMonth}',
                             style: TextStyle(
+                              color: AppColors.tp(context),
                               fontSize: TypographyTokens.screenTitleSize,
                               fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.tp(context),
+                              fontWeight: TypographyTokens.screenTitleWeight,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        Tappable(
+                          onTap: hasOtherCurrencies
+                              ? () => setState(() =>
+                                  _showOtherCurrencies = !_showOtherCurrencies)
+                              : null,
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${formatAmount(annualTotal, currency: baseCurrency)}${tr.subFreqYear}',
+                                style: TextStyle(
+                                  color: AppColors.ts(context),
+                                  fontSize: 13,
+                                ),
+                              ),
+                              if (hasOtherCurrencies) ...[
+                                const SizedBox(width: 4),
+                                AnimatedRotation(
+                                  turns: _showOtherCurrencies ? 0.5 : 0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Icon(AppIcons.caretDown,
+                                      size: 16, color: AppColors.ts(context)),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (_showOtherCurrencies)
+                          ...monthlyByCurrency.entries
+                              .where((e) => e.key != baseCurrency && e.value > 0)
+                              .map((e) => Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      '${formatAmount(e.value, currency: e.key)}${tr.subFreqMonth}',
+                                      style: TextStyle(
+                                        color: AppColors.ts(context),
+                                        fontSize: TypographyTokens.captionSize,
+                                      ),
+                                    ),
+                                  )),
+                      ],
+                    ),
                   ),
                 ),
               ),
 
-              // ── Summary banner ──
-              if (_subs.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppColors.pastel(context, AppColors.accent,
-                            light: 0.8, dark: 0.75),
-                        borderRadius: BorderRadius.circular(CardTokens.radius),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: Text(
-                                    '${formatAmount(monthlyTotal, currency: baseCurrency)}${S.of(context).subFreqMonth}',
-                                    style: TextStyle(
-                                      color: AppColors.tp(context),
-                                      fontSize: TypographyTokens.screenTitleSize,
-                                      fontFamily: TypographyTokens.displayFamily,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                GestureDetector(
-                                  onTap: hasOtherCurrencies
-                                      ? () => setState(() => _showOtherCurrencies = !_showOtherCurrencies)
-                                      : null,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '${formatAmount(annualTotal, currency: baseCurrency)}${S.of(context).subFreqYear}',
-                                        style: TextStyle(
-                                          color: AppColors.tp(context).withValues(alpha: 0.6),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      if (hasOtherCurrencies) ...[
-                                        const SizedBox(width: 4),
-                                        AnimatedRotation(
-                                          turns: _showOtherCurrencies ? 0.5 : 0,
-                                          duration: const Duration(milliseconds: 200),
-                                          child: Icon(AppIcons.caretDown,
-                                              size: 16, color: AppColors.tp(context).withValues(alpha: 0.6)),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                if (_showOtherCurrencies)
-                                  ...monthlyByCurrency.entries
-                                      .where((e) => e.key != baseCurrency && e.value > 0)
-                                      .map((e) => Padding(
-                                            padding: const EdgeInsets.only(top: 2),
-                                            child: Text(
-                                              '${formatAmount(e.value, currency: e.key)}${S.of(context).subFreqMonth}',
-                                              style: TextStyle(
-                                                color: AppColors.tp(context).withValues(alpha: 0.55),
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          )),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: AppColors.pastel(context, AppColors.accent, light: 0.6, dark: 0.55),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '$activeCount ${S.of(context).subActive.toLowerCase()}',
-                              style: TextStyle(
-                                color: AppColors.tp(context),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // ── Count summary ──
-              if (_subs.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(CardTokens.radius),
-                      ),
-                      child: Row(
-                        children: [
-                          _CountChip(
-                            icon: AppIcons.playCircle,
-                            label: '${_subs.length}',
-                            subtitle: S.of(context).subTotal,
-                            color: AppColors.accent,
-                          ),
-                          const SizedBox(width: 16),
-                          _CountChip(
-                            icon: AppIcons.play,
-                            label: '$activeCount',
-                            subtitle: S.of(context).subActive,
-                            color: AppColors.healthy,
-                          ),
-                          if (cancelledCount > 0) ...[
-                            const SizedBox(width: 16),
-                            _CountChip(
-                              icon: AppIcons.xCircle,
-                              label: '$cancelledCount',
-                              subtitle: S.of(context).subCancelled,
-                              color: AppColors.overspent,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // ── Status filter chips ──
+            // ── Count summary ──
+            if (_subs.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-                  child: Row(
-                    children: [
-                      _StatusChip(
-                        label: S.of(context).typeAll,
-                        selected: _statusFilter == null,
-                        onTap: () =>
-                            setState(() => _statusFilter = null),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: SummaryStrip(chips: [
+                    SummaryChip(
+                      icon: AppIcons.playCircle,
+                      label: '${_subs.length}',
+                      subtitle: tr.subTotal,
+                      color: AppColors.accent,
+                    ),
+                    SummaryChip(
+                      icon: AppIcons.play,
+                      label: '$activeCount',
+                      subtitle: tr.subActive,
+                      color: AppColors.healthy,
+                    ),
+                    if (pausedCount > 0)
+                      SummaryChip(
+                        icon: AppIcons.pause,
+                        label: '$pausedCount',
+                        subtitle: tr.recurringStatusPaused,
+                        color: AppColors.ts(context),
                       ),
-                      const SizedBox(width: 8),
-                      _StatusChip(
-                        label: S.of(context).subActive,
+                    if (cancelledCount > 0)
+                      SummaryChip(
+                        icon: AppIcons.xCircle,
+                        label: '$cancelledCount',
+                        subtitle: tr.subCancelled,
+                        color: AppColors.overspent,
+                      ),
+                  ]),
+                ),
+              ),
+
+            // ── Status filter chips ──
+            if (_subs.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      AppChip(
+                        label: tr.typeAll,
+                        selected: _statusFilter == null,
+                        onTap: () => setState(() => _statusFilter = null),
+                      ),
+                      AppChip(
+                        label: tr.subActive,
                         selected: _statusFilter == 'active',
                         color: AppColors.healthy,
-                        onTap: () =>
-                            setState(() => _statusFilter = 'active'),
+                        onTap: () => setState(() => _statusFilter = 'active'),
                       ),
-                      if (cancelledCount > 0) ...[
-                        const SizedBox(width: 8),
-                        _StatusChip(
-                          label: S.of(context).subCancelled,
+                      if (pausedCount > 0)
+                        AppChip(
+                          label: tr.recurringStatusPaused,
+                          selected: _statusFilter == 'paused',
+                          onTap: () =>
+                              setState(() => _statusFilter = 'paused'),
+                        ),
+                      if (cancelledCount > 0)
+                        AppChip(
+                          label: tr.subCancelled,
                           selected: _statusFilter == 'cancelled',
                           color: AppColors.overspent,
                           onTap: () =>
                               setState(() => _statusFilter = 'cancelled'),
                         ),
-                      ],
                     ],
                   ),
                 ),
               ),
 
-              // ── List ──
-              if (_loading)
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: SkeletonList(),
-                  ),
-                )
-              else if (_subs.isEmpty)
-                SliverFillRemaining(
-                  child: EmptyState(
-                    icon: AppIcons.playCircle,
-                    title: S.of(context).subNoTitle,
-                    subtitle: S.of(context).subNoSubtitle,
-                  ),
-                )
-              else if (filtered.isEmpty)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      S.of(context).subNoTitle,
-                      style: TextStyle(color: AppColors.ts(context)),
+            // ── List ──
+            if (_loading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: SkeletonList(),
+                ),
+              )
+            else if (_error != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorRetry(
+                  message: tr.subLoadFailed,
+                  details: '$_error',
+                  onRetry: () {
+                    setState(() => _loading = true);
+                    _load();
+                  },
+                ),
+              )
+            else if (_subs.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: AppIcons.playCircle,
+                  title: tr.subNoTitle,
+                  subtitle: tr.subNoSubtitle,
+                ),
+              )
+            else if (filtered.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: AppIcons.playCircle,
+                  title: tr.subNoMatch,
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => _SubscriptionTile(
+                      sub: filtered[i],
+                      categoryName: _categoryNames[filtered[i]['category_id']],
+                      categoryIcon: _categoryIcons[filtered[i]['category_id']],
+                      categoryColor:
+                          _categoryColors[filtered[i]['category_id']],
+                      status: _status(filtered[i]),
+                      nextDue: _parseDate(filtered[i]['next_due_date']),
+                      onTap: () async {
+                        final id = filtered[i]['id'] as String;
+                        await context.push('/subscriptions/$id');
+                        _load();
+                      },
+                      onToggleEnabled: () => _toggleEnabled(filtered[i]),
                     ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) => _SubscriptionTile(
-                        sub: filtered[i],
-                        categoryName:
-                            _categoryNames[filtered[i]['category_id']],
-                        categoryIcon:
-                            _categoryIcons[filtered[i]['category_id']],
-                        categoryColor:
-                            _categoryColors[filtered[i]['category_id']],
-                        frequencySuffix: _frequencySuffix(
-                          filtered[i]['frequency'] as String? ?? 'monthly',
-                          (filtered[i]['interval'] as int?) ?? 1,
-                        ),
-                        status: _status(filtered[i]),
-                        parseDate: _parseDate,
-                        onTap: () async {
-                          final id = filtered[i]['id'] as String;
-                          await context.push('/subscriptions/$id');
-                          _load();
-                        },
-                        onToggleEnabled: () => _toggleEnabled(filtered[i]),
-                      ),
-                      childCount: filtered.length,
-                    ),
+                    childCount: filtered.length,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _CountChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final Color color;
-  const _CountChip({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(label,
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context))),
-        const SizedBox(width: 4),
-        Text(subtitle,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-      ],
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color? color;
-  final VoidCallback onTap;
-  const _StatusChip({
-    required this.label,
-    required this.selected,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chipColor = color ?? AppColors.accent;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-          border: selected
-              ? Border.all(color: chipColor.withValues(alpha: 0.4))
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? chipColor : AppColors.ts(context),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SubscriptionTile extends StatelessWidget {
+class _SubscriptionTile extends ConsumerWidget {
   final Map<String, dynamic> sub;
   final String? categoryName;
   final String? categoryIcon;
   final String? categoryColor;
-  final String frequencySuffix;
   final String status;
-  final DateTime? Function(dynamic) parseDate;
+  final DateTime? nextDue;
   final VoidCallback onTap;
   final VoidCallback onToggleEnabled;
 
@@ -569,47 +430,40 @@ class _SubscriptionTile extends StatelessWidget {
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
-    required this.frequencySuffix,
     required this.status,
-    required this.parseDate,
+    required this.nextDue,
     required this.onTap,
     required this.onToggleEnabled,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tr = S.of(context);
     final title = sub['title'] as String? ?? tr.subUntitled;
     final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
-    final currency = sub['currency'] as String?;
-    final nextDue = parseDate(sub['next_due_date']);
+    final currency = sub['currency'] as String? ?? '';
+    final type = sub['type'] as String? ?? 'expense';
+    final frequency = sub['frequency'] as String? ?? 'monthly';
+    final interval = (sub['interval'] as int?) ?? 1;
     final isCancelled = status == 'cancelled';
     final isEnabled = sub['enabled'] == 1 || sub['enabled'] == true;
+    final billing = status != 'cancelled' && status != 'paused';
 
     final catColor = categoryColor != null
         ? AppColors.fromHex(categoryColor!)
         : AppColors.accent;
-
-    final statusDotColor = switch (status) {
-      'active' => AppColors.healthy,
-      'ending_soon' => AppColors.caution,
-      'cancelled' => AppColors.overspent,
-      _ => AppColors.healthy,
-    };
+    final amountColor = billing
+        ? ref.watch(txColorsProvider).forType(type)
+        : AppColors.th(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Material(
         // Transparent Material so the ripple paints above the card fill.
         type: MaterialType.transparency,
         child: ListTile(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(CardTokens.radius)),
+          shape: RoundedRectangleBorder(borderRadius: CardTokens.borderRadius),
           onTap: onTap,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -617,25 +471,25 @@ class _SubscriptionTile extends StatelessWidget {
             categoryName: categoryName ?? title,
             emoji: categoryIcon,
             color: catColor,
-            size: 44,
+            size: CategoryIconTokens.listSize,
+            circular: true,
           ),
           title: Text(
             title,
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-              color: AppColors.tp(context),
+              fontWeight: TypographyTokens.txTitleWeight,
+              fontSize: TypographyTokens.txTitleSize,
+              color: billing ? AppColors.tp(context) : AppColors.th(context),
               decoration: isCancelled ? TextDecoration.lineThrough : null,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            nextDue != null
-                ? '${S.of(context).recurringTileNext(formatDate(nextDue))} $frequencySuffix'
-                : frequencySuffix,
+            recurringNextLine(tr, isCancelled ? null : nextDue, frequency,
+                interval),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: TypographyTokens.txSubtitleSize,
               color: AppColors.ts(context),
             ),
           ),
@@ -647,13 +501,11 @@ class _SubscriptionTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    formatAmount(amount, currency: currency),
+                    formatSignedAmount(amount, currency: currency, type: type),
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: isCancelled
-                          ? AppColors.th(context)
-                          : AppColors.tp(context),
+                      fontWeight: TypographyTokens.amountRegularWeight,
+                      fontSize: TypographyTokens.amountRegularSize,
+                      color: amountColor,
                       decoration:
                           isCancelled ? TextDecoration.lineThrough : null,
                     ),
@@ -661,31 +513,9 @@ class _SubscriptionTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: statusDotColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        switch (status) {
-                          'active' => tr.subActive,
-                          'ending_soon' => tr.subEndingSoon,
-                          'cancelled' => tr.subCancelled,
-                          _ => '',
-                        },
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.ts(context),
-                        ),
-                      ),
-                    ],
+                  RecurringStatusDot(
+                    color: subscriptionStatusColor(context, status),
+                    label: subscriptionStatusLabel(tr, status),
                   ),
                 ],
               ),
@@ -696,14 +526,12 @@ class _SubscriptionTile extends StatelessWidget {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   iconSize: 20,
-                  tooltip: isEnabled ? '${tr.subPause} subscription' : '${tr.subResume} subscription',
+                  tooltip:
+                      isEnabled ? tr.subPauseTooltip : tr.subResumeTooltip,
                   icon: Icon(
-                    isEnabled
-                        ? AppIcons.pauseCircle
-                        : AppIcons.playCircle,
-                    color: isEnabled
-                        ? AppColors.th(context)
-                        : AppColors.healthy,
+                    isEnabled ? AppIcons.pauseCircle : AppIcons.playCircle,
+                    color:
+                        isEnabled ? AppColors.th(context) : AppColors.healthy,
                   ),
                   onPressed: onToggleEnabled,
                 ),

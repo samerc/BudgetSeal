@@ -12,6 +12,8 @@ import '../../shared/widgets/budget_progress.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
@@ -24,104 +26,90 @@ class ObjectivesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final objectivesAsync = ref.watch(objectivesProvider);
 
+    final tr = S.of(context);
+
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // ── Header ──
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 16, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(AppIcons.arrowLeft),
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  // Long titles (FR/AR) shrink instead of running under Add.
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        S.of(context).objTitle,
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: TypographyTokens.screenTitleSize,
-                          fontFamily: TypographyTokens.displayFamily,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tp(context),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.icon(
-                    onPressed: () => context.push('/objectives/new'),
-                    icon: const Icon(AppIcons.plus, size: 18),
-                    label: Text(S.of(context).commonAdd),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      minimumSize: Size.zero,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: objectivesAsync.when(
-        loading: () => const SkeletonList(),
-        error: (e, _) => ErrorRetry(
-          message: S.of(context).objFailedToLoad,
-          details: e.toString(),
-          onRetry: () => ref.invalidate(objectivesProvider),
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return EmptyState(
-              icon: AppIcons.flag,
-              title: S.of(context).objNoTitle,
-              subtitle: S.of(context).objIntro,
-              actionLabel: S.of(context).objCreateFirst,
-              onAction: () => context.push('/objectives/new'),
-            );
-          }
-
-          final goals = items.where((o) => o.type == 'goal').toList();
-          final loans = items.where((o) => o.type == 'loan').toList();
-
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(objectivesProvider),
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              children: [
-                // Short explanation of what this screen tracks
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    S.of(context).objIntro,
-                    style: TextStyle(
-                        fontSize: 12, height: 1.4, color: AppColors.th(context)),
+      floatingActionButton: FloatingActionButton(
+        tooltip: tr.objNewTitle,
+        onPressed: () => context.push('/objectives/new'),
+        child: const Icon(AppIcons.plus),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(objectivesProvider.future),
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(title: tr.objTitle, back: true),
+            ...objectivesAsync.when(
+              loading: () => const [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: SkeletonList(),
                   ),
                 ),
-                if (goals.isNotEmpty) ...[
-                  _SectionHeader(title: S.of(context).objGoalsSection, count: goals.length),
-                  const SizedBox(height: 8),
-                  ...goals.map((o) => _ObjectiveCard(objective: o)),
-                  const SizedBox(height: 20),
-                ],
-                if (loans.isNotEmpty) ...[
-                  _SectionHeader(title: S.of(context).objLoansSection, count: loans.length),
-                  const SizedBox(height: 8),
-                  ...loans.map((o) => _ObjectiveCard(objective: o)),
-                ],
               ],
-            ),
-          );
-        },
-              ),
+              error: (e, _) => [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: ErrorRetry(
+                    message: tr.objFailedToLoad,
+                    details: e.toString(),
+                    onRetry: () => ref.invalidate(objectivesProvider),
+                  ),
+                ),
+              ],
+              data: (items) {
+                if (items.isEmpty) {
+                  // No action button: the FAB already adds one.
+                  return [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyState(
+                        icon: AppIcons.flag,
+                        title: tr.objNoTitle,
+                        subtitle: tr.objIntro,
+                      ),
+                    ),
+                  ];
+                }
+
+                final goals = items.where((o) => o.type == 'goal').toList();
+                final loans = items.where((o) => o.type == 'loan').toList();
+
+                return [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // Short explanation of what this screen tracks
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            tr.objIntro,
+                            style: TextStyle(
+                                fontSize: TypographyTokens.captionSize,
+                                height: 1.4,
+                                color: AppColors.ts(context)),
+                          ),
+                        ),
+                        if (goals.isNotEmpty) ...[
+                          _SectionHeader(
+                              title: tr.objGoalsSection, count: goals.length),
+                          const SizedBox(height: Spacing.headerToCard),
+                          ...goals.map((o) => _ObjectiveCard(objective: o)),
+                          const SizedBox(height: Spacing.sectionGap),
+                        ],
+                        if (loans.isNotEmpty) ...[
+                          _SectionHeader(
+                              title: tr.objLoansSection, count: loans.length),
+                          const SizedBox(height: Spacing.headerToCard),
+                          ...loans.map((o) => _ObjectiveCard(objective: o)),
+                        ],
+                      ]),
+                    ),
+                  ),
+                ];
+              },
             ),
           ],
         ),
@@ -145,12 +133,12 @@ class _SectionHeader extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: AppColors.sfv(context),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(RadiusTokens.pill),
           ),
           child: Text('$count',
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontSize: TypographyTokens.overlineSize,
+                fontWeight: TypographyTokens.overlineWeight,
                 color: AppColors.ts(context),
               )),
         ),
@@ -174,19 +162,19 @@ class _ObjectiveCard extends StatelessWidget {
     final isLent = o.direction == 'lent';
 
     // Cashew objective card: tinted with the goal's color, big type, thick bar.
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.pastel(context, color, light: 0.88, dark: 0.8),
-        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
-          onTap: () => context.push('/objectives/${o.id}'),
+    final radius = BorderRadius.circular(RadiusTokens.hero);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Tappable(
+        onTap: () => context.push('/objectives/${o.id}'),
+        borderRadius: radius,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.pastel(context, color, light: 0.88, dark: 0.8),
+            borderRadius: radius,
+          ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: const EdgeInsets.all(16),
             child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -194,8 +182,8 @@ class _ObjectiveCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: CategoryIconTokens.listSize,
+                  height: CategoryIconTokens.listSize,
                   decoration: BoxDecoration(
                     color: AppColors.pastel(context, color,
                         light: 0.55, dark: 0.45),
@@ -230,7 +218,7 @@ class _ObjectiveCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: TypographyTokens.captionSize,
                             color: AppColors.ts(context),
                           ),
                         ),
@@ -243,8 +231,8 @@ class _ObjectiveCard extends StatelessWidget {
                     Text(
                       formatAmount(o.currentAmount, currency: o.targetCurrency),
                       style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TypographyTokens.amountDisplaySize,
+                        fontWeight: TypographyTokens.amountDisplayWeight,
                         color: AppColors.tp(context),
                       ),
                     ),
@@ -253,8 +241,8 @@ class _ObjectiveCard extends StatelessWidget {
                         S.of(context).objOfTarget(formatAmount(o.targetAmount,
                             currency: o.targetCurrency)),
                         style: TextStyle(
-                          fontSize: 12.5,
-                          color: AppColors.tp(context).withValues(alpha: 0.55),
+                          fontSize: TypographyTokens.captionSize,
+                          color: AppColors.ts(context),
                         ),
                       ),
                   ],

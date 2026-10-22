@@ -8,18 +8,23 @@ import '../theme/design_tokens.dart';
 /// Cashew's PageFrame header as a sliver: a large bold title that shrinks
 /// into a pinned 56px bar as the page scrolls, with actions on the end.
 ///
-/// Use as the first sliver of a tab screen's [CustomScrollView]. It pads for
-/// the status bar itself, so don't wrap it in a SafeArea.
+/// Use as the first sliver of a tab screen's [CustomScrollView] — or of a
+/// list sub-screen with [back] (Accounts, Categories, Recurring…). It pads
+/// for the status bar itself, so don't wrap it in a SafeArea.
 class LargeTitleHeader extends StatelessWidget {
   const LargeTitleHeader({
     super.key,
     required this.title,
     this.actions = const [],
     this.subtitle,
+    this.back = false,
   });
 
   final String title;
   final List<Widget> actions;
+
+  /// Show a back button at the start of the bar (pushed screens).
+  final bool back;
 
   /// Small line under the expanded title (fades out as it collapses).
   final String? subtitle;
@@ -32,6 +37,7 @@ class LargeTitleHeader extends StatelessWidget {
         title: title,
         actions: actions,
         subtitle: subtitle,
+        back: back,
         topPadding: MediaQuery.paddingOf(context).top,
         textScaler: MediaQuery.textScalerOf(context),
       ),
@@ -44,6 +50,7 @@ class _Delegate extends SliverPersistentHeaderDelegate {
     required this.title,
     required this.actions,
     required this.subtitle,
+    required this.back,
     required this.topPadding,
     required this.textScaler,
   });
@@ -51,6 +58,7 @@ class _Delegate extends SliverPersistentHeaderDelegate {
   final String title;
   final List<Widget> actions;
   final String? subtitle;
+  final bool back;
   final double topPadding;
   final TextScaler textScaler;
 
@@ -65,10 +73,10 @@ class _Delegate extends SliverPersistentHeaderDelegate {
   @override
   double get minExtent => topPadding + _barHeight;
 
-  // Without actions the empty bar row above the title is wasted space, so
-  // the expanded title starts right below the status bar.
+  // Without actions or a back button the empty bar row above the title is
+  // wasted space, so the expanded title starts right below the status bar.
   @override
-  double get maxExtent => actions.isEmpty
+  double get maxExtent => actions.isEmpty && !back
       ? topPadding + (16 + _expandedExtra).clamp(_barHeight, double.infinity)
       : topPadding + _barHeight + _expandedExtra;
 
@@ -101,7 +109,7 @@ class _Delegate extends SliverPersistentHeaderDelegate {
           // Title: bottom-start when expanded → vertically centered in the
           // bar (clear of the actions) when collapsed.
           PositionedDirectional(
-            start: 20,
+            start: lerpDouble(20, back ? 60 : 20, t)!,
             end: lerpDouble(12, actionsWidth, t),
             top: 0,
             bottom: 0,
@@ -146,6 +154,13 @@ class _Delegate extends SliverPersistentHeaderDelegate {
               ),
             ),
           ),
+          if (back)
+            const PositionedDirectional(
+              top: 0,
+              start: 4,
+              height: _barHeight,
+              child: Center(child: BackButton()),
+            ),
           // Actions stay in the top bar row.
           if (actions.isNotEmpty)
             PositionedDirectional(
@@ -164,6 +179,7 @@ class _Delegate extends SliverPersistentHeaderDelegate {
       old.title != title ||
       old.actions != actions ||
       old.subtitle != subtitle ||
+      old.back != back ||
       old.topPadding != topPadding ||
       old.textScaler != textScaler;
 }

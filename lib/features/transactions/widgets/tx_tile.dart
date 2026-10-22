@@ -89,7 +89,7 @@ class TxTile extends ConsumerWidget {
             ? AppColors.ts(context)
             : AppColors.tp(context);
     final amountText = isIncome
-        ? '+${formatAmount(amount.value, currency: amount.currency)}'
+        ? bidiSafeAmount('+${formatAmount(amount.value, currency: amount.currency)}')
         : formatAmount(amount.value, currency: amount.currency);
 
     return Semantics(
@@ -176,7 +176,7 @@ class TxTile extends ConsumerWidget {
         height: size,
         decoration: BoxDecoration(
           color: AppColors.pastel(context, typeColor),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: Icon(
           AppIcons.arrowsLeftRight,
@@ -491,7 +491,7 @@ class TxTile extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
             decoration: BoxDecoration(
               color: AppColors.accent,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
             child: Text(
               '$count',

@@ -13,7 +13,12 @@ import '../../core/services/auto_backup_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/icon_header_card.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/settings_row.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_icons.dart';
 
@@ -26,6 +31,10 @@ class BackupScreen extends ConsumerStatefulWidget {
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
   bool _working = false;
+  // Settings load before the cards show, so the switch doesn't flash its
+  // default and flip.
+  bool _loading = true;
+  bool _loadFailed = false;
   bool _autoEnabled = false;
   int _frequencyHours = AutoBackupService.defaultFrequencyHours;
   int _retention = AutoBackupService.defaultRetention;
@@ -52,10 +61,40 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           _retention = ret;
           _lastAutoBackup = last;
           _backups = backups;
+          _loading = false;
+          _loadFailed = false;
         });
       }
     } catch (e) {
       debugPrint('[BackupScreen] Failed to load backup settings: $e');
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadFailed = true;
+        });
+      }
+    }
+  }
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  /// Saves one auto-backup setting and reports the outcome.
+  Future<void> _saveSetting(
+      Future<void> Function() save, VoidCallback apply, String success) async {
+    try {
+      await save();
+      if (!mounted) return;
+      setState(apply);
+      _snack(success);
+    } catch (e) {
+      debugPrint('[BackupScreen] Saving a setting failed: $e');
+      if (mounted) _snack(S.of(context).commonSomethingWentWrong);
     }
   }
 
@@ -116,25 +155,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   Future<void> _restoreFromFile() async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.backupRestoreDialogTitle),
-        content: Text(tr.backupRestoreWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.backupRestoreTitle),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.backupRestoreConfirmTitle,
+      message: tr.backupRestoreWarning,
+      confirmLabel: tr.backupRestoreTitle,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     setState(() => _working = true);
     try {
@@ -187,29 +214,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   Future<void> _restoreLocalBackup(BackupFile backup) async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.backupRestoreDialogTitle),
-        content: Text(
-          tr.backupRestoreDialogBody(
-              formatDateTime(backup.created),
-              backup.sizeFormatted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.backupRestoreTitle),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.backupRestoreConfirmTitle,
+      message: tr.backupRestoreDialogBody(
+          formatDateTime(backup.created), backup.sizeFormatted),
+      confirmLabel: tr.backupRestoreTitle,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     try {
       await AutoBackupService.restoreFromBackup(backup.path);
@@ -266,33 +278,33 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).backupTitle)),
-      body: ListView(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _loadFailed
+              ? ErrorRetry(onRetry: () {
+                  setState(() => _loading = true);
+                  _loadSettings();
+                })
+              : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ── Auto backup card ──
-          _card(
-            context,
+          IconHeaderCard(
             icon: AppIcons.clock,
-            iconColor: AppColors.accent,
             title: S.of(context).backupAutoTitle,
             children: [
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: Text(S.of(context).backupEnable,
-                    style: const TextStyle(fontSize: 14)),
-                subtitle: Text(
-                  _autoEnabled
-                      ? S.of(context).backupAutoEvery(_frequencyLabel(context, _frequencyHours))
-                      : S.of(context).backupDisabled,
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.ts(context)),
-                ),
+              SettingsSwitchRow(
+                title: S.of(context).backupEnable,
+                subtitle: _autoEnabled
+                    ? S.of(context).backupAutoEvery(_frequencyLabel(context, _frequencyHours))
+                    : S.of(context).backupDisabled,
                 value: _autoEnabled,
-                onChanged: (v) async {
-                  await AutoBackupService.setEnabled(v);
-                  setState(() => _autoEnabled = v);
-                },
-                activeTrackColor: AppColors.accent,
+                onChanged: (v) => _saveSetting(
+                    () => AutoBackupService.setEnabled(v),
+                    () => _autoEnabled = v,
+                    v
+                        ? S.of(context).backupAutoOnSnack
+                        : S.of(context).backupAutoOffSnack),
               ),
               if (_autoEnabled) ...[
                 const SizedBox(height: 8),
@@ -324,10 +336,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         DropdownMenuItem(
                             value: 168, child: Text(S.of(context).backupWeekly)),
                       ],
-                      onChanged: (v) async {
+                      onChanged: (v) {
                         if (v == null) return;
-                        await AutoBackupService.setFrequencyHours(v);
-                        setState(() => _frequencyHours = v);
+                        _saveSetting(
+                            () => AutoBackupService.setFrequencyHours(v),
+                            () => _frequencyHours = v,
+                            S.of(context).backupSettingsSaved);
                       },
                     ),
                   ],
@@ -361,10 +375,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         DropdownMenuItem(
                             value: 30, child: Text(S.of(context).backupNBackups(30))),
                       ],
-                      onChanged: (v) async {
+                      onChanged: (v) {
                         if (v == null) return;
-                        await AutoBackupService.setRetention(v);
-                        setState(() => _retention = v);
+                        _saveSetting(
+                            () => AutoBackupService.setRetention(v),
+                            () => _retention = v,
+                            S.of(context).backupSettingsSaved);
                       },
                     ),
                   ],
@@ -374,27 +390,21 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   Text(
                     S.of(context).backupLastAutoBackup(formatDateTime(_lastAutoBackup!)),
                     style: TextStyle(
-                        fontSize: 11, color: AppColors.th(context)),
+                        fontSize: TypographyTokens.overlineSize,
+                        color: AppColors.ts(context)),
                   ),
                 ],
               ],
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
 
           // ── Manual backup card ──
-          _card(
-            context,
+          IconHeaderCard(
             icon: AppIcons.cloudArrowUp,
-            iconColor: AppColors.accent,
             title: S.of(context).backupManualTitle,
+            description: S.of(context).backupExportDesc,
             children: [
-              Text(
-                S.of(context).backupExportDesc,
-                style:
-                    TextStyle(fontSize: 13, color: AppColors.ts(context)),
-              ),
-              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
@@ -412,78 +422,48 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
 
           // ── Restore card ──
-          _card(
-            context,
+          IconHeaderCard(
             icon: AppIcons.clockCounterClockwise,
             iconColor: AppColors.caution,
             title: S.of(context).backupRestoreTitle,
+            description: S.of(context).backupRestoreDesc,
             children: [
-              Text(
-                S.of(context).backupRestoreDesc,
-                style:
-                    TextStyle(fontSize: 13, color: AppColors.ts(context)),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _working ? null : _restoreFromFile,
-                  icon: const Icon(AppIcons.fileArrowUp, size: 18),
-                  label: Text(S.of(context).backupRestoreFromFile),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.caution,
-                  ),
-                ),
+              // Secondary to Export: outlined, and the confirm dialog
+              // carries the warning.
+              OutlinedButton.icon(
+                onPressed: _working ? null : _restoreFromFile,
+                icon: const Icon(AppIcons.fileArrowUp, size: 18),
+                label: Text(S.of(context).backupRestoreFromFile),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.sectionGap),
 
           // ── Local backup history ──
           if (_backups.isNotEmpty) ...[
             SectionHeader(S.of(context).backupLocalSection,
-                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
-            ..._backups.map((b) => Container(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
+                padding: const EdgeInsetsDirectional.only(
+                    start: 4, bottom: Spacing.headerToCard)),
+            ..._backups.map((b) => AppCard(
+                  margin: const EdgeInsets.only(bottom: Spacing.sm),
+                  padding: EdgeInsets.zero,
                   child: Material(
-                    // Transparent Material so the ripple paints above the card fill.
                     type: MaterialType.transparency,
                     child: ListTile(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CardTokens.radius)),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 2),
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: AppColors.pastel(context, AppColors.accent,
-                              light: 0.85, dark: 0.78),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(AppIcons.database,
-                            size: 18, color: AppColors.accent),
-                      ),
+                      contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                          14, 2, 4, 2),
+                      leading: SettingsIcon(
+                          icon: AppIcons.database, color: AppColors.accent),
                       title: Text(
                         formatDateTime(b.created),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.tp(context),
-                        ),
+                        style: SettingsRowStyle.title(context),
                       ),
                       subtitle: Text(
                         b.sizeFormatted,
-                        style: TextStyle(
-                            fontSize: 11, color: AppColors.ts(context)),
+                        style: SettingsRowStyle.subtitle(context),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -507,41 +487,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 )),
           ],
           const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
-
-  Widget _card(
-    BuildContext context, {
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: iconColor),
-              const SizedBox(width: 10),
-              Text(title,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...children,
         ],
       ),
     );

@@ -418,7 +418,8 @@ void main() {
   test('upcoming bills list every occurrence; post now and skip advance',
       () async {
     String day(int d) {
-      final x = DateTime.now().add(Duration(days: d));
+      final n = DateTime.now();
+      final x = DateTime(n.year, n.month, n.day + d); // calendar days (DST-safe)
       return '${x.year}-${x.month.toString().padLeft(2, '0')}-${x.day.toString().padLeft(2, '0')}';
     }
 

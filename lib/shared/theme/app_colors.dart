@@ -66,6 +66,13 @@ abstract final class AppColors {
   static const overspent = Color(0xFFDC2626);
   static const overspentLight = Color(0xFFFEE2E2);
 
+  /// Cashew's calm bill colors: blue for upcoming, indigo for overdue (not
+  /// alarming red/amber). Shared by Home's bill boxes, Upcoming and Calendar.
+  static Color get billUpcoming =>
+      isDark ? const Color(0xFF7DC2DD) : const Color(0xFF58A4C2);
+  static Color get billOverdue =>
+      isDark ? const Color(0xFF8395FF) : const Color(0xFF6577E0);
+
   // ── Pastel helpers (Cashew color model) ───────────────────
   /// Blend [amount] of white over [c] — a lighter, softer version of [c].
   static Color lightenPastel(Color c, double amount) =>
@@ -173,6 +180,19 @@ abstract final class AppColors {
   /// Soft card shadow (light mode only; empty in dark/black).
   static List<BoxShadow> cardShadow(BuildContext c) =>
       _s(c)?.cardShadow ?? const [];
+
+  /// The standard card surface for hand-built cards that can't be an
+  /// [AppCard] (custom shape or clip): surface, radius, black-mode edge and
+  /// light-mode shadow.
+  static BoxDecoration card(BuildContext c, {double radius = 16}) {
+    final edge = cardBorder(c);
+    return BoxDecoration(
+      color: sf(c),
+      borderRadius: BorderRadius.circular(radius),
+      border: edge == Colors.transparent ? null : Border.all(color: edge),
+      boxShadow: cardShadow(c),
+    );
+  }
 
   static SurfaceColors? _s(BuildContext c) =>
       Theme.of(c).extension<SurfaceColors>();

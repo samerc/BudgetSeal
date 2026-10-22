@@ -13,6 +13,9 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/settings_row.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 
 class _RateRow {
@@ -215,8 +218,6 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(tr.fxTitle),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(AppIcons.arrowClockwise),
@@ -237,7 +238,7 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.accentLight,
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
+                    borderRadius: CardTokens.borderRadius,
                   ),
                   child: Row(
                     children: [
@@ -273,33 +274,27 @@ class _ExchangeRatesScreenState extends ConsumerState<ExchangeRatesScreen> {
                 if (_rows.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Text(
-                      tr.fxNoCurrencies,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.ts(context)),
+                    child: EmptyState(
+                      icon: AppIcons.currencyCircleDollar,
+                      title: tr.fxNoCurrencies,
                     ),
                   ),
                 for (final row in _rows)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.sf(context),
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
-                      boxShadow: AppColors.cardShadow(context),
-                    ),
+                  AppCard(
+                    margin: const EdgeInsets.only(bottom: Spacing.sm),
+                    padding: EdgeInsets.zero,
                     child: Material(
-                      // Transparent Material so the ripple paints above the card fill.
                       type: MaterialType.transparency,
                       child: ListTile(
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(CardTokens.radius)),
+                            borderRadius: CardTokens.borderRadius),
                         onTap: () => _editRate(row),
                         leading: Container(
-                          width: 40,
-                          height: 40,
+                          width: SettingsRowStyle.iconSize,
+                          height: SettingsRowStyle.iconSize,
                           decoration: BoxDecoration(
                             color: AppColors.accentLight,
-                            borderRadius: BorderRadius.circular(10),
+                            shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: Text(

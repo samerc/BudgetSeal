@@ -19,6 +19,13 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
+import '../../core/providers/tx_colors_provider.dart';
+import 'emoji_groups.dart';
 
 // ---------------------------------------------------------------------------
 // Colour helpers
@@ -68,6 +75,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         categories.where((c) => c.transactionType == 'expense').length;
     final incomeCount =
         categories.where((c) => c.transactionType == 'income').length;
+    final txColors = ref.watch(txColorsProvider);
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -76,45 +84,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         onPressed: () => _showForm(categories: categories),
         child: const Icon(AppIcons.plus),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
+      body: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(categoriesProvider);
             await Future.delayed(const Duration(milliseconds: 300));
           },
           child: CustomScrollView(
             slivers: [
-              // ── Header ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(AppIcons.arrowLeft),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            S.of(context).catTitle,
-                            style: TextStyle(
-                              fontSize: TypographyTokens.screenTitleSize,
-                              fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: TypographyTokens.screenTitleWeight,
-                              color: AppColors.tp(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              LargeTitleHeader(title: S.of(context).catTitle, back: true),
 
               // ── Summary ──
               if (categories.isNotEmpty)
@@ -130,12 +107,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         const SizedBox(width: 8),
                         _SummaryPill(
                           label: S.of(context).catExpenseCount(expenseCount),
-                          color: AppColors.overspent,
+                          color: txColors.expense,
                         ),
                         const SizedBox(width: 8),
                         _SummaryPill(
                           label: S.of(context).catIncomeCount(incomeCount),
-                          color: AppColors.healthy,
+                          color: txColors.income,
                         ),
                       ],
                     ),
@@ -177,27 +154,27 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               // ── Type filter chips ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
                   child: Row(
                     children: [
-                      _TypeChip(
+                      AppChip(
                         label: S.of(context).catAll,
                         selected: _typeFilter == null,
                         onTap: () => setState(() => _typeFilter = null),
                       ),
                       const SizedBox(width: 8),
-                      _TypeChip(
+                      AppChip(
                         label: S.of(context).typeExpense,
                         selected: _typeFilter == 'expense',
-                        color: AppColors.overspent,
+                        color: txColors.expense,
                         onTap: () =>
                             setState(() => _typeFilter = 'expense'),
                       ),
                       const SizedBox(width: 8),
-                      _TypeChip(
+                      AppChip(
                         label: S.of(context).typeIncome,
                         selected: _typeFilter == 'income',
-                        color: AppColors.healthy,
+                        color: txColors.income,
                         onTap: () =>
                             setState(() => _typeFilter = 'income'),
                       ),
@@ -222,11 +199,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   final filtered = _applyFilters(cats);
                   if (filtered.isEmpty) {
                     return SliverFillRemaining(
-                      child: Center(
-                        child: Text(
-                          S.of(context).catNoMatch,
-                          style: TextStyle(color: AppColors.ts(context)),
-                        ),
+                      hasScrollBody: false,
+                      child: EmptyState(
+                        icon: AppIcons.magnifyingGlassMinus,
+                        title: S.of(context).catNoMatch,
                       ),
                     );
                   }
@@ -254,7 +230,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               const SliverPadding(padding: EdgeInsets.only(bottom: 88)),
             ],
           ),
-        ),
       ),
     );
   }
@@ -288,19 +263,24 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Future<void> _toggleArchive(Category cat) async {
     final db = ref.read(databaseProvider);
     final wasArchived = cat.archived;
-    await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
-        .write(CategoriesCompanion(
-      archived: Value(!cat.archived),
-      lastModified: Value(DateTime.now()),
-    ));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text(wasArchived ? S.of(context).catRestored : S.of(context).catArchived),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    final messenger = ScaffoldMessenger.of(context);
+    final tr = S.of(context);
+    try {
+      await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+          .write(CategoriesCompanion(
+        archived: Value(!cat.archived),
+        lastModified: Value(DateTime.now()),
+      ));
+      messenger.showSnackBar(SnackBar(
+        content: Text(wasArchived ? tr.catRestored : tr.catArchived),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (e) {
+      debugPrint('[Categories] Archive failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -336,90 +316,70 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     }
 
     String? action;
+    final tr = S.of(context);
     if (warnings.isNotEmpty) {
       final warningText = warnings.join(', ');
-      final tr = S.of(context);
       action = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr.catDeleteTitle),
-          content: Text(
-            tr.catDeleteWarning(warningText),
-          ),
+          content: Text(tr.catDeleteWarning(warningText)),
           actions: [
-            TextButton(
+            OutlinedButton(
+              style: DialogButtons.outlined,
               onPressed: () => Navigator.pop(ctx, 'cancel'),
               child: Text(tr.commonCancel),
             ),
-            TextButton(
+            OutlinedButton(
+              style: DialogButtons.outlined,
               onPressed: () => Navigator.pop(ctx, 'archive'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.accent),
               child: Text(tr.allocArchiveInstead),
             ),
-            TextButton(
+            FilledButton(
+              style: DialogButtons.destructive,
               onPressed: () => Navigator.pop(ctx, 'delete'),
-              style:
-                  TextButton.styleFrom(foregroundColor: AppColors.overspent),
               child: Text(tr.commonDelete),
             ),
           ],
         ),
       );
     } else {
-      final tr = S.of(context);
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(tr.catDeleteTitle),
-          content: Text(tr.catDeleteNoTx),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(tr.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style:
-                  TextButton.styleFrom(foregroundColor: AppColors.overspent),
-              child: Text(tr.commonDelete),
-            ),
-          ],
-        ),
+      final confirmed = await showConfirmDialog(
+        context,
+        title: tr.catDeleteTitle,
+        message: tr.catDeleteNoTx,
+        confirmLabel: tr.commonDelete,
       );
-      if (confirmed == true) action = 'delete';
+      if (confirmed) action = 'delete';
     }
 
     if (!mounted || action == null || action == 'cancel') return;
+    final messenger = ScaffoldMessenger.of(context);
+    void show(String text) => messenger.showSnackBar(SnackBar(
+          content: Text(text),
+          behavior: SnackBarBehavior.floating,
+        ));
 
-    if (action == 'archive') {
-      await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
-          .write(CategoriesCompanion(
-        archived: const Value(true),
-        lastModified: Value(DateTime.now()),
-      ));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).catArchived),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+    try {
+      if (action == 'archive') {
+        await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+            .write(CategoriesCompanion(
+          archived: const Value(true),
+          lastModified: Value(DateTime.now()),
+        ));
+        show(tr.catArchived);
+      } else if (action == 'delete') {
+        await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+            .write(CategoriesCompanion(
+                deleted: const Value(true),
+                lastModified: Value(DateTime.now())));
+        ref.invalidate(categoriesProvider);
+        ref.invalidate(allocationsProvider);
+        show(tr.catDeleted);
       }
-    } else if (action == 'delete') {
-      await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
-          .write(CategoriesCompanion(
-              deleted: const Value(true),
-              lastModified: Value(DateTime.now())));
-      ref.invalidate(categoriesProvider);
-      ref.invalidate(allocationsProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).catDeleted),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+    } catch (e) {
+      debugPrint('[Categories] Delete failed: $e');
+      show(tr.commonSomethingWentWrong);
     }
   }
 }
@@ -440,56 +400,11 @@ class _SummaryPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.pastel(context, color,
             light: 0.85, dark: 0.78),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
       ),
       child: Text(label,
           style: TextStyle(
               fontSize: 12, fontWeight: FontWeight.w600, color: color)),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Type chip
-// ---------------------------------------------------------------------------
-
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color? color;
-  final VoidCallback onTap;
-  const _TypeChip({
-    required this.label,
-    required this.selected,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chipColor = color ?? AppColors.accent;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-          border: selected
-              ? Border.all(color: chipColor.withValues(alpha: 0.4))
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? chipColor : AppColors.ts(context),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -576,43 +491,24 @@ class _CategoriesSliver extends ConsumerWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           // Main category tile
-          InkWell(
+          Tappable(
             onTap: () => onEdit(group),
             onLongPress: () => _showActions(context, group),
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 14, 10),
+              padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 14, 12),
               child: Row(
                 children: [
-                  // Emoji icon in colored circle
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.pastel(context, color,
-                          light: 0.85, dark: 0.78),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: hasEmoji
-                          ? EmojiGlyph(group.icon, size: 22)
-                          : Text(
-                              group.name[0],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: color,
-                              ),
-                            ),
-                    ),
+                  CategoryIcon(
+                    categoryName: group.name,
+                    emoji: hasEmoji ? group.icon : null,
+                    color: color,
+                    size: CategoryIconTokens.listSize,
+                    circular: true,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -680,7 +576,7 @@ class _CategoriesSliver extends ConsumerWidget {
             ...subs.map((sub) {
               final subEmoji =
                   sub.icon.length <= 4 && sub.icon != 'category';
-              return InkWell(
+              return Tappable(
                 onTap: () => onEdit(sub),
                 onLongPress: () => _showActions(context, sub),
                 child: Padding(
@@ -724,17 +620,11 @@ class _CategoriesSliver extends ConsumerWidget {
       context: context,
       builder: (ctx) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 16),
-              Text(cat.name,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(ctx))),
-              const SizedBox(height: 16),
+              SheetTitle(cat.name),
               ListTile(
                 leading: const Icon(AppIcons.pencilSimple),
                 title: Text(S.of(ctx).catEdit),
@@ -804,48 +694,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   bool _loading = false;
   bool _showEmojiGrid = false;
 
-  static const _emojiGroups = <String, List<String>>{
-    'Food & Drink': [
-      '🛒', '🍕', '🍔', '🍗', '🥗', '🍣', '🍜', '🌮', '🥐', '🍰',
-      '☕', '🍺', '🥤', '🍷', '🧁', '🍩', '🥡', '🧃',
-    ],
-    'Transport': [
-      '🚗', '⛽', '🚕', '🚌', '🚇', '🚲', '✈️', '🛳️', '🚁', '🅿️',
-      '🛞', '🏍️',
-    ],
-    'Home & Bills': [
-      '🏠', '💡', '💧', '🔌', '📡', '🛏️', '🪑', '🧹', '🧺', '🔧',
-      '🏗️', '🔑',
-    ],
-    'Shopping': [
-      '🛍️', '👕', '👗', '👟', '👜', '💄', '🕶️', '💎', '🧴', '🛒',
-    ],
-    'Health & Fitness': [
-      '💊', '🏥', '🩺', '🏋️', '🧘', '🏊', '🚴', '🦷', '🩹', '💉',
-    ],
-    'Entertainment': [
-      '🎬', '🎮', '🎵', '🎤', '🎭', '🎨', '📺', '🎧', '🎪', '🎲',
-      '🍿', '📷',
-    ],
-    'Education & Work': [
-      '🎓', '📚', '💻', '📱', '🖨️', '📊', '💼', '🏢', '📝', '✏️',
-      '🔬', '📐',
-    ],
-    'Money': [
-      '💰', '💳', '🏦', '📈', '💵', '🪙', '💲', '🧾', '📑', '🏧',
-    ],
-    'Family & Pets': [
-      '👶', '🧒', '👨‍👩‍👧', '🐾', '🐕', '🐈', '🧸', '🍼', '🎁', '❤️',
-    ],
-    'Travel & Leisure': [
-      '✈️', '🏖️', '🏔️', '🗺️', '🧳', '⛺', '🏨', '🎢', '🎣', '⛷️',
-    ],
-    'Other': [
-      '📦', '🎯', '🔖', '⭐', '🌱', '♻️', '🤝', '🙏', '🚀', '🏷️',
-      '📌', '🗂️',
-    ],
-  };
-
   bool get _isNew => widget.existing == null;
 
   @override
@@ -882,44 +730,39 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Drag handle
-            const SizedBox(height: 16),
-            Text(
+            SheetTitle(
               _isNew ? S.of(context).catNewTitle : S.of(context).catEditTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context),
-              ),
+              padding: const EdgeInsetsDirectional.only(top: 4, bottom: 16),
             ),
-            const SizedBox(height: 20),
 
             // Icon + Name on the same row
             Row(
               children: [
                 // Current emoji preview (tap to expand/collapse inline picker)
-                GestureDetector(
+                Tappable(
                   onTap: () => setState(() {
                     _showEmojiGrid = !_showEmojiGrid;
                     // Dismiss keyboard when opening picker
                     if (_showEmojiGrid) FocusScope.of(context).unfocus();
                   }),
+                  borderRadius: BorderRadius.circular(
+                      CategoryIconTokens.listSize / 2),
                   child: Container(
-                    width: 52,
-                    height: 52,
                     decoration: BoxDecoration(
-                      color: AppColors.pastel(context, _color,
-                          light: 0.85, dark: 0.78),
-                      borderRadius: BorderRadius.circular(CardTokens.radius),
+                      shape: BoxShape.circle,
                       border: Border.all(
                         color: _showEmojiGrid
                             ? AppColors.accent
-                            : _color.withValues(alpha: 0.3),
-                        width: _showEmojiGrid ? 2 : 1,
+                            : Colors.transparent,
+                        width: 2,
                       ),
                     ),
-                    child: Center(
-                      child: EmojiGlyph(_emoji, size: 28),
+                    child: CategoryIcon(
+                      categoryName: _nameCtrl.text,
+                      emoji: _emoji,
+                      color: _color,
+                      size: CategoryIconTokens.listSize,
+                      circular: true,
                     ),
                   ),
                 ),
@@ -948,61 +791,12 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
             // ── Inline emoji picker (expands below icon+name row) ──
             if (_showEmojiGrid) ...[
               const SizedBox(height: 12),
-              Container(
-                height: 220,
-                decoration: BoxDecoration(
-                  color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.bd(context)),
-                ),
-                child: ListView(
-                  padding: const EdgeInsets.all(10),
-                  children: _emojiGroups.entries.map((group) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 6),
-                          child: Text(group.key,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.ts(context),
-                              )),
-                        ),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: group.value.map((e) {
-                            final isSelected = e == _emoji;
-                            return GestureDetector(
-                              onTap: () => setState(() {
-                                _emoji = e;
-                                _showEmojiGrid = false;
-                              }),
-                              child: Container(
-                                width: 38,
-                                height: 38,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.accentLight
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: isSelected
-                                      ? Border.all(color: AppColors.accent, width: 2)
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: EmojiGlyph(e, size: 24),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
+              InlineEmojiGrid(
+                selected: _emoji,
+                onPick: (e) => setState(() {
+                  _emoji = e;
+                  _showEmojiGrid = false;
+                }),
               ),
             ],
             const SizedBox(height: 16),
@@ -1025,8 +819,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
               children: _categoryColors.map((c) {
                 final isSelected =
                     c.toARGB32() == _color.toARGB32();
-                return GestureDetector(
+                return Tappable(
                   onTap: () => setState(() => _color = c),
+                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
                   child: Container(
                     width: 30,
                     height: 30,
@@ -1120,8 +915,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     )
                   : Text(
                       _isNew ? S.of(context).catCreate : S.of(context).commonSave,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w600),
                     ),
             ),
           ],
@@ -1172,6 +965,14 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           ),
         );
         Navigator.of(context).pop();
+      }
+    } catch (e) {
+      debugPrint('[Categories] Save failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).commonSomethingWentWrong),
+          behavior: SnackBarBehavior.floating,
+        ));
       }
     } finally {
       if (mounted) setState(() => _loading = false);

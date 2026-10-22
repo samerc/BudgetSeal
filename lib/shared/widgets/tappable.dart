@@ -28,7 +28,7 @@ class Tappable extends StatefulWidget {
   final VoidCallback? onLongPress;
   final BorderRadius? borderRadius;
 
-  /// Optional background color for the ink splash layer.
+  /// Optional background fill (painted on both platforms).
   final Color? color;
 
   /// Whether to trigger haptic feedback on tap.
@@ -123,7 +123,14 @@ class _TappableState extends State<Tappable>
               child: child,
             ),
           ),
-          child: widget.child,
+          // The fill the Android branch paints on its Material.
+          child: widget.color == null
+              ? widget.child
+              : DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: widget.color, borderRadius: widget.borderRadius),
+                  child: widget.child,
+                ),
         ),
       );
     }

@@ -18,6 +18,14 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/section_header.dart';
+import 'account_type.dart';
+import 'widgets/balance_hero.dart';
+
+export 'account_type.dart' show accountTypeLabel;
 
 class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
@@ -35,166 +43,84 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final accountsAsync = ref.watch(accountsWithBalanceProvider);
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // ── Header ──
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(AppIcons.arrowLeft),
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        S.of(context).acctTitle,
-                        style: TextStyle(
-                          fontSize: TypographyTokens.screenTitleSize,
-                          fontFamily: TypographyTokens.displayFamily,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tp(context),
-                        ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(accountsWithBalanceProvider);
+          await Future.delayed(const Duration(milliseconds: 300));
+        },
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(
+              title: S.of(context).acctTitle,
+              back: true,
+              actions: [_menu(context)],
+            ),
+            ...accountsAsync.when(
+              data: (accounts) {
+                if (accounts.isEmpty && !_showArchived) {
+                  return [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyState(
+                        icon: AppIcons.creditCard,
+                        title: S.of(context).acctNoYet,
+                        subtitle: S.of(context).acctTapPlus,
                       ),
                     ),
-                  ),
-                  PopupMenuButton<String>(
-            icon: Icon(AppIcons.dotsThreeVertical,
-                color: AppColors.tp(context)),
-            onSelected: (v) {
-              if (v == 'archived') {
-                setState(() => _showArchived = !_showArchived);
-              } else if (v == 'sort_name' || v == 'sort_balance' || v == 'sort_type') {
-                setState(() => _sortBy = v.replaceFirst('sort_', ''));
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'archived',
-                child: Row(children: [
-                  Icon(
-                    _showArchived
-                        ? AppIcons.eyeSlash
-                        : AppIcons.archive,
-                    size: 18,
-                    color: AppColors.ts(context),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(_showArchived
-                      ? S.of(context).acctHideArchived
-                      : S.of(context).acctShowArchived),
-                ]),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'sort_name',
-                child: Row(children: [
-                  Icon(AppIcons.sortAscending, size: 18,
-                      color: _sortBy == 'name' ? AppColors.accent : AppColors.ts(context)),
-                  const SizedBox(width: 10),
-                  Text(S.of(context).acctSortByName,
-                      style: TextStyle(
-                        fontWeight: _sortBy == 'name' ? FontWeight.w700 : FontWeight.w400,
-                      )),
-                ]),
-              ),
-              PopupMenuItem(
-                value: 'sort_balance',
-                child: Row(children: [
-                  Icon(AppIcons.wallet, size: 18,
-                      color: _sortBy == 'balance' ? AppColors.accent : AppColors.ts(context)),
-                  const SizedBox(width: 10),
-                  Text(S.of(context).acctSortByBalance,
-                      style: TextStyle(
-                        fontWeight: _sortBy == 'balance' ? FontWeight.w700 : FontWeight.w400,
-                      )),
-                ]),
-              ),
-              PopupMenuItem(
-                value: 'sort_type',
-                child: Row(children: [
-                  Icon(AppIcons.squaresFour, size: 18,
-                      color: _sortBy == 'type' ? AppColors.accent : AppColors.ts(context)),
-                  const SizedBox(width: 10),
-                  Text(S.of(context).acctSortByType,
-                      style: TextStyle(
-                        fontWeight: _sortBy == 'type' ? FontWeight.w700 : FontWeight.w400,
-                      )),
-                ]),
-              ),
-            ],
-          ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  ref.invalidate(accountsWithBalanceProvider);
-                  await Future.delayed(const Duration(milliseconds: 300));
-                },
-        child: accountsAsync.when(
-          data: (accounts) {
-            if (accounts.isEmpty && !_showArchived) {
-              return ListView(
-                children: [
-                  const SizedBox(height: 200),
-                  EmptyState(
-                    icon: AppIcons.creditCard,
-                    title: S.of(context).acctNoYet,
-                    subtitle: S.of(context).acctTapPlus,
-                  ),
-                ],
-              );
-            }
+                  ];
+                }
 
-            // Compute total balance per currency (active accounts only)
-            final Map<String, double> totals = {};
-            for (final ab in accounts) {
-              totals[ab.account.currency] =
-                  (totals[ab.account.currency] ?? 0) + ab.balance;
-            }
+                // Compute total balance per currency (active accounts only)
+                final Map<String, double> totals = {};
+                for (final ab in accounts) {
+                  totals[ab.account.currency] =
+                      (totals[ab.account.currency] ?? 0) + ab.balance;
+                }
 
-            // Apply sort
-            final sorted = List.of(accounts);
-            switch (_sortBy) {
-              case 'balance':
-                sorted.sort((a, b) => b.balance.compareTo(a.balance));
-              case 'type':
-                sorted.sort((a, b) => a.account.type.compareTo(b.account.type));
-              default:
-                // already sorted by name from provider
-                break;
-            }
+                // Apply sort
+                final sorted = List.of(accounts);
+                switch (_sortBy) {
+                  case 'balance':
+                    sorted.sort((a, b) => b.balance.compareTo(a.balance));
+                  case 'type':
+                    sorted.sort(
+                        (a, b) => a.account.type.compareTo(b.account.type));
+                  default:
+                    // already sorted by name from provider
+                    break;
+                }
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-              children: [
-                // Total balance header
-                _TotalBalanceCard(totals: totals),
-                const SizedBox(height: 16),
-                ...sorted.map((ab) => _AccountTile(
-                      accountWithBalance: ab,
-                      onTap: () => context.push('/accounts/${ab.account.id}'),
-                    )),
-                if (_showArchived) _ArchivedSection(ref: ref),
-              ],
-            );
-          },
-          loading: () => const SkeletonList(),
-          error: (e, _) => ErrorRetry(
-            message: S.of(context).commonCouldntLoadData,
-            details: '$e',
-            onRetry: () => ref.invalidate(accountsWithBalanceProvider),
-          ),
+                return [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // Total balance header
+                        _TotalBalanceCard(totals: totals),
+                        const SizedBox(height: 16),
+                        ...sorted.map((ab) => _AccountTile(
+                              accountWithBalance: ab,
+                              onTap: () =>
+                                  context.push('/accounts/${ab.account.id}'),
+                            )),
+                        if (_showArchived) _ArchivedSection(ref: ref),
+                      ]),
+                    ),
+                  ),
+                ];
+              },
+              loading: () =>
+                  [const SliverToBoxAdapter(child: SkeletonList())],
+              error: (e, _) => [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: ErrorRetry(
+                    message: S.of(context).commonCouldntLoadData,
+                    details: '$e',
+                    onRetry: () => ref.invalidate(accountsWithBalanceProvider),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -211,9 +137,60 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       ),
     );
   }
+
+  Widget _menu(BuildContext context) {
+    PopupMenuItem<String> sortItem(String value, IconData icon, String label) {
+      final on = _sortBy == value.replaceFirst('sort_', '');
+      return PopupMenuItem(
+        value: value,
+        child: Row(children: [
+          Icon(icon,
+              size: 18, color: on ? AppColors.accent : AppColors.ts(context)),
+          const SizedBox(width: 10),
+          Text(label,
+              style: TextStyle(
+                  fontWeight: on ? FontWeight.w700 : FontWeight.w400)),
+        ]),
+      );
+    }
+
+    return PopupMenuButton<String>(
+      icon: Icon(AppIcons.dotsThreeVertical, color: AppColors.ts(context)),
+      onSelected: (v) {
+        if (v == 'archived') {
+          setState(() => _showArchived = !_showArchived);
+        } else if (v.startsWith('sort_')) {
+          setState(() => _sortBy = v.replaceFirst('sort_', ''));
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: 'archived',
+          child: Row(children: [
+            Icon(
+              _showArchived ? AppIcons.eyeSlash : AppIcons.archive,
+              size: 18,
+              color: AppColors.ts(context),
+            ),
+            const SizedBox(width: 10),
+            Text(_showArchived
+                ? S.of(context).acctHideArchived
+                : S.of(context).acctShowArchived),
+          ]),
+        ),
+        const PopupMenuDivider(),
+        sortItem('sort_name', AppIcons.sortAscending,
+            S.of(context).acctSortByName),
+        sortItem('sort_balance', AppIcons.wallet,
+            S.of(context).acctSortByBalance),
+        sortItem('sort_type', AppIcons.squaresFour,
+            S.of(context).acctSortByType),
+      ],
+    );
+  }
 }
 
-/// Shows archived accounts in a separate section below active ones.
+//// Shows archived accounts in a separate section below active ones.
 class _ArchivedSection extends ConsumerWidget {
   final WidgetRef ref;
   const _ArchivedSection({required this.ref});
@@ -227,25 +204,23 @@ class _ArchivedSection extends ConsumerWidget {
     return FutureBuilder<List<AccountWithBalance>>(
       future: _loadArchived(db, householdId),
       builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting &&
+            !snap.hasData) {
+          return const SkeletonList(count: 2);
+        }
+        if (snap.hasError) {
+          return ErrorRetry(
+            message: S.of(context).commonCouldntLoadAccounts,
+            details: '${snap.error}',
+            onRetry: () => ref.invalidate(accountsWithBalanceProvider),
+          );
+        }
         if (!snap.hasData || snap.data!.isEmpty) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20, height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppColors.accent),
-                ),
-              ),
-            );
-          }
           return Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Center(
-              child: Text(S.of(context).acctNoArchived,
-                  style: TextStyle(
-                      color: AppColors.ts(context), fontSize: 13)),
+            padding: const EdgeInsets.only(top: Spacing.sm),
+            child: EmptyState(
+              icon: AppIcons.archive,
+              title: S.of(context).acctNoArchived,
             ),
           );
         }
@@ -254,17 +229,10 @@ class _ArchivedSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-              child: Text(S.of(context).acctArchived,
-                  style: TextStyle(
-                    fontSize: TypographyTokens.sectionHeaderSize,
-                    fontWeight: TypographyTokens.sectionHeaderWeight,
-                    letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                    color: AppColors.accentText(context),
-                  )),
-            ),
+            const SizedBox(height: Spacing.lg),
+            SectionHeader(S.of(context).acctArchived,
+                padding: const EdgeInsetsDirectional.only(
+                    start: 4, bottom: Spacing.headerToCard)),
             ...archived.map((ab) => _ArchivedAccountTile(
                   accountWithBalance: ab,
                   onTap: () =>
@@ -299,43 +267,35 @@ class _ArchivedSection extends ConsumerWidget {
   Future<void> _unarchive(
       BuildContext context, WidgetRef ref, Account account) async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.acctUnarchiveTitle),
-        content: Text(
-            tr.acctUnarchiveMsg(account.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(tr.commonCancel),
-          ),
-          FilledButton(
-            style: DialogButtons.filled,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr.acctUnarchive),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.acctUnarchiveConfirmTitle,
+      message: tr.acctUnarchiveMsg(account.name),
+      confirmLabel: tr.acctUnarchive,
+      destructive: false,
     );
-    if (confirmed != true) return;
+    if (!confirmed || !context.mounted) return;
 
-    final db = ref.read(databaseProvider);
-    await (db.update(db.accounts)
-          ..where((a) => a.id.equals(account.id)))
-        .write(AccountsCompanion(
-      archived: const Value(false),
-      lastModified: Value(DateTime.now()),
-    ));
-    ref.invalidate(accountsWithBalanceProvider);
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(S.of(context).acctUnarchived(account.name)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.accounts)
+            ..where((a) => a.id.equals(account.id)))
+          .write(AccountsCompanion(
+        archived: const Value(false),
+        lastModified: Value(DateTime.now()),
+      ));
+      ref.invalidate(accountsWithBalanceProvider);
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.acctUnarchived(account.name)),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (e) {
+      debugPrint('[Accounts] Unarchive failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 }
@@ -348,51 +308,29 @@ class _TotalBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (totals.isEmpty) return const SizedBox.shrink();
 
-    // Cashew transactionsAmountBox: pastel accent card, dark text.
-    final onCard = AppColors.tp(context);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
-      decoration: BoxDecoration(
-        color: AppColors.pastel(context, AppColors.accent,
-            light: 0.82, dark: 0.75),
-        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
-      ),
+    return BalanceHero(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(S.of(context).acctTotalBalance,
-              style: TextStyle(
-                  color: onCard.withValues(alpha: 0.6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
+              style: balanceHeroLabelStyle(context)),
+          const SizedBox(height: Spacing.sm),
           ...totals.entries.map((e) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.only(bottom: Spacing.xs),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      e.key,
-                      style: TextStyle(
-                        color: onCard.withValues(alpha: 0.55),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
+                    Text(e.key, style: balanceHeroLabelStyle(context)),
+                    const SizedBox(width: Spacing.sm),
                     // Large amounts shrink to one line instead of wrapping.
                     Flexible(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
+                        alignment: AlignmentDirectional.centerEnd,
                         child: Text(
                           formatAmount(e.value, currency: e.key),
-                          style: TextStyle(
-                            color: e.value < 0 ? AppColors.overspent : onCard,
-                            fontSize: 24,
-                            fontFamily: TypographyTokens.displayFamily,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style:
+                              balanceHeroAmountStyle(context, value: e.value),
                           maxLines: 1,
                         ),
                       ),
@@ -415,90 +353,23 @@ class _AccountTile extends StatelessWidget {
     required this.onTap,
   });
 
-  IconData _accountIcon(String type) => switch (type) {
-        'bank' => AppIcons.bank,
-        'credit' => AppIcons.creditCard,
-        'wallet' => AppIcons.wallet,
-        _ => AppIcons.money,
-      };
-
-  // Same HSL scheme as the More page icons: one saturation/lightness for
-  // every type (lifted in dark mode) so the hues read in both themes.
-  Color _typeColor(String type) {
-    final hue = switch (type) {
-      'bank' => 212.0,
-      'credit' => 24.0,
-      'wallet' => 40.0,
-      _ => 152.0,
-    };
-    return HSLColor.fromAHSL(1, hue, 0.62, AppColors.isDark ? 0.62 : 0.5)
-        .toColor();
-  }
-
   @override
   Widget build(BuildContext context) {
     final acc = accountWithBalance.account;
-    final balance = accountWithBalance.balance;
-    final color = _typeColor(acc.type);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: Material(
-        // Transparent Material so the ripple paints above the card fill.
-        type: MaterialType.transparency,
-        child: ListTile(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(CardTokens.radius)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          onTap: onTap,
-          leading: Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.pastel(context, color,
-                  light: 0.85, dark: 0.78),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(_accountIcon(acc.type), color: color, size: 20),
-          ),
-          title: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  acc.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AppColors.tp(context),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (acc.isTravel) ...[
-                const SizedBox(width: 6),
-                Icon(AppIcons.airplane, size: 14,
-                    color: AppColors.accent),
-              ],
-            ],
-          ),
-          subtitle: Text(
-            acc.isTravel
-                ? S.of(context).acctTravelWallet(acc.currency)
-                : '${accountTypeLabel(S.of(context), acc.type)} \u00b7 ${acc.currency}',
-            style:
-                TextStyle(color: AppColors.ts(context), fontSize: 12),
-          ),
-          trailing: CurrencyDisplay(
-            amount: balance,
-            currency: acc.currency,
-          ),
-        ),
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: _AccountRow(
+        account: acc,
+        balance: accountWithBalance.balance,
+        subtitle: acc.isTravel
+            ? S.of(context).acctTravelWallet(acc.currency)
+            : '${accountTypeLabel(S.of(context), acc.type)} · ${acc.currency}',
+        badges: [
+          if (acc.isTravel)
+            Icon(AppIcons.airplane, size: 14, color: AppColors.accent),
+        ],
       ),
     );
   }
@@ -515,91 +386,31 @@ class _ArchivedAccountTile extends StatelessWidget {
     required this.onUnarchive,
   });
 
-  IconData _accountIcon(String type) => switch (type) {
-        'bank' => AppIcons.bank,
-        'credit' => AppIcons.creditCard,
-        'wallet' => AppIcons.wallet,
-        _ => AppIcons.money,
-      };
-
   @override
   Widget build(BuildContext context) {
     final acc = accountWithBalance.account;
-    final balance = accountWithBalance.balance;
-
     return Opacity(
       opacity: 0.6,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          boxShadow: AppColors.cardShadow(context),
-        ),
-        child: Material(
-          // Transparent Material so the ripple paints above the card fill.
-          type: MaterialType.transparency,
-          child: ListTile(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(CardTokens.radius)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            onTap: onTap,
-            leading: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, AppColors.ts(context),
-                    light: 0.85, dark: 0.78),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(_accountIcon(acc.type),
-                  color: AppColors.ts(context), size: 20),
-            ),
-            title: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    acc.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: AppColors.tp(context),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(AppIcons.archive, size: 14,
-                    color: AppColors.th(context)),
-                if (acc.isTravel) ...[
-                  const SizedBox(width: 4),
-                  Icon(AppIcons.airplane, size: 14,
-                      color: AppColors.th(context)),
-                ],
-              ],
-            ),
-            subtitle: Text(
+      child: AppCard(
+        margin: const EdgeInsets.only(bottom: Spacing.sm),
+        padding: EdgeInsets.zero,
+        onTap: onTap,
+        child: _AccountRow(
+          account: acc,
+          balance: accountWithBalance.balance,
+          muted: true,
+          subtitle:
               '${accountTypeLabel(S.of(context), acc.type)} · ${acc.currency}',
-              style: TextStyle(color: AppColors.ts(context), fontSize: 12),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CurrencyDisplay(
-                  amount: balance,
-                  currency: acc.currency,
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(AppIcons.boxArrowUp,
-                      size: 20, color: AppColors.accent),
-                  tooltip: S.of(context).acctUnarchive,
-                  onPressed: onUnarchive,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
-            ),
+          badges: [
+            Icon(AppIcons.archive, size: 14, color: AppColors.th(context)),
+            if (acc.isTravel)
+              Icon(AppIcons.airplane, size: 14, color: AppColors.th(context)),
+          ],
+          trailing: IconButton(
+            icon: Icon(AppIcons.boxArrowUp, size: 20, color: AppColors.accent),
+            tooltip: S.of(context).acctUnarchive,
+            onPressed: onUnarchive,
+            visualDensity: VisualDensity.compact,
           ),
         ),
       ),
@@ -607,11 +418,74 @@ class _ArchivedAccountTile extends StatelessWidget {
   }
 }
 
-/// Translated name of an account type id ('cash', 'bank', 'credit', 'wallet').
-String accountTypeLabel(S l, String type) => switch (type) {
-      'cash' => l.acctTypeCash,
-      'bank' => l.acctTypeBank,
-      'credit' => l.acctTypeCredit,
-      'wallet' => l.acctTypeDigital,
-      _ => type,
-    };
+/// One account row: type badge, name (+ small badges), type · currency,
+/// balance on the end.
+class _AccountRow extends StatelessWidget {
+  const _AccountRow({
+    required this.account,
+    required this.balance,
+    required this.subtitle,
+    this.badges = const [],
+    this.muted = false,
+    this.trailing,
+  });
+
+  final Account account;
+  final double balance;
+  final String subtitle;
+  final List<Widget> badges;
+  final bool muted;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+          CardTokens.paddingH, 12, CardTokens.paddingH - 4, 12),
+      child: Row(
+        children: [
+          AccountTypeBadge(account.type,
+              size: CategoryIconTokens.compactSize, muted: muted),
+          const SizedBox(width: Spacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        account.name,
+                        style: TextStyle(
+                          fontWeight: TypographyTokens.txTitleWeight,
+                          fontSize: TypographyTokens.txTitleSize,
+                          color: AppColors.tp(context),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    for (final b in badges) ...[
+                      const SizedBox(width: Spacing.xs + 2),
+                      b,
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                      color: AppColors.ts(context),
+                      fontSize: TypographyTokens.txSubtitleSize),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          CurrencyDisplay(amount: balance, currency: account.currency),
+          if (trailing != null) ...[const SizedBox(width: 4), trailing!],
+        ],
+      ),
+    );
+  }
+}

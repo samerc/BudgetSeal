@@ -11,14 +11,15 @@ class AmountField extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final double fontSize;
-  final String hintText;
+  /// Defaults to "0.00" with the user's decimal separator.
+  final String? hintText;
 
   const AmountField({
     super.key,
     required this.controller,
     this.onChanged,
     this.fontSize = 32,
-    this.hintText = '0.00',
+    this.hintText,
   });
 
   @override

@@ -13,6 +13,7 @@ import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/icon_header_card.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
   const ExportScreen({super.key});
@@ -120,39 +121,15 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(title: Text(S.of(context).exportDataTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+            IconHeaderCard(
+                icon: AppIcons.fileArrowDown,
+                title: S.of(context).exportTransTitle,
+                description: S.of(context).exportTransDesc,
                 children: [
-                  Row(
-                    children: [
-                      Icon(AppIcons.fileArrowDown,
-                          size: 24, color: AppColors.accent),
-                      const SizedBox(width: 12),
-                      Text(S.of(context).exportTransTitle,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    S.of(context).exportTransDesc,
-                    style: TextStyle(
-                        fontSize: 13, color: AppColors.ts(context)),
-                  ),
-                  const SizedBox(height: 20),
                   FilledButton.icon(
                     onPressed: _exporting ? null : _exportTransactions,
                     icon: _exporting
@@ -166,10 +143,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         _exporting ? S.of(context).backupExporting : S.of(context).backupExportShare),
                   ),
                 ],
-              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

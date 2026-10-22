@@ -159,6 +159,12 @@ String formatNumber(double value, {int decimals = 2}) {
 }
 
 /// Wrap a formatted amount string with the negative indicator.
+/// A signed amount ("-$450", "+$200", "($5)") reads left to right even
+/// inside Arabic text: a leading left-to-right mark keeps the sign in front
+/// (without it "-$450.00" renders as "$450.00-"). No-op in LTR locales.
+String bidiSafeAmount(String amount) =>
+    (Intl.defaultLocale ?? '').startsWith('ar') ? '‎$amount' : amount;
+
 String _wrapNegative(String inner, bool isNeg) {
   if (!isNeg) return inner;
   return switch (_numberFormat.negative) {
@@ -196,6 +202,13 @@ int currencyDecimals(String? currency, [int? accountDecimals]) {
 /// Respects user preferences for thousands separator, decimal separator,
 /// and negative format. If [decimals] is null, auto-detects from currency.
 String formatAmount(double value, {String? currency, int? decimals}) {
+  final isNeg = value < 0;
+  return isNeg
+      ? bidiSafeAmount(_formatAmount(value, currency, decimals))
+      : _formatAmount(value, currency, decimals);
+}
+
+String _formatAmount(double value, String? currency, int? decimals) {
   final isNeg = value < 0;
   final absValue = value.abs();
 
@@ -241,13 +254,15 @@ String formatSignedAmount(
     return inner;
   }
 
+  final String out;
   if (symbol != null) {
-    if (_needsSpace(symbol)) {
-      return '$symbol ${applySign(formatted)}';
-    }
-    return applySign('$symbol$formatted');
+    out = _needsSpace(symbol)
+        ? '$symbol ${applySign(formatted)}'
+        : applySign('$symbol$formatted');
+  } else {
+    out = '$currency ${applySign(formatted)}';
   }
-  return '$currency ${applySign(formatted)}';
+  return isExpense || isIncome ? bidiSafeAmount(out) : out;
 }
 
 /// Format a number for display in calculator/input fields.

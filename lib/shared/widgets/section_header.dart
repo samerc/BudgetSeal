@@ -33,8 +33,7 @@ class SectionHeader extends StatelessWidget {
 
     final content = trailing != null
         ? Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [header, trailing!],
+            children: [Expanded(child: header), trailing!],
           )
         : header;
 

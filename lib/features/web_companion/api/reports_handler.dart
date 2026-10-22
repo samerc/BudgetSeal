@@ -8,6 +8,7 @@ import '../../../core/providers/household_provider.dart';
 import '../../../shared/utils/note_text.dart';
 import '_serializers.dart';
 import '_validation.dart';
+import '../../../shared/utils/calendar_days.dart';
 
 /// Same logic as `isRealRate()` in format_number.dart:
 /// Returns false when a foreign-currency line has the default 1.0 rate,
@@ -97,7 +98,7 @@ Handler cashflowReportHandler(Ref ref) {
 
       double totalIncome = 0;
       double totalExpense = 0;
-      final daysInMonth = end.difference(start).inDays;
+      final daysInMonth = calendarDaysBetween(start, end);
       final dailyIncome = List<double>.filled(daysInMonth, 0);
       final dailyExpense = List<double>.filled(daysInMonth, 0);
 

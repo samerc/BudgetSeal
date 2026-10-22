@@ -21,7 +21,12 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/settings_row.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/app_icons.dart';
 
 
@@ -295,7 +300,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               color: i == _currentPage
                                   ? AppColors.accent
                                   : AppColors.th(context),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(RadiusTokens.pill),
                             ),
                           ),
                         ),
@@ -381,23 +386,17 @@ class _PageTitle extends StatelessWidget {
   }
 }
 
-/// A plain app card: surface, radius 16, soft shadow.
+/// The app card, full width (onboarding's cards stretch).
 class _Card extends StatelessWidget {
   final Widget child;
-  final EdgeInsetsGeometry padding;
-  const _Card({required this.child, this.padding = const EdgeInsets.all(16)});
+  final EdgeInsetsGeometry? padding;
+  const _Card({required this.child, this.padding});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: padding,
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: child,
+      child: SizedBox(width: double.infinity, child: child),
     );
   }
 }
@@ -660,7 +659,7 @@ class _SetupPage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(s.onboardChangeLater,
                 style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.sectionGap),
 
             // ── Household ──
             SectionHeader(s.onboardHouseholdSection, padding: _sectionPad),
@@ -708,7 +707,7 @@ class _SetupPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.sectionGap),
 
             // ── First account ──
             SectionHeader(s.onboardFirstAccountSection, padding: _sectionPad),
@@ -730,16 +729,16 @@ class _SetupPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
+                  Wrap(
+                    spacing: Spacing.sm,
+                    runSpacing: Spacing.sm,
                     children: [
                       for (final t in _accountTypes(s))
-                        Expanded(
-                          child: _TypeChip(
-                            label: t.$2,
-                            icon: t.$3,
-                            selected: acctType == t.$1,
-                            onTap: () => onAcctTypeChanged(t.$1),
-                          ),
+                        AppChip(
+                          label: t.$2,
+                          icon: t.$3,
+                          selected: acctType == t.$1,
+                          onTap: () => onAcctTypeChanged(t.$1),
                         ),
                     ],
                   ),
@@ -753,49 +752,29 @@ class _SetupPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.sectionGap),
 
             // ── Categories ──
             SectionHeader(s.onboardCategoriesSection, padding: _sectionPad),
             _Card(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Column(
                 children: [
-                  SwitchListTile(
+                  SettingsSwitchRow(
                     value: seedCategories,
                     onChanged: onSeedChanged,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    title: Text(s.onboardSeedCategories,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context))),
-                    subtitle: Text(
-                        seedCategories
-                            ? s.onboardFullSetSub
-                            : s.onboardEmptySub,
-                        style: TextStyle(
-                            fontSize: 13, color: AppColors.ts(context))),
+                    title: s.onboardSeedCategories,
+                    subtitle: seedCategories
+                        ? s.onboardFullSetSub
+                        : s.onboardEmptySub,
                   ),
                   if (seedCategories) ...[
-                    Divider(
-                        height: 1,
-                        indent: 16,
-                        endIndent: 16,
-                        color: AppColors.bd(context)),
-                    SwitchListTile(
+                    Divider(height: 1, color: AppColors.bd(context)),
+                    SettingsSwitchRow(
                       value: seedEnvelopes,
                       onChanged: onSeedEnvelopesChanged,
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      title: Text(s.onboardSeedEnvelopes,
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.tp(context))),
-                      subtitle: Text(s.onboardSeedEnvelopesSub,
-                          style: TextStyle(
-                              fontSize: 13, color: AppColors.ts(context))),
+                      title: s.onboardSeedEnvelopes,
+                      subtitle: s.onboardSeedEnvelopesSub,
                     ),
                   ],
                 ],
@@ -827,62 +806,6 @@ class _SetupPage extends StatelessWidget {
   }
 }
 
-/// Account type choice — the same chip look as the account screen.
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TypeChip({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fg = selected ? AppColors.accent : AppColors.ts(context);
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.accentLight : AppColors.sfv(context),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(
-              color: selected ? AppColors.accent : AppColors.bd(context),
-              width: selected ? 1.5 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, size: 20, color: fg),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: selected ? AppColors.accent : AppColors.tp(context),
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Opening balance as a labelled input, matching the fields above it.
 /// Tapping opens the calculator (never the keyboard).
 class _BalanceField extends StatelessWidget {
@@ -901,11 +824,12 @@ class _BalanceField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme.bodyLarge;
-    return GestureDetector(
+    return Tappable(
       onTap: () async {
         final v = await showCalculatorSheet(context, value);
         if (v != null) onChanged(v);
       },
+      borderRadius: BorderRadius.circular(RadiusTokens.input),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
@@ -1009,20 +933,14 @@ class _SheetBody extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(title,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
-              const SizedBox(height: 8),
-              Text(description,
-                  style: TextStyle(fontSize: 14, color: AppColors.ts(context))),
-              const SizedBox(height: 20),
+              SheetTitle(title,
+                  subtitle: description,
+                  padding: const EdgeInsetsDirectional.only(bottom: 20)),
               ...children,
               if (error != null) ...[
                 const SizedBox(height: 12),

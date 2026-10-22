@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
+import '../utils/calendar_days.dart';
 
 /// Daily spending data for the heatmap.
 class DaySpending {
@@ -68,9 +69,9 @@ class SpendingHeatmap extends StatelessWidget {
         .reduce((a, b) => a.isBefore(b) ? a : b);
 
     // Calculate weeks
-    final startOfWeek = firstDate.subtract(
-        Duration(days: firstDate.weekday % 7)); // align to Sunday
-    final totalDays = today.difference(startOfWeek).inDays + 1;
+    final startOfWeek = DateTime(firstDate.year, firstDate.month,
+        firstDate.day - firstDate.weekday % 7); // align to Sunday
+    final totalDays = calendarDaysBetween(startOfWeek, today) + 1;
     final totalWeeks = (totalDays / 7).ceil();
 
     final gridHeight = 7 * (cellSize + cellSpacing) + 20; // +20 for month labels
@@ -182,10 +183,10 @@ class SpendingHeatmap extends StatelessWidget {
     if (day == null) return '$dateStr\n${S.of(context).heatmapNoActivity}';
     final parts = <String>[dateStr];
     if (day.income > 0) {
-      parts.add('+${formatAmount(day.income, currency: baseCurrency)}');
+      parts.add(bidiSafeAmount('+${formatAmount(day.income, currency: baseCurrency)}'));
     }
     if (day.expense > 0) {
-      parts.add('-${formatAmount(day.expense, currency: baseCurrency)}');
+      parts.add(bidiSafeAmount('-${formatAmount(day.expense, currency: baseCurrency)}'));
     }
     return parts.join('\n');
   }

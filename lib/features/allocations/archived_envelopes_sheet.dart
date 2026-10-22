@@ -9,7 +9,10 @@ import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/sheet_title.dart';
 
 /// Lists archived envelopes with an Unarchive action (Budget tab menu).
 Future<void> showArchivedEnvelopesSheet(
@@ -35,19 +38,14 @@ Future<void> showArchivedEnvelopesSheet(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 8),
-              child: Text(tr.allocArchivedTitle,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: TypographyTokens.displayFamily)),
-            ),
+            SheetTitle(tr.allocArchivedTitle),
             if (archived.isEmpty)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                child: Text(tr.allocNoArchived,
-                    style: TextStyle(color: AppColors.ts(sheetCtx))),
+                padding: const EdgeInsets.only(bottom: 24),
+                child: EmptyState(
+                  icon: AppIcons.archive,
+                  title: tr.allocNoArchived,
+                ),
               )
             else
               Flexible(
@@ -57,14 +55,12 @@ Future<void> showArchivedEnvelopesSheet(
                   children: [
                     for (final a in archived)
                       ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppColors.sfv(sheetCtx),
-                          child: (a.icon?.isNotEmpty ?? false)
-                              ? EmojiGlyph(a.icon!, size: 22)
-                              : Text(a.name.characters.first.toUpperCase(),
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: AppColors.tp(sheetCtx))),
+                        leading: CategoryIcon(
+                          categoryName: a.name,
+                          emoji: a.icon,
+                          color: AppColors.accent,
+                          size: CategoryIconTokens.compactSize,
+                          circular: true,
                         ),
                         title: Text(a.name,
                             style:

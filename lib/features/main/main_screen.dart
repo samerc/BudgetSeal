@@ -189,17 +189,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ],
         ),
         bottomNavigationBar: DecoratedBox(
-          // Cashew's sharp shadow above the bar (light mode only).
-          decoration: BoxDecoration(
-            boxShadow: Theme.of(context).brightness == Brightness.light
-                ? const [
-                    BoxShadow(
-                        color: Color(0x1E5A5A5A),
-                        blurRadius: 2,
-                        spreadRadius: 2),
-                  ]
-                : const [],
-          ),
+          // The card shadow above the bar (light mode only; none in dark).
+          decoration: BoxDecoration(boxShadow: AppColors.cardShadow(context)),
           child: NavigationBar(
             selectedIndex: _currentIndex,
             onDestinationSelected: _onTabTapped,

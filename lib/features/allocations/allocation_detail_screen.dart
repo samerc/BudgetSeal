@@ -22,6 +22,12 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
+import '../categories/emoji_groups.dart';
+import 'option_card.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -119,7 +125,8 @@ class _AllocationDetailScreenState
   }
 
   static final _sectionRadius = BorderRadius.circular(CardTokens.radius);
-  static const _inputRadius = BorderRadius.all(Radius.circular(12));
+  static const _inputRadius =
+      BorderRadius.all(Radius.circular(RadiusTokens.md));
 
   InputDecoration _inputDecoration(String label, {Widget? prefixIcon}) {
     return InputDecoration(
@@ -153,19 +160,16 @@ class _AllocationDetailScreenState
     required T selected,
     required ValueChanged<T> onChanged,
   }) {
-    return Row(children: [
-      for (int i = 0; i < options.length; i++) ...[
-        if (i > 0) const SizedBox(width: 8),
-        Expanded(
-          child: _SegmentChip(
-            label: options[i].$2,
-            icon: options[i].$3,
-            isSelected: selected == options[i].$1,
-            onTap: () => onChanged(options[i].$1),
-          ),
-        ),
+    return SegmentedButton<T>(
+      segments: [
+        for (final o in options)
+          ButtonSegment(
+              value: o.$1, label: Text(o.$2), icon: Icon(o.$3, size: 18)),
       ],
-    ]);
+      selected: {selected},
+      showSelectedIcon: false,
+      onSelectionChanged: (v) => onChanged(v.first),
+    );
   }
 
   @override
@@ -204,8 +208,8 @@ class _AllocationDetailScreenState
                   value: 'settings',
                   child: Row(children: [
                     Icon(AppIcons.gear,
-                        size: 18, color: AppColors.ts(context)),
-                    const SizedBox(width: 10),
+                        size: 20, color: AppColors.ts(context)),
+                    const SizedBox(width: 12),
                     Text(l.allocEditSettings),
                   ]),
                 ),
@@ -213,8 +217,8 @@ class _AllocationDetailScreenState
                   value: 'move',
                   child: Row(children: [
                     Icon(AppIcons.arrowsLeftRight,
-                        size: 18, color: AppColors.accent),
-                    const SizedBox(width: 10),
+                        size: 20, color: AppColors.accent),
+                    const SizedBox(width: 12),
                     Text(_targetBalance() < 0
                         ? l.allocCoverTitle
                         : l.allocMoveMenu),
@@ -224,8 +228,8 @@ class _AllocationDetailScreenState
                     value: 'withdraw',
                     child: Row(children: [
                       Icon(AppIcons.signOut,
-                          size: 18, color: AppColors.accent),
-                      const SizedBox(width: 10),
+                          size: 20, color: AppColors.accent),
+                      const SizedBox(width: 12),
                       Text(l.allocWithdrawMenu),
                     ]),
                   ),
@@ -233,8 +237,8 @@ class _AllocationDetailScreenState
                   value: 'revalue',
                   child: Row(children: [
                     Icon(AppIcons.currencyCircleDollar,
-                        size: 18, color: AppColors.accent),
-                    const SizedBox(width: 10),
+                        size: 20, color: AppColors.accent),
+                    const SizedBox(width: 12),
                     Text(l.allocRevalueMenu),
                   ]),
                 ),
@@ -242,8 +246,8 @@ class _AllocationDetailScreenState
                   value: 'archive',
                   child: Row(children: [
                     Icon(AppIcons.archive,
-                        size: 18, color: AppColors.caution),
-                    const SizedBox(width: 10),
+                        size: 20, color: AppColors.caution),
+                    const SizedBox(width: 12),
                     Text(l.allocArchiveMenu,
                         style: TextStyle(color: AppColors.caution)),
                   ]),
@@ -252,8 +256,8 @@ class _AllocationDetailScreenState
                   value: 'delete',
                   child: Row(children: [
                     Icon(AppIcons.trash,
-                        size: 18, color: AppColors.overspent),
-                    const SizedBox(width: 10),
+                        size: 20, color: AppColors.overspent),
+                    const SizedBox(width: 12),
                     Text(l.commonDelete,
                         style: TextStyle(color: AppColors.overspent)),
                   ]),
@@ -274,9 +278,7 @@ class _AllocationDetailScreenState
                           width: 20,
                           child: CircularProgressIndicator(
                               color: AppColors.onAccent, strokeWidth: 2))
-                      : Text(_isNew ? l.allocCreateButtonDetail : l.allocSaveChanges,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
+                      : Text(_isNew ? l.allocCreateButtonDetail : l.allocSaveChanges),
                 ),
               ),
             )
@@ -284,7 +286,7 @@ class _AllocationDetailScreenState
       body: Stack(
         children: [
           SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -300,31 +302,43 @@ class _AllocationDetailScreenState
               _sectionHeader(l.allocNameIconSection),
               Row(
                 children: [
-                  GestureDetector(
+                  Tappable(
                     onTap: () => setState(() {
                       _showEmojiGrid = !_showEmojiGrid;
                       if (_showEmojiGrid) FocusScope.of(context).unfocus();
                     }),
+                    borderRadius: BorderRadius.circular(
+                        CategoryIconTokens.listSize / 2),
                     child: Container(
-                      width: 48,
-                      height: 48,
                       decoration: BoxDecoration(
-                        color: AppColors.pastel(context, AppColors.accent,
-                            light: 0.85, dark: 0.78),
-                        borderRadius: BorderRadius.circular(12),
+                        shape: BoxShape.circle,
                         border: Border.all(
                           color: _showEmojiGrid
                               ? AppColors.accent
-                              : AppColors.accent.withValues(alpha: 0.3),
-                          width: _showEmojiGrid ? 2 : 1,
+                              : Colors.transparent,
+                          width: 2,
                         ),
                       ),
-                      child: Center(
-                        child: _icon != null
-                            ? EmojiGlyph(_icon!, size: 28)
-                            : Icon(AppIcons.smiley,
-                                size: 22, color: AppColors.accent),
-                      ),
+                      child: _icon != null
+                          ? CategoryIcon(
+                              categoryName: _nameController.text,
+                              emoji: _icon,
+                              color: AppColors.accent,
+                              size: CategoryIconTokens.listSize,
+                              circular: true,
+                            )
+                          : Container(
+                              width: CategoryIconTokens.listSize,
+                              height: CategoryIconTokens.listSize,
+                              decoration: BoxDecoration(
+                                color: AppColors.pastel(
+                                    context, AppColors.accent,
+                                    light: 0.85, dark: 0.78),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(AppIcons.smiley,
+                                  size: 22, color: AppColors.accent),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -362,66 +376,15 @@ class _AllocationDetailScreenState
                         _icon = null;
                         _showEmojiGrid = false;
                       }),
-                      child: Text(l.allocRemoveIcon,
-                          style: const TextStyle(fontSize: 12)),
+                      child: Text(l.allocRemoveIcon),
                     ),
                   ),
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.bd(context)),
-                  ),
-                  child: ListView(
-                    padding: const EdgeInsets.all(10),
-                    children: _emojiGroups.entries.map((group) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 6),
-                            child: Text(group.key,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.ts(context),
-                                )),
-                          ),
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 6,
-                            children: group.value.map((e) {
-                              final isSelected = e == _icon;
-                              return GestureDetector(
-                                onTap: () => setState(() {
-                                  _icon = e;
-                                  _showEmojiGrid = false;
-                                }),
-                                child: Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? AppColors.accentLight
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: isSelected
-                                        ? Border.all(
-                                            color: AppColors.accent, width: 2)
-                                        : null,
-                                  ),
-                                  child: Center(
-                                    child: EmojiGlyph(e, size: 24),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                InlineEmojiGrid(
+                  selected: _icon,
+                  onPick: (e) => setState(() {
+                    _icon = e;
+                    _showEmojiGrid = false;
+                  }),
                 ),
               ],
             ]),
@@ -431,22 +394,22 @@ class _AllocationDetailScreenState
             if (_isNew) ...[
               _sectionContainer(children: [
                 _sectionHeader(l.allocTypeSection),
-                _buildTypeOptionCard(
+                OptionCard(
                   icon: AppIcons.shoppingBag,
                   title: l.allocSpendingTitle,
-                  description: l.allocSpendingDesc,
-                  isSelected: _type == 'spending',
+                  subtitle: l.allocSpendingDesc,
+                  selected: _type == 'spending',
                   onTap: () => setState(() {
                     _type = 'spending';
                     _periodicity = 'periodic';
                   }),
                 ),
                 const SizedBox(height: 8),
-                _buildTypeOptionCard(
+                OptionCard(
                   icon: AppIcons.slidersHorizontal,
                   title: l.allocFlexibleTitle,
-                  description: l.allocFlexibleDesc,
-                  isSelected: _type == 'flexible' || _type == 'saving',
+                  subtitle: l.allocFlexibleDesc,
+                  selected: _type == 'flexible' || _type == 'saving',
                   onTap: () => setState(() {
                     _type = 'flexible';
                     _periodicity = 'permanent';
@@ -457,7 +420,7 @@ class _AllocationDetailScreenState
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,9 +598,7 @@ class _AllocationDetailScreenState
                     decoration: BoxDecoration(
                       color: AppColors.pastel(context, AppColors.caution,
                           light: 0.85, dark: 0.75),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: AppColors.caution.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
                     child: Row(children: [
                       const Icon(AppIcons.info,
@@ -658,7 +619,7 @@ class _AllocationDetailScreenState
                           horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: Row(children: [
                         CircleAvatar(
@@ -671,10 +632,15 @@ class _AllocationDetailScreenState
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500)),
                         ),
-                        GestureDetector(
+                        Tappable(
                           onTap: () => _unlinkCategory(cat.id),
-                          child: Icon(AppIcons.x,
-                              size: 16, color: AppColors.th(context)),
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.md),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(AppIcons.x,
+                                size: 16, color: AppColors.th(context)),
+                          ),
                         ),
                       ]),
                     )),
@@ -683,11 +649,6 @@ class _AllocationDetailScreenState
                   onPressed: _showLinkCategorySheet,
                   icon: const Icon(AppIcons.plus, size: 16),
                   label: Text(l.allocLinkCategory),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                        color: AppColors.accent.withValues(alpha: 0.4)),
-                  ),
                 ),
               ]),
             ], // end if (_isNew || _showSettings)
@@ -706,44 +667,6 @@ class _AllocationDetailScreenState
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Icon picker
-  // ---------------------------------------------------------------------------
-
-  static const _emojiGroups = <String, List<String>>{
-    'Money & Budget': [
-      '💰', '💳', '🏦', '📈', '💵', '🪙', '💲', '🧾', '🏧', '📊',
-    ],
-    'Food & Drink': [
-      '🛒', '🍕', '🍔', '☕', '🍺', '🥗', '🍣', '🌮', '🍩', '🥤',
-    ],
-    'Transport': [
-      '🚗', '⛽', '🚕', '🚌', '🚇', '✈️', '🚲', '🅿️', '🏍️', '🛞',
-    ],
-    'Home': [
-      '🏠', '💡', '💧', '🔌', '🛏️', '🧹', '🔧', '🔑', '🪑', '📡',
-    ],
-    'Shopping & Style': [
-      '🛍️', '👕', '👗', '💄', '👟', '💎', '🕶️', '👜', '🧴', '💇',
-    ],
-    'Health & Fitness': [
-      '💊', '🏥', '🏋️', '🧘', '🦷', '🩺', '🏊', '🚴', '🩹', '💉',
-    ],
-    'Fun & Travel': [
-      '🎬', '🎮', '🎵', '✈️', '🏖️', '🏔️', '🎭', '📷', '🎧', '🍿',
-    ],
-    'Education & Work': [
-      '🎓', '📚', '💻', '📱', '💼', '🏢', '📝', '✏️', '🔬', '📐',
-    ],
-    'Family & Pets': [
-      '👶', '🐾', '🐕', '🧸', '🍼', '🎁', '❤️', '👨‍👩‍👧', '🎂', '🏡',
-    ],
-    'Other': [
-      '📦', '🎯', '⭐', '🌱', '♻️', '🚀', '🏷️', '📌', '🗂️', '🔖',
-    ],
-  };
-
 
   // ---------------------------------------------------------------------------
   // Balance hero card
@@ -787,7 +710,7 @@ class _AllocationDetailScreenState
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
       decoration: BoxDecoration(
         color: heroColor,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+        borderRadius: BorderRadius.circular(RadiusTokens.hero),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -798,7 +721,7 @@ class _AllocationDetailScreenState
                 child: Text(
                   S.of(context).allocAvailable,
                   style: TextStyle(
-                    color: onHero.withValues(alpha: 0.6),
+                    color: AppColors.ts(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -809,7 +732,7 @@ class _AllocationDetailScreenState
                   padding: const EdgeInsetsDirectional.only(end: 8),
                   child: Text(S.of(context).sealFullyFunded,
                       style: TextStyle(
-                          color: onHero.withValues(alpha: 0.7),
+                          color: AppColors.ts(context),
                           fontSize: 13,
                           fontWeight: FontWeight.w700)),
                 ),
@@ -849,8 +772,8 @@ class _AllocationDetailScreenState
                 style: TextStyle(
                   color: entry.value < 0
                       ? AppColors.caution
-                      : onHero.withValues(alpha: 0.6),
-                  fontSize: 13.5,
+                      : AppColors.ts(context),
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -877,7 +800,7 @@ class _AllocationDetailScreenState
                     S.of(context).objOfTarget(
                         formatAmount(_targetAmount, currency: targetCurrency)),
                     style: TextStyle(
-                      color: onHero.withValues(alpha: 0.6),
+                      color: AppColors.ts(context),
                       fontSize: 13,
                     ),
                   ),
@@ -899,7 +822,7 @@ class _AllocationDetailScreenState
                             currency: targetCurrency)),
                     textAlign: TextAlign.end,
                     style: TextStyle(
-                      color: onHero.withValues(alpha: 0.6),
+                      color: AppColors.ts(context),
                       fontSize: 13,
                     ),
                   ),
@@ -913,11 +836,6 @@ class _AllocationDetailScreenState
             onPressed: () => _showFundSheet(targetCurrency),
             icon: const Icon(AppIcons.plus, size: 20),
             label: Text(S.of(context).allocFund),
-            style: FilledButton.styleFrom(
-              backgroundColor:
-                  AppColors.pastel(context, envColor, light: 0.55, dark: 0.5),
-              foregroundColor: onHero,
-            ),
           ),
         ],
       ),
@@ -959,28 +877,15 @@ class _AllocationDetailScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Padding(
           padding: EdgeInsets.fromLTRB(
-              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 24),
+              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 16),
-              Text(
+              SheetTitle(
                 tr.allocFundEnvelope(_nameController.text),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: textPrimaryColor,
-                ),
+                subtitle: tr.allocFromUnallocated,
+                padding: const EdgeInsetsDirectional.only(bottom: 16),
               ),
-              const SizedBox(height: 4),
-              Text(
-                tr.allocFromUnallocated,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textSecondaryColor,
-                ),
-              ),
-              const SizedBox(height: 16),
               // Currency selector
               if (availableCurrencies.length > 1)
                 Padding(
@@ -990,18 +895,22 @@ class _AllocationDetailScreenState
                       final isSelected = c == selectedCurrency;
                       final bal = unallocated[c] ?? 0;
                       return Expanded(
-                        child: GestureDetector(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Tappable(
                           onTap: () =>
                               setSheetState(() => selectedCurrency = c),
+                          borderRadius:
+                              BorderRadius.circular(RadiusTokens.md),
+                          color: isSelected
+                              ? AppColors.accentLight
+                              : surfaceVariantColor,
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 8),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.accentLight
-                                  : surfaceVariantColor,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius:
+                                  BorderRadius.circular(RadiusTokens.md),
                               border: Border.all(
                                 color: isSelected
                                     ? AppColors.accent
@@ -1031,6 +940,7 @@ class _AllocationDetailScreenState
                             ),
                           ),
                         ),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -1042,7 +952,7 @@ class _AllocationDetailScreenState
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: surfaceVariantColor,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
                     child: Text(
                       selectedCurrency,
@@ -1058,7 +968,7 @@ class _AllocationDetailScreenState
                     child: Container(
                       decoration: BoxDecoration(
                         color: surfaceVariantColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: CalculatorAmountField(
                         value: amount,
@@ -1105,9 +1015,7 @@ class _AllocationDetailScreenState
                 child: FilledButton(
                   onPressed: () => Navigator.pop(
                       ctx, {'amount': amount, 'currency': selectedCurrency}),
-                  child: Text(tr.allocFund,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: Text(tr.allocFund),
                 ),
               ),
             ],
@@ -1234,7 +1142,7 @@ class _AllocationDetailScreenState
         builder: (context, snapshot) {
           final ledgerEntries = snapshot.data;
           if (ledgerEntries == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const SkeletonList(count: 3);
           }
 
           final recent = ledgerEntries.take(8).toList();
@@ -1284,8 +1192,8 @@ class _AllocationDetailScreenState
 
               // A spending row opens its transaction.
               final txId = entry.sourceTransactionId;
-              return InkWell(
-                borderRadius: BorderRadius.circular(12),
+              return Tappable(
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
                 onTap: txId == null
                     ? null
                     : () => context.push('/transactions/$txId'),
@@ -1322,7 +1230,7 @@ class _AllocationDetailScreenState
                                 ? '${formatDate(row.date.toLocal())} · $label'
                                 : formatDate(row.date.toLocal()),
                             style: TextStyle(
-                                fontSize: 12.5,
+                                fontSize: TypographyTokens.txSubtitleSize,
                                 color: AppColors.ts(context)),
                           ),
                         ],
@@ -1332,8 +1240,8 @@ class _AllocationDetailScreenState
                     Text(
                       '${isPositive ? '+' : ''}${formatAmount(entry.amount, currency: entry.currency)}',
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
+                          fontSize: TypographyTokens.amountRegularSize,
+                          fontWeight: TypographyTokens.amountRegularWeight,
                           color: color),
                     ),
                   ],
@@ -1432,8 +1340,9 @@ class _AllocationDetailScreenState
                           curve: Curves.easeOut,
                           height: (60 * fraction).clamp(4.0, 60.0),
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(6),
+                            color: AppColors.accent,
+                            borderRadius:
+                                BorderRadius.circular(RadiusTokens.sm),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -1455,80 +1364,6 @@ class _AllocationDetailScreenState
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Type option card for creation flow
-  // ---------------------------------------------------------------------------
-
-  Widget _buildTypeOptionCard({
-    required IconData icon,
-    required String title,
-    required String description,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accentLight
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.bd(context),
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.accentLight
-                    : AppColors.bd(context).withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon,
-                  size: 22,
-                  color: isSelected ? AppColors.accent : AppColors.ts(context)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? AppColors.accent
-                            : AppColors.tp(context),
-                      )),
-                  const SizedBox(height: 4),
-                  Text(description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.ts(context),
-                        height: 1.4,
-                      )),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(AppIcons.checkCircleFill,
-                  size: 20, color: AppColors.accent),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1569,7 +1404,6 @@ class _AllocationDetailScreenState
     final currency = _targetCurrencyController.text;
 
     final tr = S.of(context);
-    final withdrawTextSecondary = AppColors.ts(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -1586,16 +1420,11 @@ class _AllocationDetailScreenState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(tr.allocWithdrawTitle,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text(
-                tr.allocWithdrawDesc,
-                style: TextStyle(
-                    fontSize: 13, color: withdrawTextSecondary),
+              SheetTitle(
+                tr.allocWithdrawTitle,
+                subtitle: tr.allocWithdrawDesc,
+                padding: const EdgeInsetsDirectional.only(bottom: 16),
               ),
-              const SizedBox(height: 16),
               CalculatorAmountField(
                 value: withdrawAmount,
                 label: tr.allocWithdrawAmountLabel,
@@ -1618,8 +1447,7 @@ class _AllocationDetailScreenState
                       onPressed: withdrawAmount > 0
                           ? () => Navigator.pop(ctx, true)
                           : null,
-                      child: Text(tr.allocWithdrawButton,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      child: Text(tr.allocWithdrawButton),
                     ),
                   ),
                 ],
@@ -1695,7 +1523,6 @@ class _AllocationDetailScreenState
     final linkHintColor = AppColors.th(context);
     final linkTextPrimary = AppColors.tp(context);
     final linkTextSecondary = AppColors.ts(context);
-    final linkSurfaceVariant = AppColors.sfv(context);
     final selected = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -1721,17 +1548,11 @@ class _AllocationDetailScreenState
               ),
               child: Column(
                 children: [
+                  SheetTitle(tr.allocLinkCategoryTitle),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                     child: Column(
                       children: [
-                        const SizedBox(height: 12),
-                        Text(tr.allocLinkCategoryTitle,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: linkTextPrimary)),
-                        const SizedBox(height: 10),
                         TextField(
                           onChanged: (v) =>
                               setSheetState(() => search = v),
@@ -1746,8 +1567,6 @@ class _AllocationDetailScreenState
                             prefixIcon: Icon(AppIcons.magnifyingGlass,
                                 size: 18,
                                 color: linkHintColor),
-                            filled: true,
-                            fillColor: linkSurfaceVariant,
                             contentPadding:
                                 const EdgeInsets.symmetric(vertical: 10),
                             isDense: true,
@@ -1774,18 +1593,16 @@ class _AllocationDetailScreenState
                                   AppColors.fromHex(cat.colorHex);
                               final hasEmoji = cat.icon.length <= 4 &&
                                   cat.icon != 'category';
-                              return GestureDetector(
+                              return Tappable(
                                 onTap: () =>
                                     Navigator.pop(ctx, cat.id),
+                                borderRadius:
+                                    BorderRadius.circular(RadiusTokens.md),
                                 child: Container(
                                   margin:
                                       const EdgeInsets.only(bottom: 4),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.circular(10),
-                                  ),
                                   child: Row(
                                     children: [
                                       CategoryIcon(
@@ -1794,7 +1611,8 @@ class _AllocationDetailScreenState
                                             ? cat.icon
                                             : null,
                                         color: color,
-                                        size: 32,
+                                        size: CategoryIconTokens.compactSize,
+                                        circular: true,
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
@@ -1977,41 +1795,36 @@ class _AllocationDetailScreenState
 
   Future<void> _confirmArchive() async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(tr.allocArchiveTitle),
-        content: Text(
-          tr.allocArchiveMsg,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.overspent),
-            child: Text(tr.commonArchive),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.allocArchiveTitle,
+      message: tr.allocArchiveMsg,
+      confirmLabel: tr.commonArchive,
+      destructive: false,
     );
+    if (!confirmed || !mounted) return;
+    await _archive();
+  }
 
-    if (confirmed == true && mounted) {
+  /// Archive this envelope, tell the user, and leave the screen.
+  Future<void> _archive() async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
       final db = ref.read(databaseProvider);
       await AllocationsDao(db).archive(widget.allocationId);
       ref.invalidate(allocationsProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(tr.allocArchived),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        context.pop();
-      }
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.allocArchived),
+        behavior: SnackBarBehavior.floating,
+      ));
+      if (mounted) context.pop();
+    } catch (e) {
+      debugPrint('[AllocationDetail] Archive failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.commonSomethingWentWrong),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -2039,9 +1852,10 @@ class _AllocationDetailScreenState
           S.of(context).allocDeleteLinkedWarning(linkedCount, '$names$suffix'));
     }
 
+    final tr = S.of(context);
+    String? action;
     if (warnings.isNotEmpty) {
-      final tr = S.of(context);
-      final action = await showDialog<String>(
+      action = await showDialog<String>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
           title: Text(tr.allocDeleteTitle),
@@ -2050,97 +1864,65 @@ class _AllocationDetailScreenState
             '${tr.allocDeleteConsequences}',
           ),
           actions: [
-            TextButton(
+            OutlinedButton(
+              style: DialogButtons.outlined,
               onPressed: () => Navigator.pop(dialogCtx, 'cancel'),
               child: Text(tr.commonCancel),
             ),
-            TextButton(
+            OutlinedButton(
+              style: DialogButtons.outlined,
               onPressed: () => Navigator.pop(dialogCtx, 'archive'),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accent),
               child: Text(tr.allocArchiveInstead),
             ),
-            TextButton(
+            FilledButton(
+              style: DialogButtons.destructive,
               onPressed: () => Navigator.pop(dialogCtx, 'delete'),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.overspent),
-              child: Text(tr.allocDeletePermanently),
+              child: Text(tr.commonDelete),
             ),
           ],
         ),
       );
-
-      if (!mounted) return;
-
-      if (action == 'archive') {
-        await dao.archive(widget.allocationId);
-        ref.invalidate(allocationsProvider);
-        if (mounted) context.pop();
-      } else if (action == 'delete') {
-        try {
-          for (final cat in linked) {
-            await dao.unlinkCategory(cat.id);
-          }
-          await (db.update(db.allocations)
-                ..where((a) => a.id.equals(widget.allocationId)))
-              .write(AllocationsCompanion(
-                  deleted: const Value(true),
-                  lastModified: Value(DateTime.now())));
-          ref.invalidate(allocationsProvider);
-          ref.invalidate(categoriesProvider);
-          if (mounted) context.pop();
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(S.of(context).allocDeleteError),
-              behavior: SnackBarBehavior.floating,
-            ));
-          }
-        }
-      }
     } else {
       // No linked categories -- simple confirmation.
-      final tr = S.of(context);
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogCtx) => AlertDialog(
-          title: Text(tr.allocDeleteNoLinksTitle),
-          content: Text(
-            tr.allocDeleteNoLinksMsg,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, false),
-              child: Text(tr.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, true),
-              style: TextButton.styleFrom(
-                  foregroundColor: AppColors.overspent),
-              child: Text(tr.allocDeletePermanently),
-            ),
-          ],
-        ),
+      final confirmed = await showConfirmDialog(
+        context,
+        title: tr.allocDeleteNoLinksTitle,
+        message: tr.allocDeleteNoLinksMsg,
+        confirmLabel: tr.commonDelete,
       );
+      if (confirmed) action = 'delete';
+    }
 
-      if (confirmed == true && mounted) {
-        try {
-          await (db.update(db.allocations)
-                ..where((a) => a.id.equals(widget.allocationId)))
-              .write(AllocationsCompanion(
-                  deleted: const Value(true),
-                  lastModified: Value(DateTime.now())));
-          ref.invalidate(allocationsProvider);
-          if (mounted) context.pop();
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(S.of(context).allocDeleteError),
-              behavior: SnackBarBehavior.floating,
-            ));
-          }
-        }
+    if (!mounted) return;
+    if (action == 'archive') {
+      await _archive();
+      return;
+    }
+    if (action != 'delete') return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      for (final cat in linked) {
+        await dao.unlinkCategory(cat.id);
       }
+      await (db.update(db.allocations)
+            ..where((a) => a.id.equals(widget.allocationId)))
+          .write(AllocationsCompanion(
+              deleted: const Value(true),
+              lastModified: Value(DateTime.now())));
+      ref.invalidate(allocationsProvider);
+      ref.invalidate(categoriesProvider);
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.allocDeleted),
+        behavior: SnackBarBehavior.floating,
+      ));
+      if (mounted) context.pop();
+    } catch (e) {
+      debugPrint('[AllocationDetail] Delete failed: $e');
+      messenger.showSnackBar(SnackBar(
+        content: Text(tr.allocDeleteError),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -2208,59 +1990,17 @@ class _AllocationDetailScreenState
         );
         context.pop();
       }
+    } catch (e) {
+      debugPrint('[AllocationDetail] Save failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).commonSomethingWentWrong),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
-  }
-}
-
-class _SegmentChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _SegmentChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accentLight
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.bd(context),
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon,
-              size: 22,
-              color:
-                  isSelected ? AppColors.accent : AppColors.ts(context)),
-          const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color:
-                    isSelected ? AppColors.accent : AppColors.ts(context),
-              )),
-        ]),
-      ),
-    );
   }
 }
 
@@ -2421,26 +2161,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
-          // Title
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: Row(
-              children: [
-                Icon(AppIcons.currencyCircleDollar,
-                    size: 22, color: AppColors.accent),
-                const SizedBox(width: 10),
-                Text(
-                  S.of(context).allocRevalueForeignTitle,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          SheetTitle(S.of(context).allocRevalueForeignTitle),
           // Content
           Flexible(
             child: ListView(
@@ -2497,9 +2218,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                           width: 20,
                           child: CircularProgressIndicator(
                               color: AppColors.onAccent, strokeWidth: 2))
-                      : Text(S.of(context).allocApplyRevaluation,
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
+                      : Text(S.of(context).allocApplyRevaluation),
                 ),
               ),
             ),
@@ -2519,7 +2238,6 @@ class _RevalueSheetState extends State<_RevalueSheet> {
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
         borderRadius: BorderRadius.circular(CardTokens.radius),
-        border: Border.all(color: AppColors.bd(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2533,7 +2251,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, AppColors.accent,
                       light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: Text(
                   fb.currency,
@@ -2602,9 +2320,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                   icon: const Icon(AppIcons.arrowsClockwise, size: 16),
                   label: Text(S.of(context).allocFetch),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                        color: AppColors.accent.withValues(alpha: 0.4)),
+                    minimumSize: const Size(0, 42),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                 ),
@@ -2628,7 +2344,7 @@ class _RevalueSheetState extends State<_RevalueSheet> {
                       light: 0.88, dark: 0.78)
                   : AppColors.pastel(context, AppColors.overspent,
                       light: 0.88, dark: 0.78),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

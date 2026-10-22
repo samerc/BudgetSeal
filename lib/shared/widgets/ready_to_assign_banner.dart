@@ -95,7 +95,7 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
       padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 18, 16),
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: BorderRadius.circular(RadiusTokens.dialog - 5),
+        borderRadius: BorderRadius.circular(RadiusTokens.hero),
       ),
       child: Row(
         children: [
@@ -151,7 +151,7 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
       margin: widget.margin,
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: BorderRadius.circular(RadiusTokens.dialog - 5),
+        borderRadius: BorderRadius.circular(RadiusTokens.hero),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

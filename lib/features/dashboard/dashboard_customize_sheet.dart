@@ -5,6 +5,8 @@ import '../../core/providers/dashboard_layout_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/sheet_title.dart';
 
 /// Bottom sheet for reordering and toggling dashboard sections.
 void showDashboardCustomizeSheet(BuildContext context) {
@@ -30,50 +32,38 @@ class _CustomizeSheet extends ConsumerWidget {
       expand: false,
       builder: (_, scrollCtrl) => Column(
         children: [
-          const SizedBox(height: 16),
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(S.of(context).customizeTitle,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
-                TextButton(
-                  onPressed: () {
-                    notifier.reset();
-                    Navigator.pop(context);
-                  },
-                  child: Text(S.of(context).commonReset),
-                ),
-              ],
+          SheetTitle(
+            S.of(context).customizeTitle,
+            subtitle: S.of(context).customizeDesc,
+            trailing: TextButton(
+              onPressed: () {
+                final messenger = ScaffoldMessenger.of(context);
+                final done = S.of(context).customizeResetDone;
+                notifier.reset();
+                Navigator.pop(context);
+                messenger.showSnackBar(SnackBar(
+                  content: Text(done),
+                  behavior: SnackBarBehavior.floating,
+                ));
+              },
+              child: Text(S.of(context).commonReset),
             ),
           ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              S.of(context).customizeDesc,
-              style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
-            ),
-          ),
-          const SizedBox(height: 12),
           // Reorderable list
           Expanded(
             child: ReorderableListView.builder(
               scrollController: scrollCtrl,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               itemCount: sections.length,
-              onReorder: notifier.reorder,
+              // onReorderItem already adjusts newIndex; reorder() expects the raw one.
+              onReorderItem: (from, to) =>
+                  notifier.reorder(from, to > from ? to + 1 : to),
               proxyDecorator: (child, _, animation) {
                 return AnimatedBuilder(
                   animation: animation,
                   builder: (_, __) => Material(
                     elevation: 4,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: CardTokens.borderRadius,
                     child: child,
                   ),
                 );
@@ -82,32 +72,28 @@ class _CustomizeSheet extends ConsumerWidget {
                 final config = sections[i];
                 return Container(
                   key: ValueKey(config.section),
-                  margin: const EdgeInsets.only(bottom: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
+                  margin: const EdgeInsets.only(bottom: Spacing.xs),
+                  decoration: AppColors.card(context),
                   child: Material(
                     // Transparent Material so the ripple paints above the card fill.
                     type: MaterialType.transparency,
                     child: ListTile(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                          borderRadius: CardTokens.borderRadius),
                       leading: Icon(
                         AppIcons.dotsSixVertical,
                         color: AppColors.th(context),
                       ),
                       title: Text(_sectionLabel(S.of(context), config.section),
                           style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              fontSize: TypographyTokens.cardTitleSize,
+                              fontWeight: TypographyTokens.cardTitleWeight,
                               color: config.visible
                                   ? AppColors.tp(context)
                                   : AppColors.th(context))),
                       subtitle: Text(_sectionDesc(S.of(context), config.section),
                           style: TextStyle(
-                              fontSize: 11,
+                              fontSize: TypographyTokens.captionSize,
                               color: AppColors.ts(context))),
                       trailing: Switch.adaptive(
                         value: config.visible,

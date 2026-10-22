@@ -13,12 +13,18 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/objectives_provider.dart';
+import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/currency_picker_field.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 import '../../shared/utils/save_errors.dart';
 import '../../shared/utils/note_text.dart';
 import '../transactions/widgets/category_sheet.dart';
@@ -69,6 +75,10 @@ class _ObjectiveDetailScreenState
   // Payment history
   List<Transaction> _payments = [];
 
+  /// First line of each payment (by transaction id): its amount and
+  /// currency are what was actually paid (tx.amount is in the base currency).
+  Map<String, TransactionLine> _paymentLines = {};
+
   bool get _isNew => widget.objectiveId == 'new';
 
   static const _colors = [
@@ -77,11 +87,11 @@ class _ObjectiveDetailScreenState
   ];
 
   static const _emojiGroups = <String, List<String>>{
-    'Goals': [
+    'goal': [
       '🎯', '🏆', '💰', '💵', '🐷', '🏦', '📈', '🎓', '🏠', '🚗',
       '✈️', '🏖️', '💍', '📱', '💻', '🎮', '🚲', '🛋️', '🎁', '❤️',
     ],
-    'Loans': ['🤝', '💳', '🧾', '👤', '🏛️', '📄', '⏳', '💸'],
+    'loan': ['🤝', '💳', '🧾', '👤', '🏛️', '📄', '⏳', '💸'],
   };
 
   @override
@@ -162,7 +172,22 @@ class _ObjectiveDetailScreenState
           .get();
     }
 
-    if (mounted) setState(() => _payments = txs);
+    final lineRows = txs.isEmpty
+        ? const <TransactionLine>[]
+        : await (db.select(db.transactionLines)
+              ..where((l) => l.transactionId.isIn(txs.map((t) => t.id))))
+            .get();
+    final firstLines = <String, TransactionLine>{};
+    for (final l in lineRows) {
+      firstLines.putIfAbsent(l.transactionId, () => l);
+    }
+
+    if (mounted) {
+      setState(() {
+        _payments = txs;
+        _paymentLines = firstLines;
+      });
+    }
   }
 
   /// Progress is the sum of the tagged payments themselves (their lines in
@@ -300,15 +325,14 @@ class _ObjectiveDetailScreenState
         : tr.objSaveFromAccount;
 
     final tpColor = AppColors.tp(context);
+    final thColor = AppColors.th(context);
     final tsColor = AppColors.ts(context);
-    final bdColor = AppColors.bd(context);
-    final sfColor = AppColors.sf(context);
-    final sfvColor = AppColors.sfv(context);
+    final sheetSubtitle =
+        tr.objCurrent(formatAmount(_currentAmount, currency: _currency));
 
     final result = await showModalBottomSheet<({double amount, String accountId, String? categoryId})>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: sfColor,
       builder: (ctx) {
         double amount = 0;
         String? selectedAccountId = activeAccounts.first.id;
@@ -318,43 +342,34 @@ class _ObjectiveDetailScreenState
         return StatefulBuilder(
           builder: (ctx, setModalState) => Padding(
             padding: EdgeInsets.fromLTRB(
-                24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(sheetTitle,
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                      color: tpColor)),
-              const SizedBox(height: 4),
-              Text(tr.objCurrent(formatAmount(_currentAmount, currency: _currency)),
-                  style: TextStyle(fontSize: 13, color: tsColor)),
-              const SizedBox(height: 20),
+                20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+              SheetTitle(sheetTitle,
+                  subtitle: sheetSubtitle,
+                  padding: const EdgeInsetsDirectional.only(top: 20, bottom: 16)),
 
               // Account picker
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: bdColor),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    icon: AppIcons.dropdown,
-                    value: selectedAccountId,
-                    isExpanded: true,
-                    items: activeAccounts.map((a) => DropdownMenuItem(
-                      value: a.id,
-                      child: Text('${a.name} (${a.currency})',
-                          style: const TextStyle(fontSize: 14)),
-                    )).toList(),
-                    onChanged: (v) => setModalState(() => selectedAccountId = v),
-                  ),
-                ),
+              DropdownButtonFormField<String>(
+                icon: AppIcons.dropdown,
+                initialValue: selectedAccountId,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: tr.commonAccount),
+                items: activeAccounts.map((a) => DropdownMenuItem(
+                  value: a.id,
+                  child: Text('${a.name} (${a.currency})'),
+                )).toList(),
+                onChanged: (v) => setModalState(() => selectedAccountId = v),
               ),
               const SizedBox(height: 12),
 
               // Category picker (optional) — same rich sheet as the
               // transaction screen: search, expense/income toggle,
               // parent/subcategory hierarchy with icons.
-              GestureDetector(
+              Tappable(
+                borderRadius: BorderRadius.circular(RadiusTokens.input),
                 onTap: () async {
                   final householdId = ref.read(currentHouseholdIdProvider);
                   final freshCats = ref.read(categoriesProvider).value ?? [];
@@ -403,26 +418,20 @@ class _ObjectiveDetailScreenState
                     ),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: sfvColor,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: bdColor),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(AppIcons.tag, size: 18, color: tsColor),
                   ),
                   child: Row(children: [
-                    Icon(AppIcons.tag, size: 16, color: tsColor),
-                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         selectedCategoryName ?? tr.objCategoryOptional,
                         style: TextStyle(
-                          fontSize: 14,
-                          color: selectedCategoryName != null ? tpColor : tsColor,
+                          color: selectedCategoryName != null ? tpColor : thColor,
                         ),
                       ),
                     ),
-                    Icon(AppIcons.caretRight, size: 18, color: tsColor),
+                    Icon(AppIcons.caretDown, color: tsColor),
                   ]),
                 ),
               ),
@@ -438,15 +447,12 @@ class _ObjectiveDetailScreenState
               ),
               const SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: amount > 0 && selectedAccountId != null
-                      ? () => Navigator.pop(ctx,
-                          (amount: amount, accountId: selectedAccountId!, categoryId: selectedCategoryId))
-                      : null,
-                  child: Text(buttonLabel),
-                ),
+              FilledButton(
+                onPressed: amount > 0 && selectedAccountId != null
+                    ? () => Navigator.pop(ctx,
+                        (amount: amount, accountId: selectedAccountId!, categoryId: selectedCategoryId))
+                    : null,
+                child: Text(buttonLabel),
               ),
             ]),
           ),
@@ -553,7 +559,7 @@ class _ObjectiveDetailScreenState
     // Existing: show summary with optional settings
     return Scaffold(
       appBar: AppBar(
-        title: Text(_nameCtrl.text.isEmpty ? 'Objective' : _nameCtrl.text),
+        title: Text(_nameCtrl.text, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           PopupMenuButton<String>(
             icon: Icon(AppIcons.dotsThreeVertical, color: AppColors.tp(context)),
@@ -594,7 +600,7 @@ class _ObjectiveDetailScreenState
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
               decoration: BoxDecoration(
                 color: AppColors.pastel(context, color, light: 0.8, dark: 0.75),
-                borderRadius: BorderRadius.circular(RadiusTokens.lg + 4),
+                borderRadius: BorderRadius.circular(RadiusTokens.hero),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -607,9 +613,9 @@ class _ObjectiveDetailScreenState
                             ? S.of(context).objRecordedSoFar
                             : S.of(context).objSavedSoFar),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: TypographyTokens.bodySize,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.tp(context).withValues(alpha: 0.6),
+                      color: AppColors.ts(context),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -647,11 +653,6 @@ class _ObjectiveDetailScreenState
                     label: Text(isLoan
                         ? S.of(context).objRecordPayment
                         : S.of(context).objAddFunds),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.pastel(context, color,
-                          light: 0.55, dark: 0.5),
-                      foregroundColor: AppColors.tp(context),
-                    ),
                   ),
                 ],
               ),
@@ -692,16 +693,8 @@ class _ObjectiveDetailScreenState
 
             // ── Payment History ──
             const SizedBox(height: 20),
-            Text(
-              S.of(context).objPaymentsSection,
-              style: TextStyle(
-                fontSize: TypographyTokens.sectionHeaderSize,
-                fontWeight: TypographyTokens.sectionHeaderWeight,
-                letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                color: AppColors.accentText(context),
-              ),
-            ),
-            const SizedBox(height: 8),
+            SectionHeader(S.of(context).objPaymentsSection),
+            const SizedBox(height: Spacing.headerToCard),
             if (_payments.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -726,28 +719,25 @@ class _ObjectiveDetailScreenState
             else
               ...List.generate(_payments.length, (i) {
                 final tx = _payments[i];
-                final isIncome = tx.type == 'income';
+                final line = _paymentLines[tx.id];
+                final typeColor = ref.watch(txColorsProvider).forType(tx.type);
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 6),
+                  margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
+                  decoration: AppColors.card(context, radius: CardTokens.radius),
                   child: Row(children: [
                     Container(
-                      width: 32, height: 32,
+                      width: CategoryIconTokens.compactSize,
+                      height: CategoryIconTokens.compactSize,
                       decoration: BoxDecoration(
-                        color: AppColors.pastel(context,
-                            isIncome ? AppColors.healthy : AppColors.overspent,
+                        color: AppColors.pastel(context, typeColor,
                             light: 0.85, dark: 0.75),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isIncome ? AppIcons.arrowDownLeft : AppIcons.arrowUpRight,
-                        size: 15,
-                        color: isIncome ? AppColors.healthy : AppColors.overspent,
+                        tx.type == 'income' ? AppIcons.arrowDownLeft : AppIcons.arrowUpRight,
+                        size: 16,
+                        color: typeColor,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -758,22 +748,27 @@ class _ObjectiveDetailScreenState
                           Text(
                             formatDate(tx.createdAt),
                             style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w600,
+                              fontSize: TypographyTokens.amountSmallSize,
+                              fontWeight: TypographyTokens.amountSmallWeight,
                               color: AppColors.tp(context),
                             ),
                           ),
                           if (tx.note.isNotEmpty)
                             Text(visibleNote(tx.note),
-                                style: TextStyle(fontSize: 11, color: AppColors.ts(context)),
+                                style: TextStyle(
+                                    fontSize: TypographyTokens.txSubtitleSize,
+                                    color: AppColors.ts(context)),
                                 maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
                     Text(
-                      formatAmount(tx.amount, currency: tx.currency),
+                      formatSignedAmount(line?.amount ?? tx.amount,
+                          currency: line?.currency ?? tx.currency, type: tx.type),
                       style: TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700,
-                        color: isIncome ? AppColors.healthy : AppColors.overspent,
+                        fontSize: TypographyTokens.amountRegularSize,
+                        fontWeight: TypographyTokens.amountRegularWeight,
+                        color: typeColor,
                       ),
                     ),
                   ]),
@@ -783,16 +778,8 @@ class _ObjectiveDetailScreenState
             // ── Settings (hidden, toggled via 3-dot) ──
             if (_showSettings) ...[
               const SizedBox(height: 20),
-              Text(
-                S.of(context).objSettingsSection,
-                style: TextStyle(
-                  fontSize: TypographyTokens.sectionHeaderSize,
-                  fontWeight: TypographyTokens.sectionHeaderWeight,
-                  letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-                  color: AppColors.accentText(context),
-                ),
-              ),
-              const SizedBox(height: 8),
+              SectionHeader(S.of(context).objSettingsSection),
+              const SizedBox(height: Spacing.headerToCard),
               _buildSettingsForm(context, color),
               const SizedBox(height: 12),
               SizedBox(
@@ -863,14 +850,13 @@ class _ObjectiveDetailScreenState
   }
 
   Widget _buildTypeToggle() {
-    return Row(children: [
-      _TypeChip(
+    return Wrap(spacing: 8, runSpacing: 8, children: [
+      AppChip(
         label: S.of(context).objGoalChip, icon: AppIcons.flag,
         selected: _type == 'goal',
         onTap: () => setState(() => _type = 'goal'),
       ),
-      const SizedBox(width: 8),
-      _TypeChip(
+      AppChip(
         label: S.of(context).objLoanChip, icon: AppIcons.handshake,
         selected: _type == 'loan',
         onTap: () => setState(() { _type = 'loan'; _direction ??= 'lent'; }),
@@ -886,14 +872,15 @@ class _ObjectiveDetailScreenState
         _FormCard(child: Padding(
           padding: const EdgeInsetsDirectional.only(start: 10, end: 4),
           child: Row(children: [
-            GestureDetector(
+            Tappable(
               onTap: () => setState(() => _showEmojiGrid = !_showEmojiGrid),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
               child: Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(
                   color: AppColors.pastel(context, color,
                       light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Center(
                   child: _icon != null && _icon!.isNotEmpty
@@ -941,16 +928,14 @@ class _ObjectiveDetailScreenState
                   _icon = null;
                   _showEmojiGrid = false;
                 }),
-                child: Text(S.of(context).objRemoveIcon,
-                    style: const TextStyle(fontSize: 12)),
+                child: Text(S.of(context).objRemoveIcon),
               ),
             ),
           Container(
             height: 180,
             decoration: BoxDecoration(
               color: AppColors.sfv(context),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.bd(context)),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
             child: ListView(
               padding: const EdgeInsets.all(10),
@@ -960,7 +945,10 @@ class _ObjectiveDetailScreenState
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 6),
-                      child: Text(group.key,
+                      child: Text(
+                          group.key == 'loan'
+                              ? S.of(context).objLoansSection
+                              : S.of(context).objGoalsSection,
                           style: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w700,
                             color: AppColors.ts(context),
@@ -970,18 +958,19 @@ class _ObjectiveDetailScreenState
                       spacing: 6, runSpacing: 6,
                       children: group.value.map((e) {
                         final isSelected = e == _icon;
-                        return GestureDetector(
+                        return Tappable(
                           onTap: () => setState(() {
                             _icon = e;
                             _showEmojiGrid = false;
                           }),
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
                           child: Container(
                             width: 38, height: 38,
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.accentLight
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(RadiusTokens.md),
                               border: isSelected
                                   ? Border.all(color: AppColors.accent, width: 2)
                                   : null,
@@ -1084,8 +1073,9 @@ class _ObjectiveDetailScreenState
         const SizedBox(height: 10),
 
         // Deadline
-        _FormCard(child: InkWell(
+        _FormCard(child: Tappable(
           onTap: _pickDate,
+          borderRadius: CardTokens.borderRadius,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(children: [
@@ -1100,8 +1090,9 @@ class _ObjectiveDetailScreenState
               ),
               const Spacer(),
               if (_endDate != null)
-                GestureDetector(
+                Tappable(
                   onTap: () => setState(() => _endDate = null),
+                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
                   child: Icon(AppIcons.x, size: 16, color: AppColors.th(context)),
                 ),
             ]),
@@ -1110,19 +1101,15 @@ class _ObjectiveDetailScreenState
         const SizedBox(height: 16),
 
         // Color picker
-        Text(S.of(context).objColorSection, style: TextStyle(
-          fontSize: TypographyTokens.sectionHeaderSize,
-          fontWeight: TypographyTokens.sectionHeaderWeight,
-          letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-          color: AppColors.accentText(context),
-        )),
-        const SizedBox(height: 8),
+        SectionHeader(S.of(context).objColorSection),
+        const SizedBox(height: Spacing.headerToCard),
         Wrap(spacing: 10, runSpacing: 10,
           children: _colors.map((hex) {
             final c = AppColors.fromHex(hex);
             final selected = _colorHex == hex;
-            return GestureDetector(
+            return Tappable(
               onTap: () => setState(() => _colorHex = hex),
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
               child: Container(
                 width: 36, height: 36,
                 decoration: BoxDecoration(
@@ -1138,13 +1125,8 @@ class _ObjectiveDetailScreenState
         // Type toggle (for existing, allow switching)
         if (!_isNew) ...[
           const SizedBox(height: 16),
-          Text(S.of(context).objTypeSection, style: TextStyle(
-            fontSize: TypographyTokens.sectionHeaderSize,
-            fontWeight: TypographyTokens.sectionHeaderWeight,
-            letterSpacing: TypographyTokens.sectionHeaderLetterSpacing,
-            color: AppColors.accentText(context),
-          )),
-          const SizedBox(height: 8),
+          SectionHeader(S.of(context).objTypeSection),
+          const SizedBox(height: Spacing.headerToCard),
           _buildTypeToggle(),
         ],
       ],
@@ -1156,39 +1138,39 @@ class _ObjectiveDetailScreenState
     final hasPayments = _payments.isNotEmpty;
 
     // null = cancel, 'keep' = delete tracker only, 'all' = also reverse payments
-    final choice = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.objDeleteTitle),
-        content: Text(hasPayments
-            ? tr.objDeleteLinkedPayments(_payments.length)
-            : tr.objCannotUndo),
-        actions: hasPayments
-            ? [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(tr.commonCancel)),
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx, 'keep'),
-                    child: Text(tr.objDeleteKeep)),
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx, 'all'),
-                    style: TextButton.styleFrom(
-                        foregroundColor: AppColors.overspent),
-                    child: Text(tr.objDeleteAll)),
-              ]
-            : [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(tr.commonCancel)),
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx, 'keep'),
-                    style: TextButton.styleFrom(
-                        foregroundColor: AppColors.overspent),
-                    child: Text(tr.commonDelete)),
-              ],
-      ),
-    );
+    final String? choice;
+    if (hasPayments) {
+      // Three choices, so not showConfirmDialog — same buttons, though.
+      choice = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(tr.objDeleteConfirmTitle),
+          content: Text(tr.objDeleteLinkedPayments(_payments.length)),
+          actions: [
+            OutlinedButton(
+                style: DialogButtons.outlined,
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(tr.commonCancel)),
+            OutlinedButton(
+                style: DialogButtons.outlined,
+                onPressed: () => Navigator.pop(ctx, 'keep'),
+                child: Text(tr.objDeleteKeep)),
+            FilledButton(
+                style: DialogButtons.destructive,
+                onPressed: () => Navigator.pop(ctx, 'all'),
+                child: Text(tr.objDeleteAll)),
+          ],
+        ),
+      );
+    } else {
+      final ok = await showConfirmDialog(
+        context,
+        title: tr.objDeleteConfirmTitle,
+        message: tr.objCannotUndo,
+        confirmLabel: tr.commonDelete,
+      );
+      choice = ok ? 'keep' : null;
+    }
 
     if (choice == null || !mounted) return;
 
@@ -1209,8 +1191,15 @@ class _ObjectiveDetailScreenState
               lastModified: Value(DateTime.now())));
       ref.invalidate(objectivesProvider);
       ref.invalidate(accountsWithBalanceProvider);
-      if (mounted) context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr.objDeleted),
+          behavior: SnackBarBehavior.floating,
+        ));
+        context.pop();
+      }
     } catch (e) {
+      debugPrint('[ObjectiveDetail] Delete failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1232,12 +1221,8 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      padding: CardTokens.padding,
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Column(children: children),
     );
   }
@@ -1268,54 +1253,6 @@ class _SummaryRow extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Reusable widgets
 // ─────────────────────────────────────────────
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TypeChip({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.accentLight
-                : AppColors.sf(context),
-            borderRadius: BorderRadius.circular(12),
-            border: selected ? Border.all(color: AppColors.accent) : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18,
-                  color: selected ? AppColors.accent : AppColors.ts(context)),
-              const SizedBox(width: 8),
-              Text(label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    color: selected ? AppColors.accent : AppColors.ts(context),
-                  )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _FormCard extends StatelessWidget {
   final Widget child;
   const _FormCard({required this.child});
@@ -1323,11 +1260,7 @@ class _FormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: child,
     );
   }

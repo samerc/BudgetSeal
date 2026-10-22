@@ -9,12 +9,16 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
 import '../../shared/widgets/amount_field.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/tappable.dart';
 import '../transactions/widgets/category_sheet.dart';
 import '../transactions/widgets/transaction_form_widgets.dart';
 import '../../shared/theme/app_icons.dart';
@@ -178,7 +182,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
     } else {
       if (_accountId == null) return tr.plannedSelectAccount;
     }
-    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
+    final amount = parseLooseAmount(_amountCtrl.text) ?? 0;
     if (amount <= 0) return tr.txFormEnterAmount;
     return null;
   }
@@ -202,7 +206,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
       final householdId = ref.read(currentHouseholdIdProvider);
       if (householdId == null) return;
 
-      final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
+      final amount = parseLooseAmount(_amountCtrl.text) ?? 0;
       final title = _titleCtrl.text.trim();
       final note = _noteCtrl.text.trim();
       final effectiveNote = title.isNotEmpty && note.isNotEmpty
@@ -307,8 +311,6 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
             child: FilledButton.icon(
               onPressed: _loading ? null : _save,
               style: FilledButton.styleFrom(
-                backgroundColor: _typeColor(),
-                foregroundColor: AppColors.inkOn(_typeColor()),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: Size.zero,
@@ -318,10 +320,9 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       height: 14,
                       width: 14,
                       child: CircularProgressIndicator(
-                          color: AppColors.inkOn(_typeColor()), strokeWidth: 2))
+                          color: AppColors.onAccent, strokeWidth: 2))
                   : const Icon(AppIcons.check, size: 18),
-              label: Text(S.of(context).plannedPlanButton,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              label: Text(S.of(context).plannedPlanButton),
             ),
           ),
         ],
@@ -368,7 +369,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: DropdownButtonFormField<String>(
                   icon: AppIcons.dropdown,
-                  value: _accountId,
+                  initialValue: _accountId,
                   decoration: InputDecoration(
                     labelText:
                         _type == _PlanType.transfer ? S.of(context).txFormFromAccount : S.of(context).commonAccount,
@@ -409,7 +410,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: DropdownButtonFormField<String>(
                     icon: AppIcons.dropdown,
-                    value: _destAccountId,
+                    initialValue: _destAccountId,
                     decoration: InputDecoration(
                       labelText: S.of(context).txFormToAccount,
                       border: InputBorder.none,
@@ -442,9 +443,9 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
             // ── Category (not for transfers) ──
             if (_type != _PlanType.transfer) ...[
               _TxFieldCard(
-                child: InkWell(
+                child: Tappable(
                   onTap: _pickCategory,
-                  borderRadius: BorderRadius.circular(CardTokens.radius),
+                  borderRadius: CardTokens.borderRadius,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 14),
@@ -536,9 +537,9 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
 
             // ── Exact Date (optional) ──
             _TxFieldCard(
-              child: InkWell(
+              child: Tappable(
                 onTap: _pickExactDate,
-                borderRadius: BorderRadius.circular(CardTokens.radius),
+                borderRadius: CardTokens.borderRadius,
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -550,7 +551,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       Expanded(
                         child: Text(
                           _exactDate != null
-                              ? S.of(context).plannedExactDateValue('${_exactDate!.day} ${_monthName(_exactDate!.month)}')
+                              ? S.of(context).plannedExactDateValue(formatDate(_exactDate!))
                               : S.of(context).plannedExactDate,
                           style: TextStyle(
                             fontSize: 14,
@@ -561,8 +562,9 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                         ),
                       ),
                       if (_exactDate != null)
-                        GestureDetector(
+                        Tappable(
                           onTap: () => setState(() => _exactDate = null),
+                          borderRadius: BorderRadius.circular(RadiusTokens.pill),
                           child: Icon(AppIcons.x,
                               size: 18, color: AppColors.ts(context)),
                         ),
@@ -580,10 +582,8 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.overspentLight,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: AppColors.overspent.withValues(alpha: 0.3)),
+                  color: AppColors.pastel(context, AppColors.overspent),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Row(
                   children: [
@@ -705,7 +705,10 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                 final month = i + 1;
                 final selected = _targetMonth == month;
                 final color = _typeColor();
-                return GestureDetector(
+                return AppChip(
+                  label: months[i],
+                  selected: selected,
+                  color: color,
                   onTap: () {
                     setState(() {
                       _targetMonth = month;
@@ -713,30 +716,6 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                       _exactDate = null;
                     });
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? color
-                          : AppColors.pastel(context, color, light: 0.9, dark: 0.8),
-                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                      border: Border.all(
-                        color: selected
-                            ? color
-                            : color.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Text(
-                      months[i],
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? AppColors.inkOn(color) : color,
-                      ),
-                    ),
-                  ),
                 );
               }),
             ),
@@ -744,10 +723,6 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
         ),
       ),
     );
-  }
-
-  String _monthName(int month) {
-    return DateFormat('MMMM').format(DateTime(2000, month));
   }
 }
 
@@ -760,11 +735,7 @@ class _TxFieldCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: child,
     );
   }

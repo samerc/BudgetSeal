@@ -7,6 +7,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_icons.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/theme/design_tokens.dart';
+import '../../../shared/widgets/tappable.dart';
 
 /// Home's checklist for a new budget: record income → create envelopes →
 /// fund them → log an expense. Each step ticks itself from real data
@@ -70,13 +72,14 @@ class GettingStartedCard extends ConsumerWidget {
                 Expanded(
                   child: Text(s.gsTitle,
                       style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
+                          fontSize: TypographyTokens.cardTitleSize,
+                          fontWeight: TypographyTokens.cardTitleWeight,
                           color: AppColors.tp(context))),
                 ),
                 Text(s.gsProgress(progress.doneCount, steps.length),
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.ts(context))),
+                    style: TextStyle(
+                        fontSize: TypographyTokens.amountSmallSize,
+                        color: AppColors.ts(context))),
                 IconButton(
                   tooltip: s.gsHide,
                   icon: Icon(AppIcons.x, size: 18, color: AppColors.th(context)),
@@ -136,9 +139,9 @@ class _StepRow extends StatelessWidget {
             color: isNext ? AppColors.accent : AppColors.th(context));
     return Semantics(
       checked: done,
-      child: InkWell(
+      child: Tappable(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 12, 10),
           child: Row(
@@ -154,7 +157,7 @@ class _StepRow extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(title,
                           style: TextStyle(
-                              fontSize: 15,
+                              fontSize: TypographyTokens.txTitleSize,
                               fontWeight:
                                   isNext ? FontWeight.w700 : FontWeight.w600,
                               color: done
@@ -165,7 +168,8 @@ class _StepRow extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(body!,
                           style: TextStyle(
-                              fontSize: 13, color: AppColors.ts(context))),
+                              fontSize: TypographyTokens.amountSmallSize,
+                              color: AppColors.ts(context))),
                     ],
                   ],
                 ),

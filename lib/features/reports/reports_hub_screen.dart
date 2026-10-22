@@ -32,8 +32,17 @@ import '../../shared/widgets/spending_heatmap.dart';
 import '../../shared/widgets/hint_banner.dart' show showHintIfNeeded;
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/utils/note_text.dart';
-import '../../l10n/s_lookup.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/providers/tx_colors_provider.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
+import '../accounts/account_type.dart';
+import '../accounts/widgets/balance_hero.dart';
+import 'widgets/income_expense_summary.dart';
+import 'widgets/month_nav.dart';
+import '../../shared/utils/calendar_days.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -170,9 +179,9 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
               labelColor: AppColors.tp(context),
               unselectedLabelColor: AppColors.ts(context),
               labelStyle: const TextStyle(
-                  fontSize: 14.5, fontWeight: FontWeight.w700),
+                  fontSize: TypographyTokens.cardTitleSize, fontWeight: FontWeight.w700),
               unselectedLabelStyle: const TextStyle(
-                  fontSize: 14.5, fontWeight: FontWeight.w500),
+                  fontSize: TypographyTokens.cardTitleSize, fontWeight: FontWeight.w500),
               // Cashew-style pill selector instead of an underline
               indicator: BoxDecoration(
                 color: AppColors.pastel(context, AppColors.accent,
@@ -250,7 +259,6 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
         final double totalIncome = currentMonth?.income ?? 0;
         final double totalExpense = currentMonth?.expense ?? 0;
         final typical = stats?.typicalMonthlySpend(month) ?? 0;
-        final net = totalIncome - totalExpense;
 
         // Days elapsed for this month
         final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
@@ -272,62 +280,61 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
           expenseByMonth.insert(0, 0);
         }
 
-        return GestureDetector(
-          onHorizontalDragEnd: (details) {
-            final dx = details.primaryVelocity ?? 0;
-            final isRtl = Directionality.of(context) == TextDirection.rtl;
-            final goPrev = isRtl ? dx < 0 : dx > 0;
-            final goNext = isRtl ? dx > 0 : dx < 0;
-            if (goPrev) {
-              setState(() => _selectedMonthsBack++);
-            } else if (goNext && _selectedMonthsBack > 0) {
-              setState(() => _selectedMonthsBack--);
-            }
-          },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+        return _MonthSwipe(
+          onPrev: () => setState(() => _selectedMonthsBack++),
+          onNext: _selectedMonthsBack > 0
+              ? () => setState(() => _selectedMonthsBack--)
+              : null,
+          child: _RefreshableScroll(
             child: Column(
               children: [
                 // Month navigator
-                _MonthNav(
-                  month: month,
+                MonthNav(
+                  label: _periodLabel(month),
                   onPrev: () => setState(() => _selectedMonthsBack++),
                   onNext: _selectedMonthsBack > 0
                       ? () => setState(() => _selectedMonthsBack--)
                       : null,
                 ),
-                const SizedBox(height: 12),
-                _MonthlySummaryCard(
-                  income: totalIncome,
-                  expense: totalExpense,
-                  net: net,
-                  lastMonthExpense: prevExpense,
-                  dailyRate: daysElapsed > 0 ? totalExpense / daysElapsed : 0,
-                  daysLeft: daysLeft,
-                  currency: baseCurrency,
-                  month: month,
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.md),
+                if (totalIncome == 0 && totalExpense == 0)
+                  EmptyState(
+                    icon: AppIcons.chartLineUp,
+                    title: S.of(context).reportsNothingThisMonth,
+                    subtitle: S.of(context).reportsNothingThisMonthHint,
+                  )
+                else
+                  _MonthlySummaryCard(
+                    income: totalIncome,
+                    expense: totalExpense,
+                    lastMonthExpense: prevExpense,
+                    dailyRate:
+                        daysElapsed > 0 ? totalExpense / daysElapsed : 0,
+                    daysLeft: daysLeft,
+                    currency: baseCurrency,
+                    month: month,
+                  ),
+                const SizedBox(height: Spacing.sectionGap),
                 // Spending Heatmap
                 _HeatmapSection(baseCurrency: baseCurrency),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.sectionGap),
                 // Toggle: Trend vs Daily Pace
                 Row(
                   children: [
-                    _ToggleChip(
+                    AppChip(
                       label: S.of(context).reports6MonthTrend,
                       selected: !_showDailyPace,
                       onTap: () => setState(() => _showDailyPace = false),
                     ),
-                    const SizedBox(width: 8),
-                    _ToggleChip(
+                    const SizedBox(width: Spacing.sm),
+                    AppChip(
                       label: S.of(context).reportsDailyPaceToggle,
                       selected: _showDailyPace,
                       onTap: () => setState(() => _showDailyPace = true),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: Spacing.md),
                 if (!_showDailyPace)
                   _TrendChart(
                     months: months,
@@ -347,7 +354,8 @@ class _OverviewTabState extends ConsumerState<_OverviewTab> {
           ),
         );
       },
-      loading: () => const SkeletonList(),
+      loading: () => const SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(), child: SkeletonList()),
       error: (e, _) => ErrorRetry(
         message: S.of(context).commonCouldntLoadData,
         details: '$e',
@@ -401,13 +409,12 @@ class _DailyPaceChart extends StatelessWidget {
     ];
     final maxY = allValues.fold(0.0, (a, b) => a > b ? a : b);
 
-    if (maxY == 0) {
-      return Center(
-          child: Text(S.of(context).reportsNoSpending,
-              style: TextStyle(color: AppColors.ts(context))));
-    }
+    // Same empty card as the trend chart.
+    if (maxY == 0) return _EmptyChartCard(S.of(context).reportsNoSpending);
 
-    return SizedBox(
+    return _ChartCard(
+      title: S.of(context).reportsDailyPaceToggle,
+      child: SizedBox(
       height: 200,
       child: LineChart(LineChartData(
         minX: 1,
@@ -427,7 +434,8 @@ class _DailyPaceChart extends StatelessWidget {
               interval: 7,
               getTitlesWidget: (v, _) => Text('${v.toInt()}',
                   style: TextStyle(
-                      fontSize: 10, color: AppColors.th(context))),
+                      fontSize: TypographyTokens.miniSize,
+                      color: AppColors.th(context))),
             ),
           ),
         ),
@@ -440,7 +448,7 @@ class _DailyPaceChart extends StatelessWidget {
                       formatAmount(s.y, currency: baseCurrency),
                       TextStyle(
                           color: s.bar.color ?? AppColors.tp(context),
-                          fontSize: 12,
+                          fontSize: TypographyTokens.captionSize,
                           fontWeight: FontWeight.w600),
                     ))
                 .toList(),
@@ -459,7 +467,8 @@ class _DailyPaceChart extends StatelessWidget {
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: AppColors.accent.withValues(alpha: 0.08),
+              color: AppColors.pastel(context, AppColors.accent,
+                  light: 0.85, dark: 0.7),
             ),
           ),
           // Typical pace (dashed)
@@ -476,6 +485,7 @@ class _DailyPaceChart extends StatelessWidget {
           ),
         ],
       )),
+      ),
     );
   }
 }
@@ -491,55 +501,37 @@ class _HeatmapSection extends ConsumerWidget {
     final year = DateTime.now().year;
     final heatmapAsync = ref.watch(dailySpendingProvider(year));
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return _ChartCard(
+      title: S.of(context).reportsSpendingActivity,
+      trailing: Text('$year',
+          style: TextStyle(
+              fontSize: TypographyTokens.captionSize,
+              color: AppColors.ts(context))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Icon(AppIcons.squaresFour, size: 16,
-                color: AppColors.ts(context)),
-            const SizedBox(width: 8),
-            Text(S.of(context).reportsSpendingActivity,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context))),
-            const Spacer(),
-            Text('$year',
-                style: TextStyle(
-                    fontSize: 11, color: AppColors.th(context))),
-          ]),
-          const SizedBox(height: 12),
           heatmapAsync.when(
             data: (data) => SpendingHeatmap(
               data: data,
               baseCurrency: baseCurrency,
             ),
-            loading: () => const SizedBox(
-              height: 100,
-              child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
-            error: (_, __) => SizedBox(
-              height: 100,
-              child: Center(child: Text(S.of(context).commonSomethingWentWrong)),
+            loading: () => const SkeletonLoader(
+                height: 100, borderRadius: RadiusTokens.md),
+            error: (e, _) => ErrorRetry(
+              message: S.of(context).commonCouldntLoadData,
+              details: '$e',
+              onRetry: () => ref.invalidate(dailySpendingProvider(year)),
             ),
           ),
-          const SizedBox(height: 8),
-          // Legend
+          const SizedBox(height: Spacing.sm),
+          // Legend — matches the cells SpendingHeatmap draws.
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _legendDot(context, AppColors.sfv(context), S.of(context).reportsHeatmapNone),
-              const SizedBox(width: 12),
+              const SizedBox(width: Spacing.md),
               _legendDot(context, AppColors.overspent.withValues(alpha: 0.4), S.of(context).typeExpense),
-              const SizedBox(width: 12),
+              const SizedBox(width: Spacing.md),
               _legendDot(context, AppColors.healthy.withValues(alpha: 0.4), S.of(context).typeIncome),
             ],
           ),
@@ -547,7 +539,9 @@ class _HeatmapSection extends ConsumerWidget {
           Text(
             S.of(context).reportsHeatmapHelp,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 10, color: AppColors.th(context)),
+            style: TextStyle(
+                fontSize: TypographyTokens.miniSize,
+                color: AppColors.ts(context)),
           ),
         ],
       ),
@@ -566,17 +560,20 @@ class _HeatmapSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 10, color: AppColors.th(context))),
+        const SizedBox(width: Spacing.xs),
+        Text(label,
+            style: TextStyle(
+                fontSize: TypographyTokens.miniSize,
+                color: AppColors.ts(context))),
       ],
     );
   }
 }
 
-// ── Spending Gauge (like the TD screenshot) ─────────────────────────────────
+// ── Monthly summary: income / expenses / net + pace ─────────────────────────
 
 class _MonthlySummaryCard extends StatelessWidget {
-  final double income, expense, net;
+  final double income, expense;
   final double lastMonthExpense;
   final double dailyRate;
   final int daysLeft;
@@ -586,7 +583,6 @@ class _MonthlySummaryCard extends StatelessWidget {
   const _MonthlySummaryCard({
     required this.income,
     required this.expense,
-    required this.net,
     required this.lastMonthExpense,
     required this.dailyRate,
     required this.daysLeft,
@@ -615,71 +611,34 @@ class _MonthlySummaryCard extends StatelessWidget {
       }
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    TextStyle label() => TextStyle(
+        fontSize: TypographyTokens.captionSize, color: AppColors.ts(context));
+    TextStyle value() => TextStyle(
+        fontSize: TypographyTokens.amountSmallSize,
+        fontWeight: TypographyTokens.amountSmallWeight,
+        color: AppColors.tp(context));
+
+    return AppCard(
       child: Column(
         children: [
-          // Main stats row
-          Row(
-            children: [
-              Expanded(
-                child: _statColumn(
-                  context,
-                  label: S.of(context).typeIncome,
-                  amount: income,
-                  // Nothing yet: neutral, not a green/red signal.
-                  color: income == 0 ? AppColors.ts(context) : AppColors.healthy,
-                ),
-              ),
-              Container(
-                  width: 1, height: 40, color: AppColors.bd(context)),
-              Expanded(
-                child: _statColumn(
-                  context,
-                  label: S.of(context).dashboardLabelExpenses,
-                  amount: expense,
-                  color: expense == 0 ? AppColors.ts(context) : AppColors.overspent,
-                ),
-              ),
-              Container(
-                  width: 1, height: 40, color: AppColors.bd(context)),
-              Expanded(
-                child: _statColumn(
-                  context,
-                  label: S.of(context).dashboardLabelNet,
-                  amount: net,
-                  color: net == 0
-                      ? AppColors.ts(context)
-                      : net > 0
-                          ? AppColors.healthy
-                          : AppColors.overspent,
-                  prefix: net > 0 ? '+' : '',
-                ),
-              ),
-            ],
+          // The same income / expenses / net block as Home.
+          IncomeExpenseSummary(
+            income: income,
+            expense: expense,
+            currency: currency,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.md),
           Divider(color: AppColors.bd(context), height: 1),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
           // Pace + projection
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(S.of(context).reportsDailyPace,
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.ts(context))),
+              Text(S.of(context).reportsDailyPace, style: label()),
               Text(
                 S.of(context).commonPerDay(
                     formatAmount(dailyRate, currency: currency)),
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context)),
+                style: value(),
               ),
             ],
           ),
@@ -687,15 +646,10 @@ class _MonthlySummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(S.of(context).reportsProjectedTotal,
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.ts(context))),
+              Text(S.of(context).reportsProjectedTotal, style: label()),
               Text(
                 '~${formatAmount(projected, currency: currency)}',
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.tp(context)),
+                style: value(),
               ),
             ],
           ),
@@ -713,11 +667,13 @@ class _MonthlySummaryCard extends StatelessWidget {
                   color: comparisonColor,
                 ),
                 const SizedBox(width: 6),
-                Text(comparison,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: comparisonColor)),
+                Flexible(
+                  child: Text(comparison,
+                      style: TextStyle(
+                          fontSize: TypographyTokens.captionSize,
+                          fontWeight: TypographyTokens.captionWeight,
+                          color: comparisonColor)),
+                ),
               ],
             ),
           ],
@@ -725,36 +681,11 @@ class _MonthlySummaryCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _statColumn(BuildContext context,
-      {required String label,
-      required double amount,
-      required Color color,
-      String prefix = ''}) {
-    return Column(
-      children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 11, color: AppColors.ts(context))),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            '$prefix${formatAmount(amount, currency: currency)}',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: color),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 // ── 6-Month Trend Chart ─────────────────────────────────────────────────────
 
-class _TrendChart extends StatelessWidget {
+class _TrendChart extends ConsumerWidget {
   final List<DateTime> months;
   final List<double> incomeByMonth;
   final List<double> expenseByMonth;
@@ -768,44 +699,43 @@ class _TrendChart extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = ref.watch(txColorsProvider);
     final maxVal = [
       ...incomeByMonth,
       ...expenseByMonth,
     ].fold(0.0, (a, b) => a > b ? a : b);
 
-    // No income or spending in six months: say so, like the heatmap,
-    // instead of an empty gap under the toggle.
-    if (maxVal == 0) {
-      return Container(
-        height: 120,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          boxShadow: AppColors.cardShadow(context),
-        ),
-        child: Text(S.of(context).heatmapNoData,
-            style: TextStyle(fontSize: 14, color: AppColors.th(context))),
-      );
-    }
+    // No income or spending in six months: say so instead of an empty gap
+    // under the toggle (same card as the daily pace chart's).
+    if (maxVal == 0) return _EmptyChartCard(S.of(context).heatmapNoData);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    Widget bar(double h, Color c) => Container(
+          width: 10,
+          height: h.clamp(2, 100),
+          decoration: BoxDecoration(
+              color: c, borderRadius: BorderRadius.circular(3)),
+        );
+    Widget legend(Color c, String label) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                    color: c, borderRadius: BorderRadius.circular(3))),
+            const SizedBox(width: Spacing.xs),
+            Text(label,
+                style: TextStyle(
+                    fontSize: TypographyTokens.miniSize,
+                    color: AppColors.ts(context))),
+          ],
+        );
+
+    return _ChartCard(
+      title: S.of(context).reports6MonthTrend,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(S.of(context).reports6MonthTrend,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          const SizedBox(height: 16),
           SizedBox(
             height: 140,
             child: Row(
@@ -825,28 +755,16 @@ class _TrendChart extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              width: 10,
-                              height: incH.clamp(2, 100),
-                              decoration: BoxDecoration(
-                                  color: AppColors.healthy,
-                                  borderRadius: BorderRadius.circular(3)),
-                            ),
+                            bar(incH, colors.income),
                             const SizedBox(width: 2),
-                            Container(
-                              width: 10,
-                              height: expH.clamp(2, 100),
-                              decoration: BoxDecoration(
-                                  color: AppColors.overspent,
-                                  borderRadius: BorderRadius.circular(3)),
-                            ),
+                            bar(expH, colors.expense),
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(DateFormat('MMM').format(months[i]),
                             style: TextStyle(
-                                fontSize: 9,
-                                color: AppColors.th(context))),
+                                fontSize: TypographyTokens.miniSize,
+                                color: AppColors.ts(context))),
                       ],
                     ),
                   ),
@@ -854,31 +772,13 @@ class _TrendChart extends StatelessWidget {
               }),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                      color: AppColors.healthy,
-                      borderRadius: BorderRadius.circular(3))),
-              const SizedBox(width: 4),
-              Text(S.of(context).typeIncome,
-                  style: TextStyle(
-                      fontSize: 10, color: AppColors.ts(context))),
-              const SizedBox(width: 16),
-              Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                      color: AppColors.overspent,
-                      borderRadius: BorderRadius.circular(3))),
-              const SizedBox(width: 4),
-              Text(S.of(context).typeExpense,
-                  style: TextStyle(
-                      fontSize: 10, color: AppColors.ts(context))),
+              legend(colors.income, S.of(context).typeIncome),
+              const SizedBox(width: Spacing.lg),
+              legend(colors.expense, S.of(context).typeExpense),
             ],
           ),
         ],
@@ -948,103 +848,48 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         expand: false,
         builder: (ctx, scrollCtrl) => Column(
           children: [
-            const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              padding: const EdgeInsetsDirectional.only(start: 20),
               child: Row(
                 children: [
                   CategoryIcon(
                     categoryName: categoryName,
                     emoji: category?.icon,
                     color: color,
-                    size: 36,
+                    size: CategoryIconTokens.compactSize,
                     circular: true,
                   ),
-                  const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
+                    child: SheetTitle(
                       categoryName,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(ctx),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    S.of(ctx).reportsTxCount(catTxns.length),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.ts(ctx),
+                      subtitle: S.of(ctx).reportsTxCount(catTxns.length),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          12, 20, 20, 12),
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
+            Divider(height: 1, color: AppColors.bd(ctx)),
             Expanded(
               child: catTxns.isEmpty
-                  ? Center(
-                      child: Text(S.of(ctx).reportsNoExpenses,
-                          style: TextStyle(color: AppColors.ts(ctx))))
-                  : ListView.separated(
+                  ? EmptyState(
+                      icon: AppIcons.receipt,
+                      title: S.of(ctx).reportsNoExpenses)
+                  : ListView.builder(
                       controller: scrollCtrl,
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      padding: const EdgeInsets.only(
+                          top: Spacing.sm, bottom: Spacing.xl),
                       itemCount: catTxns.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (_, i) {
-                        final e = catTxns[i];
-                        return InkWell(
-                          // Opens the transaction over the sheet.
-                          onTap: () => ctx.push('/transactions/${e.tx.id}'),
-                          child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      e.tx.note.isNotEmpty
-                                          ? visibleNote(e.tx.note)
-                                          : S.of(ctx).reportsNoNote,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: e.tx.note.isNotEmpty
-                                            ? AppColors.tp(ctx)
-                                            : AppColors.th(ctx),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      DateFormat.MMMd()
-                                          .format(e.tx.createdAt),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.ts(ctx),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                formatAmount(parts[e]!,
-                                    currency: _reportsBaseCurrency),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.tp(ctx),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ));
-                      },
+                      // Rows drawn like TxTile, but with this category's
+                      // share of a split (TxTile shows the whole amount).
+                      itemBuilder: (_, i) => _CategoryTxRow(
+                        entry: catTxns[i],
+                        amount: parts[catTxns[i]]!,
+                        category: category,
+                        categoryName: categoryName,
+                        color: color,
+                      ),
                     ),
             ),
           ],
@@ -1116,28 +961,18 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         final sortedByCount = catCount.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
 
-        return GestureDetector(
-          dragStartBehavior: DragStartBehavior.start,
-          onHorizontalDragEnd: (details) {
-            final dx = details.primaryVelocity ?? 0;
-            final isRtl = Directionality.of(context) == TextDirection.rtl;
-            final goPrev = isRtl ? dx < 0 : dx > 0;
-            final goNext = isRtl ? dx > 0 : dx < 0;
-            if (goPrev) {
-              setState(() => _selectedMonthsBack++);
-              hapticLight();
-            } else if (goNext && _selectedMonthsBack > 0) {
-              setState(() => _selectedMonthsBack--);
-              hapticLight();
-            }
-          },
+        return _MonthSwipe(
+          onPrev: () => setState(() => _selectedMonthsBack++),
+          onNext: _selectedMonthsBack > 0
+              ? () => setState(() => _selectedMonthsBack--)
+              : null,
           child: Column(
           children: [
             // Month selector
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _MonthNav(
-                month: _bucket,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: MonthNav(
+                label: _periodLabel(_bucket),
                 onPrev: () => setState(() => _selectedMonthsBack++),
                 onNext: _selectedMonthsBack > 0
                     ? () => setState(() => _selectedMonthsBack--)
@@ -1149,14 +984,14 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(
                 children: [
-                  _ToggleChip(
+                  AppChip(
                     label: S.of(context).reportsTopSpending,
                     selected: !_showByTransactions,
                     onTap: () =>
                         setState(() => _showByTransactions = false),
                   ),
-                  const SizedBox(width: 8),
-                  _ToggleChip(
+                  const SizedBox(width: Spacing.sm),
+                  AppChip(
                     label: S.of(context).reportsTopTransactions,
                     selected: _showByTransactions,
                     onTap: () =>
@@ -1168,9 +1003,17 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             // List
             Expanded(
               child: filtered.isEmpty
-                  ? EmptyState(
-                      icon: AppIcons.chartPie,
-                      title: S.of(context).reportsNoExpenses)
+                  ? RefreshIndicator(
+                      onRefresh: () => _refreshReports(ref),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          EmptyState(
+                              icon: AppIcons.chartPie,
+                              title: S.of(context).reportsNoExpenses),
+                        ],
+                      ),
+                    )
                   : Builder(builder: (context) {
                       final rows = _showByTransactions
                           ? [
@@ -1184,7 +1027,10 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                         for (final r in rows)
                           catColors[r.key] ?? AppColors.accent
                       ]);
-                      return ListView.builder(
+                      return RefreshIndicator(
+                        onRefresh: () => _refreshReports(ref),
+                        child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                         itemCount: rows.length + 1,
                         itemBuilder: (_, i) {
@@ -1224,18 +1070,96 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                             ),
                           );
                         },
-                      );
+                      ));
                     }),
             ),
           ],
           ),
         );
       },
-      loading: () => const SkeletonList(),
+      loading: () => const SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(), child: SkeletonList()),
       error: (e, _) => ErrorRetry(
         message: S.of(context).commonCouldntLoadData,
         details: '$e',
         onRetry: () => ref.invalidate(transactionEntriesProvider),
+      ),
+    );
+  }
+}
+
+/// One transaction in the category sheet: TxTile's layout (category emoji,
+/// title, date) with this category's part of the amount.
+class _CategoryTxRow extends StatelessWidget {
+  const _CategoryTxRow({
+    required this.entry,
+    required this.amount,
+    required this.category,
+    required this.categoryName,
+    required this.color,
+  });
+
+  final TransactionEntry entry;
+  final double amount;
+  final Category? category;
+  final String categoryName;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final tx = entry.tx;
+    final hasNote = tx.note.isNotEmpty;
+    return Tappable(
+      // Opens the transaction over the sheet.
+      onTap: () => context.push('/transactions/${tx.id}'),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+        child: Row(
+          children: [
+            CategoryIcon(
+              categoryName: categoryName,
+              emoji: category?.icon,
+              color: color,
+              size: CategoryIconTokens.compactSize,
+              circular: true,
+            ),
+            const SizedBox(width: Spacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hasNote ? visibleNote(tx.note) : categoryName,
+                    style: TextStyle(
+                      fontSize: TypographyTokens.txTitleSize,
+                      fontWeight: TypographyTokens.txTitleWeight,
+                      color: AppColors.tp(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatDate(tx.createdAt.toLocal()),
+                    style: TextStyle(
+                      fontSize: TypographyTokens.txSubtitleSize,
+                      color: AppColors.ts(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Text(
+              formatAmount(amount, currency: _reportsBaseCurrency),
+              style: TextStyle(
+                fontSize: TypographyTokens.amountRegularSize,
+                fontWeight: TypographyTokens.amountRegularWeight,
+                color: AppColors.tp(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1321,7 +1245,9 @@ class _CategoryPie extends StatelessWidget {
                 ),
                 Text(
                   S.of(context).dashboardSpent,
-                  style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+                  style: TextStyle(
+                      fontSize: TypographyTokens.amountSmallSize,
+                      color: AppColors.ts(context)),
                 ),
               ],
             ),
@@ -1368,7 +1294,7 @@ class _CategoryRow extends StatelessWidget {
           comparisonWidget = Text(
             '${up ? '↑' : '↓'} ${pctChange.abs()}%',
             style: TextStyle(
-                fontSize: 12.5,
+                fontSize: TypographyTokens.captionSize,
                 fontWeight: FontWeight.w700,
                 color: up ? AppColors.overspent : AppColors.healthy),
           );
@@ -1377,18 +1303,16 @@ class _CategoryRow extends StatelessWidget {
         comparisonWidget = Text(
           S.of(context).reportsNewBadge,
           style: TextStyle(
-              fontSize: 11,
+              fontSize: TypographyTokens.overlineSize,
               fontWeight: FontWeight.w800,
-              color: AppColors.accent),
+              color: AppColors.accentText(context)),
         );
       }
     }
 
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
+    return Tappable(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 4, 8),
           child: Row(
@@ -1397,7 +1321,7 @@ class _CategoryRow extends StatelessWidget {
                 categoryName: name,
                 emoji: category?.icon,
                 color: color,
-                size: 44,
+                size: CategoryIconTokens.listSize,
                 circular: true,
               ),
               const SizedBox(width: 12),
@@ -1412,7 +1336,7 @@ class _CategoryRow extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                  fontSize: 15.5,
+                                  fontSize: TypographyTokens.txTitleSize,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.tp(context))),
                         ),
@@ -1421,7 +1345,7 @@ class _CategoryRow extends StatelessWidget {
                             formatAmount(amount,
                                 currency: _reportsBaseCurrency),
                             style: TextStyle(
-                                fontSize: 16,
+                                fontSize: TypographyTokens.amountRegularSize,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.tp(context))),
                       ],
@@ -1437,7 +1361,7 @@ class _CategoryRow extends StatelessWidget {
                       children: [
                         Text('${(share * 100).round()}%',
                             style: TextStyle(
-                                fontSize: 12.5,
+                                fontSize: TypographyTokens.captionSize,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.ts(context))),
                         Flexible(
@@ -1445,7 +1369,7 @@ class _CategoryRow extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                  fontSize: 12.5,
+                                  fontSize: TypographyTokens.captionSize,
                                   color: AppColors.ts(context))),
                         ),
                         const Spacer(),
@@ -1458,276 +1382,6 @@ class _CategoryRow extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// Tab 4: Cumulative Spending (day-by-day area chart vs typical)
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _CumulativeTab extends ConsumerStatefulWidget {
-  const _CumulativeTab();
-
-  @override
-  ConsumerState<_CumulativeTab> createState() => _CumulativeTabState();
-}
-
-class _CumulativeTabState extends ConsumerState<_CumulativeTab> {
-  int _selectedMonthsBack = 0;
-
-  DateTime get _month {
-    return _reportMonth(_selectedMonthsBack);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final txAsync = ref.watch(transactionEntriesProvider);
-
-    return txAsync.when(
-      data: (entries) {
-        final month = _month;
-        final now = DateTime.now();
-        final isCurrentMonth =
-            month.year == now.year && month.month == now.month;
-        final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-        final lastDay = isCurrentMonth ? now.day : daysInMonth;
-
-        // Daily cumulative spending for this month
-        final dailyCumulative = List.filled(daysInMonth + 1, 0.0);
-        for (final e in entries) {
-          if (e.tx.type != 'expense') continue;
-          final d = e.tx.createdAt.toLocal();
-          if (d.year == month.year && d.month == month.month) {
-            dailyCumulative[d.day] += _baseAmount(e);
-          }
-        }
-        // Make cumulative
-        for (int i = 1; i <= daysInMonth; i++) {
-          dailyCumulative[i] += dailyCumulative[i - 1];
-        }
-
-        // Typical cumulative: use pre-computed stats
-        final stats = ref.watch(reportStatsProvider).value;
-        final typicalMonthly = stats?.typicalMonthlySpend(month) ?? 0;
-        final typicalDaily = typicalMonthly / daysInMonth;
-        final typicalCumulative = List.generate(
-            daysInMonth + 1, (i) => typicalDaily * i);
-
-        // Max for chart scaling
-        final allValues = [
-          ...dailyCumulative.take(lastDay + 1),
-          ...typicalCumulative,
-        ];
-        final maxY = allValues.fold(0.0, (a, b) => a > b ? a : b);
-
-        // Build fl_chart spots
-        final currentSpots = <FlSpot>[];
-        for (int i = 1; i <= lastDay; i++) {
-          currentSpots.add(FlSpot(i.toDouble(), dailyCumulative[i]));
-        }
-
-        final typicalSpots = <FlSpot>[];
-        for (int i = 1; i <= daysInMonth; i++) {
-          typicalSpots.add(FlSpot(i.toDouble(), typicalCumulative[i]));
-        }
-
-        return GestureDetector(
-          dragStartBehavior: DragStartBehavior.start,
-          onHorizontalDragEnd: (details) {
-            final dx = details.primaryVelocity ?? 0;
-            final isRtl = Directionality.of(context) == TextDirection.rtl;
-            final goPrev = isRtl ? dx < 0 : dx > 0;
-            final goNext = isRtl ? dx > 0 : dx < 0;
-            if (goPrev) {
-              setState(() => _selectedMonthsBack++);
-              hapticLight();
-            } else if (goNext && _selectedMonthsBack > 0) {
-              setState(() => _selectedMonthsBack--);
-              hapticLight();
-            }
-          },
-          child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _MonthNav(
-                month: month,
-                onPrev: () => setState(() => _selectedMonthsBack++),
-                onNext: _selectedMonthsBack > 0
-                    ? () => setState(() => _selectedMonthsBack--)
-                    : null,
-              ),
-            ),
-            // Legend
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                          color: AppColors.healthy,
-                          borderRadius: BorderRadius.circular(3))),
-                  const SizedBox(width: 6),
-                  Text(S.of(context).reportsCurrentLegend,
-                      style: TextStyle(
-                          fontSize: 12, color: AppColors.ts(context))),
-                  const SizedBox(width: 20),
-                  Container(
-                      width: 12,
-                      height: 3,
-                      color: AppColors.th(context)),
-                  const SizedBox(width: 6),
-                  Text(S.of(context).reportsTypicalLegend,
-                      style: TextStyle(
-                          fontSize: 12, color: AppColors.ts(context))),
-                ],
-              ),
-            ),
-            // Chart
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 24),
-                child: LineChart(
-                  LineChartData(
-                    minX: 1,
-                    maxX: daysInMonth.toDouble(),
-                    minY: 0,
-                    maxY: maxY > 0 ? maxY * 1.1 : 100,
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: maxY > 0 ? maxY / 4 : 25,
-                      getDrawingHorizontalLine: (v) => FlLine(
-                        color: AppColors.bd(context),
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 7,
-                          getTitlesWidget: (value, meta) {
-                            final day = value.toInt();
-                            if (day == 1 ||
-                                day == 7 ||
-                                day == 14 ||
-                                day == 21 ||
-                                day == daysInMonth) {
-                              return Text(
-                                '${DateFormat.MMM().format(month)} $day',
-                                style: TextStyle(
-                                    fontSize: 9,
-                                    color: AppColors.th(context)),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 50,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              formatAmount(value,
-                                  currency: _reportsBaseCurrency),
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: AppColors.th(context)),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    lineBarsData: [
-                      // Typical (dashed)
-                      if (typicalMonthly > 0)
-                        LineChartBarData(
-                          spots: typicalSpots,
-                          isCurved: true,
-                          color: AppColors.th(context),
-                          barWidth: 2,
-                          dotData: const FlDotData(show: false),
-                          dashArray: [6, 4],
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color:
-                                AppColors.th(context).withValues(alpha: 0.05),
-                          ),
-                        ),
-                      // Current spending
-                      LineChartBarData(
-                        spots: currentSpots,
-                        isCurved: true,
-                        color: AppColors.healthy,
-                        barWidth: 3,
-                        dotData: FlDotData(
-                          show: true,
-                          getDotPainter: (spot, _, __, ___) {
-                            // Only show dot on last point
-                            if (spot.x == lastDay.toDouble()) {
-                              return FlDotCirclePainter(
-                                radius: 4,
-                                color: AppColors.healthy,
-                                strokeWidth: 2,
-                                strokeColor: AppColors.sf(context),
-                              );
-                            }
-                            return FlDotCirclePainter(
-                                radius: 0,
-                                color: Colors.transparent,
-                                strokeWidth: 0,
-                                strokeColor: Colors.transparent);
-                          },
-                        ),
-                        belowBarData: BarAreaData(
-                          show: true,
-                          color: AppColors.healthy.withValues(alpha: 0.15),
-                        ),
-                      ),
-                    ],
-                    lineTouchData: LineTouchData(
-                      touchTooltipData: LineTouchTooltipData(
-                        getTooltipColor: (_) => AppColors.popup(context),
-                        getTooltipItems: (spots) {
-                          return spots.map((spot) {
-                            return LineTooltipItem(
-                              '${S.of(context).reportsDayN(spot.x.toInt())}\n${formatAmount(spot.y, currency: _reportsBaseCurrency)}',
-                              TextStyle(
-                                  color: AppColors.tp(context),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600),
-                            );
-                          }).toList();
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          ),
-        );
-      },
-      loading: () => const SkeletonList(),
-      error: (e, _) => ErrorRetry(
-        message: S.of(context).commonCouldntLoadData,
-        details: '$e',
-        onRetry: () => ref.invalidate(transactionEntriesProvider),
-      ),
     );
   }
 }
@@ -1768,7 +1422,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
             monthStart.year == now.year && monthStart.month == now.month;
         final daysInMonth = DateUtils.getDaysInMonth(monthStart.year, monthStart.month);
         final daysElapsed = isCurrentMonth
-            ? now.difference(monthStart).inDays + 1
+            ? calendarDaysBetween(monthStart, now) + 1
             : daysInMonth;
 
         // ── Spending velocity ──
@@ -1787,9 +1441,13 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
         final projected = dailyRate * daysInMonth;
 
         final allocs = allocationsAsync.value ?? [];
+        // Base-currency targets only — never add up amounts in different
+        // currencies.
         double totalBudget = 0;
         for (final a in allocs) {
-          final t = a.data.allocation.targetAmount;
+          final alloc = a.data.allocation;
+          final t = alloc.targetAmount;
+          if ((alloc.targetCurrency ?? baseCurrency) != baseCurrency) continue;
           if (t != null && t > 0) totalBudget += t;
         }
 
@@ -1859,32 +1517,32 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
           tips.add(l.reportsTipAgeLow(ageValue));
         }
 
-        return GestureDetector(
-          onHorizontalDragEnd: (details) {
-            final dx = details.primaryVelocity ?? 0;
-            final isRtl = Directionality.of(context) == TextDirection.rtl;
-            final goPrev = isRtl ? dx < 0 : dx > 0;
-            final goNext = isRtl ? dx > 0 : dx < 0;
-            if (goPrev) {
-              setState(() => _selectedMonthsBack++);
-            } else if (goNext && _selectedMonthsBack > 0) {
-              setState(() => _selectedMonthsBack--);
-            }
-          },
-          child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+        return _MonthSwipe(
+          onPrev: () => setState(() => _selectedMonthsBack++),
+          onNext: _selectedMonthsBack > 0
+              ? () => setState(() => _selectedMonthsBack--)
+              : null,
+          child: _RefreshableScroll(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Month navigator
-              _MonthNav(
-                month: monthStart,
+              MonthNav(
+                label: _periodLabel(_month),
                 onPrev: () => setState(() => _selectedMonthsBack++),
                 onNext: _selectedMonthsBack > 0
                     ? () => setState(() => _selectedMonthsBack--)
                     : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: Spacing.md),
+              if (monthExpense == 0 && totalIncome == 0) ...[
+                EmptyState(
+                  icon: AppIcons.lightbulb,
+                  title: S.of(context).reportsNothingThisMonth,
+                  subtitle: S.of(context).reportsNothingThisMonthHint,
+                ),
+                const SizedBox(height: Spacing.sectionGap),
+              ],
               // ── Spending Velocity ──
               if (monthExpense > 0) ...[
                 _VelocityCard(
@@ -1913,24 +1571,18 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
 
               // ── Savings Rate ──
               if (totalIncome > 0) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(context),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    boxShadow: AppColors.cardShadow(context),
-                  ),
+                AppCard(
                   child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: CategoryIconTokens.compactSize,
+                        height: CategoryIconTokens.compactSize,
                         decoration: BoxDecoration(
                           color: AppColors.pastel(context, savingsRate >= 0.1
                                   ? AppColors.healthy
                                   : AppColors.caution,
                                   light: 0.85, dark: 0.75),
-                          borderRadius: BorderRadius.circular(10),
+                          shape: BoxShape.circle,
                         ),
                         child: Icon(AppIcons.piggyBank,
                             size: 20,
@@ -1945,11 +1597,11 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                           children: [
                             Text(S.of(context).reportsSavingsRate,
                                 style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: TypographyTokens.captionSize,
                                     color: AppColors.ts(context))),
                             Text('${(savingsRate * 100).round()}%',
                                 style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: TypographyTokens.amountDisplaySize,
                                     fontFamily: TypographyTokens.displayFamily,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.tp(context))),
@@ -1960,11 +1612,11 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
                         formatAmount(totalIncome - monthExpense,
                             currency: baseCurrency),
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontSize: TypographyTokens.amountRegularSize,
+                          fontWeight: TypographyTokens.amountRegularWeight,
                           color: savingsRate >= 0
-                              ? AppColors.healthy
-                              : AppColors.overspent,
+                              ? ref.watch(txColorsProvider).income
+                              : ref.watch(txColorsProvider).expense,
                         ),
                       ),
                     ],
@@ -1990,27 +1642,26 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
               // ── Actionable Tips ──
               if (tips.isNotEmpty) ...[
                 SectionHeader(S.of(context).reportsTipsSection,
-                padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
+                padding: const EdgeInsetsDirectional.only(
+                    start: 4, bottom: Spacing.headerToCard)),
                 ...tips.map((tip) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(14),
+                      margin: const EdgeInsets.only(bottom: Spacing.sm),
+                      padding: CardTokens.padding,
                       decoration: BoxDecoration(
                         color: AppColors.pastel(context, AppColors.accent,
                             light: 0.88, dark: 0.8),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: AppColors.accent.withValues(alpha: 0.15)),
+                        borderRadius: BorderRadius.circular(CardTokens.radius),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(AppIcons.lightbulb,
-                              size: 16, color: AppColors.accent),
+                              size: 16, color: AppColors.accentText(context)),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(tip,
                                 style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: TypographyTokens.amountSmallSize,
                                     color: AppColors.tp(context),
                                     height: 1.4)),
                           ),
@@ -2023,7 +1674,8 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
         ),
         );
       },
-      loading: () => const SkeletonList(),
+      loading: () => const SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(), child: SkeletonList()),
       error: (e, _) => ErrorRetry(
         message: S.of(context).commonCouldntLoadData,
         details: '$e',
@@ -2058,13 +1710,7 @@ class _VelocityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2072,11 +1718,10 @@ class _VelocityCard extends StatelessWidget {
             children: [
               Icon(AppIcons.gauge, size: 18, color: velocityColor),
               const SizedBox(width: 8),
-              Text(S.of(context).reportsVelocityTitle,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
+              Expanded(
+                child: Text(S.of(context).reportsVelocityTitle,
+                    style: _cardTitleStyle(context)),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -2087,7 +1732,8 @@ class _VelocityCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: velocityFraction.clamp(0.0, 1.0),
                 minHeight: 10,
-                backgroundColor: velocityColor.withValues(alpha: 0.1),
+                backgroundColor: AppColors.pastel(context, velocityColor,
+                    light: 0.88, dark: 0.75),
                 valueColor: AlwaysStoppedAnimation(velocityColor),
               ),
             ),
@@ -2097,10 +1743,12 @@ class _VelocityCard extends StatelessWidget {
               children: [
                 Text(S.of(context).reportsProjected,
                     style: TextStyle(
-                        fontSize: 12, color: AppColors.ts(context))),
+                        fontSize: TypographyTokens.captionSize,
+                        color: AppColors.ts(context))),
                 Text(S.of(context).reportsBudget,
                     style: TextStyle(
-                        fontSize: 12, color: AppColors.ts(context))),
+                        fontSize: TypographyTokens.captionSize,
+                        color: AppColors.ts(context))),
               ],
             ),
             Row(
@@ -2150,11 +1798,13 @@ class _VelocityStat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: TextStyle(fontSize: 11, color: AppColors.ts(context))),
+            style: TextStyle(
+                fontSize: TypographyTokens.overlineSize,
+                color: AppColors.ts(context))),
         Text(value,
             style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: TypographyTokens.amountSmallSize,
+                fontWeight: TypographyTokens.amountSmallWeight,
                 color: AppColors.tp(context))),
       ],
     );
@@ -2163,7 +1813,7 @@ class _VelocityStat extends StatelessWidget {
 
 // ── Biggest Expense Card ────────────────────────────────────────────────────
 
-class _BiggestExpenseCard extends StatelessWidget {
+class _BiggestExpenseCard extends ConsumerWidget {
   final TransactionEntry entry;
   final double amount;
   final Map<String, Category> categoryMap;
@@ -2177,7 +1827,7 @@ class _BiggestExpenseCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cat = entry.tx.categoryId != null
         ? categoryMap[entry.tx.categoryId]
         : null;
@@ -2185,26 +1835,20 @@ class _BiggestExpenseCard extends StatelessWidget {
         (entry.tx.note.isNotEmpty
             ? visibleNote(entry.tx.note)
             : S.of(context).typeExpense);
+    final expenseColor = ref.watch(txColorsProvider).expense;
     final catColor = cat != null
         ? AppColors.fromHex(cat.colorHex)
-        : AppColors.overspent;
+        : expenseColor;
 
-    return GestureDetector(
+    return AppCard(
       onTap: () => context.push('/transactions/${entry.tx.id}'),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.sf(context),
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          boxShadow: AppColors.cardShadow(context),
-        ),
         child: Row(
           children: [
             CategoryIcon(
               categoryName: cat?.name ?? '',
               emoji: cat?.icon,
               color: catColor,
-              size: 42,
+              size: CategoryIconTokens.compactSize,
               circular: true,
             ),
             const SizedBox(width: 14),
@@ -2214,17 +1858,13 @@ class _BiggestExpenseCard extends StatelessWidget {
                 children: [
                   Text(S.of(context).reportsBiggestExpense,
                       style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TypographyTokens.captionSize,
                           color: AppColors.ts(context))),
-                  Text(catName,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
+                  Text(catName, style: _cardTitleStyle(context)),
                   if (entry.tx.note.isNotEmpty && cat != null)
                     Text(visibleNote(entry.tx.note),
                         style: TextStyle(
-                            fontSize: 12,
+                            fontSize: TypographyTokens.captionSize,
                             color: AppColors.ts(context)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
@@ -2233,15 +1873,15 @@ class _BiggestExpenseCard extends StatelessWidget {
             ),
             Text(formatAmount(amount, currency: baseCurrency),
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.overspent)),
+                    fontSize: TypographyTokens.amountDisplaySize,
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: TypographyTokens.amountDisplayWeight,
+                    color: expenseColor)),
             const SizedBox(width: 4),
             Icon(AppIcons.caretRight,
                 size: 18, color: AppColors.th(context)),
           ],
         ),
-      ),
     );
   }
 }
@@ -2272,8 +1912,11 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
         final recs = snap.data;
         if (recs == null || recs.isEmpty) return const SizedBox.shrink();
 
+        // Base-currency subscriptions only — never add up amounts in
+        // different currencies.
         double total = 0;
         for (final r in recs) {
+          if (r.currency != baseCurrency) continue;
           final interval = r.interval > 0 ? r.interval : 1;
           double monthly = r.amount;
           switch (r.frequency) {
@@ -2291,27 +1934,20 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: GestureDetector(
+          child: AppCard(
             onTap: () => context.push('/recurring'),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.sf(context),
-                borderRadius: BorderRadius.circular(CardTokens.radius),
-                boxShadow: AppColors.cardShadow(context),
-              ),
               child: Row(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: CategoryIconTokens.compactSize,
+                    height: CategoryIconTokens.compactSize,
                     decoration: BoxDecoration(
                       color: AppColors.pastel(context, AppColors.accent,
                           light: 0.85, dark: 0.78),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(AppIcons.arrowsClockwise,
-                        size: 20, color: AppColors.accent),
+                        size: 18, color: AppColors.accentText(context)),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -2319,16 +1955,13 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(S.of(context).reportsRecurringTitle,
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.tp(context))),
+                            style: _cardTitleStyle(context)),
                         Text(
                             S.of(context).reportsRecurringSummary(
                                 recs.length,
                                 formatAmount(total, currency: baseCurrency)),
                             style: TextStyle(
-                                fontSize: 12,
+                                fontSize: TypographyTokens.captionSize,
                                 color: AppColors.ts(context))),
                       ],
                     ),
@@ -2337,7 +1970,6 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
                       size: 18, color: AppColors.th(context)),
                 ],
               ),
-            ),
           ),
         );
       },
@@ -2373,29 +2005,22 @@ class _AgeOfMoneyCard extends StatelessWidget {
     // Gauge value (target is 30 days)
     final gaugeFraction = (age / 30.0).clamp(0.0, 1.0);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         children: [
           Row(
             children: [
               Icon(AppIcons.clock, size: 18, color: color),
               const SizedBox(width: 8),
-              Text(S.of(context).reportsAgeTitle,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context))),
-              const Spacer(),
+              Expanded(
+                child: Text(S.of(context).reportsAgeTitle,
+                    style: _cardTitleStyle(context)),
+              ),
               Text(S.of(context).reportsAgeDays(age),
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                      fontSize: TypographyTokens.amountDisplaySize,
+                      fontFamily: TypographyTokens.displayFamily,
+                      fontWeight: TypographyTokens.amountDisplayWeight,
                       color: color)),
             ],
           ),
@@ -2406,7 +2031,8 @@ class _AgeOfMoneyCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: gaugeFraction,
               minHeight: 10,
-              backgroundColor: color.withValues(alpha: 0.1),
+              backgroundColor:
+                  AppColors.pastel(context, color, light: 0.88, dark: 0.75),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -2450,96 +2076,130 @@ class _AgeOfMoneyCard extends StatelessWidget {
 // Shared small widgets
 // ═════════════════════════════════════════════════════════════════════════════
 
-class _MonthNav extends StatelessWidget {
-  final DateTime month;
-  final VoidCallback onPrev;
-  final VoidCallback? onNext;
-
-  const _MonthNav({
-    required this.month,
-    required this.onPrev,
-    this.onNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          icon: const Icon(AppIcons.caretLeft),
-          onPressed: onPrev,
-          color: AppColors.ts(context),
-        ),
-        Text(
-          // Budget periods show their date range ("25 Sep – 24 Oct").
-          _reportsStartDay == null
-              ? DateFormat('MMMM yyyy').format(month)
-              : () {
-                  final r = reportRangeFor(month, _reportsStartDay);
-                  final f = DateFormat('d MMM');
-                  return '${f.format(r.start)} – '
-                      '${f.format(r.end.subtract(const Duration(days: 1)))}';
-                }(),
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: AppColors.tp(context),
-          ),
-        ),
-        // No future months: hidden (but keeps its space) on the current one.
-        Visibility(
-          visible: onNext != null,
-          maintainSize: true,
-          maintainAnimation: true,
-          maintainState: true,
-          child: IconButton(
-            icon: const Icon(AppIcons.caretRight),
-            onPressed: onNext,
-            color: AppColors.ts(context),
-          ),
-        ),
-      ],
-    );
-  }
+/// The navigator label: "October 2026", or a budget period's date range
+/// ("25 Sep – 24 Oct").
+String _periodLabel(DateTime month) {
+  if (_reportsStartDay == null) return DateFormat('MMMM yyyy').format(month);
+  final r = reportRangeFor(month, _reportsStartDay);
+  final f = DateFormat('d MMM');
+  return '${f.format(r.start)} – '
+      '${f.format(r.end.subtract(const Duration(days: 1)))}';
 }
 
-class _ToggleChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+/// Horizontal swipe = previous / next month (mirrored in RTL).
+class _MonthSwipe extends StatelessWidget {
+  const _MonthSwipe({required this.onPrev, this.onNext, required this.child});
 
-  const _ToggleChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  final VoidCallback onPrev;
+  final VoidCallback? onNext;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, AppColors.accent,
-                  light: 0.7, dark: 0.6)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(RadiusTokens.pill),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w700,
-            color: selected ? AppColors.tp(context) : AppColors.ts(context),
-          ),
+      dragStartBehavior: DragStartBehavior.start,
+      onHorizontalDragEnd: (details) {
+        final dx = details.primaryVelocity ?? 0;
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
+        final goPrev = isRtl ? dx < 0 : dx > 0;
+        final goNext = isRtl ? dx > 0 : dx < 0;
+        if (goPrev) {
+          onPrev();
+          hapticLight();
+        } else if (goNext && onNext != null) {
+          onNext!();
+          hapticLight();
+        }
+      },
+      child: child,
+    );
+  }
+}
+
+/// A tab's scrolling body with pull-to-refresh (re-reads the transactions
+/// and balances every report is built from).
+class _RefreshableScroll extends ConsumerWidget {
+  const _RefreshableScroll({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return RefreshIndicator(
+      onRefresh: () => _refreshReports(ref),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+        child: child,
+      ),
+    );
+  }
+}
+
+Future<void> _refreshReports(WidgetRef ref) async {
+  ref.invalidate(transactionEntriesProvider);
+  ref.invalidate(accountsWithBalanceProvider);
+  ref.invalidate(allocationsProvider);
+  ref.invalidate(ageOfMoneyProvider);
+  await Future.delayed(const Duration(milliseconds: 300));
+}
+
+/// A report card with the standard card title (and an optional trailing
+/// widget on the title row).
+class _ChartCard extends StatelessWidget {
+  const _ChartCard({required this.title, this.trailing, required this.child});
+
+  final String title;
+  final Widget? trailing;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(children: [
+            Expanded(child: Text(title, style: _cardTitleStyle(context))),
+            if (trailing != null) trailing!,
+          ]),
+          const SizedBox(height: Spacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// The empty card a chart shows when it has nothing to draw.
+class _EmptyChartCard extends StatelessWidget {
+  const _EmptyChartCard(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: SizedBox(
+        height: 120,
+        child: Center(
+          child: Text(message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: TypographyTokens.bodySize,
+                  color: AppColors.ts(context))),
         ),
       ),
     );
   }
 }
+
+/// The one card-title style on Reports (and Home).
+TextStyle _cardTitleStyle(BuildContext context) => TextStyle(
+      fontSize: TypographyTokens.cardTitleSize,
+      fontWeight: TypographyTokens.cardTitleWeight,
+      color: AppColors.tp(context),
+    );
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Balance Sheet Tab
@@ -2586,24 +2246,17 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
       context: context,
       builder: (ctx) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.only(bottom: Spacing.sm),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: Text(l.reportsCompareTo,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(ctx))),
-              ),
+              SheetTitle(l.reportsCompareTo),
               Divider(height: 1, color: AppColors.bd(ctx)),
               ...options.map((opt) => ListTile(
                     title: Text(opt.$1,
                         style: TextStyle(
-                            fontSize: 15,
+                            fontSize: TypographyTokens.txTitleSize,
                             fontWeight: (_compareLabel ?? l.reportsEndLastMonth) == opt.$1
                                 ? FontWeight.w700
                                 : FontWeight.w400,
@@ -2702,42 +2355,22 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
               }
             }
 
-            return ListView(
+            return RefreshIndicator(
+              onRefresh: () => _refreshReports(ref),
+              child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
               children: [
                 // Compare period selector
-                GestureDetector(
-                  onTap: () => _showComparePicker(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.sfv(context),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.bd(context)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(AppIcons.calendarBlank,
-                            size: 14, color: AppColors.ts(context)),
-                        const SizedBox(width: 8),
-                        Text(
-                          _compareLabel ?? S.of(context).reportsEndLastMonth,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(AppIcons.caretDown,
-                            size: 18, color: AppColors.ts(context)),
-                      ],
-                    ),
+                Center(
+                  child: AppChip(
+                    label: _compareLabel ?? S.of(context).reportsEndLastMonth,
+                    icon: AppIcons.calendarBlank,
+                    selected: false,
+                    onTap: () => _showComparePicker(context),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.md),
                 // Date range display
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2745,7 +2378,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     Text(
                       formatDate(_compareDate),
                       style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TypographyTokens.captionSize,
                           fontWeight: FontWeight.w600,
                           color: AppColors.ts(context)),
                     ),
@@ -2754,9 +2387,9 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                     Text(
                       formatDate(today),
                       style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TypographyTokens.captionSize,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.accent),
+                          color: AppColors.accentText(context)),
                     ),
                   ],
                 ),
@@ -2765,7 +2398,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 // Assets section
                 if (assets.isNotEmpty) ...[
                   _bsSectionHeader(context, S.of(context).reportsAssets,
-                      totalAssetsCompare, totalAssetsNow, baseCurrency, isAsset: true),
+                      totalAssetsCompare, totalAssetsNow, baseCurrency),
                   ..._groupByType(assets).entries.map((group) =>
                       _bsGroup(context, group.key, group.value,
                           historicalBalances, baseCurrency, totalAssetsNow)),
@@ -2783,24 +2416,14 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                           totalLiabilitiesNow)),
                 ],
 
-                // Net Worth
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.pastel(context, AppColors.accent,
-                        light: 0.8, dark: 0.75),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                  ),
+                // Net Worth — the shared balance hero.
+                const SizedBox(height: Spacing.xl),
+                BalanceHero(
                   child: Column(
                     children: [
                       Text(S.of(context).reportsNetWorth,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ts(context),
-                          )),
-                      const SizedBox(height: 8),
+                          style: balanceHeroLabelStyle(context)),
+                      const SizedBox(height: Spacing.sm),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -2809,14 +2432,14 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                               formatAmount(netWorthCompare,
                                   currency: baseCurrency),
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: TypographyTokens.bodySize,
                                 color: AppColors.ts(context),
                               ),
                             ),
                             Text(
                               formatDate(_compareDate),
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: TypographyTokens.miniSize,
                                 color: AppColors.ts(context),
                               ),
                             ),
@@ -2827,16 +2450,13 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                           Column(children: [
                             Text(
                               formatAmount(netWorthNow, currency: baseCurrency),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontFamily: TypographyTokens.displayFamily,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.tp(context),
-                              ),
+                              style: balanceHeroAmountStyle(context,
+                                  value: netWorthNow),
                             ),
                             Text(S.of(context).commonToday,
                                 style: TextStyle(
-                                    fontSize: 10, color: AppColors.ts(context))),
+                                    fontSize: TypographyTokens.miniSize,
+                                    color: AppColors.ts(context))),
                           ]),
                         ],
                       ),
@@ -2856,7 +2476,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                           children: foreignTotals.entries.map((e) => Text(
                                 formatAmount(e.value, currency: e.key),
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: TypographyTokens.amountSmallSize,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.ts(context),
                                 ),
@@ -2867,11 +2487,12 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                   ),
                 ),
               ],
-            );
+            ));
           },
         );
       },
-      loading: () => const SkeletonList(),
+      loading: () => const SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(), child: SkeletonList()),
       error: (e, _) => ErrorRetry(
         message: S.of(context).commonCouldntLoadAccounts,
         details: '$e',
@@ -2880,57 +2501,38 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     );
   }
 
+  /// Accounts grouped by their type code ('cash', 'bank', …); the label and
+  /// icon come from the code (account_type.dart), never the translated name.
   Map<String, List<AccountWithBalance>> _groupByType(
       List<AccountWithBalance> accounts) {
     final groups = <String, List<AccountWithBalance>>{};
-    final s = currentS();
     for (final a in accounts) {
-      // Translated type name (the raw value is an English db code).
-      final type = switch (a.account.type) {
-        'cash' => s.acctTypeCash,
-        'bank' => s.acctTypeBank,
-        'credit' => s.acctTypeCredit,
-        'wallet' => s.acctTypeDigital,
-        final t => t.isEmpty ? t : t[0].toUpperCase() + t.substring(1),
-      };
-      groups.putIfAbsent(type, () => []).add(a);
+      groups.putIfAbsent(a.account.type, () => []).add(a);
     }
     return groups;
   }
 
   Widget _bsSectionHeader(BuildContext context, String label,
-      double compareTotal, double nowTotal, String currency, {bool isAsset = false}) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-      child: Row(
+      double compareTotal, double nowTotal, String currency) {
+    return SectionHeader(
+      label,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+          4, 0, 4, Spacing.headerToCard),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            flex: 3,
-            child: Text(label,
+          Text(formatAmount(compareTotal, currency: currency),
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: isAsset ? AppColors.healthy : AppColors.overspent,
-              )),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(formatAmount(compareTotal, currency: currency),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                    fontSize: 11, color: AppColors.ts(context))),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 2,
-            child: Text(formatAmount(nowTotal, currency: currency),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-          ),
-          const SizedBox(width: 22), // space for change indicator column
+                  fontSize: TypographyTokens.overlineSize,
+                  color: AppColors.ts(context))),
+          const SizedBox(width: Spacing.xs),
+          Icon(AppIcons.arrowRight, size: 12, color: AppColors.th(context)),
+          const SizedBox(width: Spacing.xs),
+          Text(formatAmount(nowTotal, currency: currency),
+              style: TextStyle(
+                  fontSize: TypographyTokens.overlineSize,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.tp(context))),
         ],
       ),
     );
@@ -2938,7 +2540,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
 
   Widget _bsGroup(
     BuildContext context,
-    String typeName,
+    String type,
     List<AccountWithBalance> accounts,
     Map<String, double> historicalBalances,
     String baseCurrency,
@@ -2961,26 +2563,20 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
         : 0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
+      decoration: AppColors.card(context),
       child: Column(
         children: [
           // Group header
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
             child: Row(
               children: [
-                Icon(_typeIcon(typeName), size: 16, color: AppColors.accent),
+                Icon(accountTypeIcon(type),
+                    size: 16, color: accountTypeColor(type)),
                 const SizedBox(width: 8),
-                Text(typeName,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.tp(context))),
+                Text(accountTypeLabel(S.of(context), type),
+                    style: _cardTitleStyle(context)),
                 if (baseAccounts.isNotEmpty) ...[
                   const SizedBox(width: 6),
                   Text('$pct%',
@@ -3106,7 +2702,7 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
         color: AppColors.pastel(context,
             isUp ? AppColors.healthy : AppColors.overspent,
             light: 0.85, dark: 0.75),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -3131,15 +2727,6 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
     );
   }
 
-  IconData _typeIcon(String type) {
-    return switch (type.toLowerCase()) {
-      'bank' => AppIcons.bank,
-      'cash' => AppIcons.money,
-      'credit' => AppIcons.creditCard,
-      'wallet' => AppIcons.wallet,
-      _ => AppIcons.bank,
-    };
-  }
 
   /// Compute what each account's balance was at a historical date.
   /// Takes current balance and reverses all transactions after that date.

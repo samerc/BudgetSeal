@@ -4,6 +4,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/error_retry.dart';
 
 class HelpScreen extends StatefulWidget {
   final String? section;
@@ -16,6 +17,7 @@ class HelpScreen extends StatefulWidget {
 class _HelpScreenState extends State<HelpScreen> {
   late final WebViewController _controller;
   bool _loading = true;
+  bool _failed = false;
 
   @override
   void initState() {
@@ -69,7 +71,12 @@ class _HelpScreenState extends State<HelpScreen> {
       await _controller.loadHtmlString(themed);
     } catch (e) {
       debugPrint('[HelpScreen] Error loading help: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _failed = true;
+        });
+      }
     }
   }
 
@@ -77,17 +84,20 @@ class _HelpScreenState extends State<HelpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).helpGuideTitle)),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (_loading)
-            Center(
-              child: CircularProgressIndicator(
-                color: AppColors.accent,
-              ),
+      body: _failed
+          ? ErrorRetry(onRetry: () {
+              setState(() {
+                _failed = false;
+                _loading = true;
+              });
+              _loadHtml();
+            })
+          : Stack(
+              children: [
+                WebViewWidget(controller: _controller),
+                if (_loading) const Center(child: CircularProgressIndicator()),
+              ],
             ),
-        ],
-      ),
     );
   }
 }

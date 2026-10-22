@@ -34,6 +34,12 @@ import '../../shared/utils/save_errors.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
+import 'widgets/tx_ui.dart';
+import '../../shared/widgets/app_chip.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bill splitter — one screen, quick split first.
@@ -613,7 +619,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               Material(
                 color: AppColors.sfv(ctx),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
-                child: InkWell(
+                child: Tappable(
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                   onTap: () async {
                     final v = await showCalculatorSheet(ctx, amount);
@@ -885,28 +891,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final accounts = (ref.read(accountsProvider).value ?? const <Account>[])
         .where((a) => !a.archived)
         .toList();
-    final id = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => SafeArea(
-        child: ConstrainedBox(
-          constraints:
-              BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
-          child: ListView(shrinkWrap: true, children: [
-            for (final a in accounts)
-              ListTile(
-                leading: Icon(a.isTravel ? AppIcons.airplane : AppIcons.wallet),
-                title: Text(a.name),
-                subtitle: Text(a.currency),
-                trailing: a.id == _accountId
-                    ? Icon(AppIcons.check, color: AppColors.accent)
-                    : null,
-                onTap: () => Navigator.pop(ctx, a.id),
-              ),
-          ]),
-        ),
-      ),
-    );
+    final id = await showAccountPickerSheet(context,
+        accounts: accounts,
+        title: S.of(context).commonAccount,
+        selectedId: _accountId);
     if (id != null && mounted) setState(() => _accountId = id);
   }
 
@@ -976,23 +964,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     }
     final isCross = _billCurrency != _baseCurrency;
     if (records && isCross && (_exchangeRate - 1.0).abs() < 0.001) {
-      final proceed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(tr.billRateNotSetTitle),
-          content: Text(tr.billRateNotSetContent(_billCurrency)),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(tr.billGoBackBtn)),
-            FilledButton(
-                style: DialogButtons.filled,
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(tr.billContinueAnyway)),
-          ],
-        ),
+      final proceed = await showConfirmDialog(
+        context,
+        title: tr.billRateNotSetTitle,
+        message: tr.billRateNotSetContent(_billCurrency),
+        cancelLabel: tr.commonGoBack,
+        confirmLabel: tr.commonSaveAnyway,
+        destructive: false,
       );
-      if (proceed != true || !mounted) return;
+      if (!proceed || !mounted) return;
     }
 
     final shares = _shares();
@@ -1133,9 +1113,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     children: [
                       Text(tr.billNoteTitle,
                           style: const TextStyle(
-                              fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20)),
+                              fontWeight: TypographyTokens.sheetTitleWeight,
+                              fontSize: TypographyTokens.sheetTitleSize)),
                       const SizedBox(height: 2),
                       Text(subtitle,
                           style: TextStyle(
@@ -1147,11 +1126,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               if (rows.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.sf(ctx),
-                    borderRadius: BorderRadius.circular(CardTokens.radius),
-                    boxShadow: AppColors.cardShadow(ctx),
-                  ),
+                  decoration: AppColors.card(ctx),
                   padding: const EdgeInsets.only(top: 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1321,25 +1296,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return b.toString();
   }
 
-  Future<bool> _confirmDiscard() async {
+  Future<bool> _confirmDiscard() {
     final tr = S.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.billDiscardTitle),
-        content: Text(tr.billDiscardBody),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(tr.commonCancel)),
-          FilledButton(
-              style: DialogButtons.filled,
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(tr.txAfDiscard)),
-        ],
-      ),
+    return showConfirmDialog(
+      context,
+      title: tr.billDiscardTitle,
+      message: tr.billDiscardBody,
+      cancelLabel: tr.txAfKeepEditing,
+      confirmLabel: tr.txAfDiscard,
     );
-    return ok == true;
   }
 
   Future<void> _pickPayer() async {
@@ -1355,14 +1320,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       isScrollControlled: true,
       builder: (ctx) => SafeArea(
         child: ListView(shrinkWrap: true, children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-            child: Text(tr.billPaidBy,
-                style: const TextStyle(
-                    fontFamily: TypographyTokens.displayFamily,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20)),
-          ),
+          SheetTitle(tr.billPaidBy),
           ListTile(
             leading: _Avatar(label: _initials(_me), color: _colorOf(_me)),
             title: Text(tr.billYou),
@@ -1462,24 +1420,18 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
             _billCard(tr),
-            const SizedBox(height: 18),
-            Row(children: [
-              Expanded(
-                child: Text(tr.billWhosIn,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accentText(context))),
-              ),
-              _ModeSwitch(
+            const SizedBox(height: Spacing.sectionGap),
+            SectionHeader(
+              tr.billWhosIn,
+              trailing: _ModeSwitch(
                 evenly: _mode == _SplitMode.evenly,
                 evenlyLabel: tr.billEvenly,
                 byItemLabel: tr.billByItem,
                 onChanged: (evenly) =>
                     _setMode(evenly ? _SplitMode.evenly : _SplitMode.byItem),
               ),
-            ]),
-            const SizedBox(height: 10),
+            ),
+            const SizedBox(height: Spacing.headerToCard),
             if (_mode == _SplitMode.evenly) ...[
               _peopleCard(tr, shares),
               if (_people.length > 1) ...[
@@ -1559,11 +1511,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             : _tipPercent.toStringAsFixed(0);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1582,7 +1530,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               height: 32,
             ),
           ]),
-          InkWell(
+          Tappable(
             onTap: byItem ? null : _editTotal,
             borderRadius: BorderRadius.circular(RadiusTokens.sm),
             child: Padding(
@@ -1595,7 +1543,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   style: TextStyle(
                     fontFamily: TypographyTokens.displayFamily,
                     fontWeight: FontWeight.w800,
-                    fontSize: 40,
+                    fontSize: kHeroAmountSize,
                     letterSpacing: -1,
                     fontFeatures: const [FontFeature.tabularFigures()],
                     color: _grand == 0
@@ -1612,7 +1560,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           if (_currencyHint != null)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: InkWell(
+              child: Tappable(
                 onTap: () => _setBillCurrency(_currencyHint!),
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 child: Padding(
@@ -1692,7 +1640,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       : tr.billTipCustom
                 ),
               ])
-                _ChoicePill(
+                AppChip(
                   label: label,
                   selected: tipChoice == value,
                   onTap: () => _setTip(value),
@@ -1712,7 +1660,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           else
             Row(children: [
               Expanded(
-                child: InkWell(
+                child: Tappable(
                   onTap: _editTax,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1747,15 +1695,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget _peopleCard(S tr, Map<String, double> shares) {
     final recent = _recentPeople;
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(children: [
         for (final p in _people) ...[
-          InkWell(
+          Tappable(
             onTap: () => _personActions(p),
             child: Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
@@ -1769,7 +1713,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700)),
                 ),
-                InkWell(
+                Tappable(
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   onTap: _people.length > 1 ? () => _setShare(p) : null,
                   child: Padding(
@@ -1866,11 +1810,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Widget _itemsCard(S tr) {
     final painting = _painting;
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context),
       clipBehavior: Clip.antiAlias,
       child: Column(children: [
         for (var i = 0; i < _items.length; i++) ...[
@@ -1906,7 +1846,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       color: has
           ? AppColors.pastel(context, paintColor!, light: 0.92, dark: 0.82)
           : Colors.transparent,
-      child: InkWell(
+      child: Tappable(
         onTap:
             painting != null ? () => _toggleItem(item) : () => _editItem(item),
         onLongPress: () => _editItem(item),
@@ -2034,7 +1974,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     if (idx.isEmpty) return const [];
     return [
       const SizedBox(height: 8),
-      InkWell(
+      Tappable(
         onTap: () => setState(() => _showUnpriced = !_showUnpriced),
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
         child: Padding(
@@ -2053,7 +1993,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       ),
       if (_showUnpriced)
         for (final i in idx)
-          InkWell(
+          Tappable(
             onTap: () => _addUnpriced(i),
             child: Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(26, 8, 4, 8),
@@ -2108,7 +2048,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return Material(
       color: AppColors.sf(context),
       elevation: 8,
-      shadowColor: Colors.black26,
+      shadowColor: Theme.of(context).colorScheme.shadow,
       shape: const RoundedRectangleBorder(
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet))),
@@ -2334,45 +2274,6 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Tip choices: outlined, filled with the accent when picked.
-class _ChoicePill extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ChoicePill(
-      {required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.accentLight : Colors.transparent,
-      shape: StadiumBorder(
-        side: BorderSide(
-            color: selected ? AppColors.accent : AppColors.bd(context),
-            width: selected ? 1.2 : 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const StadiumBorder(),
-        child: Container(
-          height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Center(
-            widthFactor: 1,
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                    color: selected
-                        ? AppColors.accentText(context)
-                        : AppColors.ts(context))),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Evenly | By item.
 class _ModeSwitch extends StatelessWidget {
   final bool evenly;
@@ -2391,7 +2292,8 @@ class _ModeSwitch extends StatelessWidget {
     Widget seg(String label, bool on, bool value) => Semantics(
           selected: on,
           button: true,
-          child: GestureDetector(
+          child: Tappable(
+            borderRadius: BorderRadius.circular(RadiusTokens.pill),
             onTap: () => onChanged(value),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
@@ -2405,7 +2307,7 @@ class _ModeSwitch extends StatelessWidget {
                     : Theme.of(context).brightness == Brightness.dark
                         ? AppColors.lightenPastel(AppColors.sfv(context), 0.12)
                         : AppColors.sf(context),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(RadiusTokens.pill),
                 boxShadow: on ? AppColors.cardShadow(context) : null,
               ),
               child: Text(label,
@@ -2421,7 +2323,7 @@ class _ModeSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
-        borderRadius: BorderRadius.circular(19),
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         seg(evenlyLabel, evenly, true),
@@ -2456,7 +2358,7 @@ class _PersonChip extends StatelessWidget {
       label: semantics,
       selected: selected,
       button: true,
-      child: InkWell(
+      child: Tappable(
         onTap: onTap,
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(RadiusTokens.md),

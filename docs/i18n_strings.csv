@@ -327,10 +327,10 @@ alloc_gain,Label,Gain,ربح,Gain
 alloc_loss,Label,Loss,خسارة,Perte
 alloc_total_adjustment,Label,Total adjustment,إجمالي التعديل,Ajustement total
 alloc_apply_revaluation,Button,Apply revaluation,تطبيق إعادة التقييم,Appliquer la réévaluation
-alloc_archive_title,Dialog title,Archive envelope,أرشفة الظرف,Archiver l'enveloppe
+alloc_archive_title,Dialog title,Archive envelope?,أرشفة الظرف؟,Archiver l'enveloppe ?
 alloc_archive_msg,Dialog content,This envelope will be hidden from all lists and stop taking spending. Linked categories and transaction history will be preserved.\n\nYou can unarchive it later from the Budget tab menu (⋮ › Archived envelopes).,سيتم إخفاء هذا الظرف من جميع القوائم ولن تُخصم منه المصاريف. ستُحفظ الفئات المرتبطة وتاريخ المعاملات.\n\nيمكنك إلغاء الأرشفة لاحقاً من قائمة تبويب الميزانية (⋮ › الأظرف المؤرشفة).,Cette enveloppe sera masquée de toutes les listes et ne recevra plus de dépenses. Les catégories liées et l'historique seront préservés.\n\nVous pourrez la désarchiver depuis le menu de l'onglet Budget (⋮ › Enveloppes archivées).
 alloc_archived,Snackbar,Envelope archived,تم أرشفة الظرف,Enveloppe archivée
-alloc_delete_title,Dialog title,Delete envelope,حذف الظرف,Supprimer l'enveloppe
+alloc_delete_title,Dialog title,Delete envelope?,حذف الظرف؟,Supprimer l'enveloppe ?
 alloc_archive_instead,Dialog button,Archive instead,أرشفة بدلاً من ذلك,Archiver à la place
 alloc_delete_permanently,Dialog button,Delete permanently,حذف نهائي,Supprimer définitivement
 alloc_percent_saved,Progress text,{pct}% saved,{pct}% مدّخر,{pct}% épargné
@@ -1176,7 +1176,7 @@ reports_age_days,Age of money display,"{age, plural, =1{1 day} other{{age} days}
 settings_version_n,About tile subtitle,Version {version},الإصدار {version},Version {version}
 settings_preview,Number format preview,Preview: {preview},معاينة: {preview},Aperçu : {preview}
 sub_could_not_update,Snackbar error,Could not update subscription,تعذّر تحديث الاشتراك,Impossible de mettre à jour l'abonnement
-help_guide_title,Help screen title,Help Guide,دليل المساعدة,Guide d'aide
+help_guide_title,Help screen title,Help guide,دليل المساعدة,Guide d'aide
 receipt_take_photo,Receipt picker option,Take photo,التقاط صورة,Prendre une photo
 receipt_choose_gallery,Receipt picker option,Choose from gallery,اختيار من المعرض,Choisir dans la galerie
 receipt_select_multiple,Receipt picker subtitle,Select multiple photos,اختيار صور متعددة,Sélectionner plusieurs photos
@@ -1308,7 +1308,7 @@ alloc_fetch_rate_error,,Could not fetch rate for {currency},تعذّر جلب ا
 alloc_delete_linked_warning,,"{count,plural, =1{1 category is} other{{count} categories are}} linked to this envelope ({names})","{count,plural, =1{فئة واحدة مرتبطة} =2{فئتان مرتبطتان} few{{count} فئات مرتبطة} many{{count} فئةً مرتبطة} other{{count} فئة مرتبطة}} بهذا الظرف ({names})","{count,plural, =1{1 catégorie est liée} other{{count} catégories sont liées}} à cette enveloppe ({names})"
 alloc_delete_and_more,,and {count} more,و{count} أخرى,et {count} autre(s)
 alloc_delete_consequences,,Deleting will:\n  • Unlink all categories from this envelope\n  • Remove all ledger history for this envelope\n\nConsider archiving instead to preserve history.,سيؤدي الحذف إلى:\n  • إلغاء ربط جميع الفئات من هذا الظرف\n  • حذف كل سجل الدفتر لهذا الظرف\n\nفكر في الأرشفة بدلاً من ذلك للحفاظ على السجل.,La suppression va :\n  • Délier toutes les catégories de cette enveloppe\n  • Supprimer tout l'historique du grand livre\n\nEnvisagez l'archivage pour préserver l'historique.
-alloc_delete_no_links_title,,Delete envelope permanently,حذف الظرف نهائياً,Supprimer l'enveloppe définitivement
+alloc_delete_no_links_title,,Delete envelope?,حذف الظرف؟,Supprimer l'enveloppe ?
 alloc_delete_no_links_msg,,This envelope has no linked categories. All ledger history will be removed.\n\nAre you sure? This cannot be undone.,هذا الظرف ليس له فئات مرتبطة. سيتم حذف كل سجل الدفتر.\n\nهل أنت متأكد؟ لا يمكن التراجع.,Cette enveloppe n'a pas de catégories liées. Tout l'historique du grand livre sera supprimé.\n\nÊtes-vous sûr ? Cette action est irréversible.
 alloc_delete_error,,Could not delete. Please try again.,تعذّر الحذف. حاول مجدداً.,Impossible de supprimer. Veuillez réessayer.
 alloc_envelope_created,,Envelope created,تم إنشاء الظرف,Enveloppe créée
@@ -1323,7 +1323,7 @@ alloc_goals_count,,"{count,plural, =1{1 goal} other{{count} goals}}","{count,plu
 alloc_loans_count,,"{count,plural, =1{1 loan} other{{count} loans}}","{count,plural, =1{قرض واحد} =2{قرضان} few{{count} قروض} many{{count} قرضًا} other{{count} قرض}}","{count,plural, =1{1 prêt} other{{count} prêts}}"
 allocNEnvelopesNeedReset,,"{count,plural, =1{1 envelope needs reset} other{{count} envelopes need reset}}","{count,plural, =1{ظرف واحد يحتاج إعادة تعيين} =2{ظرفان يحتاجان إعادة تعيين} few{{count} أظرف تحتاج إعادة تعيين} many{{count} ظرفًا تحتاج إعادة تعيين} other{{count} ظرف تحتاج إعادة تعيين}}","{count,plural, =1{1 enveloppe nécessite une réinitialisation} other{{count} enveloppes nécessitent une réinitialisation}}"
 fund_couldnt_load,,Couldn't load envelopes,تعذّر تحميل الأظرف,Impossible de charger les enveloppes
-fund_no_allocations,,No allocations to fund.\nCreate allocations first.,لا أظرف لتمويلها.\nأنشئ أظرفاً أولاً.,Aucune enveloppe à financer.\nCréez d'abord des enveloppes.
+fund_no_allocations,,No envelopes to fund,لا أظرف لتمويلها,Aucune enveloppe à financer
 fund_how_title,,How does funding work?,كيف يعمل التمويل؟,Comment fonctionne le financement ?
 fund_step1,,Check your unallocated balance — this is money you haven't assigned to any envelope yet.,تحقق من رصيدك غير الموزع — هذا المال الذي لم تخصصه لأي ظرف بعد.,Vérifiez votre solde non alloué — c'est l'argent que vous n'avez pas encore affecté à une enveloppe.
 fund_step2,,"Enter how much to put in each envelope, or use ""Quick Fill"" to auto-fill periodic envelopes up to their target.","أدخل المبلغ لكل ظرف، أو استخدم ""ملء سريع"" لملء الأظرف الدورية تلقائياً حتى هدفها.","Entrez le montant pour chaque enveloppe, ou utilisez « Remplissage rapide » pour remplir automatiquement les enveloppes périodiques jusqu'à leur objectif."
@@ -1402,7 +1402,7 @@ cat_archive,,Archive,أرشفة,Archiver
 cat_unarchive,,Unarchive,إلغاء الأرشفة,Désarchiver
 cat_restored,,Category restored,تم استعادة الفئة,Catégorie restaurée
 cat_archived,,Category archived,تم أرشفة الفئة,Catégorie archivée
-cat_delete_title,,Delete category,حذف الفئة,Supprimer la catégorie
+cat_delete_title,,Delete category?,حذف الفئة؟,Supprimer la catégorie ?
 cat_delete_no_tx,,This category has no transactions. Delete permanently?,هذه الفئة ليس لها معاملات. حذف نهائي؟,Cette catégorie n'a aucune transaction. Supprimer définitivement ?
 cat_deleted,,Category deleted,تم حذف الفئة,Catégorie supprimée
 cat_new_title,,New category,فئة جديدة,Nouvelle catégorie
@@ -1429,7 +1429,7 @@ settings_preferences_section,,Preferences,التفضيلات,Préférences
 settings_security_section,,Security,الأمان,Sécurité
 tile_recurring_bills,,Recurring & bills,المتكررة والفواتير,Récurrences et factures
 tile_bill_splitter,,Bill splitter,تقسيم الفواتير,Partage de facture
-tile_help_guide,,Help Guide,دليل المساعدة,Guide d'aide
+tile_help_guide,,Help guide,دليل المساعدة,Guide d'aide
 settings_help_sub,,How to use BudgetSeal,كيفية استخدام BudgetSeal,Comment utiliser BudgetSeal
 tile_theme,,Theme,المظهر,Thème
 tile_accent_color,,Accent color,لون التمييز,Couleur d'accentuation
@@ -1559,7 +1559,7 @@ onboard_day_n,,Day {day},اليوم {day},Jour {day}
 onboard_envelope_explainer,,"Envelope budgeting is simple: divide your income into virtual envelopes for each spending category. When an envelope runs out, you stop spending in that category.",ميزانية الأظرف بسيطة: قسّم دخلك إلى أظرف افتراضية لكل فئة إنفاق. عندما ينفد ظرف ما، تتوقف عن الإنفاق في تلك الفئة.,"La budgétisation par enveloppes est simple : répartissez vos revenus dans des enveloppes virtuelles pour chaque catégorie de dépenses. Quand une enveloppe est vide, vous arrêtez de dépenser dans cette catégorie."
 onboard_household_hint,,e.g. My Budget,مثلاً: ميزانيتي,ex. Mon Budget
 onboard_period_help,,The day your monthly budget resets (usually the 1st or your payday).,اليوم الذي تُعاد فيه ميزانيتك الشهرية (عادةً الأول من الشهر أو يوم الراتب).,Le jour où votre budget mensuel se réinitialise (généralement le 1er ou votre jour de paie).
-onboard_help_hint,,Need help? Check our guide anytime from More > Help Guide.,تحتاج مساعدة؟ تحقق من دليلنا في أي وقت من المزيد > دليل المساعدة.,Besoin d'aide ? Consultez notre guide à tout moment depuis Plus > Guide d'aide.
+onboard_help_hint,,Need help? Check our guide anytime from More > Help guide.,تحتاج مساعدة؟ تحقق من دليلنا في أي وقت من المزيد > دليل المساعدة.,Besoin d'aide ? Consultez notre guide à tout moment depuis Plus > Guide d'aide.
 travel_previous_wallet,,You have a previous {currency} travel wallet:,لديك محفظة سفر سابقة بعملة {currency}:,Vous avez un précédent portefeuille de voyage en {currency} :
 travel_exchange_failed,,Exchange failed. Please try again.,فشل التحويل. حاول مجدداً.,Échec du change. Veuillez réessayer.
 travel_balance_label,,Balance: {amount},الرصيد: {amount},Solde : {amount}
@@ -1702,7 +1702,7 @@ tx_detail_save_as_template,,Save as template,حفظ كقالب,Enregistrer comme
 tx_detail_template_saved,,Template saved,تم حفظ القالب,Modèle enregistré
 tx_detail_template_error,,Could not save template,تعذّر حفظ القالب,Impossible d'enregistrer le modèle
 tile_arabic_digits,,Arabic-Indic numerals,الأرقام العربية الهندية,Chiffres arabo-indiens
-upgrade_title,,Upgrade to Premium,الترقية إلى بريميوم,Passer au Premium
+upgrade_title,,Upgrade to premium,الترقية إلى بريميوم,Passer au Premium
 upgrade_subtitle,,"Unlock every feature with a single purchase. No subscriptions, no ads.",افتح جميع الميزات بشراء واحد. بدون اشتراكات، بدون إعلانات.,"Débloquez toutes les fonctionnalités avec un seul achat. Sans abonnement, sans publicité."
 upgrade_feature_sync,,Cloud sync,المزامنة السحابية,Synchronisation cloud
 upgrade_feature_web_companion,,Web Companion,الواجهة على الويب,Compagnon Web
@@ -1769,7 +1769,7 @@ fx_manual_tag,,Your rate,سعرك,Votre taux
 fx_live_tag,,Live,مباشر,En direct
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
-alloc_no_archived,,No archived envelopes.,لا توجد أظرف مؤرشفة.,Aucune enveloppe archivée.
+alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée
 tx_no_rate,,No rate,بلا سعر صرف,Pas de taux
 
@@ -2519,3 +2519,108 @@ bill_send_share,Bill splitter: accessibility label,Send {name} their share,أر�
 bill_person_share_text,Bill splitter: text sent to one person,Your share of the bill: {amount},حصّتك من الفاتورة: {amount},Votre part de l'addition : {amount}
 bill_split_into,Bill splitter: split an item with a quantity,Split into {qty},تقسيم إلى {qty},Diviser en {qty}
 bill_person_name,Bill splitter: add person field,Name,الاسم,Nom
+emojiGroupFood,Emoji picker group label,Food & drink,طعام وشراب,Alimentation et boissons
+emojiGroupTransport,Emoji picker group label,Transport,مواصلات,Transport
+emojiGroupHome,Emoji picker group label,Home & bills,المنزل والفواتير,Maison et factures
+emojiGroupShopping,Emoji picker group label,Shopping,تسوّق,Shopping
+emojiGroupHealth,Emoji picker group label,Health & fitness,صحة ولياقة,Santé et forme
+emojiGroupEntertainment,Emoji picker group label,Entertainment,ترفيه,Divertissement
+emojiGroupWork,Emoji picker group label,Education & work,تعليم وعمل,Études et travail
+emojiGroupMoney,Emoji picker group label,Money,مال,Argent
+emojiGroupFamily,Emoji picker group label,Family & pets,العائلة والحيوانات الأليفة,Famille et animaux
+emojiGroupTravel,Emoji picker group label,Travel & leisure,سفر وترفيه,Voyages et loisirs
+emojiGroupOther,Emoji picker group label,Other,أخرى,Autre
+tmplNoMatch,Templates: search found nothing,"No templates match ""{query}""","لا توجد قوالب تطابق ""{query}""",Aucun modèle ne correspond à « {query} »
+tmplDeleted,Templates: SnackBar after deleting,Template deleted,تم حذف القالب,Modèle supprimé
+allocDeleted,Envelope: SnackBar after deleting,Envelope deleted,تم حذف الظرف,Enveloppe supprimée
+allocOrderSaved,Reorder envelopes: SnackBar after saving,Order saved,تم حفظ الترتيب,Ordre enregistré
+leftoverResolved,Leftover screen: SnackBar after saving,Leftover resolved,تمت معالجة المتبقي,Reliquat traité
+periodTransitionDone,Period transition: SnackBar after completing,New period ready,الفترة الجديدة جاهزة,Nouvelle période prête
+catEnvelopeLinked,Category: SnackBar after linking it to an envelope,Linked to {name},تم الربط بـ {name},Liée à {name}
+catEnvelopeUnlinked,Category: SnackBar after unlinking its envelope,Envelope unlinked,تم فك ربط الظرف,Enveloppe dissociée
+txDetailRemoveReceiptTitle,Confirm dialog title before removing a receipt photo from a transaction,Remove this receipt?,إزالة هذا الإيصال؟,Retirer ce reçu ?
+txDetailRemoveReceiptBody,Confirm dialog body before removing a receipt photo,The photo will be deleted from this transaction.,سيتم حذف الصورة من هذه المعاملة.,La photo sera supprimée de cette transaction.
+txDetailReceiptRemoved,SnackBar after removing a receipt photo,Receipt removed,تمت إزالة الإيصال,Reçu retiré
+txExportFailed,SnackBar when exporting selected transactions to CSV fails,Couldn't export the transactions,تعذّر تصدير المعاملات,Impossible d'exporter les transactions
+acctDeleteConfirmTitle,Account detail: delete confirm dialog title,Delete account?,حذف الحساب؟,Supprimer le compte ?
+acctArchiveConfirmTitle,Account detail: archive confirm dialog title,Archive account?,أرشفة الحساب؟,Archiver le compte ?
+acctUnarchiveConfirmTitle,Accounts: unarchive confirm dialog title,Unarchive account?,إلغاء أرشفة الحساب؟,Désarchiver le compte ?
+acctArchivedSnack,Account detail: SnackBar after archiving,{name} archived,تمت أرشفة {name},{name} archivé
+acctDeletedSnack,Account detail: SnackBar after deleting,{name} deleted,تم حذف {name},{name} supprimé
+acctSaveFailed,Account detail: save failed SnackBar,Couldn't save the account,تعذّر حفظ الحساب,Impossible d'enregistrer le compte
+acctAdjustFailed,Account detail: adjust balance failed SnackBar,Couldn't adjust the balance,تعذّر تعديل الرصيد,Impossible d'ajuster le solde
+customizeResetDone,Customize dashboard sheet: SnackBar after Reset,Dashboard layout reset,تمت إعادة ضبط ترتيب الرئيسية,Disposition du tableau de bord réinitialisée
+exportReportFailed,Export report: failure SnackBar,Couldn't create the report,تعذّر إنشاء التقرير,Impossible de créer le rapport
+exportShareText,Export report: share sheet text,BudgetSeal report – {month},تقرير BudgetSeal – {month},Rapport BudgetSeal – {month}
+exportHtmlSubtitle,Export report HTML: subtitle under the household name,Monthly report – {month},التقرير الشهري – {month},Rapport mensuel – {month}
+exportHtmlTransactions,Export report HTML: transactions table heading,Transactions ({count}),المعاملات ({count}),Transactions ({count})
+exportHtmlFooter,Export report HTML: footer,Generated by BudgetSeal – {date},أُنشئ بواسطة BudgetSeal – {date},Généré par BudgetSeal – {date}
+reportsNothingThisMonth,Reports Overview/Insights: empty state title,Nothing recorded this month,لا شيء مسجّل هذا الشهر,Rien d'enregistré ce mois-ci
+reportsNothingThisMonthHint,Reports Overview/Insights: empty state subtitle,Swipe or use the arrows to see other months.,اسحب أو استخدم الأسهم لعرض أشهر أخرى.,Balayez ou utilisez les flèches pour voir d'autres mois.
+searchNoMatches,Global search: empty state title when nothing matches,No matches,لا توجد نتائج,Aucun résultat
+recurringNoExpenses,Recurring list: expense filter matches nothing,No recurring expenses,لا توجد مصروفات متكررة,Aucune dépense récurrente
+recurringNoIncome,Recurring list: income filter matches nothing,No recurring income,لا يوجد دخل متكرر,Aucun revenu récurrent
+recurringPausedSnack,SnackBar after pausing a recurring transaction,Recurring transaction paused,تم إيقاف المعاملة المتكررة مؤقتًا,Transaction récurrente mise en pause
+recurringResumedSnack,SnackBar after resuming a recurring transaction,Recurring transaction resumed,تم استئناف المعاملة المتكررة,Transaction récurrente reprise
+recurringUpdateFailed,SnackBar when pausing/resuming fails,Could not update recurring transaction,تعذر تحديث المعاملة المتكررة,Impossible de mettre à jour la transaction récurrente
+recurringDeleteFailed,SnackBar when deleting a recurring transaction fails,Could not delete recurring transaction,تعذر حذف المعاملة المتكررة,Impossible de supprimer la transaction récurrente
+recurringSaveFailed,SnackBar when creating/editing a recurring transaction fails,Could not save recurring transaction,تعذر حفظ المعاملة المتكررة,Impossible d'enregistrer la transaction récurrente
+recurringLoadFailed,Error state on the Recurring and Upcoming bills screens,Could not load recurring transactions,تعذر تحميل المعاملات المتكررة,Impossible de charger les transactions récurrentes
+subPausedSnack,SnackBar after pausing a subscription,Subscription paused,تم إيقاف الاشتراك مؤقتًا,Abonnement mis en pause
+subResumedSnack,SnackBar after resuming a subscription,Subscription resumed,تم استئناف الاشتراك,Abonnement repris
+subPauseTooltip,Tooltip of the pause button on a subscription row,Pause subscription,إيقاف الاشتراك مؤقتًا,Mettre l'abonnement en pause
+subResumeTooltip,Tooltip of the resume button on a subscription row,Resume subscription,استئناف الاشتراك,Reprendre l'abonnement
+subNoMatch,Subscriptions list: status filter matches nothing,No subscriptions with this status,لا توجد اشتراكات بهذه الحالة,Aucun abonnement avec ce statut
+subLoadFailed,Error state on the Subscriptions screen,Could not load subscriptions,تعذر تحميل الاشتراكات,Impossible de charger les abonnements
+subDeleteTitle,Confirm dialog title for deleting a subscription,Delete subscription?,حذف الاشتراك؟,Supprimer l'abonnement ?
+subDeleteBody,Confirm dialog body for deleting a subscription,Its past transactions stay in your history.,ستبقى معاملاته السابقة في سجلك.,Ses transactions passées restent dans votre historique.
+subDeleted,SnackBar after deleting a subscription,Subscription deleted,تم حذف الاشتراك,Abonnement supprimé
+subDeleteFailed,SnackBar when deleting a subscription fails,Could not delete subscription,تعذر حذف الاشتراك,Impossible de supprimer l'abonnement
+subCancelConfirmTitle,Confirm dialog title for setting a subscription's cancellation date,Cancel subscription?,إلغاء الاشتراك؟,Annuler l'abonnement ?
+subCancelDateSet,SnackBar after setting a subscription's cancellation date,Cancellation date set,تم تحديد تاريخ الإلغاء,Date d'annulation définie
+plannedDeleteConfirmTitle,Confirm dialog title for deleting a planned payment,Delete planned payment?,حذف الدفعة المخططة؟,Supprimer le paiement planifié ?
+plannedPostAllConfirmTitle,Confirm dialog title for posting a month's planned payments,Post all payments?,ترحيل جميع المدفوعات؟,Enregistrer tous les paiements ?
+plannedLoadFailed,Error state on the Planned payments screen,Could not load planned payments,تعذر تحميل المدفوعات المخططة,Impossible de charger les paiements planifiés
+objDeleteConfirmTitle,Confirm dialog title for deleting a goal or loan,Delete objective?,حذف الهدف؟,Supprimer l'objectif ?
+objDeleted,SnackBar after deleting a goal or loan,Objective deleted,تم حذف الهدف,Objectif supprimé
+txColorDefault,Swatch that restores the default transaction color,Default,الافتراضي,Par défaut
+txColorRed,Color preset name,Red,أحمر,Rouge
+txColorOrange,Color preset name,Orange,برتقالي,Orange
+txColorAmber,Color preset name,Amber,كهرماني,Ambre
+txColorGreen,Color preset name,Green,أخضر,Vert
+txColorTeal,Color preset name,Teal,أزرق مخضر,Bleu sarcelle
+txColorBlue,Color preset name,Blue,أزرق,Bleu
+txColorIndigo,Color preset name,Indigo,نيلي,Indigo
+txColorPurple,Color preset name,Purple,بنفسجي,Violet
+txColorPink,Color preset name,Pink,وردي,Rose
+txColorSlate,Color preset name,Slate,رمادي,Ardoise
+nfThousandsComma,Thousands separator option,"Comma (1,000)","فاصلة (1,000)","Virgule (1,000)"
+nfThousandsPeriod,Thousands separator option,Period (1.000),نقطة (1.000),Point (1.000)
+nfThousandsSpace,Thousands separator option,Space (1 000),مسافة (1 000),Espace (1 000)
+nfThousandsNone,Thousands separator option,None (1000),بدون (1000),Aucun (1000)
+nfDecimalPeriod,Decimal separator option,Period (0.50),نقطة (0.50),Point (0.50)
+nfDecimalComma,Decimal separator option,"Comma (0,50)","فاصلة (0,50)","Virgule (0,50)"
+currencySymbolExample,Hint in the currency symbol dialog,e.g. {symbol},مثال: {symbol},ex. {symbol}
+resetConfirmTitle,Reset confirm dialog title,Reset everything?,إعادة ضبط كل شيء؟,Tout réinitialiser ?
+backupRestoreConfirmTitle,Restore confirm dialog title,Restore this backup?,استعادة هذه النسخة الاحتياطية؟,Restaurer cette sauvegarde ?
+syncDisconnectConfirmTitle,Disconnect confirm dialog title,Disconnect sync?,قطع اتصال المزامنة؟,Déconnecter la synchronisation ?
+syncOtherBudgetConfirmTitle,Dialog title when the cloud holds another budget,Use the synced budget?,استخدام الميزانية المتزامنة؟,Utiliser le budget synchronisé ?
+healthRepairConfirmTitle,Repair confirm dialog title,Repair balances?,إصلاح الأرصدة؟,Réparer les soldes ?
+healthPurgeConfirmTitle,Purge confirm dialog title,Purge deleted transactions?,حذف المعاملات المحذوفة نهائيًا؟,Purger les transactions supprimées ?
+householdNameSaved,SnackBar after renaming the household,Household name saved,تم حفظ اسم الأسرة,Nom du foyer enregistré
+baseCurrencySaved,SnackBar after changing base currency,Base currency changed to {code},تم تغيير العملة الأساسية إلى {code},Devise de base changée en {code}
+backupAutoOnSnack,SnackBar,Automatic backups on,النسخ الاحتياطي التلقائي مفعّل,Sauvegardes automatiques activées
+backupAutoOffSnack,SnackBar,Automatic backups off,النسخ الاحتياطي التلقائي متوقف,Sauvegardes automatiques désactivées
+backupSettingsSaved,SnackBar after changing backup frequency/retention,Backup settings saved,تم حفظ إعدادات النسخ الاحتياطي,Paramètres de sauvegarde enregistrés
+notifReminderOnSnack,SnackBar,Daily reminder on,التذكير اليومي مفعّل,Rappel quotidien activé
+notifReminderOffSnack,SnackBar,Daily reminder off,التذكير اليومي متوقف,Rappel quotidien désactivé
+notifReminderSaved,SnackBar after changing reminder time or message,Reminder updated,تم تحديث التذكير,Rappel mis à jour
+syncDisconnectedSnack,SnackBar,Sync disconnected,تم قطع اتصال المزامنة,Synchronisation déconnectée
+biometricOnSnack,SnackBar,Biometric lock on,القفل البيومتري مفعّل,Verrouillage biométrique activé
+biometricOffSnack,SnackBar,Biometric lock off,القفل البيومتري متوقف,Verrouillage biométrique désactivé
+wcStoppedNoWifi,Web Companion: server stopped itself because Wi-Fi was lost,Stopped: the phone left the Wi-Fi network. Reconnect to start again.,توقف: غادر الهاتف شبكة WiFi. أعد الاتصال للتشغيل مجدداً.,Arrêté : le téléphone a quitté le réseau Wi-Fi. Reconnectez-vous pour relancer.
+web_load_failed,Web Companion,Couldn't load this page,تعذّر تحميل هذه الصفحة,Impossible de charger cette page
+web_load_failed_sub,Web Companion,"Check that your phone is on the same Wi‑Fi with the Web Companion running, then try again.",تأكد أن هاتفك على شبكة Wi‑Fi نفسها وأن Web Companion قيد التشغيل، ثم حاول مجددًا.,"Vérifiez que votre téléphone est sur le même Wi‑Fi avec le Web Companion lancé, puis réessayez."
+web_filter_no_match,Web Companion,Nothing matches this filter,لا شيء يطابق هذا الفلتر,Aucun résultat pour ce filtre
+web_filter_no_match_sub,Web Companion,"Try another filter, or clear it to see everything.",جرّب فلترًا آخر، أو أزله لعرض كل شيء.,"Essayez un autre filtre, ou retirez-le pour tout afficher."
+web_sub_cancelled,Web Companion,Cancelled,ملغى,Annulé

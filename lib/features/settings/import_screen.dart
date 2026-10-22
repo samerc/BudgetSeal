@@ -18,6 +18,9 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/theme/design_tokens.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/icon_header_card.dart';
 
 /// Date cells: `yyyy-MM-dd` or `d/M/yyyy` style, optional time after.
 final importDateRe =
@@ -509,37 +512,17 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   // ── File Picker Card ─────────────────────────────────────────
 
   Widget _buildFilePickerCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(AppIcons.fileArrowUp, size: 24, color: AppColors.accent),
-              const SizedBox(width: 12),
-              Text(S.of(context).importFromBank,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            S.of(context).importCsvDesc,
-            style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _pickFile,
-            icon: const Icon(AppIcons.folderOpen, size: 18),
-            label: Text(S.of(context).importLoadCsv),
-          ),
-        ],
-      ),
+    return IconHeaderCard(
+      icon: AppIcons.fileArrowUp,
+      title: S.of(context).importFromBank,
+      description: S.of(context).importCsvDesc,
+      children: [
+        FilledButton.icon(
+          onPressed: _pickFile,
+          icon: const Icon(AppIcons.folderOpen, size: 18),
+          label: Text(S.of(context).importLoadCsv),
+        ),
+      ],
     );
   }
 
@@ -548,13 +531,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   Widget _buildColumnMapper() {
     final headers = _csvData!.first;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -628,10 +605,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
                         border: Border.all(
                           color: _columnRoles[i] != ColumnRole.skip
-                              ? AppColors.accent.withValues(alpha:0.4)
+                              ? AppColors.accent
                               : AppColors.bd(context),
                         ),
                       ),
@@ -645,11 +622,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                             color: AppColors.tp(context),
                           ),
                           dropdownColor: AppColors.sf(context),
-                          icon: Icon(
-                            AppIcons.caretDown,
-                            size: 18,
-                            color: AppColors.ts(context),
-                          ),
+                          icon: AppIcons.dropdown,
                           items: ColumnRole.values.map((role) {
                             // Disable roles already assigned to another column
                             // (except Skip, which can be reused).
@@ -725,13 +698,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -754,8 +721,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha:0.08),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.accentLight,
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
             child: Row(
               children: [
@@ -789,7 +756,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: AppColors.bd(context).withValues(alpha:0.5),
+                    color: AppColors.bd(context),
                   ),
                 ),
               ),

@@ -6,8 +6,10 @@ import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
-import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_icon_hero.dart';
+import 'redeem_dialog.dart';
 
 class UpgradeScreen extends ConsumerWidget {
   final String? featureName;
@@ -35,9 +37,6 @@ class UpgradeScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: const SizedBox.shrink(),
-        // Theme background: a transparent AppBar makes Flutter pick light
-        // status bar icons, unreadable on the paper surface.
-        elevation: 0,
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -52,45 +51,12 @@ class UpgradeScreen extends ConsumerWidget {
                     children: [
                       const Spacer(flex: 2),
 
-              // ── App icon ──
-              ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: Image.asset('assets/icon/app_icon.png',
-                    width: 84, height: 84),
-              ),
-              const SizedBox(height: Spacing.xl),
-
-              // ── Title ──
-              Text(
-                l.upgradeTitle,
-                style: TextStyle(
-                  fontSize: TypographyTokens.screenTitleSize,
-                  fontFamily: TypographyTokens.displayFamily,
-                  fontWeight: TypographyTokens.screenTitleWeight,
-                  color: AppColors.tp(context),
-                ),
-              ),
-              const SizedBox(height: Spacing.sm),
-
-              // ── Subtitle ──
-              Text(
-                l.upgradeSubtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: TypographyTokens.bodySize,
-                  color: AppColors.ts(context),
-                ),
-              ),
+              // ── App icon, title + subtitle (same hero as About) ──
+              AppIconHero(title: l.upgradeTitle, subtitle: l.upgradeSubtitle),
               const SizedBox(height: Spacing.xxl),
 
               // ── Feature list ──
-              Container(
-                padding: CardTokens.padding,
-                decoration: BoxDecoration(
-                  color: AppColors.sf(context),
-                  borderRadius: CardTokens.borderRadius,
-                  boxShadow: AppColors.cardShadow(context),
-                ),
+              AppCard(
                 child: Column(
                   children: [
                     for (int i = 0; i < features.length; i++) ...[
@@ -134,13 +100,7 @@ class UpgradeScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: Text(
-                    l.upgradeButton,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: Text(l.upgradeButton),
                 ),
               ),
               const SizedBox(height: Spacing.lg),
@@ -150,13 +110,14 @@ class UpgradeScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextButton(
-                    onPressed: () => _showRedeemDialog(context, ref),
+                    onPressed: () => showRedeemDialog(context, ref,
+                        onRedeemed: () {
+                      if (context.mounted) context.pop();
+                    }),
                     child: Text(
                       l.upgradeRedeemCode,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.captionSize,
-                        color: AppColors.accent,
-                      ),
+                      style: const TextStyle(
+                          fontSize: TypographyTokens.captionSize),
                     ),
                   ),
                   Text('·',
@@ -180,10 +141,8 @@ class UpgradeScreen extends ConsumerWidget {
                     },
                     child: Text(
                       l.upgradeRestorePurchase,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.captionSize,
-                        color: AppColors.accent,
-                      ),
+                      style: const TextStyle(
+                          fontSize: TypographyTokens.captionSize),
                     ),
                   ),
                 ],
@@ -218,64 +177,6 @@ class UpgradeScreen extends ConsumerWidget {
         Icon(AppIcons.check, size: 18, color: AppColors.healthy),
       ],
     );
-  }
-
-  static Future<void> _showRedeemDialog(
-      BuildContext context, WidgetRef ref) async {
-    final l = S.of(context);
-    final controller = TextEditingController();
-    String? errorText;
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (sbCtx, setDialogState) => AlertDialog(
-          title: Text(l.upgradeRedeemCode),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              hintText: l.upgradeRedeemHint,
-              errorText: errorText,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx),
-              child: Text(l.commonCancel),
-            ),
-            FilledButton(
-              style: DialogButtons.filled,
-              onPressed: () async {
-                final code = controller.text.trim();
-                if (code.isEmpty) return;
-                if (!isValidRedeemCode(code)) {
-                  setDialogState(
-                      () => errorText = l.upgradeRedeemInvalid);
-                  return;
-                }
-                await ref
-                    .read(hasPremiumProvider.notifier)
-                    .redeemCode(code);
-                if (!dialogCtx.mounted) return;
-                Navigator.pop(dialogCtx);
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l.upgradeRedeemSuccess),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                context.pop();
-              },
-              child: Text(l.upgradeRedeemButton),
-            ),
-          ],
-        ),
-      ),
-    );
-    disposeAfterRouteAnimation(controller);
   }
 }
 

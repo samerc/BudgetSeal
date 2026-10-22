@@ -16,6 +16,8 @@ import 'web_companion_auth.dart';
 import 'web_companion_service.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 
 class WebCompanionScreen extends ConsumerStatefulWidget {
   const WebCompanionScreen({super.key});
@@ -212,34 +214,22 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     var busy = false;
 
     final tr = S.of(context);
-    final pinSurface = AppColors.sf(context);
-    final pinTextPrimary = AppColors.tp(context);
-    final pinTextSecondary = AppColors.ts(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: pinSurface,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
+                  20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: TypographyTokens.cardTitleSize,
-                          fontWeight: FontWeight.w700,
-                          color: pinTextPrimary)),
-                  const SizedBox(height: 6),
-                  Text(subtitle,
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: pinTextSecondary)),
-                  const SizedBox(height: 20),
+                  SheetTitle(title,
+                      subtitle: subtitle,
+                      padding: const EdgeInsetsDirectional.only(bottom: 20)),
                   TextField(
                     controller: controller,
                     autofocus: true,
@@ -370,11 +360,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -420,17 +406,18 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             width: double.infinity,
             child: state.isStarting
                 ? const LinearProgressIndicator()
-                : FilledButton(
-                    onPressed: (!state.isRunning && !_hasWifi)
-                        ? null
-                        : () => _toggleServer(state),
-                    style: state.isRunning
-                        ? FilledButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error)
-                        : null,
-                    child: Text(state.isRunning ? tr.wcStopButton : tr.wcStartButton),
-                  ),
+                // Start is the call to action; Stop is the quieter outlined
+                // button (no error-red fill).
+                : state.isRunning
+                    ? OutlinedButton(
+                        onPressed: () => _toggleServer(state),
+                        child: Text(tr.wcStopButton),
+                      )
+                    : FilledButton(
+                        onPressed:
+                            !_hasWifi ? null : () => _toggleServer(state),
+                        child: Text(tr.wcStartButton),
+                      ),
           ),
         ],
       ),
@@ -441,11 +428,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     final url = state.url ?? '';
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -494,14 +477,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
           ),
           const SizedBox(height: 12),
           // QR code toggle
-          GestureDetector(
+          Tappable(
             onTap: () => setState(() => _showQr = !_showQr),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _showQr
-                      ? AppIcons.qrCode
-                      : AppIcons.qrCode,
+                  AppIcons.qrCode,
                   size: 18,
                   color: AppColors.accentText(context),
                 ),
@@ -521,9 +504,11 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
             Center(
               child: Container(
                 padding: const EdgeInsets.all(12),
+                // White in every theme on purpose: scanners need dark
+                // modules on a light quiet zone.
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: QrImageView(
                   data: url,
@@ -544,11 +529,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
     final live = _connected > 0;
     return Container(
       padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Row(
         children: [
           Stack(
@@ -609,11 +590,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   Widget _buildPinSection() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -850,11 +827,7 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
   Widget _buildInfoCard() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

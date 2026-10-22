@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
 import '../utils/format_number.dart';
 import '../../shared/theme/app_icons.dart';
+import 'tappable.dart';
 
 /// A read-only amount field that opens a calculator bottom sheet when tapped.
 ///
@@ -27,8 +28,9 @@ class CalculatorAmountField extends StatelessWidget {
   /// Text styling for the displayed amount.
   final TextStyle? style;
 
-  /// Hint text shown when value is 0.
-  final String hintText;
+  /// Hint text shown when value is 0 (default: "0.00" with the user's
+  /// decimal separator).
+  final String? hintText;
 
   /// Font size (used when [style] is null).
   final double fontSize;
@@ -40,7 +42,7 @@ class CalculatorAmountField extends StatelessWidget {
     this.label,
     this.currency,
     this.style,
-    this.hintText = '0.00',
+    this.hintText,
     this.fontSize = 32,
   });
 
@@ -61,7 +63,8 @@ class CalculatorAmountField extends StatelessWidget {
           color: AppColors.tp(context),
         );
 
-    return GestureDetector(
+    return Tappable(
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
       onTap: () => _openCalculatorSheet(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +86,9 @@ class CalculatorAmountField extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  displayText.isEmpty ? hintText : displayText,
+                  displayText.isEmpty
+                      ? (hintText ?? '0${decimalSeparatorChar}00')
+                      : displayText,
                   style: displayText.isEmpty
                       ? effectiveStyle.copyWith(
                           fontWeight: FontWeight.w300,
@@ -371,7 +376,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                         color: _prefilled
                             ? AppColors.accentLight
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -457,8 +462,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   }
 
   Widget _calcRow(List<String> keys) {
-    final isBlack = Theme.of(context).scaffoldBackgroundColor ==
-        const Color(0xFF000000);
+    final isBlack = AppColors.bg(context) == AppColors.blackBackground;
     return Row(
       children: [
         for (final key in keys)
@@ -466,12 +470,13 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
             child: Container(
               // Black theme: hairline seams so keys don't merge into one slab.
               margin: isBlack ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
-              child: Material(
-                color: '+-×÷'.contains(key)
-                    ? AppColors.pastel(context, AppColors.accent,
-                        light: 0.75, dark: 0.7)
-                    : AppColors.sfv(context),
-                child: InkWell(
+              color: '+-×÷'.contains(key)
+                  ? AppColors.pastel(context, AppColors.accent,
+                      light: 0.75, dark: 0.7)
+                  : AppColors.sfv(context),
+              // The key handlers give their own haptics (selection click,
+              // medium on clear), so Tappable's is off.
+              child: Tappable(
                   onTap: () {
                     if (key == '⌫') {
                       _calcBackspace();
@@ -499,7 +504,6 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                     ),
                   ),
                 ),
-              ),
             ),
           ),
       ],

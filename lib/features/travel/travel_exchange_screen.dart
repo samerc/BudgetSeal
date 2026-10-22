@@ -17,6 +17,9 @@ import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/currency_picker_field.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../accounts/account_type.dart';
 
 class TravelExchangeScreen extends ConsumerStatefulWidget {
   const TravelExchangeScreen({super.key});
@@ -67,13 +70,11 @@ class _TravelExchangeScreenState
           children: [
             // Info banner
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: CardTokens.padding,
               decoration: BoxDecoration(
                 color: AppColors.pastel(context, AppColors.accent,
                     light: 0.88, dark: 0.8),
                 borderRadius: BorderRadius.circular(CardTokens.radius),
-                border: Border.all(
-                    color: AppColors.accent.withValues(alpha: 0.15)),
               ),
               child: Row(
                 children: [
@@ -110,21 +111,21 @@ class _TravelExchangeScreenState
                     Text(S.of(context).travelSelectAccount,
                         style: TextStyle(color: AppColors.th(context))),
                   ]),
-                  icon: Icon(AppIcons.caretDown,
-                      color: AppColors.th(context)),
+                  icon: AppIcons.dropdown,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 4),
                   items: activeAccounts.map((a) {
                     return DropdownMenuItem(
                       value: a.id,
                       child: Row(children: [
-                        Icon(_accountIcon(a.type),
+                        Icon(accountTypeIcon(a.type),
                             size: 16, color: AppColors.ts(context)),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(a.name,
                               style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500)),
+                                  fontSize: TypographyTokens.bodySize,
+                                  fontWeight: FontWeight.w500)),
                         ),
                         Text(a.currency,
                             style: TextStyle(
@@ -226,8 +227,7 @@ class _TravelExchangeScreenState
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.bd(context)),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -251,7 +251,7 @@ class _TravelExchangeScreenState
             if (openWallet != null) ...[
               const SizedBox(height: 12),
               Row(children: [
-                Icon(AppIcons.airplane, size: 14, color: AppColors.accent),
+                Icon(AppIcons.airplane, size: 14, color: AppColors.accentText(context)),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -274,12 +274,9 @@ class _TravelExchangeScreenState
                       child: CircularProgressIndicator(
                           color: AppColors.onAccent, strokeWidth: 2))
                   : const Icon(AppIcons.airplaneTakeoff, size: 18),
-              label: Text(
-                  openWallet != null
-                      ? S.of(context).travelExchangeTopUp
-                      : S.of(context).travelExchangeButton,
-                  style:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              label: Text(openWallet != null
+                  ? S.of(context).travelExchangeTopUp
+                  : S.of(context).travelExchangeButton),
             ),
           ],
         ),
@@ -394,26 +391,16 @@ class _TravelExchangeScreenState
 
   Future<bool?> _confirmOverBalance(Account from, double available) {
     final tr = S.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.travelOverBalanceTitle),
-        content: Text(tr.travelOverBalanceMsg(
-          from.name,
-          formatAmount(available, currency: from.currency),
-          formatAmount(available - _sourceAmount, currency: from.currency),
-        )),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr.travelExchangeAnyway),
-          ),
-        ],
+    return showConfirmDialog(
+      context,
+      title: tr.travelOverBalanceTitle,
+      message: tr.travelOverBalanceMsg(
+        from.name,
+        formatAmount(available, currency: from.currency),
+        formatAmount(available - _sourceAmount, currency: from.currency),
       ),
+      confirmLabel: tr.travelExchangeAnyway,
+      destructive: false,
     );
   }
 
@@ -424,7 +411,6 @@ class _TravelExchangeScreenState
     // Capture theme colors before dialog to avoid using outer context in builder
     final tsColor = AppColors.ts(context);
     final sfvColor = AppColors.sfv(context);
-    final bdColor = AppColors.bd(context);
 
     final tr = S.of(context);
     return showDialog<bool>(
@@ -441,11 +427,10 @@ class _TravelExchangeScreenState
             ),
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(Spacing.md),
               decoration: BoxDecoration(
                 color: sfvColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: bdColor),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
               child: Row(
                 children: [
@@ -461,7 +446,8 @@ class _TravelExchangeScreenState
                         Text(
                           S.of(context).travelBalanceLabel(formatAmount(balance, currency: existing.currency)),
                           style: TextStyle(
-                              fontSize: 12, color: tsColor),
+                              fontSize: TypographyTokens.captionSize,
+                              color: tsColor),
                         ),
                       ],
                     ),
@@ -476,7 +462,8 @@ class _TravelExchangeScreenState
             onPressed: () => Navigator.pop(ctx),
             child: Text(S.of(context).commonCancel),
           ),
-          TextButton(
+          OutlinedButton(
+            style: DialogButtons.outlined,
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(S.of(context).travelCreateNew),
           ),
@@ -490,12 +477,6 @@ class _TravelExchangeScreenState
     );
   }
 
-  IconData _accountIcon(String type) => switch (type) {
-        'bank' => AppIcons.bank,
-        'credit' => AppIcons.creditCard,
-        'wallet' => AppIcons.wallet,
-        _ => AppIcons.money,
-      };
 }
 
 class _SectionLabel extends StatelessWidget {
@@ -514,13 +495,6 @@ class _FormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: child,
-    );
+    return AppCard(padding: EdgeInsets.zero, child: child);
   }
 }

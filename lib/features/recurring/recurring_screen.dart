@@ -16,14 +16,21 @@ import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/error_retry.dart';
+import '../../shared/widgets/large_title_header.dart';
+import '../../shared/widgets/sheet_title.dart';
+import '../../shared/widgets/tappable.dart';
 import '../transactions/widgets/category_sheet.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import 'recurring_format.dart';
 
 class RecurringScreen extends ConsumerStatefulWidget {
   const RecurringScreen({super.key});
@@ -35,6 +42,7 @@ class RecurringScreen extends ConsumerStatefulWidget {
 class _RecurringScreenState extends ConsumerState<RecurringScreen> {
   List<RecurringTransaction> _items = [];
   bool _loading = true;
+  Object? _error;
   String? _typeFilter; // null = all, 'income', 'expense'
 
   @override
@@ -46,13 +54,27 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
   Future<void> _load() async {
     try {
       final householdId = ref.read(currentHouseholdIdProvider);
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
       final engine = ref.read(recurringEngineProvider);
       final items = await engine.getAll(householdId, excludeSubscriptions: true);
-      if (mounted) setState(() { _items = items; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _items = items;
+          _loading = false;
+          _error = null;
+        });
+      }
     } catch (e) {
       debugPrint('[Recurring] Error loading: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e;
+        });
+      }
     }
   }
 
@@ -61,245 +83,192 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     return _items.where((r) => r.type == _typeFilter).toList();
   }
 
-  String _frequencyLabel(String freq, int interval) {
+  void _snack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  Future<void> _toggle(RecurringTransaction item, bool enabled) async {
     final tr = S.of(context);
-    if (interval == 1) {
-      return switch (freq) {
-        'daily' => tr.freqDaily,
-        'weekly' => tr.freqWeekly,
-        'monthly' => tr.freqMonthly,
-        'yearly' => tr.freqYearly,
-        _ => freq,
-      };
+    try {
+      await ref.read(recurringEngineProvider).toggleEnabled(item.id, enabled);
+      if (!mounted) return;
+      _snack(enabled ? tr.recurringResumedSnack : tr.recurringPausedSnack);
+    } catch (e) {
+      debugPrint('[Recurring] Toggle failed: $e');
+      if (mounted) _snack(tr.recurringUpdateFailed);
     }
-    return switch (freq) {
-      'daily' => tr.freqEveryNDays(interval),
-      'weekly' => tr.freqEveryNWeeks(interval),
-      'monthly' => tr.freqEveryNMonths(interval),
-      'yearly' => tr.freqEveryNYears(interval),
-      _ => 'Every $interval $freq',
-    };
+    _load();
+  }
+
+  Future<void> _delete(RecurringTransaction item) async {
+    final tr = S.of(context);
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.recurringDeleteTitle,
+      message: tr.recurringDeleteBody,
+      confirmLabel: tr.commonDelete,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await ref.read(recurringEngineProvider).delete(item.id);
+      if (mounted) _snack(tr.recurringDeleted);
+    } catch (e) {
+      debugPrint('[Recurring] Delete failed: $e');
+      if (mounted) _snack(tr.recurringDeleteFailed);
+    }
+    _load();
   }
 
   @override
   Widget build(BuildContext context) {
+    final tr = S.of(context);
     final filtered = _filtered;
     final activeCount = _items.where((r) => r.enabled).length;
     final pausedCount = _items.length - activeCount;
+    final txColors = ref.watch(txColorsProvider);
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        tooltip: S.of(context).recurringAddTooltip,
+        tooltip: tr.recurringAddTooltip,
         onPressed: () {
           if (!checkFreeLimit(context, ref, _items.length, FreeLimits.maxRecurring, 'recurring')) return;
           _showAddSheet();
         },
         child: const Icon(AppIcons.plus),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () async => _load(),
-          child: CustomScrollView(
-            slivers: [
-              // ── Header ──
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child: CustomScrollView(
+          slivers: [
+            LargeTitleHeader(
+              title: tr.recurringTitle,
+              back: true,
+              actions: [
+                IconButton(
+                  tooltip: tr.calendarTitle,
+                  icon: Icon(AppIcons.calendar, color: AppColors.ts(context)),
+                  onPressed: () => context.push('/calendar'),
+                ),
+              ],
+            ),
+
+            // ── Summary strip ──
+            if (_items.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(AppIcons.arrowLeft),
-                        onPressed: () => Navigator.pop(context),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: SummaryStrip(chips: [
+                    SummaryChip(
+                      icon: AppIcons.repeat,
+                      label: '${_items.length}',
+                      subtitle: tr.recurringSummaryTotal,
+                      color: AppColors.accent,
+                    ),
+                    SummaryChip(
+                      icon: AppIcons.play,
+                      label: '$activeCount',
+                      subtitle: tr.recurringSummaryActive,
+                      color: AppColors.healthy,
+                    ),
+                    if (pausedCount > 0)
+                      SummaryChip(
+                        icon: AppIcons.pause,
+                        label: '$pausedCount',
+                        subtitle: tr.recurringSummaryPaused,
+                        color: AppColors.ts(context),
                       ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            S.of(context).recurringTitle,
-                            style: TextStyle(
-                              fontSize: TypographyTokens.screenTitleSize,
-                              fontFamily: TypographyTokens.displayFamily,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.tp(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: S.of(context).calendarTitle,
-                        icon: Icon(AppIcons.calendar,
-                            color: AppColors.ts(context)),
-                        onPressed: () =>
-                            context.push('/calendar'),
-                      ),
-                    ],
-                  ),
+                  ]),
                 ),
               ),
 
-              // ── Summary banner ──
-              if (_items.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.sfv(context),
-                        borderRadius: BorderRadius.circular(CardTokens.radius),
-                      ),
-                      child: Row(
-                        children: [
-                          _SummaryChip(
-                            icon: AppIcons.repeat,
-                            label: '${_items.length}',
-                            subtitle: S.of(context).recurringSummaryTotal,
-                            color: AppColors.accent,
-                          ),
-                          const SizedBox(width: 16),
-                          _SummaryChip(
-                            icon: AppIcons.play,
-                            label: '$activeCount',
-                            subtitle: S.of(context).recurringSummaryActive,
-                            color: AppColors.healthy,
-                          ),
-                          if (pausedCount > 0) ...[
-                            const SizedBox(width: 16),
-                            _SummaryChip(
-                              icon: AppIcons.pause,
-                              label: '$pausedCount',
-                              subtitle: S.of(context).recurringSummaryPaused,
-                              color: AppColors.caution,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // ── Type filter chips ──
+            // ── Type filter chips ──
+            if (_items.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      _TypeChip(
-                        label: S.of(context).typeAll,
+                      AppChip(
+                        label: tr.typeAll,
                         selected: _typeFilter == null,
-                        onTap: () =>
-                            setState(() => _typeFilter = null),
+                        onTap: () => setState(() => _typeFilter = null),
                       ),
-                      const SizedBox(width: 8),
-                      _TypeChip(
-                        label: S.of(context).typeExpense,
+                      AppChip(
+                        label: tr.typeExpense,
                         selected: _typeFilter == 'expense',
-                        color: ref.watch(txColorsProvider).expense,
-                        onTap: () =>
-                            setState(() => _typeFilter = 'expense'),
+                        color: txColors.expense,
+                        onTap: () => setState(() => _typeFilter = 'expense'),
                       ),
-                      const SizedBox(width: 8),
-                      _TypeChip(
-                        label: S.of(context).typeIncome,
+                      AppChip(
+                        label: tr.typeIncome,
                         selected: _typeFilter == 'income',
-                        color: ref.watch(txColorsProvider).income,
-                        onTap: () =>
-                            setState(() => _typeFilter = 'income'),
+                        color: txColors.income,
+                        onTap: () => setState(() => _typeFilter = 'income'),
                       ),
                     ],
                   ),
                 ),
               ),
 
-              // ── List ──
-              if (_loading)
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: SkeletonList(),
-                  ),
-                )
-              else if (_items.isEmpty)
-                SliverFillRemaining(
-                  child: EmptyState(
-                    icon: AppIcons.repeat,
-                    title: S.of(context).recurringEmptyTitle,
-                    subtitle: S.of(context).recurringEmptySubtitle,
-                  ),
-                )
-              else if (filtered.isEmpty)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      S.of(context).recurringFilteredEmpty(_typeFilter ?? ''),
-                      style: TextStyle(color: AppColors.ts(context)),
+            // ── List ──
+            if (_loading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: SkeletonList(),
+                ),
+              )
+            else if (_error != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorRetry(
+                  message: tr.recurringLoadFailed,
+                  details: '$_error',
+                  onRetry: () {
+                    setState(() => _loading = true);
+                    _load();
+                  },
+                ),
+              )
+            else if (_items.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: AppIcons.repeat,
+                  title: tr.recurringEmptyTitle,
+                  subtitle: tr.recurringEmptySubtitle,
+                ),
+              )
+            else if (filtered.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: AppIcons.repeat,
+                  title: _typeFilter == 'income'
+                      ? tr.recurringNoIncome
+                      : tr.recurringNoExpenses,
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => _RecurringTile(
+                      item: filtered[i],
+                      onToggle: (enabled) => _toggle(filtered[i], enabled),
+                      onDelete: () => _delete(filtered[i]),
+                      onEdit: () => _showEditSheet(filtered[i]),
                     ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) => _RecurringTile(
-                        item: filtered[i],
-                        frequencyLabel: _frequencyLabel(
-                            filtered[i].frequency, filtered[i].interval),
-                        onToggle: (enabled) async {
-                          final engine = ref.read(recurringEngineProvider);
-                          await engine.toggleEnabled(filtered[i].id, enabled);
-                          _load();
-                        },
-                        onDelete: () async {
-                          final tr = S.of(context);
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (dialogCtx) => AlertDialog(
-                              title:
-                                  Text(tr.recurringDeleteTitle),
-                              content: Text(
-                                  tr.recurringDeleteBody),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(dialogCtx, false),
-                                  child: Text(tr.commonCancel),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(dialogCtx, true),
-                                  style: TextButton.styleFrom(
-                                      foregroundColor: AppColors.overspent),
-                                  child: Text(tr.commonDelete),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmed != true || !mounted) return;
-                          final engine = ref.read(recurringEngineProvider);
-                          await engine.delete(filtered[i].id);
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text(S.of(context).recurringDeleted),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                          _load();
-                        },
-                        onEdit: () => _showEditSheet(filtered[i]),
-                      ),
-                      childCount: filtered.length,
-                    ),
+                    childCount: filtered.length,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -324,94 +293,53 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => EditRecurringSheet(item: item),
+      builder: (_) => EditRecurringSheet(
+        item: item,
+        onDelete: () => _delete(item),
+      ),
     );
     if (result == true) _load();
   }
 }
 
-class _SummaryChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String subtitle;
+/// Status line under a recurring/subscription row's amount: colored dot +
+/// label (Active / Paused / Ending soon / Cancelled).
+class RecurringStatusDot extends StatelessWidget {
   final Color color;
-  const _SummaryChip({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-  });
+  final String label;
+  const RecurringStatusDot({super.key, required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(label,
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.tp(context))),
-        const SizedBox(width: 4),
-        Text(subtitle,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-      ],
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color? color;
-  final VoidCallback onTap;
-  const _TypeChip({
-    required this.label,
-    required this.selected,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chipColor = color ?? AppColors.accent;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, chipColor, light: 0.85, dark: 0.75)
-              : AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-          border: selected
-              ? Border.all(color: chipColor.withValues(alpha: 0.4))
-              : null,
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        child: Text(
+        const SizedBox(width: 4),
+        Text(
           label,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? chipColor : AppColors.ts(context),
+            fontSize: TypographyTokens.overlineSize,
+            color: AppColors.ts(context),
           ),
         ),
-      ),
+      ],
     );
   }
 }
 
 class _RecurringTile extends ConsumerWidget {
   final RecurringTransaction item;
-  final String frequencyLabel;
   final ValueChanged<bool> onToggle;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
 
   const _RecurringTile({
     required this.item,
-    required this.frequencyLabel,
     required this.onToggle,
     required this.onDelete,
     required this.onEdit,
@@ -419,39 +347,34 @@ class _RecurringTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tr = S.of(context);
     final color = ref.watch(txColorsProvider).forType(item.type);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(CardTokens.radius),
-        boxShadow: AppColors.cardShadow(context),
-      ),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
       child: Material(
         // Transparent Material so the ripple paints above the card fill.
         type: MaterialType.transparency,
         child: ListTile(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(CardTokens.radius)),
+          shape: RoundedRectangleBorder(borderRadius: CardTokens.borderRadius),
           onTap: onEdit,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           leading: Container(
-            width: 44,
-            height: 44,
+            width: CategoryIconTokens.listSize,
+            height: CategoryIconTokens.listSize,
             decoration: BoxDecoration(
-              color: AppColors.pastel(context, color,
-                  light: 0.85, dark: 0.78),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
+              shape: BoxShape.circle,
             ),
             child: Icon(AppIcons.repeat, color: color, size: 20),
           ),
           title: Text(
             item.title.isNotEmpty ? item.title : item.note,
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+              fontWeight: TypographyTokens.txTitleWeight,
+              fontSize: TypographyTokens.txTitleSize,
               color: item.enabled
                   ? AppColors.tp(context)
                   : AppColors.th(context),
@@ -460,9 +383,10 @@ class _RecurringTile extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            '${S.of(context).recurringTileNext(formatDate(item.nextDueDate))} · $frequencyLabel',
+            recurringNextLine(
+                tr, item.nextDueDate, item.frequency, item.interval),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: TypographyTokens.txSubtitleSize,
               color: AppColors.ts(context),
             ),
           ),
@@ -477,34 +401,19 @@ class _RecurringTile extends ConsumerWidget {
                     formatSignedAmount(item.amount,
                         currency: item.currency, type: item.type),
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontWeight: TypographyTokens.amountRegularWeight,
+                      fontSize: TypographyTokens.amountRegularSize,
                       color: item.enabled ? color : AppColors.th(context),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: item.enabled
-                              ? AppColors.healthy
-                              : AppColors.th(context),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        item.enabled ? S.of(context).recurringStatusActive : S.of(context).recurringStatusPaused,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.ts(context),
-                        ),
-                      ),
-                    ],
+                  RecurringStatusDot(
+                    color: item.enabled
+                        ? AppColors.healthy
+                        : AppColors.th(context),
+                    label: item.enabled
+                        ? tr.recurringStatusActive
+                        : tr.recurringStatusPaused,
                   ),
                 ],
               ),
@@ -515,7 +424,7 @@ class _RecurringTile extends ConsumerWidget {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   iconSize: 20,
-                  tooltip: item.enabled ? S.of(context).recurringPauseTooltip : S.of(context).recurringResumeTooltip,
+                  tooltip: item.enabled ? tr.recurringPauseTooltip : tr.recurringResumeTooltip,
                   icon: Icon(
                     item.enabled
                         ? AppIcons.pauseCircle
@@ -584,10 +493,9 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 12),
-            Text(widget.forceSubscription ? S.of(context).recurringNewSubTitle : S.of(context).recurringNewTitle,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 16),
+            SheetTitle(
+                widget.forceSubscription ? S.of(context).recurringNewSubTitle : S.of(context).recurringNewTitle,
+                padding: const EdgeInsetsDirectional.only(bottom: 12)),
             TextFormField(
               controller: _titleCtrl,
               autofocus: true,
@@ -715,8 +623,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
-                  child: Text(S.of(context).recurringFormClearEndDate,
-                      style: const TextStyle(fontSize: 12)),
+                  child: Text(S.of(context).recurringFormClearEndDate),
                 ),
               ),
             ],
@@ -742,9 +649,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                       width: 20,
                       child: CircularProgressIndicator(
                           color: AppColors.onAccent, strokeWidth: 2))
-                  : Text(S.of(context).recurringFormCreate,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  : Text(S.of(context).recurringFormCreate),
             ),
           ],
         ),
@@ -808,6 +713,14 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
         Navigator.pop(context, true);
         if (goToSubs) router.push('/subscriptions');
       }
+    } catch (e) {
+      debugPrint('[Recurring] Create failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).recurringSaveFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -820,7 +733,11 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
 
 class EditRecurringSheet extends ConsumerStatefulWidget {
   final RecurringTransaction item;
-  const EditRecurringSheet({super.key, required this.item});
+
+  /// Shown as a Delete button under Save; the sheet closes first, then the
+  /// caller confirms and deletes.
+  final VoidCallback? onDelete;
+  const EditRecurringSheet({super.key, required this.item, this.onDelete});
 
   @override
   ConsumerState<EditRecurringSheet> createState() =>
@@ -879,10 +796,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 12),
-            Text(S.of(context).recurringEditTitle,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 16),
+            SheetTitle(S.of(context).recurringEditTitle,
+                padding: const EdgeInsetsDirectional.only(bottom: 12)),
             TextFormField(
               controller: _titleCtrl,
               autofocus: false,
@@ -983,8 +898,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () => setState(() => _endDate = null),
-                  child: Text(S.of(context).recurringFormClearEndDate,
-                      style: const TextStyle(fontSize: 12)),
+                  child: Text(S.of(context).recurringFormClearEndDate),
                 ),
               ),
             ],
@@ -1005,9 +919,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(S.of(context).commonCancel,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
+                    child: Text(S.of(context).commonCancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1020,13 +932,26 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                             width: 20,
                             child: CircularProgressIndicator(
                                 color: AppColors.onAccent, strokeWidth: 2))
-                        : Text(S.of(context).commonSave,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600)),
+                        : Text(S.of(context).commonSave),
                   ),
                 ),
               ],
             ),
+            if (widget.onDelete != null) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _saving
+                    ? null
+                    : () {
+                        Navigator.pop(context, false);
+                        widget.onDelete!();
+                      },
+                icon: const Icon(AppIcons.trash, size: 18),
+                label: Text(S.of(context).commonDelete),
+                style: TextButton.styleFrom(
+                    foregroundColor: AppColors.overspent),
+              ),
+            ],
           ],
         ),
         ),
@@ -1086,6 +1011,14 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         );
         Navigator.pop(context, true);
       }
+    } catch (e) {
+      debugPrint('[Recurring] Update failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).recurringSaveFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -1116,8 +1049,8 @@ class _RecurringCategoryField extends ConsumerWidget {
     final allCats = ref.watch(categoriesProvider).value ?? [];
     final selected = allCats.where((c) => c.id == categoryId).firstOrNull;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+    return Tappable(
+      borderRadius: BorderRadius.circular(RadiusTokens.input),
       onTap: () => _open(context, ref, allCats),
       child: InputDecorator(
         decoration: InputDecoration(

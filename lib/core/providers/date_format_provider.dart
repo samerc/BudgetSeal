@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/s_lookup.dart';
+import '../../shared/utils/calendar_days.dart';
 
 const _key = 'date_format';
 
@@ -66,7 +67,7 @@ String formatDateSmart(DateTime date, [String? pattern]) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final d = DateTime(date.year, date.month, date.day);
-  final diff = today.difference(d).inDays;
+  final diff = calendarDaysBetween(d, today);
 
   final formatted = DateFormat(p).format(date);
   if (diff == 0) return '${currentS().commonToday}, $formatted';

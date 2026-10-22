@@ -21,7 +21,13 @@ import '../../core/providers/household_provider.dart';
 import '../../core/services/auto_backup_service.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../core/providers/date_format_provider.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/confirm_dialog.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/theme/app_icons.dart';
 
 class HealthCheckScreen extends ConsumerStatefulWidget {
@@ -33,6 +39,7 @@ class HealthCheckScreen extends ConsumerStatefulWidget {
 
 class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   bool _running = false;
+  bool _failed = false;
   _HealthReport? _report;
 
   @override
@@ -42,7 +49,10 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   }
 
   Future<void> _runCheck() async {
-    setState(() => _running = true);
+    setState(() {
+      _running = true;
+      _failed = false;
+    });
     try {
       final db = ref.read(databaseProvider);
       final householdId = ref.read(currentHouseholdIdProvider);
@@ -54,7 +64,12 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       if (mounted) setState(() { _report = report; _running = false; });
     } catch (e) {
       debugPrint('[HealthCheck] Error: $e');
-      if (mounted) setState(() => _running = false);
+      if (mounted) {
+        setState(() {
+          _running = false;
+          _failed = true;
+        });
+      }
     }
   }
 
@@ -182,23 +197,12 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
   Future<void> _repair() async {
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.healthRepairTitle),
-        content: Text(tr.healthRepairMsg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          FilledButton(
-            style: DialogButtons.filled,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr.healthRepairDone),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.healthRepairConfirmTitle,
+      message: tr.healthRepairMsg,
+      confirmLabel: tr.healthRepairDone,
+      destructive: false,
     );
 
     if (confirmed != true || !mounted) return;
@@ -247,7 +251,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             entryType: 'adjustment',
             amount: check.unallocated, // negative value corrects the overshoot
             currency: check.currency,
-            note: Value(S.of(context).healthAutoAdjustment),
+            note: Value(tr.healthAutoAdjustment),
             deviceId: 'health-check',
           ));
           adjustments++;
@@ -336,28 +340,14 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     if (report == null || report.softDeletedCount == 0) return;
 
     final tr = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.healthPurgeTitle),
-        content: Text(
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.healthPurgeConfirmTitle,
+      message:
           tr.healthPurgeContent(report.softDeletedCount, tr.healthPurgeSuffix),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr.commonCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-                backgroundColor: AppColors.overspent),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr.healthPurgeButton),
-          ),
-        ],
-      ),
+      confirmLabel: tr.healthPurgeButton,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final db = ref.read(databaseProvider);
     final householdId = ref.read(currentHouseholdIdProvider);
@@ -436,12 +426,17 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
         ],
       ),
       body: _running
-          ? const Center(child: CircularProgressIndicator())
-          : _report == null
-              ? Center(
-                  child: Text(S.of(context).commonNoData,
-                      style: TextStyle(color: AppColors.ts(context))))
-              : _buildReport(context),
+          ? const SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(top: 8),
+              child: SkeletonList())
+          : _failed
+              ? ErrorRetry(onRetry: _runCheck)
+              : _report == null
+                  ? EmptyState(
+                      icon: AppIcons.heartbeat,
+                      title: S.of(context).commonNoData)
+                  : _buildReport(context),
     );
   }
 
@@ -455,29 +450,29 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       children: [
         // ── Overall status card ──
         _statusCard(context, allHealthy, report),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.sectionGap),
 
         // ── Balance invariant per currency ──
         _sectionHeader(context, S.of(context).healthBalanceInvariant),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.headerToCard),
         for (final check in report.checks.values) _invariantTile(context, check),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.sectionGap),
 
         // ── Accounts ──
         _sectionHeader(context, S.of(context).healthAccountBalances),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.headerToCard),
         _accountsCard(context, report.accounts),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.sectionGap),
 
         // ── Allocations ──
         _sectionHeader(context, S.of(context).healthEnvelopeBalances),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.headerToCard),
         _allocationsCard(context, report.allocations),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.sectionGap),
 
         // ── Data quality ──
         _sectionHeader(context, S.of(context).healthDataQuality),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.headerToCard),
         _dataCard(context, report),
         const SizedBox(height: 24),
 
@@ -487,9 +482,6 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             onPressed: _repair,
             icon: const Icon(AppIcons.wrench),
             label: Text(S.of(context).healthRepairButton),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.caution,
-            ),
           ),
         if (!allHealthy) const SizedBox(height: 12),
         if (report.softDeletedCount > 0)
@@ -547,7 +539,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
               _statBadge(
                 S.of(context).healthBackupStat,
                 report.lastBackup != null
-                    ? _formatDate(report.lastBackup!)
+                    ? formatDate(report.lastBackup!)
                     : S.of(context).healthNever,
               ),
             ],
@@ -576,18 +568,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       SectionHeader(title);
 
   Widget _invariantTile(BuildContext context, _CurrencyCheck check) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: check.healthy
-              ? AppColors.healthy.withValues(alpha: 0.3)
-              : AppColors.overspent.withValues(alpha: 0.3),
-        ),
-      ),
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Row(
         children: [
           Icon(
@@ -611,7 +593,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                       formatNumber(check.accountTotal),
                       formatNumber(check.allocationTotal)),
                   style: TextStyle(
-                      fontSize: 11, color: AppColors.ts(context)),
+                      fontSize: TypographyTokens.captionSize,
+                      color: AppColors.ts(context)),
                 ),
               ],
             ),
@@ -631,13 +614,11 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
   Widget _accountsCard(BuildContext context, List<_AccountInfo> accounts) {
     if (accounts.isEmpty) {
-      return _emptyCard(context, S.of(context).healthNoAccounts);
+      return EmptyState(
+          icon: AppIcons.creditCard, title: S.of(context).healthNoAccounts);
     }
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (var i = 0; i < accounts.length; i++) ...[
@@ -675,13 +656,11 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   Widget _allocationsCard(
       BuildContext context, List<_AllocationInfo> allocations) {
     if (allocations.isEmpty) {
-      return _emptyCard(context, S.of(context).healthNoEnvelopes);
+      return EmptyState(
+          icon: AppIcons.wallet, title: S.of(context).healthNoEnvelopes);
     }
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (var i = 0; i < allocations.length; i++) ...[
@@ -729,11 +708,8 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
   }
 
   Widget _dataCard(BuildContext context, _HealthReport report) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           _dataRow(
@@ -779,7 +755,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
             icon: AppIcons.cloudArrowUp,
             label: S.of(context).healthLastBackup,
             value: report.lastBackup != null
-                ? _formatDateTime(report.lastBackup!)
+                ? formatDateTime(report.lastBackup!)
                 : S.of(context).healthNever,
             valueColor:
                 report.lastBackup == null ? AppColors.caution : null,
@@ -818,34 +794,6 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     );
   }
 
-  Widget _emptyCard(BuildContext context, String message) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(message,
-            style: TextStyle(color: AppColors.th(context), fontSize: 13)),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.month}/${dt.day}';
-  }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:'
-        '${dt.minute.toString().padLeft(2, '0')}';
-  }
 }
 
 // ─── Data classes ──────────────────────────────────────────────────────────

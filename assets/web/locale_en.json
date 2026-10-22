@@ -453,5 +453,10 @@
   "web_overspent_title": "Overspent envelopes",
   "web_env_over_by": "Over by {amount}",
   "web_bills_week": "Bills due this week",
-  "web_n_accounts": "{n} accounts"
+  "web_n_accounts": "{n} accounts",
+  "web_load_failed": "Couldn't load this page",
+  "web_load_failed_sub": "Check that your phone is on the same Wi‑Fi with the Web Companion running, then try again.",
+  "web_filter_no_match": "Nothing matches this filter",
+  "web_filter_no_match_sub": "Try another filter, or clear it to see everything.",
+  "web_sub_cancelled": "Cancelled"
 }
