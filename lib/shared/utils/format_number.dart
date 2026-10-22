@@ -167,16 +167,17 @@ String _wrapNegative(String inner, bool isNeg) {
   };
 }
 
-/// Zero-decimal currencies: ISO 4217's, plus LBP (its piastres are long
-/// gone — prices are whole thousands).
+/// Zero-decimal currencies: ISO 4217's, plus LBP, SYP, IRR and IQD (their
+/// minor units are long gone — prices are whole thousands).
 const _zeroDecimalCurrencies = <String>{
-  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'LBP',
+  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW',
   'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+  'LBP', 'SYP', 'IRR', 'IQD',
 };
 
 /// Known three-decimal currencies (ISO 4217).
 const _threeDecimalCurrencies = <String>{
-  'BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND',
+  'BHD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND',
 };
 
 /// Resolve the number of decimal places for a currency.

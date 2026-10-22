@@ -1043,7 +1043,7 @@ When exchanging to a currency that has an archived travel wallet, a dialog asks:
 
 `accounts.decimalPlaces` (nullable int) — overrides the default decimal display for a currency.
 
-- **Auto-detect**: `currencyDecimals()` in `format_number.dart` returns ISO 4217 defaults (0 for JPY/KRW, 3 for BHD/KWD, 2 for everything else) — plus **LBP = 0** (user decision Oct 2026: nobody uses piastres; mirrored in `ZERO_DEC` in app.js)
+- **Auto-detect**: `currencyDecimals()` in `format_number.dart` returns ISO 4217 defaults (0 for JPY/KRW, 3 for BHD/KWD, 2 for everything else) — plus **LBP, SYP, IRR, IQD = 0** (user decision Oct 2026: their minor units are unused; mirrored in `ZERO_DEC` in app.js)
 - **Manual override**: Account detail form has a "Decimal Places" dropdown (Auto / 0 / 1 / 2 / 3)
 - `formatAmount()` and `formatSignedAmount()` both respect currency-specific decimals automatically
 

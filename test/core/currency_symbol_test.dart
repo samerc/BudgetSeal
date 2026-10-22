@@ -8,6 +8,14 @@ void main() {
     setCurrencySymbolOverrides({});
   });
 
+  test('LBP, SYP, IRR and IQD have no decimals', () {
+    for (final c in ['LBP', 'SYP', 'IRR', 'IQD']) {
+      expect(currencyDecimals(c), 0, reason: c);
+    }
+    expect(currencyDecimals('KWD'), 3);
+    expect(currencyDecimals('LBP', 2), 2); // an account's own setting wins
+  });
+
   test('Arabic-script symbols show the code outside Arabic', () {
     Intl.defaultLocale = 'en';
     expect(formatAmount(1200000, currency: 'LBP'), 'LBP 1,200,000');
