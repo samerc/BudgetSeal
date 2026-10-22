@@ -167,9 +167,10 @@ String _wrapNegative(String inner, bool isNeg) {
   };
 }
 
-/// Known zero-decimal currencies (ISO 4217).
+/// Zero-decimal currencies: ISO 4217's, plus LBP (its piastres are long
+/// gone — prices are whole thousands).
 const _zeroDecimalCurrencies = <String>{
-  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW',
+  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'LBP',
   'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
 };
 

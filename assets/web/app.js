@@ -67,7 +67,7 @@ async function loadConfig() {
 
 // ── Formatting (mirrors formatAmount() in the app) ───────────────────────────
 
-const ZERO_DEC = new Set(['BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF']);
+const ZERO_DEC = new Set(['BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'LBP', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF']);
 const THREE_DEC = new Set(['BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND']);
 const SPACED = new Set(['ل.ل', 'د.إ', 'CHF', '﷼']);
 

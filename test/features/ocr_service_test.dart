@@ -334,6 +334,108 @@ void main() {
           isEmpty);
     });
 
+    test('a real Roadster Diner receipt (ML Kit output, Oct 2026)', () {
+      // Ungrouped LBP prices with ".00", the total on the row under
+      // "TOTAL DUE" (read "6300O00.0O0"), a free "W/Regular 0.00", the USD
+      // equivalent and a VAT table after the total, a keyboard in the photo.
+      OcrRawLine l(String text, double left, double top, double right,
+              double bottom, double angle, double h) =>
+          OcrRawLine(
+              text: text,
+              rect: ui.Rect.fromLTRB(left, top, right, bottom),
+              angle: angle,
+              height: h);
+      final res = OcrService.parseLines([
+        l("Caps A", 3, 19, 66, 41, 0.0818, 17.1),
+        l("LOck", 4, 31, 44, 48, 0.0000, 17.0),
+        l("Shift", 5, 117, 31, 130, 0.0000, 13.0),
+        l("trl", 1, 204, 18, 218, 0.0000, 14.0),
+        l("A", 136, 9, 153, 27, 0.0000, 18.0),
+        l("S#", 230, 6, 268, 24, 0.0000, 18.0),
+        l("Alt", 275, 197, 299, 212, 0.0000, 15.0),
+        l("D]", 323, 4, 364, 22, 0.0000, 18.0),
+        l("CHECK # 1143185", 368, 529, 501, 546, -0.0301, 13.0),
+        l("TABLE1", 369, 545, 444, 561, -0.0400, 13.0),
+        l("GY", 510, 1, 556, 19, 0.0000, 18.0),
+        l("ROADSTER", 459, 417, 652, 462, 0.0000, 45.0),
+        l("PRESH CARUAL vOus", 473, 486, 620, 496, 0.0000, 10.0),
+        l("DlNEIR", 504, 461, 585, 480, -0.0247, 17.0),
+        l("ITEMS ORDERED", 404, 635, 520, 658, -0.0345, 19.0),
+        l("2 MIGHTY GARL", 404, 681, 521, 703, -0.0342, 18.0),
+        l("RATE", 350, 1295, 389, 1314, 0.0000, 19.0),
+        l("11.00%", 352, 1318, 407, 1342, -0.0363, 22.0),
+        l("Rd DINING : MOHAMMAD T", 438, 586, 639, 612, -0.0398, 18.0),
+        l("1 CHZ AT HEART", 414, 702, 530, 727, -0.0345, 21.0),
+        l("1 W/Skin On Fries", 416, 724, 560, 749, -0.0347, 20.0),
+        l("1 SKIN ON FRIES", 416, 747, 541, 772, -0.0400, 20.0),
+        l("BY", 556, 85, 601, 106, 0.0000, 21.0),
+        l("1 SMALL BUF WINGS", 414, 770, 560, 794, -0.0342, 19.0),
+        l("1 REF DIET PEPSI", 416, 814, 551, 840, -0.0444, 20.0),
+        l("2 REFILL MIRINDA", 408, 840, 552, 861, -0.0278, 17.0),
+        l("*************", 365, 934, 487, 952, -0.0328, 14.0),
+        l("1 ICED TEA PEACH LIPTON", 416, 791, 617, 818, -0.0298, 21.0),
+        l("1 **W/Th isld 45", 418, 861, 553, 886, -0.0370, 20.0),
+        l("1 W/Regular", 411, 889, 508, 909, 0.0000, 20.0),
+        l("SUBTOTAL", 402, 978, 540, 998, -0.0145, 18.0),
+        l("TOTAL DUE", 383, 1067, 546, 1088, -0.0184, 18.0),
+        l("DATE 10/05/26", 593, 522, 707, 540, -0.0351, 14.0),
+        l("100BPM", 651, 541, 712, 551, 0.0000, 10.0),
+        l("TIME", 595, 543, 628, 552, 0.0000, 9.0),
+        l("N1 M", 652, 83, 764, 104, 0.0000, 21.0),
+        l("USD", 512, 1139, 568, 1158, 0.0000, 19.0),
+        l("2250000.00", 636, 675, 727, 695, -0.0220, 18.0),
+        l("1260000.00", 638, 696, 726, 719, -0.0568, 18.0),
+        l("AMOUNT", 672, 629, 725, 648, -0.0377, 17.0),
+        l("# OF GUESTS", 532, 1236, 638, 1258, -0.0189, 20.0),
+        l("360000.00", 646, 720, 726, 741, -0.0500, 17.0),
+        l("585000.00", 647, 742, 729, 764, -0.0487, 18.0),
+        l("Roadster Diner SAL", 462, 1536, 642, 1561, 0.0112, 23.0),
+        l("ABC Ashrafieh", 470, 1563, 622, 1589, 0.0199, 23.0),
+        l("495000.00", 648, 767, 729, 786, -0.0247, 17.0),
+        l("***********************", 521, 930, 734, 948, -0.0141, 15.0),
+        l("270000.00", 648, 790, 730, 809, -0.0244, 17.0),
+        l("315000.00", 649, 815, 733, 833, 0.0000, 18.0),
+        l("630000.00", 649, 836, 731, 855, -0.0122, 18.0),
+        l("6300O00. 00", 560, 995, 739, 1017, -0.0168, 19.0),
+        l("135000.00", 651, 856, 732, 881, -0.0624, 20.0),
+        l("0.00", 698, 884, 735, 901, 0.0000, 17.0),
+        l("6300O00.0O0", 551, 1085, 738, 1107, -0.0267, 17.0),
+        l("70.00", 649, 1133, 741, 1155, -0.0435, 18.0),
+        l("4", 740, 1236, 749, 1253, 0.0000, 17.0),
+        l("NET", 503, 1292, 530, 1311, 0.0000, 19.0),
+        l("VAT", 612, 1289, 640, 1309, 0.0000, 20.0),
+        l("5675675.6 624324.32 6300000,00", 440, 1307, 748, 1339, -0.0325, 22.0),
+        l("GROSS", 702, 1286, 750, 1306, 0.0000, 20.0),
+        l("At", 859, 188, 884, 207, 0.0000, 19.0),
+        l("Ctrl", 957, 193, 991, 208, 0.0000, 15.0),
+        l("?S", 1042, 85, 1086, 103, 0.0000, 18.0),
+        l("Shift", 1144, 104, 1184, 118, 0.0000, 14.0),
+      ], imageWidth: 1203, imageHeight: 1600, currency: 'LBP');
+      expect(_items(res), [
+        ('MIGHTY GARL', 2250000.0, 2),
+        ('CHZ AT HEART', 1260000.0, 1),
+        ('W/Skin On Fries', 360000.0, 1),
+        ('SKIN ON FRIES', 585000.0, 1),
+        ('SMALL BUF WINGS', 495000.0, 1),
+        ('ICED TEA PEACH LIPTON', 270000.0, 1),
+        ('REF DIET PEPSI', 315000.0, 1),
+        ('REFILL MIRINDA', 630000.0, 2),
+        ('W/Th isld 45', 135000.0, 1),
+      ]);
+      expect(res.receiptTotal, 6300000);
+      expect(res.taxTotal, isNull);
+      expect(
+          res.lines
+              .where((l) => l.kind == OcrLineKind.item && !l.hasPrice)
+              .map((l) => l.text),
+          isEmpty);
+      // "USD 70.00" is the equivalent; the prices say LBP.
+      expect(
+          OcrService.receiptCurrency(res,
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          (code: 'LBP', printed: false));
+    });
+
     test('the total only fixes a price when exactly one change matches', () {
       // Two suspicious prices could each explain the gap: leave both.
       final r = _Receipt()

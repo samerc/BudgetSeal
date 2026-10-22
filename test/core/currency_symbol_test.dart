@@ -10,7 +10,7 @@ void main() {
 
   test('Arabic-script symbols show the code outside Arabic', () {
     Intl.defaultLocale = 'en';
-    expect(formatAmount(1200000, currency: 'LBP'), 'LBP 1,200,000.00');
+    expect(formatAmount(1200000, currency: 'LBP'), 'LBP 1,200,000');
     expect(formatAmount(-5, currency: 'AED'), 'AED -5.00');
     expect(formatAmount(5, currency: 'USD'), '\$5.00');
     expect(defaultCurrencySymbols['LBP'], 'LBP');

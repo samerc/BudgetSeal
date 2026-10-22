@@ -264,6 +264,21 @@ class OcrService {
       }
     }
 
+    // 4b. "TOTAL DUE" with its amount on the row below.
+    for (var i = 0; i + 1 < parsed.length; i++) {
+      final p = parsed[i], next = parsed[i + 1];
+      if ((p.kind != OcrLineKind.total && p.kind != OcrLineKind.tax) ||
+          p.amount != null ||
+          next.row.y - p.row.y > lineH * 2.2) {
+        continue;
+      }
+      final lone = _lonePrice.firstMatch(next.text.trim());
+      if (lone == null) continue;
+      p.amount = _parsePrice(lone.group(1)!, decimals);
+      p.row.absorb(next.row);
+      parsed.removeAt(i + 1);
+    }
+
     // 5. Nothing after the grand total is an item (payment, change, thanks).
     var grandIdx = -1;
     for (var i = 0; i < parsed.length; i++) {
@@ -339,8 +354,18 @@ class OcrService {
         prev.row.absorb(p.row);
         continue;
       }
+      // "1 W/Regular  0.00": a free extra, nothing to split.
+      if (p.kind == OcrLineKind.item &&
+          p.amount == null &&
+          _zeroPrice.hasMatch(p.text.trim())) {
+        p.toOther();
+        out.add(p);
+        continue;
+      }
+      // A row that starts with a count is an item of its own.
       final isText = p.kind == OcrLineKind.item &&
           p.amount == null &&
+          !_leadingQty.hasMatch(p.text.trim()) &&
           p.text.replaceAll(_nonLetter, '').length >= 2;
       if (isText &&
           nearPrev &&
@@ -456,6 +481,9 @@ class OcrService {
 
   static final _nonLetter = RegExp(r'[^\p{L}]', unicode: true);
 
+  /// A row that ends in a zero price ("0.00", "0").
+  static final _zeroPrice = RegExp(r'(^|\s)[$€£¥]?0+(?:[.,]0+)?$');
+
   /// "1 Regular Fries": a row that starts with a count and a word.
   static final _leadingQty = RegExp(r'^\d{1,2}\s+\p{L}', unicode: true);
 
@@ -489,7 +517,7 @@ class OcrService {
   /// "1,250, 000" → "1,250,000": the recognizer puts a space after a
   /// thousands separator now and then.
   static String _tidyNumbers(String text) =>
-      text.replaceAllMapped(RegExp(r'(\d[,.]) +(?=\d{3}(?!\d))'),
+      text.replaceAllMapped(RegExp(r'(\d[,.]) +(?=\d{2,3}(?!\d))'),
           (m) => m.group(1)!);
 
   /// A date or a time on the line: a header or footer, never an item.
@@ -586,6 +614,12 @@ class OcrService {
     // Strip leading separator: ",450,000" → "450,000"
     if (priceStr.startsWith(',') || priceStr.startsWith('.')) {
       priceStr = priceStr.substring(1);
+    }
+    // "6300000.000": a thousands separator never follows 5+ ungrouped
+    // digits, so this one is the decimal point.
+    final ungrouped = RegExp(r'^(\d{5,})[.,](\d{1,3})$').firstMatch(priceStr);
+    if (ungrouped != null) {
+      return double.tryParse('${ungrouped[1]}.${ungrouped[2]}');
     }
     final threeDecimal = RegExp(r'^\d+[.,]\d{3}$');
     if (decimals == 3 && threeDecimal.hasMatch(priceStr)) {
@@ -818,20 +852,25 @@ class OcrService {
         printed.add(c);
       }
     }
-    if (printed.length == 1) {
-      final c = printed.first;
-      return c == billCurrency ? null : (code: c, printed: true);
-    }
 
-    // 2. The amounts.
+    // 2. The amounts. A printed currency that doesn't fit them is an
+    // equivalent ("TOTAL 6,300,000 · USD 70.00"), not the receipt's.
     final amounts = [
       for (final l in r.lines)
         if (l.hasPrice) l.parsedAmount!.abs(),
       if (r.receiptTotal != null) r.receiptTotal!,
     ];
-    if (amounts.length < 2) return null;
-    final large = amounts.every((a) => a >= 1000 && a % 100 == 0);
+    final large = amounts.length >= 2 &&
+        amounts.every((a) => a >= 1000 && a % 100 == 0);
     final cents = amounts.any((a) => a != a.roundToDouble());
+    printed.removeWhere((c) =>
+        (large && !largeUnitCurrencies.contains(c)) ||
+        (cents && largeUnitCurrencies.contains(c)));
+    if (printed.length == 1) {
+      final c = printed.first;
+      return c == billCurrency ? null : (code: c, printed: true);
+    }
+    if (amounts.length < 2) return null;
     final billLarge = largeUnitCurrencies.contains(billCurrency);
     Iterable<String> pool = printed.isNotEmpty ? printed : mine;
     if (large && !billLarge) {
