@@ -6214,5 +6214,13 @@
   "biometricOffSnack": "Biometric lock off",
   "@biometricOffSnack": {"description": "SnackBar"},
   "wcStoppedNoWifi": "Stopped: the phone left the Wi-Fi network. Reconnect to start again.",
-  "@wcStoppedNoWifi": {"description": "Web Companion: server stopped itself because Wi-Fi was lost"}
+  "@wcStoppedNoWifi": {"description": "Web Companion: server stopped itself because Wi-Fi was lost"},
+  "backupDeleteTitle": "Delete this backup?",
+  "@backupDeleteTitle": {"description": "Backup: confirm deleting a local backup file"},
+  "backupDeleteBody": "The backup file is removed from this phone. This can't be undone.",
+  "@backupDeleteBody": {"description": "Backup: delete confirm message"},
+  "backupDeleted": "Backup deleted",
+  "@backupDeleted": {"description": "Backup: snackbar after deleting a local backup"},
+  "backupDeleteFailed": "Couldn't delete the backup",
+  "@backupDeleteFailed": {"description": "Backup: snackbar when deleting a local backup fails"}
 }

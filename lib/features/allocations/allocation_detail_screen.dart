@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:intl/intl.dart';
 
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -1347,7 +1346,7 @@ class _AllocationDetailScreenState
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          DateFormat('MMM').format(m),
+                          formatMonth(m, short: true),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,

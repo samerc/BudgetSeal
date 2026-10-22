@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/engine/planned_engine.dart';
@@ -649,7 +648,7 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
   Widget _buildTargetMonthSection() {
     final months = List.generate(
       12,
-      (i) => DateFormat('MMM').format(DateTime(2000, i + 1)),
+      (i) => formatMonth(DateTime(2000, i + 1), short: true),
     );
 
     return _TxFieldCard(

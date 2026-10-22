@@ -7845,4 +7845,17 @@ class SAr extends S {
   @override
   String get wcStoppedNoWifi =>
       'توقف: غادر الهاتف شبكة WiFi. أعد الاتصال للتشغيل مجدداً.';
+
+  @override
+  String get backupDeleteTitle => 'حذف هذه النسخة الاحتياطية؟';
+
+  @override
+  String get backupDeleteBody =>
+      'سيُحذف ملف النسخة الاحتياطية من هذا الهاتف. لا يمكن التراجع عن ذلك.';
+
+  @override
+  String get backupDeleted => 'تم حذف النسخة الاحتياطية';
+
+  @override
+  String get backupDeleteFailed => 'تعذّر حذف النسخة الاحتياطية';
 }

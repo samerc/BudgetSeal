@@ -761,7 +761,7 @@ class _TrendChart extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Text(DateFormat('MMM').format(months[i]),
+                        Text(formatMonth(months[i], short: true),
                             style: TextStyle(
                                 fontSize: TypographyTokens.miniSize,
                                 color: AppColors.ts(context))),
@@ -2079,7 +2079,7 @@ class _AgeOfMoneyCard extends StatelessWidget {
 /// The navigator label: "October 2026", or a budget period's date range
 /// ("25 Sep – 24 Oct").
 String _periodLabel(DateTime month) {
-  if (_reportsStartDay == null) return DateFormat('MMMM yyyy').format(month);
+  if (_reportsStartDay == null) return formatMonth(month, year: true);
   final r = reportRangeFor(month, _reportsStartDay);
   final f = DateFormat('d MMM');
   return '${f.format(r.start)} – '

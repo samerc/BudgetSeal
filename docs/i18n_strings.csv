@@ -2624,3 +2624,7 @@ web_load_failed_sub,Web Companion,"Check that your phone is on the same Wi‑Fi 
 web_filter_no_match,Web Companion,Nothing matches this filter,لا شيء يطابق هذا الفلتر,Aucun résultat pour ce filtre
 web_filter_no_match_sub,Web Companion,"Try another filter, or clear it to see everything.",جرّب فلترًا آخر، أو أزله لعرض كل شيء.,"Essayez un autre filtre, ou retirez-le pour tout afficher."
 web_sub_cancelled,Web Companion,Cancelled,ملغى,Annulé
+backupDeleteTitle,Backup: confirm deleting a local backup file,Delete this backup?,حذف هذه النسخة الاحتياطية؟,Supprimer cette sauvegarde ?
+backupDeleteBody,Backup: delete confirm message,The backup file is removed from this phone. This can't be undone.,سيُحذف ملف النسخة الاحتياطية من هذا الهاتف. لا يمكن التراجع عن ذلك.,Le fichier de sauvegarde est supprimé de ce téléphone. Action irréversible.
+backupDeleted,Backup: snackbar after deleting a local backup,Backup deleted,تم حذف النسخة الاحتياطية,Sauvegarde supprimée
+backupDeleteFailed,Backup: snackbar when deleting a local backup fails,Couldn't delete the backup,تعذّر حذف النسخة الاحتياطية,Impossible de supprimer la sauvegarde

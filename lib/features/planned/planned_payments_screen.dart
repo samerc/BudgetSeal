@@ -2,7 +2,6 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/providers/tx_colors_provider.dart';
@@ -186,7 +185,7 @@ class _PlannedPaymentsScreenState
         final parts = key.split('-');
         final year = int.parse(parts[0]);
         final month = int.parse(parts[1]);
-        final label = DateFormat('MMMM yyyy').format(DateTime(year, month));
+        final label = formatMonth(DateTime(year, month), year: true);
         final total = items
             .where((item) => item.lineCurrency == baseCurrency)
             .fold(0.0, (sum, item) => sum + item.lineAmount);

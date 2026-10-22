@@ -7825,4 +7825,17 @@ class SEn extends S {
   @override
   String get wcStoppedNoWifi =>
       'Stopped: the phone left the Wi-Fi network. Reconnect to start again.';
+
+  @override
+  String get backupDeleteTitle => 'Delete this backup?';
+
+  @override
+  String get backupDeleteBody =>
+      'The backup file is removed from this phone. This can\'t be undone.';
+
+  @override
+  String get backupDeleted => 'Backup deleted';
+
+  @override
+  String get backupDeleteFailed => 'Couldn\'t delete the backup';
 }

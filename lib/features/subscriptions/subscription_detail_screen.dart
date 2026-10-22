@@ -4,7 +4,6 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/database/app_database.dart';
 import '../../core/engine/recurring_engine.dart' show advanceRecurringDate;
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -224,14 +223,9 @@ class _SubscriptionDetailScreenState
     if (!confirmed || !mounted) return;
 
     try {
-    // Set end_date on the recurring transaction (moves last_modified so the
-    // change syncs).
-    await (db.update(db.recurringTransactions)
-          ..where((r) => r.id.equals(widget.subscriptionId)))
-        .write(RecurringTransactionsCompanion(
-      endDate: drift.Value(picked),
-      lastModified: drift.Value(DateTime.now()),
-    ));
+    await ref
+        .read(recurringEngineProvider)
+        .setEndDate(widget.subscriptionId, picked);
 
     // Delete transactions generated AFTER the cancellation date (with ledger cleanup)
     if (futureCount > 0) {

@@ -51,7 +51,7 @@ Manual checklists: `test/manual_test_script.md`, `test/web_companion_test_script
 
 - **Colors**: theme-aware only — `AppColors.tp/ts/th/sf/sfv/bd(context)`, `AppColors.pastel(...)` for category/accent fills, `AppColors.fromHex()` for hex. Text/icons on an accent fill: `AppColors.onAccent`, never `Colors.white`. No hardcoded colors on adaptive surfaces.
 - **Icons**: Phosphor through `AppIcons` only (never Material `Icons.*`); dropdowns pass `icon: AppIcons.dropdown`. Category/envelope emoji: `EmojiGlyph`, never `Text(emoji)`.
-- **Amounts**: entered with the calculator sheet (`AmountField`/`CalculatorAmountField`), never a numeric keyboard. Shown with `formatAmount()`/`formatNumber()`, never `toStringAsFixed()`. Dates with `formatDate()`. Typed/imported amounts parsed with `parseLooseAmount()`.
+- **Amounts**: entered with the calculator sheet (`AmountField`/`CalculatorAmountField`), never a numeric keyboard. Shown with `formatAmount()`/`formatNumber()`, never `toStringAsFixed()`. Dates with `formatDate()`, month names with `formatMonth()`, day counts with `calendarDaysBetween()`. Typed/imported amounts parsed with `parseLooseAmount()`.
 - **Riverpod 3**: `Notifier` + `NotifierProvider<N, T>(N.new)`, `AsyncValue.value`.
 - **Navigation**: GoRouter `context.push/pop/go`; routes in `app.dart`.
 - **Errors**: never show `e.toString()` — map to strings (`txSaveErrorText()`, `syncErrorText()`, `biometricErrorText()`) and `debugPrint` the rest. `.when()` errors use `ErrorRetry`. Every async `_load()` is wrapped in try/catch and clears `_loading` in both paths. User actions (save, delete, toggle) show a SnackBar on success and failure.

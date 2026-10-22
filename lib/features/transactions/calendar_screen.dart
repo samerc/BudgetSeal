@@ -311,7 +311,7 @@ class _MonthHeader extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsetsDirectional.only(start: 4),
           child: Text(
-            capitalizedFirst(DateFormat.yMMMM().format(month)),
+            formatMonth(month, year: true),
             style: TextStyle(
               fontFamily: TypographyTokens.displayFamily,
               fontSize: 22,

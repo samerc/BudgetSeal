@@ -7920,4 +7920,17 @@ class SFr extends S {
   @override
   String get wcStoppedNoWifi =>
       'Arrêté : le téléphone a quitté le réseau Wi-Fi. Reconnectez-vous pour relancer.';
+
+  @override
+  String get backupDeleteTitle => 'Supprimer cette sauvegarde ?';
+
+  @override
+  String get backupDeleteBody =>
+      'Le fichier de sauvegarde est supprimé de ce téléphone. Action irréversible.';
+
+  @override
+  String get backupDeleted => 'Sauvegarde supprimée';
+
+  @override
+  String get backupDeleteFailed => 'Impossible de supprimer la sauvegarde';
 }

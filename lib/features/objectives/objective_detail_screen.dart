@@ -31,6 +31,7 @@ import '../transactions/widgets/category_sheet.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/category_icon.dart';
+import '../../shared/widgets/error_retry.dart';
 
 class ObjectiveDetailScreen extends ConsumerStatefulWidget {
   final String objectiveId; // 'new' for creating
@@ -69,6 +70,7 @@ class _ObjectiveDetailScreenState
   String? _categoryId; // optional category for payments
   String? _categoryName;
   bool _loading = false;
+  bool _loadFailed = false;
   bool _showSettings = false; // toggle for edit form (existing objectives)
   bool _showEmojiGrid = false; // inline icon picker toggle
 
@@ -128,8 +130,10 @@ class _ObjectiveDetailScreenState
       }
       // Load payment history
       await _loadPayments();
+      if (mounted && _loadFailed) setState(() => _loadFailed = false);
     } catch (e) {
       debugPrint('[ObjectiveDetail] Error loading: $e');
+      if (mounted) setState(() => _loadFailed = true);
     }
   }
 
@@ -589,7 +593,9 @@ class _ObjectiveDetailScreenState
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: _loadFailed
+          ? ErrorRetry(onRetry: _load)
+          : RefreshIndicator(
         onRefresh: () async { await _load(); },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),

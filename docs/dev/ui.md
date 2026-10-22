@@ -54,6 +54,7 @@ One way to do each thing. New code follows this; the Oct 23 pass moved existing 
 | Load failure | `ErrorRetry` (now styled like `EmptyState`) — never fall through to the empty state | |
 | Income/expense amount color | `ref.watch(txColorsProvider).forType(type)` / `.income` / `.expense` — defaults are the strong `healthy`/`overspent`, the user can change them in Settings | `AppColors.healthy/overspent` for a *type* (those stay for status: overspent, warnings, success) |
 | Bill colors | `AppColors.billUpcoming` / `billOverdue` | hex pairs |
+| Month names / day counts | `formatMonth(date, short:, year:)` · `calendarDaysBetween(a, b)` | `DateFormat('MMM')`, `difference().inDays` on local dates |
 | Tap feedback | `Tappable` (or `AppCard(onTap:)`, `ListTile`) | bare `GestureDetector`/`InkWell` on visible surfaces |
 | Tints | `AppColors.pastel(...)`; secondary text `AppColors.ts` | `withValues(alpha:)` fills/borders/text |
 | Feedback | every save/delete/toggle: success and failure SnackBar | silent success, `try/finally` without catch |

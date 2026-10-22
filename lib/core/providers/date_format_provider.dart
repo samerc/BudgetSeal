@@ -59,6 +59,17 @@ String formatDate(DateTime date) {
 /// Format a date with the user's preferred format, with smart "Today"/"Yesterday" prefix.
 /// Date in the user's format plus the time (locale's 12/24-hour style),
 /// e.g. for backups and sync timestamps.
+/// A month name for labels and headers, in the app language, capitalized
+/// ("Octobre 2026", not "octobre 2026"): [short] gives "Oct", [year] adds
+/// the year. Use instead of DateFormat('MMM'/'MMMM yyyy') in screens.
+String formatMonth(DateTime date, {bool short = false, bool year = false}) {
+  final f = short
+      ? (year ? DateFormat.yMMM() : DateFormat.MMM())
+      : (year ? DateFormat.yMMMM() : DateFormat.MMMM());
+  final s = f.format(date);
+  return s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+}
+
 String formatDateTime(DateTime date) =>
     '${formatDate(date)} ${DateFormat.jm().format(date)}';
 

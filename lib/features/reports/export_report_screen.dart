@@ -43,7 +43,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monthLabel = DateFormat('MMMM yyyy').format(_month);
+    final monthLabel = formatMonth(_month, year: true);
 
     return Scaffold(
       appBar: AppBar(
@@ -163,7 +163,7 @@ class _ExportReportScreenState extends ConsumerState<ExportReportScreen> {
       final sortedCats = catSpend.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
 
-      final monthLabel = DateFormat('MMMM yyyy').format(_month);
+      final monthLabel = formatMonth(_month, year: true);
       final net = totalIncome - totalExpense;
 
       final html = _buildHtml(

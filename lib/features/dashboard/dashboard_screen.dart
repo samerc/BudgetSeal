@@ -2,7 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import 'package:drift/drift.dart' hide Column;
 
@@ -43,6 +42,7 @@ import '../reports/widgets/income_expense_summary.dart';
 import '../../core/providers/getting_started_provider.dart';
 import 'widgets/getting_started_card.dart';
 import 'widgets/budget_focus.dart';
+import '../../core/providers/date_format_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -581,7 +581,7 @@ class _SpendingOverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final periodLabel =
-        showWeekly ? S.of(context).dashboardLast7Days : DateFormat('MMMM').format(DateTime.now());
+        showWeekly ? S.of(context).dashboardLast7Days : formatMonth(DateTime.now());
     final sorted = categorySpend.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final topCategories = sorted.take(5).toList();

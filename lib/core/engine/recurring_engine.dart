@@ -332,4 +332,13 @@ class RecurringEngine {
         .write(RecurringTransactionsCompanion(
             enabled: Value(enabled), lastModified: Value(DateTime.now())));
   }
+
+  /// Set (or clear, with null) the last date a recurring item runs — a
+  /// subscription's cancellation date. Moves last_modified so it syncs.
+  Future<void> setEndDate(String id, DateTime? endDate) async {
+    await (_db.update(_db.recurringTransactions)
+          ..where((r) => r.id.equals(id)))
+        .write(RecurringTransactionsCompanion(
+            endDate: Value(endDate), lastModified: Value(DateTime.now())));
+  }
 }

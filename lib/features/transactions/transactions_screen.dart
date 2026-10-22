@@ -1156,8 +1156,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       final isCurrent =
                           _selectedYear == now.year && month == now.month;
                       final label =
-                          capitalizedFirst(
-                              DateFormat.MMMM().format(DateTime(2000, month)));
+                          formatMonth(DateTime(2000, month));
                       // Cashew monthSelector: fixed 100px slot, track line,
                       // animated pill under the selected month.
                       return SizedBox(
@@ -1698,8 +1697,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     if (filtered.isEmpty) {
       final hasFilters = _searchQuery.isNotEmpty || _hasAnyFilter;
-      final monthLabel = capitalizedFirst(DateFormat.yMMM()
-          .format(DateTime(_selectedYear, _selectedMonth)));
+      final monthLabel = formatMonth(
+          DateTime(_selectedYear, _selectedMonth), short: true, year: true);
       return _pullable(Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -2439,7 +2438,7 @@ class _MonthBudgetCard extends StatelessWidget {
     final now = DateTime.now();
     final isPast = year < now.year || (year == now.year && month < now.month);
     final monthName =
-        capitalizedFirst(DateFormat.MMMM().format(DateTime(year, month, 15)));
+        formatMonth(DateTime(year, month, 15));
     String f(double v) => formatAmount(v, currency: currency);
     final hasBudget = budgeted > 0;
     final left = budgeted - spent;

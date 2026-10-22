@@ -268,7 +268,21 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _deleteLocalBackup(BackupFile backup) async {
-    await AutoBackupService.deleteBackup(backup.path);
+    final tr = S.of(context);
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.backupDeleteTitle,
+      message: tr.backupDeleteBody,
+      confirmLabel: tr.commonDelete,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await AutoBackupService.deleteBackup(backup.path);
+      _snack(tr.backupDeleted);
+    } catch (e) {
+      debugPrint('[Backup] Delete failed: $e');
+      _snack(tr.backupDeleteFailed);
+    }
     _loadSettings();
   }
 

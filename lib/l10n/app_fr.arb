@@ -5534,5 +5534,9 @@
   "syncDisconnectedSnack": "Synchronisation déconnectée",
   "biometricOnSnack": "Verrouillage biométrique activé",
   "biometricOffSnack": "Verrouillage biométrique désactivé",
-  "wcStoppedNoWifi": "Arrêté : le téléphone a quitté le réseau Wi-Fi. Reconnectez-vous pour relancer."
+  "wcStoppedNoWifi": "Arrêté : le téléphone a quitté le réseau Wi-Fi. Reconnectez-vous pour relancer.",
+  "backupDeleteTitle": "Supprimer cette sauvegarde ?",
+  "backupDeleteBody": "Le fichier de sauvegarde est supprimé de ce téléphone. Action irréversible.",
+  "backupDeleted": "Sauvegarde supprimée",
+  "backupDeleteFailed": "Impossible de supprimer la sauvegarde"
 }

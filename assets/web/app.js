@@ -60,6 +60,12 @@ async function loadConfig() {
     s.setProperty('--acc-lfill', safeHex(cfg.accent.lightFill));
     s.setProperty('--acc-dfill', safeHex(cfg.accent.darkFill));
   }
+  // Income/expense/transfer colors picked in the phone's Settings win over
+  // the stylesheet's light/dark defaults (as on the phone).
+  for (const k of ['income', 'expense', 'transfer']) {
+    const c = cfg?.txColors?.[k];
+    if (c) document.documentElement.style.setProperty(`--${k}`, safeHex(c));
+  }
   if (cfg?.number) Object.assign(NUM, cfg.number);
   await loadStrings(LOCALE);
   applyI18n();

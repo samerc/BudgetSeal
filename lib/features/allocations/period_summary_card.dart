@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/database/daos/ledger_dao.dart';
@@ -14,6 +13,7 @@ import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/seal_mark.dart';
+import '../../core/providers/date_format_provider.dart';
 
 const _dismissedKey = 'period_summary_dismissed';
 
@@ -97,7 +97,7 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
     final tr = S.of(context);
     final left = d.funded - d.spent;
     final sealed = left > -0.005;
-    final month = _capitalized(DateFormat.MMMM().format(d.lastMid));
+    final month = formatMonth(d.lastMid);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 8, 12),
@@ -166,5 +166,3 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
   }
 }
 
-String _capitalized(String s) =>
-    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

@@ -13833,6 +13833,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Stopped: the phone left the Wi-Fi network. Reconnect to start again.'**
   String get wcStoppedNoWifi;
+
+  /// Backup: confirm deleting a local backup file
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this backup?'**
+  String get backupDeleteTitle;
+
+  /// Backup: delete confirm message
+  ///
+  /// In en, this message translates to:
+  /// **'The backup file is removed from this phone. This can\'t be undone.'**
+  String get backupDeleteBody;
+
+  /// Backup: snackbar after deleting a local backup
+  ///
+  /// In en, this message translates to:
+  /// **'Backup deleted'**
+  String get backupDeleted;
+
+  /// Backup: snackbar when deleting a local backup fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the backup'**
+  String get backupDeleteFailed;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -5534,5 +5534,9 @@
   "syncDisconnectedSnack": "تم قطع اتصال المزامنة",
   "biometricOnSnack": "القفل البيومتري مفعّل",
   "biometricOffSnack": "القفل البيومتري متوقف",
-  "wcStoppedNoWifi": "توقف: غادر الهاتف شبكة WiFi. أعد الاتصال للتشغيل مجدداً."
+  "wcStoppedNoWifi": "توقف: غادر الهاتف شبكة WiFi. أعد الاتصال للتشغيل مجدداً.",
+  "backupDeleteTitle": "حذف هذه النسخة الاحتياطية؟",
+  "backupDeleteBody": "سيُحذف ملف النسخة الاحتياطية من هذا الهاتف. لا يمكن التراجع عن ذلك.",
+  "backupDeleted": "تم حذف النسخة الاحتياطية",
+  "backupDeleteFailed": "تعذّر حذف النسخة الاحتياطية"
 }

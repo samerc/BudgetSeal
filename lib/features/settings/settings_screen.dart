@@ -1220,7 +1220,9 @@ class SettingsDetailScreen extends ConsumerWidget {
                   try {
                     await (db.update(db.households)
                           ..where((h) => h.id.equals(household!.id)))
-                        .write(HouseholdsCompanion(name: Value(val)));
+                        .write(HouseholdsCompanion(
+                            name: Value(val),
+                            lastModified: Value(DateTime.now())));
                     if (context.mounted) _snack(context, l.householdNameSaved);
                   } catch (e) {
                     debugPrint('[Settings] Rename household failed: $e');
@@ -1250,7 +1252,9 @@ class SettingsDetailScreen extends ConsumerWidget {
                 try {
                   await (db.update(db.households)
                         ..where((h) => h.id.equals(household.id)))
-                      .write(HouseholdsCompanion(baseCurrency: Value(result)));
+                      .write(HouseholdsCompanion(
+                          baseCurrency: Value(result),
+                          lastModified: Value(DateTime.now())));
                   if (context.mounted) {
                     _snack(context, l.baseCurrencySaved(result));
                   }
@@ -1284,7 +1288,9 @@ class SettingsDetailScreen extends ConsumerWidget {
                   final db = ref.read(databaseProvider);
                   await (db.update(db.households)
                         ..where((h) => h.id.equals(household!.id)))
-                      .write(HouseholdsCompanion(periodStartDay: Value(val)));
+                      .write(HouseholdsCompanion(
+                          periodStartDay: Value(val),
+                          lastModified: Value(DateTime.now())));
                 }),
           ),
           _SettingsTile(

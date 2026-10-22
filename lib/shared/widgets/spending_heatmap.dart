@@ -5,6 +5,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../utils/format_number.dart';
 import '../utils/calendar_days.dart';
+import '../../core/providers/date_format_provider.dart';
 
 /// Daily spending data for the heatmap.
 class DaySpending {
@@ -81,7 +82,7 @@ class SpendingHeatmap extends StatelessWidget {
     for (int w = 0; w < totalWeeks; w++) {
       final weekStart = startOfWeek.add(Duration(days: w * 7));
       if (weekStart.day <= 7) {
-        monthLabels[w] = DateFormat.MMM().format(weekStart);
+        monthLabels[w] = formatMonth(weekStart, short: true);
       }
     }
 

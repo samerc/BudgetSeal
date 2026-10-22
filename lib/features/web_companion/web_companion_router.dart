@@ -22,6 +22,7 @@ import '../../core/providers/accent_color_provider.dart';
 import '../../shared/theme/brand_palette.dart';
 import '../../shared/utils/format_number.dart';
 import 'web_companion_auth.dart';
+import '../../core/providers/tx_colors_provider.dart';
 
 /// Assembles the full shelf request handler.
 Handler buildRouter(Ref ref, WebCompanionAuth auth, ChangeFeed changes) {
@@ -229,13 +230,14 @@ const _cacheLong = 'public, max-age=604800';
 
 // ── Config (no token: the PIN screen needs it too) ───────────────────────────
 
-/// Language, accent colors and number format, so the browser looks and
+/// Language, accent and transaction colors and number format, so the browser looks and
 /// reads like the phone. Nothing private.
 Handler _configHandler(Ref ref) {
   return (Request request) {
     final lang = (Intl.defaultLocale ?? 'en').split(RegExp('[_-]')).first;
     final pair = accentPairById(ref.read(accentColorProvider)) ??
         brandPalette.first;
+    final tx = ref.read(txColorsProvider);
     String hex(Color c) =>
         '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     return Response.ok(
@@ -248,6 +250,13 @@ Handler _configHandler(Ref ref) {
           'darkFill': hex(pair.darkFill),
         },
         'number': numberFormatSpec(),
+        // Only the colors picked in Settings; the page keeps its own
+        // light/dark defaults for the rest.
+        'txColors': {
+          if (tx.customIncome != null) 'income': hex(tx.customIncome!),
+          if (tx.customExpense != null) 'expense': hex(tx.customExpense!),
+          if (tx.customTransfer != null) 'transfer': hex(tx.customTransfer!),
+        },
       }),
       headers: _jsonHeaders,
     );
