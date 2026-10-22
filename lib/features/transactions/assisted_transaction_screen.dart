@@ -1243,6 +1243,28 @@ class _AssistedTransactionScreenState
     return v.toStringAsFixed(2);
   }
 
+  /// The active line's sum ("12 + 5") is being typed: an operator and the
+  /// second number, not just "12 +".
+  bool get _midCalculation {
+    final e = _activeLine.calcExpression;
+    return e.isNotEmpty &&
+        !_activeLine.startNewOperand &&
+        e.substring(1).contains(RegExp(r'[+\-×÷]')) &&
+        !'+-×÷'.contains(e[e.length - 1]);
+  }
+
+  /// The header amount: the whole sum while one is typed, else the number.
+  String _amountText() {
+    final e = _activeLine.calcExpression;
+    if (e.isNotEmpty && e.substring(1).contains(RegExp(r'[+\-×÷]'))) {
+      return formatCalcExpression(e);
+    }
+    return _fmtCalcForDisplay(_activeLine.calcDisplay);
+  }
+
+  String _fmtCalcResult(double v) =>
+      v < 0 ? '-${formatForDisplay(-v)}' : formatForDisplay(v);
+
   /// Format the calc display with commas if it's a pure number.
   String _fmtCalcForDisplay(String raw) {
     if (raw == '0' || raw.isEmpty) return raw;
@@ -1669,7 +1691,7 @@ class _AssistedTransactionScreenState
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerEnd,
                           child: Text(
-                            '$_selectedCurrency ${_fmtCalcForDisplay(_activeLine.calcDisplay)}',
+                            '$_selectedCurrency ${_amountText()}',
                             style: TextStyle(
                               fontSize: 30,
                               fontFamily: TypographyTokens.displayFamily,
@@ -1678,12 +1700,19 @@ class _AssistedTransactionScreenState
                             ),
                           ),
                         ),
+                        // Mid-sum ("12 + 5") the running result takes the
+                        // category's line, so the header keeps its height.
                         Text(
-                          isTransfer
-                              ? S.of(context).typeTransfer
-                              : _activeLine.category!.name,
+                          _midCalculation
+                              ? '= ${_fmtCalcResult(_activeLine.amount)}'
+                              : isTransfer
+                                  ? S.of(context).typeTransfer
+                                  : _activeLine.category!.name,
                           style: TextStyle(
                             fontSize: 13,
+                            fontWeight: _midCalculation
+                                ? FontWeight.w700
+                                : FontWeight.w400,
                             color: typeColor.withValues(alpha: 0.7),
                           ),
                         ),

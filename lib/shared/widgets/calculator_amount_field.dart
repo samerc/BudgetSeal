@@ -117,6 +117,50 @@ class CalculatorAmountField extends StatelessWidget {
 }
 
 /// Open the calculator bottom sheet directly (e.g. from a header amount).
+/// A calculator expression for display ("1,200 + 5"): thousand separators
+/// on each number, the user's decimal mark, operators spaced. Shared by the
+/// calculator sheet and the assisted flow's keypad.
+///, adding thousand separators
+/// to each number token while preserving operators.
+String formatCalcExpression(String expr) {
+  if (expr.isEmpty) return '0';
+  final buf = StringBuffer();
+  final numBuf = StringBuffer();
+  for (int i = 0; i < expr.length; i++) {
+    final ch = expr[i];
+    if ('+-×÷'.contains(ch)) {
+      if (numBuf.isNotEmpty) {
+        final n = double.tryParse(numBuf.toString());
+        buf.write(n != null && n > 0 ? formatForDisplay(n) : numBuf);
+        numBuf.clear();
+      }
+      buf.write(' $ch ');
+    } else {
+      numBuf.write(ch);
+    }
+  }
+  if (numBuf.isNotEmpty) {
+    final raw = numBuf.toString();
+    final n = double.tryParse(raw);
+    if (n != null && n > 0) {
+      buf.write(formatForDisplay(n));
+      // Keep a just-typed decimal point (and trailing zeros) visible.
+      final dot = raw.indexOf('.');
+      if (dot >= 0) {
+        final frac = raw.substring(dot + 1);
+        if (frac.isEmpty) {
+          buf.write(decimalSeparatorChar);
+        } else if (frac.endsWith('0') && !formatForDisplay(n).contains(decimalSeparatorChar)) {
+          buf.write('$decimalSeparatorChar$frac');
+        }
+      }
+    } else {
+      buf.write(raw.replaceAll('.', decimalSeparatorChar));
+    }
+  }
+  return buf.toString();
+}
+
 /// Returns the confirmed amount, or null if dismissed.
 Future<double?> showCalculatorSheet(BuildContext context, double initialValue) {
   return showModalBottomSheet<double>(
@@ -251,47 +295,6 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   String _fmtResult(double v) =>
       v < 0 ? '-${formatForDisplay(-v)}' : formatForDisplay(v);
 
-  /// Format a calculator expression for display, adding thousand separators
-  /// to each number token while preserving operators.
-  String _fmtExprForDisplay(String expr) {
-    if (expr.isEmpty) return '0';
-    final buf = StringBuffer();
-    final numBuf = StringBuffer();
-    for (int i = 0; i < expr.length; i++) {
-      final ch = expr[i];
-      if ('+-×÷'.contains(ch)) {
-        if (numBuf.isNotEmpty) {
-          final n = double.tryParse(numBuf.toString());
-          buf.write(n != null && n > 0 ? formatForDisplay(n) : numBuf);
-          numBuf.clear();
-        }
-        buf.write(' $ch ');
-      } else {
-        numBuf.write(ch);
-      }
-    }
-    if (numBuf.isNotEmpty) {
-      final raw = numBuf.toString();
-      final n = double.tryParse(raw);
-      if (n != null && n > 0) {
-        buf.write(formatForDisplay(n));
-        // Keep a just-typed decimal point (and trailing zeros) visible.
-        final dot = raw.indexOf('.');
-        if (dot >= 0) {
-          final frac = raw.substring(dot + 1);
-          if (frac.isEmpty) {
-            buf.write(decimalSeparatorChar);
-          } else if (frac.endsWith('0') && !formatForDisplay(n).contains(decimalSeparatorChar)) {
-            buf.write('$decimalSeparatorChar$frac');
-          }
-        }
-      } else {
-        buf.write(raw.replaceAll('.', decimalSeparatorChar));
-      }
-    }
-    return buf.toString();
-  }
-
   double _evalExpr(String expr) {
     if (expr.isEmpty) return 0;
     try {
@@ -333,7 +336,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     final canSubmit =
         _amount > 0 || (widget.initialValue > 0 && _amount == 0 && !_hasOperator);
     final display = _amount > 0 || _hasOperator
-        ? _fmtExprForDisplay(_calcExpression)
+        ? formatCalcExpression(_calcExpression)
         : _calcDisplay.replaceAll('.', decimalSeparatorChar);
     // Mid-calculation with the second number typed ("12 + 5", not "12 +").
     final showResult = _hasOperator &&
