@@ -74,14 +74,14 @@ class _WebCompanionScreenState extends ConsumerState<WebCompanionScreen> {
 
   Future<void> _checkWifiConnectivity() async {
     try {
-      final info = NetworkInfo();
-      final ip = await info.getWifiIP();
-      final name = await info.getWifiName();
+      final ip = await WebCompanionService.wifiIp();
+      String? name;
+      try {
+        name = await NetworkInfo().getWifiName();
+      } catch (_) {}
       if (!mounted) return;
 
-      // NetworkInfo().getWifiIP() queries the WiFi interface specifically.
-      // It returns null when WiFi is off — no need for BSSID/name checks.
-      final connected = ip != null && ip.isNotEmpty && ip != '0.0.0.0';
+      final connected = ip != null;
 
       // Android hides the network name without location permission (null
       // or "<unknown ssid>"): an unknown name is not evidence of a public

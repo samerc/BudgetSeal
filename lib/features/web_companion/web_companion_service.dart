@@ -42,7 +42,7 @@ class WebCompanionService {
 
     try {
       // Get local WiFi IP
-      final ip = await _getWifiIp();
+      final ip = await wifiIp();
       if (ip == null) {
         notifier.setError(currentS().wcNoWifiDesc);
         return;
@@ -126,20 +126,49 @@ class WebCompanionService {
     _changes?.wake();
   }
 
-  // ── Private helpers ─────────────────────────────────────────────────────────
-
-  static Future<String?> _getWifiIp() async {
+  /// The phone's address on Wi-Fi (or on its own hotspot), or null.
+  ///
+  /// On Android 12+ `getWifiIP()` returns the *active* network's address —
+  /// the mobile-data one when Wi-Fi is off — so an address only counts when
+  /// it sits on a Wi-Fi interface.
+  static Future<String?> wifiIp() async {
+    String? reported;
     try {
-      // NetworkInfo().getWifiIP() queries the WiFi network interface
-      // specifically — it does NOT return cellular IPs. Returns null
-      // when WiFi is disconnected.
-      final ip = await NetworkInfo().getWifiIP();
-      if (ip == null || ip.isEmpty || ip == '0.0.0.0') return null;
-      return ip;
-    } catch (_) {
-      return null;
+      reported = await NetworkInfo().getWifiIP();
+    } catch (_) {}
+    if (reported == null || reported.isEmpty || reported == '0.0.0.0') {
+      reported = null;
+    }
+    try {
+      final interfaces =
+          await NetworkInterface.list(type: InternetAddressType.IPv4);
+      final wifi = [
+        for (final i in interfaces)
+          if (_isWifiInterface(i.name))
+            for (final a in i.addresses)
+              if (!a.isLoopback) a.address,
+      ];
+      if (reported != null && wifi.contains(reported)) return reported;
+      return wifi.isEmpty ? null : wifi.first;
+    } catch (e) {
+      // Interfaces can't be listed: trust the plugin.
+      debugPrint('[WebCompanion] Listing interfaces failed: $e');
+      return reported;
     }
   }
+
+  // Android: wlan0 is Wi-Fi, swlan0/ap0/softap0 the hotspot; mobile data is
+  // rmnet/ccmni. iOS: en0 is Wi-Fi, bridge100 the hotspot, pdp_ip0 cellular.
+  static bool _isWifiInterface(String name) {
+    final n = name.toLowerCase();
+    if (Platform.isIOS) return n == 'en0' || n.startsWith('bridge');
+    return n.startsWith('wlan') ||
+        n.startsWith('swlan') ||
+        n.startsWith('ap') ||
+        n.startsWith('softap');
+  }
+
+  // ── Private helpers ─────────────────────────────────────────────────────────
 
   static Future<void> _startForegroundService(String ip) async {
     // Request battery optimization exemption — critical on Samsung, Xiaomi,
