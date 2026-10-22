@@ -457,6 +457,8 @@
   "billShareHeader": "Addition partagée · total {total}",
   "billSharePaidBy": "Payé par {name}",
   "billReceiptMatch": "Correspond au total du ticket ({total})",
+  "billCurrencyHint": "Semble être en {currency} — changer ?",
+  "billCurrencySwitched": "Facture passée en {currency}, comme sur le ticket",
   "billReceiptDiff": "Les articles font {items} · total du ticket {total}",
   "webShortcutRefresh": "Recharger depuis le téléphone",
   "currencyNameUsd": "Dollar américain",

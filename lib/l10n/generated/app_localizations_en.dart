@@ -1559,6 +1559,16 @@ class SEn extends S {
   }
 
   @override
+  String billCurrencyHint(String currency) {
+    return 'Looks like $currency — switch?';
+  }
+
+  @override
+  String billCurrencySwitched(String currency) {
+    return 'Bill switched to $currency, as on the receipt';
+  }
+
+  @override
   String billReceiptDiff(String items, String total) {
     return 'Items add up to $items · receipt total $total';
   }

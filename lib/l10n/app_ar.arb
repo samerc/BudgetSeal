@@ -457,6 +457,8 @@
   "billShareHeader": "تقسيم فاتورة · المجموع {total}",
   "billSharePaidBy": "دفعها {name}",
   "billReceiptMatch": "يطابق مجموع الإيصال ({total})",
+  "billCurrencyHint": "يبدو أنه بـ{currency} — تبديل؟",
+  "billCurrencySwitched": "تم تحويل الفاتورة إلى {currency} كما في الإيصال",
   "billReceiptDiff": "مجموع البنود {items} · مجموع الإيصال {total}",
   "webShortcutRefresh": "إعادة التحميل من الهاتف",
   "currencyNameUsd": "دولار أمريكي",

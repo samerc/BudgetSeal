@@ -121,6 +121,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   // ── OCR ──
   bool _scanning = false;
   OcrResult? _ocr;
+
+  /// The currency the scanned receipt seems to be in (offered under the
+  /// total until the user switches or picks a currency).
+  String? _currencyHint;
   final _addedLines = <int>{};
   bool _showUnpriced = false;
 
@@ -289,6 +293,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   Future<void> _setBillCurrency(String c) async {
     setState(() {
       _billCurrency = c;
+      _currencyHint = null;
       _exchangeRate = 1.0;
       _rateCtrl.clear();
       _fixed.clear();
@@ -749,7 +754,43 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         content: Text(S.of(context).billNoText),
         behavior: SnackBarBehavior.floating,
       ));
+      return;
     }
+    _checkReceiptCurrency(result);
+  }
+
+  /// A receipt in another currency than the bill's: one it names ("LBP",
+  /// "ل.ل") switches the bill at once (with Undo); one guessed from the
+  /// amounts is offered under the total.
+  void _checkReceiptCurrency(OcrResult result) {
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    final guess = OcrService.receiptCurrency(
+      result,
+      billCurrency: _billCurrency,
+      userCurrencies: {_baseCurrency, ...accounts.map((a) => a.currency)},
+    );
+    if (guess == null) {
+      setState(() => _currencyHint = null);
+      return;
+    }
+    if (!guess.printed) {
+      setState(() => _currencyHint = guess.code);
+      return;
+    }
+    final before = _billCurrency;
+    _setBillCurrency(guess.code);
+    final tr = S.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr.billCurrencySwitched(guess.code)),
+      behavior: SnackBarBehavior.floating,
+      persist: false,
+      action: SnackBarAction(
+        label: tr.txUndoAction,
+        onPressed: () {
+          if (mounted) _setBillCurrency(before);
+        },
+      ),
+    ));
   }
 
   /// The receipt photo to read. On Android, Google's document scanner
@@ -1568,6 +1609,29 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           if (breakdown != null)
             Text(breakdown,
                 style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+          if (_currencyHint != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: InkWell(
+                onTap: () => _setBillCurrency(_currencyHint!),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(children: [
+                    Icon(AppIcons.arrowsLeftRight,
+                        size: 16, color: AppColors.accentText(context)),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(tr.billCurrencyHint(_currencyHint!),
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accentText(context))),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
           if (isCross) ...[
             const SizedBox(height: 8),
             Row(children: [

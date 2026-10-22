@@ -776,6 +776,82 @@ class OcrService {
     return false;
   }
 
+  /// Currencies whose prices are normally whole thousands ("700,000").
+  static const largeUnitCurrencies = {
+    'LBP', 'SYP', 'IRR', 'IQD', 'IDR', 'VND', 'KRW', 'COP', 'UZS', 'LAK',
+    'GNF', 'MGA', 'PYG', 'UGX', 'TZS', 'KHR', 'MMK', 'CLP', 'JPY',
+  };
+
+  /// Symbols that name one currency.
+  static const _currencySymbols = {
+    'ل.ل': 'LBP', 'l.l': 'LBP', 'l.l.': 'LBP', '€': 'EUR', '£': 'GBP',
+    'د.إ': 'AED', 'us\$': 'USD',
+  };
+
+  /// Words on a receipt that place it in a country.
+  static const _countryHints = {
+    'LBP': ['lebanon', 'liban', 'لبنان', 'beirut', 'beyrouth', 'بيروت',
+      '.lb', '+961'],
+  };
+
+  /// The receipt's currency when it isn't [billCurrency]. [printed] = the
+  /// receipt names it ("LBP", "ل.ل", "€"); otherwise it is a guess from
+  /// the amounts (whole thousands → the large-unit currency among
+  /// [userCurrencies]; cents → the one other currency) and the shop's
+  /// country. Only [userCurrencies] are suggested; null = no clear answer.
+  static ({String code, bool printed})? receiptCurrency(
+    OcrResult r, {
+    required String billCurrency,
+    required Iterable<String> userCurrencies,
+  }) {
+    final mine = {for (final c in userCurrencies) c.toUpperCase()};
+    final text = '${r.rawText}\n${r.lines.map((l) => l.text).join('\n')}';
+    final lower = text.toLowerCase();
+
+    // 1. Named on the receipt.
+    final printed = <String>{};
+    _currencySymbols.forEach((sym, code) {
+      if (mine.contains(code) && lower.contains(sym)) printed.add(code);
+    });
+    for (final c in mine) {
+      if (RegExp('(^|[^A-Za-z])$c([^A-Za-z]|\$)').hasMatch(text)) {
+        printed.add(c);
+      }
+    }
+    if (printed.length == 1) {
+      final c = printed.first;
+      return c == billCurrency ? null : (code: c, printed: true);
+    }
+
+    // 2. The amounts.
+    final amounts = [
+      for (final l in r.lines)
+        if (l.hasPrice) l.parsedAmount!.abs(),
+      if (r.receiptTotal != null) r.receiptTotal!,
+    ];
+    if (amounts.length < 2) return null;
+    final large = amounts.every((a) => a >= 1000 && a % 100 == 0);
+    final cents = amounts.any((a) => a != a.roundToDouble());
+    final billLarge = largeUnitCurrencies.contains(billCurrency);
+    Iterable<String> pool = printed.isNotEmpty ? printed : mine;
+    if (large && !billLarge) {
+      pool = pool.where(largeUnitCurrencies.contains);
+    } else if (cents && billLarge) {
+      pool = pool.where((c) => !largeUnitCurrencies.contains(c));
+    } else {
+      return null;
+    }
+    final candidates = pool.where((c) => c != billCurrency).toList();
+    if (candidates.length > 1) {
+      // Several fit: the shop's country decides.
+      candidates.retainWhere((c) =>
+          (_countryHints[c] ?? const []).any((w) => lower.contains(w)));
+    }
+    return candidates.length == 1
+        ? (code: candidates.first, printed: false)
+        : null;
+  }
+
   /// Exposed for tests.
   @visibleForTesting
   static OcrLineKind classifyForTest(String line) =>

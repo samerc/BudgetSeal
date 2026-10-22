@@ -1557,6 +1557,16 @@ class SAr extends S {
   }
 
   @override
+  String billCurrencyHint(String currency) {
+    return 'يبدو أنه بـ$currency — تبديل؟';
+  }
+
+  @override
+  String billCurrencySwitched(String currency) {
+    return 'تم تحويل الفاتورة إلى $currency كما في الإيصال';
+  }
+
+  @override
   String billReceiptDiff(String items, String total) {
     return 'مجموع البنود $items · مجموع الإيصال $total';
   }

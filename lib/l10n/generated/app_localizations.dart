@@ -2847,6 +2847,18 @@ abstract class S {
   /// **'Matches the receipt total ({total})'**
   String billReceiptMatch(String total);
 
+  /// No description provided for @billCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like {currency} — switch?'**
+  String billCurrencyHint(String currency);
+
+  /// No description provided for @billCurrencySwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill switched to {currency}, as on the receipt'**
+  String billCurrencySwitched(String currency);
+
   /// No description provided for @billReceiptDiff.
   ///
   /// In en, this message translates to:

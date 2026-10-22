@@ -356,4 +356,85 @@ void main() {
       ]);
     });
   });
+
+  group('OcrService receipt currency', () {
+    OcrResult receipt(List<(String, double)> items,
+        {double? total, String header = ''}) {
+      var y = 100.0;
+      OcrLine line(String text, [double? amount]) => OcrLine(
+          text: text,
+          boundingBox: ui.Rect.fromLTWH(40, y += 40, 700, 28),
+          parsedAmount: amount,
+          parsedName: text,
+          kind: amount == null ? OcrLineKind.other : OcrLineKind.item);
+      return OcrResult(
+        lines: [
+          if (header.isNotEmpty) line(header),
+          for (final (name, a) in items) line(name, a),
+        ],
+        imageWidth: 800,
+        imageHeight: 1400,
+        rawText: header,
+        receiptTotal: total,
+      );
+    }
+
+    final lbpMeal = [('ChickenMac Meal', 700000.0), ('Hamburger', 450000.0)];
+
+    test('whole thousands → the large-unit currency the user has', () {
+      expect(
+          OcrService.receiptCurrency(receipt(lbpMeal, total: 1150000),
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          (code: 'LBP', printed: false));
+      // Nothing to suggest without such a currency, or when it's already set.
+      expect(
+          OcrService.receiptCurrency(receipt(lbpMeal),
+              billCurrency: 'USD', userCurrencies: {'USD', 'EUR'}),
+          isNull);
+      expect(
+          OcrService.receiptCurrency(receipt(lbpMeal),
+              billCurrency: 'LBP', userCurrencies: {'USD', 'LBP'}),
+          isNull);
+    });
+
+    test('several large-unit currencies: the shop\'s country decides', () {
+      final mine = {'USD', 'LBP', 'SYP'};
+      expect(
+          OcrService.receiptCurrency(receipt(lbpMeal),
+              billCurrency: 'USD', userCurrencies: mine),
+          isNull);
+      expect(
+          OcrService.receiptCurrency(
+              receipt(lbpMeal, header: "McDonald's Lebanon"),
+              billCurrency: 'USD',
+              userCurrencies: mine),
+          (code: 'LBP', printed: false));
+    });
+
+    test('a currency printed on the receipt wins', () {
+      expect(
+          OcrService.receiptCurrency(
+              receipt([('Pizza', 24.5), ('Salad', 12.0)],
+                  header: 'Total EUR 36.50'),
+              billCurrency: 'USD',
+              userCurrencies: {'USD', 'EUR'}),
+          (code: 'EUR', printed: true));
+      expect(
+          OcrService.receiptCurrency(receipt(lbpMeal, header: 'المجموع ل.ل'),
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          (code: 'LBP', printed: true));
+    });
+
+    test('cents on a bill set in a large-unit currency', () {
+      expect(
+          OcrService.receiptCurrency(receipt([('Latte', 4.5), ('Bagel', 3.25)]),
+              billCurrency: 'LBP', userCurrencies: {'USD', 'LBP'}),
+          (code: 'USD', printed: false));
+      // Ordinary prices in the bill's own currency: nothing to say.
+      expect(
+          OcrService.receiptCurrency(receipt([('Latte', 4.5), ('Bagel', 3.25)]),
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          isNull);
+    });
+  });
 }

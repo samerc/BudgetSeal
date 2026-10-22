@@ -1568,6 +1568,16 @@ class SFr extends S {
   }
 
   @override
+  String billCurrencyHint(String currency) {
+    return 'Semble être en $currency — changer ?';
+  }
+
+  @override
+  String billCurrencySwitched(String currency) {
+    return 'Facture passée en $currency, comme sur le ticket';
+  }
+
+  @override
   String billReceiptDiff(String items, String total) {
     return 'Les articles font $items · total du ticket $total';
   }
