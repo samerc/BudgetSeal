@@ -1728,6 +1728,31 @@ class SFr extends S {
       'Passer à la date suivante sans l\'enregistrer';
 
   @override
+  String get calendarTitle => 'Calendrier';
+
+  @override
+  String get settingsCalendarSub => 'Les dépenses jour par jour';
+
+  @override
+  String get calendarAddToday => 'Ajouter une transaction aujourd\'hui';
+
+  @override
+  String get calendarAddOn => 'Ajouter ce jour-là';
+
+  @override
+  String get calendarNothing => 'Rien ce jour-là';
+
+  @override
+  String get calendarFutureDay => 'Ce jour n\'est pas encore arrivé';
+
+  @override
+  String get upcomingPaidOnDay => 'Payé un autre jour';
+
+  @override
+  String get upcomingPaidOnDayDesc =>
+      'L\'enregistrer le jour où vous l\'avez payé';
+
+  @override
   String get upcomingPosted => 'Facture enregistrée';
 
   @override
@@ -4046,20 +4071,6 @@ class SFr extends S {
   String freqEveryNYears(int n) {
     return 'Tous les $n ans';
   }
-
-  @override
-  String get billCalTitle => 'Calendrier des factures';
-
-  @override
-  String billCalNDue(int count) {
-    return '$count facture(s) due(s)';
-  }
-
-  @override
-  String get billCalUpcoming => 'À venir';
-
-  @override
-  String get billCalNoUpcoming => 'Aucune facture à venir';
 
   @override
   String get upcomingTitle => 'Factures à venir';

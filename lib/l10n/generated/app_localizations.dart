@@ -3123,6 +3123,54 @@ abstract class S {
   /// **'Move to the next date without recording it'**
   String get upcomingSkipDesc;
 
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// No description provided for @settingsCalendarSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending day by day'**
+  String get settingsCalendarSub;
+
+  /// No description provided for @calendarAddToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a transaction today'**
+  String get calendarAddToday;
+
+  /// No description provided for @calendarAddOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add on this day'**
+  String get calendarAddOn;
+
+  /// No description provided for @calendarNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this day'**
+  String get calendarNothing;
+
+  /// No description provided for @calendarFutureDay.
+  ///
+  /// In en, this message translates to:
+  /// **'This day hasn\'t come yet'**
+  String get calendarFutureDay;
+
+  /// No description provided for @upcomingPaidOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on another day'**
+  String get upcomingPaidOnDay;
+
+  /// No description provided for @upcomingPaidOnDayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Record it on the day you paid it'**
+  String get upcomingPaidOnDayDesc;
+
   /// No description provided for @upcomingPosted.
   ///
   /// In en, this message translates to:
@@ -6993,30 +7041,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Every {n} years'**
   String freqEveryNYears(int n);
-
-  /// AppBar title
-  ///
-  /// In en, this message translates to:
-  /// **'Bill calendar'**
-  String get billCalTitle;
-
-  /// Day sheet subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'{count} bill(s) due'**
-  String billCalNDue(int count);
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming'**
-  String get billCalUpcoming;
-
-  /// Empty state
-  ///
-  /// In en, this message translates to:
-  /// **'No upcoming bills'**
-  String get billCalNoUpcoming;
 
   /// AppBar title
   ///

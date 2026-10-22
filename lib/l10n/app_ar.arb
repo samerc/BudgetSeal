@@ -503,6 +503,14 @@
   "upcomingPostNowDesc": "سجّلها اليوم وانتقل إلى الموعد التالي",
   "upcomingSkip": "تخطَّ هذه المرة",
   "upcomingSkipDesc": "انتقل إلى الموعد التالي دون تسجيلها",
+  "calendarTitle": "التقويم",
+  "settingsCalendarSub": "الإنفاق يومًا بيوم",
+  "calendarAddToday": "إضافة معاملة اليوم",
+  "calendarAddOn": "إضافة في هذا اليوم",
+  "calendarNothing": "لا شيء في هذا اليوم",
+  "calendarFutureDay": "لم يأتِ هذا اليوم بعد",
+  "upcomingPaidOnDay": "دُفعت في يوم آخر",
+  "upcomingPaidOnDayDesc": "سجّلها في اليوم الذي دفعتها فيه",
   "upcomingPosted": "تم تسجيل الفاتورة",
   "upcomingSkipped": "تم التخطي — حُدّث الموعد التالي",
   "recurringPostedN": "{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}",
@@ -2090,27 +2098,6 @@
         "type": "int"
       }
     }
-  },
-  "billCalTitle": "تقويم الفواتير",
-  "@billCalTitle": {
-    "description": "AppBar title"
-  },
-  "billCalNDue": "{count} فاتورة(فواتير) مستحقة",
-  "@billCalNDue": {
-    "description": "Day sheet subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "billCalUpcoming": "القادمة",
-  "@billCalUpcoming": {
-    "description": "Section header"
-  },
-  "billCalNoUpcoming": "لا فواتير قادمة",
-  "@billCalNoUpcoming": {
-    "description": "Empty state"
   },
   "upcomingTitle": "الفواتير القادمة",
   "@upcomingTitle": {

@@ -42,9 +42,9 @@ import 'features/categories/categories_screen.dart';
 import 'features/main/main_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/periods/leftover_resolution_screen.dart';
-import 'features/recurring/bill_calendar_screen.dart';
 import 'features/recurring/recurring_screen.dart';
 import 'features/recurring/upcoming_bills_screen.dart';
+import 'features/transactions/calendar_screen.dart';
 import 'features/settings/import_screen.dart';
 import 'features/templates/templates_screen.dart';
 import 'features/periods/period_transition_screen.dart';
@@ -227,9 +227,9 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               slideUpPage(child: const RecurringScreen(), state: state),
         ),
         GoRoute(
-          path: '/bill-calendar',
+          path: '/calendar',
           pageBuilder: (_, state) =>
-              slideUpPage(child: const BillCalendarScreen(), state: state),
+              slideUpPage(child: const CalendarScreen(), state: state),
         ),
         GoRoute(
           path: '/upcoming-bills',

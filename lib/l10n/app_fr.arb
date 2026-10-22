@@ -503,6 +503,14 @@
   "upcomingPostNowDesc": "L'enregistrer aujourd'hui et passer à la date suivante",
   "upcomingSkip": "Ignorer cette échéance",
   "upcomingSkipDesc": "Passer à la date suivante sans l'enregistrer",
+  "calendarTitle": "Calendrier",
+  "settingsCalendarSub": "Les dépenses jour par jour",
+  "calendarAddToday": "Ajouter une transaction aujourd'hui",
+  "calendarAddOn": "Ajouter ce jour-là",
+  "calendarNothing": "Rien ce jour-là",
+  "calendarFutureDay": "Ce jour n'est pas encore arrivé",
+  "upcomingPaidOnDay": "Payé un autre jour",
+  "upcomingPaidOnDayDesc": "L'enregistrer le jour où vous l'avez payé",
   "upcomingPosted": "Facture enregistrée",
   "upcomingSkipped": "Ignorée — prochaine date mise à jour",
   "recurringPostedN": "{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}",
@@ -2090,27 +2098,6 @@
         "type": "int"
       }
     }
-  },
-  "billCalTitle": "Calendrier des factures",
-  "@billCalTitle": {
-    "description": "AppBar title"
-  },
-  "billCalNDue": "{count} facture(s) due(s)",
-  "@billCalNDue": {
-    "description": "Day sheet subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "billCalUpcoming": "À venir",
-  "@billCalUpcoming": {
-    "description": "Section header"
-  },
-  "billCalNoUpcoming": "Aucune facture à venir",
-  "@billCalNoUpcoming": {
-    "description": "Empty state"
   },
   "upcomingTitle": "Factures à venir",
   "@upcomingTitle": {

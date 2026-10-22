@@ -246,6 +246,11 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     return v.toStringAsFixed(2);
   }
 
+  /// The running result, with the user's separators (and a minus when a
+  /// subtraction goes below zero).
+  String _fmtResult(double v) =>
+      v < 0 ? '-${formatForDisplay(-v)}' : formatForDisplay(v);
+
   /// Format a calculator expression for display, adding thousand separators
   /// to each number token while preserving operators.
   String _fmtExprForDisplay(String expr) {
@@ -330,6 +335,10 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     final display = _amount > 0 || _hasOperator
         ? _fmtExprForDisplay(_calcExpression)
         : _calcDisplay.replaceAll('.', decimalSeparatorChar);
+    // Mid-calculation with the second number typed ("12 + 5", not "12 +").
+    final showResult = _hasOperator &&
+        !_startNewOperand &&
+        !'+-×÷'.contains(_calcExpression[_calcExpression.length - 1]);
     return Container(
       decoration: BoxDecoration(
         color: AppColors.popup(context),
@@ -346,7 +355,7 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
             children: [
               // Amount display — scales down instead of truncating.
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 26, 24, 18),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: SizedBox(
                   height: 48,
                   width: double.infinity,
@@ -373,6 +382,32 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
                             letterSpacing: -0.5,
                             color: AppColors.tp(context),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // The running result of "12 + 5": the amount Done will use.
+              // Its line is always there so the keys don't jump.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 2, 28, 10),
+                child: SizedBox(
+                  height: 22,
+                  width: double.infinity,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: showResult ? 1 : 0,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '= ${_fmtResult(_amount)}',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: AppColors.ts(context),
                         ),
                       ),
                     ),

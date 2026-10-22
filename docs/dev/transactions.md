@@ -63,7 +63,7 @@ The list answers "what did this do to my budget" (no longer Cashew's rows):
 - **Last used account**: `LastUsedService` (`core/services/last_used_service.dart`) stores the last account and transfer pair; both forms apply it to new transactions (`_applyAccountDefaults`). `_accountIsDefault` marks a defaulted account so category/title auto-fill may still replace it; picking an account by hand clears the flag. Prefilled lines without an account (a bill split's per-person lines) all get that default, but only line 0 takes the account's usual category; the others are in `_defaultedLines` and move with line 0 when an autofill (`_autofillAccount`) replaces its account.
 - **Classic form**: Save & new (`_save(addAnother: true)` → `_resetForNext()`), Undo action on the Saved SnackBar for new transactions (`_undoSaveAction`), ⇅ swap on the transfer card, `DateQuickChip` (Today/Yesterday, shared with assisted), discard guard (`PopScope(canPop: false)` + `_signature()` compared at pop time — typing doesn't rebuild), prefilled foreign lines fetch a rate after the first frame.
 - **CategorySheet** takes `initialType` and `recentIds` (`recentCategoryIds()`); the assisted picker shows the same recents as chips.
-- **Calculator**: a prefilled amount is highlighted (`_prefilled`) and replaced by the first digit.
+- **Calculator**: a prefilled amount is highlighted (`_prefilled`) and replaced by the first digit. Mid-calculation ("12 + 5", not "12 +") a "= 17" line shows the running `_amount` under the expression; its 22 px line is always reserved so the keys don't jump.
 - **Assisted**: `initialDate`/`initialTitle` params (quick-add title, viewed month), Enter on the title step continues, editable title row on the amount step, × removes the active item chip, the autofilled amount survives `_showAmountScreen()`.
 - **Activity tab**: new transactions in a past month are dated its last day (`_newTxDate()`); quick add flashes the new row.
 - **Notification/shortcut routing**: payloads are routes; `NotificationService.openRoute` (ValueNotifier) is set by taps (and cold-start launch details) and by `AppShortcutsService` (quick_actions: add transaction, fund envelopes, upcoming bills); `app.dart` pushes it.
@@ -71,6 +71,10 @@ The list answers "what did this do to my budget" (no longer Cashew's rows):
 ## Auto-fill
 
 `lib/core/providers/autofill_provider.dart` + `lib/core/services/autofill_service.dart`. When a category is selected, auto-fills fields from the last transaction with that category. Configurable in Settings > Appearance > Auto-fill: Account (default on), Title (default on), Amount (default off), Category per account (default off), Override existing values (default off). Works in both AF and classic form.
+
+## Calendar
+
+`features/transactions/calendar_screen.dart`, route `/calendar` (More › Money › Calendar and the Recurring screen's calendar button; it replaced the old bill calendar). A month grid (locale's first weekday, `_MonthGrid`): past days show the day's spending in the base currency (`_byDay`: same `isRealRate` rule as Activity's day totals; "+income" on income-only days), today and later show bills due in the Upcoming blue (`_billsByDay`: every occurrence via `advanceRecurringDate` + `recurringAmountOn`, end date respected; the amount when one bill, dots when several — bills can be in other currencies). Today has an accent ring, the selected day an accent fill. Below: one day card (Activity's header + `TxTile` rows + `_BillRow`s with "Due in N days"; a bill row opens Upcoming bills). "Add on this day" (or double-tap a past day) opens the add form with `editDate`; future days can't take a transaction. Months: back freely, forward up to 12 months (bills only).
 
 ## Future Months
 

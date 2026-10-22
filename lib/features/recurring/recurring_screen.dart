@@ -129,11 +129,11 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                         ),
                       ),
                       IconButton(
-                        tooltip: S.of(context).billCalTitle,
+                        tooltip: S.of(context).calendarTitle,
                         icon: Icon(AppIcons.calendar,
                             color: AppColors.ts(context)),
                         onPressed: () =>
-                            context.push('/bill-calendar'),
+                            context.push('/calendar'),
                       ),
                     ],
                   ),

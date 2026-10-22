@@ -88,6 +88,12 @@ class _UpcomingBillsScreenState
               onTap: () => Navigator.pop(ctx, 'post'),
             ),
             ListTile(
+              leading: const Icon(AppIcons.calendarBlank),
+              title: Text(tr.upcomingPaidOnDay),
+              subtitle: Text(tr.upcomingPaidOnDayDesc),
+              onTap: () => Navigator.pop(ctx, 'post-on'),
+            ),
+            ListTile(
               leading: const Icon(AppIcons.skipForward),
               title: Text(tr.upcomingSkip),
               subtitle: Text(tr.upcomingSkipDesc),
@@ -110,10 +116,25 @@ class _UpcomingBillsScreenState
       _load();
       return;
     }
+    DateTime? paidOn;
+    if (action == 'post-on') {
+      // Overdue: start on the due date; never after today (a future-dated
+      // payment would move balances but stay hidden in Activity).
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final due = bill.nextDueDate;
+      paidOn = await showDatePicker(
+        context: context,
+        initialDate: due.isBefore(today) ? due : today,
+        firstDate: DateTime(today.year - 1, today.month, today.day),
+        lastDate: today,
+      );
+      if (paidOn == null || !mounted) return;
+    }
     try {
       final engine = ref.read(recurringEngineProvider);
-      if (action == 'post') {
-        await engine.postNow(bill.id);
+      if (action == 'post' || action == 'post-on') {
+        await engine.postNow(bill.id, on: paidOn);
       } else {
         await engine.skipNext(bill.id);
       }
@@ -121,7 +142,7 @@ class _UpcomingBillsScreenState
       ref.invalidate(monthlyTransactionsProvider);
       ref.invalidate(allocationsProvider);
       messenger.showSnackBar(SnackBar(
-        content: Text(action == 'post' ? tr.upcomingPosted : tr.upcomingSkipped),
+        content: Text(action == 'skip' ? tr.upcomingSkipped : tr.upcomingPosted),
         behavior: SnackBarBehavior.floating,
       ));
     } catch (e) {

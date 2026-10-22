@@ -1715,6 +1715,30 @@ class SEn extends S {
   String get upcomingSkipDesc => 'Move to the next date without recording it';
 
   @override
+  String get calendarTitle => 'Calendar';
+
+  @override
+  String get settingsCalendarSub => 'Spending day by day';
+
+  @override
+  String get calendarAddToday => 'Add a transaction today';
+
+  @override
+  String get calendarAddOn => 'Add on this day';
+
+  @override
+  String get calendarNothing => 'Nothing on this day';
+
+  @override
+  String get calendarFutureDay => 'This day hasn\'t come yet';
+
+  @override
+  String get upcomingPaidOnDay => 'Paid on another day';
+
+  @override
+  String get upcomingPaidOnDayDesc => 'Record it on the day you paid it';
+
+  @override
   String get upcomingPosted => 'Bill posted';
 
   @override
@@ -4010,20 +4034,6 @@ class SEn extends S {
   String freqEveryNYears(int n) {
     return 'Every $n years';
   }
-
-  @override
-  String get billCalTitle => 'Bill calendar';
-
-  @override
-  String billCalNDue(int count) {
-    return '$count bill(s) due';
-  }
-
-  @override
-  String get billCalUpcoming => 'Upcoming';
-
-  @override
-  String get billCalNoUpcoming => 'No upcoming bills';
 
   @override
   String get upcomingTitle => 'Upcoming bills';

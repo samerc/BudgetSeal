@@ -196,6 +196,20 @@ void main() {
       await expectOnePosting(b);
     });
 
+    test('paid on another day → dated that day, still one posting', () async {
+      await seed(a);
+      final rec = await (a.select(a.recurringTransactions)).getSingle();
+      final paid = DateTime.now().subtract(const Duration(days: 3));
+      await RecurringEngine(a).postNow('rec', on: paid);
+      final tx = await (a.select(a.transactions)).getSingle();
+      expect(tx.createdAt,
+          DateTime(paid.year, paid.month, paid.day, 12));
+      expect(tx.id, RecurringEngine.occurrenceId('rec', rec.nextDueDate));
+      // The occurrence is paid: launching later doesn't post it again.
+      await RecurringEngine(a).processRecurring();
+      await expectOnePosting(a);
+    });
+
     test('already synced → not posted again', () async {
       await seed(a);
       await seed(b);

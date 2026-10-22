@@ -141,14 +141,20 @@ class RecurringEngine {
 
   /// Upcoming bills → Post now: record the next occurrence today and move
   /// the due date on (paying a bill early).
-  Future<void> postNow(String recurringId) async {
+  /// [on] = the day it was paid (an overdue bill paid on its due date, or
+  /// yesterday's payment); today when null. Another day is recorded at noon.
+  Future<void> postNow(String recurringId, {DateTime? on}) async {
     final rec = await (_db.select(_db.recurringTransactions)
           ..where((r) => r.id.equals(recurringId)))
         .getSingle();
+    final now = DateTime.now();
+    final paid = on == null ||
+            (on.year == now.year && on.month == now.month && on.day == now.day)
+        ? now
+        : DateTime(on.year, on.month, on.day, 12);
     // Keyed on the occurrence it pays, so the other device can't post
     // that occurrence again before it has synced the new due date.
-    await _generateTransaction(rec, DateTime.now(), null,
-        occurrence: rec.nextDueDate);
+    await _generateTransaction(rec, paid, null, occurrence: rec.nextDueDate);
     await _advance(rec);
   }
 

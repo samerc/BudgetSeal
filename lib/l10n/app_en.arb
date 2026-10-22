@@ -579,6 +579,14 @@
   "upcomingPostNowDesc": "Record it today and move to the next date",
   "upcomingSkip": "Skip this one",
   "upcomingSkipDesc": "Move to the next date without recording it",
+  "calendarTitle": "Calendar",
+  "settingsCalendarSub": "Spending day by day",
+  "calendarAddToday": "Add a transaction today",
+  "calendarAddOn": "Add on this day",
+  "calendarNothing": "Nothing on this day",
+  "calendarFutureDay": "This day hasn't come yet",
+  "upcomingPaidOnDay": "Paid on another day",
+  "upcomingPaidOnDayDesc": "Record it on the day you paid it",
   "upcomingPosted": "Bill posted",
   "upcomingSkipped": "Skipped — next date updated",
   "recurringPostedN": "{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}",
@@ -2517,27 +2525,6 @@
         "type": "int"
       }
     }
-  },
-  "billCalTitle": "Bill calendar",
-  "@billCalTitle": {
-    "description": "AppBar title"
-  },
-  "billCalNDue": "{count} bill(s) due",
-  "@billCalNDue": {
-    "description": "Day sheet subtitle",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "billCalUpcoming": "Upcoming",
-  "@billCalUpcoming": {
-    "description": "Section header"
-  },
-  "billCalNoUpcoming": "No upcoming bills",
-  "@billCalNoUpcoming": {
-    "description": "Empty state"
   },
   "upcomingTitle": "Upcoming bills",
   "@upcomingTitle": {

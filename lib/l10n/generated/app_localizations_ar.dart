@@ -1714,6 +1714,30 @@ class SAr extends S {
   String get upcomingSkipDesc => 'انتقل إلى الموعد التالي دون تسجيلها';
 
   @override
+  String get calendarTitle => 'التقويم';
+
+  @override
+  String get settingsCalendarSub => 'الإنفاق يومًا بيوم';
+
+  @override
+  String get calendarAddToday => 'إضافة معاملة اليوم';
+
+  @override
+  String get calendarAddOn => 'إضافة في هذا اليوم';
+
+  @override
+  String get calendarNothing => 'لا شيء في هذا اليوم';
+
+  @override
+  String get calendarFutureDay => 'لم يأتِ هذا اليوم بعد';
+
+  @override
+  String get upcomingPaidOnDay => 'دُفعت في يوم آخر';
+
+  @override
+  String get upcomingPaidOnDayDesc => 'سجّلها في اليوم الذي دفعتها فيه';
+
+  @override
   String get upcomingPosted => 'تم تسجيل الفاتورة';
 
   @override
@@ -4033,20 +4057,6 @@ class SAr extends S {
   String freqEveryNYears(int n) {
     return 'كل $n سنوات';
   }
-
-  @override
-  String get billCalTitle => 'تقويم الفواتير';
-
-  @override
-  String billCalNDue(int count) {
-    return '$count فاتورة(فواتير) مستحقة';
-  }
-
-  @override
-  String get billCalUpcoming => 'القادمة';
-
-  @override
-  String get billCalNoUpcoming => 'لا فواتير قادمة';
 
   @override
   String get upcomingTitle => 'الفواتير القادمة';

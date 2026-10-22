@@ -83,6 +83,9 @@ class SettingsScreen extends ConsumerWidget {
               _MoreRow(icon: AppIcons.playCircle, title: l.tileSubscriptions,
                   subtitle: l.settingsSubscriptionsSub, hue: 340,
                   onTap: () => context.push('/subscriptions')),
+              _MoreRow(icon: AppIcons.calendarBlank, title: l.calendarTitle,
+                  subtitle: l.settingsCalendarSub, hue: 190,
+                  onTap: () => context.push('/calendar')),
               _MoreRow(icon: AppIcons.calendarDots, title: l.plannedTitle,
                   subtitle: l.plannedSubtitle, hue: 255,
                   onTap: () {

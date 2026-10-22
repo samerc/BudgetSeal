@@ -386,10 +386,6 @@ freq_every_n_years,Frequency (interval),Every {n} years,كل {n} سنوات,Tous
 # ──────────────────────────────────────────────,,,,
 # BILL CALENDAR,,,,
 # ──────────────────────────────────────────────,,,,
-bill_cal_title,AppBar title,Bill calendar,تقويم الفواتير,Calendrier des factures
-bill_cal_n_due,Day sheet subtitle,{count} bill(s) due,{count} فاتورة(فواتير) مستحقة,{count} facture(s) due(s)
-bill_cal_upcoming,Section header,Upcoming,القادمة,À venir
-bill_cal_no_upcoming,Empty state,No upcoming bills,لا فواتير قادمة,Aucune facture à venir
 # ──────────────────────────────────────────────,,,,
 # UPCOMING BILLS,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1871,6 +1867,14 @@ upcoming_post_now,,Post now,سجّل الآن,Enregistrer maintenant
 upcoming_post_now_desc,,Record it today and move to the next date,سجّلها اليوم وانتقل إلى الموعد التالي,L'enregistrer aujourd'hui et passer à la date suivante
 upcoming_skip,,Skip this one,تخطَّ هذه المرة,Ignorer cette échéance
 upcoming_skip_desc,,Move to the next date without recording it,انتقل إلى الموعد التالي دون تسجيلها,Passer à la date suivante sans l'enregistrer
+calendar_title,More › Calendar screen title,Calendar,التقويم,Calendrier
+settings_calendar_sub,More row subtitle,Spending day by day,الإنفاق يومًا بيوم,Les dépenses jour par jour
+calendar_add_today,Calendar button,Add a transaction today,إضافة معاملة اليوم,Ajouter une transaction aujourd'hui
+calendar_add_on,Calendar,Add on this day,إضافة في هذا اليوم,Ajouter ce jour-là
+calendar_nothing,Calendar: selected day without transactions,Nothing on this day,لا شيء في هذا اليوم,Rien ce jour-là
+calendar_future_day,Calendar: selected day in the future,This day hasn't come yet,لم يأتِ هذا اليوم بعد,Ce jour n'est pas encore arrivé
+upcoming_paid_on_day,Bill sheet action,Paid on another day,دُفعت في يوم آخر,Payé un autre jour
+upcoming_paid_on_day_desc,Bill sheet action subtitle,Record it on the day you paid it,سجّلها في اليوم الذي دفعتها فيه,L'enregistrer le jour où vous l'avez payé
 upcoming_posted,,Bill posted,تم تسجيل الفاتورة,Facture enregistrée
 upcoming_skipped,,Skipped — next date updated,تم التخطي — حُدّث الموعد التالي,Ignorée — prochaine date mise à jour
 recurring_posted_n,,"{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}","{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}","{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}"
