@@ -53,9 +53,6 @@ All UI icons are **Phosphor** (phosphor_flutter, MIT) through `AppIcons` (`lib/s
 ### AnimatedAmount
 `lib/shared/widgets/animated_amount.dart` — count-up/down effect for currency amounts using `IntTween` on cents for smooth integer stepping. `lazyFirstRender: true` (default) skips animation on first build — only animates on subsequent value changes. Used on dashboard totals (income, expense, net worth, unallocated).
 
-### AnimatedCircularProgress
-`lib/shared/widgets/animated_circular_progress.dart` — custom-painted circular progress ring with overspend indicator. Main arc (0-100%) in `color`, second arc overlay in `overspendColor` for values > 100%. AnimationController at 1500ms with `easeInOutCubicEmphasized`. Used on allocation cards for envelopes with targets.
-
 ### RollingNumber
 `lib/shared/widgets/rolling_number.dart` — odometer-style rolling digit animation. Each digit scrolls independently (rightmost fastest, leftmost slowest). Non-digit characters (currency symbols, separators) crossfade. Wraps around 0↔9 via shortest path. Used on dashboard net worth and unallocated amounts.
 
@@ -94,7 +91,6 @@ All three themes come from one `_buildTheme()`; surfaces are fixed warm neutrals
 - **Spacing**: xs(4), sm(8), md(12), lg(16), xl(24), xxl(32), sectionGap(16), headerToCard(8)
 - **CardTokens**: radius(16), paddingH(16), paddingV(14), borderRadius, padding
 - **RadiusTokens**: sm(8), md(12), lg(16), pill(20), sheet(20), input(15), button(20), fab(18), dialog(25), snackbar(13)
-- **Durations**: fast(150ms), standard(250ms), emphasis(350ms) — animation timing
 - **CategoryIconTokens**: listSize(48), compactSize(36), heroSize(64)
 - **TypographyTokens**: screenTitle(28/w800), sectionHeader(15/w700/ls0), cardTitle(15/w600), amountLarge(24/w700), amountDisplay(18/w800), amountRegular(15/w700), amountSmall(13/w600), body(14/w400), caption(12/w500), overline(11/w600), mini(10/w500), txTitle(15/w600), txSubtitle(12/w400), dateHeader(14/w600)
 - **InputLimits**: nameMaxLength(100), noteMaxLength(500), maxAmount(1e9)

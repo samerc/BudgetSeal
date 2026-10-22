@@ -602,9 +602,6 @@ class SEn extends S {
   }
 
   @override
-  String get webAcctBalanceAfter => 'Balance after this transaction';
-
-  @override
   String webAcctReconciledOn(String date) {
     return 'Reconciled $date';
   }
@@ -2311,13 +2308,7 @@ class SEn extends S {
   String get commonAdd => 'Add';
 
   @override
-  String get commonClose => 'Close';
-
-  @override
   String get commonBack => 'Back';
-
-  @override
-  String get commonNext => 'Next';
 
   @override
   String get commonRetry => 'Retry';
@@ -2330,9 +2321,6 @@ class SEn extends S {
 
   @override
   String get commonConfirm => 'Confirm';
-
-  @override
-  String get commonLoading => 'Loading…';
 
   @override
   String get commonSearchHint => 'Search…';
@@ -2420,9 +2408,6 @@ class SEn extends S {
 
   @override
   String get navPressBackToExit => 'Press back again to exit';
-
-  @override
-  String get navDashboard => 'Dashboard';
 
   @override
   String get navTransactions => 'Transactions';
@@ -2569,9 +2554,6 @@ class SEn extends S {
   String get dashboardNetWorth => 'Net worth';
 
   @override
-  String get dashboardUnallocated => 'Unallocated';
-
-  @override
   String dashboardOtherCount(int count) {
     return '+ $count other';
   }
@@ -2701,11 +2683,6 @@ class SEn extends S {
 
   @override
   String get txTapPlus => 'Tap + to record one';
-
-  @override
-  String txSpentOfBudget(String spent, String budget) {
-    return 'Spent $spent of $budget budget';
-  }
 
   @override
   String txTotalCashFlow(String amount, int count) {
@@ -5878,42 +5855,6 @@ class SEn extends S {
 
   @override
   String get webShortcutHelp => 'Show this help';
-
-  @override
-  String get monthJan => 'Jan';
-
-  @override
-  String get monthFeb => 'Feb';
-
-  @override
-  String get monthMar => 'Mar';
-
-  @override
-  String get monthApr => 'Apr';
-
-  @override
-  String get monthMay => 'May';
-
-  @override
-  String get monthJun => 'Jun';
-
-  @override
-  String get monthJul => 'Jul';
-
-  @override
-  String get monthAug => 'Aug';
-
-  @override
-  String get monthSep => 'Sep';
-
-  @override
-  String get monthOct => 'Oct';
-
-  @override
-  String get monthNov => 'Nov';
-
-  @override
-  String get monthDec => 'Dec';
 
   @override
   String get notifLowEnvelopesTitle => 'Low envelopes';

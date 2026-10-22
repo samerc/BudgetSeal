@@ -2,9 +2,6 @@ import 'package:drift/drift.dart';
 
 import 'households_table.dart';
 
-// Account types
-enum AccountType { cash, bank, credit, wallet }
-
 class Accounts extends Table {
   TextColumn get id => text()();
   TextColumn get householdId =>

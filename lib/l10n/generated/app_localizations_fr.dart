@@ -604,9 +604,6 @@ class SFr extends S {
   }
 
   @override
-  String get webAcctBalanceAfter => 'Solde après cette transaction';
-
-  @override
   String webAcctReconciledOn(String date) {
     return 'Rapproché le $date';
   }
@@ -2329,13 +2326,7 @@ class SFr extends S {
   String get commonAdd => 'Ajouter';
 
   @override
-  String get commonClose => 'Fermer';
-
-  @override
   String get commonBack => 'Retour';
-
-  @override
-  String get commonNext => 'Suivant';
 
   @override
   String get commonRetry => 'Réessayer';
@@ -2348,9 +2339,6 @@ class SFr extends S {
 
   @override
   String get commonConfirm => 'Confirmer';
-
-  @override
-  String get commonLoading => 'Chargement…';
 
   @override
   String get commonSearchHint => 'Rechercher…';
@@ -2438,9 +2426,6 @@ class SFr extends S {
 
   @override
   String get navPressBackToExit => 'Appuyez à nouveau pour quitter';
-
-  @override
-  String get navDashboard => 'Tableau de bord';
 
   @override
   String get navTransactions => 'Transactions';
@@ -2588,9 +2573,6 @@ class SFr extends S {
   String get dashboardNetWorth => 'Patrimoine net';
 
   @override
-  String get dashboardUnallocated => 'Non alloué';
-
-  @override
   String dashboardOtherCount(int count) {
     return '+ $count autre(s)';
   }
@@ -2721,11 +2703,6 @@ class SFr extends S {
 
   @override
   String get txTapPlus => 'Appuyez sur + pour en ajouter';
-
-  @override
-  String txSpentOfBudget(String spent, String budget) {
-    return '$spent dépensé sur un budget de $budget';
-  }
 
   @override
   String txTotalCashFlow(String amount, int count) {
@@ -5943,42 +5920,6 @@ class SFr extends S {
 
   @override
   String get webShortcutHelp => 'Afficher cette aide';
-
-  @override
-  String get monthJan => 'Janv';
-
-  @override
-  String get monthFeb => 'Fév';
-
-  @override
-  String get monthMar => 'Mars';
-
-  @override
-  String get monthApr => 'Avr';
-
-  @override
-  String get monthMay => 'Mai';
-
-  @override
-  String get monthJun => 'Juin';
-
-  @override
-  String get monthJul => 'Juil';
-
-  @override
-  String get monthAug => 'Août';
-
-  @override
-  String get monthSep => 'Sept';
-
-  @override
-  String get monthOct => 'Oct';
-
-  @override
-  String get monthNov => 'Nov';
-
-  @override
-  String get monthDec => 'Déc';
 
   @override
   String get notifLowEnvelopesTitle => 'Enveloppes faibles';

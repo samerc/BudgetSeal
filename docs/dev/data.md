@@ -99,7 +99,7 @@ Six indexes on hot query paths: transactions by (household_id, created_at) and (
 All filters (date range, type, category, amount, search) applied in a single `.where()` pass instead of 5 sequential `.toList()` copies. Reduces allocations and iteration from O(5N) to O(N).
 
 ### RepaintBoundary on Animations
-`AnimatedCircularProgress` and `AnimatedAmount` wrapped in `RepaintBoundary` to isolate their repaints from parent widget trees. `AnimatedCircularProgress` also hoists child into `AnimatedBuilder.child` to avoid rebuilding children on every animation frame.
+`AnimatedAmount` is wrapped in `RepaintBoundary` to isolate its repaints from parent widget trees.
 
 ## Auto Backup
 

@@ -182,7 +182,6 @@
   "webImportGo": "استيراد {n}",
   "webImportNothingNew": "لا جديد — كل الصفوف ({n}) موجودة مسبقًا في BudgetSeal.",
   "webImportDone": "تم الاستيراد: {n}",
-  "webAcctBalanceAfter": "الرصيد بعد هذه المعاملة",
   "webAcctReconciledOn": "تمت المطابقة في {date}",
   "webAcctNeverReconciled": "لم تتم المطابقة بعد",
   "webAcctReconcile": "مطابقة",
@@ -675,17 +674,9 @@
   "@commonAdd": {
     "description": "Button add"
   },
-  "commonClose": "إغلاق",
-  "@commonClose": {
-    "description": "Button close"
-  },
   "commonBack": "رجوع",
   "@commonBack": {
     "description": "Button back"
-  },
-  "commonNext": "التالي",
-  "@commonNext": {
-    "description": "Button next"
   },
   "commonRetry": "إعادة المحاولة",
   "@commonRetry": {
@@ -702,10 +693,6 @@
   "commonConfirm": "تأكيد",
   "@commonConfirm": {
     "description": "Button confirm"
-  },
-  "commonLoading": "جارٍ التحميل…",
-  "@commonLoading": {
-    "description": "Loading spinner text"
   },
   "commonSearchHint": "بحث…",
   "@commonSearchHint": {
@@ -807,10 +794,6 @@
   "navPressBackToExit": "اضغط مرة أخرى للخروج",
   "@navPressBackToExit": {
     "description": "Snackbar on double-back"
-  },
-  "navDashboard": "لوحة التحكم",
-  "@navDashboard": {
-    "description": "Web sidebar label"
   },
   "navTransactions": "المعاملات",
   "@navTransactions": {
@@ -1000,10 +983,6 @@
   "dashboardNetWorth": "صافي الثروة",
   "@dashboardNetWorth": {
     "description": "Net worth label on dashboard money card"
-  },
-  "dashboardUnallocated": "غير مخصص",
-  "@dashboardUnallocated": {
-    "description": "Unallocated label on dashboard money card"
   },
   "dashboardOtherCount": "+ {count} أخرى",
   "@dashboardOtherCount": {
@@ -1196,18 +1175,6 @@
   "txTapPlus": "اضغط + لتسجيل واحدة",
   "@txTapPlus": {
     "description": "Empty state subtitle"
-  },
-  "txSpentOfBudget": "أُنفق {spent} من ميزانية {budget}",
-  "@txSpentOfBudget": {
-    "description": "Budget progress bar",
-    "placeholders": {
-      "spent": {
-        "type": "String"
-      },
-      "budget": {
-        "type": "String"
-      }
-    }
   },
   "txTotalCashFlow": "إجمالي التدفق النقدي: {amount} · {count} معاملة(ات)",
   "@txTotalCashFlow": {
@@ -4523,54 +4490,6 @@
   "webShortcutHelp": "إظهار هذه المساعدة",
   "@webShortcutHelp": {
     "description": "Description"
-  },
-  "monthJan": "يناير",
-  "@monthJan": {
-    "description": "Month abbreviation"
-  },
-  "monthFeb": "فبراير",
-  "@monthFeb": {
-    "description": "Month abbreviation"
-  },
-  "monthMar": "مارس",
-  "@monthMar": {
-    "description": "Month abbreviation"
-  },
-  "monthApr": "أبريل",
-  "@monthApr": {
-    "description": "Month abbreviation"
-  },
-  "monthMay": "مايو",
-  "@monthMay": {
-    "description": "Month abbreviation"
-  },
-  "monthJun": "يونيو",
-  "@monthJun": {
-    "description": "Month abbreviation"
-  },
-  "monthJul": "يوليو",
-  "@monthJul": {
-    "description": "Month abbreviation"
-  },
-  "monthAug": "أغسطس",
-  "@monthAug": {
-    "description": "Month abbreviation"
-  },
-  "monthSep": "سبتمبر",
-  "@monthSep": {
-    "description": "Month abbreviation"
-  },
-  "monthOct": "أكتوبر",
-  "@monthOct": {
-    "description": "Month abbreviation"
-  },
-  "monthNov": "نوفمبر",
-  "@monthNov": {
-    "description": "Month abbreviation"
-  },
-  "monthDec": "ديسمبر",
-  "@monthDec": {
-    "description": "Month abbreviation"
   },
   "notifLowEnvelopesTitle": "أظرف منخفضة",
   "@notifLowEnvelopesTitle": {

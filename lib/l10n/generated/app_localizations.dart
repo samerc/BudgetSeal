@@ -1197,12 +1197,6 @@ abstract class S {
   /// **'Imported: {n}'**
   String webImportDone(int n);
 
-  /// No description provided for @webAcctBalanceAfter.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance after this transaction'**
-  String get webAcctBalanceAfter;
-
   /// No description provided for @webAcctReconciledOn.
   ///
   /// In en, this message translates to:
@@ -4036,23 +4030,11 @@ abstract class S {
   /// **'Add'**
   String get commonAdd;
 
-  /// Button close
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get commonClose;
-
   /// Button back
   ///
   /// In en, this message translates to:
   /// **'Back'**
   String get commonBack;
-
-  /// Button next
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get commonNext;
 
   /// Button retry
   ///
@@ -4077,12 +4059,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get commonConfirm;
-
-  /// Loading spinner text
-  ///
-  /// In en, this message translates to:
-  /// **'Loading…'**
-  String get commonLoading;
 
   /// Search field hint
   ///
@@ -4257,12 +4233,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Press back again to exit'**
   String get navPressBackToExit;
-
-  /// Web sidebar label
-  ///
-  /// In en, this message translates to:
-  /// **'Dashboard'**
-  String get navDashboard;
 
   /// Web sidebar label
   ///
@@ -4540,12 +4510,6 @@ abstract class S {
   /// **'Net worth'**
   String get dashboardNetWorth;
 
-  /// Unallocated label on dashboard money card
-  ///
-  /// In en, this message translates to:
-  /// **'Unallocated'**
-  String get dashboardUnallocated;
-
   /// Shows count of other currencies
   ///
   /// In en, this message translates to:
@@ -4761,12 +4725,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Tap + to record one'**
   String get txTapPlus;
-
-  /// Budget progress bar
-  ///
-  /// In en, this message translates to:
-  /// **'Spent {spent} of {budget} budget'**
-  String txSpentOfBudget(String spent, String budget);
 
   /// Footer summary
   ///
@@ -10503,78 +10461,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Show this help'**
   String get webShortcutHelp;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Jan'**
-  String get monthJan;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Feb'**
-  String get monthFeb;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Mar'**
-  String get monthMar;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Apr'**
-  String get monthApr;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'May'**
-  String get monthMay;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Jun'**
-  String get monthJun;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Jul'**
-  String get monthJul;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Aug'**
-  String get monthAug;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Sep'**
-  String get monthSep;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Oct'**
-  String get monthOct;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Nov'**
-  String get monthNov;
-
-  /// Month abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **'Dec'**
-  String get monthDec;
 
   /// Notification title
   ///

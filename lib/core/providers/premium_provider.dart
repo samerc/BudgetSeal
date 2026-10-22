@@ -79,9 +79,6 @@ class PremiumNotifier extends Notifier<bool> {
 /// Check if a specific feature requires premium.
 bool isFeaturePremium(String feature) => _premiumFeatures.contains(feature);
 
-/// Check if the user has hit a free-tier limit.
-bool isAtFreeLimit(int currentCount, int limit) => currentCount >= limit;
-
 /// Valid redeem codes. In production, these could be fetched from a server
 /// or use a more sophisticated validation (HMAC, expiry, etc.).
 /// For now, a simple hardcoded set that you control.

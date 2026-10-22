@@ -257,14 +257,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.35.1"
-  drift_flutter:
-    dependency: "direct main"
-    description:
-      name: drift_flutter
-      sha256: "91acf4bee7c3c84467cba46455aa70e5292a3b889f4582645d74f2e5a8c106f2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
   dynamic_color:
     dependency: "direct main"
     description:
@@ -581,14 +573,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "17.5.0"
-  google_cloud:
-    dependency: transitive
-    description:
-      name: google_cloud
-      sha256: b385e20726ef5315d302c5933bfb728103116c5be2d3d17094b01a82da538c1f
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
   google_fonts:
     dependency: "direct main"
     description:
@@ -677,14 +661,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "17.0.0"
-  googleapis_auth:
-    dependency: "direct main"
-    description:
-      name: googleapis_auth
-      sha256: d31822528becea550f7c7a9ab73a4518e31e48f201ab574be7e141f262923f27
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.4"
   graphs:
     dependency: transitive
     description:
@@ -1362,14 +1338,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  sliver_tools:
-    dependency: "direct main"
-    description:
-      name: sliver_tools
-      sha256: eae28220badfb9d0559207badcbbc9ad5331aac829a88cb0964d330d2a4636a6
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.12"
   source_gen:
     dependency: transitive
     description:
@@ -1386,14 +1354,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.2"
-  sqlcipher_flutter_libs:
-    dependency: transitive
-    description:
-      name: sqlcipher_flutter_libs
-      sha256: "38d62d659d2fb8739bf25a42c9a350d1fdd6c29a5a61f13a946778ec75d27929"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0+eol"
   sqlite3:
     dependency: transitive
     description:

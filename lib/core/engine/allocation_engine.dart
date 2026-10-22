@@ -11,8 +11,6 @@ import '../database/daos/ledger_dao.dart';
 import '../fx/fx_service.dart' show latestCachedRate;
 import 'balance_calculator.dart';
 
-enum OverspendOption { useUnallocated, allowNegative, cancel }
-
 /// A line is in a different currency from its account and no exchange rate
 /// between the two is known (none entered, none cached).
 class CurrencyConversionException implements Exception {

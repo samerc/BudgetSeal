@@ -182,7 +182,6 @@
   "webImportGo": "Importer {n}",
   "webImportNothingNew": "Rien de nouveau — les {n} lignes sont déjà dans BudgetSeal.",
   "webImportDone": "Importées : {n}",
-  "webAcctBalanceAfter": "Solde après cette transaction",
   "webAcctReconciledOn": "Rapproché le {date}",
   "webAcctNeverReconciled": "Jamais rapproché",
   "webAcctReconcile": "Rapprocher",
@@ -675,17 +674,9 @@
   "@commonAdd": {
     "description": "Button add"
   },
-  "commonClose": "Fermer",
-  "@commonClose": {
-    "description": "Button close"
-  },
   "commonBack": "Retour",
   "@commonBack": {
     "description": "Button back"
-  },
-  "commonNext": "Suivant",
-  "@commonNext": {
-    "description": "Button next"
   },
   "commonRetry": "Réessayer",
   "@commonRetry": {
@@ -702,10 +693,6 @@
   "commonConfirm": "Confirmer",
   "@commonConfirm": {
     "description": "Button confirm"
-  },
-  "commonLoading": "Chargement…",
-  "@commonLoading": {
-    "description": "Loading spinner text"
   },
   "commonSearchHint": "Rechercher…",
   "@commonSearchHint": {
@@ -807,10 +794,6 @@
   "navPressBackToExit": "Appuyez à nouveau pour quitter",
   "@navPressBackToExit": {
     "description": "Snackbar on double-back"
-  },
-  "navDashboard": "Tableau de bord",
-  "@navDashboard": {
-    "description": "Web sidebar label"
   },
   "navTransactions": "Transactions",
   "@navTransactions": {
@@ -1000,10 +983,6 @@
   "dashboardNetWorth": "Patrimoine net",
   "@dashboardNetWorth": {
     "description": "Net worth label on dashboard money card"
-  },
-  "dashboardUnallocated": "Non alloué",
-  "@dashboardUnallocated": {
-    "description": "Unallocated label on dashboard money card"
   },
   "dashboardOtherCount": "+ {count} autre(s)",
   "@dashboardOtherCount": {
@@ -1196,18 +1175,6 @@
   "txTapPlus": "Appuyez sur + pour en ajouter",
   "@txTapPlus": {
     "description": "Empty state subtitle"
-  },
-  "txSpentOfBudget": "{spent} dépensé sur un budget de {budget}",
-  "@txSpentOfBudget": {
-    "description": "Budget progress bar",
-    "placeholders": {
-      "spent": {
-        "type": "String"
-      },
-      "budget": {
-        "type": "String"
-      }
-    }
   },
   "txTotalCashFlow": "Flux total : {amount} · {count} transaction(s)",
   "@txTotalCashFlow": {
@@ -4523,54 +4490,6 @@
   "webShortcutHelp": "Afficher cette aide",
   "@webShortcutHelp": {
     "description": "Description"
-  },
-  "monthJan": "Janv",
-  "@monthJan": {
-    "description": "Month abbreviation"
-  },
-  "monthFeb": "Fév",
-  "@monthFeb": {
-    "description": "Month abbreviation"
-  },
-  "monthMar": "Mars",
-  "@monthMar": {
-    "description": "Month abbreviation"
-  },
-  "monthApr": "Avr",
-  "@monthApr": {
-    "description": "Month abbreviation"
-  },
-  "monthMay": "Mai",
-  "@monthMay": {
-    "description": "Month abbreviation"
-  },
-  "monthJun": "Juin",
-  "@monthJun": {
-    "description": "Month abbreviation"
-  },
-  "monthJul": "Juil",
-  "@monthJul": {
-    "description": "Month abbreviation"
-  },
-  "monthAug": "Août",
-  "@monthAug": {
-    "description": "Month abbreviation"
-  },
-  "monthSep": "Sept",
-  "@monthSep": {
-    "description": "Month abbreviation"
-  },
-  "monthOct": "Oct",
-  "@monthOct": {
-    "description": "Month abbreviation"
-  },
-  "monthNov": "Nov",
-  "@monthNov": {
-    "description": "Month abbreviation"
-  },
-  "monthDec": "Déc",
-  "@monthDec": {
-    "description": "Month abbreviation"
   },
   "notifLowEnvelopesTitle": "Enveloppes faibles",
   "@notifLowEnvelopesTitle": {

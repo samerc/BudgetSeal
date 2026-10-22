@@ -64,18 +64,6 @@ abstract final class RadiusTokens {
   static const double snackbar = 13;
 }
 
-// ── Animation durations ─────────────────────────────────────────────────────
-abstract final class Durations {
-  /// Quick feedback (tap, toggle)
-  static const Duration fast = Duration(milliseconds: 150);
-
-  /// Standard transitions (expand, fade)
-  static const Duration standard = Duration(milliseconds: 250);
-
-  /// Emphasized motion (page transitions, large reveals)
-  static const Duration emphasis = Duration(milliseconds: 350);
-}
-
 // ── Category icon tokens ────────────────────────────────────────────────────
 abstract final class CategoryIconTokens {
   /// Large circle used in transaction list rows and detail screens.

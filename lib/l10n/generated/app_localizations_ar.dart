@@ -604,9 +604,6 @@ class SAr extends S {
   }
 
   @override
-  String get webAcctBalanceAfter => 'الرصيد بعد هذه المعاملة';
-
-  @override
   String webAcctReconciledOn(String date) {
     return 'تمت المطابقة في $date';
   }
@@ -2327,13 +2324,7 @@ class SAr extends S {
   String get commonAdd => 'إضافة';
 
   @override
-  String get commonClose => 'إغلاق';
-
-  @override
   String get commonBack => 'رجوع';
-
-  @override
-  String get commonNext => 'التالي';
 
   @override
   String get commonRetry => 'إعادة المحاولة';
@@ -2346,9 +2337,6 @@ class SAr extends S {
 
   @override
   String get commonConfirm => 'تأكيد';
-
-  @override
-  String get commonLoading => 'جارٍ التحميل…';
 
   @override
   String get commonSearchHint => 'بحث…';
@@ -2436,9 +2424,6 @@ class SAr extends S {
 
   @override
   String get navPressBackToExit => 'اضغط مرة أخرى للخروج';
-
-  @override
-  String get navDashboard => 'لوحة التحكم';
 
   @override
   String get navTransactions => 'المعاملات';
@@ -2583,9 +2568,6 @@ class SAr extends S {
   String get dashboardNetWorth => 'صافي الثروة';
 
   @override
-  String get dashboardUnallocated => 'غير مخصص';
-
-  @override
   String dashboardOtherCount(int count) {
     return '+ $count أخرى';
   }
@@ -2715,11 +2697,6 @@ class SAr extends S {
 
   @override
   String get txTapPlus => 'اضغط + لتسجيل واحدة';
-
-  @override
-  String txSpentOfBudget(String spent, String budget) {
-    return 'أُنفق $spent من ميزانية $budget';
-  }
 
   @override
   String txTotalCashFlow(String amount, int count) {
@@ -5890,42 +5867,6 @@ class SAr extends S {
 
   @override
   String get webShortcutHelp => 'إظهار هذه المساعدة';
-
-  @override
-  String get monthJan => 'يناير';
-
-  @override
-  String get monthFeb => 'فبراير';
-
-  @override
-  String get monthMar => 'مارس';
-
-  @override
-  String get monthApr => 'أبريل';
-
-  @override
-  String get monthMay => 'مايو';
-
-  @override
-  String get monthJun => 'يونيو';
-
-  @override
-  String get monthJul => 'يوليو';
-
-  @override
-  String get monthAug => 'أغسطس';
-
-  @override
-  String get monthSep => 'سبتمبر';
-
-  @override
-  String get monthOct => 'أكتوبر';
-
-  @override
-  String get monthNov => 'نوفمبر';
-
-  @override
-  String get monthDec => 'ديسمبر';
 
   @override
   String get notifLowEnvelopesTitle => 'أظرف منخفضة';

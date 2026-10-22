@@ -124,28 +124,35 @@ Run through each section before every release build. Mark pass/fail for each ite
 
 ## 6. BILL SPLITTER
 
-### Happy Path
-- [ ] Open from More > Bill Splitter
-- [ ] "Bill in USD" chip visible at top
-- [ ] Change currency to LBP — exchange rate field appears in amber card
-- [ ] Add items manually — currency symbol prefix shown
-- [ ] Add 2+ people, assign items
-- [ ] Review: per-person totals with base-currency conversion
-- [ ] Save — navigates to transaction form (not back to splitter)
+### Quick split (Evenly)
+- [ ] Open from More > Bill splitter, the Split quick action, or long-press on the Activity +
+- [ ] Tap the total → calculator; shares update live for everyone in "Who's in"
+- [ ] Add a person, and a recent person (from Goals & loans contacts)
+- [ ] Tap someone's amount → set it by hand; the others split the rest; Reset puts it back
+- [ ] Tip None / 10% / 15% / Custom; "+ Tax or service charge" (percent or amount)
+- [ ] Change currency to LBP → rate row + "≈ base" appear; amounts show without decimals
+- [ ] Paid by: You → "They owe you…"; a person → "You owe…"; Each their own
+- [ ] Save → sheet with who owes what, Share split, per-person send, Done, Undo
+- [ ] Undo removes the payment and the loans and keeps the bill on screen
 
-### OCR Scan
-- [ ] Scan receipt — items detected
-- [ ] Amounts like `765000T` recognized
-- [ ] Amounts like `1080000.00` recognized
-- [ ] Items with quantity (2x Coffee) — split dialog offered
+### By item
+- [ ] Switch to By item; items default to everyone
+- [ ] Pick a person in the bottom strip, tap items to toggle them; each item keeps someone
+- [ ] Tap an item (no person picked) → edit name, amount, "Split into N", delete
+- [ ] Remove a person whose items were theirs alone → items become everyone's (Undo)
 
-### Edge Cases — CRASH TESTS
-- [ ] **Remove a person with solo items** — reassign dialog appears
-- [ ] **0 people** — Next button disabled
-- [ ] **All items unassigned** — Save disabled
-- [ ] **Very long item name** — truncated in UI, no overflow
-- [ ] **Tip = 0%** — no tip added
-- [ ] **Tip as fixed amount** — toggle works
+### Receipt scan
+- [ ] Camera icon → document scanner (Android) or camera/gallery sheet → items in By item
+- [ ] "Matches the receipt total" or the amber difference line
+- [ ] Lines read without a price are listed under the items; tap one to add it
+- [ ] Delivery / service on the receipt → prefilled as tax or service charge
+- [ ] LBP receipt on a USD bill → "Looks like LBP — switch?"; a receipt naming its currency switches at once with Undo
+- [ ] Meal parts ("1 Regular Fries" under a meal) are not separate items
+
+### Edge cases
+- [ ] **Only you in the bill** — Save still works (your share is the whole bill)
+- [ ] **Very long item or person name** — wraps/truncates, no overflow
+- [ ] **Small phone, By item** — bottom bar leaves room to scroll the items
 
 ---
 

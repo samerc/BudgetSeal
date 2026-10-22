@@ -8,14 +8,11 @@ common_save,Button save,Save,حفظ,Enregistrer
 common_ok,Dialog confirm,OK,حسناً,OK
 common_edit,Button/tooltip edit,Edit,تعديل,Modifier
 common_add,Button add,Add,إضافة,Ajouter
-common_close,Button close,Close,إغلاق,Fermer
 common_back,Button back,Back,رجوع,Retour
-common_next,Button next,Next,التالي,Suivant
 common_retry,Button retry,Retry,إعادة المحاولة,Réessayer
 common_reset,Button reset,Reset,إعادة تعيين,Réinitialiser
 common_done,Button done,Done,تم,Terminé
 common_confirm,Button confirm,Confirm,تأكيد,Confirmer
-common_loading,Loading spinner text,Loading…,جارٍ التحميل…,Chargement…
 common_search_hint,Search field hint,Search…,بحث…,Rechercher…
 common_none,Dropdown option none,None,لا شيء,Aucun
 common_today,Date label,Today,اليوم,Aujourd'hui
@@ -47,7 +44,6 @@ nav_press_back_to_exit,Snackbar on double-back,Press back again to exit,اضغط
 # ──────────────────────────────────────────────,,,,
 # NAVIGATION — Web sidebar,,,,
 # ──────────────────────────────────────────────,,,,
-nav_dashboard,Web sidebar label,Dashboard,لوحة التحكم,Tableau de bord
 nav_transactions,Web sidebar label,Transactions,المعاملات,Transactions
 nav_categories,Web sidebar label,Categories,الفئات,Catégories
 nav_accounts,Web sidebar label,Accounts,الحسابات,Comptes
@@ -131,7 +127,6 @@ tx_no_category_in_month,Empty state with category filter,No {categoryName} trans
 tx_no_matching,Empty state with filters,No matching transactions,لا معاملات مطابقة,Aucune transaction correspondante
 tx_no_yet,Empty state,No transactions yet,لا توجد معاملات بعد,Aucune transaction pour le moment
 tx_tap_plus,Empty state subtitle,Tap + to record one,اضغط + لتسجيل واحدة,Appuyez sur + pour en ajouter
-tx_spent_of_budget,Budget progress bar,Spent {spent} of {budget} budget,أُنفق {spent} من ميزانية {budget},{spent} dépensé sur un budget de {budget}
 tx_total_cash_flow,Footer summary,Total cash flow: {amount} · {count} transaction(s),إجمالي التدفق النقدي: {amount} · {count} معاملة(ات),Flux total : {amount} · {count} transaction(s)
 tx_n_items,Multi-line display,{count} items,{count} عناصر,{count} éléments
 tx_n_more,Multi-line suffix,+{count} more,+{count} أخرى,+{count} de plus
@@ -1052,18 +1047,6 @@ web_shortcut_help,Description,Show this help,إظهار هذه المساعدة,
 # ──────────────────────────────────────────────,,,,
 # WEB SPA — Months (abbreviated),,,,
 # ──────────────────────────────────────────────,,,,
-month_jan,Month abbreviation,Jan,يناير,Janv
-month_feb,Month abbreviation,Feb,فبراير,Fév
-month_mar,Month abbreviation,Mar,مارس,Mars
-month_apr,Month abbreviation,Apr,أبريل,Avr
-month_may,Month abbreviation,May,مايو,Mai
-month_jun,Month abbreviation,Jun,يونيو,Juin
-month_jul,Month abbreviation,Jul,يوليو,Juil
-month_aug,Month abbreviation,Aug,أغسطس,Août
-month_sep,Month abbreviation,Sep,سبتمبر,Sept
-month_oct,Month abbreviation,Oct,أكتوبر,Oct
-month_nov,Month abbreviation,Nov,نوفمبر,Nov
-month_dec,Month abbreviation,Dec,ديسمبر,Déc
 # ──────────────────────────────────────────────,,,,
 # NOTIFICATIONS — Push,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1258,7 +1241,6 @@ common_category,,Category,فئة,Catégorie
 common_currency,,Currency,العملة,Devise
 common_title,,Title,العنوان,Titre
 dashboard_net_worth,,Net worth,صافي الثروة,Patrimoine net
-dashboard_unallocated,,Unallocated,غير مخصص,Non alloué
 dashboard_other_count,,+ {count} other,+ {count} أخرى,+ {count} autre(s)
 dashboard_fund_envelopes_tooltip,,Fund envelopes,تمويل الأظرف,Alimenter les enveloppes
 dashboard_split_bill_tooltip,,Split a bill,تقسيم فاتورة,Partager une note
@@ -2202,7 +2184,6 @@ web_plan_delete_msg,,"It was never recorded, so no balance changes.",لم تُس
 
 # ──────────────────────────────────────────────,,,,
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
-web_acct_balance_after,,Balance after this transaction,الرصيد بعد هذه المعاملة,Solde après cette transaction
 web_acct_reconciled_on,,Reconciled {date},تمت المطابقة في {date},Rapproché le {date}
 web_acct_never_reconciled,,Never reconciled,لم تتم المطابقة بعد,Jamais rapproché
 web_acct_reconcile,,Reconcile,مطابقة,Rapprocher
