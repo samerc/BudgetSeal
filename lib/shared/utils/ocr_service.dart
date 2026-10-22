@@ -296,10 +296,21 @@ class OcrService {
 
     // 7. Quantity lines ("2 x 4.50", "2 @ 4,500  9,000") belong to the
     // item above; a priceless text line right under an item is the rest of
-    // its name.
+    // its name; priceless lines indented under an item are its parts (a
+    // meal's "1 Regular Fries", "NO Ice") — not items of their own.
     final out = <_Parsed>[];
+    _Parsed? priced; // the last item with a price
     for (final p in parsed) {
       final prev = out.isEmpty ? null : out.last;
+      if (p.amount == null &&
+          (p.kind == OcrLineKind.item || p.kind == OcrLineKind.discount) &&
+          priced != null &&
+          p.row.left > priced.row.left + lineH * 0.6 &&
+          (prev != priced || _leadingQty.hasMatch(p.text.trim()))) {
+        p.toOther();
+        out.add(p);
+        continue;
+      }
       final nearPrev =
           prev != null && (p.row.y - prev.row.y) < lineH * 2.5;
       final namedPrev = nearPrev &&
@@ -343,6 +354,16 @@ class OcrService {
         continue;
       }
       out.add(p);
+      if (p.kind == OcrLineKind.item && p.amount != null) priced = p;
+    }
+
+    // Above the first priced item is the header (shop name, address, VAT
+    // number): no items waiting for a price, no tax.
+    final firstPriced = out.indexWhere(
+        (p) => p.kind == OcrLineKind.item && p.amount != null);
+    for (var i = 0; i < (firstPriced < 0 ? 0 : firstPriced); i++) {
+      final k = out[i].kind;
+      if (k == OcrLineKind.item || k == OcrLineKind.tax) out[i].toOther();
     }
 
     _matchTotal(out);
@@ -435,6 +456,9 @@ class OcrService {
 
   static final _nonLetter = RegExp(r'[^\p{L}]', unicode: true);
 
+  /// "1 Regular Fries": a row that starts with a count and a word.
+  static final _leadingQty = RegExp(r'^\d{1,2}\s+\p{L}', unicode: true);
+
   /// A row that is only a price: "4.50", "$12.00", "450,000 LBP".
   static final _lonePrice = RegExp(
       r'^[$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,3})?|\d{4,}(?:[.,]\d{1,3})?)\s*[A-Za-z]{0,3}$');
@@ -481,8 +505,9 @@ class OcrService {
   static final _letter = RegExp(r'\p{L}', unicode: true);
 
   // Optional currency symbol before ($/€/£/¥) or letters after (T, TTC, LBP…).
+  // Not glued to a number or a code ("MDS-8865", "122732-601", "#3360009").
   static final _priceRe = RegExp(
-    r'[$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,3})?|\d{4,}(?:[.,]\d{1,3})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
+    r'(?<![\d#/]|[A-Za-z\d]-)[$€£¥]?\s*([,.]?\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,3})?|\d{4,}(?:[.,]\d{1,3})?)\s*[A-Za-z*+]{0,4}(?=\s|$)',
   );
 
   /// Try to parse a line into (name, amount) using multiple strategies.
@@ -685,6 +710,8 @@ class OcrService {
   static const _taxWords = [
     'tax', 'vat', 'tva', 'gst', 'hst', 'iva', 'mwst', 'service', 'svc',
     'ضريبة', 'القيمة المضافة', 'خدمة',
+    // Charges shared like tax.
+    'delivery', 'livraison', 'توصيل',
   ];
   static const _discountWords = [
     'discount', 'remise', 'réduction', 'promo', 'coupon', 'descuento',
@@ -693,6 +720,7 @@ class OcrService {
   static const _otherWords = [
     // Tip is entered separately; payment, change and contact lines aren't items.
     'tip', 'gratuity', 'pourboire', 'cash', 'change', 'rendu', 'monnaie',
+    'rounding', 'arrondi', 'tendered',
     'espèces', 'carte', 'card', 'visa', 'mastercard', 'payment', 'paiement',
     'paid', 'thank', 'merci', 'receipt', 'invoice', 'facture', 'reçu',
     'www', 'http', 'tel', 'tél', 'fax', 'نقدا', 'نقداً', 'الباقي', 'الدفع',
@@ -700,6 +728,14 @@ class OcrService {
   ];
 
   static final _latinWord = RegExp(r'^[a-zà-ÿ .\-]+$');
+
+  /// "Total (incl VAT)", "Total TTC": the tax is inside the amount.
+  static final _taxIncluded =
+      RegExp(r'(^|[^a-z])(incl|includ\w*|inclus\w*|ttc)([^a-z]|$)');
+
+  /// "VAT no: 1227", "TAX INVOICE", "Tax ID": header lines, not tax.
+  static final _taxId = RegExp(
+      r'(^|[^a-z])(vat|tax|tva|gst|trn)\s*(no|n°|nr|number|#|id|reg\w*|invoice|facture)([^a-z]|$)');
 
   static bool _has(String lower, List<String> words) {
     for (final w in words) {
@@ -719,6 +755,10 @@ class OcrService {
     if (_isNoise(lower)) return OcrLineKind.other;
     if (_dateOrTime.hasMatch(lower)) return OcrLineKind.other;
     if (_has(lower, _subtotalWords)) return OcrLineKind.other;
+    if (_taxId.hasMatch(lower)) return OcrLineKind.other;
+    if (_taxIncluded.hasMatch(lower)) {
+      return _has(lower, _totalWords) ? OcrLineKind.total : OcrLineKind.other;
+    }
     if (_has(lower, _discountWords)) return OcrLineKind.discount;
     if (_has(lower, _taxWords)) return OcrLineKind.tax;
     if (_has(lower, _totalWords)) return OcrLineKind.total;
