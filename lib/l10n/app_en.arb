@@ -512,30 +512,16 @@
   "@billItemN": {"placeholders": {"n": {"type": "int"}}},
   "billDiscardTitle": "Discard this bill?",
   "billDiscardBody": "The items and splits you entered will be lost.",
-  "billWhoPaid": "Who paid?",
-  "billPaidMe": "I paid the whole bill",
-  "billPaidMeDesc": "Records the full bill from your account and tracks what each person owes you in Goals & Loans.",
-  "billPaidOther": "Someone else paid",
-  "billPaidOtherDesc": "Tracks what you owe {name} in Goals & Loans. Nothing leaves your account until you pay them back.",
-  "@billPaidOtherDesc": {"placeholders": {"name": {"type": "String"}}},
-  "billPaidEach": "Everyone paid their own part",
   "billPaidEachDesc": "Records only your share.",
   "billLinePart": "{name}'s part",
   "@billLinePart": {"placeholders": {"name": {"type": "String"}}},
   "billLoanName": "Bill split · {date}",
   "@billLoanName": {"placeholders": {"date": {"type": "String"}}},
-  "billLoansCreated": "{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}",
-  "@billLoansCreated": {"placeholders": {"n": {"type": "int"}}},
-  "billOweCreated": "Added to goals & loans: you owe {name} {amount}",
-  "@billOweCreated": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}}},
   "billShare": "Share split",
   "billShareHeader": "Bill split · total {total}",
   "@billShareHeader": {"placeholders": {"total": {"type": "String"}}},
   "billSharePaidBy": "Paid by {name}",
   "@billSharePaidBy": {"placeholders": {"name": {"type": "String"}}},
-  "billTax": "Tax & service",
-  "billTaxAmount": "Tax & service amount",
-  "billTaxHint": "Split in proportion to what each person ordered.",
   "billReceiptMatch": "Matches the receipt total ({total})",
   "@billReceiptMatch": {"placeholders": {"total": {"type": "String"}}},
   "billReceiptDiff": "Items add up to {items} · receipt total {total}",
@@ -1822,33 +1808,13 @@
   "@txListPreviewNote": {
     "description": "Preview note"
   },
-  "billTitle": "Bill splitter",
-  "@billTitle": {
-    "description": "Screen title"
-  },
   "billScanning": "Scanning receipt...",
   "@billScanning": {
     "description": "Loading text"
   },
-  "billScanTooltip": "Scan receipt",
-  "@billScanTooltip": {
-    "description": "Tooltip"
-  },
-  "billEmptyTitle": "Add items to split",
-  "@billEmptyTitle": {
-    "description": "Empty state title"
-  },
-  "billEmptySubtitle": "Scan a receipt or add items manually",
-  "@billEmptySubtitle": {
-    "description": "Empty state subtitle"
-  },
   "billScanButton": "Scan receipt",
   "@billScanButton": {
     "description": "Primary button"
-  },
-  "billAddManually": "Add manually",
-  "@billAddManually": {
-    "description": "Secondary button"
   },
   "billAddItem": "Add item",
   "@billAddItem": {
@@ -1866,33 +1832,9 @@
   "@billNoText": {
     "description": "OCR failure snackbar"
   },
-  "billEnterAmount": "Enter amount",
-  "@billEnterAmount": {
-    "description": "OCR amount dialog title"
-  },
-  "billKeepAsOne": "Keep as one",
-  "@billKeepAsOne": {
-    "description": "Dialog button"
-  },
-  "billSplit": "Split",
-  "@billSplit": {
-    "description": "Dialog button"
-  },
-  "billWhosSplitting": "Who's splitting?",
-  "@billWhosSplitting": {
-    "description": "Section header"
-  },
   "billAddPerson": "Add person",
   "@billAddPerson": {
     "description": "Text field hint"
-  },
-  "billSplitEvenly": "Split evenly",
-  "@billSplitEvenly": {
-    "description": "Toggle title"
-  },
-  "billAssignItems": "Assign items",
-  "@billAssignItems": {
-    "description": "Section header"
   },
   "billItemName": "Item name",
   "@billItemName": {
@@ -1902,139 +1844,19 @@
   "@billTip": {
     "description": "Section title"
   },
-  "billPercentage": "Percentage",
-  "@billPercentage": {
-    "description": "Tip mode"
-  },
-  "billTipAmount": "Tip amount",
-  "@billTipAmount": {
-    "description": "Tip field label"
-  },
-  "billBillCurrency": "Bill currency",
-  "@billBillCurrency": {
-    "description": "Currency label"
-  },
   "billRateHint": "Rate",
   "@billRateHint": {
     "description": "Rate field hint"
-  },
-  "billTotal": "Total",
-  "@billTotal": {
-    "description": "Summary label"
-  },
-  "billReScan": "Re-scan",
-  "@billReScan": {
-    "description": "Re-scan button"
-  },
-  "billNLines": "{detected} lines ({withPrice} with prices)",
-  "@billNLines": {
-    "description": "OCR summary",
-    "placeholders": {
-      "detected": {
-        "type": "int"
-      },
-      "withPrice": {
-        "type": "int"
-      }
-    }
   },
   "billMe": "Me",
   "@billMe": {
     "description": "Default person name"
   },
-  "billStep1Desc": "Step 1: Add items from your receipt — scan or enter manually.",
-  "@billStep1Desc": {
-    "description": "Step instruction"
-  },
-  "billStep2Desc": "Step 2: Add people and assign items. Toggle \"Split evenly\" to divide the total equally.",
-  "@billStep2Desc": {
-    "description": "Step instruction"
-  },
-  "billStep3Desc": "Step 3: Review the split, add tip, and confirm.",
-  "@billStep3Desc": {
-    "description": "Step instruction"
-  },
-  "billBillIn": "Bill in {currency}",
-  "@billBillIn": {
-    "description": "Currency indicator",
-    "placeholders": {
-      "currency": {
-        "type": "String"
-      }
-    }
-  },
-  "billExchangeRateTitle": "Exchange rate",
-  "@billExchangeRateTitle": {
-    "description": "Section title"
-  },
-  "billRemovePersonTitle": "Remove person",
-  "@billRemovePersonTitle": {
-    "description": "Dialog title"
-  },
-  "billRemovePersonContent": "{name} has {count} item(s) assigned only to them. Reassign to someone else, or delete those items?",
-  "@billRemovePersonContent": {
-    "description": "Dialog content",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "billReassignTo": "Reassign to:",
-  "@billReassignTo": {
-    "description": "Dialog label"
-  },
-  "billPersonRemoved": "Person removed",
-  "billEveryone": "Everyone",
   "billSharedEach": "Shared {count} ways · {amount} each",
   "@billSharedEach": {
     "placeholders": {
       "count": { "type": "int" },
       "amount": { "type": "String" }
-    }
-  },
-  "billSplitIntoUnits": "Split into units",
-  "billSplitUnitsPrompt": "How many units?",
-  "billTipLabel": "Tip",
-  "billItemRemoved": "Item removed",
-  "billDeleteItems": "Delete items",
-  "@billDeleteItems": {
-    "description": "Dialog button"
-  },
-  "billEachPays": "Each person pays {amount}",
-  "@billEachPays": {
-    "description": "Split evenly subtitle",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "billSplitQtyTitle": "{qty} × {name}",
-  "@billSplitQtyTitle": {
-    "description": "Split quantity dialog title",
-    "placeholders": {
-      "qty": {
-        "type": "int"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "billSplitQtyContent": "Split into {qty} items ({amount} each)?",
-  "@billSplitQtyContent": {
-    "description": "Split quantity dialog content",
-    "placeholders": {
-      "qty": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
     }
   },
   "billRateNotSetTitle": "Exchange rate not set",
@@ -6220,6 +6042,90 @@
   "webBillsWeek": "Bills due this week",
   "@webBillsWeek": { "description": "Web Home: bills due within 7 days" },
   "webNAccounts": "{n} accounts",
-  "@webNAccounts": { "description": "Web transaction row: split across several accounts", "placeholders": { "n": { "type": "String" } } }
+  "@webNAccounts": { "description": "Web transaction row: split across several accounts", "placeholders": { "n": { "type": "String" } } },
+  "billScreenTitle": "Split a bill",
+  "@billScreenTitle": { "description": "Bill splitter: screen title" },
+  "billTotalLabel": "Bill total",
+  "@billTotalLabel": { "description": "Bill splitter" },
+  "billPlusTip": "+ tip {amount}",
+  "@billPlusTip": { "description": "Bill splitter: under the total, e.g. \"+ tip $9.00\"" },
+  "billPlusTax": "+ tax or service {amount}",
+  "@billPlusTax": { "description": "Bill splitter: under the total" },
+  "billTipCustom": "Custom",
+  "@billTipCustom": { "description": "Bill splitter: tip chip, any amount" },
+  "billAddTax": "Tax or service charge",
+  "@billAddTax": { "description": "Bill splitter: optional link under the tip" },
+  "billTaxPercent": "Percentage of the bill",
+  "@billTaxPercent": { "description": "Bill splitter: tax choice" },
+  "billTaxFixed": "Fixed amount",
+  "@billTaxFixed": { "description": "Bill splitter: tax choice" },
+  "billWhosIn": "Who's in",
+  "@billWhosIn": { "description": "Bill splitter: section header" },
+  "billEvenly": "Evenly",
+  "@billEvenly": { "description": "Bill splitter: split mode" },
+  "billByItem": "By item",
+  "@billByItem": { "description": "Bill splitter: split mode" },
+  "billYou": "You",
+  "@billYou": { "description": "Bill splitter: the user in the people list" },
+  "billRecent": "Recent",
+  "@billRecent": { "description": "Bill splitter: people from earlier splits and loans" },
+  "billByHandHint": "Tap an amount to set it by hand — the others rebalance.",
+  "@billByHandHint": { "description": "Bill splitter" },
+  "billPaidBy": "Paid by",
+  "@billPaidBy": { "description": "Bill splitter: bottom bar label" },
+  "billFrom": "From",
+  "@billFrom": { "description": "Bill splitter: bottom bar label, the account" },
+  "billEachOwn": "Each their own",
+  "@billEachOwn": { "description": "Bill splitter: everyone paid their own part" },
+  "billOwesYouOne": "{name} owes you {amount}",
+  "@billOwesYouOne": { "description": "Bill splitter", "placeholders": { "name": { "type": "String" }, "amount": { "type": "String" } } },
+  "billTheyOweYou": "They owe you {amount}",
+  "@billTheyOweYou": { "description": "Bill splitter: several people" },
+  "billYouOwe": "You owe {name} {amount}",
+  "@billYouOwe": { "description": "Bill splitter", "placeholders": { "name": { "type": "String" }, "amount": { "type": "String" } } },
+  "billNobodyOwes": "No one owes anyone",
+  "@billNobodyOwes": { "description": "Bill splitter" },
+  "billNothingLeaves": "Nothing leaves your account until you pay {name} back.",
+  "@billNothingLeaves": { "description": "Bill splitter" },
+  "billSaveFrom": "Save · {amount} from {account}",
+  "@billSaveFrom": { "description": "Bill splitter: save button", "placeholders": { "amount": { "type": "String" }, "account": { "type": "String" } } },
+  "billSaveOwe": "Save · you owe {name} {amount}",
+  "@billSaveOwe": { "description": "Bill splitter: save button", "placeholders": { "name": { "type": "String" }, "amount": { "type": "String" } } },
+  "billSaveShare": "Save · your share {amount}",
+  "@billSaveShare": { "description": "Bill splitter: save button" },
+  "billTapWhatHad": "Tap what {name} had",
+  "@billTapWhatHad": { "description": "Bill splitter: by item, a person is picked" },
+  "billPickPersonHint": "Tap a person below, then the items they had.",
+  "@billPickPersonHint": { "description": "Bill splitter" },
+  "billEveryoneEach": "Everyone · {amount} each",
+  "@billEveryoneEach": { "description": "Bill splitter" },
+  "billOnly": "{name} only",
+  "@billOnly": { "description": "Bill splitter" },
+  "billItemsSharedNow": "{name}'s items are now shared by everyone",
+  "@billItemsSharedNow": { "description": "Bill splitter" },
+  "billSetShare": "Set share",
+  "@billSetShare": { "description": "Bill splitter" },
+  "billResetShare": "Split it evenly again",
+  "@billResetShare": { "description": "Bill splitter" },
+  "billUnpricedLines": "Lines without a price: {count} — tap one to add it",
+  "@billUnpricedLines": { "description": "Bill splitter: receipt lines read without a price", "placeholders": { "count": { "type": "int" } } },
+  "billSavedFrom": "{total} from {account} · your share {share}",
+  "@billSavedFrom": { "description": "Bill splitter: after saving", "placeholders": { "total": { "type": "String" }, "account": { "type": "String" }, "share": { "type": "String" } } },
+  "billSavedEach": "Your share {share} from {account}",
+  "@billSavedEach": { "description": "Bill splitter: after saving", "placeholders": { "share": { "type": "String" }, "account": { "type": "String" } } },
+  "billOwesYouTitle": "Owes you",
+  "@billOwesYouTitle": { "description": "Bill splitter: after saving" },
+  "billYouOweTitle": "You owe",
+  "@billYouOweTitle": { "description": "Bill splitter: after saving" },
+  "billTrackedHint": "Tracked in Goals & loans — mark each one paid when they settle up.",
+  "@billTrackedHint": { "description": "Bill splitter" },
+  "billSendShare": "Send {name} their share",
+  "@billSendShare": { "description": "Bill splitter: accessibility label" },
+  "billPersonShareText": "Your share of the bill: {amount}",
+  "@billPersonShareText": { "description": "Bill splitter: text sent to one person" },
+  "billSplitInto": "Split into {qty}",
+  "@billSplitInto": { "description": "Bill splitter: split an item with a quantity", "placeholders": { "qty": { "type": "int" } } },
+  "billPersonName": "Name",
+  "@billPersonName": { "description": "Bill splitter: add person field" }
 }
 

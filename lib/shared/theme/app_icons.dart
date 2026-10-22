@@ -125,6 +125,7 @@ abstract final class AppIcons {
   static const pause = IconData(0xe39e, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const pauseCircle = IconData(0xe3a0, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const pencilSimple = IconData(0xe3b4, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const percent = IconData(0xe3b6, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const piggyBank = IconData(0xea04, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const play = IconData(0xe3d0, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const playCircle = IconData(0xe3d2, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
@@ -137,6 +138,7 @@ abstract final class AppIcons {
   static const receipt = IconData(0xe3ec, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const repeat = IconData(0xe3f6, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const rows = IconData(0xe5a2, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const shareFat = IconData(0xed52, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const shareNetwork = IconData(0xe408, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const shieldCheck = IconData(0xe40c, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const shoppingBag = IconData(0xe416, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
@@ -163,6 +165,7 @@ abstract final class AppIcons {
   static const trendUp = IconData(0xe4ae, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const user = IconData(0xe4c2, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const users = IconData(0xe4d6, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const usersThree = IconData(0xe68e, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const wallet = IconData(0xe68a, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const walletFill = IconData(0xe68a, fontFamily: 'PhosphorFill', fontPackage: 'phosphor_flutter');
   static const warning = IconData(0xe4e0, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');

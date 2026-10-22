@@ -12,31 +12,37 @@ import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/engine/allocation_engine.dart';
 import '../../core/fx/fx_service.dart';
+import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/objectives_provider.dart';
+import '../../core/providers/transactions_provider.dart';
+import '../../core/services/last_used_service.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/dispose_later.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/ocr_service.dart';
+import '../../shared/utils/save_errors.dart';
 import '../../shared/widgets/calculator_amount_field.dart';
-import '../../shared/widgets/currency_picker_field.dart';
-import '../../shared/widgets/empty_state.dart';
-import '../../shared/widgets/section_header.dart';
-import 'widgets/currency_sheet.dart' show kCurrencySymbols;
-import '../../l10n/generated/app_localizations.dart';
-import '../../shared/utils/dispose_later.dart';
-import '../../shared/theme/app_icons.dart';
-import '../../core/providers/transactions_provider.dart';
+import 'widgets/category_sheet.dart';
+import 'widgets/currency_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Bill Splitter — 3-step guided flow
-//   Step 0: Add items (scan or manual)
-//   Step 1: Split (assign people)
-//   Step 2: Review & save
+// Bill splitter — one screen, quick split first.
+//   Bill card: total (calculator), currency, tip chips, optional tax/service.
+//   Who's in: Evenly (shares, tap one to set it by hand) | By item (pick a
+//   person, tap the items they had; items start as "everyone").
+//   Bottom bar: Paid by, From account + category, Save — records the
+//   expense and the loans directly, then shows who owes what.
+// Layout rule (see CLAUDE.md): the body is ONE flat ListView.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BillSplitterScreen extends ConsumerStatefulWidget {
@@ -46,49 +52,88 @@ class BillSplitterScreen extends ConsumerStatefulWidget {
   ConsumerState<BillSplitterScreen> createState() => _BillSplitterScreenState();
 }
 
-class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
-  int _step = 0; // 0=items, 1=split, 2=review
+enum _SplitMode { evenly, byItem }
 
-  // ── People ──
-  // First person is always the user; named in the user's language below.
+/// Who paid the bill: the user, another person (who the user now owes), or
+/// everyone their own part.
+enum _PaidMode { me, other, each }
+
+class _BillItem {
+  String name;
+  double amount;
+
+  /// Quantity read from the receipt ("3 x Lemonade"); offers "Split into 3".
+  int qty;
+
+  /// Who had it. Empty = everyone.
+  final Set<String> people;
+  final int? ocrLineIndex;
+
+  _BillItem({
+    required this.name,
+    required this.amount,
+    this.qty = 1,
+    Set<String>? people,
+    this.ocrLineIndex,
+  }) : people = people ?? {};
+}
+
+const _personColors = [
+  Color(0xFF4F7BD9),
+  Color(0xFFE07A3F),
+  Color(0xFF2F9E6E),
+  Color(0xFF8E5CC9),
+  Color(0xFFD9488A),
+  Color(0xFF1E9DB0),
+  Color(0xFFB8892B),
+  Color(0xFF6B7FA8),
+];
+
+class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
+  // ── People ── first is always the user (named in their language).
   final _people = <String>['Me'];
   bool _meNamed = false;
-  final _personCtrl = TextEditingController();
 
-  // ── Items ──
+  // ── Split ──
+  _SplitMode _mode = _SplitMode.evenly;
+  double _subtotalEntered = 0; // Evenly: the bill before tip/tax
+  final _fixed = <String, double>{}; // Evenly: shares set by hand
   final _items = <_BillItem>[];
-  bool _splitEvenly = false;
+  String? _painting; // By item: the person whose items are being tapped
 
-  // ── Tip ──
+  // ── Tip ── percentage (proportional) or a fixed amount (split evenly)
   double _tipPercent = 0;
   double _tipAmount = 0;
   bool _tipIsAmount = false;
-  bool _tipExpanded = false;
+
+  // ── Tax or service ── optional, in proportion to what each person had
+  bool _taxOn = false;
+  double _taxPercent = 0;
+  double _taxAmount = 0;
+  bool _taxIsAmount = true;
 
   // ── Currency ──
   late String _billCurrency;
   double _exchangeRate = 1.0;
-  bool _rateInverted = true; // default: show base currency first (1 USD = X LBP)
+  bool _rateInverted = true; // 1 <base> = X <bill>
   final _rateCtrl = TextEditingController();
-  bool _currencyExpanded = false;
 
   // ── OCR ──
   bool _scanning = false;
-  OcrResult? _ocrResult;
-
-  /// Receipt lines already added as items.
+  OcrResult? _ocr;
   final _addedLines = <int>{};
-  bool _showAllLines = true;
+  bool _showUnpriced = false;
 
-  // ── Tax & service: split in proportion to each person's items ──
-  double _taxPercent = 0;
-  double _taxAmount = 0;
-  bool _taxIsAmount = true;
-  bool _taxExpanded = false;
-
-  // ── Who paid ──
+  // ── Paying ──
   _PaidMode _paidMode = _PaidMode.me;
-  String? _payer; // set when someone else paid
+  String? _payer;
+  String? _accountId;
+  String? _categoryId;
+  bool _saving = false;
+
+  /// The "Tap what Sam had" banner: scrolled to the top when a person is
+  /// picked, so the items show above the bottom bar.
+  final _bannerKey = GlobalKey();
 
   String get _baseCurrency =>
       ref.read(householdProvider).value?.baseCurrency ?? 'USD';
@@ -97,12 +142,19 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   void initState() {
     super.initState();
     _billCurrency = ref.read(householdProvider).value?.baseCurrency ?? 'USD';
+    // The usual account, once accounts have loaded.
+    ref.listenManual(accountsProvider, (_, next) async {
+      final accounts =
+          (next.value ?? const <Account>[]).where((a) => !a.archived).toList();
+      if (_accountId != null || accounts.isEmpty) return;
+      final id = await LastUsedService.defaultAccount(accounts);
+      if (mounted && _accountId == null) setState(() => _accountId = id);
+    }, fireImmediately: true);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Name the user once, before anything is assigned to them.
     if (!_meNamed) {
       _meNamed = true;
       _people[0] = S.of(context).billMe;
@@ -111,198 +163,592 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   @override
   void dispose() {
-    _personCtrl.dispose();
     _rateCtrl.dispose();
     super.dispose();
   }
 
-  // ─── Navigation ───────────────────────────────────────────────────────────
+  String get _me => _people.first;
+  List<String> get _others => _people.skip(1).toList();
+  String _fmt(double v) => formatAmount(v, currency: _billCurrency);
 
-  void _goToStep(int step) => setState(() {
-    _step = step;
-    _currencyExpanded = false; // reset expansion when changing steps
-  });
+  bool get _isEmpty =>
+      _subtotalEntered == 0 && _items.isEmpty && _people.length == 1;
 
-  bool get _canProceedFromItems => _items.isNotEmpty;
+  // ─── Money ─────────────────────────────────────────────────────────────────
 
-  bool get _canProceedFromSplit {
-    // Alone, every item is the user's; otherwise each needs someone.
-    if (_splitEvenly || _people.length == 1) return true;
-    return _items.every((i) => i.assignedTo.isNotEmpty);
+  double get _itemsTotal => _items.fold(0.0, (s, i) => s + i.amount);
+  double get _subtotal =>
+      _mode == _SplitMode.evenly ? _subtotalEntered : _itemsTotal;
+  double get _taxTotal =>
+      !_taxOn ? 0 : (_taxIsAmount ? _taxAmount : _subtotal * _taxPercent / 100);
+  double get _tipTotal =>
+      _tipIsAmount ? _tipAmount : _subtotal * _tipPercent / 100;
+  double get _grand => _subtotal + _taxTotal + _tipTotal;
+
+  double get _factor =>
+      math.pow(10, currencyDecimals(_billCurrency)).toDouble();
+
+  /// Who had [item]: its people, or everyone.
+  Set<String> _owners(_BillItem item) {
+    final own = item.people.where(_people.contains).toSet();
+    return own.isEmpty ? _people.toSet() : own;
   }
 
-  // ─── People ───────────────────────────────────────────────────────────────
-
-  void _addPerson() {
-    final name = _personCtrl.text.trim();
-    if (name.isEmpty || _people.contains(name)) return;
-    setState(() => _people.add(name));
-    _personCtrl.clear();
-  }
-
-  void _removePerson(String name) async {
-    // The first person is the user — their share is what gets saved.
-    if (_people.length <= 1 || name == _people.first) return;
-
-    // Count items solely assigned to this person
-    final soloItems = _items.where((item) =>
-        item.assignedTo.contains(name) && item.assignedTo.length == 1).length;
-    final others = _people.where((p) => p != name).toList();
-
-    if (soloItems > 0 && others.isNotEmpty && mounted) {
-      final tr = S.of(context);
-      final result = await showDialog<String>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(tr.billRemovePersonTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(tr.billRemovePersonContent(name, soloItems)),
-              if (others.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(tr.billReassignTo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                const SizedBox(height: 8),
-                ...others.map((other) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(ctx, other),
-                      child: Text(other),
-                    ),
-                  ),
-                )),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(tr.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, '_delete'),
-              child: Text(tr.billDeleteItems),
-            ),
-          ],
-        ),
-      );
-      if (result == null || !mounted) return;
-
-      // Snapshot state so a "Delete items" removal can be undone (the only
-      // branch that discards data — reassign keeps the items).
-      final peopleBackup = List<String>.from(_people);
-      final itemsBackup = _items
-          .map((it) => _BillItem(
-                name: it.name,
-                amount: it.amount,
-                assignedTo: Set<String>.from(it.assignedTo),
-                ocrLineIndex: it.ocrLineIndex,
-              ))
-          .toList();
-      final selectionBackup = Set<int>.from(_addedLines);
-      final payerBackup = _payer;
-
-      setState(() {
-        if (result != '_delete') {
-          // Reassign solo items to the chosen person
-          for (final item in _items) {
-            if (item.assignedTo.contains(name) && item.assignedTo.length == 1) {
-              item.assignedTo.add(result);
-            }
-          }
-        }
-        _people.remove(name);
-        if (_payer == name) _payer = null;
-        final toRemove = <int>[];
-        for (var i = 0; i < _items.length; i++) {
-          // Only items that were this person's alone go; items nobody has
-          // been given yet stay.
-          final had = _items[i].assignedTo.remove(name);
-          if (had && _items[i].assignedTo.isEmpty) {
-            if (_items[i].ocrLineIndex != null) {
-              _addedLines.remove(_items[i].ocrLineIndex);
-            }
-            toRemove.add(i);
-          }
-        }
-        for (var i = toRemove.length - 1; i >= 0; i--) {
-          _items.removeAt(toRemove[i]);
-        }
-      });
-
-      // Offer undo only when items were actually discarded.
-      if (result == '_delete' && mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(tr.billPersonRemoved),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 5),
-            persist: false,
-            action: SnackBarAction(
-              label: tr.txUndoAction,
-              onPressed: () => setState(() {
-                _people
-                  ..clear()
-                  ..addAll(peopleBackup);
-                _items
-                  ..clear()
-                  ..addAll(itemsBackup);
-                _addedLines
-                  ..clear()
-                  ..addAll(selectionBackup);
-                _payer = payerBackup;
-              }),
-            ),
-          ),
-        );
+  /// Each person's share of the whole bill (tip and tax included), rounded
+  /// to the currency so the shares add up to the rounded total exactly.
+  Map<String, double> _shares() {
+    final raw = <String, double>{};
+    final exact = <String>{};
+    if (_mode == _SplitMode.evenly) {
+      final fixed = {
+        for (final p in _people)
+          if (_fixed.containsKey(p)) p: _fixed[p]!,
+      };
+      final free = _people.where((p) => !fixed.containsKey(p)).toList();
+      final rest = _grand - fixed.values.fold(0.0, (s, v) => s + v);
+      raw.addAll(fixed);
+      exact.addAll(fixed.keys);
+      for (final p in free) {
+        raw[p] = rest / free.length;
       }
     } else {
-      // No solo items — just remove
-      setState(() {
-        _people.remove(name);
-        if (_payer == name) _payer = null;
-        for (final item in _items) {
-          item.assignedTo.remove(name);
+      final sub = {for (final p in _people) p: 0.0};
+      for (final item in _items) {
+        final owners = _owners(item);
+        for (final p in owners) {
+          sub[p] = sub[p]! + item.amount / owners.length;
+        }
+      }
+      final subtotal = _itemsTotal;
+      for (final p in _people) {
+        final s = sub[p]!;
+        final tax = subtotal != 0 ? s / subtotal * _taxTotal : 0.0;
+        final tip =
+            _tipIsAmount ? _tipAmount / _people.length : s * _tipPercent / 100;
+        raw[p] = s + tax + tip;
+      }
+    }
+    return _rounded(raw, exact);
+  }
+
+  /// Largest remainder rounding; [exact] (shares set by hand) are kept.
+  Map<String, double> _rounded(Map<String, double> raw, Set<String> exact) {
+    final f = _factor;
+    final target = (raw.values.fold(0.0, (s, v) => s + v) * f).round();
+    final units = {
+      for (final e in raw.entries)
+        e.key: exact.contains(e.key)
+            ? (e.value * f).round()
+            : (e.value * f).floor(),
+    };
+    var remainder = target - units.values.fold(0, (s, v) => s + v);
+    final byFraction = raw.keys.where((k) => !exact.contains(k)).toList()
+      ..sort((a, b) =>
+          ((raw[b]! * f) - units[b]!).compareTo((raw[a]! * f) - units[a]!));
+    for (final p in byFraction) {
+      if (remainder <= 0) break;
+      units[p] = units[p]! + 1;
+      remainder--;
+    }
+    return {for (final p in _people) p: (units[p] ?? 0) / f};
+  }
+
+  double _toBase(double amount) {
+    if (_billCurrency == _baseCurrency) return amount;
+    if ((_exchangeRate - 1.0).abs() < 0.001) return amount;
+    return amount * _exchangeRate;
+  }
+
+  double get _tolerance => 1.5 / _factor;
+
+  _PaidMode get _effectiveMode => _others.isEmpty ? _PaidMode.each : _paidMode;
+
+  String get _effectivePayer => _payer != null && _people.contains(_payer)
+      ? _payer!
+      : (_others.isNotEmpty ? _others.first : _me);
+
+  // ─── Currency ──────────────────────────────────────────────────────────────
+
+  Future<void> _pickCurrency() async {
+    final accts = ref.read(accountsProvider).value ?? const <Account>[];
+    final c = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CurrencySheet(
+        current: _billCurrency,
+        accountCurrencies: accts.map((a) => a.currency).toSet().toList(),
+      ),
+    );
+    if (c == null || c == _billCurrency || !mounted) return;
+    await _setBillCurrency(c);
+  }
+
+  /// Switches the bill currency and fills the rate from the app's rates
+  /// (live, else cached). The user can still type their own.
+  Future<void> _setBillCurrency(String c) async {
+    setState(() {
+      _billCurrency = c;
+      _exchangeRate = 1.0;
+      _rateCtrl.clear();
+      _fixed.clear();
+    });
+    if (c == _baseCurrency) return;
+    final rate = await rateToBaseOrOne(ref.read(fxServiceProvider),
+        ref.read(databaseProvider), c, _baseCurrency);
+    if (!mounted || _billCurrency != c || rate == 1.0) return;
+    setState(() {
+      _exchangeRate = rate;
+      _rateCtrl.text =
+          formatRateForInput(roundRate(_rateInverted ? 1.0 / rate : rate));
+    });
+  }
+
+  void _onRateTyped(String v) {
+    final r = parseLooseAmount(v) ?? 0;
+    if (r > 0) _exchangeRate = _rateInverted ? 1.0 / r : r;
+    setState(() {});
+  }
+
+  void _swapRateDirection() => setState(() {
+        _rateInverted = !_rateInverted;
+        if (_exchangeRate > 0 && _exchangeRate != 1.0) {
+          _rateCtrl.text = formatRateForInput(
+              roundRate(_rateInverted ? 1.0 / _exchangeRate : _exchangeRate));
         }
       });
+
+  // ─── Total, tip, tax ───────────────────────────────────────────────────────
+
+  Future<void> _editTotal() async {
+    if (_mode == _SplitMode.byItem) return; // the items make the total
+    final v = await showCalculatorSheet(context, _subtotalEntered);
+    if (v == null || !mounted) return;
+    setState(() {
+      _subtotalEntered = v;
+      _fixed.clear();
+    });
+  }
+
+  Future<void> _setTip(String choice) async {
+    if (choice == 'custom') {
+      final v =
+          await showCalculatorSheet(context, _tipIsAmount ? _tipAmount : 0);
+      if (v == null || !mounted) return;
+      setState(() {
+        _tipIsAmount = true;
+        _tipAmount = v;
+        _fixed.clear();
+      });
+      return;
+    }
+    setState(() {
+      _tipIsAmount = false;
+      _tipAmount = 0;
+      _tipPercent = double.parse(choice);
+      _fixed.clear();
+    });
+  }
+
+  Future<void> _editTax() async {
+    final tr = S.of(context);
+    final percent = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(AppIcons.percent),
+            title: Text(tr.billTaxPercent),
+            onTap: () => Navigator.pop(ctx, true),
+          ),
+          ListTile(
+            leading: const Icon(AppIcons.money),
+            title: Text(tr.billTaxFixed),
+            onTap: () => Navigator.pop(ctx, false),
+          ),
+        ]),
+      ),
+    );
+    if (percent == null || !mounted) return;
+    final v =
+        await showCalculatorSheet(context, percent ? _taxPercent : _taxAmount);
+    if (v == null || !mounted) return;
+    setState(() {
+      _taxOn = v > 0;
+      _taxIsAmount = !percent;
+      if (percent) {
+        _taxPercent = v;
+      } else {
+        _taxAmount = v;
+      }
+      _fixed.clear();
+    });
+  }
+
+  // ─── People ────────────────────────────────────────────────────────────────
+
+  List<String> get _recentPeople {
+    final loans = ref.watch(objectivesProvider).value ?? const <Objective>[];
+    final sorted = loans
+        .where(
+            (o) => o.type == 'loan' && (o.contactName ?? '').trim().isNotEmpty)
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final out = <String>[];
+    for (final o in sorted) {
+      final n = o.contactName!.trim();
+      if (!out.contains(n) && !_people.contains(n)) out.add(n);
+      if (out.length == 3) break;
+    }
+    return out;
+  }
+
+  void _addPersonNamed(String name) {
+    final n = name.trim();
+    if (n.isEmpty || _people.contains(n)) return;
+    setState(() {
+      _people.add(n);
+      _fixed.clear();
+    });
+  }
+
+  Future<void> _addPerson() async {
+    final tr = S.of(context);
+    final ctrl = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.billAddPerson),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(hintText: tr.billPersonName),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr.commonCancel)),
+          FilledButton(
+              style: DialogButtons.filled,
+              onPressed: () => Navigator.pop(ctx, ctrl.text),
+              child: Text(tr.commonAdd)),
+        ],
+      ),
+    );
+    disposeAfterRouteAnimation(ctrl);
+    if (name != null) _addPersonNamed(name);
+  }
+
+  void _removePerson(String name) {
+    if (name == _me) return;
+    final tr = S.of(context);
+    // Items that were only theirs would silently become everyone's: say so.
+    final solo = _items
+        .where((i) => i.people.length == 1 && i.people.contains(name))
+        .toList();
+    final index = _people.indexOf(name);
+    final fixedBackup = Map<String, double>.from(_fixed);
+    setState(() {
+      _people.remove(name);
+      _fixed.clear();
+      for (final i in _items) {
+        i.people.remove(name);
+      }
+      if (_painting == name) _painting = null;
+      if (_payer == name) _payer = null;
+    });
+    if (solo.isEmpty) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(
+        content: Text(tr.billItemsSharedNow(name)),
+        behavior: SnackBarBehavior.floating,
+        persist: false,
+        action: SnackBarAction(
+          label: tr.txUndoAction,
+          onPressed: () {
+            if (!mounted || _people.contains(name)) return;
+            setState(() {
+              _people.insert(math.min(index, _people.length), name);
+              for (final i in solo) {
+                i.people
+                  ..clear()
+                  ..add(name);
+              }
+              _fixed
+                ..clear()
+                ..addAll(fixedBackup);
+            });
+          },
+        ),
+      ));
+  }
+
+  Future<void> _personActions(String name) async {
+    final tr = S.of(context);
+    final canSet = _mode == _SplitMode.evenly &&
+        _people.length > 1 &&
+        // The last free person takes whatever is left.
+        _people.where((p) => !_fixed.containsKey(p) && p != name).isNotEmpty;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          if (canSet)
+            ListTile(
+              leading: const Icon(AppIcons.pencilSimple),
+              title: Text(tr.billSetShare),
+              onTap: () => Navigator.pop(ctx, 'set'),
+            ),
+          if (_fixed.containsKey(name))
+            ListTile(
+              leading: const Icon(AppIcons.arrowCounterClockwise),
+              title: Text(tr.billResetShare),
+              onTap: () => Navigator.pop(ctx, 'reset'),
+            ),
+          if (name != _me)
+            ListTile(
+              leading: Icon(AppIcons.trash, color: AppColors.overspent),
+              title: Text(tr.commonRemove,
+                  style: TextStyle(color: AppColors.overspent)),
+              onTap: () => Navigator.pop(ctx, 'remove'),
+            ),
+        ]),
+      ),
+    );
+    if (!mounted) return;
+    switch (action) {
+      case 'set':
+        await _setShare(name);
+      case 'reset':
+        setState(() => _fixed.remove(name));
+      case 'remove':
+        _removePerson(name);
     }
   }
 
-  // ─── Items ────────────────────────────────────────────────────────────────
-
-  void _addManualItem() {
-    setState(() => _items.add(
-        _BillItem(name: '', amount: 0, assignedTo: {}, ocrLineIndex: null)));
+  /// Evenly: set one person's share by hand; the others split the rest.
+  Future<void> _setShare(String name) async {
+    if (_mode != _SplitMode.evenly || _people.length < 2) return;
+    final others = _people.where((p) => p != name);
+    if (others.every(_fixed.containsKey)) return; // someone must take the rest
+    final current = _shares()[name] ?? 0;
+    final v = await showCalculatorSheet(context, current);
+    if (v == null || !mounted) return;
+    final fixedOthers = _fixed.entries
+        .where((e) => e.key != name)
+        .fold(0.0, (s, e) => s + e.value);
+    if (v + fixedOthers > _grand + _tolerance) {
+      HapticFeedback.heavyImpact();
+      return;
+    }
+    setState(() => _fixed[name] = v);
   }
 
-  // ─── OCR ──────────────────────────────────────────────────────────────────
+  // ─── Items ─────────────────────────────────────────────────────────────────
+
+  void _setMode(_SplitMode m) {
+    if (m == _mode) return;
+    setState(() {
+      if (m == _SplitMode.evenly && _items.isNotEmpty) {
+        _subtotalEntered = _itemsTotal;
+      }
+      _mode = m;
+      _painting = null;
+      _fixed.clear();
+    });
+  }
+
+  void _toggleItem(_BillItem item) {
+    final p = _painting;
+    if (p == null) return;
+    final owners = _owners(item);
+    setState(() {
+      if (owners.contains(p)) {
+        if (owners.length == 1) {
+          HapticFeedback.heavyImpact(); // someone has to have had it
+          return;
+        }
+        item.people
+          ..clear()
+          ..addAll(owners..remove(p));
+      } else {
+        item.people
+          ..clear()
+          ..addAll(owners..add(p));
+      }
+      // Everyone again = the default.
+      if (item.people.length == _people.length) item.people.clear();
+    });
+  }
+
+  /// Add (item null) or edit an item: name, amount, split a quantity, delete.
+  Future<void> _editItem([_BillItem? item]) async {
+    final tr = S.of(context);
+    final nameCtrl = TextEditingController(text: item?.name ?? '');
+    var amount = item?.amount ?? 0;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(item == null ? tr.billAddItem : tr.commonEdit),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                autofocus: item == null,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(hintText: tr.billItemName),
+              ),
+              const SizedBox(height: 12),
+              Material(
+                color: AppColors.sfv(ctx),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  onTap: () async {
+                    final v = await showCalculatorSheet(ctx, amount);
+                    if (v != null) setLocal(() => amount = v);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 14),
+                    child: Row(children: [
+                      Text(tr.commonAmount,
+                          style: TextStyle(color: AppColors.ts(ctx))),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Text(_fmt(amount),
+                              style: const TextStyle(
+                                  fontFamily: TypographyTokens.displayFamily,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18)),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+              if (item != null && item.qty > 1 && item.amount > 0)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.pop(ctx, 'split'),
+                    icon: const Icon(AppIcons.arrowsSplit, size: 18),
+                    label: Text(tr.billSplitInto(item.qty)),
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            if (item != null)
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'delete'),
+                style:
+                    TextButton.styleFrom(foregroundColor: AppColors.overspent),
+                child: Text(tr.commonDelete),
+              ),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(tr.commonCancel)),
+            FilledButton(
+                style: DialogButtons.filled,
+                onPressed: () => Navigator.pop(ctx, 'save'),
+                child: Text(tr.commonSave)),
+          ],
+        ),
+      ),
+    );
+    final name = nameCtrl.text.trim();
+    disposeAfterRouteAnimation(nameCtrl);
+    if (!mounted || result == null) return;
+    setState(() {
+      switch (result) {
+        case 'delete':
+          _items.remove(item);
+          if (item?.ocrLineIndex != null) {
+            _addedLines.remove(item!.ocrLineIndex);
+          }
+        case 'split':
+          final i = _items.indexOf(item!);
+          final unit = item.amount / item.qty;
+          final base = item.name.replaceAll(RegExp(r'\s*×\d+$'), '');
+          _items
+            ..removeAt(i)
+            ..insertAll(i, [
+              for (var n = 0; n < item.qty; n++)
+                _BillItem(
+                  name: '$base (${n + 1}/${item.qty})',
+                  amount: unit,
+                  people: Set.of(item.people),
+                  ocrLineIndex: item.ocrLineIndex,
+                ),
+            ]);
+        case 'save':
+          if (amount == 0) return;
+          final label = name.isEmpty ? tr.billItemN(_items.length + 1) : name;
+          if (item == null) {
+            _items.add(_BillItem(name: label, amount: amount));
+          } else {
+            item
+              ..name = label
+              ..amount = amount;
+          }
+      }
+    });
+  }
+
+  // ─── OCR ───────────────────────────────────────────────────────────────────
 
   Future<void> _scanReceipt() async {
     final path = await _receiptImage();
     if (path == null || !mounted) return;
-
     setState(() => _scanning = true);
-
-    final result =
-        await OcrService.scanReceipt(path, currency: _billCurrency);
-
-    if (mounted) {
-      setState(() {
-        _scanning = false;
-        _ocrResult = result;
-        _addedLines.clear();
-        _items.clear();
-      });
-      if (result.lines.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).billNoText),
-          behavior: SnackBarBehavior.floating,
+    final result = await OcrService.scanReceipt(path, currency: _billCurrency);
+    if (!mounted) return;
+    setState(() {
+      _scanning = false;
+      _ocr = result;
+      _addedLines.clear();
+      _items.clear();
+      _painting = null;
+      _fixed.clear();
+      for (var i = 0; i < result.lines.length; i++) {
+        final l = result.lines[i];
+        if (!l.hasPrice) continue;
+        final name = l.parsedName ?? l.text.trim();
+        _items.add(_BillItem(
+          name: l.parsedQuantity > 1 ? '$name ×${l.parsedQuantity}' : name,
+          amount: l.parsedAmount!,
+          qty: l.parsedQuantity,
+          ocrLineIndex: i,
         ));
+        _addedLines.add(i);
       }
+      if (_items.isNotEmpty) _mode = _SplitMode.byItem;
+      // A receipt that lists tax/service separately: when items + tax
+      // match its total, fill the tax (a tax-inclusive one is left alone).
+      final tax = result.taxTotal, total = result.receiptTotal;
+      if (tax != null &&
+          total != null &&
+          (_itemsTotal + tax - total).abs() <= _tolerance) {
+        _taxOn = true;
+        _taxIsAmount = true;
+        _taxAmount = tax;
+      }
+    });
+    if (result.lines.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.of(context).billNoText),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -359,7 +805,6 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       ),
     );
     if (source == null) return null;
-
     XFile? image;
     try {
       image = await picker.pickImage(
@@ -379,260 +824,117 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return image.path;
   }
 
-  void _onLineTapped(int lineIndex) {
-    final line = _ocrResult!.lines[lineIndex];
-    if (_addedLines.contains(lineIndex)) {
-      setState(() {
-        _addedLines.remove(lineIndex);
-        _items.removeWhere((item) => item.ocrLineIndex == lineIndex);
-      });
-      return;
-    }
-    // Tax and total lines feed the tax field and the total check instead.
-    if (line.kind == OcrLineKind.tax || line.kind == OcrLineKind.total) return;
-    if (!line.hasPrice) {
-      _promptAmountForLine(lineIndex, line);
-      return;
-    }
-    _addLine(lineIndex, line);
-  }
-
-  Future<void> _promptAmountForLine(int lineIndex, OcrLine line) async {
-    final amount = await showCalculatorSheet(context, 0);
-    if (amount == null || amount <= 0 || !mounted) return;
-    final fixedLine = OcrLine(
-      text: line.text,
-      boundingBox: line.boundingBox,
-      parsedAmount: amount,
-      parsedName: line.parsedName ?? line.text.trim(),
-    );
-    _ocrResult!.lines[lineIndex] = fixedLine;
-    _addLine(lineIndex, fixedLine);
-  }
-
-  /// Adds a receipt line as an item. Items start unassigned: who had what is
-  /// chosen in the next step.
-  Future<void> _addLine(int lineIndex, OcrLine line) async {
-    final qty = line.parsedQuantity;
-    final amount = line.parsedAmount ?? 0;
-    final name = line.parsedName ?? line.text;
-
-    if (qty > 1) {
-      final tr = S.of(context);
-      final split = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(tr.billSplitQtyTitle(qty, name)),
-          content: Text(tr.billSplitQtyContent(
-              qty, formatAmount(amount / qty, currency: _billCurrency))),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(tr.billKeepAsOne)),
-            FilledButton(
-                style: DialogButtons.filled,
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(tr.billSplit)),
-          ],
-        ),
-      );
-      if (!mounted || split == null) return;
-      if (split) {
-        final unitPrice = amount / qty;
-        setState(() {
-          _addedLines.add(lineIndex);
-          for (var i = 0; i < qty; i++) {
-            _items.add(_BillItem(
-              name: '$name (${i + 1}/$qty)',
-              amount: unitPrice,
-              assignedTo: {},
-              ocrLineIndex: lineIndex,
-            ));
-          }
-        });
-        return;
-      }
-    }
-
+  /// A receipt line read without a price: ask for it, then add it.
+  Future<void> _addUnpriced(int index) async {
+    final line = _ocr!.lines[index];
+    final v = await showCalculatorSheet(context, 0);
+    if (v == null || v == 0 || !mounted) return;
     setState(() {
-      _addedLines.add(lineIndex);
       _items.add(_BillItem(
-        name: qty > 1 ? '$name ×$qty' : name,
-        amount: amount,
-        assignedTo: {},
-        ocrLineIndex: lineIndex,
-      ));
+          name: line.parsedName ?? line.text.trim(),
+          amount: v,
+          ocrLineIndex: index));
+      _addedLines.add(index);
     });
   }
 
-  // ─── Calculations ─────────────────────────────────────────────────────────
+  // ─── Account & category ────────────────────────────────────────────────────
 
-  double get _itemsTotal => _items.fold(0.0, (s, i) => s + i.amount);
-
-  double _taxTotalFor(double subtotal) =>
-      _taxIsAmount ? _taxAmount : subtotal * _taxPercent / 100;
-
-  /// Per-person breakdown: items, their share of tax & service (in proportion
-  /// to their items) and of the tip, kept separate for the review screen.
-  Map<String, ({double subtotal, double tax, double tip})>
-      _calculateBreakdown() {
-    final sub = <String, double>{for (final p in _people) p: 0};
-    final subtotal = _itemsTotal;
-
-    if (_splitEvenly && subtotal != 0 && _people.isNotEmpty) {
-      final perPerson = subtotal / _people.length;
-      for (final p in _people) {
-        sub[p] = perPerson;
-      }
-    } else {
-      for (final item in _items) {
-        // Discounts are negative items and reduce the people they're given to.
-        final owners =
-            _people.length == 1 ? {_people.first} : item.assignedTo;
-        if (owners.isEmpty || item.amount == 0) continue;
-        final share = item.amount / owners.length;
-        for (final person in owners) {
-          sub[person] = (sub[person] ?? 0) + share;
-        }
-      }
-    }
-
-    final taxTotal = _taxTotalFor(subtotal);
-    final tax = <String, double>{
-      for (final p in _people)
-        p: subtotal != 0 ? (sub[p] ?? 0) / subtotal * taxTotal : 0,
-    };
-
-    final tip = <String, double>{for (final p in _people) p: 0};
-    if (_tipIsAmount && _tipAmount > 0 && _people.isNotEmpty) {
-      // Fixed tip split evenly.
-      final tipPerPerson = _tipAmount / _people.length;
-      for (final p in _people) {
-        tip[p] = tipPerPerson;
-      }
-    } else if (!_tipIsAmount && _tipPercent > 0) {
-      // Percentage tip is proportional to each person's item subtotal.
-      for (final p in _people) {
-        tip[p] = (sub[p] ?? 0) * _tipPercent / 100;
-      }
-    }
-
-    return {
-      for (final p in _people)
-        p: (subtotal: sub[p] ?? 0, tax: tax[p] ?? 0, tip: tip[p] ?? 0),
-    };
+  Future<void> _pickAccount() async {
+    final accounts = (ref.read(accountsProvider).value ?? const <Account>[])
+        .where((a) => !a.archived)
+        .toList();
+    final id = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
+          child: ListView(shrinkWrap: true, children: [
+            for (final a in accounts)
+              ListTile(
+                leading: Icon(a.isTravel ? AppIcons.airplane : AppIcons.wallet),
+                title: Text(a.name),
+                subtitle: Text(a.currency),
+                trailing: a.id == _accountId
+                    ? Icon(AppIcons.check, color: AppColors.accent)
+                    : null,
+                onTap: () => Navigator.pop(ctx, a.id),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (id != null && mounted) setState(() => _accountId = id);
   }
 
-  /// Per-person totals (items + tax + tip), rounded to the currency's
-  /// decimals so the shares add up to the rounded bill total exactly.
-  Map<String, double> _calculateSplits() {
-    final raw = {
-      for (final e in _calculateBreakdown().entries)
-        e.key: e.value.subtotal + e.value.tax + e.value.tip,
-    };
-    final factor = math.pow(10, currencyDecimals(_billCurrency)).toDouble();
-    final target = (raw.values.fold(0.0, (s, v) => s + v) * factor).round();
-    final units = {for (final e in raw.entries) e.key: (e.value * factor).floor()};
-    var remainder = target - units.values.fold(0, (s, v) => s + v);
-    // Hand the leftover cents to whoever lost the most to rounding down.
-    final byFraction = raw.keys.toList()
-      ..sort((a, b) => ((raw[b]! * factor) - units[b]!)
-          .compareTo((raw[a]! * factor) - units[a]!));
-    for (final p in byFraction) {
-      if (remainder <= 0) break;
-      units[p] = units[p]! + 1;
-      remainder--;
-    }
-    return {for (final p in _people) p: (units[p] ?? 0) / factor};
+  Future<void> _pickCategory() async {
+    final categories = ref.read(categoriesProvider).value ?? const <Category>[];
+    final householdId = ref.read(currentHouseholdIdProvider);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CategorySheet(
+        categories: categories,
+        selectedId: _categoryId,
+        householdId: householdId,
+        initialType: 'expense',
+        recentIds: recentCategoryIds(
+            ref.read(transactionEntriesProvider).value ?? const []),
+        onSelected: (id, name, color, txType) {
+          if (mounted) setState(() => _categoryId = id);
+          Navigator.of(ctx).pop();
+        },
+        onCreated: (name) async {
+          if (householdId == null) return;
+          final db = ref.read(databaseProvider);
+          final cats = ref.read(categoriesProvider).value ?? [];
+          final color =
+              categoryPresetColors[cats.length % categoryPresetColors.length];
+          final colorHex =
+              '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+          final newId = const Uuid().v4();
+          try {
+            await db.into(db.categories).insert(CategoriesCompanion.insert(
+                  id: newId,
+                  householdId: householdId,
+                  name: name,
+                  colorHex: Value(colorHex),
+                  transactionType: const Value('expense'),
+                ));
+          } catch (e) {
+            debugPrint('[BillSplitter] Creating category failed: $e');
+            return;
+          }
+          if (!mounted) return;
+          ref.invalidate(categoriesProvider);
+          setState(() => _categoryId = newId);
+          if (ctx.mounted) Navigator.of(ctx).pop();
+        },
+      ),
+    );
   }
 
-  double _toBase(double amount) {
-    if (_billCurrency == _baseCurrency) return amount;
-    if ((_exchangeRate - 1.0).abs() < 0.001) return amount;
-    return amount * _exchangeRate;
-  }
-
-  // ─── Create Transaction ───────────────────────────────────────────────────
-
-  // ─── Exchange rate ────────────────────────────────────────────────────────
-
-  /// Switches the bill currency and fills the rate from the app's rates
-  /// (live, else cached). The user can still type their own.
-  Future<void> _setBillCurrency(String c) async {
-    setState(() {
-      _billCurrency = c;
-      _exchangeRate = 1.0;
-      _rateCtrl.clear();
-    });
-    if (c == _baseCurrency) return;
-    final rate = await rateToBaseOrOne(ref.read(fxServiceProvider),
-        ref.read(databaseProvider), c, _baseCurrency);
-    if (!mounted || _billCurrency != c || rate == 1.0) return;
-    setState(() {
-      _exchangeRate = rate;
-      _rateCtrl.text =
-          formatRateForInput(roundRate(_rateInverted ? 1.0 / rate : rate));
-    });
-  }
-
-  void _onRateTyped(String v) {
-    final r = parseLooseAmount(v) ?? 0;
-    if (r > 0) _exchangeRate = _rateInverted ? 1.0 / r : r;
-    setState(() {});
-  }
-
-  void _swapRateDirection() => setState(() {
-        _rateInverted = !_rateInverted;
-        if (_exchangeRate > 0 && _exchangeRate != 1.0) {
-          _rateCtrl.text = formatRateForInput(roundRate(
-              _rateInverted ? 1.0 / _exchangeRate : _exchangeRate));
-        }
-      });
-
-  /// A receipt that lists tax/service separately: when items + tax match the
-  /// receipt total, fill the tax field (a tax-inclusive receipt is left alone).
-  void _prefillTaxFromReceipt() {
-    final ocr = _ocrResult;
-    if (ocr == null || ocr.taxTotal == null || ocr.receiptTotal == null) return;
-    if (_taxAmount > 0 || _taxPercent > 0) return;
-    if ((_itemsTotal + ocr.taxTotal! - ocr.receiptTotal!).abs() > _tolerance) {
-      return;
-    }
-    _taxIsAmount = true;
-    _taxAmount = ocr.taxTotal!;
-    _taxExpanded = true;
-  }
-
-  double get _tolerance =>
-      1.5 / math.pow(10, currencyDecimals(_billCurrency)).toDouble();
-
-  // ─── Save ─────────────────────────────────────────────────────────────────
-
-  List<String> get _others => _people.skip(1).toList();
-
-  /// Who paid when "someone else paid" is chosen (first other by default).
-  String get _effectivePayer =>
-      _payer ?? (_others.isNotEmpty ? _others.first : _people.first);
-
-  _PaidMode get _mode => _others.isEmpty ? _PaidMode.each : _paidMode;
+  // ─── Save ──────────────────────────────────────────────────────────────────
 
   bool get _canSave {
-    final splits = _calculateSplits();
-    final total = splits.values.fold(0.0, (s, v) => s + v);
-    final mine = splits[_people.first] ?? 0;
-    if (total <= 0) return false;
-    return _mode == _PaidMode.me ? true : mine > 0;
+    if (_saving || _grand <= 0) return false;
+    final mine = _shares()[_me] ?? 0;
+    return _effectiveMode == _PaidMode.me || mine > 0;
   }
 
   Future<void> _save() async {
     final tr = S.of(context);
-    final mode = _mode;
+    final mode = _effectiveMode;
+    final records = mode != _PaidMode.other;
+    if (records && _accountId == null) {
+      await _pickAccount();
+      if (_accountId == null || !mounted) return;
+    }
     final isCross = _billCurrency != _baseCurrency;
-    final rateNotSet = isCross && (_exchangeRate - 1.0).abs() < 0.001;
-
-    // Loans are kept in the bill's currency; only a recorded expense needs
-    // a rate to the base currency.
-    if (rateNotSet && mode != _PaidMode.other) {
+    if (records && isCross && (_exchangeRate - 1.0).abs() < 0.001) {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -652,109 +954,285 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       if (proceed != true || !mounted) return;
     }
 
-    final splits = _calculateSplits();
-    final myShare = splits[_people.first] ?? 0;
-    final total = splits.values.fold(0.0, (s, v) => s + v);
+    final shares = _shares();
+    final mine = shares[_me] ?? 0;
+    final total = shares.values.fold(0.0, (s, v) => s + v);
     final others = _others;
-    final totalText = formatAmount(total, currency: _billCurrency);
-    final note = others.isEmpty
-        ? tr.billNoteTotal(totalText)
-        : tr.billNoteSplitWith(others.join(', '), totalText);
-    final rate = isCross ? _exchangeRate : 1.0;
-    final messenger = ScaffoldMessenger.of(context);
+    final owed = {
+      for (final p in others)
+        if ((shares[p] ?? 0) > 0) p: shares[p]!,
+    };
+    final account = (ref.read(accountsProvider).value ?? const <Account>[])
+        .where((a) => a.id == _accountId)
+        .firstOrNull;
 
-    if (mode == _PaidMode.other) {
-      // Nothing leaves the account now: track what the user owes the payer.
-      final payer = _effectivePayer;
-      final ids = await _createLoans('borrowed', {payer: myShare});
-      if (!mounted || ids.isEmpty) return;
-      final undo = _undoAction(loanIds: ids);
-      context.pop();
-      messenger.showSnackBar(SnackBar(
-        content: Text(tr.billOweCreated(
-            payer, formatAmount(myShare, currency: _billCurrency))),
-        behavior: SnackBarBehavior.floating,
-        persist: false,
-        action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
-      ));
+    setState(() => _saving = true);
+    String? txId;
+    var loanIds = const <String>[];
+    try {
+      if (records) {
+        final householdId = ref.read(currentHouseholdIdProvider);
+        if (householdId == null) throw StateError('no household');
+        final rate = isCross ? _exchangeRate : 1.0;
+        final note = others.isEmpty
+            ? tr.billNoteTotal(_fmt(total))
+            : tr.billNoteSplitWith(others.join(', '), _fmt(total));
+        final lines = <TxLine>[
+          if (mine > 0)
+            TxLine(
+              amount: mine,
+              currency: _billCurrency,
+              categoryId: _categoryId,
+              accountId: _accountId,
+              exchangeRateToBase: rate,
+            ),
+          if (mode == _PaidMode.me)
+            for (final e in owed.entries)
+              TxLine(
+                amount: e.value,
+                currency: _billCurrency,
+                accountId: _accountId,
+                exchangeRateToBase: rate,
+                note: tr.billLinePart(e.key),
+              ),
+        ];
+        txId = await ref.read(allocationEngineProvider).recordTransaction(
+              householdId: householdId,
+              accountId: _accountId!,
+              type: 'expense',
+              lines: lines,
+              baseCurrency: _baseCurrency,
+              note: '${tr.billNoteTitle} — $note',
+            );
+        LastUsedService.rememberAccount(_accountId!);
+      }
+      if (mode == _PaidMode.me) {
+        loanIds = await _createLoans('lent', owed);
+      } else if (mode == _PaidMode.other) {
+        loanIds = await _createLoans('borrowed', {_effectivePayer: mine});
+        if (loanIds.isEmpty) throw StateError('loan not saved');
+      }
+    } catch (e) {
+      debugPrint('[BillSplitter] Save failed: $e');
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(txSaveErrorText(tr, e)),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
       return;
     }
-
-    // "I paid": the whole bill leaves the account — the user's share plus one
-    // line per person. "Each paid": only the user's share.
-    final lines = <Map<String, dynamic>>[
-      if (myShare > 0)
-        {
-          'amount': myShare,
-          'currency': _billCurrency,
-          'exchangeRateToBase': rate,
-        },
-      if (mode == _PaidMode.me)
-        for (final p in others)
-          if ((splits[p] ?? 0) > 0)
-            {
-              'amount': splits[p],
-              'currency': _billCurrency,
-              'exchangeRateToBase': rate,
-              'note': tr.billLinePart(p),
-            },
-    ];
-    if (lines.isEmpty) return;
-
-    final txId = await context.push<String?>('/add-transaction', extra: {
-      'editType': 'expense',
-      'editNote': '${tr.billNoteTitle} — $note',
-      'editLines': lines,
-    });
-    // Not saved (form closed): stay on the bill so nothing is lost.
-    if (txId == null || !mounted) return;
-
-    var loanIds = const <String>[];
-    if (mode == _PaidMode.me) {
-      loanIds = await _createLoans('lent', {
-        for (final p in others)
-          if ((splits[p] ?? 0) > 0) p: splits[p]!,
-      });
-    }
     if (!mounted) return;
-    final undo = _undoAction(txId: txId, loanIds: loanIds);
-    context.pop();
-    if (loanIds.isNotEmpty) {
-      // Replaces the form's "Saved" SnackBar: its Undo would remove the
-      // payment but leave these loans behind.
-      messenger.clearSnackBars();
-      messenger.showSnackBar(SnackBar(
-        content: Text(tr.billLoansCreated(loanIds.length)),
-        behavior: SnackBarBehavior.floating,
-        persist: false,
-        action: SnackBarAction(label: tr.txUndoAction, onPressed: undo),
-      ));
+    setState(() => _saving = false);
+
+    final outcome = await _showSaved(
+      mode: mode,
+      shares: shares,
+      owed: owed,
+      total: total,
+      accountName: account?.name ?? '',
+    );
+    if (!mounted) return;
+    if (outcome == 'undo') {
+      await _undo(txId: txId, loanIds: loanIds);
+      return; // the bill stays on screen to fix
     }
+    context.pop();
   }
 
-  /// Undo for a saved bill: the payment (if any) and the loans it created,
-  /// together. Captures the container — the screen is gone by then.
-  VoidCallback _undoAction({String? txId, List<String> loanIds = const []}) {
-    final container = ProviderScope.containerOf(context);
-    return () async {
-      try {
-        if (txId != null) {
-          await container.read(allocationEngineProvider).deleteTransaction(txId);
-          container.invalidate(transactionEntriesProvider);
-          container.invalidate(monthlyTransactionsProvider);
-        }
-        if (loanIds.isNotEmpty) {
-          final db = container.read(databaseProvider);
-          await (db.update(db.objectives)..where((o) => o.id.isIn(loanIds)))
-              .write(ObjectivesCompanion(
-                  deleted: const Value(true),
-                  lastModified: Value(DateTime.now())));
-          container.invalidate(objectivesProvider);
-        }
-      } catch (e) {
-        debugPrint('[BillSplitter] Undo failed: $e');
-      }
+  /// The saved bill: who owes what, a way to send each share, Undo.
+  Future<String?> _showSaved({
+    required _PaidMode mode,
+    required Map<String, double> shares,
+    required Map<String, double> owed,
+    required double total,
+    required String accountName,
+  }) {
+    final tr = S.of(context);
+    final mine = shares[_me] ?? 0;
+    final payer = _effectivePayer;
+    final subtitle = switch (mode) {
+      _PaidMode.me => tr.billSavedFrom(_fmt(total), accountName, _fmt(mine)),
+      _PaidMode.each => tr.billSavedEach(_fmt(mine), accountName),
+      _PaidMode.other => tr.billNothingLeaves(payer),
     };
+    final rows = mode == _PaidMode.me
+        ? owed
+        : mode == _PaidMode.other
+            ? {payer: mine}
+            : const <String, double>{};
+    final shareText = _shareText(shares, mode);
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.pastel(ctx, AppColors.healthy,
+                        light: 0.82, dark: 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(AppIcons.check,
+                      size: 24, color: AppColors.healthy),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tr.billNoteTitle,
+                          style: const TextStyle(
+                              fontFamily: TypographyTokens.displayFamily,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20)),
+                      const SizedBox(height: 2),
+                      Text(subtitle,
+                          style: TextStyle(
+                              fontSize: 13, color: AppColors.ts(ctx))),
+                    ],
+                  ),
+                ),
+              ]),
+              if (rows.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.sf(ctx),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
+                    boxShadow: AppColors.cardShadow(ctx),
+                  ),
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          mode == _PaidMode.me
+                              ? tr.billOwesYouTitle
+                              : tr.billYouOweTitle,
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ts(ctx)),
+                        ),
+                      ),
+                      for (final e in rows.entries)
+                        Padding(
+                          padding:
+                              const EdgeInsetsDirectional.fromSTEB(16, 4, 4, 4),
+                          child: Row(children: [
+                            _Avatar(
+                                label: _initials(e.key),
+                                color: _colorOf(e.key),
+                                size: 36),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(e.key,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                            Text(
+                              _fmt(e.value),
+                              style: TextStyle(
+                                fontFamily: TypographyTokens.displayFamily,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures()
+                                ],
+                                color: mode == _PaidMode.me
+                                    ? AppColors.healthy
+                                    : AppColors.caution,
+                              ),
+                            ),
+                            if (mode == _PaidMode.me)
+                              IconButton(
+                                tooltip: tr.billSendShare(e.key),
+                                icon: Icon(AppIcons.shareFat,
+                                    size: 20, color: AppColors.accent),
+                                onPressed: () => SharePlus.instance.share(
+                                    ShareParams(
+                                        text: tr.billPersonShareText(
+                                            _fmt(e.value)))),
+                              )
+                            else
+                              const SizedBox(width: 12),
+                          ]),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                        child: Text(tr.billTrackedHint,
+                            style: TextStyle(
+                                fontSize: 12, color: AppColors.ts(ctx))),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Row(children: [
+                if (_others.isNotEmpty) ...[
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => SharePlus.instance
+                          .share(ShareParams(text: shareText)),
+                      icon: const Icon(AppIcons.shareNetwork, size: 18),
+                      label: Text(tr.billShare),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(ctx, 'done'),
+                    child: Text(tr.commonDone),
+                  ),
+                ),
+              ]),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'undo'),
+                child: Text(tr.txUndoAction),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Undo a saved bill: the payment (if any) and the loans it created.
+  Future<void> _undo({String? txId, List<String> loanIds = const []}) async {
+    try {
+      if (txId != null) {
+        await ref.read(allocationEngineProvider).deleteTransaction(txId);
+        ref.invalidate(transactionEntriesProvider);
+        ref.invalidate(monthlyTransactionsProvider);
+      }
+      if (loanIds.isNotEmpty) {
+        final db = ref.read(databaseProvider);
+        await (db.update(db.objectives)..where((o) => o.id.isIn(loanIds)))
+            .write(ObjectivesCompanion(
+                deleted: const Value(true),
+                lastModified: Value(DateTime.now())));
+        ref.invalidate(objectivesProvider);
+      }
+    } catch (e) {
+      debugPrint('[BillSplitter] Undo failed: $e');
+    }
   }
 
   /// One loan per person in Goals & Loans, in the bill's currency. Repayments
@@ -766,52 +1244,40 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final db = ref.read(databaseProvider);
     final name = S.of(context).billLoanName(formatDate(DateTime.now()));
     final ids = <String>[];
-    try {
-      for (final e in amounts.entries) {
-        if (e.value <= 0) continue;
-        final id = const Uuid().v4();
-        await db.into(db.objectives).insert(ObjectivesCompanion.insert(
-              id: id,
-              householdId: householdId,
-              name: name,
-              type: 'loan',
-              targetCurrency: _billCurrency,
-              deviceId: 'local',
-              targetAmount: Value(e.value),
-              currentAmount: const Value(0),
-              contactName: Value(e.key),
-              direction: Value(direction),
-              lastModified: Value(DateTime.now()),
-            ));
-        ids.add(id);
-      }
-      ref.invalidate(objectivesProvider);
-    } catch (e) {
-      debugPrint('[BillSplitter] creating loans failed: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).commonSomethingWentWrong),
-          behavior: SnackBarBehavior.floating,
-        ));
-      }
+    for (final e in amounts.entries) {
+      if (e.value <= 0) continue;
+      final id = const Uuid().v4();
+      await db.into(db.objectives).insert(ObjectivesCompanion.insert(
+            id: id,
+            householdId: householdId,
+            name: name,
+            type: 'loan',
+            targetCurrency: _billCurrency,
+            deviceId: 'local',
+            targetAmount: Value(e.value),
+            currentAmount: const Value(0),
+            contactName: Value(e.key),
+            direction: Value(direction),
+            lastModified: Value(DateTime.now()),
+          ));
+      ids.add(id);
     }
+    ref.invalidate(objectivesProvider);
     return ids;
   }
 
   /// Plain-text summary for a group chat.
-  Future<void> _shareSplit() async {
+  String _shareText(Map<String, double> shares, _PaidMode mode) {
     final tr = S.of(context);
-    final splits = _calculateSplits();
-    final total = splits.values.fold(0.0, (s, v) => s + v);
-    final b = StringBuffer(
-        tr.billShareHeader(formatAmount(total, currency: _billCurrency)));
+    final total = shares.values.fold(0.0, (s, v) => s + v);
+    final b = StringBuffer(tr.billShareHeader(_fmt(total)));
     for (final p in _people) {
-      b.write('\n$p: ${formatAmount(splits[p] ?? 0, currency: _billCurrency)}');
+      b.write('\n$p: ${_fmt(shares[p] ?? 0)}');
     }
-    if (_mode == _PaidMode.other) {
+    if (mode == _PaidMode.other) {
       b.write('\n${tr.billSharePaidBy(_effectivePayer)}');
     }
-    await SharePlus.instance.share(ShareParams(text: b.toString()));
+    return b.toString();
   }
 
   Future<bool> _confirmDiscard() async {
@@ -835,1214 +1301,1132 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return ok == true;
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  Color _personColor(String person) {
-    const colors = [
-      Color(0xFF6366F1), Color(0xFF10B981), Color(0xFFF59E0B),
-      Color(0xFFEF4444), Color(0xFF8B5CF6), Color(0xFF06B6D4),
-      Color(0xFFEC4899), Color(0xFFFF7043),
-    ];
-    final idx = _people.indexOf(person);
-    return colors[idx >= 0 ? idx % colors.length : 0];
+  Future<void> _pickPayer() async {
+    final tr = S.of(context);
+    final mode = _effectiveMode;
+    final payer = _effectivePayer;
+    // One line per choice: the bottom bar already says what it means
+    // ("They owe you…", "You owe Sam…").
+    Widget? check(bool on) =>
+        on ? Icon(AppIcons.check, color: AppColors.accent) : null;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+            child: Text(tr.billPaidBy,
+                style: const TextStyle(
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20)),
+          ),
+          ListTile(
+            leading: _Avatar(label: _initials(_me), color: _colorOf(_me)),
+            title: Text(tr.billYou),
+            trailing: check(mode == _PaidMode.me),
+            onTap: () => Navigator.pop(ctx, 'me'),
+          ),
+          for (final p in _others)
+            ListTile(
+              leading: _Avatar(label: _initials(p), color: _colorOf(p)),
+              title: Text(p),
+              trailing: check(mode == _PaidMode.other && payer == p),
+              onTap: () => Navigator.pop(ctx, 'p:$p'),
+            ),
+          ListTile(
+            leading:
+                const SizedBox(width: 36, child: Icon(AppIcons.usersThree)),
+            title: Text(tr.billEachOwn),
+            subtitle: Text(tr.billPaidEachDesc),
+            trailing: check(mode == _PaidMode.each),
+            onTap: () => Navigator.pop(ctx, 'each'),
+          ),
+        ]),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    setState(() {
+      if (choice == 'me') {
+        _paidMode = _PaidMode.me;
+      } else if (choice == 'each') {
+        _paidMode = _PaidMode.each;
+      } else {
+        _paidMode = _PaidMode.other;
+        _payer = choice.substring(2);
+      }
+    });
   }
 
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+
+  Color _colorOf(String person) {
+    if (person == _me) return AppColors.accent;
+    final i = _people.indexOf(person);
+    return _personColors[
+        (i < 1 ? person.hashCode.abs() : i - 1) % _personColors.length];
+  }
+
+  String _initials(String person) {
+    if (person == _me) return _me;
+    final t = person.trim();
+    return t.isEmpty ? '?' : t.characters.first.toUpperCase();
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // BUILD — single ListView, no Column/Expanded
+  // BUILD — the body is one flat ListView (see the file header).
   // ═══════════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
+    final tr = S.of(context);
     if (_scanning) {
       return Scaffold(
-        appBar: AppBar(title: Text(S.of(context).billTitle)),
+        appBar: AppBar(title: Text(tr.billScreenTitle)),
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(S.of(context).billScanning),
-            ],
-          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(tr.billScanning),
+          ]),
         ),
       );
     }
-
-    final splits = _calculateSplits();
-    final grandTotal = splits.values.fold(0.0, (s, v) => s + v);
-
+    final shares = _shares();
     return PopScope(
-      // Back goes to the previous step, and asks before throwing a bill away.
-      canPop: _step == 0 && _items.isEmpty && _ocrResult == null,
+      canPop: _isEmpty,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (_step > 0) {
-          _goToStep(_step - 1);
+        if (_painting != null) {
+          setState(() => _painting = null);
           return;
         }
         if (!await _confirmDiscard() || !mounted) return;
         this.context.pop();
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).billTitle),
-        actions: [
-          if (_step == 0)
+        appBar: AppBar(
+          title: Text(tr.billScreenTitle),
+          actions: [
             IconButton(
-              icon: const Icon(AppIcons.camera),
-              tooltip: S.of(context).billScanTooltip,
+              tooltip: tr.billScanButton,
               onPressed: _scanReceipt,
+              icon: const Icon(AppIcons.camera),
             ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (_step == 0) ...[
-            // Step instruction
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                S.of(context).billStep1Desc,
-                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
-              ),
-            ),
-            // Currency indicator — tap to change
-            GestureDetector(
-              onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.sfv(context),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(AppIcons.money, size: 16, color: AppColors.ts(context)),
-                    const SizedBox(width: 6),
-                    Text(S.of(context).billBillIn(_billCurrency),
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                            color: AppColors.tp(context))),
-                    const SizedBox(width: 4),
-                    Icon(AppIcons.pencilSimple, size: 12, color: AppColors.th(context)),
-                  ],
-                ),
-              ),
-            ),
-            if (_currencyExpanded) ...[
-              CurrencyPickerField(value: _billCurrency, label: S.of(context).billBillCurrency,
-                onChanged: (c) {
-                  setState(() => _currencyExpanded = false);
-                  _setBillCurrency(c);
-                }),
-              const SizedBox(height: 12),
-            ],
-            // Show exchange rate inline when cross-currency
-            if (_billCurrency != _baseCurrency) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.caution,
-                      light: 0.88, dark: 0.8),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.caution.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(S.of(context).billExchangeRateTitle,
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
-                            color: AppColors.caution)),
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
-                          style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-                      Expanded(child: TextField(controller: _rateCtrl,
-                        decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true, fillColor: AppColors.sfv(context),),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: _onRateTyped)),
-                      Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
-                          style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: _swapRateDirection,
-                        child: Icon(AppIcons.arrowsDownUp,
-                            size: 20, color: AppColors.accent),
-                      ),
-                    ]),
-                  ],
-                ),
-              ),
-            ],
-            if (_items.isEmpty && _ocrResult == null) ...[
-              const SizedBox(height: 40),
-              EmptyState(
-                icon: AppIcons.receipt,
-                title: S.of(context).billEmptyTitle,
-                subtitle: S.of(context).billEmptySubtitle,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _scanReceipt,
-                icon: const Icon(AppIcons.camera, size: 20),
-                label: Text(S.of(context).billScanButton),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: _addManualItem,
-                icon: const Icon(AppIcons.pencilSimple, size: 18),
-                label: Text(S.of(context).billAddManually),
-              ),
-            ] else ...[
-              if (_ocrResult != null) ...[
-                _buildDetectedLinesList(),
-                const SizedBox(height: 12),
-              ],
-              for (var i = 0; i < _items.length; i++) _buildItemTile(i),
-              if (_ocrResult?.receiptTotal != null && _items.isNotEmpty)
-                _buildReceiptCheck(),
-              TextButton.icon(
-                onPressed: _addManualItem,
-                icon: const Icon(AppIcons.plus, size: 18),
-                label: Text(S.of(context).billAddItem),
-              ),
-            ],
+            const SizedBox(width: 4),
           ],
-          if (_step == 1) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                S.of(context).billStep2Desc,
-                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            _billCard(tr),
+            const SizedBox(height: 18),
+            Row(children: [
+              Expanded(
+                child: Text(tr.billWhosIn,
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentText(context))),
               ),
-            ),
-            _buildPeopleSection(),
-            const SizedBox(height: 12),
-            _buildSplitEvenlyToggle(),
-            const SizedBox(height: 12),
-            if (!_splitEvenly && _people.length > 1) ...[
-              SectionHeader(S.of(context).billAssignItems),
-              const SizedBox(height: 8),
-              for (var i = 0; i < _items.length; i++) _buildAssignableItem(i),
-            ],
-          ],
-          if (_step == 2) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                S.of(context).billStep3Desc,
-                style: TextStyle(fontSize: 13, color: AppColors.ts(context)),
+              _ModeSwitch(
+                evenly: _mode == _SplitMode.evenly,
+                evenlyLabel: tr.billEvenly,
+                byItemLabel: tr.billByItem,
+                onChanged: (evenly) =>
+                    _setMode(evenly ? _SplitMode.evenly : _SplitMode.byItem),
               ),
-            ),
-            _buildSummaryCard(),
+            ]),
             const SizedBox(height: 10),
-            if (_others.isNotEmpty) ...[
-              _buildWhoPaidSection(),
-              const SizedBox(height: 10),
-            ],
-            _buildTaxSection(),
-            const SizedBox(height: 8),
-            _buildTipSection(),
-            const SizedBox(height: 8),
-            _buildCurrencySection(),
-            if (_others.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: grandTotal > 0 ? _shareSplit : null,
-                icon: const Icon(AppIcons.shareNetwork, size: 18),
-                label: Text(S.of(context).billShare),
-              ),
-            ],
-          ],
-          // Nav buttons at bottom
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              if (_step > 0) ...[
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _goToStep(_step - 1),
-                    child: Text(S.of(context).commonBack),
+            if (_mode == _SplitMode.evenly) ...[
+              _peopleCard(tr, shares),
+              if (_people.length > 1) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 4),
+                  child: Text(tr.billByHandHint,
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context))),
+                ),
+              ],
+            ] else ...[
+              if (_painting != null)
+                _paintingBanner(tr)
+              else if (_people.length > 1 && _items.isNotEmpty)
+                Padding(
+                  padding:
+                      const EdgeInsetsDirectional.only(start: 4, bottom: 8),
+                  child: Text(tr.billPickPersonHint,
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context))),
+                ),
+              if (_items.isNotEmpty) ...[
+                _itemsCard(tr),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: _editItem,
+                    icon: const Icon(AppIcons.plus, size: 18),
+                    label: Text(tr.billAddItem),
                   ),
                 ),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: _step == 2
-                    ? FilledButton.icon(
-                        onPressed: _canSave ? _save : null,
-                        icon: const Icon(AppIcons.check, size: 18),
-                        label: Text(S.of(context).commonSave),
-                      )
-                    : FilledButton(
-                        onPressed: _step == 0
-                            ? (_canProceedFromItems
-                                ? () {
-                                    _prefillTaxFromReceipt();
-                                    _goToStep(1);
-                                  }
-                                : null)
-                            : (_canProceedFromSplit ? () => _goToStep(2) : null),
-                        child: Text(S.of(context).commonNext),
-                      ),
-              ),
+              ] else
+                // No items yet: read them off the receipt, or type them.
+                Row(children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _scanReceipt,
+                      icon: const Icon(AppIcons.camera, size: 18),
+                      label: Text(tr.billScanButton),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _editItem,
+                      icon: const Icon(AppIcons.plus, size: 18),
+                      label: Text(tr.billAddItem),
+                    ),
+                  ),
+                ]),
+              ..._receiptCheck(tr),
+              ..._unpricedLines(tr),
             ],
-          ),
-          const SizedBox(height: 40),
-        ],
+          ],
+        ),
+        bottomNavigationBar: _bottomBar(tr, shares),
       ),
-    ),
     );
   }
 
-  Widget _buildItemTile(int index) {
-    final item = _items[index];
-    // Every item (including scanned ones) is editable. ObjectKey keeps each
-    // field's text bound to its item when the list changes (e.g. after a split).
+  // ─── Bill card ─────────────────────────────────────────────────────────────
+
+  Widget _billCard(S tr) {
+    final byItem = _mode == _SplitMode.byItem;
+    final parts = <String>[
+      if (_tipTotal != 0) tr.billPlusTip(_fmt(_tipTotal)),
+      if (_taxTotal != 0) tr.billPlusTax(_fmt(_taxTotal)),
+    ];
+    final breakdown =
+        parts.isEmpty ? null : '${_fmt(_subtotal)} ${parts.join(' ')}';
+    final isCross = _billCurrency != _baseCurrency;
+    final tipChoice = _tipIsAmount
+        ? 'custom'
+        : _tipPercent == 0
+            ? '0'
+            : _tipPercent.toStringAsFixed(0);
     return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
       decoration: BoxDecoration(
         color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
         boxShadow: AppColors.cardShadow(context),
       ),
-      child: Row(
-        children: [
-          if (item.assignedTo.isNotEmpty)
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsetsDirectional.only(end: 10),
-              decoration: BoxDecoration(
-                color: _personColor(item.assignedTo.first),
-                shape: BoxShape.circle,
-              ),
-            ),
-          Expanded(
-            child: TextFormField(
-              key: ValueKey('name_${identityHashCode(item)}'),
-              initialValue: item.name,
-              decoration: InputDecoration(
-                hintText: S.of(context).billItemName,
-                isDense: true,
-                border: InputBorder.none,
-        filled: false,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: const TextStyle(fontSize: 13),
-              onChanged: (v) => item.name = v,
-            ),
-          ),
-          const SizedBox(width: 8),
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () async {
-              final v = await showCalculatorSheet(context, item.amount.abs());
-              if (v == null || !mounted) return;
-              // A discount stays negative when its amount is edited.
-              setState(() => item.amount = item.amount < 0 ? -v : v);
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-              child: Text(
-                item.amount == 0
-                    ? formatAmount(0, currency: _billCurrency)
-                    : formatAmount(item.amount, currency: _billCurrency),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: item.amount == 0
-                      ? AppColors.th(context)
-                      : item.amount < 0
-                          ? AppColors.healthy
-                          : AppColors.tp(context),
-                ),
-              ),
-            ),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: Icon(AppIcons.arrowsSplit,
-                size: 18, color: AppColors.ts(context)),
-            tooltip: S.of(context).billSplitIntoUnits,
-            onPressed: () => _splitItemIntoUnits(index),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: Icon(AppIcons.x,
-                size: 18, color: AppColors.ts(context)),
-            tooltip: S.of(context).commonDelete,
-            onPressed: () => _removeItem(index),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Splits one item into [n] equal unit-items so a shared multi-quantity item
-  /// (e.g. "5× fries" for 3 people) can be assigned per-person in the next step.
-  Future<void> _splitItemIntoUnits(int index) async {
-    if (index < 0 || index >= _items.length) return;
-    final item = _items[index];
-    final tr = S.of(context);
-    final ctrl = TextEditingController(text: '2');
-    final n = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr.billSplitIntoUnits),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: tr.billSplitUnitsPrompt),
-          onSubmitted: (_) => Navigator.pop(ctx, int.tryParse(ctrl.text)),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(tr.commonCancel)),
-          FilledButton(
-              style: DialogButtons.filled,
-              onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
-              child: Text(tr.billSplit)),
-        ],
-      ),
-    );
-    disposeAfterRouteAnimation(ctrl);
-    if (n == null || n < 2 || n > 50 || !mounted) return;
-    if (index >= _items.length) return;
-    setState(() {
-      final unit = item.amount / n;
-      // Drop any trailing "×5" / "(1/5)" qualifier before re-numbering.
-      final base = item.name
-          .replaceAll(RegExp(r'\s*[×x]\s*\d+\s*$'), '')
-          .replaceAll(RegExp(r'\s*\(\d+/\d+\)\s*$'), '')
-          .trim();
-      final display = base.isEmpty ? tr.billItemN(index + 1) : base;
-      final units = [
-        for (var i = 0; i < n; i++)
-          _BillItem(
-            name: '$display (${i + 1}/$n)',
-            amount: unit,
-            assignedTo: Set<String>.from(item.assignedTo),
-            ocrLineIndex: null,
-          ),
-      ];
-      _items.replaceRange(index, index + 1, units);
-    });
-  }
-
-  void _removeItem(int index) {
-    if (index < 0 || index >= _items.length) return;
-    final removed = _items[index];
-    final at = index;
-    final line = removed.ocrLineIndex;
-    setState(() {
-      _items.removeAt(index);
-      if (line != null && !_items.any((i) => i.ocrLineIndex == line)) {
-        _addedLines.remove(line);
-      }
-    });
-    final tr = S.of(context);
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr.billItemRemoved),
-      behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 4),
-      persist: false,
-      action: SnackBarAction(
-        label: tr.txUndoAction,
-        onPressed: () => setState(() {
-          _items.insert(at <= _items.length ? at : _items.length, removed);
-          if (line != null) _addedLines.add(line);
-        }),
-      ),
-    ));
-  }
-
-  // ─── Split helpers (used inline in ListView) ──────────────────────────────
-
-  Widget _buildPeopleSection() {
-    return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SectionHeader(S.of(context).billWhosSplitting),
-          const SizedBox(height: 10),
-          Wrap(spacing: 8, runSpacing: 6, children: [
-            for (final p in _people) _personChip(p),
-          ]),
-          const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: TextField(
-              controller: _personCtrl,
-              decoration: InputDecoration(hintText: S.of(context).billAddPerson, isDense: true, fillColor: AppColors.sfv(context),),
-              textCapitalization: TextCapitalization.words,
-              onSubmitted: (_) => _addPerson(),
-            )),
-            const SizedBox(width: 8),
-            IconButton.filled(onPressed: _addPerson,
-              icon: const Icon(AppIcons.plus, size: 18),
-              style: IconButton.styleFrom(backgroundColor: AppColors.accent)),
+            Expanded(
+              child: Text(tr.billTotalLabel,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ts(context))),
+            ),
+            _Pill(
+              onTap: _pickCurrency,
+              label: _billCurrency,
+              trailing: AppIcons.caretDown,
+              height: 32,
+            ),
           ]),
+          InkWell(
+            onTap: byItem ? null : _editTotal,
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  _fmt(_grand),
+                  style: TextStyle(
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 40,
+                    letterSpacing: -1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: _grand == 0
+                        ? AppColors.th(context)
+                        : AppColors.tp(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (breakdown != null)
+            Text(breakdown,
+                style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+          if (isCross) ...[
+            const SizedBox(height: 8),
+            Row(children: [
+              Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
+                  style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              SizedBox(
+                width: 110,
+                child: TextField(
+                  controller: _rateCtrl,
+                  decoration:
+                      InputDecoration(hintText: tr.billRateHint, isDense: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: _onRateTyped,
+                ),
+              ),
+              Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
+                  style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
+              IconButton(
+                onPressed: _swapRateDirection,
+                icon: Icon(AppIcons.arrowsDownUp,
+                    size: 18, color: AppColors.accent),
+              ),
+              const Spacer(),
+              if ((_exchangeRate - 1.0).abs() >= 0.001 && _grand > 0)
+                Flexible(
+                  child: Text(
+                    '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)}',
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.ts(context)),
+                  ),
+                ),
+            ]),
+          ],
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: 34,
+                child: Text(tr.billTip,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ts(context))),
+              ),
+              for (final (value, label) in [
+                ('0', tr.commonNone),
+                ('10', '10%'),
+                ('15', '15%'),
+                (
+                  'custom',
+                  _tipIsAmount && _tipAmount > 0
+                      ? _fmt(_tipAmount)
+                      : tr.billTipCustom
+                ),
+              ])
+                _ChoicePill(
+                  label: label,
+                  selected: tipChoice == value,
+                  onTap: () => _setTip(value),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          if (!_taxOn)
+            TextButton.icon(
+              onPressed: _editTax,
+              style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: const Size(0, 36)),
+              icon: const Icon(AppIcons.plus, size: 16),
+              label: Text(tr.billAddTax),
+            )
+          else
+            Row(children: [
+              Expanded(
+                child: InkWell(
+                  onTap: _editTax,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      _taxIsAmount
+                          ? '${tr.billAddTax} · ${_fmt(_taxAmount)}'
+                          : '${tr.billAddTax} · ${formatNumber(_taxPercent)}% · ${_fmt(_taxTotal)}',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.tp(context)),
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                onPressed: () => setState(() {
+                  _taxOn = false;
+                  _fixed.clear();
+                }),
+                icon: Icon(AppIcons.x, size: 18, color: AppColors.th(context)),
+              ),
+            ]),
         ],
       ),
     );
   }
 
-  Widget _buildSplitEvenlyToggle() {
-    return _card(
-      child: SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(S.of(context).billSplitEvenly,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        subtitle: Text(
-          S.of(context).billEachPays(formatAmount(_items.fold(0.0, (s, i) => s + i.amount) / (_people.isNotEmpty ? _people.length : 1), currency: _billCurrency)),
-          style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-        value: _splitEvenly,
-        onChanged: (v) => setState(() => _splitEvenly = v),
-      ),
-    );
-  }
+  // ─── Evenly: people and their shares ───────────────────────────────────────
 
-  // ─── Review helpers ───────────────────────────────────────────────────────
-
-  Widget _buildSummaryCard() {
-    final isCross = _billCurrency != _baseCurrency;
-    final hasRate = isCross && (_exchangeRate - 1.0).abs() >= 0.001;
-    final breakdown = _calculateBreakdown();
-    final splits = _calculateSplits(); // rounded so they add up exactly
-    final grandTotal = splits.values.fold(0.0, (s, v) => s + v);
-    final totalTip = breakdown.values.fold(0.0, (s, b) => s + b.tip);
-    final totalTax = breakdown.values.fold(0.0, (s, b) => s + b.tax);
-    final tr = S.of(context);
-    final small = TextStyle(fontSize: 11, color: AppColors.ts(context));
-    final rowLabel = TextStyle(fontSize: 13, color: AppColors.ts(context));
-    return _card(
-      child: Column(children: [
-        for (final entry in breakdown.entries)
-          Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(children: [
-                Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                        color: _personColor(entry.key),
-                        shape: BoxShape.circle)),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: Text(entry.key,
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: entry.key == _people.first
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: AppColors.tp(context)))),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  Text(
-                      formatAmount(splits[entry.key] ?? 0,
-                          currency: _billCurrency),
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context))),
-                  // Show the tax and tip portions so no one has to guess them.
-                  if (entry.value.tax.abs() >= 0.005)
-                    Text(
-                        '${tr.billTax} ${formatAmount(entry.value.tax, currency: _billCurrency)}',
-                        style: small),
-                  if (entry.value.tip > 0)
-                    Text(
-                        '${tr.billTipLabel} ${formatAmount(entry.value.tip, currency: _billCurrency)}',
-                        style: small),
-                  if (hasRate)
-                    Text(
-                        '≈ ${formatAmount(_toBase(splits[entry.key] ?? 0), currency: _baseCurrency)}',
-                        style: small),
-                ]),
-              ])),
-        Divider(color: AppColors.bd(context)),
-        if (totalTax.abs() >= 0.005)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(children: [
-              Expanded(child: Text(tr.billTax, style: rowLabel)),
-              Text(formatAmount(totalTax, currency: _billCurrency),
-                  style: rowLabel),
-            ]),
-          ),
-        if (totalTip > 0)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(children: [
-              Expanded(child: Text(tr.billTipLabel, style: rowLabel)),
-              Text(formatAmount(totalTip, currency: _billCurrency),
-                  style: rowLabel),
-            ]),
-          ),
-        Row(children: [
-          Expanded(
-              child: Text(tr.billTotal,
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tp(context)))),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(formatAmount(grandTotal, currency: _billCurrency),
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tp(context))),
-            if (hasRate)
-              Text(
-                  '≈ ${formatAmount(_toBase(grandTotal), currency: _baseCurrency)}',
-                  style: small),
-          ]),
-        ]),
-      ]),
-    );
-  }
-
-  /// Items vs the receipt's TOTAL line, so a missed or misread line shows.
-  Widget _buildReceiptCheck() {
-    final tr = S.of(context);
-    final receipt = _ocrResult!.receiptTotal!;
-    final items = _itemsTotal;
-    final tax = _ocrResult!.taxTotal ?? 0;
-    // Tax-inclusive receipts match on items alone; others on items + tax.
-    final matches = (items - receipt).abs() <= _tolerance ||
-        (tax > 0 && (items + tax - receipt).abs() <= _tolerance);
-    final color = matches ? AppColors.healthy : AppColors.caution;
-    final receiptText = formatAmount(receipt, currency: _billCurrency);
+  Widget _peopleCard(S tr, Map<String, double> shares) {
+    final recent = _recentPeople;
     return Container(
-      margin: const EdgeInsets.only(top: 4, bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.pastel(context, color, light: 0.88, dark: 0.78),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        boxShadow: AppColors.cardShadow(context),
       ),
-      child: Row(children: [
-        Icon(matches ? AppIcons.checkCircleFill : AppIcons.info,
-            size: 18, color: color),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            matches
-                ? tr.billReceiptMatch(receiptText)
-                : tr.billReceiptDiff(
-                    formatAmount(items, currency: _billCurrency), receiptText),
-            style: TextStyle(fontSize: 12.5, color: AppColors.tp(context)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: [
+        for (final p in _people) ...[
+          InkWell(
+            onTap: () => _personActions(p),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
+              child: Row(children: [
+                _Avatar(label: _initials(p), color: _colorOf(p)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(p == _me ? tr.billYou : p,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700)),
+                ),
+                InkWell(
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  onTap: _people.length > 1 ? () => _setShare(p) : null,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Text(
+                      _fmt(shares[p] ?? 0),
+                      style: TextStyle(
+                        fontFamily: TypographyTokens.displayFamily,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: _fixed.containsKey(p)
+                            ? AppColors.accentText(context)
+                            : AppColors.tp(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+          Divider(height: 1, indent: 64, color: AppColors.bd(context)),
+        ],
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _Pill(
+                onTap: _addPerson,
+                icon: AppIcons.plus,
+                label: tr.commonAdd,
+                accent: true,
+              ),
+              if (recent.isNotEmpty)
+                Text(tr.billRecent,
+                    style:
+                        TextStyle(fontSize: 12, color: AppColors.ts(context))),
+              for (final r in recent)
+                _Pill(onTap: () => _addPersonNamed(r), label: r),
+            ],
           ),
         ),
       ]),
     );
   }
 
-  Widget _buildWhoPaidSection() {
-    final tr = S.of(context);
-    final payer = _effectivePayer;
+  // ─── By item ───────────────────────────────────────────────────────────────
 
-    Widget option(_PaidMode m, String title, String desc) {
-      final selected = _paidMode == m;
-      return InkWell(
+  void _pickPainter(String p) {
+    setState(() => _painting = _painting == p ? null : p);
+    if (_painting == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _bannerKey.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(ctx,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut);
+      }
+    });
+  }
+
+  Widget _paintingBanner(S tr) {
+    final p = _painting!;
+    final c = _colorOf(p);
+    return Container(
+      key: _bannerKey,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 6, 6),
+      decoration: BoxDecoration(
+        color: AppColors.pastel(context, c, light: 0.82, dark: 0.72),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        onTap: () => setState(() => _paidMode = m),
+      ),
+      child: Row(children: [
+        _Avatar(label: _initials(p), color: c, size: 32),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(tr.billTapWhatHad(p == _me ? tr.billYou : p),
+              style:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        ),
+        TextButton(
+          onPressed: () => setState(() => _painting = null),
+          child: Text(tr.commonDone),
+        ),
+      ]),
+    );
+  }
+
+  Widget _itemsCard(S tr) {
+    final painting = _painting;
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.sf(context),
+        borderRadius: BorderRadius.circular(CardTokens.radius),
+        boxShadow: AppColors.cardShadow(context),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: [
+        for (var i = 0; i < _items.length; i++) ...[
+          if (i > 0)
+            Divider(
+                height: 1,
+                indent: painting != null ? 52 : 16,
+                color: AppColors.bd(context)),
+          _itemRow(tr, _items[i], painting),
+        ],
+      ]),
+    );
+  }
+
+  Widget _itemRow(S tr, _BillItem item, String? painting) {
+    final owners = _owners(item);
+    final everyone = owners.length == _people.length;
+    final has = painting != null && owners.contains(painting);
+    final each = owners.isEmpty ? 0.0 : item.amount / owners.length;
+    final String sub;
+    if (_people.length == 1) {
+      sub = '';
+    } else if (everyone) {
+      sub = tr.billEveryoneEach(_fmt(each));
+    } else if (owners.length == 1) {
+      final o = owners.first;
+      sub = tr.billOnly(o == _me ? tr.billYou : o);
+    } else {
+      sub = tr.billSharedEach(owners.length, _fmt(each));
+    }
+    final paintColor = painting == null ? null : _colorOf(painting);
+    return Material(
+      color: has
+          ? AppColors.pastel(context, paintColor!, light: 0.92, dark: 0.82)
+          : Colors.transparent,
+      child: InkWell(
+        onTap:
+            painting != null ? () => _toggleItem(item) : () => _editItem(item),
+        onLongPress: () => _editItem(item),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(
-              selected
-                  ? AppIcons.radioButtonFill
-                  : AppIcons.circle,
-              size: 20,
-              color: selected ? AppColors.accent : AppColors.th(context),
-            ),
-            const SizedBox(width: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(children: [
+            if (painting != null) ...[
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: has ? paintColor : null,
+                  border: has
+                      ? null
+                      : Border.all(color: AppColors.th(context), width: 2),
+                ),
+                child: has
+                    ? Icon(AppIcons.check,
+                        size: 14, color: AppColors.inkOn(paintColor!))
+                    : null,
+              ),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context))),
-                  const SizedBox(height: 2),
-                  Text(desc,
-                      style: TextStyle(
-                          fontSize: 12, color: AppColors.ts(context))),
+                  Text(item.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700)),
+                  if (sub.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Row(children: [
+                      if (!everyone && owners.length > 1)
+                        for (final o in owners.take(4))
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 3),
+                            child: _Avatar(
+                                label: _initials(o),
+                                color: _colorOf(o),
+                                size: 20),
+                          ),
+                      if (!everyone && owners.length > 1)
+                        const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(sub,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 12, color: AppColors.ts(context))),
+                      ),
+                    ]),
+                  ],
                 ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _fmt(item.amount),
+              style: TextStyle(
+                fontFamily: TypographyTokens.displayFamily,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontFeatures: const [FontFeature.tabularFigures()],
+                color:
+                    item.amount < 0 ? AppColors.healthy : AppColors.tp(context),
               ),
             ),
           ]),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionHeader(tr.billWhoPaid),
-          const SizedBox(height: 4),
-          option(_PaidMode.me, tr.billPaidMe, tr.billPaidMeDesc),
-          option(_PaidMode.other, tr.billPaidOther,
-              tr.billPaidOtherDesc(payer)),
-          // Pick the payer when more than one other person is splitting.
-          if (_paidMode == _PaidMode.other && _others.length > 1)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: 30, bottom: 6),
-              child: Wrap(spacing: 6, runSpacing: 4, children: [
-                for (final p in _others)
-                  _assignChip(
-                    label: p,
-                    selected: p == payer,
-                    color: _personColor(p),
-                    onTap: () => setState(() => _payer = p),
-                  ),
+  /// Items vs the receipt's total (or the total typed before itemizing), so
+  /// a missed or misread line shows.
+  List<Widget> _receiptCheck(S tr) {
+    final receipt =
+        _ocr?.receiptTotal ?? (_subtotalEntered > 0 ? _subtotalEntered : null);
+    if (receipt == null || _items.isEmpty) return const [];
+    final items = _itemsTotal;
+    final tax = _ocr?.taxTotal ?? 0;
+    final matches = (items - receipt).abs() <= _tolerance ||
+        (tax > 0 && (items + tax - receipt).abs() <= _tolerance);
+    final color = matches ? AppColors.healthy : AppColors.caution;
+    return [
+      Container(
+        margin: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.pastel(context, color, light: 0.88, dark: 0.78),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+        child: Row(children: [
+          Icon(matches ? AppIcons.checkCircleFill : AppIcons.warningCircleFill,
+              size: 18, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              matches
+                  ? tr.billReceiptMatch(_fmt(receipt))
+                  : tr.billReceiptDiff(_fmt(items), _fmt(receipt)),
+              style: TextStyle(fontSize: 12.5, color: AppColors.tp(context)),
+            ),
+          ),
+        ]),
+      ),
+    ];
+  }
+
+  /// Receipt lines read as an item but without a price: tap to add one.
+  List<Widget> _unpricedLines(S tr) {
+    final ocr = _ocr;
+    if (ocr == null) return const [];
+    final idx = [
+      for (var i = 0; i < ocr.lines.length; i++)
+        if (ocr.lines[i].kind == OcrLineKind.item &&
+            !ocr.lines[i].hasPrice &&
+            !_addedLines.contains(i))
+          i,
+    ];
+    if (idx.isEmpty) return const [];
+    return [
+      const SizedBox(height: 8),
+      InkWell(
+        onTap: () => setState(() => _showUnpriced = !_showUnpriced),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Row(children: [
+            Icon(_showUnpriced ? AppIcons.caretUp : AppIcons.caretDown,
+                size: 16, color: AppColors.ts(context)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(tr.billUnpricedLines(idx.length),
+                  style:
+                      TextStyle(fontSize: 12.5, color: AppColors.ts(context))),
+            ),
+          ]),
+        ),
+      ),
+      if (_showUnpriced)
+        for (final i in idx)
+          InkWell(
+            onTap: () => _addUnpriced(i),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(26, 8, 4, 8),
+              child: Row(children: [
+                Expanded(
+                  child: Text(ocr.lines[i].text,
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.tp(context))),
+                ),
+                Icon(AppIcons.plus, size: 16, color: AppColors.accent),
               ]),
             ),
-          option(_PaidMode.each, tr.billPaidEach, tr.billPaidEachDesc),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaxSection() {
-    final tr = S.of(context);
-    final active = _taxIsAmount ? _taxAmount > 0 : _taxPercent > 0;
-    return _collapsibleCard(
-      title: tr.billTax,
-      trailing: active
-          ? (_taxIsAmount
-              ? formatAmount(_taxAmount, currency: _billCurrency)
-              : '${_taxPercent.round()}%')
-          : tr.commonNone,
-      expanded: _taxExpanded,
-      onTap: () => setState(() => _taxExpanded = !_taxExpanded),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(tr.billTaxHint,
-            style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
-        const SizedBox(height: 10),
-        Row(children: [
-          _segmentButton(tr.billPercentage, !_taxIsAmount,
-              () => setState(() => _taxIsAmount = false)),
-          const SizedBox(width: 8),
-          _segmentButton(tr.commonAmount, _taxIsAmount,
-              () => setState(() => _taxIsAmount = true)),
-        ]),
-        const SizedBox(height: 12),
-        if (!_taxIsAmount)
-          Row(children: [
-            Expanded(
-                child: Slider(
-                    value: _taxPercent,
-                    min: 0,
-                    max: 30,
-                    divisions: 30,
-                    label: '${_taxPercent.round()}%',
-                    onChanged: (v) => setState(() => _taxPercent = v))),
-            SizedBox(
-                width: 50,
-                child: Text('${_taxPercent.round()}%',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context)))),
-          ])
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.sfv(context),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: CalculatorAmountField(
-              value: _taxAmount,
-              label: tr.billTaxAmount,
-              currency: kCurrencySymbols[_billCurrency] ?? _billCurrency,
-              fontSize: 18,
-              onChanged: (v) => setState(() => _taxAmount = v),
-            ),
           ),
-      ]),
-    );
+    ];
   }
 
-  Widget _buildTipSection() {
-    return _collapsibleCard(
-      title: S.of(context).billTip,
-      trailing: _tipPercent > 0 || _tipAmount > 0
-          ? _tipIsAmount
-              ? formatAmount(_tipAmount, currency: _billCurrency)
-              : '${_tipPercent.round()}%'
-          : S.of(context).commonNone,
-      expanded: _tipExpanded,
-      onTap: () => setState(() => _tipExpanded = !_tipExpanded),
-      child: Column(children: [
-        Row(children: [
-          _segmentButton(S.of(context).billPercentage, !_tipIsAmount,
-              () => setState(() => _tipIsAmount = false)),
-          const SizedBox(width: 8),
-          _segmentButton(S.of(context).commonAmount, _tipIsAmount,
-              () => setState(() => _tipIsAmount = true)),
-        ]),
-        const SizedBox(height: 12),
-        if (!_tipIsAmount)
-          Row(children: [
-            Expanded(child: Slider(value: _tipPercent, min: 0, max: 30,
-                divisions: 6, label: '${_tipPercent.round()}%',
-                onChanged: (v) => setState(() => _tipPercent = v))),
-            SizedBox(width: 50, child: Text('${_tipPercent.round()}%',
-                textAlign: TextAlign.center, style: TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColors.tp(context)))),
-          ])
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.sfv(context),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: CalculatorAmountField(
-              value: _tipAmount,
-              label: S.of(context).billTipAmount,
-              currency: kCurrencySymbols[_billCurrency] ?? _billCurrency,
-              fontSize: 18,
-              onChanged: (v) => setState(() => _tipAmount = v),
-            ),
-          ),
-      ]),
-    );
-  }
+  // ─── Bottom bar ────────────────────────────────────────────────────────────
 
-  Widget _buildCurrencySection() {
-    final isCross = _billCurrency != _baseCurrency;
-    return _collapsibleCard(
-      title: S.of(context).commonCurrency,
-      trailing: _billCurrency,
-      expanded: _currencyExpanded,
-      onTap: () => setState(() => _currencyExpanded = !_currencyExpanded),
-      child: Column(children: [
-        CurrencyPickerField(value: _billCurrency, label: S.of(context).billBillCurrency,
-          onChanged: _setBillCurrency),
-        if (isCross) ...[
-          const SizedBox(height: 12),
-          Row(children: [
-            Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
-                style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-            Expanded(child: TextField(controller: _rateCtrl,
-              decoration: InputDecoration(hintText: S.of(context).billRateHint, isDense: true, fillColor: AppColors.sfv(context),),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              onChanged: _onRateTyped)),
-            Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
-                style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: _swapRateDirection,
-              child: Container(padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, AppColors.accent,
-                      light: 0.85, dark: 0.78),
-                  borderRadius: BorderRadius.circular(6)),
-                child: Icon(AppIcons.arrowsDownUp, size: 16,
-                    color: AppColors.accent)),
-            ),
-          ]),
-        ],
-      ]),
-    );
-  }
+  Widget _bottomBar(S tr, Map<String, double> shares) {
+    final mode = _effectiveMode;
+    final mine = shares[_me] ?? 0;
+    final owedTotal = _others.fold(0.0, (s, p) => s + (shares[p] ?? 0));
+    final payer = _effectivePayer;
+    final accounts = ref.watch(accountsProvider).value ?? const <Account>[];
+    final account = accounts.where((a) => a.id == _accountId).firstOrNull;
+    final categories =
+        ref.watch(categoriesProvider).value ?? const <Category>[];
+    final category = categories.where((c) => c.id == _categoryId).firstOrNull;
 
-  Widget _personChip(String name) {
-    final color = _personColor(name);
-    final removable = _people.length > 1 && name != _people.first;
-    return GestureDetector(
-      onLongPress: removable ? () => _removePerson(name) : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.sfv(context),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.bd(context)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 8, height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 6),
-            Text(name,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.tp(context))),
-            if (removable) ...[
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: () => _removePerson(name),
-                child: Icon(AppIcons.x,
-                    size: 14, color: AppColors.th(context)),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+    final String? consequence = switch (mode) {
+      _PaidMode.me when _others.length == 1 =>
+        tr.billOwesYouOne(_others.first, _fmt(owedTotal)),
+      _PaidMode.me => tr.billTheyOweYou(_fmt(owedTotal)),
+      _PaidMode.other => tr.billYouOwe(payer, _fmt(mine)),
+      _PaidMode.each => _others.isEmpty ? null : tr.billNobodyOwes,
+    };
+    final consequenceColor = switch (mode) {
+      _PaidMode.me => AppColors.healthy,
+      _PaidMode.other => AppColors.caution,
+      _PaidMode.each => AppColors.ts(context),
+    };
+    final saveLabel = switch (mode) {
+      _PaidMode.me => tr.billSaveFrom(_fmt(_grand), account?.name ?? '…'),
+      _PaidMode.other => tr.billSaveOwe(payer, _fmt(mine)),
+      _PaidMode.each => tr.billSaveShare(_fmt(mine)),
+    };
+    final labelStyle = TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: AppColors.ts(context));
 
-  Widget _buildAssignableItem(int index) {
-    final item = _items[index];
-    final tr = S.of(context);
-    final sharedBy = item.assignedTo.length;
-    final perPerson = sharedBy > 0 ? item.amount / sharedBy : 0.0;
-    final allSelected =
-        _people.isNotEmpty && item.assignedTo.length == _people.length;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Material(
+      color: AppColors.sf(context),
+      elevation: 8,
+      shadowColor: Colors.black26,
+      shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet))),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Text(item.name.isEmpty ? tr.billItemN(index + 1) : item.name,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-              ),
-              Text(formatAmount(item.amount, currency: _billCurrency),
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.tp(context))),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: [
-              // "Everyone" shortcut — for items shared by the whole table.
-              if (_people.length > 1)
-                _assignChip(
-                  label: tr.billEveryone,
-                  selected: allSelected,
-                  color: AppColors.accent,
-                  onTap: () {
-                    setState(() {
-                      if (allSelected) {
-                        item.assignedTo.clear();
-                      } else {
-                        item.assignedTo
-                          ..clear()
-                          ..addAll(_people);
-                      }
-                    });
-                    HapticFeedback.selectionClick();
-                  },
-                ),
-              for (final p in _people)
-                _assignChip(
-                  label: p,
-                  selected: item.assignedTo.contains(p),
-                  color: _personColor(p),
-                  onTap: () {
-                    setState(() {
-                      if (item.assignedTo.contains(p)) {
-                        item.assignedTo.remove(p);
-                      } else {
-                        item.assignedTo.add(p);
-                      }
-                    });
-                    HapticFeedback.selectionClick();
-                  },
-                ),
-            ],
-          ),
-          // When an item is shared, show how the cost divides so it's obvious.
-          if (sharedBy >= 2) ...[
-            const SizedBox(height: 6),
-            Text(
-              tr.billSharedEach(
-                  sharedBy, formatAmount(perPerson, currency: _billCurrency)),
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accent),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// A pill toggle used for assigning an item to a person (or everyone).
-  Widget _assignChip({
-    required String label,
-    required bool selected,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.pastel(context, color, light: 0.85, dark: 0.75)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(CardTokens.radius),
-          border: Border.all(color: selected ? color : AppColors.bd(context)),
-        ),
-        child: Text(label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              color: selected ? color : AppColors.ts(context),
-            )),
-      ),
-    );
-  }
-
-  // ─── Shared Widgets ───────────────────────────────────────────────────────
-
-  Widget _card({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _collapsibleCard({
-    required String title,
-    required String trailing,
-    required bool expanded,
-    required VoidCallback onTap,
-    required Widget child,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.sf(context),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: AppColors.cardShadow(context),
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
-                  const Spacer(),
-                  Text(trailing,
-                      style: TextStyle(
-                          fontSize: 13, color: AppColors.ts(context))),
-                  const SizedBox(width: 4),
-                  Icon(
-                    expanded
-                        ? AppIcons.caretUp
-                        : AppIcons.caretDown,
-                    size: 20,
-                    color: AppColors.ts(context),
+              if (_mode == _SplitMode.byItem) ...[
+                // Sized by its content (a fixed height overflowed at large
+                // text sizes); scrolls sideways with many people.
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final p in _people)
+                        _PersonChip(
+                          label: _initials(p),
+                          color: _colorOf(p),
+                          amount: _fmt(shares[p] ?? 0),
+                          selected: _painting == p,
+                          semantics: p == _me ? tr.billYou : p,
+                          onTap: () => _pickPainter(p),
+                          onLongPress: () => _personActions(p),
+                        ),
+                      _PersonChip(
+                        label: '+',
+                        color: AppColors.ts(context),
+                        amount: tr.commonAdd,
+                        selected: false,
+                        semantics: tr.billAddPerson,
+                        onTap: _addPerson,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-              child: child,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _segmentButton(String label, bool selected, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.accentLight
-                : AppColors.sfv(context),
-            borderRadius: BorderRadius.circular(8),
-            border: selected
-                ? Border.all(color: AppColors.accent.withValues(alpha: 0.4))
-                : null,
-          ),
-          child: Center(
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    color: selected ? AppColors.accent : AppColors.ts(context))),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ─── OCR Lines List ───────────────────────────────────────────────────────
-
-  Widget _buildDetectedLinesList() {
-    final result = _ocrResult!;
-    final detected = result.lines.length;
-    final withPrice = result.lines.where((l) => l.hasPrice).length;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: () => setState(() => _showAllLines = !_showAllLines),
-          child: Row(
-            children: [
-              Icon(
-                _showAllLines
-                    ? AppIcons.caretUp
-                    : AppIcons.caretDown,
-                size: 18,
-                color: AppColors.ts(context),
-              ),
-              const SizedBox(width: 4),
-              Text(S.of(context).billNLines(detected, withPrice),
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.ts(context))),
-              const Spacer(),
-              TextButton(
-                onPressed: _scanReceipt,
-                style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 30)),
-                child:
-                    Text(S.of(context).billReScan, style: const TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-        ),
-        if (_showAllLines) ...[
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.sf(context),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: AppColors.cardShadow(context),
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < result.lines.length; i++)
-                  GestureDetector(
-                    onTap: () => _onLineTapped(i),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 5, horizontal: 8),
-                      margin: const EdgeInsets.only(bottom: 2),
-                      decoration: BoxDecoration(
-                        color: _addedLines.contains(i)
-                            ? AppColors.accentLight
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        children: [
-                          if (_addedLines.contains(i))
-                            Padding(
-                              padding: const EdgeInsetsDirectional.only(end: 6),
-                              child: Icon(AppIcons.checkCircleFill,
-                                  size: 14, color: AppColors.accent),
-                            ),
-                          Expanded(
-                            child: Text(result.lines[i].text,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.tp(context))),
-                          ),
-                          if (result.lines[i].hasPrice)
-                            Text(
-                              formatAmount(result.lines[i].parsedAmount!,
-                                  currency: _billCurrency),
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: result.lines[i].parsedAmount! < 0
-                                      ? AppColors.healthy
-                                      : AppColors.accent),
-                            )
-                          else if (result.lines[i].parsedAmount != null &&
-                              (result.lines[i].kind == OcrLineKind.tax ||
-                                  result.lines[i].kind == OcrLineKind.total))
-                            // Not an item: shown so the user sees it was read.
-                            Text(
-                              '${result.lines[i].kind == OcrLineKind.tax ? S.of(context).billTax : S.of(context).billTotal}'
-                              ' · ${formatAmount(result.lines[i].parsedAmount!, currency: _billCurrency)}',
-                              style: TextStyle(
-                                  fontSize: 11, color: AppColors.ts(context)),
-                            ),
-                        ],
-                      ),
+                ),
+                const SizedBox(height: 6),
+              ],
+              if (_others.isNotEmpty)
+                Row(children: [
+                  SizedBox(
+                      width: 60, child: Text(tr.billPaidBy, style: labelStyle)),
+                  _Pill(
+                    onTap: _pickPayer,
+                    leading: mode == _PaidMode.each
+                        ? null
+                        : _Avatar(
+                            label:
+                                _initials(mode == _PaidMode.me ? _me : payer),
+                            color: _colorOf(mode == _PaidMode.me ? _me : payer),
+                            size: 26),
+                    label: switch (mode) {
+                      _PaidMode.me => _me,
+                      _PaidMode.other => payer,
+                      _PaidMode.each => tr.billEachOwn,
+                    },
+                    trailing: AppIcons.caretDown,
+                  ),
+                  const SizedBox(width: 8),
+                  if (consequence != null)
+                    Expanded(
+                      child: Text(consequence,
+                          textAlign: TextAlign.end,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: consequenceColor)),
+                    ),
+                ]),
+              if (mode == _PaidMode.other)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 60, top: 4),
+                  child: Text(tr.billNothingLeaves(payer),
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.ts(context))),
+                )
+              else ...[
+                if (_others.isNotEmpty) const SizedBox(height: 8),
+                Row(children: [
+                  SizedBox(
+                      width: 60, child: Text(tr.billFrom, style: labelStyle)),
+                  Flexible(
+                    child: _Pill(
+                      onTap: _pickAccount,
+                      icon: AppIcons.wallet,
+                      label: account?.name ?? tr.commonAccount,
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: _Pill(
+                      onTap: _pickCategory,
+                      leading: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: category == null
+                              ? AppColors.th(context)
+                              : AppColors.fromHex(category.colorHex),
+                        ),
+                      ),
+                      label: category?.name ?? tr.commonCategory,
+                    ),
+                  ),
+                ]),
               ],
-            ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: _canSave ? _save : null,
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text(saveLabel,
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
           ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }
 
-// ─── Data Model ─────────────────────────────────────────────────────────────
+// ─── Small widgets ───────────────────────────────────────────────────────────
 
-/// Who paid the bill: the user, another person (who the user now owes), or
-/// everyone their own part.
-enum _PaidMode { me, other, each }
+/// A person's initials on their pastel.
+class _Avatar extends StatelessWidget {
+  final String label;
+  final Color color;
+  final double size;
+  const _Avatar({required this.label, required this.color, this.size = 36});
 
-class _BillItem {
-  String name;
-  double amount;
-  final Set<String> assignedTo;
-  final int? ocrLineIndex;
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.pastel(context, color, light: 0.78, dark: 0.68),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+        style: TextStyle(
+          fontSize: size * (label.length > 2 ? 0.3 : 0.38),
+          fontWeight: FontWeight.w800,
+          color: dark
+              ? AppColors.lightenPastel(color, 0.35)
+              : AppColors.darkenPastel(color, 0.35),
+        ),
+      ),
+    );
+  }
+}
 
-  _BillItem({
-    required this.name,
-    required this.amount,
-    required this.assignedTo,
-    required this.ocrLineIndex,
+/// Tonal pill button: chips for currency, account, category, Add, recent
+/// people.
+class _Pill extends StatelessWidget {
+  final VoidCallback onTap;
+  final String label;
+  final IconData? icon;
+  final IconData? trailing;
+  final Widget? leading;
+  final double height;
+  final bool accent;
+  const _Pill({
+    required this.onTap,
+    required this.label,
+    this.icon,
+    this.trailing,
+    this.leading,
+    this.height = 36,
+    this.accent = false,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = accent ? AppColors.accentText(context) : AppColors.tp(context);
+    return Material(
+      color: AppColors.sfv(context),
+      shape: const StadiumBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: Container(
+          height: height,
+          padding: EdgeInsetsDirectional.fromSTEB(
+              leading != null ? 5 : 12, 0, trailing != null ? 10 : 12, 0),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            if (leading != null) ...[leading!, const SizedBox(width: 6)],
+            if (icon != null) ...[
+              Icon(icon, size: 16, color: fg),
+              const SizedBox(width: 6),
+            ],
+            Flexible(
+              child: Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700, color: fg)),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 4),
+              Icon(trailing, size: 12, color: fg),
+            ],
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tip choices: outlined, filled with the accent when picked.
+class _ChoicePill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ChoicePill(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? AppColors.accentLight : Colors.transparent,
+      shape: StadiumBorder(
+        side: BorderSide(
+            color: selected ? AppColors.accent : AppColors.bd(context),
+            width: selected ? 1.2 : 1),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: Container(
+          height: 34,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Center(
+            widthFactor: 1,
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                    color: selected
+                        ? AppColors.accentText(context)
+                        : AppColors.ts(context))),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Evenly | By item.
+class _ModeSwitch extends StatelessWidget {
+  final bool evenly;
+  final String evenlyLabel;
+  final String byItemLabel;
+  final ValueChanged<bool> onChanged;
+  const _ModeSwitch({
+    required this.evenly,
+    required this.evenlyLabel,
+    required this.byItemLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget seg(String label, bool on, bool value) => Semantics(
+          selected: on,
+          button: true,
+          child: GestureDetector(
+            onTap: () => onChanged(value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                // In dark mode sf is darker than the track: lift it.
+                color: !on
+                    ? Colors.transparent
+                    : Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.lightenPastel(AppColors.sfv(context), 0.12)
+                        : AppColors.sf(context),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: on ? AppColors.cardShadow(context) : null,
+              ),
+              child: Text(label,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: on ? FontWeight.w700 : FontWeight.w600,
+                      color:
+                          on ? AppColors.tp(context) : AppColors.ts(context))),
+            ),
+          ),
+        );
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: AppColors.sfv(context),
+        borderRadius: BorderRadius.circular(19),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        seg(evenlyLabel, evenly, true),
+        seg(byItemLabel, !evenly, false),
+      ]),
+    );
+  }
+}
+
+/// A person in the By-item strip: avatar + their share; picked = ringed.
+class _PersonChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final String amount;
+  final bool selected;
+  final String semantics;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  const _PersonChip({
+    required this.label,
+    required this.color,
+    required this.amount,
+    required this.selected,
+    required this.semantics,
+    required this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: semantics,
+      selected: selected,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        // As wide as the share needs (LBP amounts are long), at least 72.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 72, maxWidth: 150),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.all(2.5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: selected ? color : Colors.transparent, width: 2),
+                ),
+                child: _Avatar(label: label, color: color, size: 36),
+              ),
+              const SizedBox(height: 2),
+              Text(amount,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+                    fontSize: 12.5,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: selected ? color : AppColors.tp(context),
+                  )),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
 }

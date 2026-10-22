@@ -450,23 +450,12 @@
   "billItemN": "البند {n}",
   "billDiscardTitle": "تجاهل هذه الفاتورة؟",
   "billDiscardBody": "ستفقد البنود والتقسيم الذي أدخلته.",
-  "billWhoPaid": "من دفع؟",
-  "billPaidMe": "دفعت الفاتورة كاملة",
-  "billPaidMeDesc": "يسجّل الفاتورة كاملة من حسابك ويتتبّع ما يدين به كل شخص لك في الأهداف والقروض.",
-  "billPaidOther": "دفع شخص آخر",
-  "billPaidOtherDesc": "يتتبّع ما تدين به لـ {name} في الأهداف والقروض. لا يخرج شيء من حسابك حتى تسدّد له.",
-  "billPaidEach": "دفع كلٌّ حصّته",
   "billPaidEachDesc": "يسجّل حصّتك فقط.",
   "billLinePart": "حصّة {name}",
   "billLoanName": "تقسيم فاتورة · {date}",
-  "billLoansCreated": "{n, plural, =1{أُضيف قرض واحد إلى الأهداف والقروض} =2{أُضيف قرضان إلى الأهداف والقروض} few{أُضيفت {n} قروض إلى الأهداف والقروض} many{أُضيف {n} قرضًا إلى الأهداف والقروض} other{أُضيف {n} قرض إلى الأهداف والقروض}}",
-  "billOweCreated": "أُضيف إلى الأهداف والقروض: تدين لـ {name} بمبلغ {amount}",
   "billShare": "مشاركة التقسيم",
   "billShareHeader": "تقسيم فاتورة · المجموع {total}",
   "billSharePaidBy": "دفعها {name}",
-  "billTax": "الضريبة والخدمة",
-  "billTaxAmount": "مبلغ الضريبة والخدمة",
-  "billTaxHint": "يُقسَّم بحسب ما طلبه كل شخص.",
   "billReceiptMatch": "يطابق مجموع الإيصال ({total})",
   "billReceiptDiff": "مجموع البنود {items} · مجموع الإيصال {total}",
   "webShortcutRefresh": "إعادة التحميل من الهاتف",
@@ -1674,33 +1663,13 @@
   "@txListPreviewNote": {
     "description": "Preview note"
   },
-  "billTitle": "تقسيم الفاتورة",
-  "@billTitle": {
-    "description": "Screen title"
-  },
   "billScanning": "جارٍ مسح الإيصال...",
   "@billScanning": {
     "description": "Loading text"
   },
-  "billScanTooltip": "مسح الإيصال",
-  "@billScanTooltip": {
-    "description": "Tooltip"
-  },
-  "billEmptyTitle": "أضف عناصر للتقسيم",
-  "@billEmptyTitle": {
-    "description": "Empty state title"
-  },
-  "billEmptySubtitle": "امسح إيصالاً أو أضف عناصر يدوياً",
-  "@billEmptySubtitle": {
-    "description": "Empty state subtitle"
-  },
   "billScanButton": "مسح الإيصال",
   "@billScanButton": {
     "description": "Primary button"
-  },
-  "billAddManually": "إضافة يدوية",
-  "@billAddManually": {
-    "description": "Secondary button"
   },
   "billAddItem": "إضافة عنصر",
   "@billAddItem": {
@@ -1718,33 +1687,9 @@
   "@billNoText": {
     "description": "OCR failure snackbar"
   },
-  "billEnterAmount": "أدخل المبلغ",
-  "@billEnterAmount": {
-    "description": "OCR amount dialog title"
-  },
-  "billKeepAsOne": "إبقاء كعنصر واحد",
-  "@billKeepAsOne": {
-    "description": "Dialog button"
-  },
-  "billSplit": "تقسيم",
-  "@billSplit": {
-    "description": "Dialog button"
-  },
-  "billWhosSplitting": "من يتقاسم؟",
-  "@billWhosSplitting": {
-    "description": "Section header"
-  },
   "billAddPerson": "إضافة شخص",
   "@billAddPerson": {
     "description": "Text field hint"
-  },
-  "billSplitEvenly": "تقسيم بالتساوي",
-  "@billSplitEvenly": {
-    "description": "Toggle title"
-  },
-  "billAssignItems": "تعيين العناصر",
-  "@billAssignItems": {
-    "description": "Section header"
   },
   "billItemName": "اسم العنصر",
   "@billItemName": {
@@ -1754,41 +1699,9 @@
   "@billTip": {
     "description": "Section title"
   },
-  "billPercentage": "نسبة مئوية",
-  "@billPercentage": {
-    "description": "Tip mode"
-  },
-  "billTipAmount": "مبلغ البقشيش",
-  "@billTipAmount": {
-    "description": "Tip field label"
-  },
-  "billBillCurrency": "عملة الفاتورة",
-  "@billBillCurrency": {
-    "description": "Currency label"
-  },
   "billRateHint": "السعر",
   "@billRateHint": {
     "description": "Rate field hint"
-  },
-  "billTotal": "الإجمالي",
-  "@billTotal": {
-    "description": "Summary label"
-  },
-  "billReScan": "إعادة المسح",
-  "@billReScan": {
-    "description": "Re-scan button"
-  },
-  "billNLines": "{detected} سطر ({withPrice} بأسعار)",
-  "@billNLines": {
-    "description": "OCR summary",
-    "placeholders": {
-      "detected": {
-        "type": "int"
-      },
-      "withPrice": {
-        "type": "int"
-      }
-    }
   },
   "billMe": "أنا",
   "@billMe": {
@@ -5200,25 +5113,7 @@
   "leftoverResolveFailed": "فشل حل المتبقي. حاول مجدداً.",
   "txLongPressHint": "اضغط مطوّلاً للتحديد",
   "txListNone": "لا شيء",
-  "billStep1Desc": "الخطوة 1: أضف العناصر من إيصالك — امسح ضوئياً أو أدخلها يدوياً.",
-  "billStep2Desc": "الخطوة 2: أضف الأشخاص وعيّن العناصر. فعّل \"تقسيم بالتساوي\" لتقسيم المبلغ بالتساوي.",
-  "billStep3Desc": "الخطوة 3: راجع التقسيم، أضف البقشيش، وأكّد.",
-  "billBillIn": "الفاتورة بعملة {currency}",
-  "billExchangeRateTitle": "سعر الصرف",
-  "billRemovePersonTitle": "إزالة الشخص",
-  "billRemovePersonContent": "{name} لديه {count} عنصر(ات) مخصصة له فقط. أعد تعيينها لشخص آخر، أو احذفها؟",
-  "billReassignTo": "إعادة تعيين إلى:",
-  "billPersonRemoved": "تمت إزالة الشخص",
-  "billEveryone": "الجميع",
   "billSharedEach": "مقسّم على {count} · {amount} لكل شخص",
-  "billSplitIntoUnits": "تقسيم إلى وحدات",
-  "billSplitUnitsPrompt": "كم عدد الوحدات؟",
-  "billTipLabel": "بقشيش",
-  "billItemRemoved": "تمت إزالة العنصر",
-  "billDeleteItems": "حذف العناصر",
-  "billEachPays": "كل شخص يدفع {amount}",
-  "billSplitQtyTitle": "{qty} × {name}",
-  "billSplitQtyContent": "تقسيم إلى {qty} عناصر ({amount} لكل عنصر)؟",
   "billRateNotSetTitle": "لم يتم تعيين سعر الصرف",
   "billRateNotSetContent": "الفاتورة بعملة {currency} ولكن لم يتم إدخال سعر.\nسيتم حفظ المعاملة بدون تحويل.",
   "billGoBackBtn": "الرجوع",
@@ -5603,5 +5498,47 @@
   "webOverspentTitle": "أظرف متجاوزة",
   "webEnvOverBy": "تجاوز بـ {amount}",
   "webBillsWeek": "فواتير مستحقة هذا الأسبوع",
-  "webNAccounts": "حسابات: {n}"
+  "webNAccounts": "حسابات: {n}",
+  "billScreenTitle": "تقسيم فاتورة",
+  "billTotalLabel": "مجموع الفاتورة",
+  "billPlusTip": "+ بقشيش {amount}",
+  "billPlusTax": "+ ضريبة أو خدمة {amount}",
+  "billTipCustom": "مخصّص",
+  "billAddTax": "ضريبة أو رسم خدمة",
+  "billTaxPercent": "نسبة من الفاتورة",
+  "billTaxFixed": "مبلغ ثابت",
+  "billWhosIn": "المشاركون",
+  "billEvenly": "بالتساوي",
+  "billByItem": "حسب البند",
+  "billYou": "أنت",
+  "billRecent": "مؤخرًا",
+  "billByHandHint": "اضغط على مبلغ لتحدّده بنفسك، ويُعاد توزيع الباقي.",
+  "billPaidBy": "دفعها",
+  "billFrom": "من",
+  "billEachOwn": "كلٌّ حصّته",
+  "billOwesYouOne": "{name} يدين لك بـ {amount}",
+  "billTheyOweYou": "يدينون لك بـ {amount}",
+  "billYouOwe": "تدين لـ {name} بـ {amount}",
+  "billNobodyOwes": "لا أحد يدين لأحد",
+  "billNothingLeaves": "لا يخرج شيء من حسابك حتى تسدّد لـ {name}.",
+  "billSaveFrom": "حفظ · {amount} من {account}",
+  "billSaveOwe": "حفظ · تدين لـ {name} بـ {amount}",
+  "billSaveShare": "حفظ · حصّتك {amount}",
+  "billTapWhatHad": "اضغط على ما طلبه {name}",
+  "billPickPersonHint": "اضغط على شخص في الأسفل، ثم على ما طلبه.",
+  "billEveryoneEach": "الجميع · {amount} لكل شخص",
+  "billOnly": "{name} فقط",
+  "billItemsSharedNow": "بنود {name} أصبحت للجميع",
+  "billSetShare": "تحديد الحصّة",
+  "billResetShare": "إعادة التقسيم بالتساوي",
+  "billUnpricedLines": "أسطر بلا سعر: {count} — اضغط على أحدها لإضافته",
+  "billSavedFrom": "{total} من {account} · حصّتك {share}",
+  "billSavedEach": "حصّتك {share} من {account}",
+  "billOwesYouTitle": "يدينون لك",
+  "billYouOweTitle": "تدين لـ",
+  "billTrackedHint": "تُتابَع في الأهداف والقروض — علّم كل واحد مدفوعًا عند التسوية.",
+  "billSendShare": "أرسل لـ {name} حصّته",
+  "billPersonShareText": "حصّتك من الفاتورة: {amount}",
+  "billSplitInto": "تقسيم إلى {qty}",
+  "billPersonName": "الاسم"
 }

@@ -254,41 +254,18 @@ tx_list_preview_note,Preview note,This is a note that is part of the transaction
 # ──────────────────────────────────────────────,,,,
 # BILL SPLITTER,,,,
 # ──────────────────────────────────────────────,,,,
-bill_title,Screen title,Bill splitter,تقسيم الفاتورة,Partage d'addition
 bill_scanning,Loading text,Scanning receipt...,جارٍ مسح الإيصال...,Numérisation du reçu...
-bill_scan_tooltip,Tooltip,Scan receipt,مسح الإيصال,Scanner le reçu
-bill_empty_title,Empty state title,Add items to split,أضف عناصر للتقسيم,Ajouter des éléments à partager
-bill_empty_subtitle,Empty state subtitle,Scan a receipt or add items manually,امسح إيصالاً أو أضف عناصر يدوياً,Scannez un reçu ou ajoutez manuellement
 bill_scan_button,Primary button,Scan receipt,مسح الإيصال,Scanner le reçu
-bill_add_manually,Secondary button,Add manually,إضافة يدوية,Ajouter manuellement
 bill_add_item,Button,Add item,إضافة عنصر,Ajouter un élément
 bill_take_photo,Image source,Take photo,التقاط صورة,Prendre une photo
 bill_from_gallery,Image source,Choose from gallery,اختيار من المعرض,Choisir depuis la galerie
 bill_no_text,OCR failure snackbar,No text detected. Try a clearer photo.,لم يتم اكتشاف نص. جرب صورة أوضح.,Aucun texte détecté. Essayez une photo plus nette.
-bill_enter_amount,OCR amount dialog title,Enter amount,أدخل المبلغ,Saisir le montant
-bill_keep_as_one,Dialog button,Keep as one,إبقاء كعنصر واحد,Garder en un seul
-bill_split,Dialog button,Split,تقسيم,Diviser
-bill_whos_splitting,Section header,Who's splitting?,من يتقاسم؟,Qui partage ?
 bill_add_person,Text field hint,Add person,إضافة شخص,Ajouter une personne
-bill_split_evenly,Toggle title,Split evenly,تقسيم بالتساوي,Partager équitablement
-bill_assign_items,Section header,Assign items,تعيين العناصر,Attribuer les éléments
 bill_item_name,Text field hint,Item name,اسم العنصر,Nom de l'élément
 bill_tip,Section title,Tip,بقشيش,Pourboire
-bill_percentage,Tip mode,Percentage,نسبة مئوية,Pourcentage
-bill_tip_amount,Tip field label,Tip amount,مبلغ البقشيش,Montant du pourboire
-bill_bill_currency,Currency label,Bill currency,عملة الفاتورة,Devise de l'addition
 bill_rate_hint,Rate field hint,Rate,السعر,Taux
-bill_total,Summary label,Total,الإجمالي,Total
-bill_re_scan,Re-scan button,Re-scan,إعادة المسح,Re-scanner
-bill_n_lines,OCR summary,{detected} lines ({withPrice} with prices),{detected} سطر ({withPrice} بأسعار),{detected} lignes ({withPrice} avec prix)
 bill_me,Default person name,Me,أنا,Moi
-bill_person_removed,Undo snackbar,Person removed,تمت إزالة الشخص,Personne supprimée
-bill_everyone,Assign chip,Everyone,الجميع,Tout le monde
 bill_shared_each,Assign hint,Shared {count} ways · {amount} each,مقسّم على {count} · {amount} لكل شخص,Partagé en {count} · {amount} chacun
-bill_split_into_units,Item action,Split into units,تقسيم إلى وحدات,Diviser en unités
-bill_split_units_prompt,Dialog prompt,How many units?,كم عدد الوحدات؟,Combien d'unités ?
-bill_tip_label,Summary label,Tip,بقشيش,Pourboire
-bill_item_removed,Undo snackbar,Item removed,تمت إزالة العنصر,Article supprimé
 # ──────────────────────────────────────────────,,,,
 # ALLOCATIONS / ENVELOPES — List,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1294,18 +1271,6 @@ dashboard_chart_semantic,,"Spending chart, total {amount}, {count} categories",�
 dashboard_no_spending_semantic,,No spending this period,لا إنفاق في هذه الفترة,Aucune dépense cette période
 tx_long_press_hint,,Long press to select,اضغط مطوّلاً للتحديد,Appui long pour sélectionner
 tx_list_none,,None,لا شيء,Aucun
-bill_step1_desc,,Step 1: Add items from your receipt — scan or enter manually.,الخطوة 1: أضف العناصر من إيصالك — امسح ضوئياً أو أدخلها يدوياً.,Étape 1 : Ajoutez les articles de votre reçu — scannez ou entrez manuellement.
-bill_step2_desc,,"Step 2: Add people and assign items. Toggle ""Split evenly"" to divide the total equally.","الخطوة 2: أضف الأشخاص وعيّن العناصر. فعّل ""تقسيم بالتساوي"" لتقسيم المبلغ بالتساوي.",Étape 2 : Ajoutez des personnes et assignez les articles. Activez « Diviser également » pour répartir le total équitablement.
-bill_step3_desc,,"Step 3: Review the split, add tip, and confirm.",الخطوة 3: راجع التقسيم، أضف البقشيش، وأكّد.,"Étape 3 : Vérifiez la répartition, ajoutez le pourboire et confirmez."
-bill_bill_in,,Bill in {currency},الفاتورة بعملة {currency},Addition en {currency}
-bill_exchange_rate_title,,Exchange rate,سعر الصرف,Taux de change
-bill_remove_person_title,,Remove person,إزالة الشخص,Supprimer la personne
-bill_remove_person_content,,"{name} has {count} item(s) assigned only to them. Reassign to someone else, or delete those items?",{name} لديه {count} عنصر(ات) مخصصة له فقط. أعد تعيينها لشخص آخر، أو احذفها؟,{name} a {count} article(s) assigné(s) uniquement à lui/elle. Réassigner à quelqu'un d'autre ou supprimer ces articles ?
-bill_reassign_to,,Reassign to:,إعادة تعيين إلى:,Réassigner à :
-bill_delete_items,,Delete items,حذف العناصر,Supprimer les articles
-bill_each_pays,,Each person pays {amount},كل شخص يدفع {amount},Chaque personne paie {amount}
-bill_split_qty_title,,{qty} × {name},{qty} × {name},{qty} × {name}
-bill_split_qty_content,,Split into {qty} items ({amount} each)?,تقسيم إلى {qty} عناصر ({amount} لكل عنصر)؟,Diviser en {qty} articles ({amount} chacun) ?
 bill_rate_not_set_title,,Exchange rate not set,لم يتم تعيين سعر الصرف,Taux de change non défini
 bill_rate_not_set_content,,Bill is in {currency} but no rate was entered.\nThe transaction will be saved without conversion.,الفاتورة بعملة {currency} ولكن لم يتم إدخال سعر.\nسيتم حفظ المعاملة بدون تحويل.,L'addition est en {currency} mais aucun taux n'a été saisi.\nLa transaction sera enregistrée sans conversion.
 bill_go_back_btn,,Go back,الرجوع,Retour
@@ -1967,23 +1932,12 @@ web_shortcut_refresh,,Reload from the phone,إعادة التحميل من ال�
 bill_item_n,,Item {n},البند {n},Article {n}
 bill_discard_title,,Discard this bill?,تجاهل هذه الفاتورة؟,Abandonner cette addition ?
 bill_discard_body,,The items and splits you entered will be lost.,ستفقد البنود والتقسيم الذي أدخلته.,Les articles et la répartition saisis seront perdus.
-bill_who_paid,,Who paid?,من دفع؟,Qui a payé ?
-bill_paid_me,,I paid the whole bill,دفعت الفاتورة كاملة,J'ai payé toute l'addition
-bill_paid_me_desc,,Records the full bill from your account and tracks what each person owes you in Goals & Loans.,يسجّل الفاتورة كاملة من حسابك ويتتبّع ما يدين به كل شخص لك في الأهداف والقروض.,Enregistre toute l'addition sur votre compte et suit ce que chacun vous doit dans Objectifs et prêts.
-bill_paid_other,,Someone else paid,دفع شخص آخر,Quelqu'un d'autre a payé
-bill_paid_other_desc,,Tracks what you owe {name} in Goals & Loans. Nothing leaves your account until you pay them back.,يتتبّع ما تدين به لـ {name} في الأهداف والقروض. لا يخرج شيء من حسابك حتى تسدّد له.,Suit ce que vous devez à {name} dans Objectifs et prêts. Rien ne sort de votre compte avant le remboursement.
-bill_paid_each,,Everyone paid their own part,دفع كلٌّ حصّته,Chacun a payé sa part
 bill_paid_each_desc,,Records only your share.,يسجّل حصّتك فقط.,Enregistre seulement votre part.
 bill_line_part,,{name}'s part,حصّة {name},Part de {name}
 bill_loan_name,,Bill split · {date},تقسيم فاتورة · {date},Addition partagée · {date}
-bill_loans_created,,"{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}","{n, plural, =1{أُضيف قرض واحد إلى الأهداف والقروض} =2{أُضيف قرضان إلى الأهداف والقروض} few{أُضيفت {n} قروض إلى الأهداف والقروض} many{أُضيف {n} قرضًا إلى الأهداف والقروض} other{أُضيف {n} قرض إلى الأهداف والقروض}}","{n, plural, =1{1 prêt ajouté à Objectifs et prêts} other{{n} prêts ajoutés à Objectifs et prêts}}"
-bill_owe_created,,Added to goals & loans: you owe {name} {amount},أُضيف إلى الأهداف والقروض: تدين لـ {name} بمبلغ {amount},Ajouté à Objectifs et prêts : vous devez {amount} à {name}
 bill_share,,Share split,مشاركة التقسيم,Partager la répartition
 bill_share_header,,Bill split · total {total},تقسيم فاتورة · المجموع {total},Addition partagée · total {total}
 bill_share_paid_by,,Paid by {name},دفعها {name},Payé par {name}
-bill_tax,,Tax & service,الضريبة والخدمة,Taxes et service
-bill_tax_amount,,Tax & service amount,مبلغ الضريبة والخدمة,Montant taxes et service
-bill_tax_hint,,Split in proportion to what each person ordered.,يُقسَّم بحسب ما طلبه كل شخص.,Réparti selon ce que chacun a commandé.
 bill_receipt_match,,Matches the receipt total ({total}),يطابق مجموع الإيصال ({total}),Correspond au total du ticket ({total})
 bill_receipt_diff,,Items add up to {items} · receipt total {total},مجموع البنود {items} · مجموع الإيصال {total},Les articles font {items} · total du ticket {total}
 
@@ -2536,3 +2490,45 @@ web_overspent_title,Web Home: card listing envelopes below zero,Overspent envelo
 web_env_over_by,"Web Home: overspent envelope row, e.g. ""Over by $9.00""",Over by {amount},تجاوز بـ {amount},Dépassée de {amount}
 web_bills_week,Web Home: bills due within 7 days,Bills due this week,فواتير مستحقة هذا الأسبوع,Factures de la semaine
 web_n_accounts,Web transaction row: split across several accounts,{n} accounts,حسابات: {n},{n} comptes
+bill_screen_title,Bill splitter: screen title,Split a bill,تقسيم فاتورة,Partager une addition
+bill_total_label,Bill splitter,Bill total,مجموع الفاتورة,Total de l'addition
+bill_plus_tip,"Bill splitter: under the total, e.g. ""+ tip $9.00""",+ tip {amount},+ بقشيش {amount},+ pourboire {amount}
+bill_plus_tax,Bill splitter: under the total,+ tax or service {amount},+ ضريبة أو خدمة {amount},+ taxe ou service {amount}
+bill_tip_custom,"Bill splitter: tip chip, any amount",Custom,مخصّص,Autre
+bill_add_tax,Bill splitter: optional link under the tip,Tax or service charge,ضريبة أو رسم خدمة,Taxe ou frais de service
+bill_tax_percent,Bill splitter: tax choice,Percentage of the bill,نسبة من الفاتورة,Pourcentage de l'addition
+bill_tax_fixed,Bill splitter: tax choice,Fixed amount,مبلغ ثابت,Montant fixe
+bill_whos_in,Bill splitter: section header,Who's in,المشاركون,Qui participe
+bill_evenly,Bill splitter: split mode,Evenly,بالتساوي,À parts égales
+bill_by_item,Bill splitter: split mode,By item,حسب البند,Par article
+bill_you,Bill splitter: the user in the people list,You,أنت,Vous
+bill_recent,Bill splitter: people from earlier splits and loans,Recent,مؤخرًا,Récents
+bill_by_hand_hint,Bill splitter,Tap an amount to set it by hand — the others rebalance.,اضغط على مبلغ لتحدّده بنفسك، ويُعاد توزيع الباقي.,Touchez un montant pour le fixer vous-même — les autres s'ajustent.
+bill_paid_by,Bill splitter: bottom bar label,Paid by,دفعها,Payé par
+bill_from,"Bill splitter: bottom bar label, the account",From,من,Depuis
+bill_each_own,Bill splitter: everyone paid their own part,Each their own,كلٌّ حصّته,Chacun sa part
+bill_owes_you_one,Bill splitter,{name} owes you {amount},{name} يدين لك بـ {amount},{name} vous doit {amount}
+bill_they_owe_you,Bill splitter: several people,They owe you {amount},يدينون لك بـ {amount},On vous doit {amount}
+bill_you_owe,Bill splitter,You owe {name} {amount},تدين لـ {name} بـ {amount},Vous devez {amount} à {name}
+bill_nobody_owes,Bill splitter,No one owes anyone,لا أحد يدين لأحد,Personne ne doit rien
+bill_nothing_leaves,Bill splitter,Nothing leaves your account until you pay {name} back.,لا يخرج شيء من حسابك حتى تسدّد لـ {name}.,Rien ne sort de votre compte avant que vous remboursiez {name}.
+bill_save_from,Bill splitter: save button,Save · {amount} from {account},حفظ · {amount} من {account},Enregistrer · {amount} depuis {account}
+bill_save_owe,Bill splitter: save button,Save · you owe {name} {amount},حفظ · تدين لـ {name} بـ {amount},Enregistrer · vous devez {amount} à {name}
+bill_save_share,Bill splitter: save button,Save · your share {amount},حفظ · حصّتك {amount},Enregistrer · votre part {amount}
+bill_tap_what_had,"Bill splitter: by item, a person is picked",Tap what {name} had,اضغط على ما طلبه {name},Touchez ce qu'a pris {name}
+bill_pick_person_hint,Bill splitter,"Tap a person below, then the items they had.",اضغط على شخص في الأسفل، ثم على ما طلبه.,"Touchez une personne en bas, puis ses articles."
+bill_everyone_each,Bill splitter,Everyone · {amount} each,الجميع · {amount} لكل شخص,Tout le monde · {amount} chacun
+bill_only,Bill splitter,{name} only,{name} فقط,{name} seulement
+bill_items_shared_now,Bill splitter,{name}'s items are now shared by everyone,بنود {name} أصبحت للجميع,Les articles de {name} sont maintenant partagés par tous
+bill_set_share,Bill splitter,Set share,تحديد الحصّة,Fixer la part
+bill_reset_share,Bill splitter,Split it evenly again,إعادة التقسيم بالتساوي,Répartir à nouveau également
+bill_unpriced_lines,Bill splitter: receipt lines read without a price,Lines without a price: {count} — tap one to add it,أسطر بلا سعر: {count} — اضغط على أحدها لإضافته,Lignes sans prix : {count} — touchez-en une pour l'ajouter
+bill_saved_from,Bill splitter: after saving,{total} from {account} · your share {share},{total} من {account} · حصّتك {share},{total} depuis {account} · votre part {share}
+bill_saved_each,Bill splitter: after saving,Your share {share} from {account},حصّتك {share} من {account},Votre part {share} depuis {account}
+bill_owes_you_title,Bill splitter: after saving,Owes you,يدينون لك,Vous doivent
+bill_you_owe_title,Bill splitter: after saving,You owe,تدين لـ,Vous devez
+bill_tracked_hint,Bill splitter,Tracked in Goals & loans — mark each one paid when they settle up.,تُتابَع في الأهداف والقروض — علّم كل واحد مدفوعًا عند التسوية.,Suivi dans Objectifs et prêts — marquez chacun comme payé une fois réglé.
+bill_send_share,Bill splitter: accessibility label,Send {name} their share,أرسل لـ {name} حصّته,Envoyer sa part à {name}
+bill_person_share_text,Bill splitter: text sent to one person,Your share of the bill: {amount},حصّتك من الفاتورة: {amount},Votre part de l'addition : {amount}
+bill_split_into,Bill splitter: split an item with a quantity,Split into {qty},تقسيم إلى {qty},Diviser en {qty}
+bill_person_name,Bill splitter: add person field,Name,الاسم,Nom

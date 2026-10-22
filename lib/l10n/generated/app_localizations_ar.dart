@@ -1526,27 +1526,6 @@ class SAr extends S {
   String get billDiscardBody => 'ستفقد البنود والتقسيم الذي أدخلته.';
 
   @override
-  String get billWhoPaid => 'من دفع؟';
-
-  @override
-  String get billPaidMe => 'دفعت الفاتورة كاملة';
-
-  @override
-  String get billPaidMeDesc =>
-      'يسجّل الفاتورة كاملة من حسابك ويتتبّع ما يدين به كل شخص لك في الأهداف والقروض.';
-
-  @override
-  String get billPaidOther => 'دفع شخص آخر';
-
-  @override
-  String billPaidOtherDesc(String name) {
-    return 'يتتبّع ما تدين به لـ $name في الأهداف والقروض. لا يخرج شيء من حسابك حتى تسدّد له.';
-  }
-
-  @override
-  String get billPaidEach => 'دفع كلٌّ حصّته';
-
-  @override
   String get billPaidEachDesc => 'يسجّل حصّتك فقط.';
 
   @override
@@ -1557,25 +1536,6 @@ class SAr extends S {
   @override
   String billLoanName(String date) {
     return 'تقسيم فاتورة · $date';
-  }
-
-  @override
-  String billLoansCreated(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'أُضيف $n قرض إلى الأهداف والقروض',
-      many: 'أُضيف $n قرضًا إلى الأهداف والقروض',
-      few: 'أُضيفت $n قروض إلى الأهداف والقروض',
-      two: 'أُضيف قرضان إلى الأهداف والقروض',
-      one: 'أُضيف قرض واحد إلى الأهداف والقروض',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String billOweCreated(String name, String amount) {
-    return 'أُضيف إلى الأهداف والقروض: تدين لـ $name بمبلغ $amount';
   }
 
   @override
@@ -1590,15 +1550,6 @@ class SAr extends S {
   String billSharePaidBy(String name) {
     return 'دفعها $name';
   }
-
-  @override
-  String get billTax => 'الضريبة والخدمة';
-
-  @override
-  String get billTaxAmount => 'مبلغ الضريبة والخدمة';
-
-  @override
-  String get billTaxHint => 'يُقسَّم بحسب ما طلبه كل شخص.';
 
   @override
   String billReceiptMatch(String total) {
@@ -3081,25 +3032,10 @@ class SAr extends S {
   String get txListPreviewNote => 'هذه ملاحظة مرتبطة بالمعاملة.';
 
   @override
-  String get billTitle => 'تقسيم الفاتورة';
-
-  @override
   String get billScanning => 'جارٍ مسح الإيصال...';
 
   @override
-  String get billScanTooltip => 'مسح الإيصال';
-
-  @override
-  String get billEmptyTitle => 'أضف عناصر للتقسيم';
-
-  @override
-  String get billEmptySubtitle => 'امسح إيصالاً أو أضف عناصر يدوياً';
-
-  @override
   String get billScanButton => 'مسح الإيصال';
-
-  @override
-  String get billAddManually => 'إضافة يدوية';
 
   @override
   String get billAddItem => 'إضافة عنصر';
@@ -3114,25 +3050,7 @@ class SAr extends S {
   String get billNoText => 'لم يتم اكتشاف نص. جرب صورة أوضح.';
 
   @override
-  String get billEnterAmount => 'أدخل المبلغ';
-
-  @override
-  String get billKeepAsOne => 'إبقاء كعنصر واحد';
-
-  @override
-  String get billSplit => 'تقسيم';
-
-  @override
-  String get billWhosSplitting => 'من يتقاسم؟';
-
-  @override
   String get billAddPerson => 'إضافة شخص';
-
-  @override
-  String get billSplitEvenly => 'تقسيم بالتساوي';
-
-  @override
-  String get billAssignItems => 'تعيين العناصر';
 
   @override
   String get billItemName => 'اسم العنصر';
@@ -3141,100 +3059,14 @@ class SAr extends S {
   String get billTip => 'بقشيش';
 
   @override
-  String get billPercentage => 'نسبة مئوية';
-
-  @override
-  String get billTipAmount => 'مبلغ البقشيش';
-
-  @override
-  String get billBillCurrency => 'عملة الفاتورة';
-
-  @override
   String get billRateHint => 'السعر';
-
-  @override
-  String get billTotal => 'الإجمالي';
-
-  @override
-  String get billReScan => 'إعادة المسح';
-
-  @override
-  String billNLines(int detected, int withPrice) {
-    return '$detected سطر ($withPrice بأسعار)';
-  }
 
   @override
   String get billMe => 'أنا';
 
   @override
-  String get billStep1Desc =>
-      'الخطوة 1: أضف العناصر من إيصالك — امسح ضوئياً أو أدخلها يدوياً.';
-
-  @override
-  String get billStep2Desc =>
-      'الخطوة 2: أضف الأشخاص وعيّن العناصر. فعّل \"تقسيم بالتساوي\" لتقسيم المبلغ بالتساوي.';
-
-  @override
-  String get billStep3Desc => 'الخطوة 3: راجع التقسيم، أضف البقشيش، وأكّد.';
-
-  @override
-  String billBillIn(String currency) {
-    return 'الفاتورة بعملة $currency';
-  }
-
-  @override
-  String get billExchangeRateTitle => 'سعر الصرف';
-
-  @override
-  String get billRemovePersonTitle => 'إزالة الشخص';
-
-  @override
-  String billRemovePersonContent(String name, int count) {
-    return '$name لديه $count عنصر(ات) مخصصة له فقط. أعد تعيينها لشخص آخر، أو احذفها؟';
-  }
-
-  @override
-  String get billReassignTo => 'إعادة تعيين إلى:';
-
-  @override
-  String get billPersonRemoved => 'تمت إزالة الشخص';
-
-  @override
-  String get billEveryone => 'الجميع';
-
-  @override
   String billSharedEach(int count, String amount) {
     return 'مقسّم على $count · $amount لكل شخص';
-  }
-
-  @override
-  String get billSplitIntoUnits => 'تقسيم إلى وحدات';
-
-  @override
-  String get billSplitUnitsPrompt => 'كم عدد الوحدات؟';
-
-  @override
-  String get billTipLabel => 'بقشيش';
-
-  @override
-  String get billItemRemoved => 'تمت إزالة العنصر';
-
-  @override
-  String get billDeleteItems => 'حذف العناصر';
-
-  @override
-  String billEachPays(String amount) {
-    return 'كل شخص يدفع $amount';
-  }
-
-  @override
-  String billSplitQtyTitle(int qty, String name) {
-    return '$qty × $name';
-  }
-
-  @override
-  String billSplitQtyContent(int qty, String amount) {
-    return 'تقسيم إلى $qty عناصر ($amount لكل عنصر)؟';
   }
 
   @override
@@ -7585,4 +7417,170 @@ class SAr extends S {
   String webNAccounts(String n) {
     return 'حسابات: $n';
   }
+
+  @override
+  String get billScreenTitle => 'تقسيم فاتورة';
+
+  @override
+  String get billTotalLabel => 'مجموع الفاتورة';
+
+  @override
+  String billPlusTip(Object amount) {
+    return '+ بقشيش $amount';
+  }
+
+  @override
+  String billPlusTax(Object amount) {
+    return '+ ضريبة أو خدمة $amount';
+  }
+
+  @override
+  String get billTipCustom => 'مخصّص';
+
+  @override
+  String get billAddTax => 'ضريبة أو رسم خدمة';
+
+  @override
+  String get billTaxPercent => 'نسبة من الفاتورة';
+
+  @override
+  String get billTaxFixed => 'مبلغ ثابت';
+
+  @override
+  String get billWhosIn => 'المشاركون';
+
+  @override
+  String get billEvenly => 'بالتساوي';
+
+  @override
+  String get billByItem => 'حسب البند';
+
+  @override
+  String get billYou => 'أنت';
+
+  @override
+  String get billRecent => 'مؤخرًا';
+
+  @override
+  String get billByHandHint =>
+      'اضغط على مبلغ لتحدّده بنفسك، ويُعاد توزيع الباقي.';
+
+  @override
+  String get billPaidBy => 'دفعها';
+
+  @override
+  String get billFrom => 'من';
+
+  @override
+  String get billEachOwn => 'كلٌّ حصّته';
+
+  @override
+  String billOwesYouOne(String name, String amount) {
+    return '$name يدين لك بـ $amount';
+  }
+
+  @override
+  String billTheyOweYou(Object amount) {
+    return 'يدينون لك بـ $amount';
+  }
+
+  @override
+  String billYouOwe(String name, String amount) {
+    return 'تدين لـ $name بـ $amount';
+  }
+
+  @override
+  String get billNobodyOwes => 'لا أحد يدين لأحد';
+
+  @override
+  String billNothingLeaves(Object name) {
+    return 'لا يخرج شيء من حسابك حتى تسدّد لـ $name.';
+  }
+
+  @override
+  String billSaveFrom(String amount, String account) {
+    return 'حفظ · $amount من $account';
+  }
+
+  @override
+  String billSaveOwe(String name, String amount) {
+    return 'حفظ · تدين لـ $name بـ $amount';
+  }
+
+  @override
+  String billSaveShare(Object amount) {
+    return 'حفظ · حصّتك $amount';
+  }
+
+  @override
+  String billTapWhatHad(Object name) {
+    return 'اضغط على ما طلبه $name';
+  }
+
+  @override
+  String get billPickPersonHint => 'اضغط على شخص في الأسفل، ثم على ما طلبه.';
+
+  @override
+  String billEveryoneEach(Object amount) {
+    return 'الجميع · $amount لكل شخص';
+  }
+
+  @override
+  String billOnly(Object name) {
+    return '$name فقط';
+  }
+
+  @override
+  String billItemsSharedNow(Object name) {
+    return 'بنود $name أصبحت للجميع';
+  }
+
+  @override
+  String get billSetShare => 'تحديد الحصّة';
+
+  @override
+  String get billResetShare => 'إعادة التقسيم بالتساوي';
+
+  @override
+  String billUnpricedLines(int count) {
+    return 'أسطر بلا سعر: $count — اضغط على أحدها لإضافته';
+  }
+
+  @override
+  String billSavedFrom(String total, String account, String share) {
+    return '$total من $account · حصّتك $share';
+  }
+
+  @override
+  String billSavedEach(String share, String account) {
+    return 'حصّتك $share من $account';
+  }
+
+  @override
+  String get billOwesYouTitle => 'يدينون لك';
+
+  @override
+  String get billYouOweTitle => 'تدين لـ';
+
+  @override
+  String get billTrackedHint =>
+      'تُتابَع في الأهداف والقروض — علّم كل واحد مدفوعًا عند التسوية.';
+
+  @override
+  String billSendShare(Object name) {
+    return 'أرسل لـ $name حصّته';
+  }
+
+  @override
+  String billPersonShareText(Object amount) {
+    return 'حصّتك من الفاتورة: $amount';
+  }
+
+  @override
+  String billSplitInto(int qty) {
+    return 'تقسيم إلى $qty';
+  }
+
+  @override
+  String get billPersonName => 'الاسم';
 }

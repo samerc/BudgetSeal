@@ -1528,27 +1528,6 @@ class SEn extends S {
       'The items and splits you entered will be lost.';
 
   @override
-  String get billWhoPaid => 'Who paid?';
-
-  @override
-  String get billPaidMe => 'I paid the whole bill';
-
-  @override
-  String get billPaidMeDesc =>
-      'Records the full bill from your account and tracks what each person owes you in Goals & Loans.';
-
-  @override
-  String get billPaidOther => 'Someone else paid';
-
-  @override
-  String billPaidOtherDesc(String name) {
-    return 'Tracks what you owe $name in Goals & Loans. Nothing leaves your account until you pay them back.';
-  }
-
-  @override
-  String get billPaidEach => 'Everyone paid their own part';
-
-  @override
   String get billPaidEachDesc => 'Records only your share.';
 
   @override
@@ -1559,22 +1538,6 @@ class SEn extends S {
   @override
   String billLoanName(String date) {
     return 'Bill split · $date';
-  }
-
-  @override
-  String billLoansCreated(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n loans added to Goals & Loans',
-      one: '1 loan added to Goals & Loans',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String billOweCreated(String name, String amount) {
-    return 'Added to goals & loans: you owe $name $amount';
   }
 
   @override
@@ -1589,15 +1552,6 @@ class SEn extends S {
   String billSharePaidBy(String name) {
     return 'Paid by $name';
   }
-
-  @override
-  String get billTax => 'Tax & service';
-
-  @override
-  String get billTaxAmount => 'Tax & service amount';
-
-  @override
-  String get billTaxHint => 'Split in proportion to what each person ordered.';
 
   @override
   String billReceiptMatch(String total) {
@@ -3066,25 +3020,10 @@ class SEn extends S {
       'This is a note that is part of the transaction.';
 
   @override
-  String get billTitle => 'Bill splitter';
-
-  @override
   String get billScanning => 'Scanning receipt...';
 
   @override
-  String get billScanTooltip => 'Scan receipt';
-
-  @override
-  String get billEmptyTitle => 'Add items to split';
-
-  @override
-  String get billEmptySubtitle => 'Scan a receipt or add items manually';
-
-  @override
   String get billScanButton => 'Scan receipt';
-
-  @override
-  String get billAddManually => 'Add manually';
 
   @override
   String get billAddItem => 'Add item';
@@ -3099,25 +3038,7 @@ class SEn extends S {
   String get billNoText => 'No text detected. Try a clearer photo.';
 
   @override
-  String get billEnterAmount => 'Enter amount';
-
-  @override
-  String get billKeepAsOne => 'Keep as one';
-
-  @override
-  String get billSplit => 'Split';
-
-  @override
-  String get billWhosSplitting => 'Who\'s splitting?';
-
-  @override
   String get billAddPerson => 'Add person';
-
-  @override
-  String get billSplitEvenly => 'Split evenly';
-
-  @override
-  String get billAssignItems => 'Assign items';
 
   @override
   String get billItemName => 'Item name';
@@ -3126,100 +3047,14 @@ class SEn extends S {
   String get billTip => 'Tip';
 
   @override
-  String get billPercentage => 'Percentage';
-
-  @override
-  String get billTipAmount => 'Tip amount';
-
-  @override
-  String get billBillCurrency => 'Bill currency';
-
-  @override
   String get billRateHint => 'Rate';
-
-  @override
-  String get billTotal => 'Total';
-
-  @override
-  String get billReScan => 'Re-scan';
-
-  @override
-  String billNLines(int detected, int withPrice) {
-    return '$detected lines ($withPrice with prices)';
-  }
 
   @override
   String get billMe => 'Me';
 
   @override
-  String get billStep1Desc =>
-      'Step 1: Add items from your receipt — scan or enter manually.';
-
-  @override
-  String get billStep2Desc =>
-      'Step 2: Add people and assign items. Toggle \"Split evenly\" to divide the total equally.';
-
-  @override
-  String get billStep3Desc => 'Step 3: Review the split, add tip, and confirm.';
-
-  @override
-  String billBillIn(String currency) {
-    return 'Bill in $currency';
-  }
-
-  @override
-  String get billExchangeRateTitle => 'Exchange rate';
-
-  @override
-  String get billRemovePersonTitle => 'Remove person';
-
-  @override
-  String billRemovePersonContent(String name, int count) {
-    return '$name has $count item(s) assigned only to them. Reassign to someone else, or delete those items?';
-  }
-
-  @override
-  String get billReassignTo => 'Reassign to:';
-
-  @override
-  String get billPersonRemoved => 'Person removed';
-
-  @override
-  String get billEveryone => 'Everyone';
-
-  @override
   String billSharedEach(int count, String amount) {
     return 'Shared $count ways · $amount each';
-  }
-
-  @override
-  String get billSplitIntoUnits => 'Split into units';
-
-  @override
-  String get billSplitUnitsPrompt => 'How many units?';
-
-  @override
-  String get billTipLabel => 'Tip';
-
-  @override
-  String get billItemRemoved => 'Item removed';
-
-  @override
-  String get billDeleteItems => 'Delete items';
-
-  @override
-  String billEachPays(String amount) {
-    return 'Each person pays $amount';
-  }
-
-  @override
-  String billSplitQtyTitle(int qty, String name) {
-    return '$qty × $name';
-  }
-
-  @override
-  String billSplitQtyContent(int qty, String amount) {
-    return 'Split into $qty items ($amount each)?';
   }
 
   @override
@@ -7561,4 +7396,171 @@ class SEn extends S {
   String webNAccounts(String n) {
     return '$n accounts';
   }
+
+  @override
+  String get billScreenTitle => 'Split a bill';
+
+  @override
+  String get billTotalLabel => 'Bill total';
+
+  @override
+  String billPlusTip(Object amount) {
+    return '+ tip $amount';
+  }
+
+  @override
+  String billPlusTax(Object amount) {
+    return '+ tax or service $amount';
+  }
+
+  @override
+  String get billTipCustom => 'Custom';
+
+  @override
+  String get billAddTax => 'Tax or service charge';
+
+  @override
+  String get billTaxPercent => 'Percentage of the bill';
+
+  @override
+  String get billTaxFixed => 'Fixed amount';
+
+  @override
+  String get billWhosIn => 'Who\'s in';
+
+  @override
+  String get billEvenly => 'Evenly';
+
+  @override
+  String get billByItem => 'By item';
+
+  @override
+  String get billYou => 'You';
+
+  @override
+  String get billRecent => 'Recent';
+
+  @override
+  String get billByHandHint =>
+      'Tap an amount to set it by hand — the others rebalance.';
+
+  @override
+  String get billPaidBy => 'Paid by';
+
+  @override
+  String get billFrom => 'From';
+
+  @override
+  String get billEachOwn => 'Each their own';
+
+  @override
+  String billOwesYouOne(String name, String amount) {
+    return '$name owes you $amount';
+  }
+
+  @override
+  String billTheyOweYou(Object amount) {
+    return 'They owe you $amount';
+  }
+
+  @override
+  String billYouOwe(String name, String amount) {
+    return 'You owe $name $amount';
+  }
+
+  @override
+  String get billNobodyOwes => 'No one owes anyone';
+
+  @override
+  String billNothingLeaves(Object name) {
+    return 'Nothing leaves your account until you pay $name back.';
+  }
+
+  @override
+  String billSaveFrom(String amount, String account) {
+    return 'Save · $amount from $account';
+  }
+
+  @override
+  String billSaveOwe(String name, String amount) {
+    return 'Save · you owe $name $amount';
+  }
+
+  @override
+  String billSaveShare(Object amount) {
+    return 'Save · your share $amount';
+  }
+
+  @override
+  String billTapWhatHad(Object name) {
+    return 'Tap what $name had';
+  }
+
+  @override
+  String get billPickPersonHint =>
+      'Tap a person below, then the items they had.';
+
+  @override
+  String billEveryoneEach(Object amount) {
+    return 'Everyone · $amount each';
+  }
+
+  @override
+  String billOnly(Object name) {
+    return '$name only';
+  }
+
+  @override
+  String billItemsSharedNow(Object name) {
+    return '$name\'s items are now shared by everyone';
+  }
+
+  @override
+  String get billSetShare => 'Set share';
+
+  @override
+  String get billResetShare => 'Split it evenly again';
+
+  @override
+  String billUnpricedLines(int count) {
+    return 'Lines without a price: $count — tap one to add it';
+  }
+
+  @override
+  String billSavedFrom(String total, String account, String share) {
+    return '$total from $account · your share $share';
+  }
+
+  @override
+  String billSavedEach(String share, String account) {
+    return 'Your share $share from $account';
+  }
+
+  @override
+  String get billOwesYouTitle => 'Owes you';
+
+  @override
+  String get billYouOweTitle => 'You owe';
+
+  @override
+  String get billTrackedHint =>
+      'Tracked in Goals & loans — mark each one paid when they settle up.';
+
+  @override
+  String billSendShare(Object name) {
+    return 'Send $name their share';
+  }
+
+  @override
+  String billPersonShareText(Object amount) {
+    return 'Your share of the bill: $amount';
+  }
+
+  @override
+  String billSplitInto(int qty) {
+    return 'Split into $qty';
+  }
+
+  @override
+  String get billPersonName => 'Name';
 }

@@ -450,23 +450,12 @@
   "billItemN": "Article {n}",
   "billDiscardTitle": "Abandonner cette addition ?",
   "billDiscardBody": "Les articles et la répartition saisis seront perdus.",
-  "billWhoPaid": "Qui a payé ?",
-  "billPaidMe": "J'ai payé toute l'addition",
-  "billPaidMeDesc": "Enregistre toute l'addition sur votre compte et suit ce que chacun vous doit dans Objectifs et prêts.",
-  "billPaidOther": "Quelqu'un d'autre a payé",
-  "billPaidOtherDesc": "Suit ce que vous devez à {name} dans Objectifs et prêts. Rien ne sort de votre compte avant le remboursement.",
-  "billPaidEach": "Chacun a payé sa part",
   "billPaidEachDesc": "Enregistre seulement votre part.",
   "billLinePart": "Part de {name}",
   "billLoanName": "Addition partagée · {date}",
-  "billLoansCreated": "{n, plural, =1{1 prêt ajouté à Objectifs et prêts} other{{n} prêts ajoutés à Objectifs et prêts}}",
-  "billOweCreated": "Ajouté à Objectifs et prêts : vous devez {amount} à {name}",
   "billShare": "Partager la répartition",
   "billShareHeader": "Addition partagée · total {total}",
   "billSharePaidBy": "Payé par {name}",
-  "billTax": "Taxes et service",
-  "billTaxAmount": "Montant taxes et service",
-  "billTaxHint": "Réparti selon ce que chacun a commandé.",
   "billReceiptMatch": "Correspond au total du ticket ({total})",
   "billReceiptDiff": "Les articles font {items} · total du ticket {total}",
   "webShortcutRefresh": "Recharger depuis le téléphone",
@@ -1674,33 +1663,13 @@
   "@txListPreviewNote": {
     "description": "Preview note"
   },
-  "billTitle": "Partage d'addition",
-  "@billTitle": {
-    "description": "Screen title"
-  },
   "billScanning": "Numérisation du reçu...",
   "@billScanning": {
     "description": "Loading text"
   },
-  "billScanTooltip": "Scanner le reçu",
-  "@billScanTooltip": {
-    "description": "Tooltip"
-  },
-  "billEmptyTitle": "Ajouter des éléments à partager",
-  "@billEmptyTitle": {
-    "description": "Empty state title"
-  },
-  "billEmptySubtitle": "Scannez un reçu ou ajoutez manuellement",
-  "@billEmptySubtitle": {
-    "description": "Empty state subtitle"
-  },
   "billScanButton": "Scanner le reçu",
   "@billScanButton": {
     "description": "Primary button"
-  },
-  "billAddManually": "Ajouter manuellement",
-  "@billAddManually": {
-    "description": "Secondary button"
   },
   "billAddItem": "Ajouter un élément",
   "@billAddItem": {
@@ -1718,33 +1687,9 @@
   "@billNoText": {
     "description": "OCR failure snackbar"
   },
-  "billEnterAmount": "Saisir le montant",
-  "@billEnterAmount": {
-    "description": "OCR amount dialog title"
-  },
-  "billKeepAsOne": "Garder en un seul",
-  "@billKeepAsOne": {
-    "description": "Dialog button"
-  },
-  "billSplit": "Diviser",
-  "@billSplit": {
-    "description": "Dialog button"
-  },
-  "billWhosSplitting": "Qui partage ?",
-  "@billWhosSplitting": {
-    "description": "Section header"
-  },
   "billAddPerson": "Ajouter une personne",
   "@billAddPerson": {
     "description": "Text field hint"
-  },
-  "billSplitEvenly": "Partager équitablement",
-  "@billSplitEvenly": {
-    "description": "Toggle title"
-  },
-  "billAssignItems": "Attribuer les éléments",
-  "@billAssignItems": {
-    "description": "Section header"
   },
   "billItemName": "Nom de l'élément",
   "@billItemName": {
@@ -1754,41 +1699,9 @@
   "@billTip": {
     "description": "Section title"
   },
-  "billPercentage": "Pourcentage",
-  "@billPercentage": {
-    "description": "Tip mode"
-  },
-  "billTipAmount": "Montant du pourboire",
-  "@billTipAmount": {
-    "description": "Tip field label"
-  },
-  "billBillCurrency": "Devise de l'addition",
-  "@billBillCurrency": {
-    "description": "Currency label"
-  },
   "billRateHint": "Taux",
   "@billRateHint": {
     "description": "Rate field hint"
-  },
-  "billTotal": "Total",
-  "@billTotal": {
-    "description": "Summary label"
-  },
-  "billReScan": "Re-scanner",
-  "@billReScan": {
-    "description": "Re-scan button"
-  },
-  "billNLines": "{detected} lignes ({withPrice} avec prix)",
-  "@billNLines": {
-    "description": "OCR summary",
-    "placeholders": {
-      "detected": {
-        "type": "int"
-      },
-      "withPrice": {
-        "type": "int"
-      }
-    }
   },
   "billMe": "Moi",
   "@billMe": {
@@ -5200,25 +5113,7 @@
   "leftoverResolveFailed": "Échec de la résolution des restes. Veuillez réessayer.",
   "txLongPressHint": "Appui long pour sélectionner",
   "txListNone": "Aucun",
-  "billStep1Desc": "Étape 1 : Ajoutez les articles de votre reçu — scannez ou entrez manuellement.",
-  "billStep2Desc": "Étape 2 : Ajoutez des personnes et assignez les articles. Activez « Diviser également » pour répartir le total équitablement.",
-  "billStep3Desc": "Étape 3 : Vérifiez la répartition, ajoutez le pourboire et confirmez.",
-  "billBillIn": "Addition en {currency}",
-  "billExchangeRateTitle": "Taux de change",
-  "billRemovePersonTitle": "Supprimer la personne",
-  "billRemovePersonContent": "{name} a {count} article(s) assigné(s) uniquement à lui/elle. Réassigner à quelqu'un d'autre ou supprimer ces articles ?",
-  "billReassignTo": "Réassigner à :",
-  "billPersonRemoved": "Personne supprimée",
-  "billEveryone": "Tout le monde",
   "billSharedEach": "Partagé en {count} · {amount} chacun",
-  "billSplitIntoUnits": "Diviser en unités",
-  "billSplitUnitsPrompt": "Combien d'unités ?",
-  "billTipLabel": "Pourboire",
-  "billItemRemoved": "Article supprimé",
-  "billDeleteItems": "Supprimer les articles",
-  "billEachPays": "Chaque personne paie {amount}",
-  "billSplitQtyTitle": "{qty} × {name}",
-  "billSplitQtyContent": "Diviser en {qty} articles ({amount} chacun) ?",
   "billRateNotSetTitle": "Taux de change non défini",
   "billRateNotSetContent": "L'addition est en {currency} mais aucun taux n'a été saisi.\nLa transaction sera enregistrée sans conversion.",
   "billGoBackBtn": "Retour",
@@ -5603,5 +5498,47 @@
   "webOverspentTitle": "Enveloppes dépassées",
   "webEnvOverBy": "Dépassée de {amount}",
   "webBillsWeek": "Factures de la semaine",
-  "webNAccounts": "{n} comptes"
+  "webNAccounts": "{n} comptes",
+  "billScreenTitle": "Partager une addition",
+  "billTotalLabel": "Total de l'addition",
+  "billPlusTip": "+ pourboire {amount}",
+  "billPlusTax": "+ taxe ou service {amount}",
+  "billTipCustom": "Autre",
+  "billAddTax": "Taxe ou frais de service",
+  "billTaxPercent": "Pourcentage de l'addition",
+  "billTaxFixed": "Montant fixe",
+  "billWhosIn": "Qui participe",
+  "billEvenly": "À parts égales",
+  "billByItem": "Par article",
+  "billYou": "Vous",
+  "billRecent": "Récents",
+  "billByHandHint": "Touchez un montant pour le fixer vous-même — les autres s'ajustent.",
+  "billPaidBy": "Payé par",
+  "billFrom": "Depuis",
+  "billEachOwn": "Chacun sa part",
+  "billOwesYouOne": "{name} vous doit {amount}",
+  "billTheyOweYou": "On vous doit {amount}",
+  "billYouOwe": "Vous devez {amount} à {name}",
+  "billNobodyOwes": "Personne ne doit rien",
+  "billNothingLeaves": "Rien ne sort de votre compte avant que vous remboursiez {name}.",
+  "billSaveFrom": "Enregistrer · {amount} depuis {account}",
+  "billSaveOwe": "Enregistrer · vous devez {amount} à {name}",
+  "billSaveShare": "Enregistrer · votre part {amount}",
+  "billTapWhatHad": "Touchez ce qu'a pris {name}",
+  "billPickPersonHint": "Touchez une personne en bas, puis ses articles.",
+  "billEveryoneEach": "Tout le monde · {amount} chacun",
+  "billOnly": "{name} seulement",
+  "billItemsSharedNow": "Les articles de {name} sont maintenant partagés par tous",
+  "billSetShare": "Fixer la part",
+  "billResetShare": "Répartir à nouveau également",
+  "billUnpricedLines": "Lignes sans prix : {count} — touchez-en une pour l'ajouter",
+  "billSavedFrom": "{total} depuis {account} · votre part {share}",
+  "billSavedEach": "Votre part {share} depuis {account}",
+  "billOwesYouTitle": "Vous doivent",
+  "billYouOweTitle": "Vous devez",
+  "billTrackedHint": "Suivi dans Objectifs et prêts — marquez chacun comme payé une fois réglé.",
+  "billSendShare": "Envoyer sa part à {name}",
+  "billPersonShareText": "Votre part de l'addition : {amount}",
+  "billSplitInto": "Diviser en {qty}",
+  "billPersonName": "Nom"
 }

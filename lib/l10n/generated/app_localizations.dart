@@ -2805,42 +2805,6 @@ abstract class S {
   /// **'The items and splits you entered will be lost.'**
   String get billDiscardBody;
 
-  /// No description provided for @billWhoPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Who paid?'**
-  String get billWhoPaid;
-
-  /// No description provided for @billPaidMe.
-  ///
-  /// In en, this message translates to:
-  /// **'I paid the whole bill'**
-  String get billPaidMe;
-
-  /// No description provided for @billPaidMeDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Records the full bill from your account and tracks what each person owes you in Goals & Loans.'**
-  String get billPaidMeDesc;
-
-  /// No description provided for @billPaidOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Someone else paid'**
-  String get billPaidOther;
-
-  /// No description provided for @billPaidOtherDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Tracks what you owe {name} in Goals & Loans. Nothing leaves your account until you pay them back.'**
-  String billPaidOtherDesc(String name);
-
-  /// No description provided for @billPaidEach.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyone paid their own part'**
-  String get billPaidEach;
-
   /// No description provided for @billPaidEachDesc.
   ///
   /// In en, this message translates to:
@@ -2859,18 +2823,6 @@ abstract class S {
   /// **'Bill split · {date}'**
   String billLoanName(String date);
 
-  /// No description provided for @billLoansCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'{n, plural, =1{1 loan added to Goals & Loans} other{{n} loans added to Goals & Loans}}'**
-  String billLoansCreated(int n);
-
-  /// No description provided for @billOweCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to goals & loans: you owe {name} {amount}'**
-  String billOweCreated(String name, String amount);
-
   /// No description provided for @billShare.
   ///
   /// In en, this message translates to:
@@ -2888,24 +2840,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Paid by {name}'**
   String billSharePaidBy(String name);
-
-  /// No description provided for @billTax.
-  ///
-  /// In en, this message translates to:
-  /// **'Tax & service'**
-  String get billTax;
-
-  /// No description provided for @billTaxAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Tax & service amount'**
-  String get billTaxAmount;
-
-  /// No description provided for @billTaxHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Split in proportion to what each person ordered.'**
-  String get billTaxHint;
 
   /// No description provided for @billReceiptMatch.
   ///
@@ -5404,47 +5338,17 @@ abstract class S {
   /// **'This is a note that is part of the transaction.'**
   String get txListPreviewNote;
 
-  /// Screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Bill splitter'**
-  String get billTitle;
-
   /// Loading text
   ///
   /// In en, this message translates to:
   /// **'Scanning receipt...'**
   String get billScanning;
 
-  /// Tooltip
-  ///
-  /// In en, this message translates to:
-  /// **'Scan receipt'**
-  String get billScanTooltip;
-
-  /// Empty state title
-  ///
-  /// In en, this message translates to:
-  /// **'Add items to split'**
-  String get billEmptyTitle;
-
-  /// Empty state subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Scan a receipt or add items manually'**
-  String get billEmptySubtitle;
-
   /// Primary button
   ///
   /// In en, this message translates to:
   /// **'Scan receipt'**
   String get billScanButton;
-
-  /// Secondary button
-  ///
-  /// In en, this message translates to:
-  /// **'Add manually'**
-  String get billAddManually;
 
   /// Button
   ///
@@ -5470,47 +5374,11 @@ abstract class S {
   /// **'No text detected. Try a clearer photo.'**
   String get billNoText;
 
-  /// OCR amount dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Enter amount'**
-  String get billEnterAmount;
-
-  /// Dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Keep as one'**
-  String get billKeepAsOne;
-
-  /// Dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Split'**
-  String get billSplit;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Who\'s splitting?'**
-  String get billWhosSplitting;
-
   /// Text field hint
   ///
   /// In en, this message translates to:
   /// **'Add person'**
   String get billAddPerson;
-
-  /// Toggle title
-  ///
-  /// In en, this message translates to:
-  /// **'Split evenly'**
-  String get billSplitEvenly;
-
-  /// Section header
-  ///
-  /// In en, this message translates to:
-  /// **'Assign items'**
-  String get billAssignItems;
 
   /// Text field hint
   ///
@@ -5524,47 +5392,11 @@ abstract class S {
   /// **'Tip'**
   String get billTip;
 
-  /// Tip mode
-  ///
-  /// In en, this message translates to:
-  /// **'Percentage'**
-  String get billPercentage;
-
-  /// Tip field label
-  ///
-  /// In en, this message translates to:
-  /// **'Tip amount'**
-  String get billTipAmount;
-
-  /// Currency label
-  ///
-  /// In en, this message translates to:
-  /// **'Bill currency'**
-  String get billBillCurrency;
-
   /// Rate field hint
   ///
   /// In en, this message translates to:
   /// **'Rate'**
   String get billRateHint;
-
-  /// Summary label
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get billTotal;
-
-  /// Re-scan button
-  ///
-  /// In en, this message translates to:
-  /// **'Re-scan'**
-  String get billReScan;
-
-  /// OCR summary
-  ///
-  /// In en, this message translates to:
-  /// **'{detected} lines ({withPrice} with prices)'**
-  String billNLines(int detected, int withPrice);
 
   /// Default person name
   ///
@@ -5572,119 +5404,11 @@ abstract class S {
   /// **'Me'**
   String get billMe;
 
-  /// Step instruction
-  ///
-  /// In en, this message translates to:
-  /// **'Step 1: Add items from your receipt — scan or enter manually.'**
-  String get billStep1Desc;
-
-  /// Step instruction
-  ///
-  /// In en, this message translates to:
-  /// **'Step 2: Add people and assign items. Toggle \"Split evenly\" to divide the total equally.'**
-  String get billStep2Desc;
-
-  /// Step instruction
-  ///
-  /// In en, this message translates to:
-  /// **'Step 3: Review the split, add tip, and confirm.'**
-  String get billStep3Desc;
-
-  /// Currency indicator
-  ///
-  /// In en, this message translates to:
-  /// **'Bill in {currency}'**
-  String billBillIn(String currency);
-
-  /// Section title
-  ///
-  /// In en, this message translates to:
-  /// **'Exchange rate'**
-  String get billExchangeRateTitle;
-
-  /// Dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Remove person'**
-  String get billRemovePersonTitle;
-
-  /// Dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'{name} has {count} item(s) assigned only to them. Reassign to someone else, or delete those items?'**
-  String billRemovePersonContent(String name, int count);
-
-  /// Dialog label
-  ///
-  /// In en, this message translates to:
-  /// **'Reassign to:'**
-  String get billReassignTo;
-
-  /// No description provided for @billPersonRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Person removed'**
-  String get billPersonRemoved;
-
-  /// No description provided for @billEveryone.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyone'**
-  String get billEveryone;
-
   /// No description provided for @billSharedEach.
   ///
   /// In en, this message translates to:
   /// **'Shared {count} ways · {amount} each'**
   String billSharedEach(int count, String amount);
-
-  /// No description provided for @billSplitIntoUnits.
-  ///
-  /// In en, this message translates to:
-  /// **'Split into units'**
-  String get billSplitIntoUnits;
-
-  /// No description provided for @billSplitUnitsPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'How many units?'**
-  String get billSplitUnitsPrompt;
-
-  /// No description provided for @billTipLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Tip'**
-  String get billTipLabel;
-
-  /// No description provided for @billItemRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Item removed'**
-  String get billItemRemoved;
-
-  /// Dialog button
-  ///
-  /// In en, this message translates to:
-  /// **'Delete items'**
-  String get billDeleteItems;
-
-  /// Split evenly subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Each person pays {amount}'**
-  String billEachPays(String amount);
-
-  /// Split quantity dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'{qty} × {name}'**
-  String billSplitQtyTitle(int qty, String name);
-
-  /// Split quantity dialog content
-  ///
-  /// In en, this message translates to:
-  /// **'Split into {qty} items ({amount} each)?'**
-  String billSplitQtyContent(int qty, String amount);
 
   /// Dialog title
   ///
@@ -13377,6 +13101,258 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{n} accounts'**
   String webNAccounts(String n);
+
+  /// Bill splitter: screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Split a bill'**
+  String get billScreenTitle;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Bill total'**
+  String get billTotalLabel;
+
+  /// Bill splitter: under the total, e.g. "+ tip $9.00"
+  ///
+  /// In en, this message translates to:
+  /// **'+ tip {amount}'**
+  String billPlusTip(Object amount);
+
+  /// Bill splitter: under the total
+  ///
+  /// In en, this message translates to:
+  /// **'+ tax or service {amount}'**
+  String billPlusTax(Object amount);
+
+  /// Bill splitter: tip chip, any amount
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get billTipCustom;
+
+  /// Bill splitter: optional link under the tip
+  ///
+  /// In en, this message translates to:
+  /// **'Tax or service charge'**
+  String get billAddTax;
+
+  /// Bill splitter: tax choice
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of the bill'**
+  String get billTaxPercent;
+
+  /// Bill splitter: tax choice
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed amount'**
+  String get billTaxFixed;
+
+  /// Bill splitter: section header
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s in'**
+  String get billWhosIn;
+
+  /// Bill splitter: split mode
+  ///
+  /// In en, this message translates to:
+  /// **'Evenly'**
+  String get billEvenly;
+
+  /// Bill splitter: split mode
+  ///
+  /// In en, this message translates to:
+  /// **'By item'**
+  String get billByItem;
+
+  /// Bill splitter: the user in the people list
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get billYou;
+
+  /// Bill splitter: people from earlier splits and loans
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get billRecent;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an amount to set it by hand — the others rebalance.'**
+  String get billByHandHint;
+
+  /// Bill splitter: bottom bar label
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by'**
+  String get billPaidBy;
+
+  /// Bill splitter: bottom bar label, the account
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get billFrom;
+
+  /// Bill splitter: everyone paid their own part
+  ///
+  /// In en, this message translates to:
+  /// **'Each their own'**
+  String get billEachOwn;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'{name} owes you {amount}'**
+  String billOwesYouOne(String name, String amount);
+
+  /// Bill splitter: several people
+  ///
+  /// In en, this message translates to:
+  /// **'They owe you {amount}'**
+  String billTheyOweYou(Object amount);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {name} {amount}'**
+  String billYouOwe(String name, String amount);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'No one owes anyone'**
+  String get billNobodyOwes;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing leaves your account until you pay {name} back.'**
+  String billNothingLeaves(Object name);
+
+  /// Bill splitter: save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save · {amount} from {account}'**
+  String billSaveFrom(String amount, String account);
+
+  /// Bill splitter: save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save · you owe {name} {amount}'**
+  String billSaveOwe(String name, String amount);
+
+  /// Bill splitter: save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save · your share {amount}'**
+  String billSaveShare(Object amount);
+
+  /// Bill splitter: by item, a person is picked
+  ///
+  /// In en, this message translates to:
+  /// **'Tap what {name} had'**
+  String billTapWhatHad(Object name);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a person below, then the items they had.'**
+  String get billPickPersonHint;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone · {amount} each'**
+  String billEveryoneEach(Object amount);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'{name} only'**
+  String billOnly(Object name);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s items are now shared by everyone'**
+  String billItemsSharedNow(Object name);
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Set share'**
+  String get billSetShare;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Split it evenly again'**
+  String get billResetShare;
+
+  /// Bill splitter: receipt lines read without a price
+  ///
+  /// In en, this message translates to:
+  /// **'Lines without a price: {count} — tap one to add it'**
+  String billUnpricedLines(int count);
+
+  /// Bill splitter: after saving
+  ///
+  /// In en, this message translates to:
+  /// **'{total} from {account} · your share {share}'**
+  String billSavedFrom(String total, String account, String share);
+
+  /// Bill splitter: after saving
+  ///
+  /// In en, this message translates to:
+  /// **'Your share {share} from {account}'**
+  String billSavedEach(String share, String account);
+
+  /// Bill splitter: after saving
+  ///
+  /// In en, this message translates to:
+  /// **'Owes you'**
+  String get billOwesYouTitle;
+
+  /// Bill splitter: after saving
+  ///
+  /// In en, this message translates to:
+  /// **'You owe'**
+  String get billYouOweTitle;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked in Goals & loans — mark each one paid when they settle up.'**
+  String get billTrackedHint;
+
+  /// Bill splitter: accessibility label
+  ///
+  /// In en, this message translates to:
+  /// **'Send {name} their share'**
+  String billSendShare(Object name);
+
+  /// Bill splitter: text sent to one person
+  ///
+  /// In en, this message translates to:
+  /// **'Your share of the bill: {amount}'**
+  String billPersonShareText(Object amount);
+
+  /// Bill splitter: split an item with a quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Split into {qty}'**
+  String billSplitInto(int qty);
+
+  /// Bill splitter: add person field
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get billPersonName;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
