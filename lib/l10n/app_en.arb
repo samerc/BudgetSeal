@@ -6284,5 +6284,21 @@
   "quickItemsOverTotal": "Items are {amount} more than the total",
   "@quickItemsOverTotal": {"description": "One-screen add: split items add up to more than the total", "placeholders": {"amount": {"type": "String"}}},
   "quickSplitRest": "The rest",
-  "@quickSplitRest": {"description": "One-screen add: the first split item, which takes what is left of the total"}
+  "@quickSplitRest": {"description": "One-screen add: the first split item, which takes what is left of the total"},
+  "txReceiptPaidFrom": "Paid from {account}",
+  "@txReceiptPaidFrom": {"description": "Transaction receipt: the account an expense came from", "placeholders": {"account": {"type": "String"}}},
+  "txReceiptPaidInto": "Into {account}",
+  "@txReceiptPaidInto": {"description": "Transaction receipt: the account income went into", "placeholders": {"account": {"type": "String"}}},
+  "txReceiptTotal": "Total",
+  "@txReceiptTotal": {"description": "Transaction receipt: label before the total (shown in capitals)"},
+  "txReceiptItems": "{n, plural, =1{1 item} other{{n} items}}",
+  "@txReceiptItems": {"description": "Transaction receipt: number of lines", "placeholders": {"n": {"type": "int"}}},
+  "txStampNotPaid": "Not paid yet",
+  "@txStampNotPaid": {"description": "Transaction receipt stamp: a planned (upcoming) transaction"},
+  "txStampSkipped": "Skipped",
+  "@txStampSkipped": {"description": "Transaction receipt stamp: a skipped planned transaction"},
+  "txStampEnvelopesSame": "Envelopes unchanged",
+  "@txStampEnvelopesSame": {"description": "Transaction receipt stamp: a transfer between accounts"},
+  "txCoverAmount": "Cover {amount}",
+  "@txCoverAmount": {"description": "Transaction receipt: button that covers the envelope's overspending", "placeholders": {"amount": {"type": "String"}}}
 }

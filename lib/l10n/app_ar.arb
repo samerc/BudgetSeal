@@ -5569,5 +5569,13 @@
   "entryModeOneDesc": "المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ",
   "quickSplitNeedsTotal": "اكتب المجموع أولاً، ثم قسّمه",
   "quickItemsOverTotal": "البنود تزيد {amount} عن المجموع",
-  "quickSplitRest": "الباقي"
+  "quickSplitRest": "الباقي",
+  "txReceiptPaidFrom": "دُفع من {account}",
+  "txReceiptPaidInto": "إلى {account}",
+  "txReceiptTotal": "المجموع",
+  "txReceiptItems": "{n, plural, =1{بند واحد} other{{n} بنود}}",
+  "txStampNotPaid": "لم يُدفع بعد",
+  "txStampSkipped": "تم تخطيه",
+  "txStampEnvelopesSame": "المغلفات لم تتغير",
+  "txCoverAmount": "غطِّ {amount}"
 }

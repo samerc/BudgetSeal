@@ -7960,4 +7960,42 @@ class SEn extends S {
 
   @override
   String get quickSplitRest => 'The rest';
+
+  @override
+  String txReceiptPaidFrom(String account) {
+    return 'Paid from $account';
+  }
+
+  @override
+  String txReceiptPaidInto(String account) {
+    return 'Into $account';
+  }
+
+  @override
+  String get txReceiptTotal => 'Total';
+
+  @override
+  String txReceiptItems(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get txStampNotPaid => 'Not paid yet';
+
+  @override
+  String get txStampSkipped => 'Skipped';
+
+  @override
+  String get txStampEnvelopesSame => 'Envelopes unchanged';
+
+  @override
+  String txCoverAmount(String amount) {
+    return 'Cover $amount';
+  }
 }

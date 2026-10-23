@@ -8056,4 +8056,42 @@ class SFr extends S {
 
   @override
   String get quickSplitRest => 'Le reste';
+
+  @override
+  String txReceiptPaidFrom(String account) {
+    return 'Payé depuis $account';
+  }
+
+  @override
+  String txReceiptPaidInto(String account) {
+    return 'Vers $account';
+  }
+
+  @override
+  String get txReceiptTotal => 'Total';
+
+  @override
+  String txReceiptItems(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get txStampNotPaid => 'Pas encore payé';
+
+  @override
+  String get txStampSkipped => 'Ignoré';
+
+  @override
+  String get txStampEnvelopesSame => 'Enveloppes inchangées';
+
+  @override
+  String txCoverAmount(String amount) {
+    return 'Couvrir $amount';
+  }
 }

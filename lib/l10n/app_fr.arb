@@ -5569,5 +5569,13 @@
   "entryModeOneDesc": "Le montant d'abord, pavé ouvert, et ce qu'il reste dans l'enveloppe avant d'enregistrer",
   "quickSplitNeedsTotal": "Saisissez d'abord le total, puis divisez-le",
   "quickItemsOverTotal": "Les articles dépassent le total de {amount}",
-  "quickSplitRest": "Le reste"
+  "quickSplitRest": "Le reste",
+  "txReceiptPaidFrom": "Payé depuis {account}",
+  "txReceiptPaidInto": "Vers {account}",
+  "txReceiptTotal": "Total",
+  "txReceiptItems": "{n, plural, =1{1 article} other{{n} articles}}",
+  "txStampNotPaid": "Pas encore payé",
+  "txStampSkipped": "Ignoré",
+  "txStampEnvelopesSame": "Enveloppes inchangées",
+  "txCoverAmount": "Couvrir {amount}"
 }

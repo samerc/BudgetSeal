@@ -14043,6 +14043,54 @@ abstract class S {
   /// In en, this message translates to:
   /// **'The rest'**
   String get quickSplitRest;
+
+  /// Transaction receipt: the account an expense came from
+  ///
+  /// In en, this message translates to:
+  /// **'Paid from {account}'**
+  String txReceiptPaidFrom(String account);
+
+  /// Transaction receipt: the account income went into
+  ///
+  /// In en, this message translates to:
+  /// **'Into {account}'**
+  String txReceiptPaidInto(String account);
+
+  /// Transaction receipt: label before the total (shown in capitals)
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get txReceiptTotal;
+
+  /// Transaction receipt: number of lines
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 item} other{{n} items}}'**
+  String txReceiptItems(int n);
+
+  /// Transaction receipt stamp: a planned (upcoming) transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Not paid yet'**
+  String get txStampNotPaid;
+
+  /// Transaction receipt stamp: a skipped planned transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get txStampSkipped;
+
+  /// Transaction receipt stamp: a transfer between accounts
+  ///
+  /// In en, this message translates to:
+  /// **'Envelopes unchanged'**
+  String get txStampEnvelopesSame;
+
+  /// Transaction receipt: button that covers the envelope's overspending
+  ///
+  /// In en, this message translates to:
+  /// **'Cover {amount}'**
+  String txCoverAmount(String amount);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

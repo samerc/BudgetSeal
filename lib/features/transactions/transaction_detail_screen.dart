@@ -2,25 +2,21 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../shared/utils/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
-import '../../core/providers/accounts_provider.dart';
+import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
-import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
-import '../../core/providers/tx_colors_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/receipt_helper.dart';
-import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -30,8 +26,8 @@ import '../../shared/utils/note_text.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'widgets/delete_with_undo.dart';
 import 'widgets/tx_form_args.dart';
+import 'widgets/tx_receipt.dart';
 import 'widgets/tx_tile.dart';
-import 'widgets/tx_ui.dart';
 import '../../shared/theme/app_icons.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
@@ -86,58 +82,28 @@ class _DetailBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tx = entry.tx;
-    final isIncome = tx.type == 'income';
-    final isExpense = tx.type == 'expense';
-    final accounts = ref.watch(accountsProvider).value ?? [];
-    final accountMap = {for (final a in accounts) a.id: a};
     final baseCurrency =
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
 
-    final Color typeColor = ref.watch(txColorsProvider).forType(tx.type);
-
-    final IconData icon = isIncome
-        ? AppIcons.arrowDown
-        : isExpense
-            ? AppIcons.arrowUp
-            : AppIcons.arrowsLeftRight;
-
-    final typeLabel = switch (tx.type) {
-      'income' => S.of(context).typeIncome,
-      'expense' => S.of(context).typeExpense,
-      'transfer' => S.of(context).typeTransfer,
-      _ => tx.type,
-    };
-
-    // Resolve primary category for hero display
-    final primaryCat = tx.categoryId != null ? categoryMap[tx.categoryId] : null;
-    final catColor = primaryCat != null
-        ? AppColors.fromHex(primaryCat.colorHex)
-        : typeColor;
-
-    // Same pastel band as the add/edit form, so view and edit look alike.
-    final bandColor =
-        AppColors.pastel(context, catColor, light: 0.75, dark: 0.7);
+    final tr = S.of(context);
+    final envelope = receiptEnvelope(entry, categoryMap,
+        ref.watch(allocationsProvider).value ?? const []);
+    final overBy = envelope != null && envelope.balance < -0.005
+        ? -envelope.balance
+        : null;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: bandColor,
-        title: Text(S.of(context).txDetailTitle),
         actions: [
           IconButton(
             icon: const Icon(AppIcons.pencilSimple),
-            tooltip: S.of(context).commonEdit,
+            tooltip: tr.commonEdit,
             onPressed: () => _editTransaction(context, ref),
           ),
           PopupMenuButton<String>(
             icon: Icon(AppIcons.dotsThreeVertical, color: AppColors.ts(context)),
             onSelected: (action) {
               switch (action) {
-                case 'duplicate':
-                  final args = txFormArgs(
-                      entry, ref.read(categoriesProvider).value ?? const [],
-                      edit: false);
-                  context.pop();
-                  context.push('/add-transaction', extra: args);
                 case 'save_template':
                   _saveAsTemplate(context, ref);
                 case 'delete':
@@ -146,22 +112,12 @@ class _DetailBody extends ConsumerWidget {
             },
             itemBuilder: (_) => [
               PopupMenuItem(
-                value: 'duplicate',
-                child: Row(
-                  children: [
-                    Icon(AppIcons.copy, size: 20, color: AppColors.ts(context)),
-                    const SizedBox(width: 12),
-                    Text(S.of(context).txContextDuplicate),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
                 value: 'save_template',
                 child: Row(
                   children: [
                     Icon(AppIcons.lightning, size: 20, color: AppColors.ts(context)),
                     const SizedBox(width: 12),
-                    Text(S.of(context).txDetailSaveAsTemplate),
+                    Text(tr.txDetailSaveAsTemplate),
                   ],
                 ),
               ),
@@ -171,7 +127,7 @@ class _DetailBody extends ConsumerWidget {
                   children: [
                     Icon(AppIcons.trash, size: 20, color: AppColors.overspent),
                     const SizedBox(width: 12),
-                    Text(S.of(context).commonDelete,
+                    Text(tr.commonDelete,
                         style: TextStyle(color: AppColors.overspent)),
                   ],
                 ),
@@ -181,366 +137,65 @@ class _DetailBody extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
         children: [
-          // -- Hero band (Cashew style) --
-          Container(
-            color: bandColor,
-            padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 20, 20),
-            child: Row(
-              children: [
-                // Icon with the category name under it (same as the form).
-                SizedBox(
-                  width: 96,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                        if (primaryCat != null)
-                          Hero(
-                            tag: 'tx_${tx.id}',
-                            child: CategoryIcon(
-                              categoryName: primaryCat.name,
-                              emoji: primaryCat.icon.length <= 4 &&
-                                      primaryCat.icon != 'category'
-                                  ? primaryCat.icon
-                                  : null,
-                              color: catColor,
-                              size: 64,
-                              circular: true,
-                            ),
-                          )
-                        else
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: AppColors.pastel(context, typeColor,
-                                  light: 0.35, dark: 0.3),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(icon,
-                                color: AppColors.pastel(context, typeColor,
-                                    light: 0.5, dark: 0.4, inverse: true),
-                                size: 30),
-                          ),
-                      const SizedBox(height: 6),
-                      Text(
-                        primaryCat?.name ?? typeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.tp(context).withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                Builder(builder: (_) {
-                        final String amountText;
-                        if (entry.lines.length == 1) {
-                          amountText = formatSignedAmount(entry.lines.first.amount,
-                              currency: entry.lines.first.currency, type: tx.type);
-                        } else {
-                          // Multi-line: compute base total from lines, skipping bogus rates
-                          double baseTotal = 0;
-                          for (final l in entry.lines) {
-                            if (l.currency == baseCurrency) {
-                              baseTotal += l.amount;
-                            } else if (isRealRate(l.currency, baseCurrency,
-                                l.exchangeRateToBase)) {
-                              baseTotal += l.amount * l.exchangeRateToBase;
-                            }
-                            // else: skip lines with unset rate
-                          }
-                          amountText = formatSignedAmount(baseTotal,
-                              currency: baseCurrency, type: tx.type);
-                        }
-                        return GestureDetector(
-                          onLongPress: () {
-                            Clipboard.setData(ClipboardData(text: amountText));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(S.of(context).txDetailCopied(amountText)),
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          child: SizedBox(
-                            height: 50,
-                            width: double.infinity,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: AlignmentDirectional.centerEnd,
-                              child: Text(
-                                amountText,
-                                style: TextStyle(
-                                  fontSize: kHeroAmountSize,
-                                  fontFamily: TypographyTokens.displayFamily,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
-                                  color: AppColors.tp(context),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                      if (entry.lines.length == 1 &&
-                          entry.lines.first.currency != baseCurrency)
-                        Text(
-                          '= ${formatAmount(tx.amount, currency: baseCurrency)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.ts(context),
-                          ),
-                        ),
-                      const SizedBox(height: 2),
-                      Text(
-                        typeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context).withValues(alpha: 0.75),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          // The transaction as a paper receipt.
+          TxReceipt(
+            entry: entry,
+            categoryMap: categoryMap,
+            baseCurrency: baseCurrency,
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-          const SizedBox(height: 16),
-
-          // -- Details card --
-          _card(
-            context,
-            children: [
-              _detailRow(context, S.of(context).txDetailDate,
-                  formatDate(tx.createdAt.toLocal()),
-                  icon: AppIcons.calendarBlank),
-              _divider(context),
-              _detailRow(context, S.of(context).txDetailTime,
-                  // Follows the device's 12/24-hour setting.
-                  TimeOfDay.fromDateTime(tx.createdAt.toLocal())
-                      .format(context),
-                  icon: AppIcons.clock),
-              _divider(context),
-              Builder(builder: (_) {
-                final involvedNames = entry.involvedAccountNames;
-                if (involvedNames.length > 1) {
-                  // Multi-account: show all account names
-                  return _detailRow(context, S.of(context).txDetailAccounts,
-                      involvedNames.join(', '),
-                      icon: AppIcons.wallet);
-                }
-                // The line's account (per-line accounts), as shown in the name.
-                final accountId = entry.lines.isNotEmpty
-                    ? (entry.lines.first.accountId ?? tx.accountId)
-                    : tx.accountId;
-                return Tappable(
-                  onTap: () => context.push('/accounts/$accountId'),
-                  child: _detailRow(context, S.of(context).commonAccount,
-                      '${entry.accountName.isNotEmpty ? entry.accountName : S.of(context).txDetailUnknownAccount} ›',
-                      icon: AppIcons.wallet),
-                );
-              }),
-              if (tx.note.isNotEmpty) ...[
-                _divider(context),
-                _detailRow(context, S.of(context).txDetailNote, visibleNote(tx.note),
-                    icon: AppIcons.textAlignLeft),
-              ],
-              if (tx.categoryId != null &&
-                  categoryMap.containsKey(tx.categoryId)) ...[
-                _divider(context),
-                _detailRow(context, S.of(context).commonCategory,
-                    categoryMap[tx.categoryId]!.name,
-                    icon: AppIcons.tag),
-              ],
-            ],
-          ),
-
-          // -- Receipt --
           const SizedBox(height: 16),
           _ReceiptSection(
             receiptPath: tx.receiptPath,
             transactionId: tx.id,
           ),
-
-          // -- Split lines --
-          if (entry.lines.length > 1) ...[
-            const SizedBox(height: 16),
-            SectionHeader(S.of(context).txDetailSplitItems(entry.lines.length),
-                padding:
-                    const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
-            _card(context, children: [
-              for (var i = 0; i < entry.lines.length; i++) ...[
-                if (i > 0) _divider(context),
-                _lineRow(context, entry.lines[i], categoryMap, accountMap,
-                    baseCurrency),
-              ],
-            ]),
-          ],
-
-          // -- Single line detail --
-          // Only when the line adds something the band doesn't already show.
-          if (entry.lines.length == 1 &&
-              ((entry.lines.first.note.isNotEmpty &&
-                      entry.lines.first.note.trim() != tx.note.trim()) ||
-                  (entry.lines.first.categoryId != null &&
-                      entry.lines.first.categoryId != tx.categoryId))) ...[
-            const SizedBox(height: 16),
-            SectionHeader(S.of(context).txDetailLineDetail,
-                padding:
-                    const EdgeInsetsDirectional.only(start: 4, bottom: 8)),
-            _buildSingleLineCard(context, entry.lines.first, categoryMap),
-          ],
+          const SizedBox(height: 16),
+          Row(children: [
+            if (overBy != null) ...[
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => context.push(
+                      '/allocations/${envelope.allocationId}',
+                      extra: {'cover': true}),
+                  child: Text(
+                      tr.txCoverAmount(
+                          formatAmount(overBy, currency: envelope!.currency)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () {
+                  final args = txFormArgs(
+                      entry, ref.read(categoriesProvider).value ?? const [],
+                      edit: false);
+                  context.pop();
+                  context.push('/add-transaction', extra: args);
+                },
+                child: Text(tr.txContextDuplicate),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 4),
+          Center(
+            child: TextButton(
+              onPressed: () => _confirmDelete(context, ref),
+              style: TextButton.styleFrom(
+                  foregroundColor: AppColors.overspent,
+                  minimumSize: const Size(0, 44)),
+              child: Text(tr.commonDelete),
+            ),
+          ),
 
           // -- Related transactions (linked mixed-type entries) --
           _RelatedTransactions(tx: tx, categoryMap: categoryMap),
-              ],
-            ),
-          ),
         ],
       ),
     );
-  }
-
-  Widget _buildSingleLineCard(
-      BuildContext context, TransactionLine line, Map<String, Category> catMap) {
-    return _card(context, children: [
-      if (line.categoryId != null && catMap.containsKey(line.categoryId))
-        _detailRow(context, S.of(context).commonCategory, catMap[line.categoryId]!.name,
-            icon: AppIcons.tag),
-      if (line.categoryId != null &&
-          catMap.containsKey(line.categoryId) &&
-          line.note.isNotEmpty)
-        _divider(context),
-      if (line.note.isNotEmpty)
-        _detailRow(context, S.of(context).txDetailNote, line.note, icon: AppIcons.textAlignLeft),
-    ]);
-  }
-
-  Widget _card(BuildContext context, {required List<Widget> children}) {
-    return Container(
-      decoration: AppColors.card(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(children: children),
-      ),
-    );
-  }
-
-  Widget _detailRow(BuildContext context, String label, String value,
-      {IconData? icon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (icon != null) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 1),
-              child: Icon(icon, size: 18, color: AppColors.th(context)),
-            ),
-            const SizedBox(width: 12),
-          ],
-          SizedBox(
-            width: 90,
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.ts(context),
-                    fontWeight: FontWeight.w500)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(value,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.tp(context),
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _lineRow(BuildContext context, TransactionLine line,
-      Map<String, Category> catMap, Map<String, Account> accountMap,
-      String baseCurrency) {
-    final catName = line.categoryId != null
-        ? catMap[line.categoryId]?.name ?? S.of(context).txDetailUnknownAccount
-        : S.of(context).txDetailUncategorized;
-    final lineAccount =
-        line.accountId != null ? accountMap[line.accountId] : null;
-    final showConversion =
-        line.currency != baseCurrency && line.exchangeRateToBase != 1.0;
-    final baseAmount = line.amount * line.exchangeRateToBase;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(children: [
-        Icon(AppIcons.tag,
-            size: 16, color: AppColors.th(context)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(catName,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.tp(context))),
-                if (lineAccount != null)
-                  Text(lineAccount.name,
-                      style: TextStyle(
-                          fontSize: 11, color: AppColors.ts(context))),
-                if (line.note.isNotEmpty)
-                  Text(line.note,
-                      style: TextStyle(
-                          fontSize: 11, color: AppColors.ts(context)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-              ]),
-        ),
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text(formatAmount(line.amount, currency: line.currency),
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tp(context))),
-          if (showConversion)
-            Text('= ${formatAmount(baseAmount, currency: baseCurrency)}',
-                style: TextStyle(
-                    fontSize: 11, color: AppColors.ts(context))),
-        ]),
-      ]),
-    );
-  }
-
-  Widget _divider(BuildContext context) {
-    return Divider(
-        height: 1, indent: 16, endIndent: 16, color: AppColors.bd(context));
   }
 
   void _editTransaction(BuildContext context, WidgetRef ref) {

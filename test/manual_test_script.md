@@ -42,6 +42,13 @@ Run through each section before every release build. Mark pass/fail for each ite
 - [ ] Long category name at 360 dp + large text fits the pill (account is in the chip under the amount)
 - [ ] Settings › Entry mode switches between One screen, Assisted and Classic
 
+### Transaction detail (receipt)
+- [ ] Tap a transaction → paper receipt: icon, title, date · time, "Paid from X ›" (opens the account), item rows, TOTAL without a minus, torn bottom edge
+- [ ] Split → one row per item; foreign line shows "= base"; note after " — " in italics
+- [ ] Stamp: expense → envelope "$X left" / red "over by"; income → Ready to assign; transfer → envelopes unchanged; planned → not paid yet
+- [ ] Overspent → Cover $X opens the envelope's cover sheet; Duplicate opens the form; Delete removes with Undo; ✏ edits
+- [ ] Dark mode + Arabic: paper readable, stamp text legible
+
 ### Add Expense (Assisted Flow)
 - [ ] Tap + on Activity tab — opens expense form directly
 - [ ] Step indicator shows 1/2/3 dots

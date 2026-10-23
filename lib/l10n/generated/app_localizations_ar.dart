@@ -7978,4 +7978,42 @@ class SAr extends S {
 
   @override
   String get quickSplitRest => 'الباقي';
+
+  @override
+  String txReceiptPaidFrom(String account) {
+    return 'دُفع من $account';
+  }
+
+  @override
+  String txReceiptPaidInto(String account) {
+    return 'إلى $account';
+  }
+
+  @override
+  String get txReceiptTotal => 'المجموع';
+
+  @override
+  String txReceiptItems(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n بنود',
+      one: 'بند واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get txStampNotPaid => 'لم يُدفع بعد';
+
+  @override
+  String get txStampSkipped => 'تم تخطيه';
+
+  @override
+  String get txStampEnvelopesSame => 'المغلفات لم تتغير';
+
+  @override
+  String txCoverAmount(String amount) {
+    return 'غطِّ $amount';
+  }
 }
