@@ -2424,44 +2424,68 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                       Text(S.of(context).reportsNetWorth,
                           style: balanceHeroLabelStyle(context)),
                       const SizedBox(height: Spacing.sm),
+                      // Each side shares the width; a big amount shrinks
+                      // to fit instead of overflowing the card.
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Column(children: [
-                            Text(
-                              formatAmount(netWorthCompare,
-                                  currency: baseCurrency),
-                              style: TextStyle(
-                                fontSize: TypographyTokens.bodySize,
-                                color: AppColors.ts(context),
+                          Expanded(
+                            flex: 2,
+                            child: Column(children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  formatAmount(netWorthCompare,
+                                      currency: baseCurrency),
+                                  style: TextStyle(
+                                    fontSize: TypographyTokens.bodySize,
+                                    color: AppColors.ts(context),
+                                  ),
+                                ),
                               ),
-                            ),
-                            Text(
-                              formatDate(_compareDate),
-                              style: TextStyle(
-                                fontSize: TypographyTokens.miniSize,
-                                color: AppColors.ts(context),
-                              ),
-                            ),
-                          ]),
-                          Icon(AppIcons.arrowRight,
-                              size: 16,
-                              color: AppColors.th(context)),
-                          Column(children: [
-                            Text(
-                              formatAmount(netWorthNow, currency: baseCurrency),
-                              style: balanceHeroAmountStyle(context,
-                                  value: netWorthNow),
-                            ),
-                            Text(S.of(context).commonToday,
+                              Text(
+                                formatDate(_compareDate),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    fontSize: TypographyTokens.miniSize,
-                                    color: AppColors.ts(context))),
-                          ]),
+                                  fontSize: TypographyTokens.miniSize,
+                                  color: AppColors.ts(context),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Icon(AppIcons.arrowRight,
+                                size: 16,
+                                color: AppColors.th(context)),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Column(children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  formatAmount(netWorthNow,
+                                      currency: baseCurrency),
+                                  style: balanceHeroAmountStyle(context,
+                                      value: netWorthNow),
+                                ),
+                              ),
+                              Text(S.of(context).commonToday,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: TypographyTokens.miniSize,
+                                      color: AppColors.ts(context))),
+                            ]),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      _bsChangeChip(netWorthCompare, netWorthNow),
+                      // No percentage from zero.
+                      if (netWorthCompare.abs() > 0.005) ...[
+                        const SizedBox(height: 8),
+                        _bsChangeChip(netWorthCompare, netWorthNow),
+                      ],
                       // Foreign currency totals
                       if (foreignTotals.isNotEmpty) ...[
                         const SizedBox(height: 10),
