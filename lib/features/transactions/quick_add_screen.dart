@@ -35,7 +35,6 @@ import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/sheet_title.dart';
 import '../../shared/widgets/tappable.dart';
 import '../allocations/move_money_sheet.dart';
-import 'add_transaction_screen.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/save_feedback.dart';
 import 'widgets/tx_ui.dart';
@@ -46,17 +45,62 @@ import 'widgets/tx_ui.dart';
 /// envelope before saving (Cover chips when it would overspend). Extras
 /// (note, split, receipt, photo) sit in an always-visible row.
 ///
-/// New transactions only; editing keeps the classic form. Split hands what
-/// was typed to the classic form, which has items.
+/// Split keeps the total and carves items out of it: the first item holds
+/// what's left. It also edits ([editTransactionId]) and takes prefilled
+/// lines, as long as they share one account and currency ([canTake]).
 class QuickAddScreen extends ConsumerStatefulWidget {
   final String? initialType;
   final DateTime? initialDate;
+
+  /// The note as stored: "title — note".
   final String? initialTitle;
-  const QuickAddScreen(
-      {super.key, this.initialType, this.initialDate, this.initialTitle});
+  final String? editTransactionId;
+  final List<Map<String, dynamic>>? editLines;
+  final String? editFromAccountId;
+  final String? editDestAccountId;
+  const QuickAddScreen({
+    super.key,
+    this.initialType,
+    this.initialDate,
+    this.initialTitle,
+    this.editTransactionId,
+    this.editLines,
+    this.editFromAccountId,
+    this.editDestAccountId,
+  });
+
+  /// Built from the `/add-transaction` route extra.
+  factory QuickAddScreen.fromExtra(Map<String, dynamic>? extra) =>
+      QuickAddScreen(
+        initialType: extra?['editType'] as String?,
+        initialDate: extra?['editDate'] as DateTime?,
+        initialTitle: extra?['editNote'] as String?,
+        editTransactionId: extra?['editTransactionId'] as String?,
+        editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
+        editFromAccountId: extra?['editFromAccountId'] as String?,
+        editDestAccountId: extra?['editDestAccountId'] as String?,
+      );
+
+  /// One account and one currency per transaction here; lines spread over
+  /// several need the classic form.
+  static bool canTake(Map<String, dynamic>? extra) {
+    final lines = extra?['editLines'] as List<Map<String, dynamic>>?;
+    if (lines == null || extra?['editType'] == 'transfer') return true;
+    final accounts = lines.map((l) => l['accountId']).whereType<String>();
+    final currencies = lines.map((l) => l['currency']).whereType<String>();
+    return accounts.toSet().length <= 1 && currencies.toSet().length <= 1;
+  }
 
   @override
   ConsumerState<QuickAddScreen> createState() => _QuickAddScreenState();
+}
+
+/// One split item. The first item's [expr] is unused: it holds the rest.
+class _Item {
+  String? categoryId;
+  String expr;
+  final String note;
+  _Item({this.categoryId, this.expr = '', this.note = ''});
 }
 
 /// A recent transaction offered as a one-tap fill.
@@ -82,6 +126,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   final _titleCtrl = TextEditingController();
   final _titleFocus = FocusNode();
+  final _scroll = ScrollController();
   String? _categoryId;
   String? _accountId;
 
@@ -98,6 +143,25 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   /// Null while unknown.
   double? _rate;
   bool _saving = false;
+
+  /// Split items; empty when not split, else at least two.
+  List<_Item> _items = [];
+
+  /// What the keypad types into: 0 = the total, else that item.
+  int _target = 0;
+
+  bool _receiptsTouched = false;
+  late final String _initialSignature;
+
+  /// Editing: what the saved version already did, taken out of the
+  /// "before" figures so it isn't counted twice. Envelope → currency →
+  /// ledger sum; Ready to assign by currency; account → balance change.
+  Map<String, Map<String, double>> _oldEnvelope = {};
+  Map<String, double> _oldUnallocated = {};
+  Map<String, double> _oldAccount = {};
+
+  bool get _editing => widget.editTransactionId != null;
+  bool get _split => _items.isNotEmpty;
 
   static const _ops = '+-×÷';
 
@@ -121,19 +185,47 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   double get _amount => _eval(_expr);
 
-  bool get _midCalculation {
-    final e = _expr;
+  /// Item [i]'s amount; the first takes what the others leave of the total.
+  double _itemAmount(int i) {
+    if (i > 0) return _eval(_items[i].expr);
+    var rest = _amount;
+    for (var j = 1; j < _items.length; j++) {
+      rest -= _eval(_items[j].expr);
+    }
+    return rest;
+  }
+
+  static bool _isMid(String e) {
     if (e.length < 2) return false;
     final body = e.substring(1);
     return body.contains(RegExp(r'[+\-×÷]')) && !_ops.contains(e[e.length - 1]);
   }
 
-  bool get _dirty =>
-      _expr.isNotEmpty ||
-      _titleCtrl.text.trim().isNotEmpty ||
-      _note.isNotEmpty ||
-      _receipts.isNotEmpty ||
-      _categoryId != null;
+  bool get _midCalculation => _isMid(_expr);
+
+  /// The expression the keypad edits.
+  String get _active => _target > 0 ? _items[_target].expr : _expr;
+  set _active(String v) {
+    if (_target > 0) {
+      _items[_target].expr = v;
+    } else {
+      _expr = v;
+    }
+  }
+
+  /// Form state when it opened: leaving with changes asks first.
+  String _signature() => [
+        _type,
+        _expr,
+        _titleCtrl.text.trim(),
+        _note,
+        _categoryId,
+        _saveDate.toIso8601String(),
+        if (_editing) ...[_accountId, _destId],
+        for (final i in _items) '${i.categoryId}/${i.expr}',
+      ].join('|');
+
+  bool get _dirty => _receiptsTouched || _signature() != _initialSignature;
 
   // ── Lifecycle ───────────────────────────────────────────────────
 
@@ -144,20 +236,149 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         ? widget.initialType!
         : 'expense';
     _date = widget.initialDate ?? DateTime.now();
-    if (widget.initialTitle != null) _titleCtrl.text = widget.initialTitle!;
+    if (widget.initialDate != null) {
+      _time = TimeOfDay.fromDateTime(widget.initialDate!);
+    }
+    final note = widget.initialTitle ?? '';
+    final dash = note.indexOf(' — ');
+    if (dash >= 0) {
+      _titleCtrl.text = note.substring(0, dash);
+      _note = note.substring(dash + 3);
+    } else {
+      _titleCtrl.text = note;
+    }
+    _initFromLines();
+    _initialSignature = _signature();
     _titleFocus.addListener(() {
       if (!_titleFocus.hasFocus) _autofillFromTitle();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _applyAccountDefaults();
-      if (widget.initialTitle != null) _autofillFromTitle();
+      if (_editing) {
+        _loadEditState();
+      } else if (_titleCtrl.text.isNotEmpty && _categoryId == null) {
+        _autofillFromTitle();
+      }
     });
   }
+
+  /// Prefilled lines (edit, duplicate, template): one line fills the
+  /// amount and category, several become split items.
+  void _initFromLines() {
+    if (_type == 'transfer') {
+      _accountId = widget.editFromAccountId;
+      _destId = widget.editDestAccountId;
+    }
+    final lines = widget.editLines ?? const <Map<String, dynamic>>[];
+    if (lines.isEmpty) return;
+    if (_type != 'transfer') {
+      _accountId = lines
+          .map((l) => l['accountId'])
+          .whereType<String>()
+          .firstOrNull;
+    }
+    final decimals = currencyDecimals(
+        _account(_accountId)?.currency ?? lines.first['currency'] as String? ??
+            _baseCurrency);
+    final amounts = [for (final l in lines) (l['amount'] as num?)?.toDouble() ?? 0];
+    final total = amounts.fold<double>(0, (a, b) => a + b);
+    if (total > 0) _expr = _exprFor(total, decimals);
+    _prefilled = lines.length == 1 && total > 0;
+    if (lines.length == 1) {
+      _categoryId = lines.first['categoryId'] as String?;
+    } else {
+      _items = [
+        for (var i = 0; i < lines.length; i++)
+          _Item(
+            categoryId: lines[i]['categoryId'] as String?,
+            expr: i == 0 ? '' : _exprFor(amounts[i], decimals),
+            note: lines[i]['note'] as String? ?? '',
+          ),
+      ];
+      _categoryId = _items.first.categoryId;
+    }
+    // Stored rate: base per account unit (transfer: destination per source).
+    final r = (lines.first['exchangeRateToBase'] as num?)?.toDouble();
+    if (r != null && r > 0 && (r - 1).abs() > 1e-9) {
+      _rate = _type == 'transfer' ? r : 1 / r;
+    }
+  }
+
+  /// An edit saves under a new id: carry the receipts over, and note what
+  /// the saved version did to balances.
+  Future<void> _loadEditState() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final id = widget.editTransactionId!;
+      final tx = await db.transactionsDao.getById(id);
+      final ledger = await (db.select(db.allocationLedger)
+            ..where((l) => l.sourceTransactionId.equals(id)))
+          .get();
+      if (tx == null || !mounted) return;
+
+      final envelope = <String, Map<String, double>>{};
+      final unallocated = <String, double>{};
+      final account = <String, double>{};
+      void add(Map<String, double> m, String k, double v) =>
+          m[k] = (m[k] ?? 0) + v;
+      final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+      String curOf(String? accountId, String fallback) =>
+          accounts.where((a) => a.id == accountId).firstOrNull?.currency ??
+          fallback;
+
+      final lines = widget.editLines ?? const <Map<String, dynamic>>[];
+      if (tx.type == 'transfer') {
+        final amount = (lines.firstOrNull?['amount'] as num?)?.toDouble() ??
+            tx.amount;
+        final r = tx.exchangeRateToBase > 0 ? tx.exchangeRateToBase : 1.0;
+        final from = curOf(tx.accountId, tx.currency);
+        final to = curOf(tx.destinationAccountId, from);
+        final credit = from == to ? amount : amount * r;
+        add(account, tx.accountId, -amount);
+        add(unallocated, from, -amount);
+        if (tx.destinationAccountId != null) {
+          add(account, tx.destinationAccountId!, credit);
+          add(unallocated, to, credit);
+        }
+      } else {
+        final sign = tx.type == 'income' ? 1.0 : -1.0;
+        for (final l in lines) {
+          final amount = (l['amount'] as num?)?.toDouble() ?? 0;
+          final acc = l['accountId'] as String? ?? tx.accountId;
+          final cur = l['currency'] as String? ?? curOf(acc, tx.currency);
+          add(account, acc, sign * amount);
+          add(unallocated, cur, sign * amount);
+        }
+      }
+      // Unallocated = accounts − envelopes.
+      for (final e in ledger) {
+        add(envelope.putIfAbsent(e.allocationId, () => {}), e.currency,
+            e.amount);
+        add(unallocated, e.currency, -e.amount);
+      }
+
+      final paths = parseReceiptPaths(tx.receiptPath);
+      setState(() {
+        _oldEnvelope = envelope;
+        _oldUnallocated = unallocated;
+        _oldAccount = account;
+        if (paths.isNotEmpty) _receipts = [...paths, ..._receipts];
+      });
+    } catch (e) {
+      debugPrint('[QuickAdd] Loading the edited transaction failed: $e');
+    }
+  }
+
+  /// An envelope's balance without the transaction being edited.
+  double _envBalance(AllocationWithBalance a, String cur) =>
+      (a.balanceByCurrency[cur] ?? 0) -
+      (_oldEnvelope[a.data.allocation.id]?[cur] ?? 0);
 
   @override
   void dispose() {
     _titleCtrl.dispose();
     _titleFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -183,7 +404,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           _accountIsDefault = true;
         });
       }
-      _refreshRate();
+      // A prefilled line brings its own rate.
+      if (_rate == null) _refreshRate();
     } catch (e) {
       debugPrint('[QuickAdd] Account defaults failed: $e');
     }
@@ -211,14 +433,15 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   // ── Keypad ──────────────────────────────────────────────────────
 
   String get _currentOperand {
-    final i = _expr.lastIndexOf(RegExp(r'[+\-×÷]'));
-    return i < 0 ? _expr : _expr.substring(i + 1);
+    final e = _active;
+    final i = e.lastIndexOf(RegExp(r'[+\-×÷]'));
+    return i < 0 ? e : e.substring(i + 1);
   }
 
   void _digit(String d) {
     HapticFeedback.lightImpact();
     setState(() {
-      if (_prefilled) {
+      if (_prefilled && _target == 0) {
         _expr = '';
         _prefilled = false;
       }
@@ -226,7 +449,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       if (d == '.') {
         if (operand.contains('.')) return;
         if (currencyDecimals(_currency) == 0) return;
-        _expr += operand.isEmpty ? '0.' : '.';
+        _active += operand.isEmpty ? '0.' : '.';
         return;
       }
       if (operand.replaceAll('.', '').length >= 12) return;
@@ -234,10 +457,11 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       if (dot >= 0 && operand.length - dot - 1 >= currencyDecimals(_currency)) {
         return;
       }
+      final e = _active;
       if (operand == '0') {
-        _expr = _expr.substring(0, _expr.length - 1) + d;
+        _active = e.substring(0, e.length - 1) + d;
       } else {
-        _expr += d;
+        _active = e + d;
       }
     });
   }
@@ -246,11 +470,12 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     HapticFeedback.mediumImpact();
     setState(() {
       _prefilled = false;
-      if (_expr.isEmpty) return;
-      if (_ops.contains(_expr[_expr.length - 1])) {
-        _expr = _expr.substring(0, _expr.length - 1) + op;
+      final e = _active;
+      if (e.isEmpty) return;
+      if (_ops.contains(e[e.length - 1])) {
+        _active = e.substring(0, e.length - 1) + op;
       } else {
-        _expr += op;
+        _active = e + op;
       }
     });
   }
@@ -259,7 +484,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     HapticFeedback.lightImpact();
     setState(() {
       _prefilled = false;
-      if (_expr.isNotEmpty) _expr = _expr.substring(0, _expr.length - 1);
+      final e = _active;
+      if (e.isNotEmpty) _active = e.substring(0, e.length - 1);
     });
   }
 
@@ -267,7 +493,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     HapticFeedback.heavyImpact();
     setState(() {
       _prefilled = false;
-      _expr = '';
+      _active = '';
     });
   }
 
@@ -297,13 +523,17 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     return result;
   }
 
-  void _setAmount(double v) {
-    final d = currencyDecimals(_currency);
-    var s = v.toStringAsFixed(d);
+  /// [v] as keypad input: no grouping, no trailing zeros.
+  static String _exprFor(double v, int decimals) {
+    var s = v.toStringAsFixed(decimals);
     if (s.contains('.')) {
       s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
     }
-    _expr = s;
+    return s;
+  }
+
+  void _setAmount(double v) {
+    _expr = _exprFor(v, currencyDecimals(_currency));
     _prefilled = true;
   }
 
@@ -345,12 +575,13 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       _titleCtrl.text = s.title;
       _titleCtrl.selection =
           TextSelection.collapsed(offset: _titleCtrl.text.length);
-      if (s.categoryId != null) _categoryId = s.categoryId;
+      if (s.categoryId != null && !_split) _categoryId = s.categoryId;
       if (account != null) {
         _accountId = account.id;
         _accountIsDefault = false;
       }
-      if (s.amount != null && s.amount! > 0 && s.currency == _currency) {
+      if (s.amount != null && s.amount! > 0 && s.currency == _currency &&
+          !_split) {
         _setAmount(s.amount!);
       }
     });
@@ -360,7 +591,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   void _autofillFromTitle() {
     final title = _titleCtrl.text.trim();
-    if (title.isEmpty || _type == 'transfer') return;
+    if (title.isEmpty || _type == 'transfer' || _split) return;
     final settings = ref.read(autofillProvider);
     final fill = lookupAutofillByTitle(
       title: title,
@@ -429,12 +660,17 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       if (type == 'transfer' || (cat != null && cat.transactionType != type)) {
         _categoryId = null;
       }
+      if (type == 'transfer') {
+        _items = [];
+        _target = 0;
+      }
     });
     if (type == 'transfer') _applyAccountDefaults();
     _refreshRate();
   }
 
-  Future<void> _pickCategory() async {
+  /// The category of the transaction, or of split item [item].
+  Future<void> _pickCategory({int? item}) async {
     final categories = ref.read(categoriesProvider).value ?? const <Category>[];
     final householdId = ref.read(currentHouseholdIdProvider);
     final allocations = ref.read(allocationsProvider).value ?? const [];
@@ -451,7 +687,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => CategorySheet(
         categories: categories,
-        selectedId: _categoryId,
+        selectedId: item != null ? _items[item].categoryId : _categoryId,
         householdId: householdId,
         envelopeInfo: envelopeInfo,
         initialType: _type == 'income' ? 'income' : 'expense',
@@ -461,6 +697,11 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           Navigator.of(ctx).pop();
           if (!mounted) return;
           setState(() {
+            if (item != null) {
+              _items[item].categoryId = id;
+              if (item == 0) _categoryId = id;
+              return;
+            }
             _categoryId = id;
             if (txType == 'income' || txType == 'expense') _type = txType;
             _autofillFromCategory(id);
@@ -614,7 +855,10 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     _titleFocus.unfocus();
     final files = await pickAndSaveReceipts(context, fromCamera: camera);
     if (files.isEmpty || !mounted) return;
-    setState(() => _receipts = [..._receipts, ...files]);
+    setState(() {
+      _receipts = [..._receipts, ...files];
+      _receiptsTouched = true;
+    });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(S.of(context).txFormReceiptAttached),
       behavior: SnackBarBehavior.floating,
@@ -631,30 +875,43 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     setState(() => _rate = inverted ? 1 / v : v);
   }
 
-  /// Split into items: the classic form has them. It gets what was typed.
+  /// Split: the typed total stays; the first item keeps the category and
+  /// what's left, a new item is carved out of it. Tapping again adds one.
   void _openSplit() {
-    final cats = ref.read(categoriesProvider).value ?? const <Category>[];
-    final cat = cats.where((c) => c.id == _categoryId).firstOrNull;
-    final title = _titleCtrl.text.trim();
-    final note = _note.isEmpty ? title : (title.isEmpty ? _note : '$title — $_note');
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (_) => AddTransactionScreen(
-        editType: _type,
-        editDate: _saveDate,
-        editNote: note,
-        editLines: [
-          {
-            'amount': _amount > 0 ? _amount : null,
-            'currency': _currency,
-            'accountId': _accountId,
-            'categoryId': _categoryId,
-            'categoryName': cat?.name,
-            'note': '',
-            if (_needsRate && _rate != null) 'exchangeRateToBase': 1 / _rate!,
-          },
-        ],
-      ),
-    ));
+    if (!_split && _amount <= 0) {
+      HapticFeedback.heavyImpact();
+      _snack(S.of(context).quickSplitNeedsTotal);
+      return;
+    }
+    HapticFeedback.selectionClick();
+    _titleFocus.unfocus();
+    setState(() {
+      if (!_split) _items = [_Item(categoryId: _categoryId)];
+      _items.add(_Item());
+      _target = _items.length - 1;
+      _prefilled = false;
+    });
+    // Bring the new item into view above the keypad.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      _scroll.animateTo(_scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+    });
+  }
+
+  /// Its amount goes back to the first item; one item left ends the split.
+  void _removeItem(int i) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _items.removeAt(i);
+      if (_items.length < 2) {
+        _categoryId = _items.firstOrNull?.categoryId;
+        _items = [];
+        _target = 0;
+      } else if (_target >= i) {
+        _target = _target == i ? 0 : _target - 1;
+      }
+    });
   }
 
   // ── Cover ───────────────────────────────────────────────────────
@@ -724,6 +981,12 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       HapticFeedback.heavyImpact();
       return;
     }
+    if (_split && _itemAmount(0) < -0.005) {
+      HapticFeedback.heavyImpact();
+      _snack(tr.quickItemsOverTotal(
+          formatAmount(-_itemAmount(0), currency: _currency)));
+      return;
+    }
     if (amount > InputLimits.maxAmount) {
       _snack(tr.commonSomethingWentWrong);
       return;
@@ -741,7 +1004,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       _editRate();
       return;
     }
-    if (_type != 'transfer') {
+    if (_type != 'transfer' && !_split && !_editing) {
       final dup = await _findDuplicate(amount);
       if (dup != null && mounted) {
         if (!await confirmDuplicateTransaction(context, dup)) return;
@@ -782,19 +1045,26 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           accountId: _accountId!,
           type: _type,
           lines: [
-            TxLine(
-              amount: amount,
-              currency: _currency,
-              categoryId: _categoryId,
-              accountId: _accountId,
-              exchangeRateToBase: _needsRate ? 1 / _rate! : 1.0,
-            ),
+            for (final (i, item) in (_split ? _items : [_Item()]).indexed)
+              if (!_split || _itemAmount(i) > 0.005)
+                TxLine(
+                  amount: _split ? _itemAmount(i) : amount,
+                  currency: _currency,
+                  categoryId: _split ? item.categoryId : _categoryId,
+                  accountId: _accountId,
+                  exchangeRateToBase: _needsRate ? 1 / _rate! : 1.0,
+                  note: item.note,
+                ),
           ],
           baseCurrency: _baseCurrency,
           note: note,
           date: _saveDate,
         );
         LastUsedService.rememberAccount(_accountId!);
+      }
+      // Only drop the old one once the new one is saved.
+      if (_editing) {
+        await engine.deleteTransaction(widget.editTransactionId!);
       }
       if (_receipts.isNotEmpty) {
         try {
@@ -840,12 +1110,15 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           _titleCtrl.clear();
           _note = '';
           _receipts = [];
+          _receiptsTouched = false;
           _categoryId = null;
+          _items = [];
+          _target = 0;
           _saving = false;
         });
         messenger.showSnackBar(snack);
       } else {
-        context.pop();
+        context.pop(txId);
         messenger.showSnackBar(snack);
       }
     } catch (e) {
@@ -884,6 +1157,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
               _header(tr),
               Expanded(
                 child: ListView(
+                  controller: _scroll,
                   padding: const EdgeInsets.only(bottom: 12),
                   children: [
                     _amountBlock(tr),
@@ -896,7 +1170,11 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                       _titleField(tr),
                       if (suggestions.isNotEmpty) _suggestionRow(suggestions),
                       _pillsRow(tr),
-                      if (_type == 'expense') _envelopeCard(tr) else _incomeCard(tr),
+                      if (_split) _itemsCard(tr),
+                      if (_type != 'expense')
+                        _incomeCard(tr)
+                      else if (!_split)
+                        _envelopeCard(tr),
                     ],
                   ],
                 ),
@@ -1034,6 +1312,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                       ? _currency
                       : '$_currency · ${account.name}',
                   onTap: () => _pickAccount(),
+                  icon: account?.isTravel == true
+                      ? AppIcons.airplane
+                      : AppIcons.wallet,
                 ),
               if (_needsRate)
                 _smallChip(
@@ -1048,7 +1329,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     );
   }
 
-  Widget _smallChip(String text, {VoidCallback? onTap, bool warn = false}) {
+  Widget _smallChip(String text,
+      {VoidCallback? onTap, bool warn = false, IconData? icon}) {
+    final color = warn ? AppColors.caution : AppColors.ts(context);
     return Tappable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -1060,11 +1343,23 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
               : AppColors.sfv(context),
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: warn ? AppColors.caution : AppColors.ts(context))),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 5),
+          ],
+          Flexible(
+            child: Text(text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+          ),
+          if (icon != null) ...[
+            const SizedBox(width: 2),
+            Icon(AppIcons.caretDown, size: 12, color: color),
+          ],
+        ]),
       ),
     );
   }
@@ -1225,9 +1520,16 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         child: Row(children: [datePill]),
       );
     }
+    // The account is in the chip under the amount: the category gets the
+    // room. Split items carry their own categories.
+    if (_split) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+        child: Row(children: [datePill]),
+      );
+    }
     final cats = ref.watch(categoriesProvider).value ?? const <Category>[];
     final cat = cats.where((c) => c.id == _categoryId).firstOrNull;
-    final account = _account(_accountId);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       child: Row(children: [
@@ -1254,19 +1556,215 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                 expand: true,
               ),
         const SizedBox(width: 8),
-        if (account != null) ...[
-          _pill(
-            leading: Icon(
-                account.isTravel ? AppIcons.airplane : AppIcons.wallet,
-                size: 16,
-                color: AppColors.tp(context)),
-            label: account.name,
-            onTap: () => _pickAccount(),
-          ),
-          const SizedBox(width: 8),
-        ],
         datePill,
       ]),
+    );
+  }
+
+  /// Split items: category, its envelope after this spending, amount. The
+  /// selected row takes the keypad; the first holds the rest of the total.
+  Widget _itemsCard(S tr) {
+    final cats = {
+      for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
+        c.id: c,
+    };
+    final allocations =
+        ref.watch(allocationsProvider).value ?? const <AllocationWithBalance>[];
+    final cur = _currency;
+    final colors = ref.watch(txColorsProvider);
+    final bad = AppColors.overspent;
+    // On a dark card plain red is unreadable: lift it.
+    final badText = AppColors.isDark ? AppColors.lightenPastel(bad, 0.45) : bad;
+
+    // Items in one envelope spend from the same balance.
+    final envOf = <int, AllocationWithBalance>{};
+    final spent = <String, double>{};
+    if (_type == 'expense') {
+      for (var i = 0; i < _items.length; i++) {
+        final catId = _items[i].categoryId;
+        if (catId == null) continue;
+        final envId = envelopeForCategory(catId,
+            categoriesById: cats,
+            liveAllocations: allocations.map((a) => a.data.allocation));
+        final env =
+            allocations.where((a) => a.data.allocation.id == envId).firstOrNull;
+        if (env == null) continue;
+        envOf[i] = env;
+        final amt = _itemAmount(i);
+        spent[envId!] = (spent[envId] ?? 0) + (amt > 0 ? amt : 0);
+      }
+    }
+    final rest = _itemAmount(0);
+    final overTotal = rest < -0.005;
+
+    Widget row(int i) {
+      final item = _items[i];
+      final cat = cats[item.categoryId];
+      final selected = _target == i;
+      final env = envOf[i];
+      String? sub;
+      var subBad = false;
+      if (env != null) {
+        final before = _envBalance(env, cur);
+        final after = before - (spent[env.data.allocation.id] ?? 0);
+        subBad = after < -0.005;
+        final left = subBad
+            ? tr.quickOverBy(formatAmount(-after, currency: cur))
+            : tr.quickLeft(formatAmount(after, currency: cur));
+        // Short enough for one line: the envelope's name only when it
+        // isn't the category's.
+        final envName = env.data.allocation.name;
+        sub = envName == cat?.name
+            ? capitalizedFirst(left)
+            : '$envName · $left';
+      } else if (item.note.isNotEmpty) {
+        sub = item.note;
+      } else if (i == 0) {
+        sub = tr.quickSplitRest;
+      }
+      final e = item.expr;
+      final typing =
+          i > 0 && e.isNotEmpty && (_isMid(e) || _ops.contains(e[e.length - 1]));
+      final amountText = typing
+          ? formatCalcExpression(e)
+          : formatAmount(_itemAmount(i), currency: cur);
+      return Tappable(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          _titleFocus.unfocus();
+          setState(() {
+            _target = i;
+            _prefilled = false;
+          });
+        },
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsetsDirectional.fromSTEB(8, 6, 0, 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.accentLight : Colors.transparent,
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(
+                color: selected ? AppColors.accent : Colors.transparent,
+                width: 1.5),
+          ),
+          child: Row(children: [
+            Tappable(
+              onTap: () => _pickCategory(item: i),
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
+              child: cat == null
+                  ? Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: AppColors.th(context), width: 1.5),
+                      ),
+                      child: Icon(AppIcons.plus,
+                          size: 16, color: AppColors.ts(context)),
+                    )
+                  : CategoryIcon(
+                      categoryName: cat.name,
+                      emoji: cat.icon,
+                      color: AppColors.fromHex(cat.colorHex),
+                      size: 32,
+                      circular: true,
+                    ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Tappable(
+                    onTap: () => _pickCategory(item: i),
+                    child: Text(cat?.name ?? tr.commonCategory,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: cat == null
+                                ? AppColors.ts(context)
+                                : AppColors.tp(context))),
+                  ),
+                  if (sub != null)
+                    Text(sub,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: subBad ? badText : AppColors.ts(context))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(amountText,
+                textDirection: TextDirection.ltr,
+                style: TextStyle(
+                  fontFamily: TypographyTokens.displayFamily,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: i == 0 && overTotal
+                      ? badText
+                      : _type == 'income'
+                          ? colors.income
+                          : AppColors.tp(context),
+                )),
+            if (i > 0)
+              IconButton(
+                tooltip: tr.txAfRemoveItem,
+                visualDensity: VisualDensity.compact,
+                iconSize: 16,
+                icon: Icon(AppIcons.x, color: AppColors.ts(context)),
+                onPressed: () => _removeItem(i),
+              )
+            else
+              const SizedBox(width: 40),
+          ]),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      padding: const EdgeInsets.all(6),
+      decoration: AppColors.card(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < _items.length; i++) row(i),
+          if (overTotal)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(8, 6, 8, 2),
+              child: Text(
+                  tr.quickItemsOverTotal(formatAmount(-rest, currency: cur)),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: badText)),
+            ),
+          Tappable(
+            onTap: _openSplit,
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              child: Row(children: [
+                Icon(AppIcons.plusCircle,
+                    size: 18, color: AppColors.accentText(context)),
+                const SizedBox(width: 8),
+                Text(tr.txFormAddItem,
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentText(context))),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1310,7 +1808,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     if (env == null) return _infoCard(tr.quickNotBudgeted, AppIcons.info);
 
     final cur = _currency;
-    final before = env.balanceByCurrency[cur] ?? 0;
+    final before = _envBalance(env, cur);
     final amount = _amount;
     final after = before - amount;
     final over = after < -0.005;
@@ -1344,14 +1842,13 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       final donors = allocations
           .where((a) =>
               a.data.allocation.id != env.data.allocation.id &&
-              (a.balanceByCurrency[cur] ?? 0) >= shortfall - 0.005)
+              _envBalance(a, cur) >= shortfall - 0.005)
           .toList()
-        ..sort((a, b) => (b.balanceByCurrency[cur] ?? 0)
-            .compareTo(a.balanceByCurrency[cur] ?? 0));
+        ..sort((a, b) => _envBalance(b, cur).compareTo(_envBalance(a, cur)));
       final donor = donors.firstOrNull;
       if (donor != null) {
         coverChips.add(_coverChip(
-          '${donor.data.allocation.name} · ${formatAmount(donor.balanceByCurrency[cur] ?? 0, currency: cur)}',
+          '${donor.data.allocation.name} · ${formatAmount(_envBalance(donor, cur), currency: cur)}',
           () => _cover(
             toId: env.data.allocation.id,
             fromId: donor.data.allocation.id,
@@ -1363,7 +1860,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       }
       final unallocated =
           ref.watch(unallocatedProvider).value ?? const <String, double>{};
-      if ((unallocated[cur] ?? 0) >= shortfall - 0.005) {
+      if ((unallocated[cur] ?? 0) - (_oldUnallocated[cur] ?? 0) >=
+          shortfall - 0.005) {
         coverChips.add(_coverChip(
           tr.allocReadyToAssign,
           () => _cover(
@@ -1508,7 +2006,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     final cur = _currency;
     final unallocated =
         ref.watch(unallocatedProvider).value ?? const <String, double>{};
-    final before = unallocated[cur] ?? 0;
+    final before = (unallocated[cur] ?? 0) - (_oldUnallocated[cur] ?? 0);
     final after = before + _amount;
     final ink = AppColors.inkOn(AppColors.accentBright);
     return Container(
@@ -1563,7 +2061,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
     Widget row(String label, String? id, double delta, bool destination) {
       final acc = _account(id);
-      final bal = id == null ? null : balances[id];
+      final raw = id == null ? null : balances[id];
+      final bal = raw == null ? null : raw - (_oldAccount[id] ?? 0);
       return Tappable(
         onTap: () => _pickAccount(destination: destination),
         child: Padding(
@@ -1707,7 +2206,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       child: Row(children: [
         btn(tr.quickNote, AppIcons.textAlignLeft, _editNote, on: _note.isNotEmpty),
         const SizedBox(width: 8),
-        btn(tr.quickSplit, AppIcons.arrowsSplit, _openSplit),
+        btn(tr.quickSplit, AppIcons.arrowsSplit, _openSplit, on: _split),
         const SizedBox(width: 8),
         btn(tr.quickReceipt, AppIcons.camera, () => _addReceipt(camera: true),
             badge: _receipts.length),
@@ -1796,7 +2295,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(3, 4, 3, 8),
               child: Row(children: [
-                if (_type != 'transfer' && amount > 0) ...[
+                if (_type != 'transfer' && amount > 0 && !_editing) ...[
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(

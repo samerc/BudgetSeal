@@ -8044,4 +8044,16 @@ class SFr extends S {
   @override
   String get entryModeOneDesc =>
       'Le montant d\'abord, pavé ouvert, et ce qu\'il reste dans l\'enveloppe avant d\'enregistrer';
+
+  @override
+  String get quickSplitNeedsTotal =>
+      'Saisissez d\'abord le total, puis divisez-le';
+
+  @override
+  String quickItemsOverTotal(String amount) {
+    return 'Les articles dépassent le total de $amount';
+  }
+
+  @override
+  String get quickSplitRest => 'Le reste';
 }

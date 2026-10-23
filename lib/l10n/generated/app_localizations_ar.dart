@@ -7967,4 +7967,15 @@ class SAr extends S {
   @override
   String get entryModeOneDesc =>
       'المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ';
+
+  @override
+  String get quickSplitNeedsTotal => 'اكتب المجموع أولاً، ثم قسّمه';
+
+  @override
+  String quickItemsOverTotal(String amount) {
+    return 'البنود تزيد $amount عن المجموع';
+  }
+
+  @override
+  String get quickSplitRest => 'الباقي';
 }

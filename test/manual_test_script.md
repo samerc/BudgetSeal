@@ -31,9 +31,15 @@ Run through each section before every release build. Mark pass/fail for each ite
 - [ ] Category picked → envelope card "$before → $after left" + "about $X a day"
 - [ ] Spend more than the envelope has → red card "over by"; Cover from an envelope / Ready to assign moves the money and the card turns white; Other… opens the cover sheet
 - [ ] Category without an envelope → "isn't budgeted"; income → Ready to assign before → after; transfer → both balances before → after, swap works
-- [ ] Note / Receipt / Photo / Split always visible above the pad (small phone, large text too); Split opens the full form with the amount and category
+- [ ] Note / Receipt / Photo / Split always visible above the pad (small phone, large text too); Split with no amount says to type the total first
 - [ ] LBP account → rate chip "1 USD = 89,500 LBP"; tap to change it
 - [ ] Save & new keeps the screen; Save closes with "N left in X" (Cover action when over); leaving with changes asks first
+- [ ] Split: 82.40 → Split → type 20 → first item shows 62.40, each row shows its envelope after; Add item adds another and scrolls to it; × gives the amount back; items over the total → red line, Save refuses
+- [ ] Split saved → detail shows the items; receipts attached before splitting are on it
+- [ ] Edit (detail ✏, swipe, selection bar) opens the one screen filled in: items, date/time, receipts; the envelope card doesn't count the old amount twice; no Save & new; save replaces it (no duplicate in Activity)
+- [ ] Edit a transfer / income → balances / Ready to assign before → after are right
+- [ ] Edit a transaction with lines on two accounts → classic form opens
+- [ ] Long category name at 360 dp + large text fits the pill (account is in the chip under the amount)
 - [ ] Settings › Entry mode switches between One screen, Assisted and Classic
 
 ### Add Expense (Assisted Flow)

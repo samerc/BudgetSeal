@@ -5566,5 +5566,8 @@
   "quickSetRate": "حدد سعر الصرف",
   "quickNoteTitle": "ملاحظة",
   "entryModeOne": "شاشة واحدة",
-  "entryModeOneDesc": "المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ"
+  "entryModeOneDesc": "المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ",
+  "quickSplitNeedsTotal": "اكتب المجموع أولاً، ثم قسّمه",
+  "quickItemsOverTotal": "البنود تزيد {amount} عن المجموع",
+  "quickSplitRest": "الباقي"
 }

@@ -6278,5 +6278,11 @@
   "entryModeOne": "One screen",
   "@entryModeOne": {"description": "Entry mode option: the new one-screen add"},
   "entryModeOneDesc": "Amount first with the keypad open, and what's left in the envelope before you save",
-  "@entryModeOneDesc": {"description": "Entry mode option description"}
+  "@entryModeOneDesc": {"description": "Entry mode option description"},
+  "quickSplitNeedsTotal": "Type the total first, then split it",
+  "@quickSplitNeedsTotal": {"description": "One-screen add: Split tapped with no amount"},
+  "quickItemsOverTotal": "Items are {amount} more than the total",
+  "@quickItemsOverTotal": {"description": "One-screen add: split items add up to more than the total", "placeholders": {"amount": {"type": "String"}}},
+  "quickSplitRest": "The rest",
+  "@quickSplitRest": {"description": "One-screen add: the first split item, which takes what is left of the total"}
 }

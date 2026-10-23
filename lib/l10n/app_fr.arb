@@ -5566,5 +5566,8 @@
   "quickSetRate": "Définir le taux de change",
   "quickNoteTitle": "Note",
   "entryModeOne": "Un seul écran",
-  "entryModeOneDesc": "Le montant d'abord, pavé ouvert, et ce qu'il reste dans l'enveloppe avant d'enregistrer"
+  "entryModeOneDesc": "Le montant d'abord, pavé ouvert, et ce qu'il reste dans l'enveloppe avant d'enregistrer",
+  "quickSplitNeedsTotal": "Saisissez d'abord le total, puis divisez-le",
+  "quickItemsOverTotal": "Les articles dépassent le total de {amount}",
+  "quickSplitRest": "Le reste"
 }

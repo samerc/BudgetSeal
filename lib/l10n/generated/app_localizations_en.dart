@@ -7949,4 +7949,15 @@ class SEn extends S {
   @override
   String get entryModeOneDesc =>
       'Amount first with the keypad open, and what\'s left in the envelope before you save';
+
+  @override
+  String get quickSplitNeedsTotal => 'Type the total first, then split it';
+
+  @override
+  String quickItemsOverTotal(String amount) {
+    return 'Items are $amount more than the total';
+  }
+
+  @override
+  String get quickSplitRest => 'The rest';
 }

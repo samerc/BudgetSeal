@@ -14025,6 +14025,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Amount first with the keypad open, and what\'s left in the envelope before you save'**
   String get entryModeOneDesc;
+
+  /// One-screen add: Split tapped with no amount
+  ///
+  /// In en, this message translates to:
+  /// **'Type the total first, then split it'**
+  String get quickSplitNeedsTotal;
+
+  /// One-screen add: split items add up to more than the total
+  ///
+  /// In en, this message translates to:
+  /// **'Items are {amount} more than the total'**
+  String quickItemsOverTotal(String amount);
+
+  /// One-screen add: the first split item, which takes what is left of the total
+  ///
+  /// In en, this message translates to:
+  /// **'The rest'**
+  String get quickSplitRest;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

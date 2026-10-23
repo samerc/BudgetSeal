@@ -156,35 +156,8 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/add-transaction',
           pageBuilder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            // If editing or has pre-fill data, always use classic form.
-            final hasEditData = extra != null &&
-                (extra.containsKey('editTransactionId') ||
-                    extra.containsKey('editLines'));
-
-            if (!hasEditData) {
-              // Check entry mode preference.
-              // We can't use ref here directly, read from container.
-              // For simplicity, check if assisted mode via the route.
-              return slideUpPage(
-                child: _EntryModeRouter(extra: extra),
-                state: state,
-              );
-            }
-
             return slideUpPage(
-              child: AddTransactionScreen(
-                editTransactionId:
-                    extra['editTransactionId'] as String?,
-                editType: extra['editType'] as String?,
-                editNote: extra['editNote'] as String?,
-                editDate: extra['editDate'] as DateTime?,
-                editLines:
-                    extra['editLines'] as List<Map<String, dynamic>>?,
-                editFromAccountId:
-                    extra['editFromAccountId'] as String?,
-                editDestAccountId:
-                    extra['editDestAccountId'] as String?,
-              ),
+              child: _EntryModeRouter(extra: extra),
               state: state,
             );
           },
@@ -701,16 +674,16 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       );
     }
 
-    // A prefilled split (bill splitter) needs items: the classic form.
-    final hasLines = widget.extra?['editLines'] != null;
-    if (mode == 'one' && !hasLines) {
-      return QuickAddScreen(
-        initialType: widget.extra?['editType'] as String?,
-        initialDate: widget.extra?['editDate'] as DateTime?,
-        initialTitle: widget.extra?['editNote'] as String?,
-      );
+    // Edits and prefilled lines: the one screen when they fit it (one
+    // account, one currency), else the classic form. Step by step only
+    // starts new ones.
+    final extra = widget.extra;
+    if (mode == 'one' && QuickAddScreen.canTake(extra)) {
+      return QuickAddScreen.fromExtra(extra);
     }
-    if (mode == 'assisted') {
+    final prefilled = extra?['editTransactionId'] != null ||
+        extra?['editLines'] != null;
+    if (mode == 'assisted' && !prefilled) {
       return AssistedTransactionScreen(
         initialType: widget.extra?['editType'] as String?,
         initialDate: widget.extra?['editDate'] as DateTime?,
@@ -718,10 +691,13 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       );
     }
     return AddTransactionScreen(
-      editType: widget.extra?['editType'] as String?,
-      editDate: widget.extra?['editDate'] as DateTime?,
-      editNote: widget.extra?['editNote'] as String?,
-      editLines: widget.extra?['editLines'] as List<Map<String, dynamic>>?,
+      editTransactionId: extra?['editTransactionId'] as String?,
+      editType: extra?['editType'] as String?,
+      editDate: extra?['editDate'] as DateTime?,
+      editNote: extra?['editNote'] as String?,
+      editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
+      editFromAccountId: extra?['editFromAccountId'] as String?,
+      editDestAccountId: extra?['editDestAccountId'] as String?,
     );
   }
 }
