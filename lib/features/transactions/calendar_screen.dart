@@ -364,7 +364,7 @@ class _MonthGrid extends ConsumerWidget {
     final count = DateTime(month.year, month.month + 1, 0).day;
     final rows = ((lead + count) / 7).ceil();
     final weekdayNames = DateFormat.E().dateSymbols.NARROWWEEKDAYS;
-    final incomeColor = ref.watch(txColorsProvider).income;
+    final colors = ref.watch(txColorsProvider);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
@@ -389,14 +389,14 @@ class _MonthGrid extends ConsumerWidget {
         for (var r = 0; r < rows; r++)
           Row(children: [
             for (var c = 0; c < 7; c++)
-              Expanded(child: _cell(context, r * 7 + c - lead + 1, count, incomeColor)),
+              Expanded(child: _cell(context, r * 7 + c - lead + 1, count, colors)),
           ]),
       ]),
     );
   }
 
   Widget _cell(
-      BuildContext context, int day, int count, Color incomeColor) {
+      BuildContext context, int day, int count, TxColors colors) {
     if (day < 1 || day > count) return const SizedBox(height: 56);
     final date = DateTime(month.year, month.month, day);
     final isToday = date == today;
@@ -408,14 +408,24 @@ class _MonthGrid extends ConsumerWidget {
         ? 0.0
         : due.fold(0.0, (t, b) => b.bill.type == 'income' ? t : t + b.amount);
 
+    // A day with transactions is tinted by its net (income − spent): green
+    // when it came out ahead, red when behind, neutral when even (transfers
+    // only). The label is that net.
     String? label;
     Color? labelColor;
-    if (d != null && d.spent >= 0.005) {
-      label = _short(d.spent);
-      labelColor = AppColors.ts(context);
-    } else if (d != null && d.income >= 0.005) {
-      label = '+${_short(d.income)}';
-      labelColor = incomeColor;
+    Color? fill;
+    if (d != null && d.entries.isNotEmpty) {
+      final net = d.income - d.spent;
+      if (net >= 0.005) {
+        label = '+${_short(net)}';
+        labelColor = colors.income;
+      } else if (net <= -0.005) {
+        label = '-${_short(-net)}';
+        labelColor = colors.expense;
+      }
+      fill = labelColor == null
+          ? AppColors.sfv(context)
+          : AppColors.pastel(context, labelColor, light: 0.85, dark: 0.78);
     } else if (due != null) {
       // Bills can be in other currencies: the amount only when one bill.
       label = due.length == 1 && dueTotal > 0
@@ -427,12 +437,16 @@ class _MonthGrid extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(2),
       child: Material(
-        color: isSelected ? AppColors.accentLight : Colors.transparent,
+        // A tinted day keeps its color when selected (an outline marks it).
+        color: fill ??
+            (isSelected ? AppColors.accentLight : Colors.transparent),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          side: isToday && !isSelected
-              ? BorderSide(color: AppColors.accentText(context), width: 1.5)
-              : BorderSide.none,
+          side: isSelected && fill != null
+              ? BorderSide(color: AppColors.accentText(context), width: 2)
+              : isToday && !isSelected
+                  ? BorderSide(color: AppColors.accentText(context), width: 1.5)
+                  : BorderSide.none,
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -466,7 +480,8 @@ class _MonthGrid extends ConsumerWidget {
                             label,
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                              fontWeight:
+                                  fill != null ? FontWeight.w700 : FontWeight.w600,
                               fontFeatures: const [
                                 FontFeature.tabularFigures()
                               ],
