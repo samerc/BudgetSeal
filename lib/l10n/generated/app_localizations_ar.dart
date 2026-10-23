@@ -8100,4 +8100,35 @@ class SAr extends S {
 
   @override
   String get closeSeeRecap => 'اعرض الملخص';
+
+  @override
+  String get allocSpendButton => 'اصرف';
+
+  @override
+  String allocBudgetLine(String budgeted, String spent) {
+    return '$budgeted مخصّص · $spent مصروف';
+  }
+
+  @override
+  String allocDaysLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بقي $n أيام',
+      one: 'بقي يوم واحد',
+      zero: 'آخر يوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allocNeedsAttention => 'يحتاج انتباهك';
+
+  @override
+  String allocSpentOf(String spent, String budget) {
+    return 'صُرف $spent من $budget';
+  }
+
+  @override
+  String get allocNothingSpent => 'لم يُصرف شيء بعد';
 }

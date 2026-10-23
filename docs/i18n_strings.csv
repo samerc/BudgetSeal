@@ -2685,3 +2685,9 @@ closeReview,Month close: envelopes waiting for a manual reset decision,"{n, plur
 closePlan,"Month close: main button, opens funding for the new month",Plan {month},خطّط لـ {month},Planifier {month}
 closeShare,Month close: share the recap as an image,Share recap,شارك الملخص,Partager le bilan
 closeSeeRecap,Budget tab period card: opens the month close screen,See the recap,اعرض الملخص,Voir le bilan
+allocSpendButton,Envelope screen: button to add an expense from this envelope,Spend,اصرف,Dépenser
+allocBudgetLine,Budget tab: one-line summary under Ready to assign,{budgeted} budgeted · {spent} spent,{budgeted} مخصّص · {spent} مصروف,{budgeted} budgété · {spent} dépensé
+allocDaysLeft,Budget tab: days left in the budget period,"{n, plural, =0{Last day} =1{1 day left} other{{n} days left}}","{n, plural, =0{آخر يوم} =1{بقي يوم واحد} other{بقي {n} أيام}}","{n, plural, =0{Dernier jour} =1{1 jour restant} other{{n} jours restants}}"
+allocNeedsAttention,Budget tab: section of overspent envelopes,Needs attention,يحتاج انتباهك,À surveiller
+allocSpentOf,Budget tab row: spending envelope progress,{spent} spent of {budget},صُرف {spent} من {budget},{spent} dépensé sur {budget}
+allocNothingSpent,Budget tab row: spending envelope with no spending this period,Nothing spent yet,لم يُصرف شيء بعد,Rien de dépensé

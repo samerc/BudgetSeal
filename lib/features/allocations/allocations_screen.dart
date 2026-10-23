@@ -18,7 +18,8 @@ import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/utils/haptics.dart';
-import '../../shared/widgets/allocation_card.dart';
+import '../../shared/utils/calendar_days.dart';
+import '../../shared/widgets/envelope_row.dart';
 import '../../shared/widgets/budget_progress.dart';
 import '../../shared/widgets/ready_to_assign_banner.dart';
 
@@ -424,98 +425,6 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // -- Budget Summary (hidden during search) --
-          if (_searchQuery.isEmpty)
-          SliverToBoxAdapter(
-            child: allocationsAsync.when(
-              data: (allocations) {
-                // Only sum base-currency envelopes for the summary
-                // to avoid mixing currencies (e.g., USD + LBP raw).
-                final baseAllocs = allocations.where((a) =>
-                    (a.data.allocation.targetCurrency ?? baseCurrency) ==
-                    baseCurrency);
-                final totalBudgeted = baseAllocs.fold<double>(
-                  0.0,
-                  (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0),
-                );
-                // Spent this period from the ledger (a negative balance
-                // only shows overdrafts, not normal spending).
-                final spending = ref.watch(periodSpendingProvider).value ?? {};
-                final totalSpent = baseAllocs.fold<double>(
-                  0.0,
-                  (sum, a) =>
-                      sum +
-                      (spending[a.data.allocation.id]?[baseCurrency] ?? 0),
-                );
-                final totalRemaining = baseAllocs.fold<double>(
-                  0.0,
-                  (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0),
-                );
-
-                if (allocations.isEmpty) return const SizedBox.shrink();
-
-                final nonBaseCount = allocations
-                    .where((a) =>
-                        (a.data.allocation.targetCurrency ?? baseCurrency) !=
-                        baseCurrency)
-                    .length;
-
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.sfv(context),
-                          borderRadius: BorderRadius.circular(CardTokens.radius),
-                        ),
-                        child: Row(
-                          children: [
-                            _SummaryItem(
-                              label: l.allocBudgeted,
-                              amount: totalBudgeted,
-                              currency: baseCurrency,
-                              color: AppColors.tp(context),
-                            ),
-                            _SummaryDivider(context: context),
-                            _SummaryItem(
-                              label: l.allocSpent,
-                              amount: totalSpent,
-                              currency: baseCurrency,
-                              color: AppColors.overspent,
-                            ),
-                            _SummaryDivider(context: context),
-                            _SummaryItem(
-                              label: l.allocRemaining,
-                              amount: totalRemaining,
-                              currency: baseCurrency,
-                              color: totalRemaining < -0.005
-                                  ? AppColors.overspent
-                                  : AppColors.healthy,
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (nonBaseCount > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            l.allocBaseCurrencyOnly(baseCurrency, nonBaseCount),
-                            style: TextStyle(
-                                fontSize: 10, color: AppColors.th(context)),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-          ),
-
           // -- Unallocated Banner (hidden during search) --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
@@ -536,6 +445,48 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               loading: () => const SizedBox(height: 80),
               error: (_, __) => const SizedBox.shrink(),
             ),
+          ),
+
+          // -- One line: budgeted · spent, days left (base currency) --
+          if (_searchQuery.isEmpty)
+          SliverToBoxAdapter(
+            child: Builder(builder: (context) {
+              final allocations = allocationsAsync.value ?? const [];
+              if (allocations.isEmpty) return const SizedBox.shrink();
+              // Only base-currency envelopes: currencies never mix.
+              final baseAllocs = allocations.where((a) =>
+                  (a.data.allocation.targetCurrency ?? baseCurrency) ==
+                  baseCurrency);
+              final totalBudgeted = baseAllocs.fold<double>(
+                  0.0, (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0));
+              final spending = ref.watch(periodSpendingProvider).value ?? {};
+              final totalSpent = baseAllocs.fold<double>(
+                  0.0,
+                  (sum, a) =>
+                      sum + (spending[a.data.allocation.id]?[baseCurrency] ?? 0));
+              final period = BudgetProgress.currentPeriod(
+                  household?.periodStartDay ?? 1);
+              final daysLeft =
+                  calendarDaysBetween(DateTime.now(), period.end).clamp(0, 999);
+              final style = TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.ts(context));
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Row(children: [
+                  Expanded(
+                    child: Text(
+                        l.allocBudgetLine(
+                            formatAmount(totalBudgeted, currency: baseCurrency),
+                            formatAmount(totalSpent, currency: baseCurrency)),
+                        style: style),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(l.allocDaysLeft(daysLeft), style: style),
+                ]),
+              );
+            }),
           ),
 
           // -- Goals & Loans shortcut --
@@ -634,203 +585,140 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     Map<String, List<AllocationWithBalance>> grouped,
     String baseCurrency,
   ) {
+    final l = S.of(context);
     final widgets = <Widget>[];
-    final period = BudgetProgress.currentPeriod(
-        ref.read(householdProvider).value?.periodStartDay ?? 1);
+    final pendingIds = ref.watch(pendingResetProvider).value ?? const <String>[];
+    final sealedIds =
+        ref.watch(sealedEnvelopesProvider).value ?? const <String>{};
+    final spending = ref.watch(periodSpendingProvider).value ?? const {};
+    // Envelope → its linked category (categories.allocationId; a top-level
+    // one wins over a subcategory). The legacy allocations.categoryId join
+    // is empty for envelopes created since categories link themselves.
+    final linkedCat = <String, Category>{};
+    for (final c in ref.watch(categoriesProvider).value ?? const <Category>[]) {
+      final id = c.allocationId;
+      if (id == null) continue;
+      final existing = linkedCat[id];
+      if (existing == null ||
+          (existing.parentId != null && c.parentId == null)) {
+        linkedCat[id] = c;
+      }
+    }
 
-    for (final entry in grouped.entries) {
-      final type = entry.key;
-      final items = entry.value;
+    bool isOver(AllocationWithBalance a) =>
+        (a.balanceByCurrency[a.data.allocation.targetCurrency ?? baseCurrency] ??
+            0) <
+        -0.01;
 
-      // Compute section total in base currency only (avoid mixing).
-      final sectionTotal = items.fold<double>(
-        0.0,
-        (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0),
+    Widget row(AllocationWithBalance a) {
+      final alloc = a.data.allocation;
+      final cur = alloc.targetCurrency ?? baseCurrency;
+      final cat = linkedCat[alloc.id] ?? a.data.category;
+      return EnvelopeRow(
+        key: ValueKey(alloc.id),
+        needsReview: pendingIds.contains(alloc.id),
+        sealed: sealedIds.contains(alloc.id),
+        name: alloc.name,
+        type: alloc.type,
+        balanceByCurrency: a.balanceByCurrency,
+        baseCurrency: baseCurrency,
+        targetAmount: alloc.targetAmount,
+        targetCurrency: alloc.targetCurrency,
+        envelopeIcon: alloc.icon,
+        categoryName: cat?.name,
+        categoryIcon: cat?.icon,
+        categoryColorHex: cat?.colorHex,
+        spent: spending[alloc.id]?[cur] ?? 0,
+        plannedAmount: _plannedByAllocation[alloc.id],
+        plannedCurrency: _plannedCurrencyByAllocation[alloc.id],
+        onTap: () {
+          hapticLight();
+          context.push('/allocations/${alloc.id}');
+        },
+        onCover: () => showMoveMoneySheet(context, ref,
+            toId: alloc.id,
+            currency: cur,
+            amount: -(a.balanceByCurrency[cur] ?? 0),
+            cover: true),
       );
+    }
 
-      widgets.add(
-        Padding(
-          padding: EdgeInsetsDirectional.only(
-            top: widgets.isEmpty ? 4 : 20,
-            bottom: 8,
-            start: 4,
-          ),
-          child: Row(
-            children: [
-              SectionHeader(_sectionTitle(type)),
-              const SizedBox(width: 8),
-              Text(
-                '${items.length}',
-                style: TextStyle(
+    Widget card(List<AllocationWithBalance> items, {Color? color}) {
+      return Container(
+        decoration: color == null
+            ? AppColors.card(context)
+            : BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(CardTokens.radius)),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0)
+              Divider(
+                  height: 1,
+                  indent: 64,
+                  endIndent: 14,
+                  color: AppColors.bd(context)),
+            row(items[i]),
+          ],
+        ]),
+      );
+    }
+
+    Widget header(String title, int count, double? total, {bool first = false}) {
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+            top: first ? 4 : 20, bottom: 8, start: 4, end: 4),
+        child: Row(children: [
+          SectionHeader(title),
+          const SizedBox(width: 8),
+          Text('$count',
+              style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.th(context),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                formatAmount(sectionTotal, currency: baseCurrency),
+                  color: AppColors.th(context))),
+          const Spacer(),
+          if (total != null)
+            Text(formatAmount(total, currency: baseCurrency),
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: sectionTotal < 0
-                      ? AppColors.overspent
-                      : AppColors.ts(context),
-                ),
-              ),
-            ],
-          ),
-        ),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: total < 0
+                        ? AppColors.overspent
+                        : AppColors.ts(context))),
+        ]),
       );
+    }
 
-      final pendingIds = ref.watch(pendingResetProvider).value ?? [];
-      final sealedIds = ref.watch(sealedEnvelopesProvider).value ?? const <String>{};
-      // Envelope → its linked category (categories.allocationId; a top-level
-      // one wins over a subcategory). The legacy allocations.categoryId join
-      // is empty for envelopes created since categories link themselves.
-      final linkedCat = <String, Category>{};
-      for (final c in ref.watch(categoriesProvider).value ?? const <Category>[]) {
-        final id = c.allocationId;
-        if (id == null) continue;
-        final existing = linkedCat[id];
-        if (existing == null ||
-            (existing.parentId != null && c.parentId == null)) {
-          linkedCat[id] = c;
-        }
-      }
-      for (int idx = 0; idx < items.length; idx++) {
-        final a = items[idx];
-        final cat = linkedCat[a.data.allocation.id] ?? a.data.category;
-        widgets.add(
-          TweenAnimationBuilder<double>(
-            key: ValueKey(a.data.allocation.id),
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: Duration(milliseconds: 300 + idx * 60),
-            curve: Curves.easeOutCubic,
-            builder: (_, v, child) => Opacity(
-              opacity: v,
-              child: Transform.translate(
-                offset: Offset(0, 16 * (1 - v)),
-                child: child,
-              ),
-            ),
-            child: AllocationCard(
-            needsReview: pendingIds.contains(a.data.allocation.id),
-            sealed: sealedIds.contains(a.data.allocation.id),
-            name: a.data.allocation.name,
-            type: a.data.allocation.type,
-            periodicity: a.data.allocation.periodicity,
-            balanceByCurrency: a.balanceByCurrency,
-            baseCurrency: baseCurrency,
-            targetAmount: a.data.allocation.targetAmount,
-            targetCurrency: a.data.allocation.targetCurrency,
-            envelopeIcon: a.data.allocation.icon,
-            categoryName: cat?.name,
-            categoryIcon: cat?.icon,
-            categoryColorHex: cat?.colorHex,
-            // Current budget period → daily allowance + today marker.
-            periodStart: period.start,
-            periodEnd: period.end,
-            plannedAmount: _plannedByAllocation[a.data.allocation.id],
-            plannedCurrency: _plannedCurrencyByAllocation[a.data.allocation.id],
-            onTap: () {
-              hapticLight();
-              context.push('/allocations/${a.data.allocation.id}');
-            },
-            onCover: () {
-              final cur = a.data.allocation.targetCurrency ?? baseCurrency;
-              showMoveMoneySheet(context, ref,
-                  toId: a.data.allocation.id,
-                  currency: cur,
-                  amount: -(a.balanceByCurrency[cur] ?? 0),
-                  cover: true);
-            },
-            onSpend: () {
-              // Pre-fill with the linked category.
-              context.push('/add-transaction', extra: cat != null ? {
-                'editType': 'expense',
-                'editLines': [
-                  {
-                    'categoryId': cat.id,
-                    'categoryName': cat.name,
-                    'currency': a.data.allocation.targetCurrency ?? baseCurrency,
-                  }
-                ],
-              } : null);
-            },
-          )),
-        );
-      }
+    // Overspent envelopes first, in their own tinted card (not while
+    // searching: then every match stays in its section).
+    final overspent = _searchQuery.isEmpty
+        ? [for (final items in grouped.values) ...items.where(isOver)]
+        : const <AllocationWithBalance>[];
+    if (overspent.isNotEmpty) {
+      widgets.add(header(l.allocNeedsAttention, overspent.length, null,
+          first: true));
+      widgets.add(card(overspent,
+          color: AppColors.pastel(context, AppColors.overspent,
+              light: 0.9, dark: 0.82)));
+    }
+
+    for (final entry in grouped.entries) {
+      final items = entry.value.where((a) => !overspent.contains(a)).toList();
+      if (items.isEmpty) continue;
+      // Section total in base currency only (no mixing).
+      final sectionTotal = entry.value.fold<double>(
+          0.0, (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0));
+      widgets.add(header(_sectionTitle(entry.key), entry.value.length,
+          sectionTotal,
+          first: widgets.isEmpty));
+      widgets.add(card(items));
     }
 
     return widgets;
   }
 }
 
-// -----------------------------------------
-// Budget Summary Item
-// -----------------------------------------
-class _SummaryItem extends StatelessWidget {
-  final String label;
-  final double amount;
-  final String currency;
-  final Color color;
-
-  const _SummaryItem({
-    required this.label,
-    required this.amount,
-    required this.currency,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppColors.ts(context),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            formatAmount(amount, currency: currency),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryDivider extends StatelessWidget {
-  final BuildContext context;
-  const _SummaryDivider({required this.context});
-
-  @override
-  Widget build(BuildContext _) {
-    return Container(
-      width: 1,
-      height: 28,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      color: AppColors.bd(context),
-    );
-  }
-}
-
-// -----------------------------------------
-// Goals & Loans Banner
-// -----------------------------------------
 class _GoalsLoansBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {

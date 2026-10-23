@@ -5595,5 +5595,11 @@
   "closeReview": "{n, plural, =1{راجع مغلفاً واحداً} other{راجع {n} مغلفات}}",
   "closePlan": "خطّط لـ {month}",
   "closeShare": "شارك الملخص",
-  "closeSeeRecap": "اعرض الملخص"
+  "closeSeeRecap": "اعرض الملخص",
+  "allocSpendButton": "اصرف",
+  "allocBudgetLine": "{budgeted} مخصّص · {spent} مصروف",
+  "allocDaysLeft": "{n, plural, =0{آخر يوم} =1{بقي يوم واحد} other{بقي {n} أيام}}",
+  "allocNeedsAttention": "يحتاج انتباهك",
+  "allocSpentOf": "صُرف {spent} من {budget}",
+  "allocNothingSpent": "لم يُصرف شيء بعد"
 }

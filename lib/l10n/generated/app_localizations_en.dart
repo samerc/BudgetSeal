@@ -8083,4 +8083,35 @@ class SEn extends S {
 
   @override
   String get closeSeeRecap => 'See the recap';
+
+  @override
+  String get allocSpendButton => 'Spend';
+
+  @override
+  String allocBudgetLine(String budgeted, String spent) {
+    return '$budgeted budgeted · $spent spent';
+  }
+
+  @override
+  String allocDaysLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days left',
+      one: '1 day left',
+      zero: 'Last day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allocNeedsAttention => 'Needs attention';
+
+  @override
+  String allocSpentOf(String spent, String budget) {
+    return '$spent spent of $budget';
+  }
+
+  @override
+  String get allocNothingSpent => 'Nothing spent yet';
 }

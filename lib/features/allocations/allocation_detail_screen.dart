@@ -830,15 +830,52 @@ class _AllocationDetailScreenState
             ),
           ],
           const SizedBox(height: 16),
-          // Fund button — tonal on the pastel card
-          FilledButton.icon(
-            onPressed: () => _showFundSheet(targetCurrency),
-            icon: const Icon(AppIcons.plus, size: 20),
-            label: Text(S.of(context).allocFund),
-          ),
+          // Fund, and Spend from it (the Budget list's rows have no cart).
+          Row(children: [
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: () => _showFundSheet(targetCurrency),
+                icon: const Icon(AppIcons.plus, size: 20),
+                label: Text(S.of(context).allocFund),
+              ),
+            ),
+            if (_type == 'spending') ...[
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _spend(targetCurrency),
+                  icon: const Icon(AppIcons.shoppingCart, size: 20),
+                  label: Text(S.of(context).allocSpendButton),
+                ),
+              ),
+            ],
+          ]),
         ],
       ),
     );
+  }
+
+  /// New expense prefilled with this envelope's category (top level first).
+  void _spend(String currency) {
+    final linked = (ref.read(categoriesProvider).value ?? const <Category>[])
+        .where((c) => c.allocationId == widget.allocationId)
+        .toList()
+      ..sort((a, b) =>
+          (a.parentId == null ? 0 : 1).compareTo(b.parentId == null ? 0 : 1));
+    final cat = linked.firstOrNull;
+    context.push('/add-transaction',
+        extra: cat == null
+            ? null
+            : {
+                'editType': 'expense',
+                'editLines': [
+                  {
+                    'categoryId': cat.id,
+                    'categoryName': cat.name,
+                    'currency': currency,
+                  }
+                ],
+              });
   }
 
   Future<void> _showFundSheet(String defaultCurrency) async {

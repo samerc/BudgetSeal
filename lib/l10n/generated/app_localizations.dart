@@ -14199,6 +14199,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'See the recap'**
   String get closeSeeRecap;
+
+  /// Envelope screen: button to add an expense from this envelope
+  ///
+  /// In en, this message translates to:
+  /// **'Spend'**
+  String get allocSpendButton;
+
+  /// Budget tab: one-line summary under Ready to assign
+  ///
+  /// In en, this message translates to:
+  /// **'{budgeted} budgeted · {spent} spent'**
+  String allocBudgetLine(String budgeted, String spent);
+
+  /// Budget tab: days left in the budget period
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0{Last day} =1{1 day left} other{{n} days left}}'**
+  String allocDaysLeft(int n);
+
+  /// Budget tab: section of overspent envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get allocNeedsAttention;
+
+  /// Budget tab row: spending envelope progress
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} spent of {budget}'**
+  String allocSpentOf(String spent, String budget);
+
+  /// Budget tab row: spending envelope with no spending this period
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing spent yet'**
+  String get allocNothingSpent;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

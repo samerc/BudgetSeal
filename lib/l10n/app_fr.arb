@@ -5595,5 +5595,11 @@
   "closeReview": "{n, plural, =1{Revoir 1 enveloppe} other{Revoir {n} enveloppes}}",
   "closePlan": "Planifier {month}",
   "closeShare": "Partager le bilan",
-  "closeSeeRecap": "Voir le bilan"
+  "closeSeeRecap": "Voir le bilan",
+  "allocSpendButton": "Dépenser",
+  "allocBudgetLine": "{budgeted} budgété · {spent} dépensé",
+  "allocDaysLeft": "{n, plural, =0{Dernier jour} =1{1 jour restant} other{{n} jours restants}}",
+  "allocNeedsAttention": "À surveiller",
+  "allocSpentOf": "{spent} dépensé sur {budget}",
+  "allocNothingSpent": "Rien de dépensé"
 }

@@ -6336,5 +6336,17 @@
   "closeShare": "Share recap",
   "@closeShare": {"description": "Month close: share the recap as an image"},
   "closeSeeRecap": "See the recap",
-  "@closeSeeRecap": {"description": "Budget tab period card: opens the month close screen"}
+  "@closeSeeRecap": {"description": "Budget tab period card: opens the month close screen"},
+  "allocSpendButton": "Spend",
+  "@allocSpendButton": {"description": "Envelope screen: button to add an expense from this envelope"},
+  "allocBudgetLine": "{budgeted} budgeted · {spent} spent",
+  "@allocBudgetLine": {"description": "Budget tab: one-line summary under Ready to assign", "placeholders": {"budgeted": {"type": "String"}, "spent": {"type": "String"}}},
+  "allocDaysLeft": "{n, plural, =0{Last day} =1{1 day left} other{{n} days left}}",
+  "@allocDaysLeft": {"description": "Budget tab: days left in the budget period", "placeholders": {"n": {"type": "int"}}},
+  "allocNeedsAttention": "Needs attention",
+  "@allocNeedsAttention": {"description": "Budget tab: section of overspent envelopes"},
+  "allocSpentOf": "{spent} spent of {budget}",
+  "@allocSpentOf": {"description": "Budget tab row: spending envelope progress", "placeholders": {"spent": {"type": "String"}, "budget": {"type": "String"}}},
+  "allocNothingSpent": "Nothing spent yet",
+  "@allocNothingSpent": {"description": "Budget tab row: spending envelope with no spending this period"}
 }

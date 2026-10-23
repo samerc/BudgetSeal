@@ -42,6 +42,13 @@ Run through each section before every release build. Mark pass/fail for each ite
 - [ ] Long category name at 360 dp + large text fits the pill (account is in the chip under the amount)
 - [ ] Settings › Entry mode switches between One screen, Assisted and Classic
 
+### Budget tab
+- [ ] One line under Ready to assign: "$X budgeted · $Y spent" + "N days left"
+- [ ] Overspent envelopes in "Needs attention" (red card) with "Over by $X" + Cover; not repeated below
+- [ ] Rows: what's left, thin bar (amber under 10 %), "$X spent of $Y" / "Nothing spent yet" / "N% saved"; planned amount shows
+- [ ] Seal only on fully funded envelopes that aren't below zero; overspending removes it
+- [ ] Search: matches stay in their sections; envelope screen → Spend opens a prefilled expense
+
 ### Month close
 - [ ] First week of a period: Budget tab card → See the recap → month close screen
 - [ ] Within budget: dated seal stamps in, "<Month> sealed"; over: calendar icon, "<Month> is done"

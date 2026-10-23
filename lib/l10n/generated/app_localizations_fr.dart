@@ -8179,4 +8179,35 @@ class SFr extends S {
 
   @override
   String get closeSeeRecap => 'Voir le bilan';
+
+  @override
+  String get allocSpendButton => 'Dépenser';
+
+  @override
+  String allocBudgetLine(String budgeted, String spent) {
+    return '$budgeted budgété · $spent dépensé';
+  }
+
+  @override
+  String allocDaysLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours restants',
+      one: '1 jour restant',
+      zero: 'Dernier jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allocNeedsAttention => 'À surveiller';
+
+  @override
+  String allocSpentOf(String spent, String budget) {
+    return '$spent dépensé sur $budget';
+  }
+
+  @override
+  String get allocNothingSpent => 'Rien de dépensé';
 }

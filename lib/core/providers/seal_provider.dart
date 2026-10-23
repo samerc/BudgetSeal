@@ -7,9 +7,10 @@ import 'allocations_provider.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
 
-/// Ids of envelopes that are fully funded ("sealed"): a target is set and
+/// Ids of envelopes that are fully funded ("sealed"): a target is set, the
+/// envelope isn't below zero, and
 /// - spending envelopes: what was put in this period reaches the target
-///   (spending from it afterwards doesn't break the seal);
+///   (spending from it afterwards keeps the seal, overspending breaks it);
 /// - flexible envelopes: the balance reaches the target.
 /// Amounts in the envelope's target currency. Recomputed whenever the
 /// envelopes or their ledger change.
@@ -36,6 +37,7 @@ bool isEnvelopeSealed(Allocation alloc, Map<String, double> balances,
   final target = alloc.targetAmount ?? 0;
   if (target <= 0) return false;
   final cur = alloc.targetCurrency ?? baseCurrency;
+  if ((balances[cur] ?? 0) < -0.005) return false;
   final have = alloc.type == 'spending'
       ? (funded?[cur] ?? 0)
       : (balances[cur] ?? 0);
