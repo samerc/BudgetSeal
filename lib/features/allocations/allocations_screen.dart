@@ -606,9 +606,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     }
 
     bool isOver(AllocationWithBalance a) =>
-        (a.balanceByCurrency[a.data.allocation.targetCurrency ?? baseCurrency] ??
-            0) <
-        -0.01;
+        overspentCurrency(a.balanceByCurrency,
+            a.data.allocation.targetCurrency ?? baseCurrency) !=
+        null;
 
     Widget row(AllocationWithBalance a) {
       final alloc = a.data.allocation;
@@ -635,11 +635,14 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
           hapticLight();
           context.push('/allocations/${alloc.id}');
         },
-        onCover: () => showMoveMoneySheet(context, ref,
-            toId: alloc.id,
-            currency: cur,
-            amount: -(a.balanceByCurrency[cur] ?? 0),
-            cover: true),
+        onCover: () {
+          final overCur = overspentCurrency(a.balanceByCurrency, cur) ?? cur;
+          showMoveMoneySheet(context, ref,
+              toId: alloc.id,
+              currency: overCur,
+              amount: -(a.balanceByCurrency[overCur] ?? 0),
+              cover: true);
+        },
       );
     }
 

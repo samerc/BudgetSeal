@@ -76,6 +76,9 @@ Future<void> _startApp() async {
   final prefs = await SharedPreferences.getInstance();
   Intl.defaultLocale = prefs.getString('app_locale') ??
       WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  // Dates use Western digits like every amount does ("21 أكتوبر 2026", not
+  // "٢١ أكتوبر ٢٠٢٦"), so a row never mixes two digit systems.
+  DateFormat.useNativeDigitsByDefaultFor('ar', false);
 
   // Notifications are optional: a plugin failure must not leave the app
   // stuck before runApp.

@@ -2579,7 +2579,7 @@
   "@periodNoLeftovers": {
     "description": "Empty state title"
   },
-  "periodAllZero": "جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.",
+  "periodAllZero": "لا توجد مغلفات بانتظار المراجعة في هذه الفترة.",
   "@periodAllZero": {
     "description": "Empty state subtitle"
   },

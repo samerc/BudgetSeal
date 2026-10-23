@@ -6381,7 +6381,7 @@ class SFr extends S {
 
   @override
   String get periodAllZero =>
-      'Toutes les enveloppes périodiques ont des soldes nuls ou négatifs.';
+      'Aucune enveloppe n\'attend de révision pour cette période.';
 
   @override
   String get periodCompleteButton => 'Terminer la transition de période';

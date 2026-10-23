@@ -2375,12 +2375,17 @@ class _DateHeaderTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          // "Wednesday" + a long date at large text: the date shrinks
+          // instead of losing its year.
           Expanded(
-            child: Text(
-              formatDate(date),
-              style: TextStyle(fontSize: 12.5, color: AppColors.ts(context)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                formatDate(date),
+                style: TextStyle(fontSize: 12.5, color: AppColors.ts(context)),
+                maxLines: 1,
+              ),
             ),
           ),
           if (showTotal && dayTotal.abs() >= 0.005)

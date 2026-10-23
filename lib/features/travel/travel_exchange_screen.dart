@@ -64,7 +64,8 @@ class _TravelExchangeScreenState
         title: Text(S.of(context).travelTitle),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+            16, 8, 16, 32 + MediaQuery.viewPaddingOf(context).bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -189,16 +190,12 @@ class _TravelExchangeScreenState
             // ── Target Currency ──
             _SectionLabel(label: S.of(context).travelCurrencySection),
             const SizedBox(height: 6),
-            _FormCard(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: CurrencyPickerField(
-                  label: S.of(context).travelCurrencyReceive,
-                  value: _targetCurrency,
-                  exclude: {if (fromAcc != null) fromAcc.currency},
-                  onChanged: (v) => setState(() => _targetCurrency = v),
-                ),
-              ),
+            // Already a filled field: no card around it.
+            CurrencyPickerField(
+              label: S.of(context).travelCurrencyReceive,
+              value: _targetCurrency,
+              exclude: {if (fromAcc != null) fromAcc.currency},
+              onChanged: (v) => setState(() => _targetCurrency = v),
             ),
             const SizedBox(height: 16),
 

@@ -11305,7 +11305,7 @@ abstract class S {
   /// Period transition empty state subtitle
   ///
   /// In en, this message translates to:
-  /// **'All periodic allocations have zero or negative balances.'**
+  /// **'No envelopes are waiting for review this period.'**
   String get periodAllZero;
 
   /// Period transition submit button

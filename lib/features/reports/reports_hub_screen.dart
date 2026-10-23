@@ -1890,11 +1890,12 @@ class _SubscriptionSummaryCard extends ConsumerWidget {
         final recs = snap.data;
         if (recs == null || recs.isEmpty) return const SizedBox.shrink();
 
-        // Base-currency subscriptions only — never add up amounts in
-        // different currencies.
+        // What they cost: base-currency expenses only — never add up
+        // amounts in different currencies, and salary or a monthly
+        // transfer to savings isn't a cost.
         double total = 0;
         for (final r in recs) {
-          if (r.currency != baseCurrency) continue;
+          if (r.currency != baseCurrency || r.type != 'expense') continue;
           final interval = r.interval > 0 ? r.interval : 1;
           double monthly = r.amount;
           switch (r.frequency) {
@@ -2577,25 +2578,43 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
                 Icon(accountTypeIcon(type),
                     size: 16, color: accountTypeColor(type)),
                 const SizedBox(width: 8),
-                Text(accountTypeLabel(S.of(context), type),
-                    style: _cardTitleStyle(context)),
+                Expanded(
+                  child: Row(children: [
+                    Flexible(
+                      child: Text(accountTypeLabel(S.of(context), type),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _cardTitleStyle(context)),
+                    ),
+                    if (baseAccounts.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Text('$pct%',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.ts(context))),
+                    ],
+                  ]),
+                ),
                 if (baseAccounts.isNotEmpty) ...[
-                  const SizedBox(width: 6),
-                  Text('$pct%',
-                      style: TextStyle(
-                          fontSize: 11, color: AppColors.ts(context))),
-                ],
-                const Spacer(),
-                if (baseAccounts.isNotEmpty) ...[
-                  Text(formatAmount(groupCompare, currency: baseCurrency),
-                      style: TextStyle(
-                          fontSize: 11, color: AppColors.ts(context))),
-                  const SizedBox(width: 12),
-                  Text(formatAmount(groupNow, currency: baseCurrency),
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context))),
+                  const SizedBox(width: 8),
+                  // Totals shrink rather than push past the card.
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 170),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text(formatAmount(groupCompare, currency: baseCurrency),
+                            style: TextStyle(
+                                fontSize: 11, color: AppColors.ts(context))),
+                        const SizedBox(width: 12),
+                        Text(formatAmount(groupNow, currency: baseCurrency),
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.tp(context))),
+                      ]),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -2648,26 +2667,34 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
               ],
             ),
           ),
-          // Compare balance
+          // Compare balance (long LBP figures shrink, never wrap)
           Expanded(
             flex: 2,
-            child: Text(
-              formatAmount(compare, currency: a.account.currency),
-              textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                formatAmount(compare, currency: a.account.currency),
+                maxLines: 1,
+                style: TextStyle(fontSize: 12, color: AppColors.ts(context)),
+              ),
             ),
           ),
           const SizedBox(width: 8),
           // Current balance
           Expanded(
             flex: 2,
-            child: Text(
-              formatAmount(now, currency: a.account.currency),
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.tp(context)),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                formatAmount(now, currency: a.account.currency),
+                maxLines: 1,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context)),
+              ),
             ),
           ),
           const SizedBox(width: 4),

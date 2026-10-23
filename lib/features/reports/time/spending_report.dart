@@ -75,7 +75,12 @@ class SpendingReport extends ConsumerWidget {
     }
     final ranked = overall.entries.where((e) => e.value > 0.005).toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final stacked = ranked.take(4).map((e) => e.key).toList();
+    // Uncategorized money goes into Other: both would be the same gray.
+    final stacked = ranked
+        .where((e) => cats[e.key] != null)
+        .take(4)
+        .map((e) => e.key)
+        .toList();
     final otherColor = AppColors.th(context);
     Color colorOf(String? id) =>
         cats[id] != null ? AppColors.fromHex(cats[id]!.colorHex) : otherColor;

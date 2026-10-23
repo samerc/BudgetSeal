@@ -456,88 +456,56 @@ class _SubscriptionTile extends ConsumerWidget {
         ? ref.watch(txColorsProvider).forType(type)
         : AppColors.th(context);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: AppColors.card(context, radius: CardTokens.radius),
-      child: Material(
-        // Transparent Material so the ripple paints above the card fill.
-        type: MaterialType.transparency,
-        child: ListTile(
-          shape: RoundedRectangleBorder(borderRadius: CardTokens.borderRadius),
-          onTap: onTap,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          leading: CategoryIcon(
-            categoryName: categoryName ?? title,
-            emoji: categoryIcon,
-            color: catColor,
-            size: CategoryIconTokens.listSize,
-            circular: true,
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontWeight: TypographyTokens.txTitleWeight,
-              fontSize: TypographyTokens.txTitleSize,
-              color: billing ? AppColors.tp(context) : AppColors.th(context),
-              decoration: isCancelled ? TextDecoration.lineThrough : null,
+    return RecurringRow(
+      onTap: onTap,
+      leading: CategoryIcon(
+        categoryName: categoryName ?? title,
+        emoji: categoryIcon,
+        color: catColor,
+        size: CategoryIconTokens.listSize,
+        circular: true,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: TypographyTokens.txTitleWeight,
+          fontSize: TypographyTokens.txTitleSize,
+          color: billing ? AppColors.tp(context) : AppColors.th(context),
+          decoration: isCancelled ? TextDecoration.lineThrough : null,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      amount: Text(
+        formatSignedAmount(amount, currency: currency, type: type),
+        maxLines: 1,
+        style: TextStyle(
+          fontWeight: TypographyTokens.amountRegularWeight,
+          fontSize: TypographyTokens.amountRegularSize,
+          color: amountColor,
+          decoration: isCancelled ? TextDecoration.lineThrough : null,
+        ),
+      ),
+      subtitle: recurringNextLine(
+          tr, isCancelled ? null : nextDue, frequency, interval),
+      status: status == 'active'
+          ? null
+          : RecurringStatusDot(
+              color: subscriptionStatusColor(context, status),
+              label: subscriptionStatusLabel(tr, status),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+      toggle: SizedBox(
+        width: 32,
+        height: 32,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          iconSize: 20,
+          tooltip: isEnabled ? tr.subPauseTooltip : tr.subResumeTooltip,
+          icon: Icon(
+            isEnabled ? AppIcons.pauseCircle : AppIcons.playCircle,
+            color: isEnabled ? AppColors.th(context) : AppColors.healthy,
           ),
-          subtitle: Text(
-            recurringNextLine(tr, isCancelled ? null : nextDue, frequency,
-                interval),
-            style: TextStyle(
-              fontSize: TypographyTokens.txSubtitleSize,
-              color: AppColors.ts(context),
-            ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatSignedAmount(amount, currency: currency, type: type),
-                    style: TextStyle(
-                      fontWeight: TypographyTokens.amountRegularWeight,
-                      fontSize: TypographyTokens.amountRegularSize,
-                      color: amountColor,
-                      decoration:
-                          isCancelled ? TextDecoration.lineThrough : null,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  RecurringStatusDot(
-                    color: subscriptionStatusColor(context, status),
-                    label: subscriptionStatusLabel(tr, status),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 6),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  iconSize: 20,
-                  tooltip:
-                      isEnabled ? tr.subPauseTooltip : tr.subResumeTooltip,
-                  icon: Icon(
-                    isEnabled ? AppIcons.pauseCircle : AppIcons.playCircle,
-                    color:
-                        isEnabled ? AppColors.th(context) : AppColors.healthy,
-                  ),
-                  onPressed: onToggleEnabled,
-                ),
-              ),
-            ],
-          ),
+          onPressed: onToggleEnabled,
         ),
       ),
     );

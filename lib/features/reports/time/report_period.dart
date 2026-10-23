@@ -200,7 +200,8 @@ PeriodTotals periodTotals(
       t.spendDays.add(DateTime(d.year, d.month, d.day));
       t.biggest.add((entry: e, amount: txBase));
       final title = _title(e.tx.note);
-      if (title.isNotEmpty) {
+      // Goal savings and loan payments ("[obj:…]") aren't places.
+      if (title.isNotEmpty && !e.tx.note.contains('[obj:')) {
         final key = title.toLowerCase();
         final p = t.places[key];
         t.places[key] = (

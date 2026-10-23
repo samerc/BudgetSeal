@@ -600,7 +600,8 @@ class _FundingBanner extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              Expanded(
+               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(S.of(context).fundAvailableToDistribute,
@@ -622,19 +623,33 @@ class _FundingBanner extends StatelessWidget {
                     ),
                   ),
                 ],
+               ),
               ),
-              if (unallocated.length > 1)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: unallocated.entries
-                      .where((e) => e.key != baseCurrency)
-                      .map((e) => Text(
-                            formatAmount(e.value, currency: e.key),
-                            style: TextStyle(
-                                color: AppColors.ts(context), fontSize: 12),
-                          ))
-                      .toList(),
+              // Other currencies (LBP 47,500,000…) shrink rather than push
+              // the row past the card.
+              if (unallocated.length > 1) ...[
+                const SizedBox(width: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 130),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: unallocated.entries
+                        .where((e) => e.key != baseCurrency)
+                        .map((e) => FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: Text(
+                                formatAmount(e.value, currency: e.key),
+                                maxLines: 1,
+                                style: TextStyle(
+                                    color: AppColors.ts(context),
+                                    fontSize: 12),
+                              ),
+                            ))
+                        .toList(),
+                  ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 14),

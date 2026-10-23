@@ -5179,7 +5179,7 @@
   "@periodNoLeftovers": {
     "description": "Period transition empty state title"
   },
-  "periodAllZero": "All periodic allocations have zero or negative balances.",
+  "periodAllZero": "No envelopes are waiting for review this period.",
   "@periodAllZero": {
     "description": "Period transition empty state subtitle"
   },

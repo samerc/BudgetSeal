@@ -6305,7 +6305,7 @@ class SEn extends S {
 
   @override
   String get periodAllZero =>
-      'All periodic allocations have zero or negative balances.';
+      'No envelopes are waiting for review this period.';
 
   @override
   String get periodCompleteButton => 'Complete period transition';

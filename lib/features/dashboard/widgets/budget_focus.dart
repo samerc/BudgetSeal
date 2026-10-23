@@ -10,6 +10,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/envelope_row.dart' show overspentCurrency;
 import '../../../shared/widgets/ready_to_assign_banner.dart';
 import '../../allocations/move_money_sheet.dart';
 import '../../../shared/widgets/tappable.dart';
@@ -42,10 +43,9 @@ class BudgetFocus extends ConsumerWidget {
     }
     final overspent = [
       for (final a in allocations)
-        if ((a.balanceByCurrency[
-                    a.data.allocation.targetCurrency ?? baseCurrency] ??
-                0) <
-            -0.005)
+        if (overspentCurrency(a.balanceByCurrency,
+                a.data.allocation.targetCurrency ?? baseCurrency) !=
+            null)
           a,
     ];
 
@@ -118,7 +118,10 @@ class _OverspentCard extends ConsumerWidget {
   Widget _row(BuildContext context, WidgetRef ref, AllocationWithBalance a) {
     final s = S.of(context);
     final alloc = a.data.allocation;
-    final cur = alloc.targetCurrency ?? baseCurrency;
+    // The currency it's over in (its own, or a lira/euro side).
+    final cur = overspentCurrency(a.balanceByCurrency,
+            alloc.targetCurrency ?? baseCurrency) ??
+        (alloc.targetCurrency ?? baseCurrency);
     final over = -(a.balanceByCurrency[cur] ?? 0);
     final cat = linked[alloc.id] ?? a.data.category;
     final color =

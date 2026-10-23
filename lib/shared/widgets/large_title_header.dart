@@ -124,15 +124,20 @@ class _Delegate extends SliverPersistentHeaderDelegate {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.tp(context),
-                        fontSize: fontSize,
-                        fontFamily: TypographyTokens.displayFamily,
-                        fontWeight: TypographyTokens.screenTitleWeight,
+                    // A long title ("Planned payments" at large text)
+                    // shrinks to fit instead of losing its end.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: AppColors.tp(context),
+                          fontSize: fontSize,
+                          fontFamily: TypographyTokens.displayFamily,
+                          fontWeight: TypographyTokens.screenTitleWeight,
+                        ),
                       ),
                     ),
                     if (subtitle != null && t < 0.6)

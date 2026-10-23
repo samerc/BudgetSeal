@@ -531,7 +531,7 @@ period_error,Error retry,Couldn't load envelopes,تعذّر تحميل الأظ�
 period_resolve_leftovers,Subheading,Resolve leftover balances,حل الأرصدة المتبقية,Résoudre les soldes restants
 period_n_items,Item count,{count} items,{count} عناصر,{count} éléments
 period_no_leftovers,Empty state title,No leftover balances to resolve,لا أرصدة متبقية لحلها,Aucun solde restant à résoudre
-period_all_zero,Empty state subtitle,All periodic allocations have zero or negative balances.,جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.,Toutes les enveloppes périodiques ont des soldes nuls ou négatifs.
+period_all_zero,Empty state subtitle,No envelopes are waiting for review this period.,لا توجد مغلفات بانتظار المراجعة في هذه الفترة.,Aucune enveloppe n'attend de révision pour cette période.
 period_complete_button,Button,Complete period transition,إتمام انتقال الفترة,Terminer la transition de période
 period_rollover,Card subtitle,Rollover allocation,ظرف مُرحَّل,Enveloppe avec report
 period_periodic,Card subtitle,Periodic allocation,ظرف دوري,Enveloppe périodique

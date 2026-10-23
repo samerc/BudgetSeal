@@ -9,6 +9,19 @@ import 'category_icon.dart';
 import 'seal_mark.dart';
 import 'tappable.dart';
 
+/// The currency an envelope is overspent in: its own first, else any other
+/// side gone below zero (an LBP or EUR expense with no money in that
+/// currency). Null when nothing is below zero.
+String? overspentCurrency(Map<String, double> balances, String main) {
+  if ((balances[main] ?? 0) < -0.01) return main;
+  final others = [
+    for (final e in balances.entries)
+      if (e.value < -0.01) e.key,
+  ]..sort();
+  return others.firstOrNull;
+}
+
+
 /// One envelope on the Budget tab: icon (with the seal when fully funded),
 /// name and what's left, a thin bar of what's been used, and a line on how
 /// it's going. Rows sit together in one card per section; an overspent one
@@ -108,9 +121,10 @@ class EnvelopeRow extends StatelessWidget {
     final cur = targetCurrency ?? baseCurrency;
     final balance = balanceByCurrency[cur] ?? 0;
     final target = (targetAmount ?? 0) > 0 ? targetAmount! : null;
-    final over = balance < -0.01;
+    final overCur = overspentCurrency(balanceByCurrency, cur);
+    final over = overCur != null;
     final otherDebts = balanceByCurrency.entries
-        .where((e) => e.key != cur && e.value < -0.01)
+        .where((e) => e.key != cur && e.key != overCur && e.value < -0.01)
         .length;
     final color = categoryColorHex != null
         ? AppColors.fromHex(categoryColorHex!)
@@ -124,7 +138,8 @@ class EnvelopeRow extends StatelessWidget {
     double? used;
     String? sub;
     if (over) {
-      sub = capitalizedOver(tr, money(-balance));
+      sub = capitalizedOver(tr,
+          formatAmount(-balanceByCurrency[overCur]!, currency: overCur));
     } else if (_isFlexible) {
       if (target != null) {
         used = (balance / target).clamp(0.0, 1.0);

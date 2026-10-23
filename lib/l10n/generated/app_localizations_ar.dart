@@ -6315,7 +6315,7 @@ class SAr extends S {
   String get periodNoLeftovers => 'لا أرصدة متبقية لحلها';
 
   @override
-  String get periodAllZero => 'جميع الأظرف الدورية لديها أرصدة صفرية أو سالبة.';
+  String get periodAllZero => 'لا توجد مغلفات بانتظار المراجعة في هذه الفترة.';
 
   @override
   String get periodCompleteButton => 'إتمام انتقال الفترة';

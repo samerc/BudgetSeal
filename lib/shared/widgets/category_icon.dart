@@ -144,9 +144,13 @@ String? categoryIconFile(String categoryName, String? emoji) {
     if (file != null) return file;
   }
   // 2. Fallback: match the (possibly translated) name against English keywords.
+  // A keyword must start a word: "cat" inside "Uncategorized" or
+  // "Education", "rent" inside "Parents" or "atm" inside "Treatment" isn't one.
   final lowerName = categoryName.toLowerCase();
   for (final entry in _keywordEmoji.entries) {
-    if (lowerName.contains(entry.key)) return _fluentFile(entry.value);
+    if (RegExp('(^|[^a-z])${entry.key}').hasMatch(lowerName)) {
+      return _fluentFile(entry.value);
+    }
   }
   return null;
 }

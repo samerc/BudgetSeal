@@ -568,6 +568,9 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       SectionHeader(title);
 
   Widget _invariantTile(BuildContext context, _CurrencyCheck check) {
+    String n(double v) =>
+        formatNumber(v, decimals: currencyDecimals(check.currency));
+    // Stacked lines, full width: LBP totals don't fit side by side.
     return AppCard(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Row(
@@ -590,21 +593,23 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                 const SizedBox(height: 2),
                 Text(
                   S.of(context).healthAccountsVsEnvelopes(
-                      formatNumber(check.accountTotal),
-                      formatNumber(check.allocationTotal)),
+                      n(check.accountTotal), n(check.allocationTotal)),
                   style: TextStyle(
                       fontSize: TypographyTokens.captionSize,
                       color: AppColors.ts(context)),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  S.of(context).healthUnallocShort(n(check.unallocated)),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: check.healthy
+                        ? AppColors.healthy
+                        : AppColors.overspent,
+                  ),
+                ),
               ],
-            ),
-          ),
-          Text(
-            S.of(context).healthUnallocShort(formatNumber(check.unallocated)),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: check.healthy ? AppColors.healthy : AppColors.overspent,
             ),
           ),
         ],
@@ -635,7 +640,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                         style: const TextStyle(fontSize: 13)),
                   ),
                   Text(
-                    '${accounts[i].currency} ${formatNumber(accounts[i].balance)}',
+                    '${accounts[i].currency} ${formatNumber(accounts[i].balance, decimals: currencyDecimals(accounts[i].currency))}',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -682,7 +687,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
                       for (final entry
                           in allocations[i].balanceByCurrency.entries)
                         Text(
-                          '${entry.key} ${formatNumber(entry.value)}',
+                          '${entry.key} ${formatNumber(entry.value, decimals: currencyDecimals(entry.key))}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,

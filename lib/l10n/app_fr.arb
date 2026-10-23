@@ -2579,7 +2579,7 @@
   "@periodNoLeftovers": {
     "description": "Empty state title"
   },
-  "periodAllZero": "Toutes les enveloppes périodiques ont des soldes nuls ou négatifs.",
+  "periodAllZero": "Aucune enveloppe n'attend de révision pour cette période.",
   "@periodAllZero": {
     "description": "Empty state subtitle"
   },

@@ -489,8 +489,10 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Amount + use count
-              Flexible(
+              // Amount + use count: as wide as it needs, up to 150 dp
+              // (the title gets the rest instead of half the row).
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 150),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [

@@ -131,10 +131,16 @@
     justify-content: space-between;
   }
 
-  .mobile-header h2 {
+  .mobile-header h2,
+  .mobile-header h2:first-of-type {
     font-size: 16px;
     font-weight: 800;
     color: var(--accent);
+    /* Not a section heading: drop the h2 margins, padding and rule, or the
+       fixed header grows and covers the page title. */
+    margin: 0;
+    padding: 0;
+    border: 0;
   }
 
   .menu-btn {
@@ -297,6 +303,13 @@
     text-align: left;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
+    /* Long words wrap inside the cell: a table wider than the phone
+       widens the whole page and pushes the menu button off screen. */
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 768px) {
+    th, td { padding: 8px 10px; }
   }
 
   th {

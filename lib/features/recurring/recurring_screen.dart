@@ -350,94 +350,60 @@ class _RecurringTile extends ConsumerWidget {
     final tr = S.of(context);
     final color = ref.watch(txColorsProvider).forType(item.type);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: AppColors.card(context, radius: CardTokens.radius),
-      child: Material(
-        // Transparent Material so the ripple paints above the card fill.
-        type: MaterialType.transparency,
-        child: ListTile(
-          shape: RoundedRectangleBorder(borderRadius: CardTokens.borderRadius),
-          onTap: onEdit,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          leading: Container(
-            width: CategoryIconTokens.listSize,
-            height: CategoryIconTokens.listSize,
-            decoration: BoxDecoration(
-              color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
-              shape: BoxShape.circle,
+    return RecurringRow(
+      onTap: onEdit,
+      leading: Container(
+        width: CategoryIconTokens.listSize,
+        height: CategoryIconTokens.listSize,
+        decoration: BoxDecoration(
+          color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(AppIcons.repeat, color: color, size: 20),
+      ),
+      title: Text(
+        item.title.isNotEmpty ? item.title : item.note,
+        style: TextStyle(
+          fontWeight: TypographyTokens.txTitleWeight,
+          fontSize: TypographyTokens.txTitleSize,
+          color: item.enabled ? AppColors.tp(context) : AppColors.th(context),
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      amount: Text(
+        formatSignedAmount(item.amount,
+            currency: item.currency, type: item.type),
+        maxLines: 1,
+        style: TextStyle(
+          fontWeight: TypographyTokens.amountRegularWeight,
+          fontSize: TypographyTokens.amountRegularSize,
+          color: item.enabled ? color : AppColors.th(context),
+        ),
+      ),
+      subtitle: recurringNextLine(
+          tr, item.nextDueDate, item.frequency, item.interval),
+      // Active is the normal state (the pause button says so).
+      status: item.enabled
+          ? null
+          : RecurringStatusDot(
+              color: AppColors.th(context),
+              label: tr.recurringStatusPaused,
             ),
-            child: Icon(AppIcons.repeat, color: color, size: 20),
+      toggle: SizedBox(
+        width: 32,
+        height: 32,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          iconSize: 20,
+          tooltip: item.enabled
+              ? tr.recurringPauseTooltip
+              : tr.recurringResumeTooltip,
+          icon: Icon(
+            item.enabled ? AppIcons.pauseCircle : AppIcons.playCircle,
+            color: item.enabled ? AppColors.th(context) : AppColors.healthy,
           ),
-          title: Text(
-            item.title.isNotEmpty ? item.title : item.note,
-            style: TextStyle(
-              fontWeight: TypographyTokens.txTitleWeight,
-              fontSize: TypographyTokens.txTitleSize,
-              color: item.enabled
-                  ? AppColors.tp(context)
-                  : AppColors.th(context),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Text(
-            recurringNextLine(
-                tr, item.nextDueDate, item.frequency, item.interval),
-            style: TextStyle(
-              fontSize: TypographyTokens.txSubtitleSize,
-              color: AppColors.ts(context),
-            ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatSignedAmount(item.amount,
-                        currency: item.currency, type: item.type),
-                    style: TextStyle(
-                      fontWeight: TypographyTokens.amountRegularWeight,
-                      fontSize: TypographyTokens.amountRegularSize,
-                      color: item.enabled ? color : AppColors.th(context),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  RecurringStatusDot(
-                    color: item.enabled
-                        ? AppColors.healthy
-                        : AppColors.th(context),
-                    label: item.enabled
-                        ? tr.recurringStatusActive
-                        : tr.recurringStatusPaused,
-                  ),
-                ],
-              ),
-              const SizedBox(width: 6),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  iconSize: 20,
-                  tooltip: item.enabled ? tr.recurringPauseTooltip : tr.recurringResumeTooltip,
-                  icon: Icon(
-                    item.enabled
-                        ? AppIcons.pauseCircle
-                        : AppIcons.playCircle,
-                    color: item.enabled
-                        ? AppColors.th(context)
-                        : AppColors.healthy,
-                  ),
-                  onPressed: () => onToggle(!item.enabled),
-                ),
-              ),
-            ],
-          ),
+          onPressed: () => onToggle(!item.enabled),
         ),
       ),
     );

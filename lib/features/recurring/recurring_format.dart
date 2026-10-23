@@ -159,3 +159,84 @@ String subscriptionStatusLabel(S tr, String status) => switch (status) {
       'paused' => tr.recurringStatusPaused,
       _ => tr.subActive,
     };
+
+/// One recurring item as a card row (Recurring, Subscriptions): name and
+/// amount on top, the next date under it at full width, a status line only
+/// when it isn't simply active (paused, cancelled, ending soon), and the
+/// pause/resume button at the end. Long amounts (LBP 1,800,000) shrink
+/// instead of squeezing the name or the date.
+class RecurringRow extends StatelessWidget {
+  final Widget leading;
+  final Widget title;
+  final Widget amount;
+  final String subtitle;
+  final Widget? status;
+  final Widget toggle;
+  final VoidCallback onTap;
+
+  const RecurringRow({
+    super.key,
+    required this.leading,
+    required this.title,
+    required this.amount,
+    required this.subtitle,
+    this.status,
+    required this.toggle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: AppColors.card(context, radius: CardTokens.radius),
+      child: Material(
+        // Transparent Material so the ripple paints above the card fill.
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: CardTokens.borderRadius,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 6, 10),
+            child: Row(children: [
+              leading,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Expanded(child: title),
+                      const SizedBox(width: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: amount,
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 2),
+                    Text(subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: TypographyTokens.txSubtitleSize,
+                            color: AppColors.ts(context))),
+                    if (status != null) ...[
+                      const SizedBox(height: 4),
+                      status!,
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              toggle,
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}

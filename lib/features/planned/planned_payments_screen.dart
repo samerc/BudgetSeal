@@ -12,6 +12,7 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
+import '../../shared/utils/calendar_days.dart';
 import '../../shared/utils/format_number.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/confirm_dialog.dart';
@@ -736,13 +737,26 @@ class _PlannedCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      formatDate(tx.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.th(context),
+                    // A plan whose day has passed is overdue: it still
+                    // waits to be posted (or skipped). The word replaces the
+                    // date so the row keeps its room.
+                    if (calendarDaysBetween(DateTime.now(), tx.createdAt) < 0)
+                      Text(
+                        S.of(context).dashOverdue,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.billOverdue,
+                        ),
+                      )
+                    else
+                      Text(
+                        formatDate(tx.createdAt),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.th(context),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
