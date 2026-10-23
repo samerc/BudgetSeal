@@ -73,7 +73,12 @@ class _CustomizeSheet extends ConsumerWidget {
                 return Container(
                   key: ValueKey(config.section),
                   margin: const EdgeInsets.only(bottom: Spacing.xs),
-                  decoration: AppColors.card(context),
+                  // Inside a sheet: the container color, not a card (a card
+                  // is the sheet's own color in dark mode).
+                  decoration: BoxDecoration(
+                    color: AppColors.sfv(context),
+                    borderRadius: CardTokens.borderRadius,
+                  ),
                   child: Material(
                     // Transparent Material so the ripple paints above the card fill.
                     type: MaterialType.transparency,
