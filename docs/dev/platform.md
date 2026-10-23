@@ -61,3 +61,6 @@ Requires OAuth client ID configured in Google Cloud Console. Client ID goes in `
 **Critical:** `DailyReminderService` shares the same `FlutterLocalNotificationsPlugin` instance as `NotificationService` via `setSharedPlugin()` — having two separate instances causes the second `initialize()` to break the first's scheduling callbacks on Android. The plugin is initialized once in `NotificationService.init()`, then shared via `DailyReminderService.setSharedPlugin(NotificationService.plugin)` in `main.dart`.
 
 **Exact alarm fallback:** On Android 14+, `SCHEDULE_EXACT_ALARM` requires explicit user grant. The service checks `canScheduleExactNotifications()` first — if denied, falls back to `inexactAllowWhileIdle` (fires within ~15 min window, fine for daily reminders). Never calls `requestExactAlarmsPermission()` automatically as it navigates away from the app.
+
+### Device support (Play)
+ML Kit's document scanner activity (`GmsDocumentScanningDelegateActivity`) declares `screenOrientation="portrait"`, which makes Play imply `android.hardware.screen.portrait` as required and drop landscape-only devices (POS screens, car head units). `AndroidManifest.xml` declares it `required="false"`. When Play warns "no longer supports N devices", open the device list and read the reason before proceeding.

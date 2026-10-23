@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <!-- ML Kit's document scanner activity is locked to portrait, which makes
+         Play treat portrait as required and drop landscape-only devices
+         (POS screens, car head units). The app works in either. -->
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false"/>
     <application
         android:label="${appLabel}"
         android:name="${applicationName}"
