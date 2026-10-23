@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/design_tokens.dart';
+import 'seal_art.dart';
 
 /// A reusable empty-state placeholder used across all screens.
 ///
@@ -13,6 +15,11 @@ class EmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
+  /// The sealed-envelope illustration instead of the icon — for "nothing
+  /// here yet" screens (a fresh Activity month, no envelopes, no accounts),
+  /// not for "no results".
+  final bool art;
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -20,6 +27,7 @@ class EmptyState extends StatelessWidget {
     this.subtitle,
     this.actionLabel,
     this.onAction,
+    this.art = false,
   });
 
   @override
@@ -30,6 +38,9 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (art)
+              const SealedEnvelopeArt(width: 170)
+            else
             // Cashew NoResults: the icon sits in a large pastel circle.
             Container(
               width: 96,
@@ -46,8 +57,9 @@ class EmptyState extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontFamily: art ? TypographyTokens.displayFamily : null,
+                fontSize: art ? 22 : 18,
+                fontWeight: art ? FontWeight.w800 : FontWeight.w700,
                 color: AppColors.tp(context),
               ),
             ),

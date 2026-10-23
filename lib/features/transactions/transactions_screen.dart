@@ -1717,6 +1717,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
             ),
           EmptyState(
+            art: !hasFilters,
             icon: hasFilters
                 ? AppIcons.magnifyingGlassMinus
                 : AppIcons.receipt,

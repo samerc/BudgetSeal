@@ -62,6 +62,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: EmptyState(
+                        art: true,
                         icon: AppIcons.creditCard,
                         title: S.of(context).acctNoYet,
                         subtitle: S.of(context).acctTapPlus,

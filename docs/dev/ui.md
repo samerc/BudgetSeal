@@ -62,7 +62,8 @@ One way to do each thing. New code follows this; the Oct 23 pass moved existing 
 
 ### Standard Widgets
 - Loading: `SkeletonList` (Cashew ghost rows: circle + bars, theme-aware shimmer) for lists, `CircularProgressIndicator` for detail screens (list screens never show a bare centered spinner: in a sliver list `SliverToBoxAdapter(child: SkeletonList())`, in a box body a non-scrolling `SingleChildScrollView(child: SkeletonList())`)
-- Empty: `EmptyState` widget everywhere (icon in a 96px pastel circle, 18/w700 title, theme `FilledButton` action). Don't add an action that repeats a visible FAB/+ (Activity's empty state has none; Budget hides its FAB while there are no envelopes).
+- Empty: `EmptyState` widget everywhere (icon in a 96px pastel circle, 18/w700 title, theme `FilledButton` action). `art: true` swaps the icon for the sealed-envelope illustration and a 22 px Bricolage title — only on "nothing here yet" screens (Activity month with no filters, no envelopes, no accounts, no goals), never on "no results".
+- Illustrations: `shared/widgets/seal_art.dart` — `SealedEnvelopeArt` (empty states) and `WelcomeArt` (onboarding welcome, notes going into a sealed envelope on a gold disc), painted in theme colours (paper = `sf`, ink = `accentText`, seal = `accentBright`), so they follow light/dark and the accent. Don't add an action that repeats a visible FAB/+ (Activity's empty state has none; Budget hides its FAB while there are no envelopes).
 - Error: `ErrorRetry` widget everywhere
 - Cards: use `AppCard`, or `CardTokens.radius` (16) + `CardTokens.padding` (16h, 14v) + `AppColors.sf(context)` + `AppColors.cardShadow(context)` (no border — see Design Conventions)
 - Section headers: Use `SectionHeader` widget or `TypographyTokens.sectionHeaderSize/Weight/LetterSpacing`

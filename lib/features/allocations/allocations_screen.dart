@@ -796,6 +796,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = S.of(context);
     return EmptyState(
+      art: true,
       icon: AppIcons.envelopeSimple,
       title: l.allocNoYet,
       subtitle: l.allocCreateHelp,

@@ -28,6 +28,7 @@ import '../../shared/widgets/settings_row.dart';
 import '../../shared/widgets/sheet_title.dart';
 import '../../shared/widgets/tappable.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/seal_art.dart';
 
 
 /// The phone's region currency (en_GB → GBP, fr_FR → EUR) when it's one
@@ -460,17 +461,12 @@ class _WelcomePageState extends State<_WelcomePage>
             child: Column(
               children: [
                 const SizedBox(height: 8),
-                // ── Branding: the app icon, as on the splash screen ──
+                // ── The seal illustration: notes into a sealed envelope ──
                 SlideTransition(
                   position: _slideIcon,
                   child: FadeTransition(
                     opacity: _fadeIcon,
-                    child: Image.asset(
-                      'assets/icon/splash_logo.png',
-                      width: 88,
-                      height: 88,
-                      filterQuality: FilterQuality.medium,
-                    ),
+                    child: const WelcomeArt(width: 200),
                   ),
                 ),
                 const SizedBox(height: 16),

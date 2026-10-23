@@ -65,6 +65,7 @@ class ObjectivesScreen extends ConsumerWidget {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: EmptyState(
+                        art: true,
                         icon: AppIcons.flag,
                         title: tr.objNoTitle,
                         subtitle: tr.objIntro,
