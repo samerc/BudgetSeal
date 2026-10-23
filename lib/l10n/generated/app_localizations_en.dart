@@ -5340,18 +5340,6 @@ class SEn extends S {
   String get reportsTitle => 'Reports';
 
   @override
-  String get reportsOverviewTab => 'Overview';
-
-  @override
-  String get reportsCategoriesTab => 'Categories';
-
-  @override
-  String get reportsInsightsTab => 'Insights';
-
-  @override
-  String get reportsBalanceTab => 'Balance sheet';
-
-  @override
   String get reportsHintTitle => 'Explore your spending patterns';
 
   @override
@@ -8114,4 +8102,462 @@ class SEn extends S {
 
   @override
   String get allocNothingSpent => 'Nothing spent yet';
+
+  @override
+  String get rptSpanMonth => 'Month';
+
+  @override
+  String get rptSpan3 => '3 months';
+
+  @override
+  String get rptSpan6 => '6 months';
+
+  @override
+  String get rptSpan12 => '12 months';
+
+  @override
+  String get rptSpanYear => 'This year';
+
+  @override
+  String get rptSpanCustom => 'Custom…';
+
+  @override
+  String rptComparedWith(String range, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'the $n months before',
+      one: 'the month before',
+    );
+    return '$range · compared with $_temp0';
+  }
+
+  @override
+  String get rptPickFrom => 'From';
+
+  @override
+  String get rptPickTo => 'To';
+
+  @override
+  String rptStoryKept(int pct) {
+    return 'You kept $pct% of what you earned.';
+  }
+
+  @override
+  String rptStoryOverspent(String amount) {
+    return 'You spent $amount more than you earned.';
+  }
+
+  @override
+  String rptStorySpentOnly(String amount) {
+    return 'You spent $amount.';
+  }
+
+  @override
+  String get rptStoryNothing => 'Nothing recorded in this period yet.';
+
+  @override
+  String rptStoryTop(String category, String amount) {
+    return '$category took the most: $amount.';
+  }
+
+  @override
+  String rptStoryLess(int pct) {
+    return 'Spending was $pct% lower than the period before.';
+  }
+
+  @override
+  String rptStoryMore(int pct) {
+    return 'Spending was $pct% higher than the period before.';
+  }
+
+  @override
+  String get rptStorySame =>
+      'Spending was about the same as the period before.';
+
+  @override
+  String get rptEarned => 'Earned';
+
+  @override
+  String get rptSpent => 'Spent';
+
+  @override
+  String get rptKept => 'Kept';
+
+  @override
+  String rptOfIncome(int pct) {
+    return '$pct% of income';
+  }
+
+  @override
+  String get rptGroupBudget => 'Budget';
+
+  @override
+  String get rptGroupSpending => 'Spending';
+
+  @override
+  String get rptGroupMoney => 'Money';
+
+  @override
+  String get rptGroupCommitments => 'Commitments';
+
+  @override
+  String get rptBudgetVsActual => 'Budget vs actual';
+
+  @override
+  String get rptBudgetVsActualSub =>
+      'Planned vs spent each month, and every envelope\'s record';
+
+  @override
+  String get rptInsights => 'Month insights';
+
+  @override
+  String get rptInsightsSub => 'Pace, savings rate, age of money and tips';
+
+  @override
+  String get rptOverview => 'Month overview';
+
+  @override
+  String get rptOverviewSub =>
+      'One month against your usual, daily pace and spending activity';
+
+  @override
+  String get rptSpendingTime => 'Spending over time';
+
+  @override
+  String get rptSpendingTimeSub => 'Each category, month by month';
+
+  @override
+  String get rptCategories => 'By category';
+
+  @override
+  String get rptCategoriesSub =>
+      'Where one month\'s money went, with the top spending';
+
+  @override
+  String get rptPlaces => 'Places and patterns';
+
+  @override
+  String get rptPlacesSub => 'Where you spend most, and when';
+
+  @override
+  String get rptBiggest => 'Biggest expenses';
+
+  @override
+  String get rptBiggestSub => 'The largest single payments in the period';
+
+  @override
+  String get rptIncomeSpending => 'Income vs spending';
+
+  @override
+  String get rptIncomeSpendingSub =>
+      'What came in, went out and stayed, plus net worth over time';
+
+  @override
+  String get rptBalanceSheet => 'Balance sheet';
+
+  @override
+  String get rptBalanceSheetSub => 'What you own and owe, compared with a date';
+
+  @override
+  String get rptAccounts => 'Accounts';
+
+  @override
+  String get rptAccountsSub => 'Money in and out of each account';
+
+  @override
+  String get rptCurrencies => 'Currencies';
+
+  @override
+  String get rptCurrenciesSub => 'Spending in each currency you use';
+
+  @override
+  String get rptSubscriptions => 'Subscriptions and bills';
+
+  @override
+  String get rptSubscriptionsSub => 'What they cost per month and per year';
+
+  @override
+  String get rptGoals => 'Goals and loans';
+
+  @override
+  String get rptGoalsSub => 'Progress and what\'s left';
+
+  @override
+  String rptYearReview(String year) {
+    return '$year in review';
+  }
+
+  @override
+  String get rptYearReviewSub => 'Your year so far, ready to share';
+
+  @override
+  String get rptAllEnvelopes => 'All envelopes';
+
+  @override
+  String rptHeldOf(int held, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n months',
+      one: '1 month',
+    );
+    return 'Held $held of $_temp0';
+  }
+
+  @override
+  String rptAvgOf(String avg, String plan) {
+    return 'Average $avg spent of $plan planned';
+  }
+
+  @override
+  String rptAvgOfShort(String avg, String plan) {
+    return 'Avg $avg of $plan';
+  }
+
+  @override
+  String get rptLegendHeld => 'Spent, held';
+
+  @override
+  String get rptLegendOver => 'Spent, over';
+
+  @override
+  String get rptLegendPlanned => 'Planned';
+
+  @override
+  String get rptTrackRecord => 'Envelope track record';
+
+  @override
+  String get rptHeld => 'Held';
+
+  @override
+  String get rptWentOver => 'Went over';
+
+  @override
+  String get rptNotUsed => 'Not used';
+
+  @override
+  String get rptNoEnvelopes => 'No envelope activity in this period';
+
+  @override
+  String rptAboutPerMonth(String amount) {
+    return 'About $amount a month';
+  }
+
+  @override
+  String rptHighLow(
+      String high, String highAmount, String low, String lowAmount) {
+    return 'Highest in $high ($highAmount), lowest in $low ($lowAmount)';
+  }
+
+  @override
+  String get rptByCategory => 'By category';
+
+  @override
+  String get rptAMonthAvg => 'a month, on average';
+
+  @override
+  String get rptSteady => 'Steady';
+
+  @override
+  String rptAboveAvg(String month, int pct) {
+    return '$month $pct% above average';
+  }
+
+  @override
+  String rptBelowAvg(String month, int pct) {
+    return '$month $pct% below average';
+  }
+
+  @override
+  String get rptOther => 'Other';
+
+  @override
+  String get rptUncategorized => 'Uncategorized';
+
+  @override
+  String rptKeptAmount(String amount) {
+    return 'You kept $amount';
+  }
+
+  @override
+  String rptSpentMoreAmount(String amount) {
+    return 'You spent $amount more than you earned';
+  }
+
+  @override
+  String rptKeptShare(int pct) {
+    return '$pct% of what came in.';
+  }
+
+  @override
+  String get rptAllAbove => 'Every month ended above zero.';
+
+  @override
+  String rptSomeBelow(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n months ended below zero.',
+      one: '1 month ended below zero.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptKeptRow => 'Bottom row: kept that month';
+
+  @override
+  String rptSince(String amount, String month) {
+    return '$amount since $month';
+  }
+
+  @override
+  String rptNetWorthNote(String currency) {
+    return 'Counts accounts in $currency. Accounts in other currencies are left out, not converted.';
+  }
+
+  @override
+  String get rptWhereMost => 'Where you spend most';
+
+  @override
+  String get rptByTitle => 'by title';
+
+  @override
+  String rptVisits(int n, String avg) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n visits',
+      one: '1 visit',
+    );
+    return '$_temp0 · about $avg each';
+  }
+
+  @override
+  String get rptWhenSpend => 'When you spend';
+
+  @override
+  String rptDayCostsMost(String day) {
+    return '$day costs the most';
+  }
+
+  @override
+  String rptDayAverage(String amount, String day) {
+    return 'About $amount on an average $day';
+  }
+
+  @override
+  String get rptBusiestTime => 'Busiest time';
+
+  @override
+  String rptShareOfPayments(int pct) {
+    return '$pct% of payments';
+  }
+
+  @override
+  String get rptNoSpendDays => 'No-spend days';
+
+  @override
+  String rptNofM(int a, int b) {
+    return '$a of $b';
+  }
+
+  @override
+  String rptLongestRun(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Longest run: $n days',
+      one: 'Longest run: 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptNoPlaces =>
+      'Give your expenses titles to see where you spend most';
+
+  @override
+  String get rptIn => 'In';
+
+  @override
+  String get rptOut => 'Out';
+
+  @override
+  String get rptNotConverted => 'Each currency on its own, not converted.';
+
+  @override
+  String rptPerMonth(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String rptPerYear(String amount) {
+    return '$amount a year';
+  }
+
+  @override
+  String get rptInTotal => 'In total';
+
+  @override
+  String get rptNoSubscriptions => 'No recurring payments yet';
+
+  @override
+  String get rptNothingInPeriod => 'Nothing recorded in this period';
+
+  @override
+  String rptYourYear(String year) {
+    return 'Your $year';
+  }
+
+  @override
+  String rptYearSpan(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String get rptYouKept => 'You kept';
+
+  @override
+  String rptOfEverything(int pct) {
+    return '$pct% of everything that came in';
+  }
+
+  @override
+  String get rptMonthsSealed => 'Months sealed';
+
+  @override
+  String get rptEveryHeld => 'every envelope held';
+
+  @override
+  String get rptMostReliable => 'Most reliable';
+
+  @override
+  String rptHeldMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'held $n months',
+      one: 'held 1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptBiggestShare => 'Biggest share';
+
+  @override
+  String get rptFavouritePlace => 'Favourite place';
+
+  @override
+  String get rptBestMonth => 'Best month';
+
+  @override
+  String rptBestMonthValue(String month, String amount) {
+    return '$month · kept $amount';
+  }
+
+  @override
+  String get rptShareImage => 'Share as image';
 }

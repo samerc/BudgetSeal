@@ -9478,30 +9478,6 @@ abstract class S {
   /// **'Reports'**
   String get reportsTitle;
 
-  /// Tab
-  ///
-  /// In en, this message translates to:
-  /// **'Overview'**
-  String get reportsOverviewTab;
-
-  /// Tab
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get reportsCategoriesTab;
-
-  /// Tab
-  ///
-  /// In en, this message translates to:
-  /// **'Insights'**
-  String get reportsInsightsTab;
-
-  /// Tab
-  ///
-  /// In en, this message translates to:
-  /// **'Balance sheet'**
-  String get reportsBalanceTab;
-
   /// Hint title
   ///
   /// In en, this message translates to:
@@ -14235,6 +14211,697 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Nothing spent yet'**
   String get allocNothingSpent;
+
+  /// Reports: period chip
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get rptSpanMonth;
+
+  /// Reports: period chip
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get rptSpan3;
+
+  /// Reports: period chip
+  ///
+  /// In en, this message translates to:
+  /// **'6 months'**
+  String get rptSpan6;
+
+  /// Reports: period chip
+  ///
+  /// In en, this message translates to:
+  /// **'12 months'**
+  String get rptSpan12;
+
+  /// Reports: period chip
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get rptSpanYear;
+
+  /// Reports: period chip, opens a month range picker
+  ///
+  /// In en, this message translates to:
+  /// **'Custom…'**
+  String get rptSpanCustom;
+
+  /// Reports: the period shown and what it is compared with
+  ///
+  /// In en, this message translates to:
+  /// **'{range} · compared with {n, plural, =1{the month before} other{the {n} months before}}'**
+  String rptComparedWith(String range, int n);
+
+  /// Reports custom range: first month
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get rptPickFrom;
+
+  /// Reports custom range: last month
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get rptPickTo;
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'You kept {pct}% of what you earned.'**
+  String rptStoryKept(int pct);
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount} more than you earned.'**
+  String rptStoryOverspent(String amount);
+
+  /// Reports story: no income in the period
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount}.'**
+  String rptStorySpentOnly(String amount);
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded in this period yet.'**
+  String get rptStoryNothing;
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'{category} took the most: {amount}.'**
+  String rptStoryTop(String category, String amount);
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'Spending was {pct}% lower than the period before.'**
+  String rptStoryLess(int pct);
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'Spending was {pct}% higher than the period before.'**
+  String rptStoryMore(int pct);
+
+  /// Reports story
+  ///
+  /// In en, this message translates to:
+  /// **'Spending was about the same as the period before.'**
+  String get rptStorySame;
+
+  /// Reports tile
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get rptEarned;
+
+  /// Reports tile
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get rptSpent;
+
+  /// Reports tile
+  ///
+  /// In en, this message translates to:
+  /// **'Kept'**
+  String get rptKept;
+
+  /// Reports tile: kept as a share of income
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of income'**
+  String rptOfIncome(int pct);
+
+  /// Reports library section
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get rptGroupBudget;
+
+  /// Reports library section
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get rptGroupSpending;
+
+  /// Reports library section
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get rptGroupMoney;
+
+  /// Reports library section
+  ///
+  /// In en, this message translates to:
+  /// **'Commitments'**
+  String get rptGroupCommitments;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Budget vs actual'**
+  String get rptBudgetVsActual;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Planned vs spent each month, and every envelope\'s record'**
+  String get rptBudgetVsActualSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Month insights'**
+  String get rptInsights;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Pace, savings rate, age of money and tips'**
+  String get rptInsightsSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Month overview'**
+  String get rptOverview;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'One month against your usual, daily pace and spending activity'**
+  String get rptOverviewSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Spending over time'**
+  String get rptSpendingTime;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Each category, month by month'**
+  String get rptSpendingTimeSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get rptCategories;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Where one month\'s money went, with the top spending'**
+  String get rptCategoriesSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Places and patterns'**
+  String get rptPlaces;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Where you spend most, and when'**
+  String get rptPlacesSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest expenses'**
+  String get rptBiggest;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'The largest single payments in the period'**
+  String get rptBiggestSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs spending'**
+  String get rptIncomeSpending;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'What came in, went out and stayed, plus net worth over time'**
+  String get rptIncomeSpendingSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Balance sheet'**
+  String get rptBalanceSheet;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'What you own and owe, compared with a date'**
+  String get rptBalanceSheetSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get rptAccounts;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Money in and out of each account'**
+  String get rptAccountsSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Currencies'**
+  String get rptCurrencies;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Spending in each currency you use'**
+  String get rptCurrenciesSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions and bills'**
+  String get rptSubscriptions;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'What they cost per month and per year'**
+  String get rptSubscriptionsSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'Goals and loans'**
+  String get rptGoals;
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Progress and what\'s left'**
+  String get rptGoalsSub;
+
+  /// Report title
+  ///
+  /// In en, this message translates to:
+  /// **'{year} in review'**
+  String rptYearReview(String year);
+
+  /// Report description
+  ///
+  /// In en, this message translates to:
+  /// **'Your year so far, ready to share'**
+  String get rptYearReviewSub;
+
+  /// Budget vs actual: chip
+  ///
+  /// In en, this message translates to:
+  /// **'All envelopes'**
+  String get rptAllEnvelopes;
+
+  /// Budget vs actual headline
+  ///
+  /// In en, this message translates to:
+  /// **'Held {held} of {n, plural, =1{1 month} other{{n} months}}'**
+  String rptHeldOf(int held, int n);
+
+  /// Budget vs actual
+  ///
+  /// In en, this message translates to:
+  /// **'Average {avg} spent of {plan} planned'**
+  String rptAvgOf(String avg, String plan);
+
+  /// Track record row
+  ///
+  /// In en, this message translates to:
+  /// **'Avg {avg} of {plan}'**
+  String rptAvgOfShort(String avg, String plan);
+
+  /// Chart legend
+  ///
+  /// In en, this message translates to:
+  /// **'Spent, held'**
+  String get rptLegendHeld;
+
+  /// Chart legend
+  ///
+  /// In en, this message translates to:
+  /// **'Spent, over'**
+  String get rptLegendOver;
+
+  /// Chart legend: what the envelope had to spend
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get rptLegendPlanned;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope track record'**
+  String get rptTrackRecord;
+
+  /// Track record legend
+  ///
+  /// In en, this message translates to:
+  /// **'Held'**
+  String get rptHeld;
+
+  /// Track record legend
+  ///
+  /// In en, this message translates to:
+  /// **'Went over'**
+  String get rptWentOver;
+
+  /// Track record legend
+  ///
+  /// In en, this message translates to:
+  /// **'Not used'**
+  String get rptNotUsed;
+
+  /// Budget vs actual empty
+  ///
+  /// In en, this message translates to:
+  /// **'No envelope activity in this period'**
+  String get rptNoEnvelopes;
+
+  /// Spending over time headline
+  ///
+  /// In en, this message translates to:
+  /// **'About {amount} a month'**
+  String rptAboutPerMonth(String amount);
+
+  /// Spending over time
+  ///
+  /// In en, this message translates to:
+  /// **'Highest in {high} ({highAmount}), lowest in {low} ({lowAmount})'**
+  String rptHighLow(
+      String high, String highAmount, String low, String lowAmount);
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get rptByCategory;
+
+  /// Section note
+  ///
+  /// In en, this message translates to:
+  /// **'a month, on average'**
+  String get rptAMonthAvg;
+
+  /// Category trend
+  ///
+  /// In en, this message translates to:
+  /// **'Steady'**
+  String get rptSteady;
+
+  /// Category trend
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {pct}% above average'**
+  String rptAboveAvg(String month, int pct);
+
+  /// Category trend
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {pct}% below average'**
+  String rptBelowAvg(String month, int pct);
+
+  /// Chart: categories folded together
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get rptOther;
+
+  /// Chart: no category
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get rptUncategorized;
+
+  /// Income vs spending headline
+  ///
+  /// In en, this message translates to:
+  /// **'You kept {amount}'**
+  String rptKeptAmount(String amount);
+
+  /// Income vs spending headline
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount} more than you earned'**
+  String rptSpentMoreAmount(String amount);
+
+  /// Income vs spending
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of what came in.'**
+  String rptKeptShare(int pct);
+
+  /// Income vs spending
+  ///
+  /// In en, this message translates to:
+  /// **'Every month ended above zero.'**
+  String get rptAllAbove;
+
+  /// Income vs spending
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 month ended below zero.} other{{n} months ended below zero.}}'**
+  String rptSomeBelow(int n);
+
+  /// Chart note
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom row: kept that month'**
+  String get rptKeptRow;
+
+  /// Net worth change
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} since {month}'**
+  String rptSince(String amount, String month);
+
+  /// Net worth note
+  ///
+  /// In en, this message translates to:
+  /// **'Counts accounts in {currency}. Accounts in other currencies are left out, not converted.'**
+  String rptNetWorthNote(String currency);
+
+  /// Section
+  ///
+  /// In en, this message translates to:
+  /// **'Where you spend most'**
+  String get rptWhereMost;
+
+  /// Section note
+  ///
+  /// In en, this message translates to:
+  /// **'by title'**
+  String get rptByTitle;
+
+  /// Places row
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 visit} other{{n} visits}} · about {avg} each'**
+  String rptVisits(int n, String avg);
+
+  /// Section
+  ///
+  /// In en, this message translates to:
+  /// **'When you spend'**
+  String get rptWhenSpend;
+
+  /// Patterns headline
+  ///
+  /// In en, this message translates to:
+  /// **'{day} costs the most'**
+  String rptDayCostsMost(String day);
+
+  /// Patterns
+  ///
+  /// In en, this message translates to:
+  /// **'About {amount} on an average {day}'**
+  String rptDayAverage(String amount, String day);
+
+  /// Patterns tile
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest time'**
+  String get rptBusiestTime;
+
+  /// Patterns tile
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of payments'**
+  String rptShareOfPayments(int pct);
+
+  /// Patterns tile
+  ///
+  /// In en, this message translates to:
+  /// **'No-spend days'**
+  String get rptNoSpendDays;
+
+  /// Patterns tile
+  ///
+  /// In en, this message translates to:
+  /// **'{a} of {b}'**
+  String rptNofM(int a, int b);
+
+  /// Patterns tile
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Longest run: 1 day} other{Longest run: {n} days}}'**
+  String rptLongestRun(int n);
+
+  /// Places empty
+  ///
+  /// In en, this message translates to:
+  /// **'Give your expenses titles to see where you spend most'**
+  String get rptNoPlaces;
+
+  /// Accounts report
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get rptIn;
+
+  /// Accounts report
+  ///
+  /// In en, this message translates to:
+  /// **'Out'**
+  String get rptOut;
+
+  /// Currencies report note
+  ///
+  /// In en, this message translates to:
+  /// **'Each currency on its own, not converted.'**
+  String get rptNotConverted;
+
+  /// Subscriptions report
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String rptPerMonth(String amount);
+
+  /// Subscriptions report
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a year'**
+  String rptPerYear(String amount);
+
+  /// Subscriptions report
+  ///
+  /// In en, this message translates to:
+  /// **'In total'**
+  String get rptInTotal;
+
+  /// Subscriptions report empty
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring payments yet'**
+  String get rptNoSubscriptions;
+
+  /// Report empty
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded in this period'**
+  String get rptNothingInPeriod;
+
+  /// Year in review title
+  ///
+  /// In en, this message translates to:
+  /// **'Your {year}'**
+  String rptYourYear(String year);
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String rptYearSpan(String from, String to);
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'You kept'**
+  String get rptYouKept;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of everything that came in'**
+  String rptOfEverything(int pct);
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'Months sealed'**
+  String get rptMonthsSealed;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'every envelope held'**
+  String get rptEveryHeld;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'Most reliable'**
+  String get rptMostReliable;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{held 1 month} other{held {n} months}}'**
+  String rptHeldMonths(int n);
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest share'**
+  String get rptBiggestShare;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite place'**
+  String get rptFavouritePlace;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'Best month'**
+  String get rptBestMonth;
+
+  /// Year in review
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · kept {amount}'**
+  String rptBestMonthValue(String month, String amount);
+
+  /// Year in review button
+  ///
+  /// In en, this message translates to:
+  /// **'Share as image'**
+  String get rptShareImage;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

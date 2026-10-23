@@ -5356,18 +5356,6 @@ class SAr extends S {
   String get reportsTitle => 'التقارير';
 
   @override
-  String get reportsOverviewTab => 'نظرة عامة';
-
-  @override
-  String get reportsCategoriesTab => 'الفئات';
-
-  @override
-  String get reportsInsightsTab => 'رؤى';
-
-  @override
-  String get reportsBalanceTab => 'الميزانية العمومية';
-
-  @override
   String get reportsHintTitle => 'استكشف أنماط إنفاقك';
 
   @override
@@ -8131,4 +8119,459 @@ class SAr extends S {
 
   @override
   String get allocNothingSpent => 'لم يُصرف شيء بعد';
+
+  @override
+  String get rptSpanMonth => 'شهر';
+
+  @override
+  String get rptSpan3 => '3 أشهر';
+
+  @override
+  String get rptSpan6 => '6 أشهر';
+
+  @override
+  String get rptSpan12 => '12 شهراً';
+
+  @override
+  String get rptSpanYear => 'هذه السنة';
+
+  @override
+  String get rptSpanCustom => 'مخصص…';
+
+  @override
+  String rptComparedWith(String range, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بالـ $n أشهر السابقة',
+      one: 'بالشهر السابق',
+    );
+    return '$range · مقارنةً $_temp0';
+  }
+
+  @override
+  String get rptPickFrom => 'من';
+
+  @override
+  String get rptPickTo => 'إلى';
+
+  @override
+  String rptStoryKept(int pct) {
+    return 'احتفظت بـ $pct% مما كسبت.';
+  }
+
+  @override
+  String rptStoryOverspent(String amount) {
+    return 'صرفت $amount أكثر مما كسبت.';
+  }
+
+  @override
+  String rptStorySpentOnly(String amount) {
+    return 'صرفت $amount.';
+  }
+
+  @override
+  String get rptStoryNothing => 'لا شيء مسجّل في هذه الفترة بعد.';
+
+  @override
+  String rptStoryTop(String category, String amount) {
+    return '$category أخذ الحصة الأكبر: $amount.';
+  }
+
+  @override
+  String rptStoryLess(int pct) {
+    return 'كان الصرف أقل بـ $pct% من الفترة السابقة.';
+  }
+
+  @override
+  String rptStoryMore(int pct) {
+    return 'كان الصرف أعلى بـ $pct% من الفترة السابقة.';
+  }
+
+  @override
+  String get rptStorySame => 'كان الصرف مماثلاً تقريباً للفترة السابقة.';
+
+  @override
+  String get rptEarned => 'المكسب';
+
+  @override
+  String get rptSpent => 'المصروف';
+
+  @override
+  String get rptKept => 'المتبقي';
+
+  @override
+  String rptOfIncome(int pct) {
+    return '$pct% من الدخل';
+  }
+
+  @override
+  String get rptGroupBudget => 'الميزانية';
+
+  @override
+  String get rptGroupSpending => 'الصرف';
+
+  @override
+  String get rptGroupMoney => 'المال';
+
+  @override
+  String get rptGroupCommitments => 'الالتزامات';
+
+  @override
+  String get rptBudgetVsActual => 'الميزانية مقابل الفعلي';
+
+  @override
+  String get rptBudgetVsActualSub =>
+      'المخطط مقابل المصروف كل شهر، وسجل كل مغلف';
+
+  @override
+  String get rptInsights => 'رؤى الشهر';
+
+  @override
+  String get rptInsightsSub => 'الوتيرة ومعدل الادخار وعمر المال ونصائح';
+
+  @override
+  String get rptOverview => 'نظرة على الشهر';
+
+  @override
+  String get rptOverviewSub =>
+      'شهر واحد مقارنةً بالمعتاد، والوتيرة اليومية ونشاط الصرف';
+
+  @override
+  String get rptSpendingTime => 'الصرف عبر الزمن';
+
+  @override
+  String get rptSpendingTimeSub => 'كل فئة شهراً بشهر';
+
+  @override
+  String get rptCategories => 'حسب الفئة';
+
+  @override
+  String get rptCategoriesSub => 'أين ذهب مال الشهر، مع أكبر المصاريف';
+
+  @override
+  String get rptPlaces => 'الأماكن والأنماط';
+
+  @override
+  String get rptPlacesSub => 'أين تصرف أكثر، ومتى';
+
+  @override
+  String get rptBiggest => 'أكبر المصاريف';
+
+  @override
+  String get rptBiggestSub => 'أكبر الدفعات الفردية في الفترة';
+
+  @override
+  String get rptIncomeSpending => 'الدخل مقابل الصرف';
+
+  @override
+  String get rptIncomeSpendingSub =>
+      'ما دخل وما خرج وما بقي، مع صافي الثروة عبر الزمن';
+
+  @override
+  String get rptBalanceSheet => 'الميزانية العمومية';
+
+  @override
+  String get rptBalanceSheetSub => 'ما تملكه وما عليك، مقارنةً بتاريخ';
+
+  @override
+  String get rptAccounts => 'الحسابات';
+
+  @override
+  String get rptAccountsSub => 'المال الداخل والخارج من كل حساب';
+
+  @override
+  String get rptCurrencies => 'العملات';
+
+  @override
+  String get rptCurrenciesSub => 'الصرف بكل عملة تستخدمها';
+
+  @override
+  String get rptSubscriptions => 'الاشتراكات والفواتير';
+
+  @override
+  String get rptSubscriptionsSub => 'كم تكلّف شهرياً وسنوياً';
+
+  @override
+  String get rptGoals => 'الأهداف والقروض';
+
+  @override
+  String get rptGoalsSub => 'التقدم وما تبقّى';
+
+  @override
+  String rptYearReview(String year) {
+    return 'حصاد $year';
+  }
+
+  @override
+  String get rptYearReviewSub => 'سنتك حتى الآن، جاهزة للمشاركة';
+
+  @override
+  String get rptAllEnvelopes => 'كل المغلفات';
+
+  @override
+  String rptHeldOf(int held, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n أشهر',
+      one: 'شهر واحد',
+    );
+    return 'صمد $held من $_temp0';
+  }
+
+  @override
+  String rptAvgOf(String avg, String plan) {
+    return 'معدل $avg مصروف من $plan مخطط';
+  }
+
+  @override
+  String rptAvgOfShort(String avg, String plan) {
+    return 'معدل $avg من $plan';
+  }
+
+  @override
+  String get rptLegendHeld => 'مصروف، صمد';
+
+  @override
+  String get rptLegendOver => 'مصروف، تجاوز';
+
+  @override
+  String get rptLegendPlanned => 'المخطط';
+
+  @override
+  String get rptTrackRecord => 'سجل المغلفات';
+
+  @override
+  String get rptHeld => 'صمد';
+
+  @override
+  String get rptWentOver => 'تجاوز';
+
+  @override
+  String get rptNotUsed => 'غير مستخدم';
+
+  @override
+  String get rptNoEnvelopes => 'لا نشاط للمغلفات في هذه الفترة';
+
+  @override
+  String rptAboutPerMonth(String amount) {
+    return 'حوالي $amount شهرياً';
+  }
+
+  @override
+  String rptHighLow(
+      String high, String highAmount, String low, String lowAmount) {
+    return 'الأعلى في $high ($highAmount)، الأدنى في $low ($lowAmount)';
+  }
+
+  @override
+  String get rptByCategory => 'حسب الفئة';
+
+  @override
+  String get rptAMonthAvg => 'شهرياً، في المتوسط';
+
+  @override
+  String get rptSteady => 'ثابت';
+
+  @override
+  String rptAboveAvg(String month, int pct) {
+    return '$month أعلى من المتوسط بـ $pct%';
+  }
+
+  @override
+  String rptBelowAvg(String month, int pct) {
+    return '$month أقل من المتوسط بـ $pct%';
+  }
+
+  @override
+  String get rptOther => 'أخرى';
+
+  @override
+  String get rptUncategorized => 'بدون فئة';
+
+  @override
+  String rptKeptAmount(String amount) {
+    return 'احتفظت بـ $amount';
+  }
+
+  @override
+  String rptSpentMoreAmount(String amount) {
+    return 'صرفت $amount أكثر مما كسبت';
+  }
+
+  @override
+  String rptKeptShare(int pct) {
+    return '$pct% مما دخل.';
+  }
+
+  @override
+  String get rptAllAbove => 'انتهى كل شهر فوق الصفر.';
+
+  @override
+  String rptSomeBelow(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'انتهت $n أشهر تحت الصفر.',
+      one: 'انتهى شهر واحد تحت الصفر.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptKeptRow => 'الصف السفلي: المتبقي في ذلك الشهر';
+
+  @override
+  String rptSince(String amount, String month) {
+    return '$amount منذ $month';
+  }
+
+  @override
+  String rptNetWorthNote(String currency) {
+    return 'يحتسب الحسابات بـ $currency. الحسابات بعملات أخرى مستثناة، لا تُحوَّل.';
+  }
+
+  @override
+  String get rptWhereMost => 'أين تصرف أكثر';
+
+  @override
+  String get rptByTitle => 'حسب العنوان';
+
+  @override
+  String rptVisits(int n, String avg) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n زيارات',
+      one: 'زيارة واحدة',
+    );
+    return '$_temp0 · حوالي $avg لكل منها';
+  }
+
+  @override
+  String get rptWhenSpend => 'متى تصرف';
+
+  @override
+  String rptDayCostsMost(String day) {
+    return '$day الأكثر كلفة';
+  }
+
+  @override
+  String rptDayAverage(String amount, String day) {
+    return 'حوالي $amount في $day المعتاد';
+  }
+
+  @override
+  String get rptBusiestTime => 'أكثر الأوقات صرفاً';
+
+  @override
+  String rptShareOfPayments(int pct) {
+    return '$pct% من الدفعات';
+  }
+
+  @override
+  String get rptNoSpendDays => 'أيام بلا صرف';
+
+  @override
+  String rptNofM(int a, int b) {
+    return '$a من $b';
+  }
+
+  @override
+  String rptLongestRun(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'أطول فترة: $n أيام',
+      one: 'أطول فترة: يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptNoPlaces => 'أضف عناوين لمصاريفك لترى أين تصرف أكثر';
+
+  @override
+  String get rptIn => 'داخل';
+
+  @override
+  String get rptOut => 'خارج';
+
+  @override
+  String get rptNotConverted => 'كل عملة على حدة، دون تحويل.';
+
+  @override
+  String rptPerMonth(String amount) {
+    return '$amount شهرياً';
+  }
+
+  @override
+  String rptPerYear(String amount) {
+    return '$amount سنوياً';
+  }
+
+  @override
+  String get rptInTotal => 'المجموع';
+
+  @override
+  String get rptNoSubscriptions => 'لا دفعات متكررة بعد';
+
+  @override
+  String get rptNothingInPeriod => 'لا شيء مسجّل في هذه الفترة';
+
+  @override
+  String rptYourYear(String year) {
+    return 'سنتك $year';
+  }
+
+  @override
+  String rptYearSpan(String from, String to) {
+    return 'من $from إلى $to';
+  }
+
+  @override
+  String get rptYouKept => 'احتفظت بـ';
+
+  @override
+  String rptOfEverything(int pct) {
+    return '$pct% من كل ما دخل';
+  }
+
+  @override
+  String get rptMonthsSealed => 'أشهر مختومة';
+
+  @override
+  String get rptEveryHeld => 'صمدت كل المغلفات';
+
+  @override
+  String get rptMostReliable => 'الأكثر انضباطاً';
+
+  @override
+  String rptHeldMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'صمد $n أشهر',
+      one: 'صمد شهراً واحداً',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rptBiggestShare => 'الحصة الأكبر';
+
+  @override
+  String get rptFavouritePlace => 'المكان المفضّل';
+
+  @override
+  String get rptBestMonth => 'أفضل شهر';
+
+  @override
+  String rptBestMonthValue(String month, String amount) {
+    return '$month · بقي $amount';
+  }
+
+  @override
+  String get rptShareImage => 'شارك كصورة';
 }

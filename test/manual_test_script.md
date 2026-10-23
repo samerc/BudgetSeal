@@ -42,6 +42,16 @@ Run through each section before every release build. Mark pass/fail for each ite
 - [ ] Long category name at 360 dp + large text fits the pill (account is in the chip under the amount)
 - [ ] Settings › Entry mode switches between One screen, Assisted and Classic
 
+### Reports
+- [ ] Reports tab: period chips (Month … Custom…), range + "compared with", story sentences match the numbers, Earned/Spent/Kept tiles equal height with deltas
+- [ ] Budget vs actual: All envelopes + one envelope; red bars on months that went over; track record dots (held / ring = over / grey = not used); tap a row selects it
+- [ ] Spending over time: stacked months, legend, averages ignore months before the first spending
+- [ ] Places and patterns: titles with visits, weekday bars (busiest highlighted), busiest time, no-spend days
+- [ ] Income vs spending: kept under each month; net worth line ends at today's base-currency total
+- [ ] Biggest expenses (tap opens the receipt), Accounts, Currencies, Subscriptions and bills
+- [ ] By category / Month insights / Balance sheet / Month overview open the old month reports
+- [ ] Year in review: dark card, Share as image; Arabic + large text: nothing cut off
+
 ### Budget tab
 - [ ] One line under Ready to assign: "$X budgeted · $Y spent" + "N days left"
 - [ ] Overspent envelopes in "Needs attention" (red card) with "Over by $X" + Cover; not repeated below

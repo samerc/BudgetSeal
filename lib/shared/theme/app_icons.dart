@@ -48,6 +48,9 @@ abstract final class AppIcons {
   static const caretRight = IconData(0xe13a, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter', matchTextDirection: true);
   static const caretUp = IconData(0xe13c, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const caretUpDown = IconData(0xe140, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const chartBar = IconData(0xe150, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const mapPin = IconData(0xe316, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const scales = IconData(0xe750, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const chartLineUp = IconData(0xe156, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const chartPie = IconData(0xe158, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const chartPieFill = IconData(0xe158, fontFamily: 'PhosphorFill', fontPackage: 'phosphor_flutter');

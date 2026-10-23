@@ -42,6 +42,7 @@ import '../accounts/account_type.dart';
 import '../accounts/widgets/balance_hero.dart';
 import 'widgets/income_expense_summary.dart';
 import 'widgets/month_nav.dart';
+import 'time/reports_home.dart';
 import '../../shared/utils/calendar_days.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -88,13 +89,10 @@ class ReportsHubScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  late final TabController _tabCtrl;
-
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showHintIfNeeded(
@@ -105,12 +103,6 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
         body: S.of(context).reportsHintBody,
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _tabCtrl.dispose();
-    super.dispose();
   }
 
   @override
@@ -171,51 +163,37 @@ class _ReportsHubScreenState extends ConsumerState<ReportsHubScreen>
                 ],
               ),
             ),
-            // ── Tab bar ──
-            TabBar(
-              controller: _tabCtrl,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              labelColor: AppColors.tp(context),
-              unselectedLabelColor: AppColors.ts(context),
-              labelStyle: const TextStyle(
-                  fontSize: TypographyTokens.cardTitleSize, fontWeight: FontWeight.w700),
-              unselectedLabelStyle: const TextStyle(
-                  fontSize: TypographyTokens.cardTitleSize, fontWeight: FontWeight.w500),
-              // Cashew-style pill selector instead of an underline
-              indicator: BoxDecoration(
-                color: AppColors.pastel(context, AppColors.accent,
-                    light: 0.7, dark: 0.6),
-                borderRadius: BorderRadius.circular(RadiusTokens.pill),
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorPadding: const EdgeInsets.symmetric(vertical: 6),
-              labelPadding: const EdgeInsets.symmetric(horizontal: 14),
-              splashBorderRadius: BorderRadius.circular(RadiusTokens.pill),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              dividerHeight: 0,
-              tabs: [
-                Tab(text: S.of(context).reportsOverviewTab),
-                Tab(text: S.of(context).reportsCategoriesTab),
-                Tab(text: S.of(context).reportsInsightsTab),
-                Tab(text: S.of(context).reportsBalanceTab),
-              ],
-            ),
-            // ── Tab content ──
-            Expanded(
-              child: TabBarView(
-                controller: _tabCtrl,
-                children: const [
-                  _OverviewTab(),
-                  _CategoriesTab(),
-                  _InsightsTab(),
-                  _BalanceSheetTab(),
-                ],
-              ),
-            ),
+            // ── Period chips, the story and the report library ──
+            const Expanded(child: ReportsHome()),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A report from the library as its own screen: the month reports that
+/// were tabs (overview, categories, insights, balance sheet) live here;
+/// the time reports have their own screens (see [ReportView]).
+class LegacyReportPage extends ConsumerWidget {
+  final String id;
+  final String title;
+  const LegacyReportPage({super.key, required this.id, required this.title});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // The tabs read these module-level settings.
+    _reportsBaseCurrency =
+        ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
+    _reportsStartDay = ref.watch(reportsStartDayProvider);
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: switch (id) {
+        'categories' => const _CategoriesTab(),
+        'insights' => const _InsightsTab(),
+        'balance' => const _BalanceSheetTab(),
+        _ => const _OverviewTab(),
+      },
     );
   }
 }

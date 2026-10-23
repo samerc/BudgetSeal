@@ -2691,3 +2691,118 @@ allocDaysLeft,Budget tab: days left in the budget period,"{n, plural, =0{Last da
 allocNeedsAttention,Budget tab: section of overspent envelopes,Needs attention,يحتاج انتباهك,À surveiller
 allocSpentOf,Budget tab row: spending envelope progress,{spent} spent of {budget},صُرف {spent} من {budget},{spent} dépensé sur {budget}
 allocNothingSpent,Budget tab row: spending envelope with no spending this period,Nothing spent yet,لم يُصرف شيء بعد,Rien de dépensé
+rptSpanMonth,Reports: period chip,Month,شهر,Mois
+rptSpan3,Reports: period chip,3 months,3 أشهر,3 mois
+rptSpan6,Reports: period chip,6 months,6 أشهر,6 mois
+rptSpan12,Reports: period chip,12 months,12 شهراً,12 mois
+rptSpanYear,Reports: period chip,This year,هذه السنة,Cette année
+rptSpanCustom,"Reports: period chip, opens a month range picker",Custom…,مخصص…,Personnalisé…
+rptComparedWith,Reports: the period shown and what it is compared with,"{range} · compared with {n, plural, =1{the month before} other{the {n} months before}}","{range} · مقارنةً {n, plural, =1{بالشهر السابق} other{بالـ {n} أشهر السابقة}}","{range} · comparé {n, plural, =1{au mois précédent} other{aux {n} mois précédents}}"
+rptPickFrom,Reports custom range: first month,From,من,Du
+rptPickTo,Reports custom range: last month,To,إلى,Au
+rptStoryKept,Reports story,You kept {pct}% of what you earned.,احتفظت بـ {pct}% مما كسبت.,Vous avez gardé {pct} % de ce que vous avez gagné.
+rptStoryOverspent,Reports story,You spent {amount} more than you earned.,صرفت {amount} أكثر مما كسبت.,Vous avez dépensé {amount} de plus que vos revenus.
+rptStorySpentOnly,Reports story: no income in the period,You spent {amount}.,صرفت {amount}.,Vous avez dépensé {amount}.
+rptStoryNothing,Reports story,Nothing recorded in this period yet.,لا شيء مسجّل في هذه الفترة بعد.,Rien d'enregistré sur cette période.
+rptStoryTop,Reports story,{category} took the most: {amount}.,{category} أخذ الحصة الأكبر: {amount}.,{category} a pris le plus : {amount}.
+rptStoryLess,Reports story,Spending was {pct}% lower than the period before.,كان الصرف أقل بـ {pct}% من الفترة السابقة.,Les dépenses ont baissé de {pct} % par rapport à la période précédente.
+rptStoryMore,Reports story,Spending was {pct}% higher than the period before.,كان الصرف أعلى بـ {pct}% من الفترة السابقة.,Les dépenses ont augmenté de {pct} % par rapport à la période précédente.
+rptStorySame,Reports story,Spending was about the same as the period before.,كان الصرف مماثلاً تقريباً للفترة السابقة.,Les dépenses sont restées à peu près les mêmes que la période précédente.
+rptEarned,Reports tile,Earned,المكسب,Gagné
+rptSpent,Reports tile,Spent,المصروف,Dépensé
+rptKept,Reports tile,Kept,المتبقي,Gardé
+rptOfIncome,Reports tile: kept as a share of income,{pct}% of income,{pct}% من الدخل,{pct} % des revenus
+rptGroupBudget,Reports library section,Budget,الميزانية,Budget
+rptGroupSpending,Reports library section,Spending,الصرف,Dépenses
+rptGroupMoney,Reports library section,Money,المال,Argent
+rptGroupCommitments,Reports library section,Commitments,الالتزامات,Engagements
+rptBudgetVsActual,Report title,Budget vs actual,الميزانية مقابل الفعلي,Budget et réel
+rptBudgetVsActualSub,Report description,"Planned vs spent each month, and every envelope's record","المخطط مقابل المصروف كل شهر، وسجل كل مغلف","Prévu et dépensé chaque mois, et le bilan de chaque enveloppe"
+rptInsights,Report title,Month insights,رؤى الشهر,Analyse du mois
+rptInsightsSub,Report description,"Pace, savings rate, age of money and tips",الوتيرة ومعدل الادخار وعمر المال ونصائح,"Rythme, taux d'épargne, âge de l'argent et conseils"
+rptOverview,Report title,Month overview,نظرة على الشهر,Aperçu du mois
+rptOverviewSub,Report description,"One month against your usual, daily pace and spending activity",شهر واحد مقارنةً بالمعتاد، والوتيرة اليومية ونشاط الصرف,"Un mois face à l'habitude, rythme quotidien et activité"
+rptSpendingTime,Report title,Spending over time,الصرف عبر الزمن,Dépenses dans le temps
+rptSpendingTimeSub,Report description,"Each category, month by month",كل فئة شهراً بشهر,"Chaque catégorie, mois par mois"
+rptCategories,Report title,By category,حسب الفئة,Par catégorie
+rptCategoriesSub,Report description,"Where one month's money went, with the top spending",أين ذهب مال الشهر، مع أكبر المصاريف,"Où est allé l'argent du mois, avec les plus grosses dépenses"
+rptPlaces,Report title,Places and patterns,الأماكن والأنماط,Lieux et habitudes
+rptPlacesSub,Report description,"Where you spend most, and when",أين تصرف أكثر، ومتى,"Où vous dépensez le plus, et quand"
+rptBiggest,Report title,Biggest expenses,أكبر المصاريف,Plus grosses dépenses
+rptBiggestSub,Report description,The largest single payments in the period,أكبر الدفعات الفردية في الفترة,Les plus gros paiements de la période
+rptIncomeSpending,Report title,Income vs spending,الدخل مقابل الصرف,Revenus et dépenses
+rptIncomeSpendingSub,Report description,"What came in, went out and stayed, plus net worth over time",ما دخل وما خرج وما بقي، مع صافي الثروة عبر الزمن,"Ce qui est entré, sorti et resté, et la valeur nette dans le temps"
+rptBalanceSheet,Report title,Balance sheet,الميزانية العمومية,Bilan
+rptBalanceSheetSub,Report description,"What you own and owe, compared with a date",ما تملكه وما عليك، مقارنةً بتاريخ,"Ce que vous possédez et devez, comparé à une date"
+rptAccounts,Report title,Accounts,الحسابات,Comptes
+rptAccountsSub,Report description,Money in and out of each account,المال الداخل والخارج من كل حساب,Entrées et sorties de chaque compte
+rptCurrencies,Report title,Currencies,العملات,Devises
+rptCurrenciesSub,Report description,Spending in each currency you use,الصرف بكل عملة تستخدمها,Dépenses dans chaque devise utilisée
+rptSubscriptions,Report title,Subscriptions and bills,الاشتراكات والفواتير,Abonnements et factures
+rptSubscriptionsSub,Report description,What they cost per month and per year,كم تكلّف شهرياً وسنوياً,Leur coût par mois et par an
+rptGoals,Report title,Goals and loans,الأهداف والقروض,Objectifs et prêts
+rptGoalsSub,Report description,Progress and what's left,التقدم وما تبقّى,Progression et reste
+rptYearReview,Report title,{year} in review,حصاد {year},Bilan {year}
+rptYearReviewSub,Report description,"Your year so far, ready to share",سنتك حتى الآن، جاهزة للمشاركة,"Votre année jusqu'ici, prête à partager"
+rptAllEnvelopes,Budget vs actual: chip,All envelopes,كل المغلفات,Toutes les enveloppes
+rptHeldOf,Budget vs actual headline,"Held {held} of {n, plural, =1{1 month} other{{n} months}}","صمد {held} من {n, plural, =1{شهر واحد} other{{n} أشهر}}","A tenu {held} {n, plural, =1{mois sur 1} other{mois sur {n}}}"
+rptAvgOf,Budget vs actual,Average {avg} spent of {plan} planned,معدل {avg} مصروف من {plan} مخطط,En moyenne {avg} dépensé sur {plan} prévu
+rptAvgOfShort,Track record row,Avg {avg} of {plan},معدل {avg} من {plan},Moy. {avg} sur {plan}
+rptLegendHeld,Chart legend,"Spent, held",مصروف، صمد,"Dépensé, tenu"
+rptLegendOver,Chart legend,"Spent, over",مصروف، تجاوز,"Dépensé, dépassé"
+rptLegendPlanned,Chart legend: what the envelope had to spend,Planned,المخطط,Prévu
+rptTrackRecord,Section title,Envelope track record,سجل المغلفات,Bilan des enveloppes
+rptHeld,Track record legend,Held,صمد,Tenu
+rptWentOver,Track record legend,Went over,تجاوز,Dépassé
+rptNotUsed,Track record legend,Not used,غير مستخدم,Non utilisé
+rptNoEnvelopes,Budget vs actual empty,No envelope activity in this period,لا نشاط للمغلفات في هذه الفترة,Aucune activité d'enveloppe sur cette période
+rptAboutPerMonth,Spending over time headline,About {amount} a month,حوالي {amount} شهرياً,Environ {amount} par mois
+rptHighLow,Spending over time,"Highest in {high} ({highAmount}), lowest in {low} ({lowAmount})",الأعلى في {high} ({highAmount})، الأدنى في {low} ({lowAmount}),"Le plus haut en {high} ({highAmount}), le plus bas en {low} ({lowAmount})"
+rptByCategory,Section title,By category,حسب الفئة,Par catégorie
+rptAMonthAvg,Section note,"a month, on average",شهرياً، في المتوسط,"par mois, en moyenne"
+rptSteady,Category trend,Steady,ثابت,Stable
+rptAboveAvg,Category trend,{month} {pct}% above average,{month} أعلى من المتوسط بـ {pct}%,{month} {pct} % au-dessus de la moyenne
+rptBelowAvg,Category trend,{month} {pct}% below average,{month} أقل من المتوسط بـ {pct}%,{month} {pct} % sous la moyenne
+rptOther,Chart: categories folded together,Other,أخرى,Autres
+rptUncategorized,Chart: no category,Uncategorized,بدون فئة,Sans catégorie
+rptKeptAmount,Income vs spending headline,You kept {amount},احتفظت بـ {amount},Vous avez gardé {amount}
+rptSpentMoreAmount,Income vs spending headline,You spent {amount} more than you earned,صرفت {amount} أكثر مما كسبت,Vous avez dépensé {amount} de plus que vos revenus
+rptKeptShare,Income vs spending,{pct}% of what came in.,{pct}% مما دخل.,{pct} % de ce qui est entré.
+rptAllAbove,Income vs spending,Every month ended above zero.,انتهى كل شهر فوق الصفر.,Chaque mois s'est terminé au-dessus de zéro.
+rptSomeBelow,Income vs spending,"{n, plural, =1{1 month ended below zero.} other{{n} months ended below zero.}}","{n, plural, =1{انتهى شهر واحد تحت الصفر.} other{انتهت {n} أشهر تحت الصفر.}}","{n, plural, =1{1 mois s'est terminé sous zéro.} other{{n} mois se sont terminés sous zéro.}}"
+rptKeptRow,Chart note,Bottom row: kept that month,الصف السفلي: المتبقي في ذلك الشهر,Ligne du bas : gardé ce mois-là
+rptSince,Net worth change,{amount} since {month},{amount} منذ {month},{amount} depuis {month}
+rptNetWorthNote,Net worth note,"Counts accounts in {currency}. Accounts in other currencies are left out, not converted.",يحتسب الحسابات بـ {currency}. الحسابات بعملات أخرى مستثناة، لا تُحوَّل.,"Compte les comptes en {currency}. Les autres devises sont exclues, pas converties."
+rptWhereMost,Section,Where you spend most,أين تصرف أكثر,Où vous dépensez le plus
+rptByTitle,Section note,by title,حسب العنوان,par titre
+rptVisits,Places row,"{n, plural, =1{1 visit} other{{n} visits}} · about {avg} each","{n, plural, =1{زيارة واحدة} other{{n} زيارات}} · حوالي {avg} لكل منها","{n, plural, =1{1 passage} other{{n} passages}} · environ {avg} chacun"
+rptWhenSpend,Section,When you spend,متى تصرف,Quand vous dépensez
+rptDayCostsMost,Patterns headline,{day} costs the most,{day} الأكثر كلفة,{day} coûte le plus
+rptDayAverage,Patterns,About {amount} on an average {day},حوالي {amount} في {day} المعتاد,Environ {amount} un {day} moyen
+rptBusiestTime,Patterns tile,Busiest time,أكثر الأوقات صرفاً,Moment le plus actif
+rptShareOfPayments,Patterns tile,{pct}% of payments,{pct}% من الدفعات,{pct} % des paiements
+rptNoSpendDays,Patterns tile,No-spend days,أيام بلا صرف,Jours sans dépense
+rptNofM,Patterns tile,{a} of {b},{a} من {b},{a} sur {b}
+rptLongestRun,Patterns tile,"{n, plural, =1{Longest run: 1 day} other{Longest run: {n} days}}","{n, plural, =1{أطول فترة: يوم واحد} other{أطول فترة: {n} أيام}}","{n, plural, =1{Plus longue série : 1 jour} other{Plus longue série : {n} jours}}"
+rptNoPlaces,Places empty,Give your expenses titles to see where you spend most,أضف عناوين لمصاريفك لترى أين تصرف أكثر,Donnez un titre à vos dépenses pour voir où vous dépensez le plus
+rptIn,Accounts report,In,داخل,Entrées
+rptOut,Accounts report,Out,خارج,Sorties
+rptNotConverted,Currencies report note,"Each currency on its own, not converted.",كل عملة على حدة، دون تحويل.,"Chaque devise à part, sans conversion."
+rptPerMonth,Subscriptions report,{amount} a month,{amount} شهرياً,{amount} par mois
+rptPerYear,Subscriptions report,{amount} a year,{amount} سنوياً,{amount} par an
+rptInTotal,Subscriptions report,In total,المجموع,Au total
+rptNoSubscriptions,Subscriptions report empty,No recurring payments yet,لا دفعات متكررة بعد,Aucun paiement récurrent
+rptNothingInPeriod,Report empty,Nothing recorded in this period,لا شيء مسجّل في هذه الفترة,Rien d'enregistré sur cette période
+rptYourYear,Year in review title,Your {year},سنتك {year},Votre {year}
+rptYearSpan,Year in review,{from} to {to},من {from} إلى {to},De {from} à {to}
+rptYouKept,Year in review,You kept,احتفظت بـ,Vous avez gardé
+rptOfEverything,Year in review,{pct}% of everything that came in,{pct}% من كل ما دخل,{pct} % de tout ce qui est entré
+rptMonthsSealed,Year in review,Months sealed,أشهر مختومة,Mois scellés
+rptEveryHeld,Year in review,every envelope held,صمدت كل المغلفات,toutes les enveloppes ont tenu
+rptMostReliable,Year in review,Most reliable,الأكثر انضباطاً,La plus fiable
+rptHeldMonths,Year in review,"{n, plural, =1{held 1 month} other{held {n} months}}","{n, plural, =1{صمد شهراً واحداً} other{صمد {n} أشهر}}","{n, plural, =1{a tenu 1 mois} other{a tenu {n} mois}}"
+rptBiggestShare,Year in review,Biggest share,الحصة الأكبر,Plus grosse part
+rptFavouritePlace,Year in review,Favourite place,المكان المفضّل,Lieu préféré
+rptBestMonth,Year in review,Best month,أفضل شهر,Meilleur mois
+rptBestMonthValue,Year in review,{month} · kept {amount},{month} · بقي {amount},{month} · gardé {amount}
+rptShareImage,Year in review button,Share as image,شارك كصورة,Partager en image
