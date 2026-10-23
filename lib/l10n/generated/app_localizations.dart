@@ -14091,6 +14091,114 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Cover {amount}'**
   String txCoverAmount(String amount);
+
+  /// Month close: title when the month went over budget
+  ///
+  /// In en, this message translates to:
+  /// **'{month} is done'**
+  String closeDone(String month);
+
+  /// Month close: first story line, under budget
+  ///
+  /// In en, this message translates to:
+  /// **'You kept {amount} of what you planned.'**
+  String closeStoryKept(String amount);
+
+  /// Month close: first story line, over budget
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount} more than you planned.'**
+  String closeStoryOverTotal(String amount);
+
+  /// Month close: no envelope went over
+  ///
+  /// In en, this message translates to:
+  /// **'Every envelope held.'**
+  String get closeStoryAllHeld;
+
+  /// Month close: one envelope went over
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was the only envelope that went over.'**
+  String closeStoryOneOver(String name);
+
+  /// Month close: several envelopes went over
+  ///
+  /// In en, this message translates to:
+  /// **'{n} envelopes went over.'**
+  String closeStoryNOver(int n);
+
+  /// Month close: what envelopes had to spend this period
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted'**
+  String get closeFunded;
+
+  /// Month close: money spent
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get closeSpent;
+
+  /// Month close: funded minus spent, when positive
+  ///
+  /// In en, this message translates to:
+  /// **'Kept'**
+  String get closeKept;
+
+  /// Month close: funded minus spent, when negative
+  ///
+  /// In en, this message translates to:
+  /// **'Over'**
+  String get closeOver;
+
+  /// Month close: envelopes that stayed at or above zero
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 envelope held} other{{n} envelopes held}}'**
+  String closeHeld(int n);
+
+  /// Month close: section about leftovers
+  ///
+  /// In en, this message translates to:
+  /// **'What was left'**
+  String get closeLeftover;
+
+  /// Month close: what the period reset returned
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} from spending envelopes went back to Ready to assign.'**
+  String closeReturned(String amount);
+
+  /// Month close: nothing was reset
+  ///
+  /// In en, this message translates to:
+  /// **'What was left in your envelopes stays there for next month.'**
+  String get closeStayed;
+
+  /// Month close: envelopes waiting for a manual reset decision
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Review 1 envelope} other{Review {n} envelopes}}'**
+  String closeReview(int n);
+
+  /// Month close: main button, opens funding for the new month
+  ///
+  /// In en, this message translates to:
+  /// **'Plan {month}'**
+  String closePlan(String month);
+
+  /// Month close: share the recap as an image
+  ///
+  /// In en, this message translates to:
+  /// **'Share recap'**
+  String get closeShare;
+
+  /// Budget tab period card: opens the month close screen
+  ///
+  /// In en, this message translates to:
+  /// **'See the recap'**
+  String get closeSeeRecap;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

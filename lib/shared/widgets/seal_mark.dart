@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/brand_palette.dart';
+import '../theme/design_tokens.dart';
 import '../utils/haptics.dart';
 
 /// BudgetSeal's wax seal: a scalloped disc in the bright accent with an
@@ -37,7 +38,10 @@ class _SealPainter extends CustomPainter {
   final Color mark;
   final Color ring;
 
-  _SealPainter(this.fill, this.mark, this.ring);
+  /// False: the centre stays free for a label ([DatedSeal]).
+  final bool check;
+
+  _SealPainter(this.fill, this.mark, this.ring, {this.check = true});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,13 +70,14 @@ class _SealPainter extends CustomPainter {
         ..color = ring,
     );
 
+    if (!check) return;
     // Check.
-    final check = Path()
+    final tick = Path()
       ..moveTo(c.dx - r * 0.3, c.dy + r * 0.02)
       ..lineTo(c.dx - r * 0.08, c.dy + r * 0.24)
       ..lineTo(c.dx + r * 0.32, c.dy - r * 0.2);
     canvas.drawPath(
-      check,
+      tick,
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = r * 0.16
@@ -84,7 +89,60 @@ class _SealPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SealPainter old) =>
-      old.fill != fill || old.mark != mark || old.ring != ring;
+      old.fill != fill ||
+      old.mark != mark ||
+      old.ring != ring ||
+      old.check != check;
+}
+
+/// A large wax seal pressed with a label (the month close: "OCT" over
+/// "2026") instead of a check.
+class DatedSeal extends StatelessWidget {
+  final String top;
+  final String? bottom;
+  final double size;
+
+  const DatedSeal({super.key, required this.top, this.bottom, this.size = 112});
+
+  @override
+  Widget build(BuildContext context) {
+    final gold = AppColors.accentBright;
+    return SizedBox.square(
+      dimension: size,
+      child: CustomPaint(
+        painter: _SealPainter(gold, brandInk, AppColors.darkenPastel(gold, 0.22),
+            check: false),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(size * 0.24),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(top,
+                      style: TextStyle(
+                          fontFamily: TypographyTokens.displayFamily,
+                          fontSize: size * 0.18,
+                          height: 1.0,
+                          fontWeight: FontWeight.w800,
+                          color: brandInk)),
+                  if (bottom != null)
+                    Text(bottom!,
+                        style: TextStyle(
+                            fontFamily: TypographyTokens.displayFamily,
+                            fontSize: size * 0.12,
+                            height: 1.1,
+                            fontWeight: FontWeight.w700,
+                            color: brandInk)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Shows a [SealMark] while [sealed]. When [sealed] turns true while this is

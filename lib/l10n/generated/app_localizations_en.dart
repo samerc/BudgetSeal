@@ -7998,4 +7998,89 @@ class SEn extends S {
   String txCoverAmount(String amount) {
     return 'Cover $amount';
   }
+
+  @override
+  String closeDone(String month) {
+    return '$month is done';
+  }
+
+  @override
+  String closeStoryKept(String amount) {
+    return 'You kept $amount of what you planned.';
+  }
+
+  @override
+  String closeStoryOverTotal(String amount) {
+    return 'You spent $amount more than you planned.';
+  }
+
+  @override
+  String get closeStoryAllHeld => 'Every envelope held.';
+
+  @override
+  String closeStoryOneOver(String name) {
+    return '$name was the only envelope that went over.';
+  }
+
+  @override
+  String closeStoryNOver(int n) {
+    return '$n envelopes went over.';
+  }
+
+  @override
+  String get closeFunded => 'Budgeted';
+
+  @override
+  String get closeSpent => 'Spent';
+
+  @override
+  String get closeKept => 'Kept';
+
+  @override
+  String get closeOver => 'Over';
+
+  @override
+  String closeHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n envelopes held',
+      one: '1 envelope held',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closeLeftover => 'What was left';
+
+  @override
+  String closeReturned(String amount) {
+    return '$amount from spending envelopes went back to Ready to assign.';
+  }
+
+  @override
+  String get closeStayed =>
+      'What was left in your envelopes stays there for next month.';
+
+  @override
+  String closeReview(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Review $n envelopes',
+      one: 'Review 1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String closePlan(String month) {
+    return 'Plan $month';
+  }
+
+  @override
+  String get closeShare => 'Share recap';
+
+  @override
+  String get closeSeeRecap => 'See the recap';
 }

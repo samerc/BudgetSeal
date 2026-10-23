@@ -8094,4 +8094,89 @@ class SFr extends S {
   String txCoverAmount(String amount) {
     return 'Couvrir $amount';
   }
+
+  @override
+  String closeDone(String month) {
+    return '$month est terminé';
+  }
+
+  @override
+  String closeStoryKept(String amount) {
+    return 'Vous avez gardé $amount de ce que vous aviez prévu.';
+  }
+
+  @override
+  String closeStoryOverTotal(String amount) {
+    return 'Vous avez dépensé $amount de plus que prévu.';
+  }
+
+  @override
+  String get closeStoryAllHeld => 'Toutes les enveloppes ont tenu.';
+
+  @override
+  String closeStoryOneOver(String name) {
+    return '$name est la seule enveloppe dépassée.';
+  }
+
+  @override
+  String closeStoryNOver(int n) {
+    return '$n enveloppes ont été dépassées.';
+  }
+
+  @override
+  String get closeFunded => 'Budgété';
+
+  @override
+  String get closeSpent => 'Dépensé';
+
+  @override
+  String get closeKept => 'Gardé';
+
+  @override
+  String get closeOver => 'Dépassé';
+
+  @override
+  String closeHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n enveloppes ont tenu',
+      one: '1 enveloppe a tenu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closeLeftover => 'Ce qui restait';
+
+  @override
+  String closeReturned(String amount) {
+    return '$amount des enveloppes de dépenses sont revenus dans À répartir.';
+  }
+
+  @override
+  String get closeStayed =>
+      'Ce qui restait dans vos enveloppes y reste pour le mois prochain.';
+
+  @override
+  String closeReview(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Revoir $n enveloppes',
+      one: 'Revoir 1 enveloppe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String closePlan(String month) {
+    return 'Planifier $month';
+  }
+
+  @override
+  String get closeShare => 'Partager le bilan';
+
+  @override
+  String get closeSeeRecap => 'Voir le bilan';
 }

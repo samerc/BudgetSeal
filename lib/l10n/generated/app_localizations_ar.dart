@@ -8016,4 +8016,88 @@ class SAr extends S {
   String txCoverAmount(String amount) {
     return 'غطِّ $amount';
   }
+
+  @override
+  String closeDone(String month) {
+    return 'انتهى $month';
+  }
+
+  @override
+  String closeStoryKept(String amount) {
+    return 'احتفظت بـ $amount مما خطّطت له.';
+  }
+
+  @override
+  String closeStoryOverTotal(String amount) {
+    return 'صرفت $amount أكثر مما خطّطت له.';
+  }
+
+  @override
+  String get closeStoryAllHeld => 'صمدت كل المغلفات.';
+
+  @override
+  String closeStoryOneOver(String name) {
+    return '$name هو المغلف الوحيد الذي تجاوز.';
+  }
+
+  @override
+  String closeStoryNOver(int n) {
+    return 'تجاوزت $n مغلفات.';
+  }
+
+  @override
+  String get closeFunded => 'المخصّص';
+
+  @override
+  String get closeSpent => 'مصروف';
+
+  @override
+  String get closeKept => 'متبقٍّ';
+
+  @override
+  String get closeOver => 'تجاوز';
+
+  @override
+  String closeHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'صمدت $n مغلفات',
+      one: 'صمد مغلف واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closeLeftover => 'ما تبقّى';
+
+  @override
+  String closeReturned(String amount) {
+    return 'عاد $amount من مغلفات الصرف إلى جاهز للتوزيع.';
+  }
+
+  @override
+  String get closeStayed => 'ما تبقّى في مغلفاتك يبقى فيها للشهر القادم.';
+
+  @override
+  String closeReview(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'راجع $n مغلفات',
+      one: 'راجع مغلفاً واحداً',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String closePlan(String month) {
+    return 'خطّط لـ $month';
+  }
+
+  @override
+  String get closeShare => 'شارك الملخص';
+
+  @override
+  String get closeSeeRecap => 'اعرض الملخص';
 }

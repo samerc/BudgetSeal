@@ -38,6 +38,7 @@ import 'features/accounts/account_detail_screen.dart';
 import 'features/accounts/accounts_screen.dart';
 import 'features/allocations/allocation_detail_screen.dart';
 import 'features/allocations/funding_screen.dart';
+import 'features/allocations/month_close_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/main/main_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -244,6 +245,11 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/sync',
           pageBuilder: (_, state) => slideUpPage(
               child: const SyncScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/month-close',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const MonthCloseScreen(), state: state),
         ),
         GoRoute(
           path: '/period-transition',

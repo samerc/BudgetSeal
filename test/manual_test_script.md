@@ -42,6 +42,14 @@ Run through each section before every release build. Mark pass/fail for each ite
 - [ ] Long category name at 360 dp + large text fits the pill (account is in the chip under the amount)
 - [ ] Settings › Entry mode switches between One screen, Assisted and Classic
 
+### Month close
+- [ ] First week of a period: Budget tab card → See the recap → month close screen
+- [ ] Within budget: dated seal stamps in, "<Month> sealed"; over: calendar icon, "<Month> is done"
+- [ ] Budgeted = what the envelopes had (incl. money funded earlier); Spent; Kept/Over matches
+- [ ] N envelopes held + one row per overspent envelope with "Over by"
+- [ ] What was left: reset amount, or "stays there"; Review N envelopes when manual resets are pending
+- [ ] Plan <month> opens funding; Share recap shares a picture (light + dark)
+
 ### Transaction detail (receipt)
 - [ ] Tap a transaction → paper receipt: icon, title, date · time, "Paid from X ›" (opens the account), item rows, TOTAL without a minus, torn bottom edge
 - [ ] Split → one row per item; foreign line shows "= base"; note after " — " in italics

@@ -2667,3 +2667,21 @@ txStampNotPaid,Transaction receipt stamp: a planned (upcoming) transaction,Not p
 txStampSkipped,Transaction receipt stamp: a skipped planned transaction,Skipped,تم تخطيه,Ignoré
 txStampEnvelopesSame,Transaction receipt stamp: a transfer between accounts,Envelopes unchanged,المغلفات لم تتغير,Enveloppes inchangées
 txCoverAmount,Transaction receipt: button that covers the envelope's overspending,Cover {amount},غطِّ {amount},Couvrir {amount}
+closeDone,Month close: title when the month went over budget,{month} is done,انتهى {month},{month} est terminé
+closeStoryKept,"Month close: first story line, under budget",You kept {amount} of what you planned.,احتفظت بـ {amount} مما خطّطت له.,Vous avez gardé {amount} de ce que vous aviez prévu.
+closeStoryOverTotal,"Month close: first story line, over budget",You spent {amount} more than you planned.,صرفت {amount} أكثر مما خطّطت له.,Vous avez dépensé {amount} de plus que prévu.
+closeStoryAllHeld,Month close: no envelope went over,Every envelope held.,صمدت كل المغلفات.,Toutes les enveloppes ont tenu.
+closeStoryOneOver,Month close: one envelope went over,{name} was the only envelope that went over.,{name} هو المغلف الوحيد الذي تجاوز.,{name} est la seule enveloppe dépassée.
+closeStoryNOver,Month close: several envelopes went over,{n} envelopes went over.,تجاوزت {n} مغلفات.,{n} enveloppes ont été dépassées.
+closeFunded,Month close: what envelopes had to spend this period,Budgeted,المخصّص,Budgété
+closeSpent,Month close: money spent,Spent,مصروف,Dépensé
+closeKept,"Month close: funded minus spent, when positive",Kept,متبقٍّ,Gardé
+closeOver,"Month close: funded minus spent, when negative",Over,تجاوز,Dépassé
+closeHeld,Month close: envelopes that stayed at or above zero,"{n, plural, =1{1 envelope held} other{{n} envelopes held}}","{n, plural, =1{صمد مغلف واحد} other{صمدت {n} مغلفات}}","{n, plural, =1{1 enveloppe a tenu} other{{n} enveloppes ont tenu}}"
+closeLeftover,Month close: section about leftovers,What was left,ما تبقّى,Ce qui restait
+closeReturned,Month close: what the period reset returned,{amount} from spending envelopes went back to Ready to assign.,عاد {amount} من مغلفات الصرف إلى جاهز للتوزيع.,{amount} des enveloppes de dépenses sont revenus dans À répartir.
+closeStayed,Month close: nothing was reset,What was left in your envelopes stays there for next month.,ما تبقّى في مغلفاتك يبقى فيها للشهر القادم.,Ce qui restait dans vos enveloppes y reste pour le mois prochain.
+closeReview,Month close: envelopes waiting for a manual reset decision,"{n, plural, =1{Review 1 envelope} other{Review {n} envelopes}}","{n, plural, =1{راجع مغلفاً واحداً} other{راجع {n} مغلفات}}","{n, plural, =1{Revoir 1 enveloppe} other{Revoir {n} enveloppes}}"
+closePlan,"Month close: main button, opens funding for the new month",Plan {month},خطّط لـ {month},Planifier {month}
+closeShare,Month close: share the recap as an image,Share recap,شارك الملخص,Partager le bilan
+closeSeeRecap,Budget tab period card: opens the month close screen,See the recap,اعرض الملخص,Voir le bilan

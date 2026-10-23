@@ -162,6 +162,64 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     return result;
   }
 
+  /// Each envelope's balance just before [at]: every row dated earlier
+  /// (spending at its transaction's date, as in [watchByAllocation]), rows
+  /// of deleted transactions left out. `Map<allocationId, Map<currency, balance>>`.
+  Future<Map<String, Map<String, double>>> balancesAt(
+      String householdId, DateTime at) async {
+    final rows = await customSelect(
+      'SELECT l.allocation_id AS allocation_id, l.currency AS currency, '
+      'SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'INNER JOIN allocations a ON a.id = l.allocation_id '
+      'LEFT JOIN transactions t ON t.id = l.source_transaction_id '
+      'WHERE a.household_id = ? '
+      'AND (l.source_transaction_id IS NULL OR t.id IS NULL OR t.deleted = 0) '
+      'AND COALESCE(t.created_at, l.created_at) < ? '
+      'GROUP BY l.allocation_id, l.currency',
+      variables: [
+        Variable.withString(householdId),
+        Variable.withInt(at.millisecondsSinceEpoch ~/ 1000),
+      ],
+      readsFrom: {allocationLedger, attachedDatabase.allocations,
+          attachedDatabase.transactions},
+    ).get();
+    final result = <String, Map<String, double>>{};
+    for (final row in rows) {
+      final total = (row.data['total'] as num?)?.toDouble() ?? 0.0;
+      if (total.abs() > 0.001) {
+        result.putIfAbsent(row.data['allocation_id'] as String,
+            () => {})[row.data['currency'] as String] = total;
+      }
+    }
+    return result;
+  }
+
+  /// What period resets since [from] took out of envelopes and returned to
+  /// Ready to assign, per currency (positive amounts).
+  Future<Map<String, double>> resetReturnedSince(
+      String householdId, DateTime from) async {
+    final rows = await customSelect(
+      'SELECT l.currency AS currency, SUM(l.amount) AS total '
+      'FROM allocation_ledger l '
+      'INNER JOIN allocations a ON a.id = l.allocation_id '
+      "WHERE a.household_id = ? AND l.entry_type = 'period_reset' "
+      'AND l.created_at >= ? '
+      'GROUP BY l.currency',
+      variables: [
+        Variable.withString(householdId),
+        Variable.withInt(from.millisecondsSinceEpoch ~/ 1000),
+      ],
+      readsFrom: {allocationLedger, attachedDatabase.allocations},
+    ).get();
+    return {
+      for (final row in rows)
+        if (-((row.data['total'] as num?)?.toDouble() ?? 0) > 0.001)
+          row.data['currency'] as String:
+              -((row.data['total'] as num?)?.toDouble() ?? 0),
+    };
+  }
+
   /// Get all ledger entries for a household across all allocations.
   /// Use getAllBalances() instead when you only need sums.
   Future<List<AllocationLedgerData>> getAllForHousehold(

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/database/daos/ledger_dao.dart';
+import '../../core/engine/budget_history.dart';
 import '../../core/engine/period_engine.dart' show budgetPeriodFor;
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
@@ -56,13 +57,17 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
           current.start.subtract(const Duration(days: 1)));
       final dao = LedgerDao(ref.read(databaseProvider));
       final base = household.baseCurrency;
-      double sum(Map<String, Map<String, double>> m) =>
-          m.values.fold(0.0, (t, byCur) => t + (byCur[base] ?? 0));
+      // Budgeted = what the envelopes had to spend: what they closed with
+      // plus what they spent (money funded before the period included), as
+      // on the month close screen.
+      final stats = await envelopePeriodStats(dao,
+          householdId: household.id,
+          start: last.start,
+          end: last.end,
+          currency: base);
+      final spent = stats.values.fold(0.0, (t, s) => t + s.spent);
       final funded =
-          sum(await dao.fundedInPeriod(household.id, last.start, last.end));
-      final spent = sum(await dao
-          .watchSpendingInPeriod(household.id, last.start, last.end)
-          .first);
+          stats.values.fold(0.0, (t, s) => t + s.endBalance + s.spent);
       if (funded <= 0 && spent <= 0) return; // nothing to report
       if (mounted) {
         // The month most of the last period fell in (start day may be the
@@ -153,12 +158,18 @@ class _PeriodSummaryCardState extends ConsumerState<PeriodSummaryCard> {
                     color: left > 0 ? AppColors.healthy : AppColors.overspent),
               ),
             ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              onPressed: () => context.push('/funding'),
-              child: Text(tr.periodSummaryFund),
-            ),
+          Wrap(
+            alignment: WrapAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => context.push('/month-close'),
+                child: Text(tr.closeSeeRecap),
+              ),
+              TextButton(
+                onPressed: () => context.push('/funding'),
+                child: Text(tr.periodSummaryFund),
+              ),
+            ],
           ),
         ],
       ),
