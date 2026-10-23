@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _key = 'entry_mode';
 
-/// 'assisted' = step-by-step wizard, 'classic' = single-form
+/// 'one' = one-screen add (default), 'assisted' = step-by-step wizard,
+/// 'classic' = single form
 final entryModeProvider =
     NotifierProvider<EntryModeNotifier, String>(EntryModeNotifier.new);
 
@@ -11,13 +12,13 @@ class EntryModeNotifier extends Notifier<String> {
   @override
   String build() {
     _load();
-    return 'assisted';
+    return 'one';
   }
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      state = prefs.getString(_key) ?? 'assisted';
+      state = prefs.getString(_key) ?? 'one';
     } catch (_) {}
   }
 

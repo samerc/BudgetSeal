@@ -13857,6 +13857,174 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Couldn\'t delete the backup'**
   String get backupDeleteFailed;
+
+  /// One-screen add: title field hint
+  ///
+  /// In en, this message translates to:
+  /// **'What was it for?'**
+  String get quickWhatFor;
+
+  /// One-screen add: envelope card before a category is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category to see what\'s left in its envelope'**
+  String get quickPickCategoryHint;
+
+  /// One-screen add: envelope card title
+  ///
+  /// In en, this message translates to:
+  /// **'{name} envelope'**
+  String quickEnvelopeName(String name);
+
+  /// One-screen add: envelope balance after this spending
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String quickLeft(String amount);
+
+  /// One-screen add: envelope overspent after this spending
+  ///
+  /// In en, this message translates to:
+  /// **'over by {amount}'**
+  String quickOverBy(String amount);
+
+  /// One-screen add: what the envelope allows per day until the period ends
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day left} other{{days} days left}} · about {amount} a day'**
+  String quickPerDay(int days, String amount);
+
+  /// One-screen add: chips that move money into the overspent envelope follow
+  ///
+  /// In en, this message translates to:
+  /// **'Cover from'**
+  String get quickCoverFrom;
+
+  /// One-screen add: open the full cover sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Other…'**
+  String get quickCoverOther;
+
+  /// One-screen add: snackbar after covering
+  ///
+  /// In en, this message translates to:
+  /// **'Moved {amount} from {name}'**
+  String quickCovered(String amount, String name);
+
+  /// One-screen add: category not linked to an envelope
+  ///
+  /// In en, this message translates to:
+  /// **'This category has no envelope, so this spending isn\'t budgeted'**
+  String get quickNotBudgeted;
+
+  /// One-screen add: income card hint
+  ///
+  /// In en, this message translates to:
+  /// **'After saving, Assign puts it into your envelopes.'**
+  String get quickIncomeHint;
+
+  /// One-screen add: transfer hint
+  ///
+  /// In en, this message translates to:
+  /// **'Your envelopes and Ready to assign stay the same: the money only changes accounts.'**
+  String get quickTransferHint;
+
+  /// One-screen add: save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save {amount}'**
+  String quickSaveAmount(String amount);
+
+  /// One-screen add: transfer save button
+  ///
+  /// In en, this message translates to:
+  /// **'Move {amount}'**
+  String quickMoveAmount(String amount);
+
+  /// One-screen add: extras button
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get quickNote;
+
+  /// One-screen add: extras button (split into items)
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get quickSplit;
+
+  /// One-screen add: extras button (camera)
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get quickReceipt;
+
+  /// One-screen add: extras button (gallery)
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get quickPhoto;
+
+  /// One-screen add: transfer source
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get quickFrom;
+
+  /// One-screen add: transfer destination
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get quickTo;
+
+  /// One-screen add: date and time sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get quickWhen;
+
+  /// One-screen add: date sheet row
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get quickPickDate;
+
+  /// One-screen add: date sheet time row
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get quickTime;
+
+  /// One-screen add: exchange rate chip
+  ///
+  /// In en, this message translates to:
+  /// **'1 {from} = {rate} {to}'**
+  String quickRateLine(String from, String rate, String to);
+
+  /// One-screen add: no rate known yet
+  ///
+  /// In en, this message translates to:
+  /// **'Set exchange rate'**
+  String get quickSetRate;
+
+  /// One-screen add: note dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get quickNoteTitle;
+
+  /// Entry mode option: the new one-screen add
+  ///
+  /// In en, this message translates to:
+  /// **'One screen'**
+  String get entryModeOne;
+
+  /// Entry mode option description
+  ///
+  /// In en, this message translates to:
+  /// **'Amount first with the keypad open, and what\'s left in the envelope before you save'**
+  String get entryModeOneDesc;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

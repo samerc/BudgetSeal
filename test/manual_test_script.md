@@ -25,6 +25,17 @@ Run through each section before every release build. Mark pass/fail for each ite
 
 ## 2. TRANSACTIONS
 
+### Add (One screen — default)
+- [ ] + opens with the number pad ready; typing shows the amount; 26 × 2 shows "26 × 2" above and 52 big
+- [ ] A recent suggestion fills title, category, account and amount; the next digit replaces the amount
+- [ ] Category picked → envelope card "$before → $after left" + "about $X a day"
+- [ ] Spend more than the envelope has → red card "over by"; Cover from an envelope / Ready to assign moves the money and the card turns white; Other… opens the cover sheet
+- [ ] Category without an envelope → "isn't budgeted"; income → Ready to assign before → after; transfer → both balances before → after, swap works
+- [ ] Note / Receipt / Photo / Split always visible above the pad (small phone, large text too); Split opens the full form with the amount and category
+- [ ] LBP account → rate chip "1 USD = 89,500 LBP"; tap to change it
+- [ ] Save & new keeps the screen; Save closes with "N left in X" (Cover action when over); leaving with changes asks first
+- [ ] Settings › Entry mode switches between One screen, Assisted and Classic
+
 ### Add Expense (Assisted Flow)
 - [ ] Tap + on Activity tab — opens expense form directly
 - [ ] Step indicator shows 1/2/3 dots

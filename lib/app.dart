@@ -74,6 +74,7 @@ import 'features/planned/planned_payments_screen.dart';
 import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
+import 'features/transactions/quick_add_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
 import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_colors.dart';
@@ -687,7 +688,7 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
   Future<void> _resolveMode() async {
     // Read directly from SharedPreferences to avoid the provider race.
     final prefs = await SharedPreferences.getInstance();
-    final mode = prefs.getString('entry_mode') ?? 'assisted';
+    final mode = prefs.getString('entry_mode') ?? 'one';
     if (mounted) setState(() => _resolvedMode = mode);
   }
 
@@ -700,6 +701,15 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       );
     }
 
+    // A prefilled split (bill splitter) needs items: the classic form.
+    final hasLines = widget.extra?['editLines'] != null;
+    if (mode == 'one' && !hasLines) {
+      return QuickAddScreen(
+        initialType: widget.extra?['editType'] as String?,
+        initialDate: widget.extra?['editDate'] as DateTime?,
+        initialTitle: widget.extra?['editNote'] as String?,
+      );
+    }
     if (mode == 'assisted') {
       return AssistedTransactionScreen(
         initialType: widget.extra?['editType'] as String?,

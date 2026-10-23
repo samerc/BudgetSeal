@@ -7858,4 +7858,113 @@ class SAr extends S {
 
   @override
   String get backupDeleteFailed => 'تعذّر حذف النسخة الاحتياطية';
+
+  @override
+  String get quickWhatFor => 'على ماذا؟';
+
+  @override
+  String get quickPickCategoryHint => 'اختر فئة لترى ما تبقى في ظرفها';
+
+  @override
+  String quickEnvelopeName(String name) {
+    return 'ظرف $name';
+  }
+
+  @override
+  String quickLeft(String amount) {
+    return 'متبقٍ $amount';
+  }
+
+  @override
+  String quickOverBy(String amount) {
+    return 'تجاوز بـ $amount';
+  }
+
+  @override
+  String quickPerDay(int days, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days أيام متبقية',
+      one: 'يوم واحد متبقٍ',
+    );
+    return '$_temp0 · حوالي $amount في اليوم';
+  }
+
+  @override
+  String get quickCoverFrom => 'غطِّ من';
+
+  @override
+  String get quickCoverOther => 'غير ذلك…';
+
+  @override
+  String quickCovered(String amount, String name) {
+    return 'تم نقل $amount من $name';
+  }
+
+  @override
+  String get quickNotBudgeted =>
+      'هذه الفئة بلا ظرف، لذا هذا الإنفاق غير مدرج في الميزانية';
+
+  @override
+  String get quickIncomeHint => 'بعد الحفظ، يضعه زر التوزيع في أظرفك.';
+
+  @override
+  String get quickTransferHint =>
+      'تبقى أظرفك والمبلغ الجاهز للتوزيع كما هي: المال ينتقل بين الحسابات فقط.';
+
+  @override
+  String quickSaveAmount(String amount) {
+    return 'حفظ $amount';
+  }
+
+  @override
+  String quickMoveAmount(String amount) {
+    return 'نقل $amount';
+  }
+
+  @override
+  String get quickNote => 'ملاحظة';
+
+  @override
+  String get quickSplit => 'تقسيم';
+
+  @override
+  String get quickReceipt => 'إيصال';
+
+  @override
+  String get quickPhoto => 'صورة';
+
+  @override
+  String get quickFrom => 'من';
+
+  @override
+  String get quickTo => 'إلى';
+
+  @override
+  String get quickWhen => 'متى';
+
+  @override
+  String get quickPickDate => 'اختر تاريخاً';
+
+  @override
+  String get quickTime => 'الوقت';
+
+  @override
+  String quickRateLine(String from, String rate, String to) {
+    return '1 $from = $rate $to';
+  }
+
+  @override
+  String get quickSetRate => 'حدد سعر الصرف';
+
+  @override
+  String get quickNoteTitle => 'ملاحظة';
+
+  @override
+  String get entryModeOne => 'شاشة واحدة';
+
+  @override
+  String get entryModeOneDesc =>
+      'المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ';
 }

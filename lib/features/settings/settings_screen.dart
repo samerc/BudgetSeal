@@ -891,6 +891,17 @@ class _EntryModeSheet extends ConsumerWidget {
               subtitle: S.of(context).entryModeDesc,
               padding: const EdgeInsetsDirectional.only(bottom: 16)),
           _EntryModeCard(
+            icon: AppIcons.lightning,
+            title: S.of(context).entryModeOne,
+            description: S.of(context).entryModeOneDesc,
+            isSelected: currentMode == 'one',
+            onTap: () {
+              ref.read(entryModeProvider.notifier).setMode('one');
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(height: 12),
+          _EntryModeCard(
             icon: AppIcons.magicWand,
             title: S.of(context).entryModeAssisted,
             description: S.of(context).entryModeAssistedDesc,
@@ -1028,7 +1039,11 @@ class SettingsDetailScreen extends ConsumerWidget {
           Builder(builder: (context) {
             final mode = ref.watch(entryModeProvider);
             return _SettingsTile(icon: AppIcons.handTap, title: S.of(context).tileEntryMode,
-                subtitle: mode == 'assisted' ? S.of(context).entryModeAssistedShort : S.of(context).entryModeClassicShort,
+                subtitle: switch (mode) {
+                  'one' => S.of(context).entryModeOne,
+                  'assisted' => S.of(context).entryModeAssistedShort,
+                  _ => S.of(context).entryModeClassicShort,
+                },
                 iconColor: SettingsRowStyle.hue(207),
                 onTap: () => _showEntryModePicker(context, ref));
           }),

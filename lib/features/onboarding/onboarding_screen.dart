@@ -232,8 +232,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         }
       });
 
-      // 4. Set entry mode (default: assisted)
-      ref.read(entryModeProvider.notifier).setMode('assisted');
+      // 4. Set entry mode (default: the one-screen add)
+      ref.read(entryModeProvider.notifier).setMode('one');
 
       // 5. Go to done page
       if (mounted) _goTo(2);

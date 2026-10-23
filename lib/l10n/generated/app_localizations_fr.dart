@@ -7933,4 +7933,115 @@ class SFr extends S {
 
   @override
   String get backupDeleteFailed => 'Impossible de supprimer la sauvegarde';
+
+  @override
+  String get quickWhatFor => 'C\'était pour quoi ?';
+
+  @override
+  String get quickPickCategoryHint =>
+      'Choisissez une catégorie pour voir ce qu\'il reste dans son enveloppe';
+
+  @override
+  String quickEnvelopeName(String name) {
+    return 'Enveloppe $name';
+  }
+
+  @override
+  String quickLeft(String amount) {
+    return '$amount restants';
+  }
+
+  @override
+  String quickOverBy(String amount) {
+    return 'dépassé de $amount';
+  }
+
+  @override
+  String quickPerDay(int days, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours restants',
+      one: '1 jour restant',
+    );
+    return '$_temp0 · environ $amount par jour';
+  }
+
+  @override
+  String get quickCoverFrom => 'Couvrir depuis';
+
+  @override
+  String get quickCoverOther => 'Autre…';
+
+  @override
+  String quickCovered(String amount, String name) {
+    return '$amount déplacés depuis $name';
+  }
+
+  @override
+  String get quickNotBudgeted =>
+      'Cette catégorie n\'a pas d\'enveloppe : cette dépense n\'est pas budgétée';
+
+  @override
+  String get quickIncomeHint =>
+      'Après l\'enregistrement, Répartir le place dans vos enveloppes.';
+
+  @override
+  String get quickTransferHint =>
+      'Vos enveloppes et le montant à répartir ne changent pas : l\'argent change seulement de compte.';
+
+  @override
+  String quickSaveAmount(String amount) {
+    return 'Enregistrer $amount';
+  }
+
+  @override
+  String quickMoveAmount(String amount) {
+    return 'Transférer $amount';
+  }
+
+  @override
+  String get quickNote => 'Note';
+
+  @override
+  String get quickSplit => 'Diviser';
+
+  @override
+  String get quickReceipt => 'Reçu';
+
+  @override
+  String get quickPhoto => 'Photo';
+
+  @override
+  String get quickFrom => 'De';
+
+  @override
+  String get quickTo => 'Vers';
+
+  @override
+  String get quickWhen => 'Quand';
+
+  @override
+  String get quickPickDate => 'Choisir une date';
+
+  @override
+  String get quickTime => 'Heure';
+
+  @override
+  String quickRateLine(String from, String rate, String to) {
+    return '1 $from = $rate $to';
+  }
+
+  @override
+  String get quickSetRate => 'Définir le taux de change';
+
+  @override
+  String get quickNoteTitle => 'Note';
+
+  @override
+  String get entryModeOne => 'Un seul écran';
+
+  @override
+  String get entryModeOneDesc =>
+      'Le montant d\'abord, pavé ouvert, et ce qu\'il reste dans l\'enveloppe avant d\'enregistrer';
 }

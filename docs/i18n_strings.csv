@@ -2628,3 +2628,31 @@ backupDeleteTitle,Backup: confirm deleting a local backup file,Delete this backu
 backupDeleteBody,Backup: delete confirm message,The backup file is removed from this phone. This can't be undone.,سيُحذف ملف النسخة الاحتياطية من هذا الهاتف. لا يمكن التراجع عن ذلك.,Le fichier de sauvegarde est supprimé de ce téléphone. Action irréversible.
 backupDeleted,Backup: snackbar after deleting a local backup,Backup deleted,تم حذف النسخة الاحتياطية,Sauvegarde supprimée
 backupDeleteFailed,Backup: snackbar when deleting a local backup fails,Couldn't delete the backup,تعذّر حذف النسخة الاحتياطية,Impossible de supprimer la sauvegarde
+quickWhatFor,One-screen add: title field hint,What was it for?,على ماذا؟,C'était pour quoi ?
+quickPickCategoryHint,One-screen add: envelope card before a category is chosen,Pick a category to see what's left in its envelope,اختر فئة لترى ما تبقى في ظرفها,Choisissez une catégorie pour voir ce qu'il reste dans son enveloppe
+quickEnvelopeName,One-screen add: envelope card title,{name} envelope,ظرف {name},Enveloppe {name}
+quickLeft,One-screen add: envelope balance after this spending,{amount} left,متبقٍ {amount},{amount} restants
+quickOverBy,One-screen add: envelope overspent after this spending,over by {amount},تجاوز بـ {amount},dépassé de {amount}
+quickPerDay,One-screen add: what the envelope allows per day until the period ends,"{days, plural, =1{1 day left} other{{days} days left}} · about {amount} a day","{days, plural, =1{يوم واحد متبقٍ} other{{days} أيام متبقية}} · حوالي {amount} في اليوم","{days, plural, =1{1 jour restant} other{{days} jours restants}} · environ {amount} par jour"
+quickCoverFrom,One-screen add: chips that move money into the overspent envelope follow,Cover from,غطِّ من,Couvrir depuis
+quickCoverOther,One-screen add: open the full cover sheet,Other…,غير ذلك…,Autre…
+quickCovered,One-screen add: snackbar after covering,Moved {amount} from {name},تم نقل {amount} من {name},{amount} déplacés depuis {name}
+quickNotBudgeted,One-screen add: category not linked to an envelope,"This category has no envelope, so this spending isn't budgeted",هذه الفئة بلا ظرف، لذا هذا الإنفاق غير مدرج في الميزانية,Cette catégorie n'a pas d'enveloppe : cette dépense n'est pas budgétée
+quickIncomeHint,One-screen add: income card hint,"After saving, Assign puts it into your envelopes.",بعد الحفظ، يضعه زر التوزيع في أظرفك.,"Après l'enregistrement, Répartir le place dans vos enveloppes."
+quickTransferHint,One-screen add: transfer hint,Your envelopes and Ready to assign stay the same: the money only changes accounts.,تبقى أظرفك والمبلغ الجاهز للتوزيع كما هي: المال ينتقل بين الحسابات فقط.,Vos enveloppes et le montant à répartir ne changent pas : l'argent change seulement de compte.
+quickSaveAmount,One-screen add: save button,Save {amount},حفظ {amount},Enregistrer {amount}
+quickMoveAmount,One-screen add: transfer save button,Move {amount},نقل {amount},Transférer {amount}
+quickNote,One-screen add: extras button,Note,ملاحظة,Note
+quickSplit,One-screen add: extras button (split into items),Split,تقسيم,Diviser
+quickReceipt,One-screen add: extras button (camera),Receipt,إيصال,Reçu
+quickPhoto,One-screen add: extras button (gallery),Photo,صورة,Photo
+quickFrom,One-screen add: transfer source,From,من,De
+quickTo,One-screen add: transfer destination,To,إلى,Vers
+quickWhen,One-screen add: date and time sheet title,When,متى,Quand
+quickPickDate,One-screen add: date sheet row,Pick a date,اختر تاريخاً,Choisir une date
+quickTime,One-screen add: date sheet time row,Time,الوقت,Heure
+quickRateLine,One-screen add: exchange rate chip,1 {from} = {rate} {to},1 {from} = {rate} {to},1 {from} = {rate} {to}
+quickSetRate,One-screen add: no rate known yet,Set exchange rate,حدد سعر الصرف,Définir le taux de change
+quickNoteTitle,One-screen add: note dialog title,Note,ملاحظة,Note
+entryModeOne,Entry mode option: the new one-screen add,One screen,شاشة واحدة,Un seul écran
+entryModeOneDesc,Entry mode option description,"Amount first with the keypad open, and what's left in the envelope before you save",المبلغ أولاً ولوحة الأرقام مفتوحة، وما يتبقى في الظرف قبل الحفظ,"Le montant d'abord, pavé ouvert, et ce qu'il reste dans l'enveloppe avant d'enregistrer"
