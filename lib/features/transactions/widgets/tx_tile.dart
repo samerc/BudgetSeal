@@ -606,8 +606,14 @@ class _BalanceText extends StatelessWidget {
       )..layout();
       final fits = painter.width <= box.maxWidth;
       painter.dispose();
-      return Text(fits ? full : balance,
-          style: style, maxLines: 1, overflow: TextOverflow.ellipsis);
+      if (fits) return Text(full, style: style, maxLines: 1);
+      // Without the name; a balance that still doesn't fit (LBP) shrinks
+      // rather than losing digits.
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Text(balance, style: style, maxLines: 1),
+      );
     });
   }
 }

@@ -5360,7 +5360,7 @@ class SAr extends S {
 
   @override
   String get reportsHintBody =>
-      'تنقل بين علامات التبويب لعرض مختلف. علامة الرؤى تُظهر صحتك المالية.';
+      'اختر فترة في الأعلى. البطاقة الأولى تلخّصها في جملة، وكل تقرير أدناه يُفتح على الفترة نفسها.';
 
   @override
   String get reportsDailyPace => 'السرعة اليومية';
@@ -8568,10 +8568,23 @@ class SAr extends S {
   String get rptBestMonth => 'أفضل شهر';
 
   @override
-  String rptBestMonthValue(String month, String amount) {
-    return '$month · بقي $amount';
+  String get rptShareImage => 'شارك كصورة';
+
+  @override
+  String rptKeptValue(String amount) {
+    return 'بقي $amount';
   }
 
   @override
-  String get rptShareImage => 'شارك كصورة';
+  String rptOfDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يومًا',
+      few: '$count أيام',
+      two: 'يومين',
+      one: 'يوم واحد',
+    );
+    return 'من $_temp0';
+  }
 }

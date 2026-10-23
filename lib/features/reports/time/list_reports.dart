@@ -40,12 +40,20 @@ Widget _rows(BuildContext context, List<Widget> rows) => ReportCard(
       ]),
     );
 
-Widget _amount(String text, {Color? color}) => Text(text,
-    style: TextStyle(
-        fontFamily: TypographyTokens.displayFamily,
-        fontSize: 15,
-        fontWeight: FontWeight.w800,
-        color: color));
+/// A row's amount: shrinks past 190 dp rather than overflowing (LBP).
+Widget _amount(String text, {Color? color}) => ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 190),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(text,
+            maxLines: 1,
+            style: TextStyle(
+                fontFamily: TypographyTokens.displayFamily,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: color)),
+      ),
+    );
 
 /// The largest single expenses in the period (base currency); a row opens
 /// the transaction.
@@ -160,26 +168,31 @@ class AccountsReport extends ConsumerWidget {
                 final net = f.value.inflow - f.value.outflow;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 11),
-                  child: Row(children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(acc?.name ?? tr.txDetailUnknownAccount,
+                  // Amount beside the name, in/out below at full width:
+                  // LBP figures don't fit next to each other.
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Expanded(
+                          child: Text(acc?.name ?? tr.txDetailUnknownAccount,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w700)),
-                          Text(
-                              '${tr.rptIn} ${formatAmount(f.value.inflow, currency: cur)} · '
-                              '${tr.rptOut} ${formatAmount(f.value.outflow, currency: cur)}',
-                              style: TextStyle(
-                                  fontSize: 12, color: AppColors.ts(context))),
-                        ],
-                      ),
-                    ),
-                    _amount(
-                        '${net >= 0 ? '+' : '−'}${formatAmount(net.abs(), currency: cur)}',
-                        color: net >= 0 ? colors.income : colors.expense),
-                  ]),
+                        ),
+                        const SizedBox(width: 8),
+                        _amount(
+                            '${net >= 0 ? '+' : '−'}${formatAmount(net.abs(), currency: cur)}',
+                            color: net >= 0 ? colors.income : colors.expense),
+                      ]),
+                      Text(
+                          '${tr.rptIn} ${formatAmount(f.value.inflow, currency: cur)} · '
+                          '${tr.rptOut} ${formatAmount(f.value.outflow, currency: cur)}',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.ts(context))),
+                    ],
+                  ),
                 );
               }(),
           ]),
@@ -338,12 +351,19 @@ class SubscriptionsReport extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700)),
+                              Row(children: [
+                                Expanded(
+                                  child: Text(title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                                const SizedBox(width: 8),
+                                _amount(tr.rptPerMonth(
+                                    formatAmount(m, currency: r.currency))),
+                              ]),
                               Text(
                                   tr.rptPerYear(formatAmount(m * 12,
                                       currency: r.currency)),
@@ -353,8 +373,6 @@ class SubscriptionsReport extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        _amount(tr.rptPerMonth(
-                            formatAmount(m, currency: r.currency))),
                       ]),
                     );
                   }(),

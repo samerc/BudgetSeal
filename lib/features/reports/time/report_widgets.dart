@@ -21,7 +21,8 @@ class ReportScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: EdgeInsets.only(
+            bottom: 32 + MediaQuery.viewPaddingOf(context).bottom),
         children: [
           if (chips) const ReportSpanChips(),
           ...children,

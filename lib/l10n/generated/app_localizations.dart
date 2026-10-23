@@ -9487,7 +9487,7 @@ abstract class S {
   /// Hint body
   ///
   /// In en, this message translates to:
-  /// **'Switch between tabs to see different views. The Insights tab shows your financial health.'**
+  /// **'Pick a period at the top. The first card sums it up in a sentence; every report below opens for the same period.'**
   String get reportsHintBody;
 
   /// Summary label
@@ -14891,17 +14891,23 @@ abstract class S {
   /// **'Best month'**
   String get rptBestMonth;
 
-  /// Year in review
-  ///
-  /// In en, this message translates to:
-  /// **'{month} · kept {amount}'**
-  String rptBestMonthValue(String month, String amount);
-
   /// Year in review button
   ///
   /// In en, this message translates to:
   /// **'Share as image'**
   String get rptShareImage;
+
+  /// Year in review: best month's sub-line
+  ///
+  /// In en, this message translates to:
+  /// **'kept {amount}'**
+  String rptKeptValue(String amount);
+
+  /// Year in review: no-spend days sub-line, e.g. 269 / of 296 days
+  ///
+  /// In en, this message translates to:
+  /// **'of {count, plural, =1{1 day} other{{count} days}}'**
+  String rptOfDays(int count);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

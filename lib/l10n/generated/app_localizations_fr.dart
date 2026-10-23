@@ -5406,7 +5406,7 @@ class SFr extends S {
 
   @override
   String get reportsHintBody =>
-      'Basculez entre les onglets pour différentes vues. L\'onglet Analyses montre votre santé financière.';
+      'Choisissez une période en haut. La première carte la résume en une phrase ; chaque rapport ci-dessous s\'ouvre sur la même période.';
 
   @override
   String get reportsDailyPace => 'Rythme quotidien';
@@ -8652,10 +8652,21 @@ class SFr extends S {
   String get rptBestMonth => 'Meilleur mois';
 
   @override
-  String rptBestMonthValue(String month, String amount) {
-    return '$month · gardé $amount';
+  String get rptShareImage => 'Partager en image';
+
+  @override
+  String rptKeptValue(String amount) {
+    return 'gardé $amount';
   }
 
   @override
-  String get rptShareImage => 'Partager en image';
+  String rptOfDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
+    return 'sur $_temp0';
+  }
 }

@@ -3891,7 +3891,7 @@
   "@reportsHintTitle": {
     "description": "Hint title"
   },
-  "reportsHintBody": "Switch between tabs to see different views. The Insights tab shows your financial health.",
+  "reportsHintBody": "Pick a period at the top. The first card sums it up in a sentence; every report below opens for the same period.",
   "@reportsHintBody": {
     "description": "Hint body"
   },
@@ -6559,8 +6559,10 @@
   "@rptFavouritePlace": {"description": "Year in review"},
   "rptBestMonth": "Best month",
   "@rptBestMonth": {"description": "Year in review"},
-  "rptBestMonthValue": "{month} · kept {amount}",
-  "@rptBestMonthValue": {"description": "Year in review", "placeholders": {"month": {"type": "String"}, "amount": {"type": "String"}}},
   "rptShareImage": "Share as image",
-  "@rptShareImage": {"description": "Year in review button"}
+  "@rptShareImage": {"description": "Year in review button"},
+  "rptKeptValue": "kept {amount}",
+  "@rptKeptValue": {"description": "Year in review: best month's sub-line", "placeholders": {"amount": {"type": "String"}}},
+  "rptOfDays": "of {count, plural, =1{1 day} other{{count} days}}",
+  "@rptOfDays": {"description": "Year in review: no-spend days sub-line, e.g. 269 / of 296 days", "placeholders": {"count": {"type": "int"}}}
 }

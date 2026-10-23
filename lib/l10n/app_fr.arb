@@ -3810,7 +3810,7 @@
   "@reportsHintTitle": {
     "description": "Hint title"
   },
-  "reportsHintBody": "Basculez entre les onglets pour différentes vues. L'onglet Analyses montre votre santé financière.",
+  "reportsHintBody": "Choisissez une période en haut. La première carte la résume en une phrase ; chaque rapport ci-dessous s'ouvre sur la même période.",
   "@reportsHintBody": {
     "description": "Hint body"
   },
@@ -5699,6 +5699,7 @@
   "rptBiggestShare": "Plus grosse part",
   "rptFavouritePlace": "Lieu préféré",
   "rptBestMonth": "Meilleur mois",
-  "rptBestMonthValue": "{month} · gardé {amount}",
-  "rptShareImage": "Partager en image"
+  "rptShareImage": "Partager en image",
+  "rptKeptValue": "gardé {amount}",
+  "rptOfDays": "sur {count, plural, =1{1 jour} other{{count} jours}}"
 }

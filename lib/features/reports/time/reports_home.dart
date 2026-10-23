@@ -211,7 +211,9 @@ class ReportsHome extends ConsumerWidget {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.centerStart,
+                // One line: IntrinsicHeight measures it unscaled.
                 child: Text(value,
+                    maxLines: 1,
                     style: const TextStyle(
                         fontFamily: TypographyTokens.displayFamily,
                         fontSize: 17,
@@ -222,6 +224,7 @@ class ReportsHome extends ConsumerWidget {
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerStart,
                   child: Text(sub,
+                      maxLines: 1,
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

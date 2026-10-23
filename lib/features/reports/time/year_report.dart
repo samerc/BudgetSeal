@@ -124,7 +124,8 @@ class _YearReportState extends ConsumerState<YearReport> {
         data: (d) => d == null
             ? const SizedBox.shrink()
             : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: EdgeInsets.fromLTRB(
+                    16, 0, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
                 children: [
                   RepaintBoundary(
                     key: _shot,
@@ -231,7 +232,9 @@ class _YearReportState extends ConsumerState<YearReport> {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.centerStart,
+                // One line: IntrinsicHeight measures it unscaled.
                 child: Text(value,
+                    maxLines: 1,
                     style: const TextStyle(
                         fontFamily: TypographyTokens.displayFamily,
                         fontSize: 20,
@@ -317,8 +320,8 @@ class _YearReportState extends ConsumerState<YearReport> {
             box(
                 tr.rptBestMonth,
                 bestMonth == null ? '—' : formatMonth(bestMonth),
-                bestMonth == null ? null : tr.rptBestMonthValue(formatMonth(bestMonth), money(bestKept))),
-            box(tr.rptNoSpendDays, '$noSpend', tr.rptNofM(noSpend, days)),
+                bestMonth == null ? null : tr.rptKeptValue(money(bestKept))),
+            box(tr.rptNoSpendDays, '$noSpend', tr.rptOfDays(days)),
           ];
           return [
             for (var i = 0; i < boxes.length; i += 2) boxes.sublist(i, i + 2),

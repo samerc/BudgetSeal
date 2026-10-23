@@ -3810,7 +3810,7 @@
   "@reportsHintTitle": {
     "description": "Hint title"
   },
-  "reportsHintBody": "تنقل بين علامات التبويب لعرض مختلف. علامة الرؤى تُظهر صحتك المالية.",
+  "reportsHintBody": "اختر فترة في الأعلى. البطاقة الأولى تلخّصها في جملة، وكل تقرير أدناه يُفتح على الفترة نفسها.",
   "@reportsHintBody": {
     "description": "Hint body"
   },
@@ -5699,6 +5699,7 @@
   "rptBiggestShare": "الحصة الأكبر",
   "rptFavouritePlace": "المكان المفضّل",
   "rptBestMonth": "أفضل شهر",
-  "rptBestMonthValue": "{month} · بقي {amount}",
-  "rptShareImage": "شارك كصورة"
+  "rptShareImage": "شارك كصورة",
+  "rptKeptValue": "بقي {amount}",
+  "rptOfDays": "من {count, plural, =1{يوم واحد} =2{يومين} few{{count} أيام} other{{count} يومًا}}"
 }

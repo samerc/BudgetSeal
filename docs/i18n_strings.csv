@@ -831,7 +831,7 @@ reports_categories_tab,Tab,Categories,الفئات,Catégories
 reports_insights_tab,Tab,Insights,رؤى,Analyses
 reports_balance_tab,Tab,Balance sheet,الميزانية العمومية,Bilan
 reports_hint_title,Hint title,Explore your spending patterns,استكشف أنماط إنفاقك,Explorez vos habitudes de dépenses
-reports_hint_body,Hint body,Switch between tabs to see different views. The Insights tab shows your financial health.,تنقل بين علامات التبويب لعرض مختلف. علامة الرؤى تُظهر صحتك المالية.,Basculez entre les onglets pour différentes vues. L'onglet Analyses montre votre santé financière.
+reports_hint_body,Hint body,Pick a period at the top. The first card sums it up in a sentence; every report below opens for the same period.,اختر فترة في الأعلى. البطاقة الأولى تلخّصها في جملة، وكل تقرير أدناه يُفتح على الفترة نفسها.,Choisissez une période en haut. La première carte la résume en une phrase ; chaque rapport ci-dessous s'ouvre sur la même période.
 reports_daily_pace,Summary label,Daily pace,السرعة اليومية,Rythme quotidien
 reports_projected_total,Summary label,Projected total,الإجمالي المتوقع,Total projeté
 reports_less_than_last,Comparison,{pct}% less than last month,{pct}% أقل من الشهر الماضي,{pct}% de moins que le mois dernier
@@ -2804,5 +2804,6 @@ rptHeldMonths,Year in review,"{n, plural, =1{held 1 month} other{held {n} months
 rptBiggestShare,Year in review,Biggest share,الحصة الأكبر,Plus grosse part
 rptFavouritePlace,Year in review,Favourite place,المكان المفضّل,Lieu préféré
 rptBestMonth,Year in review,Best month,أفضل شهر,Meilleur mois
-rptBestMonthValue,Year in review,{month} · kept {amount},{month} · بقي {amount},{month} · gardé {amount}
 rptShareImage,Year in review button,Share as image,شارك كصورة,Partager en image
+rptKeptValue,Year in review: best month's sub-line,kept {amount},بقي {amount},gardé {amount}
+rptOfDays,"Year in review: no-spend days sub-line, e.g. 269 / of 296 days","of {count, plural, =1{1 day} other{{count} days}}","من {count, plural, =1{يوم واحد} =2{يومين} few{{count} أيام} other{{count} يومًا}}","sur {count, plural, =1{1 jour} other{{count} jours}}"

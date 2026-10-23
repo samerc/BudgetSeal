@@ -570,7 +570,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   void _applySuggestion(_Suggestion s) {
     HapticFeedback.selectionClick();
-    final account = _account(s.accountId);
+    // An amount the user typed stays, with its account (and currency).
+    final typed = _amount > 0 && !_prefilled;
+    final account = typed ? null : _account(s.accountId);
     setState(() {
       _titleCtrl.text = s.title;
       _titleCtrl.selection =
@@ -580,8 +582,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         _accountId = account.id;
         _accountIsDefault = false;
       }
-      if (s.amount != null && s.amount! > 0 && s.currency == _currency &&
-          !_split) {
+      if (!typed && s.amount != null && s.amount! > 0 &&
+          s.currency == _currency && !_split) {
         _setAmount(s.amount!);
       }
     });
@@ -721,7 +723,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         accounts: destination
             ? accounts.where((a) => a.id != _accountId).toList()
             : accounts,
-        title: destination ? tr.txFormToAccount : tr.txFormFromAccount,
+        title: destination || _type == 'income'
+            ? tr.txFormToAccount
+            : tr.txFormFromAccount,
         selectedId: destination ? _destId : _accountId,
         addLabel: tr.txAfAddAccount);
     if (picked == null || !mounted) return;
@@ -2145,6 +2149,10 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     );
   }
 
+  /// Small phones (Galaxy A02: ~750 dp tall) need the room for the
+  /// category and date, so the pinned parts get a little shorter.
+  bool get _shortScreen => MediaQuery.sizeOf(context).height < 800;
+
   Widget _extrasRow(S tr) {
     Widget btn(String label, IconData icon, VoidCallback onTap,
         {bool on = false, int badge = 0}) {
@@ -2153,7 +2161,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
           child: Container(
-            height: 50,
+            height: _shortScreen ? 44 : 50,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: on ? AppColors.accentLight : AppColors.sf(context),
@@ -2229,7 +2237,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
             scaleFactor: 0.95,
             borderRadius: BorderRadius.circular(RadiusTokens.md + 2),
             child: Container(
-              height: 46,
+              height: _shortScreen ? 40 : 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: op ? AppColors.accentLight : AppColors.sf(context),
@@ -2320,8 +2328,10 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                             height: 20,
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: AppColors.onAccent))
-                        : Text(label,
-                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        // Shrink rather than cut long amounts (LBP 42,000,000).
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(label, maxLines: 1)),
                   ),
                 ),
               ]),

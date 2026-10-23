@@ -43,7 +43,11 @@ class MoneyReport extends ConsumerWidget {
     final n = period.length;
     final income = [for (final b in period.buckets) totals.incomeByBucket[b] ?? 0.0];
     final spent = [for (final b in period.buckets) totals.spentByBucket[b] ?? 0.0];
-    final below = [for (var i = 0; i < n; i++) income[i] - spent[i]]
+    bool active(int i) => income[i] > 0.005 || spent[i] > 0.005;
+    // Months before the budget had any money in or out don't count.
+    final first = [for (var i = 0; i < n; i++) i].firstWhere(active,
+        orElse: () => n);
+    final below = [for (var i = first; i < n; i++) income[i] - spent[i]]
         .where((k) => k < -0.005)
         .length;
     final maxY = niceMax([...income, ...spent].fold(0.0, (m, v) => v > m ? v : m));
@@ -81,7 +85,8 @@ class MoneyReport extends ConsumerWidget {
                 sub: [
                   if (totals.income > 0.005 && kept >= 0)
                     tr.rptKeptShare((kept / totals.income * 100).round()),
-                  if (n > 1) below == 0 ? tr.rptAllAbove : tr.rptSomeBelow(below),
+                  if (n - first > 1)
+                    below == 0 ? tr.rptAllAbove : tr.rptSomeBelow(below),
                 ].join(' '),
               ),
               const SizedBox(height: 16),
@@ -128,7 +133,9 @@ class MoneyReport extends ConsumerWidget {
                                       fontWeight: FontWeight.w700,
                                       color: ts)),
                               Text(
-                                  '${k >= 0 ? '+' : '−'}${axisAmount(k.abs())}',
+                                  !active(i)
+                                      ? ' '
+                                      : '${k >= 0 ? '+' : '−'}${axisAmount(k.abs())}',
                                   style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,

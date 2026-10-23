@@ -5344,7 +5344,7 @@ class SEn extends S {
 
   @override
   String get reportsHintBody =>
-      'Switch between tabs to see different views. The Insights tab shows your financial health.';
+      'Pick a period at the top. The first card sums it up in a sentence; every report below opens for the same period.';
 
   @override
   String get reportsDailyPace => 'Daily pace';
@@ -8554,10 +8554,21 @@ class SEn extends S {
   String get rptBestMonth => 'Best month';
 
   @override
-  String rptBestMonthValue(String month, String amount) {
-    return '$month · kept $amount';
+  String get rptShareImage => 'Share as image';
+
+  @override
+  String rptKeptValue(String amount) {
+    return 'kept $amount';
   }
 
   @override
-  String get rptShareImage => 'Share as image';
+  String rptOfDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'of $_temp0';
+  }
 }

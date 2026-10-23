@@ -42,8 +42,10 @@ ReceiptEnvelope? receiptEnvelope(
       liveAllocations: allocations.map((a) => a.data.allocation));
   final env =
       allocations.where((a) => a.data.allocation.id == envId).firstOrNull;
-  final balance = env?.balanceByCurrency[line.currency];
-  if (env == null || balance == null) return null;
+  if (env == null) return null;
+  // No entry for the line's currency means that side is back to 0
+  // (an LBP expense covered exactly), not that there's nothing to say.
+  final balance = env.balanceByCurrency[line.currency] ?? 0.0;
   return (
     allocationId: env.data.allocation.id,
     name: env.data.allocation.name,
